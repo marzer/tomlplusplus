@@ -75,6 +75,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0;_SCL_SECURE_NO_WARNINGS;_CRT_SECURE_NO_WARNINGS;_MSC_TOOLSET_VER=$(PlatformToolsetVersion)</PreprocessorDefinitions>
       <LanguageStandard Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">stdcpplatest</LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
@@ -90,9 +91,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\include\toml17\base.h" />
     <ClInclude Include="..\include\toml17\toml17.h" />
-    <ClInclude Include="..\include\toml17\value.h" />
+    <ClInclude Include="..\include\toml17\toml_array.h" />
+    <ClInclude Include="..\include\toml17\toml_base.h" />
+    <ClInclude Include="..\include\toml17\toml_value.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

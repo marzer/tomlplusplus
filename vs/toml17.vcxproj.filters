@@ -2,8 +2,9 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="..\include\toml17\toml17.h" />
-    <ClInclude Include="..\include\toml17\base.h" />
-    <ClInclude Include="..\include\toml17\value.h" />
+    <ClInclude Include="..\include\toml17\toml_array.h" />
+    <ClInclude Include="..\include\toml17\toml_base.h" />
+    <ClInclude Include="..\include\toml17\toml_value.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

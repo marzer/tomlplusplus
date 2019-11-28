@@ -40,8 +40,9 @@
 	#define TOML17_DISABLE_WARNINGS		__pragma(warning(push, 0))
 	#define TOML17_RESTORE_WARNINGS		__pragma(warning(pop, 0))
 
+	#define TOML17_INTERFACE			__declspec(novtable)
+	#define TOML17_EMPTY_BASES			__declspec(empty_bases)
 	#define TOML17_ALWAYS_INLINE		_forceinline
-	#define TOML17_NEVER_INLINE			__declspec(noinline)
 	#define TOML17_ASSUME(cond)			_assume(cond)
 	#define TOML17_UNREACHABLE			__assume(0)
 
@@ -66,7 +67,6 @@
 		_Pragma("clang diagnostic pop")
 
 	#define TOML17_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML17_NEVER_INLINE			__attribute__((__noinline__))
 	#define TOML17_ASSUME(cond)			__builtin_assume(cond)
 	#define TOML17_UNREACHABLE			__builtin_unreachable()
 
@@ -90,12 +90,8 @@
 		Pragma("GCC diagnostic pop")
 
 	#define TOML17_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML17_NEVER_INLINE			__attribute__((__noinline__))
-	#define TOML17_ASSUME(cond)			(void)0
 	#define TOML17_UNREACHABLE			__builtin_unreachable()
 
-#else
-	#error Toml17 does not currently support your compiler.
 #endif
 
 #if TOML17_LANG_VERSION < 201703L
@@ -148,6 +144,30 @@
 #define TOML17_SPEC_VERSION_MINOR 5
 #define TOML17_SPEC_VERSION_REVISION 0
 
+#ifndef TOML17_DISABLE_WARNINGS
+	#define TOML17_DISABLE_WARNINGS
+#endif
+#ifndef TOML17_RESTORE_WARNINGS
+	#define TOML17_RESTORE_WARNINGS
+#endif
+#ifndef TOML17_INTERFACE
+	#define TOML17_INTERFACE
+#endif
+#ifndef TOML17_EMPTY_BASES
+	#define TOML17_EMPTY_BASES
+#endif
+#ifndef TOML17_ALWAYS_INLINE
+	#define TOML17_ALWAYS_INLINE inline
+#endif
+#ifndef TOML17_ASSUME(cond)
+	#define (void)0
+#endif
+#ifndef TOML17_UNREACHABLE
+	#define (void)0
+#endif
+
+#define TOML17_NO_DEFAULT_CASE		default: TOML17_UNREACHABLE
+
 //--------------------------------------------------------------------
 // INCLUDES
 //--------------------------------------------------------------------
@@ -177,7 +197,8 @@ TOML17_RESTORE_WARNINGS
 
 namespace TOML17_NAMESPACE
 {
-	class value;
+	/*class value;
+	class array;*/
 
 #if TOML17_LANG >= 20 || (defined(_MSC_VER) && defined(_HAS_CXX20))
 	template <typename T>
@@ -187,4 +208,21 @@ namespace TOML17_NAMESPACE
 	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
 #endif
 
+	template <typename T>
+	inline constexpr bool is_value_type =
+		std::is_same_v<T, std::string>
+		|| std::is_same_v<T, int64_t>
+		|| std::is_same_v<T, double>
+		|| std::is_same_v<T, bool>;
+
+
+	template <typename T>
+	class node;
+
+	template <>
+	class node<void>
+	{
+
+		virtual ~node() noexcept = default;
+	};
 }
