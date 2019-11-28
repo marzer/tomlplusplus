@@ -93,7 +93,7 @@
   <ItemGroup>
     <ClInclude Include="..\include\toml17\toml17.h" />
     <ClInclude Include="..\include\toml17\toml_array.h" />
-    <ClInclude Include="..\include\toml17\toml_base.h" />
+    <ClInclude Include="..\include\toml17\toml_common.h" />
     <ClInclude Include="..\include\toml17\toml_value.h" />
   </ItemGroup>
   <ItemGroup>

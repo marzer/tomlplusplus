@@ -3,8 +3,8 @@
   <ItemGroup>
     <ClInclude Include="..\include\toml17\toml17.h" />
     <ClInclude Include="..\include\toml17\toml_array.h" />
-    <ClInclude Include="..\include\toml17\toml_base.h" />
     <ClInclude Include="..\include\toml17\toml_value.h" />
+    <ClInclude Include="..\include\toml17\toml_common.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
