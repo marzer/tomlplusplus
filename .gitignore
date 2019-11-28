@@ -21,11 +21,13 @@ x64/
 x86/
 bld/
 [Bb]in/
+[Bb]uild/
 [Oo]bj/
 [Ll]og/
 
 # Visual Studio 2015/2017 cache/options directory
 .vs/
+.vscode/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
@@ -84,6 +86,13 @@ StyleCopReport.xml
 *.pidb
 *.svclog
 *.scc
+*.Designer.cs.dll
+unsuccessfulbuild
+*.lastbuildstate
+*.psess
+*.vsp
+*.vspx
+*.tlog
 
 # Chutzpah Test files
 _Chutzpah*
@@ -328,3 +337,14 @@ ASALocalRun/
 
 # MFractors (Xamarin productivity tool) working folder 
 .mfractor/
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
