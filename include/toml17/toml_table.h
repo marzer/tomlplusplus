@@ -3,10 +3,10 @@
 
 namespace TOML17_NAMESPACE
 {
-	class array final
+	class table final
 		: public node
 	{
 		private:
-			std::vector<std::shared_ptr<node>> values;
+			std::map<string, std::shared_ptr<node>, std::less<>> values;
 	};
 }

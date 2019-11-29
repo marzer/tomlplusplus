@@ -57,6 +57,7 @@
   </ImportGroup>
   <PropertyGroup>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir)..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
     <ClCompile>
@@ -94,6 +95,9 @@
     <ClInclude Include="..\include\toml17\toml17.h" />
     <ClInclude Include="..\include\toml17\toml_array.h" />
     <ClInclude Include="..\include\toml17\toml_common.h" />
+    <ClInclude Include="..\include\toml17\toml_parser.h" />
+    <ClInclude Include="..\include\toml17\toml_table.h" />
+    <ClInclude Include="..\include\toml17\toml_table_array.h" />
     <ClInclude Include="..\include\toml17\toml_value.h" />
   </ItemGroup>
   <ItemGroup>
