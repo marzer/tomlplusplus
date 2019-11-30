@@ -3,29 +3,34 @@
 #include "toml_array.h"
 #include "toml_table_array.h"
 
-namespace TOML17_NAMESPACE
+namespace TOML_NAMESPACE
 {
 	class parse_error final
-		: std::runtime_error
+		: public std::runtime_error
 	{
 		private:
-			document_region where_;
+			document_region region_;
 
 		public:
-			parse_error(const std::string& what, document_region&& where) noexcept
+			parse_error(const std::string& what, document_region&& region) noexcept
 				: std::runtime_error{ what },
-				where_{ std::move(where) }
+				region_{ std::move(region) }
 			{}
 
-			parse_error(const std::string& what, document_position&& where) noexcept
+			parse_error(const std::string& what, const document_position& position, const std::shared_ptr<const path>& source_path) noexcept
 				: std::runtime_error{ what },
-				where_{ where, where }
+				region_{ position, position, source_path }
+			{}
+
+			parse_error(const std::string& what, const document_position& position) noexcept
+				: std::runtime_error{ what },
+				region_{ position, position }
 			{}
 
 			[[nodiscard]]
 			const document_region& where() const noexcept
 			{
-				return where_;
+				return region_;
 			}
 	};
 
@@ -33,12 +38,6 @@ namespace TOML17_NAMESPACE
 	{
 		using namespace std::literals::string_literals;
 		using namespace std::literals::string_view_literals;
-
-		[[nodiscard]] TOML17_ALWAYS_INLINE
-		constexpr uint32_t operator"" _cp(char c) noexcept
-		{
-			return static_cast<uint32_t>(c);
-		}
 
 		//based on the decoder found here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 		struct utf8_decoder final
@@ -78,7 +77,7 @@ namespace TOML17_NAMESPACE
 
 			constexpr void operator () (uint8_t byte) noexcept
 			{
-				assert(!error());
+				TOML_ASSERT(!error());
 
 				const auto type = state_table[byte];
 
@@ -139,23 +138,28 @@ namespace TOML17_NAMESPACE
 
 			std::basic_istream<CHAR>& source;
 
-			utf8_byte_stream(std::basic_istream<CHAR>& stream)
+			utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
 				: source{ stream }
 			{
 				if (stream)
 				{
-					std::array<uint8_t, 3> bom;
-					const auto intialPos = stream.tellg();
+					static constexpr auto bom = std::array{
+						0xEF_u8,
+						0xBB_u8,
+						0xBF_u8
+					};
 
-					size_t i{};
-					for (; i < 3 && stream; i++)
-						bom[i] = static_cast<uint8_t>(source.get());
-
-					if (i < 3
-						|| bom[0] != 0xEF_u8
-						|| bom[1] != 0xBB_u8
-						|| bom[2] != 0xBF_u8)
-						stream.seekg(initialPos);
+					using stream_traits = typename decltype(source)::traits_type;
+					const auto initial_pos = stream.tellg();
+					size_t bom_pos{};
+					auto bom_char = source.get();
+					while (source && bom_char != stream_traits::eof && bom_char == bom[bom_pos])
+					{
+						bom_pos++;
+						bom_char = source.get();
+					}
+					if (!source || bom_pos < 3_sz)
+						stream.seekg(initial_pos);
 				}
 			}
 
@@ -180,34 +184,49 @@ namespace TOML17_NAMESPACE
 
 		struct utf8_codepoint final
 		{
-			uint32_t value;
+			char32_t value;
 			document_position position;
+			uint8_t byte_count;
+			std::array<uint8_t, 4> bytes;
 		};
+		static_assert(std::is_trivial_v<utf8_codepoint>);
+		static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-		
-		struct TOML17_INTERFACE utf8_reader_interface
+		struct TOML_INTERFACE utf8_reader_interface
 		{
+			[[nodiscard]]
+			virtual const std::shared_ptr<path>& source_path() noexcept = 0;
+
 			[[nodiscard]]
 			virtual const utf8_codepoint* next() = 0;
 		};
 
 		template <typename T>
-		class TOML17_EMPTY_BASES utf8_reader final
+		class TOML_EMPTY_BASES utf8_reader final
 			: public utf8_reader_interface
 		{
 			private:
 				utf8_byte_stream<T> stream;
 				utf8_decoder decoder;
-				document_position next_position{};
-				utf8_codepoint last_codepoint;
+				utf8_codepoint prev{}, current{};
+				std::shared_ptr<const path> source_path_;
 
 			public:
 
 				template <typename U>
-				utf8_reader(U && source)
+				utf8_reader(U && source, const path& source_path = {})
 					noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 					: stream{ std::forward<U>(source) }
-				{}
+				{
+					if (!source_path.empty())
+						source_path_ = std::make_shared<const path>(source_path);
+				}
+
+				[[nodiscard]]
+				const std::shared_ptr<path>& source_path() noexcept override
+				{
+					return source_path_;
+				}
 
 				[[nodiscard]]
 				const utf8_codepoint* next() override
@@ -215,9 +234,9 @@ namespace TOML17_NAMESPACE
 					if (stream.eof())
 						return nullptr;
 					if (stream.error())
-						throw parse_error{ "The underlying stream entered an error state."s, last_codepoint.position };
+						throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
 					if (decoder.error())
-						throw parse_error{ "Encountered invalid utf-8 sequence."s, last_codepoint.position };
+						throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
 
 					while (true)
 					{
@@ -234,69 +253,373 @@ namespace TOML17_NAMESPACE
 							}
 							catch (const std::exception& exc)
 							{
-								throw parse_error{ exc.what(), last_codepoint.position };
+								throw parse_error{ exc.what(), prev.position, source_path_ };
 							}
 							catch (...)
 							{
-								throw parse_error{ "An unspecified error occurred."s, last_codepoint.position };
+								throw parse_error{ "An unspecified error occurred"s, prev.position, source_path_ };
 							}
 						}
 						if (stream.error())
-							throw parse_error{ "The underlying stream entered an error state."s, last_codepoint.position };
+							throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
 
 						decoder(nextByte);
 						if (decoder.error())
-							throw parse_error{ "Encountered invalid utf-8 sequence."s, last_codepoint.position };
+							throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
 
+						current.bytes[current.byte_count++] = nextByte;
 						if (decoder.has_code_point())
 						{
-							last_codepoint.value = decoder.codepoint;
-							last_codepoint.position = next_position;
-
-							next_position.position++;
-							if (last_codepoint.value == '\n'_cp)
+							prev = current;
+							prev.value = static_cast<char32_t>(decoder.codepoint);
+							current.byte_count = {};
+							current.position.position++;
+							if (prev.value == U'\n')
 							{
-								next_position.line++;
-								next_position.column = {};
+								current.position.line++;
+								current.position.column = {};
 							}
 							else
-								next_position.column++;
-							return &last_codepoint;
+								current.position.column++;
+							return &prev;
 						}
 
 						if (stream.eof())
-							throw parse_error{ "Incomplete utf-8 code point at EOF."s, last_codepoint.position };
+							throw parse_error{ "Encountered EOF during incomplete utf-8 code point sequence"s, prev.position, source_path_ };
 					}
 				}
 		};
 
 		template <typename CHAR>
-		utf8_reader(std::basic_string_view<CHAR>) -> utf8_reader<std::basic_string_view<CHAR>>;
+		utf8_reader(std::basic_string_view<CHAR>, const path&) -> utf8_reader<std::basic_string_view<CHAR>>;
 
+		template <typename CHAR>
+		utf8_reader(std::basic_istream<CHAR>&, const path&) -> utf8_reader<std::basic_istream<CHAR>>;
 
-		inline void parse_table_body(utf8_reader_interface& doc, std::shared_ptr<table>& table)
+		[[nodiscard]]
+		constexpr bool is_whitespace(char32_t codepoint) noexcept
 		{
-
+			switch (codepoint)
+			{
+				case U'\t':		[[fallthrough]];
+				case U'\v':		[[fallthrough]]; 
+				case U'\f':		[[fallthrough]]; 
+				case U' ':		[[fallthrough]];
+				case U'\u0085':	[[fallthrough]]; //next line
+				case U'\u00A0':	[[fallthrough]]; //no-break space
+				case U'\u1680':	[[fallthrough]]; //ogham space mark
+				case U'\u2000':	[[fallthrough]]; //en quad
+				case U'\u2001':	[[fallthrough]]; //em quad
+				case U'\u2002':	[[fallthrough]]; //en space
+				case U'\u2003':	[[fallthrough]]; //em space
+				case U'\u2004':	[[fallthrough]]; //three-per-em space
+				case U'\u2005':	[[fallthrough]]; //four-per-em space
+				case U'\u2006':	[[fallthrough]]; //six-per-em space
+				case U'\u2007':	[[fallthrough]]; //figure space
+				case U'\u2008':	[[fallthrough]]; //punctuation space
+				case U'\u2009':	[[fallthrough]]; //thin space
+				case U'\u200A':	[[fallthrough]]; //hair space
+				case U'\u2028':	[[fallthrough]]; //line separator
+				case U'\u2029':	[[fallthrough]]; //paragraph separator
+				case U'\u202F':	[[fallthrough]]; //narrow no-break space
+				case U'\u205F':	[[fallthrough]]; //medium mathematical space
+				case U'\u3000':	                 //ideographic space
+					return true;
+			}
+			return false;
 		}
+
+		[[nodiscard]]
+		constexpr bool is_bare_key_character(char32_t codepoint) noexcept
+		{
+			return (codepoint >= U'a' && codepoint <= U'z')
+				|| (codepoint >= U'A' && codepoint <= U'Z')
+				|| (codepoint >= U'0' && codepoint <= U'9')
+				|| codepoint == U'-'
+				|| codepoint == U'_'
+				/*
+				|| (codepoint >= U'\u00E0' && codepoint <= U'\u00F6')	//LATIN SMALL LETTER A WITH GRAVE -> LATIN SMALL LETTER O WITH DIAERESIS
+				|| (codepoint >= U'\u00F8' && codepoint <= U'\u00FE')	//LATIN SMALL LETTER O WITH STROKE -> LATIN SMALL LETTER THORN
+				|| (codepoint >= U'\u00C0' && codepoint <= U'\u00D6')	//LATIN CAPITAL LETTER A WITH GRAVE -> LATIN CAPITAL LETTER O WITH DIAERESIS
+				|| (codepoint >= U'\u00D8' && codepoint <= U'\u00DE')	//LATIN CAPITAL LETTER O WITH STROKE -> LATIN CAPITAL LETTER THORN
+				*/
+			;
+		}
+
+		[[nodiscard]]
+		constexpr bool is_string_delimiter(char32_t codepoint) noexcept
+		{
+			return codepoint == U'"'
+				|| codepoint == U'\'';
+		}
+
+		[[nodiscard]]
+		constexpr bool is_line_ending(char32_t codepoint) noexcept
+		{
+			return codepoint == U'\r'
+				|| codepoint == U'\n';
+		}
+
+		class parser final
+		{
+			private:
+				utf8_reader_interface& reader_;
+				std::shared_ptr<table> root;
+				document_position prev_pos = {};
+				const utf8_codepoint* cp = {};
+				std::set<table*> implicit_tables;
+				table* current_table;
+
+				void advance()
+				{
+					if (cp)
+						prev_pos = cp->position;
+					cp = reader_.next();
+				}
+
+				bool consume_whitespace()
+				{
+					if (!cp || !is_whitespace(cp->value))
+						return false;
+
+					do
+					{
+						advance();
+					}
+					while (cp && is_whitespace(cp->value));
+					return true;
+				}
+
+				bool consume_line_ending()
+				{
+					if (!cp || !is_line_ending(cp->value))
+						return false;
+
+					if (cp->value == U'\r')
+					{
+						advance();  //skip \r
+						if (!cp)
+							throw parse_error{ "Encountered EOF while consuming CRLF"s, prev_pos, reader_.source_path() };
+						if (cp->value != U'\n')
+							throw parse_error{ "Encountered unexpected character while consuming CRLF"s, cp->position, reader_.source_path() };
+					}
+					advance(); //skip \n
+					return true;
+				}
+
+				bool consume_rest_of_line()
+				{
+					if (!cp)
+						return false;
+
+					do
+					{
+						if (is_line_ending(cp->value))
+							return consume_line_ending();
+						else
+							advance();
+					}
+					while (cp);
+					return true;
+				}
+
+				bool consume_comment()
+				{
+					if (!cp || cp->value != U'#')
+						return false;
+					return consume_rest_of_line();
+				}
+
+				string parse_string()
+				{
+					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+				}
+
+				string parse_bare_key_segment()
+				{
+					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+				}
+
+				std::vector<string> parse_key()
+				{
+					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
+
+					std::vector<string> key;
+				}
+
+				struct table_header
+				{
+					std::vector<string> key;
+					bool is_array;
+				};
+
+				table_header parse_table_header()
+				{
+					TOML_ASSERT(cp && cp->value == U'[');
+
+					const auto start_pos = prev_pos;
+					do
+					{
+						//skip first [
+						advance();
+						if (!cp)
+							break;
+
+						//skip second [ (if present)
+						table_header header{};
+						if (cp->value == U'[')
+						{
+							advance();
+							if (!cp)
+								break;
+							header.is_array = true;
+						}
+
+						//skip past any whitespace that followed the [
+						if (consume_whitespace() && !cp)
+							break;
+
+						//get the actual key
+						header.key = parse_key();
+
+						//skip past any whitespace that followed the key
+						if (consume_whitespace() && !cp)
+							break;
+
+						//consume the first closing ]
+						if (cp->value != U']')
+							throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+						advance();
+
+						//consume the second closing ]
+						if (header.is_array)
+						{
+							if (cp->value != U']')
+								throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+							advance();
+						}
+
+						//handle the rest of the line after the table 
+						consume_whitespace();
+						if ((!consume_comment() && !consume_line_ending()) && cp)
+							throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+
+						return header;
+					}
+					while (false);
+
+					throw parse_error{ "Encountered EOF while parsing table header"s, start_pos, reader_.source_path() };
+				}
+
+				void parse_document()
+				{
+					TOML_ASSERT(cp);
+					
+					do
+					{
+						// leading whitespace, line endings, comments
+						if (consume_whitespace()
+							|| consume_line_ending()
+							|| consume_comment())
+							continue;
+
+						// [tables]
+						// [[array of tables]]
+						else if (cp->value == U'[')
+						{
+							auto header = parse_table_header();
+							TOML_ASSERT(!header.key.empty());
+
+							if (header.is_array)
+							{
+
+							}
+							else
+							{
+								auto prev_super = root.get();
+								for (size_t i = 0; i < header.key.size() - 1_sz; i++)
+								{
+									//each super table must either not exist already, or be a table
+									auto next_super = prev_super->get(header.key[i]);
+									if (!next_super)
+									{
+										next_super = prev_super->values.emplace(
+											string{ header.key[i] },
+											std::make_shared<table>()
+										).first->second.get();
+										implicit_tables.insert(next_super->as_table_unsafe());
+									}
+									else if (!next_super->is_table())
+									{
+										//throw parse_error{ "FFFFFFFFFFFFF"s, prev_pos, reader_.source_path() };
+									}
+									prev_super = next_super->as_table_unsafe();
+								}
+
+								//the last table in the key must not exist already, or be a table that was created implicitly
+								{
+								}
+							}
+						}
+
+						// bare_keys
+						// dotted.keys
+						// "quoted keys"
+						else if (is_string_delimiter(cp->value)
+							|| is_bare_key_character(cp->value))
+						{
+
+						}
+
+						else //??
+							throw parse_error{ "Encountered unexpected character while parsing document"s, prev_pos, reader_.source_path() };
+
+					}
+					while (cp);
+				}
+
+			public:
+
+				parser(utf8_reader_interface&& reader)
+					: reader_{ reader },
+					root{ std::make_shared<table>() }
+				{
+					root->region_.begin = {};
+					root->region_.source_path = reader_.source_path();
+					current_table = root.get();
+
+					advance();
+					if (cp)
+						parse_document();
+				}
+
+				[[nodiscard]]
+				operator std::shared_ptr<table>() const noexcept
+				{
+					return root;
+				}
+		};
 	}
 
-	inline std::shared_ptr<table> parse(std::string_view doc)
+	template <typename CHAR>
+	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, const path& source_path = {})
 	{
-		impl::utf8_reader reader{ doc };
-		auto rootTable = std::make_shared<table>();
-		impl::parse_table_body(reader, rootTable);
-		return rootTable;
+		static_assert(
+			sizeof(CHAR) == 1_sz,
+			"The string view's underlying character type must be 1 byte in size."
+		);
+
+		return impl::parser{ impl::utf8_reader{ doc, source_path } };
 	}
 
-	#ifdef __cpp_lib_char8_t
-
-	inline std::shared_ptr<table> parse(std::u8string_view doc)
+	template <typename CHAR>
+	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, const path& source_path = {})
 	{
-		impl::utf8_reader reader{ doc };
-		auto rootTable = std::make_shared<table>();
-		impl::parse_table_body(reader, rootTable);
-		return rootTable;
-	}
+		static_assert(
+			sizeof(CHAR) == 1_sz,
+			"The stream's underlying character type must be 1 byte in size."
+		);
 
-	#endif
+		return impl::parser{ impl::utf8_reader{ doc, source_path } };
+	}
 }

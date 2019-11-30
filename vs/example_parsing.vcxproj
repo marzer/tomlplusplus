@@ -20,31 +20,31 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{0E287B5A-1168-43FD-B067-F6BE8E182A57}</ProjectGuid>
+    <ProjectGuid>{259FCEE5-3442-4076-9547-2BA793ECA1CB}</ProjectGuid>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -56,13 +56,7 @@
   </ImportGroup>
   <Import Project="$(ProjectDir)\toml17.props" />
   <ItemGroup>
-    <ClInclude Include="..\include\toml17\toml.h" />
-    <ClInclude Include="..\include\toml17\toml_array.h" />
-    <ClInclude Include="..\include\toml17\toml_common.h" />
-    <ClInclude Include="..\include\toml17\toml_parser.h" />
-    <ClInclude Include="..\include\toml17\toml_table.h" />
-    <ClInclude Include="..\include\toml17\toml_table_array.h" />
-    <ClInclude Include="..\include\toml17\toml_value.h" />
+    <ClCompile Include="..\examples\parsing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

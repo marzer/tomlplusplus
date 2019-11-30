@@ -3,22 +3,21 @@
 //--------------------------------------------------------------------
 // CONFIGURATION
 //--------------------------------------------------------------------
-// clang-format off
 
-#ifdef TOML17_CONFIG_HEADER
-	#include TOML17_CONFIG_HEADER
+#ifdef TOML_CONFIG_HEADER
+	#include TOML_CONFIG_HEADER
 #endif
 
-#ifndef TOML17_NAMESPACE
-	#define TOML17_NAMESPACE toml
+#ifndef TOML_NAMESPACE
+	#define TOML_NAMESPACE toml
 #endif
 
-#ifndef TOML17_USE_CHAR_8_IF_AVAILABLE
-	#define TOML17_USE_CHAR_8_IF_AVAILABLE 1
+#ifndef TOML_USE_CHAR_8_IF_AVAILABLE
+	#define TOML_USE_CHAR_8_IF_AVAILABLE 1
 #endif
 
-#ifndef TOML17_NONSTANDARD_ATTRIBUTES
-	#define TOML17_NONSTANDARD_ATTRIBUTES 0
+#ifndef TOML_ASSERT
+	#define TOML_DEFAULT_ASSERT
 #endif
 
 //--------------------------------------------------------------------
@@ -31,154 +30,161 @@
 
 #if defined(_MSC_VER)
 
-	#define TOML17_LANG_VERSION _MSVC_LANG
+	#define TOML_LANG_VERSION _MSVC_LANG
 
 	#ifdef _CPPRTTI
-		#define TOML17_RTTI_ENABLED
+		#define TOML_RTTI_ENABLED
 	#endif
 
 	#ifdef _CPPUNWIND
-		#define TOML17_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML17_DISABLE_WARNINGS		__pragma(warning(push, 0))
-	#define TOML17_RESTORE_WARNINGS		__pragma(warning(pop, 0))
+	#define TOML_DISABLE_WARNINGS		__pragma(warning(push, 0))
+	#define TOML_RESTORE_WARNINGS		__pragma(warning(pop, 0))
 
-	#define TOML17_INTERFACE			__declspec(novtable)
-	#define TOML17_EMPTY_BASES			__declspec(empty_bases)
-	#define TOML17_ALWAYS_INLINE		_forceinline
-	#define TOML17_ASSUME(cond)			_assume(cond)
-	#define TOML17_UNREACHABLE			__assume(0)
+	#define TOML_INTERFACE				__declspec(novtable)
+	#define TOML_EMPTY_BASES			__declspec(empty_bases)
+	#define TOML_ALWAYS_INLINE			__forceinline
+	#define TOML_ASSUME(cond)			__assume(cond)
+	#define TOML_UNREACHABLE			__assume(0)
 
 #elif defined(__clang__)
 
-	#define TOML17_LANG_VERSION __cplusplus
+	#define TOML_LANG_VERSION __cplusplus
 
 	#if __has_feature(cxx_rtti)
-		#define TOML17_RTTI_ENABLED
+		#define TOML_RTTI_ENABLED
 	#endif
 
 	#ifdef __EXCEPTIONS
-		#define TOML17_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML17_DISABLE_WARNINGS						\
+	#define TOML_DISABLE_WARNINGS						\
 		_Pragma("clang diagnostic push")				\
 		_Pragma("clang diagnostic ignored \"-Wall\"")	\
 		_Pragma("clang diagnostic ignored \"-Wextra\"")
 
-	#define TOML17_RESTORE_WARNINGS						\
+	#define TOML_RESTORE_WARNINGS						\
 		_Pragma("clang diagnostic pop")
 
-	#define TOML17_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML17_ASSUME(cond)			__builtin_assume(cond)
-	#define TOML17_UNREACHABLE			__builtin_unreachable()
+	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
+	#define TOML_ASSUME(cond)			__builtin_assume(cond)
+	#define TOML_UNREACHABLE			__builtin_unreachable()
 
 #elif defined(__GNUC__)
 
-	#define TOML17_LANG_VERSION __cplusplus
+	#define TOML_LANG_VERSION __cplusplus
 
 	#ifdef __GXX_RTTI
-		#define TOML17_RTTI_ENABLED
+		#define TOML_RTTI_ENABLED
 	#endif
 
 	#ifdef __EXCEPTIONS
-		#define TOML17_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML17_DISABLE_WARNINGS						\
+	#define TOML_DISABLE_WARNINGS						\
 		Pragma("GCC diagnostic push")					\
 		Pragma("GCC diagnostic ignored \"-Wall\"")
 
-	#define TOML17_RESTORE_WARNINGS						\
+	#define TOML_RESTORE_WARNINGS						\
 		Pragma("GCC diagnostic pop")
 
-	#define TOML17_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML17_UNREACHABLE			__builtin_unreachable()
+	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
+	#define TOML_UNREACHABLE			__builtin_unreachable()
 
 #endif
 
-#if TOML17_LANG_VERSION < 201703L
-	#error Toml17 C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
+#if TOML_LANG_VERSION < 201703L
+	#error Toml17 requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
 #endif
 
-// #ifndef TOML17_RTTI_ENABLED
+// #ifndef TOML_RTTI_ENABLED
 //     #error Toml17 requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
 // #endif
 
-#ifndef TOML17_EXCEPTIONS_ENABLED
+#ifndef TOML_EXCEPTIONS_ENABLED
 	#error Toml17 currently requires that exceptions be enabled.
 #endif
 
-#if TOML17_LANG_VERSION >= 202600LL
-	#define TOML17_LANG 26
-#elif TOML17_LANG_VERSION >= 202300LL
-	#define TOML17_LANG 23
-#elif TOML17_LANG_VERSION >= 202000LL
-	#define TOML17_LANG 20
+#if TOML_LANG_VERSION >= 202600LL
+	#define TOML_LANG 26
+#elif TOML_LANG_VERSION >= 202300LL
+	#define TOML_LANG 23
+#elif TOML_LANG_VERSION >= 202000LL
+	#define TOML_LANG 20
 #else
-	#define TOML17_LANG 17
+	#define TOML_LANG 17
+#endif
+
+#ifndef TOML_DISABLE_WARNINGS
+	#define TOML_DISABLE_WARNINGS
+#endif
+#ifndef TOML_RESTORE_WARNINGS
+	#define TOML_RESTORE_WARNINGS
+#endif
+
+#ifdef TOML_DEFAULT_ASSERT
+	TOML_DISABLE_WARNINGS
+	#include <cassert>
+	TOML_RESTORE_WARNINGS
+	#define TOML_ASSERT(cond)	assert(cond)
 #endif
 
 #if __has_include(<version>)
-	TOML17_DISABLE_WARNINGS
+	TOML_DISABLE_WARNINGS
 	#include <version>
-	TOML17_RESTORE_WARNINGS
+	TOML_RESTORE_WARNINGS
 #endif
 
 #if __has_cpp_attribute(likely)
-	#define TOML17_LIKELY [[likely]]
+	#define TOML_LIKELY [[likely]]
 #else
-	#define TOML17_LIKELY
+	#define TOML_LIKELY
 #endif
 
 #if __has_cpp_attribute(unlikely)
-	#define TOML17_UNLIKELY [[unlikely]]
+	#define TOML_UNLIKELY [[unlikely]]
 #else
-	#define TOML17_UNLIKELY
+	#define TOML_UNLIKELY
 #endif
 
 #if __has_cpp_attribute(no_unique_address)
-	#define TOML17_NO_UNIQUE_ADDRESS [[no_unique_address]]
+	#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
 #else
-	#define TOML17_NO_UNIQUE_ADDRESS
+	#define TOML_NO_UNIQUE_ADDRESS
 #endif
 
-#define TOML17_SPEC_VERSION_MAJOR 0
-#define TOML17_SPEC_VERSION_MINOR 5
-#define TOML17_SPEC_VERSION_REVISION 0
+#define TOML_SPEC_VERSION_MAJOR		0
+#define TOML_SPEC_VERSION_MINOR		5
+#define TOML_SPEC_VERSION_REVISION	0
 
-#ifndef TOML17_DISABLE_WARNINGS
-	#define TOML17_DISABLE_WARNINGS
+#ifndef TOML_INTERFACE
+	#define TOML_INTERFACE
 #endif
-#ifndef TOML17_RESTORE_WARNINGS
-	#define TOML17_RESTORE_WARNINGS
+#ifndef TOML_EMPTY_BASES
+	#define TOML_EMPTY_BASES
 #endif
-#ifndef TOML17_INTERFACE
-	#define TOML17_INTERFACE
+#ifndef TOML_ALWAYS_INLINE
+	#define TOML_ALWAYS_INLINE	inline
 #endif
-#ifndef TOML17_EMPTY_BASES
-	#define TOML17_EMPTY_BASES
+#ifndef TOML_ASSUME
+	#define TOML_ASSUME(cond)		(void)0
 #endif
-#ifndef TOML17_ALWAYS_INLINE
-	#define TOML17_ALWAYS_INLINE inline
-#endif
-#ifndef TOML17_ASSUME(cond)
-	#define (void)0
-#endif
-#ifndef TOML17_UNREACHABLE
-	#define (void)0
+#ifndef TOML_UNREACHABLE
+	#define TOML_UNREACHABLE		(void)0
 #endif
 
-#define TOML17_NO_DEFAULT_CASE		default: TOML17_UNREACHABLE
+#define TOML_NO_DEFAULT_CASE		default: TOML_UNREACHABLE
 
 //--------------------------------------------------------------------
 // INCLUDES
 //--------------------------------------------------------------------
 
-TOML17_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS
 
-#include <cassert>
 #include <cstdint>
 #include <optional>
 #include <memory>
@@ -188,58 +194,46 @@ TOML17_DISABLE_WARNINGS
 #include <vector>
 #include <algorithm>
 #include <map>
+#include <set>
 #include <iosfwd>
 #include <stdexcept>
-//#include <sstream>
-// include <sstream>
-// include <fstream>
- 
-// include <type_traits>
-// include <iomanip>
+#include <filesystem>
 
-TOML17_RESTORE_WARNINGS
+TOML_RESTORE_WARNINGS
 
 //--------------------------------------------------------------------
 // FORWARD DECLARATIONS & TYPEDEFS
 //--------------------------------------------------------------------
-// clang-format on
 
-namespace TOML17_NAMESPACE
+namespace TOML_NAMESPACE
 {
-	/*class value;
-	class array;*/
+#	if TOML_LANG >= 20 || (defined(_MSC_VER) && defined(_HAS_CXX20))
 
-#if TOML17_LANG >= 20 || (defined(_MSC_VER) && defined(_HAS_CXX20))
 	template <typename T>
 	using remove_cvref_t = std::remove_cvref_t<T>;
-#else
+
+	#else
+
 	template <typename T>
 	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
-#endif
+
+	#endif
 
 	namespace impl
 	{
-		template <typename T>
-		[[nodiscard]] TOML17_ALWAYS_INLINE
-		constexpr auto unwrap_enum(T val) noexcept
-		{
-			if constexpr (std::is_enum_v<T>)
-				return static_cast<std::underlying_type_t<T>>(val);
-			else
-				return val;
-		}
-
-		[[nodiscard]] TOML17_ALWAYS_INLINE
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr uint8_t operator"" _u8(unsigned long long n) noexcept
 		{
 			return static_cast<uint8_t>(n);
 		}
 
-		[[nodiscard]] TOML17_ALWAYS_INLINE
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr size_t operator"" _sz(unsigned long long n) noexcept
 		{
 			return static_cast<size_t>(n);
 		}
+
+		class parser;
 	}
 
 	struct date final
@@ -270,7 +264,7 @@ namespace TOML17_NAMESPACE
 		std::optional<time_offset> time_offset;
 	};
 
-	#if defined(__cpp_lib_char8_t) && TOML17_USE_CHAR_8_IF_AVAILABLE
+	#if defined(__cpp_lib_char8_t) && TOML_USE_CHAR_8_IF_AVAILABLE
 
 	using string = std::u8string;
 	using string_view = std::u8string_view;
@@ -281,6 +275,8 @@ namespace TOML17_NAMESPACE
 	using string_view = std::string_view;
 
 	#endif
+
+	using path = std::filesystem::path;
 
 	template <typename T>
 	inline constexpr bool is_value_type =
@@ -296,10 +292,6 @@ namespace TOML17_NAMESPACE
 	template <>				class value<double>;
 	template <>				class value<bool>;
 	template <>				class value<datetime>;
-
-	template <typename T>
-	using value_ptr = std::shared_ptr<value<T>>;
-
 	class array;
 	class table;
 	class table_array;
@@ -315,13 +307,27 @@ namespace TOML17_NAMESPACE
 	{
 		document_position begin;
 		document_position end;
-		std::shared_ptr<string> file_path;
+		std::shared_ptr<const path> source_path;
 	};
 
-	class node
+	class TOML_INTERFACE node
 		: public std::enable_shared_from_this<node>
 	{
+		private:
+			friend class impl::parser;
+			document_region region_;
+
+			[[nodiscard]] value<string>* as_string_unsafe() noexcept { return reinterpret_cast<value<string>*>(this); }
+			[[nodiscard]] value<int64_t>* as_int_unsafe() noexcept	{ return reinterpret_cast<value<int64_t>*>(this); }
+			[[nodiscard]] value<double>* as_float_unsafe() noexcept { return reinterpret_cast<value<double>*>(this); }
+			[[nodiscard]] value<bool>* as_bool_unsafe() noexcept { return reinterpret_cast<value<bool>*>(this); }
+			[[nodiscard]] value<datetime>* as_datetime_unsafe() noexcept { return reinterpret_cast<value<datetime>*>(this); }
+			[[nodiscard]] array* as_array_unsafe() noexcept { return reinterpret_cast<array*>(this); }
+			[[nodiscard]] table* as_table_unsafe() noexcept { return reinterpret_cast<table*>(this); }
+			[[nodiscard]] table_array* as_table_array_unsafe() noexcept { return reinterpret_cast<table_array*>(this); }
+
 		public:
+
 			[[nodiscard]] virtual bool is_value() const noexcept = 0;
 			[[nodiscard]] virtual bool is_string() const noexcept = 0;
 			[[nodiscard]] virtual bool is_int() const noexcept = 0;
@@ -332,15 +338,29 @@ namespace TOML17_NAMESPACE
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
 			[[nodiscard]] virtual bool is_table_array() const noexcept = 0;
 
-			[[nodiscard]] virtual value_ptr<string> as_string() const noexcept = 0;
-			[[nodiscard]] virtual value_ptr<int64_t> as_int() const noexcept = 0;
-			[[nodiscard]] virtual value_ptr<double> as_float() const noexcept = 0;
-			[[nodiscard]] virtual value_ptr<bool> as_bool() const noexcept = 0;
-			[[nodiscard]] virtual value_ptr<datetime> as_datetime() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<string>> as_string() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<int64_t>> as_int() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<double>> as_float() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<bool>> as_bool() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<datetime>> as_datetime() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<array> as_array() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<table> as_table() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<table_array> as_table_array() noexcept = 0;
 
-			[[nodiscard]] virtual std::shared_ptr<array> as_array() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<table> as_table() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<table_array> as_table_array() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<string>> as_string() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<int64_t>> as_int() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<double>> as_float() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<bool>> as_bool() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<datetime>> as_datetime() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const array> as_array() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const table> as_table() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const table_array> as_table_array() const noexcept = 0;
+
+			[[nodiscard]]
+			const document_region& region() const noexcept
+			{
+				return region_;
+			}
 
 			virtual ~node() noexcept = default;
 	};

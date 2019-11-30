@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_common.h"
 
-namespace TOML17_NAMESPACE
+namespace TOML_NAMESPACE
 {
 	template <typename T>
 	class value final
@@ -13,11 +13,25 @@ namespace TOML17_NAMESPACE
 		);
 
 		private:
-			template <typename T>
-			[[nodiscard]] TOML17_ALWAYS_INLINE
-			value_ptr<T> value_ptr_from_base() const noexcept
+
+			template <typename U>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			std::shared_ptr<toml::value<U>> value_ptr_from_base() noexcept
 			{
-				return std::static_pointer_cast<node<T>>(shared_from_this());
+				if constexpr (std::is_same_v<T, U>)
+					return std::static_pointer_cast<toml::value<U>>(shared_from_this());
+				else
+					return {};
+			}
+
+			template <typename U>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			std::shared_ptr<const toml::value<U>> value_ptr_from_base() const noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return std::static_pointer_cast<const toml::value<U>>(shared_from_this());
+				else
+					return {};
 			}
 
 		public:
@@ -33,63 +47,32 @@ namespace TOML17_NAMESPACE
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
 			[[nodiscard]] bool is_table_array() const noexcept override { return false; }
 
-			[[nodiscard]]
-			value_ptr<string> as_string() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, string>)
-					return value_ptr_from_base<string>();
-				else
-					return {};
-			}
+			[[nodiscard]] std::shared_ptr<toml::value<string>> as_string() noexcept override { return value_ptr_from_base<string>(); };
+			[[nodiscard]] std::shared_ptr<toml::value<int64_t>> as_int() noexcept override { return value_ptr_from_base<int64_t>(); };
+			[[nodiscard]] std::shared_ptr<toml::value<double>> as_float() noexcept override { return value_ptr_from_base<double>(); };
+			[[nodiscard]] std::shared_ptr<toml::value<bool>> as_bool() noexcept override { return value_ptr_from_base<bool>(); };
+			[[nodiscard]] std::shared_ptr<toml::value<datetime>> as_datetime() noexcept override { return value_ptr_from_base<datetime>(); };
+			[[nodiscard]] std::shared_ptr<array> as_array() noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<table> as_table() noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<table_array> as_table_array() noexcept override { return {}; }
 
-			[[nodiscard]]
-			value_ptr<int64_t> as_int() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, int64_t>)
-					return value_ptr_from_base<int64_t>();
-				else
-					return {};
-			}
+			[[nodiscard]] std::shared_ptr<const toml::value<string>> as_string() const noexcept override { return value_ptr_from_base<string>(); };
+			[[nodiscard]] std::shared_ptr<const toml::value<int64_t>> as_int() const noexcept override { return value_ptr_from_base<int64_t>(); };
+			[[nodiscard]] std::shared_ptr<const toml::value<double>> as_float() const noexcept override { return value_ptr_from_base<double>(); };
+			[[nodiscard]] std::shared_ptr<const toml::value<bool>> as_bool() const noexcept override { return value_ptr_from_base<bool>(); };
+			[[nodiscard]] std::shared_ptr<const toml::value<datetime>> as_datetime() const noexcept override { return value_ptr_from_base<datetime>(); };
+			[[nodiscard]] std::shared_ptr<const array> as_array() const noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
-			[[nodiscard]]
-			value_ptr<double> as_float() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, double>)
-					return value_ptr_from_base<double>();
-				else
-					return {};
-			}
-
-			[[nodiscard]]
-			value_ptr<bool> as_bool() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, bool>)
-					return value_ptr_from_base<bool>();
-				else
-					return {};
-			}
-
-			[[nodiscard]]
-			value_ptr<datetime> as_datetime() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, datetime>)
-					return value_ptr_from_base<datetime>();
-				else
-					return {};
-			}
-
-			[[nodiscard]] std::shared_ptr<array> as_array() const noexcept override { return {}; }
-			[[nodiscard]] std::shared_ptr<table> as_table() const noexcept override { return {}; }
-			[[nodiscard]] std::shared_ptr<table_array> as_table_array() const noexcept override { return {}; }
-
-			node(const T& val) noexcept
+			value(const T& val) noexcept
 				: value{ val }
 			{}
 
-			node(T&& val) noexcept
+			value(T&& val) noexcept
 				: value{ std::move(val) }
 			{}
 
-			~node() noexcept = default;
+			~value() noexcept = default;
 	};
 }
