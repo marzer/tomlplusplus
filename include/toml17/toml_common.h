@@ -3,6 +3,7 @@
 //--------------------------------------------------------------------
 // CONFIGURATION
 //--------------------------------------------------------------------
+// clang-format off
 
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
@@ -157,6 +158,12 @@
 	#define TOML_NO_UNIQUE_ADDRESS
 #endif
 
+#if TOML_LANG >= 20
+	#define TOML_CONSTEVAL	consteval
+#else
+	#define TOML_CONSTEVAL	constexpr
+#endif
+
 #define TOML_SPEC_VERSION_MAJOR		0
 #define TOML_SPEC_VERSION_MINOR		5
 #define TOML_SPEC_VERSION_REVISION	0
@@ -178,6 +185,8 @@
 #endif
 
 #define TOML_NO_DEFAULT_CASE		default: TOML_UNREACHABLE
+
+#define TOML_NOT_IMPLEMENTED_YET	TOML_ASSERT(false && "Implement me")
 
 //--------------------------------------------------------------------
 // INCLUDES
@@ -204,6 +213,7 @@ TOML_RESTORE_WARNINGS
 //--------------------------------------------------------------------
 // FORWARD DECLARATIONS & TYPEDEFS
 //--------------------------------------------------------------------
+// clang-format on
 
 namespace TOML_NAMESPACE
 {
@@ -222,13 +232,13 @@ namespace TOML_NAMESPACE
 	namespace impl
 	{
 		[[nodiscard]] TOML_ALWAYS_INLINE
-		constexpr uint8_t operator"" _u8(unsigned long long n) noexcept
+		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
 		{
 			return static_cast<uint8_t>(n);
 		}
 
 		[[nodiscard]] TOML_ALWAYS_INLINE
-		constexpr size_t operator"" _sz(unsigned long long n) noexcept
+		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 		{
 			return static_cast<size_t>(n);
 		}
@@ -298,9 +308,9 @@ namespace TOML_NAMESPACE
 
 	struct document_position
 	{
-		size_t line;
-		size_t column;
-		size_t position;
+		size_t line;	//begins at 1
+		size_t column;	//begins at 1
+		size_t index;	//begins at 0
 	};
 
 	struct document_region
@@ -317,14 +327,14 @@ namespace TOML_NAMESPACE
 			friend class impl::parser;
 			document_region region_;
 
-			[[nodiscard]] value<string>* as_string_unsafe() noexcept { return reinterpret_cast<value<string>*>(this); }
-			[[nodiscard]] value<int64_t>* as_int_unsafe() noexcept	{ return reinterpret_cast<value<int64_t>*>(this); }
-			[[nodiscard]] value<double>* as_float_unsafe() noexcept { return reinterpret_cast<value<double>*>(this); }
-			[[nodiscard]] value<bool>* as_bool_unsafe() noexcept { return reinterpret_cast<value<bool>*>(this); }
-			[[nodiscard]] value<datetime>* as_datetime_unsafe() noexcept { return reinterpret_cast<value<datetime>*>(this); }
-			[[nodiscard]] array* as_array_unsafe() noexcept { return reinterpret_cast<array*>(this); }
-			[[nodiscard]] table* as_table_unsafe() noexcept { return reinterpret_cast<table*>(this); }
-			[[nodiscard]] table_array* as_table_array_unsafe() noexcept { return reinterpret_cast<table_array*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE value<string>* reinterpret_as_string() noexcept { return reinterpret_cast<value<string>*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE value<int64_t>* reinterpret_as_int() noexcept	{ return reinterpret_cast<value<int64_t>*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE value<double>* reinterpret_as_float() noexcept { return reinterpret_cast<value<double>*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE value<bool>* reinterpret_as_bool() noexcept { return reinterpret_cast<value<bool>*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE value<datetime>* reinterpret_as_datetime() noexcept { return reinterpret_cast<value<datetime>*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE array* reinterpret_as_array() noexcept { return reinterpret_cast<array*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE table* reinterpret_as_table() noexcept { return reinterpret_cast<table*>(this); }
+			[[nodiscard]] TOML_ALWAYS_INLINE table_array* reinterpret_as_table_array() noexcept { return reinterpret_cast<table_array*>(this); }
 
 		public:
 

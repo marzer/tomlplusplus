@@ -90,96 +90,100 @@ namespace TOML_NAMESPACE
 		};
 
 		template <typename T>
-		struct utf8_byte_stream;
+		class utf8_byte_stream;
 
 		template <typename CHAR>
-		struct utf8_byte_stream<std::basic_string_view<CHAR>> final
+		class utf8_byte_stream<std::basic_string_view<CHAR>> final
 		{
 			static_assert(sizeof(CHAR) == 1_sz);
 
-			std::basic_string_view<CHAR> source;
-			size_t position = {};
+			private:
+				std::basic_string_view<CHAR> source;
+				size_t position = {};
 
-			utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
-				: source{ sv }
-			{
-				if (source.length() >= 3_sz
-					&& static_cast<uint8_t>(source[0]) == 0xEF_u8
-					&& static_cast<uint8_t>(source[1]) == 0xBB_u8
-					&& static_cast<uint8_t>(source[2]) == 0xBF_u8)
+			public:
+				utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
+					: source{ sv }
 				{
-					position += 3_sz;
+					if (source.length() >= 3_sz
+						&& static_cast<uint8_t>(source[0]) == 0xEF_u8
+						&& static_cast<uint8_t>(source[1]) == 0xBB_u8
+						&& static_cast<uint8_t>(source[2]) == 0xBF_u8)
+					{
+						position += 3_sz;
+					}
 				}
-			}
 
-			[[nodiscard]]
-			bool eof() const noexcept
-			{
-				return position >= source.length();
-			}
+				[[nodiscard]]
+				bool eof() const noexcept
+				{
+					return position >= source.length();
+				}
 
-			[[nodiscard]]
-			constexpr bool error() const noexcept
-			{
-				return false;
-			}
+				[[nodiscard]]
+				constexpr bool error() const noexcept
+				{
+					return false;
+				}
 
-			[[nodiscard]]
-			uint8_t operator() () noexcept
-			{
-				return static_cast<uint8_t>(source[position++]);
-			}
+				[[nodiscard]]
+				uint8_t operator() () noexcept
+				{
+					return static_cast<uint8_t>(source[position++]);
+				}
 		};
 
 		template <typename CHAR>
-		struct utf8_byte_stream<std::basic_istream<CHAR>> final
+		class utf8_byte_stream<std::basic_istream<CHAR>> final
 		{
 			static_assert(sizeof(CHAR) == 1_sz);
 
-			std::basic_istream<CHAR>& source;
+			private:
+				std::basic_istream<CHAR>* source;
 
-			utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
-				: source{ stream }
-			{
-				if (stream)
+			public:
+				utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
+					: source{ &stream }
 				{
-					static constexpr auto bom = std::array{
-						0xEF_u8,
-						0xBB_u8,
-						0xBF_u8
-					};
-
-					using stream_traits = typename decltype(source)::traits_type;
-					const auto initial_pos = stream.tellg();
-					size_t bom_pos{};
-					auto bom_char = source.get();
-					while (source && bom_char != stream_traits::eof && bom_char == bom[bom_pos])
+					if (*source)
 					{
-						bom_pos++;
-						bom_char = source.get();
+						static constexpr auto bom = std::array{
+							0xEF_u8,
+							0xBB_u8,
+							0xBF_u8
+						};
+
+						using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
+						const auto initial_pos = source->tellg();
+						size_t bom_pos{};
+						auto bom_char = source->get();
+						while (*source && bom_char != stream_traits::eof && bom_char == bom[bom_pos])
+						{
+							bom_pos++;
+							bom_char = source->get();
+						}
+						if (!(*source) || bom_pos < 3_sz)
+							source->seekg(initial_pos);
 					}
-					if (!source || bom_pos < 3_sz)
-						stream.seekg(initial_pos);
 				}
-			}
 
-			[[nodiscard]]
-			bool eof() const noexcept
-			{
-				return source.eof();
-			}
+				[[nodiscard]]
+				bool eof() const noexcept
+				{
+					return source->eof();
+				}
 
-			[[nodiscard]]
-			bool error() const noexcept
-			{
-				return !source;
-			}
+				[[nodiscard]]
+				bool error() const noexcept
+				{
+					return !(*source);
+				}
 
-			[[nodiscard]]
-			uint8_t operator() ()
-			{
-				return static_cast<uint8_t>(source.get());
-			}
+				[[nodiscard]]
+				uint8_t operator() ()
+				{
+					return static_cast<uint8_t>(source->get());
+				}
 		};
 
 		struct utf8_codepoint final
@@ -195,7 +199,7 @@ namespace TOML_NAMESPACE
 		struct TOML_INTERFACE utf8_reader_interface
 		{
 			[[nodiscard]]
-			virtual const std::shared_ptr<path>& source_path() noexcept = 0;
+			virtual const std::shared_ptr<const path>& source_path() noexcept = 0;
 
 			[[nodiscard]]
 			virtual const utf8_codepoint* next() = 0;
@@ -218,12 +222,15 @@ namespace TOML_NAMESPACE
 					noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 					: stream{ std::forward<U>(source) }
 				{
+					current.position.line = 1_sz;
+					current.position.column = 1_sz;
+
 					if (!source_path.empty())
 						source_path_ = std::make_shared<const path>(source_path);
 				}
 
 				[[nodiscard]]
-				const std::shared_ptr<path>& source_path() noexcept override
+				const std::shared_ptr<const path>& source_path() noexcept override
 				{
 					return source_path_;
 				}
@@ -272,15 +279,17 @@ namespace TOML_NAMESPACE
 						{
 							prev = current;
 							prev.value = static_cast<char32_t>(decoder.codepoint);
+
 							current.byte_count = {};
-							current.position.position++;
+							current.position.index++;
 							if (prev.value == U'\n')
 							{
 								current.position.line++;
-								current.position.column = {};
+								current.position.column = 1_sz;
 							}
 							else
 								current.position.column++;
+
 							return &prev;
 						}
 
@@ -365,19 +374,20 @@ namespace TOML_NAMESPACE
 			private:
 				utf8_reader_interface& reader_;
 				std::shared_ptr<table> root;
-				document_position prev_pos = {};
+				document_position prev_pos = { 1_sz, 1_sz };
 				const utf8_codepoint* cp = {};
 				std::set<table*> implicit_tables;
 				table* current_table;
 
 				void advance()
 				{
-					if (cp)
-						prev_pos = cp->position;
+					TOML_ASSERT(cp);
+
+					prev_pos = cp->position;
 					cp = reader_.next();
 				}
 
-				bool consume_whitespace()
+				bool consume_leading_whitespace()
 				{
 					if (!cp || !is_whitespace(cp->value))
 						return false;
@@ -433,18 +443,24 @@ namespace TOML_NAMESPACE
 				string parse_string()
 				{
 					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+
+					TOML_NOT_IMPLEMENTED_YET;
 				}
 
 				string parse_bare_key_segment()
 				{
 					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+
+					TOML_NOT_IMPLEMENTED_YET;
 				}
 
 				std::vector<string> parse_key()
 				{
 					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
 
-					std::vector<string> key;
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
 				}
 
 				struct table_header
@@ -476,14 +492,14 @@ namespace TOML_NAMESPACE
 						}
 
 						//skip past any whitespace that followed the [
-						if (consume_whitespace() && !cp)
+						if (consume_leading_whitespace() && !cp)
 							break;
 
 						//get the actual key
 						header.key = parse_key();
 
 						//skip past any whitespace that followed the key
-						if (consume_whitespace() && !cp)
+						if (consume_leading_whitespace() && !cp)
 							break;
 
 						//consume the first closing ]
@@ -500,7 +516,7 @@ namespace TOML_NAMESPACE
 						}
 
 						//handle the rest of the line after the table 
-						consume_whitespace();
+						consume_leading_whitespace();
 						if ((!consume_comment() && !consume_line_ending()) && cp)
 							throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
 
@@ -511,6 +527,88 @@ namespace TOML_NAMESPACE
 					throw parse_error{ "Encountered EOF while parsing table header"s, start_pos, reader_.source_path() };
 				}
 
+				void parse_key_value_pair()
+				{
+					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
+
+					TOML_NOT_IMPLEMENTED_YET;
+				}
+
+				bool is_implicit_table(node* node) const noexcept
+				{
+					return node
+						&& node->is_table()
+						&& implicit_tables.find(node->reinterpret_as_table()) != implicit_tables.end();
+				};
+
+				void parse_table_or_table_array()
+				{
+					TOML_ASSERT(cp && cp->value == U'[');
+
+					const auto table_start_position = prev_pos;
+					auto header = parse_table_header();
+					TOML_ASSERT(!header.key.empty());
+
+					if (header.is_array)
+					{
+						TOML_NOT_IMPLEMENTED_YET;
+					}
+					else
+					{
+						auto super = root.get();
+						for (size_t i = 0; i < header.key.size() - 1_sz; i++)
+						{
+							//each super table must either not exist already, or be a table
+							auto next_super = super->get(header.key[i]);
+							if (!next_super)
+							{
+								next_super = super->values.emplace(
+									string{ header.key[i] },
+									std::make_shared<table>()
+								).first->second.get();
+								implicit_tables.insert(next_super->reinterpret_as_table());
+								next_super->region_ = { table_start_position, table_start_position, reader_.source_path() };
+							}
+							else if (!next_super->is_table())
+							{
+								//throw parse_error{ "FFFFFFFFFFFFF"s, prev_pos, reader_.source_path() };
+								TOML_NOT_IMPLEMENTED_YET;
+							}
+							super = next_super->reinterpret_as_table();
+						}
+
+						//the last table in the key must not exist already, or be a table that was created implicitly
+						{
+							auto matching_node = super->get(header.key.back());
+							if (matching_node)
+							{
+								if (!matching_node->is_table())
+								{
+									//redefinition error
+									TOML_NOT_IMPLEMENTED_YET;
+								}
+								else if (!is_implicit_table(matching_node))
+								{
+									//invalid ordering error
+									TOML_NOT_IMPLEMENTED_YET;
+								}
+
+								//table was implicit; promote it to explicit and update the region info so it matches the explicit definition
+								implicit_tables.erase(matching_node->reinterpret_as_table());
+								matching_node->region_.begin = matching_node->region_.end = table_start_position;
+							}
+							else
+							{
+								matching_node = super->values.emplace(
+									string{ header.key.back() },
+									std::make_shared<table>()
+								).first->second.get();
+								matching_node->region_ = { table_start_position, table_start_position, reader_.source_path() };
+							}
+						}
+					}
+				}
+
 				void parse_document()
 				{
 					TOML_ASSERT(cp);
@@ -518,7 +616,7 @@ namespace TOML_NAMESPACE
 					do
 					{
 						// leading whitespace, line endings, comments
-						if (consume_whitespace()
+						if (consume_leading_whitespace()
 							|| consume_line_ending()
 							|| consume_comment())
 							continue;
@@ -527,39 +625,7 @@ namespace TOML_NAMESPACE
 						// [[array of tables]]
 						else if (cp->value == U'[')
 						{
-							auto header = parse_table_header();
-							TOML_ASSERT(!header.key.empty());
-
-							if (header.is_array)
-							{
-
-							}
-							else
-							{
-								auto prev_super = root.get();
-								for (size_t i = 0; i < header.key.size() - 1_sz; i++)
-								{
-									//each super table must either not exist already, or be a table
-									auto next_super = prev_super->get(header.key[i]);
-									if (!next_super)
-									{
-										next_super = prev_super->values.emplace(
-											string{ header.key[i] },
-											std::make_shared<table>()
-										).first->second.get();
-										implicit_tables.insert(next_super->as_table_unsafe());
-									}
-									else if (!next_super->is_table())
-									{
-										//throw parse_error{ "FFFFFFFFFFFFF"s, prev_pos, reader_.source_path() };
-									}
-									prev_super = next_super->as_table_unsafe();
-								}
-
-								//the last table in the key must not exist already, or be a table that was created implicitly
-								{
-								}
-							}
+							parse_table_or_table_array();
 						}
 
 						// bare_keys
@@ -568,7 +634,7 @@ namespace TOML_NAMESPACE
 						else if (is_string_delimiter(cp->value)
 							|| is_bare_key_character(cp->value))
 						{
-
+							parse_key_value_pair();
 						}
 
 						else //??
@@ -584,11 +650,10 @@ namespace TOML_NAMESPACE
 					: reader_{ reader },
 					root{ std::make_shared<table>() }
 				{
-					root->region_.begin = {};
-					root->region_.source_path = reader_.source_path();
+					root->region_ = { prev_pos, prev_pos, reader_.source_path() };
 					current_table = root.get();
 
-					advance();
+					cp = reader_.next();
 					if (cp)
 						parse_document();
 				}
@@ -605,7 +670,7 @@ namespace TOML_NAMESPACE
 	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, const path& source_path = {})
 	{
 		static_assert(
-			sizeof(CHAR) == 1_sz,
+			sizeof(CHAR) == 1,
 			"The string view's underlying character type must be 1 byte in size."
 		);
 
@@ -616,7 +681,7 @@ namespace TOML_NAMESPACE
 	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, const path& source_path = {})
 	{
 		static_assert(
-			sizeof(CHAR) == 1_sz,
+			sizeof(CHAR) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
