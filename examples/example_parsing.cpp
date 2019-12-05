@@ -1,10 +1,10 @@
-#include <toml17/toml.h>
+#include <toml++/toml.h>
 
 using namespace std::literals;
 
 //example from the TOML spec document
 inline constexpr auto toml_document =
-u8R"(# This is a TOML document.
+R"(# This is a TOML document.
 
 title = "TOML Example"
 

@@ -14,7 +14,7 @@
 #endif
 
 #ifndef TOML_USE_CHAR_8_IF_AVAILABLE
-	#define TOML_USE_CHAR_8_IF_AVAILABLE 1
+	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
 #endif
 
 #ifndef TOML_ASSERT
@@ -26,12 +26,10 @@
 //--------------------------------------------------------------------
 
 #ifndef __cplusplus
-	#error Toml17 is a C++ library.
+	#error Toml++ is a C++ library.
 #endif
 
-#if defined(_MSC_VER)
-
-	#define TOML_LANG_VERSION _MSVC_LANG
+#if defined(_MSC_VER) //or clang in msvc mode
 
 	#ifdef _CPPRTTI
 		#define TOML_RTTI_ENABLED
@@ -41,18 +39,16 @@
 		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML_DISABLE_WARNINGS		__pragma(warning(push, 0))
-	#define TOML_RESTORE_WARNINGS		__pragma(warning(pop, 0))
-
-	#define TOML_INTERFACE				__declspec(novtable)
-	#define TOML_EMPTY_BASES			__declspec(empty_bases)
-	#define TOML_ALWAYS_INLINE			__forceinline
-	#define TOML_ASSUME(cond)			__assume(cond)
-	#define TOML_UNREACHABLE			__assume(0)
+	#define TOML_LANG_VERSION		_MSVC_LANG
+	#define TOML_DISABLE_WARNINGS	__pragma(warning(push, 0))
+	#define TOML_RESTORE_WARNINGS	__pragma(warning(pop, 0))
+	#define TOML_INTERFACE			__declspec(novtable)
+	#define TOML_EMPTY_BASES		__declspec(empty_bases)
+	#define TOML_ALWAYS_INLINE		__forceinline
+	#define TOML_ASSUME(cond)		__assume(cond)
+	#define TOML_UNREACHABLE		__assume(0)
 
 #elif defined(__clang__)
-
-	#define TOML_LANG_VERSION __cplusplus
 
 	#if __has_feature(cxx_rtti)
 		#define TOML_RTTI_ENABLED
@@ -70,13 +66,12 @@
 	#define TOML_RESTORE_WARNINGS						\
 		_Pragma("clang diagnostic pop")
 
+	#define TOML_LANG_VERSION		__cplusplus
 	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML_ASSUME(cond)			__builtin_assume(cond)
-	#define TOML_UNREACHABLE			__builtin_unreachable()
+	#define TOML_ASSUME(cond)		__builtin_assume(cond)
+	#define TOML_UNREACHABLE		__builtin_unreachable()
 
 #elif defined(__GNUC__)
-
-	#define TOML_LANG_VERSION __cplusplus
 
 	#ifdef __GXX_RTTI
 		#define TOML_RTTI_ENABLED
@@ -93,21 +88,22 @@
 	#define TOML_RESTORE_WARNINGS						\
 		Pragma("GCC diagnostic pop")
 
+	#define TOML_LANG_VERSION		__cplusplus
 	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML_UNREACHABLE			__builtin_unreachable()
+	#define TOML_UNREACHABLE		__builtin_unreachable()
 
 #endif
 
 #if TOML_LANG_VERSION < 201703L
-	#error Toml17 requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
+	#error Toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
 #endif
 
 // #ifndef TOML_RTTI_ENABLED
-//     #error Toml17 requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
+//     #error Toml++ requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
 // #endif
 
 #ifndef TOML_EXCEPTIONS_ENABLED
-	#error Toml17 currently requires that exceptions be enabled.
+	#error Toml++ currently requires that exceptions be enabled.
 #endif
 
 #if TOML_LANG_VERSION >= 202600LL
@@ -126,6 +122,47 @@
 #ifndef TOML_RESTORE_WARNINGS
 	#define TOML_RESTORE_WARNINGS
 #endif
+#ifndef TOML_INTERFACE
+	#define TOML_INTERFACE
+#endif
+#ifndef TOML_EMPTY_BASES
+	#define TOML_EMPTY_BASES
+#endif
+#ifndef TOML_ALWAYS_INLINE
+	#define TOML_ALWAYS_INLINE	inline
+#endif
+#ifndef TOML_ASSUME
+	#define TOML_ASSUME(cond)	(void)0
+#endif
+#ifndef TOML_UNREACHABLE
+	#define TOML_UNREACHABLE	(void)0
+#endif
+#define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
+#ifdef __cpp_consteval
+	#define TOML_CONSTEVAL		consteval
+#else
+	#define TOML_CONSTEVAL		constexpr
+#endif
+#ifndef __INTELLISENSE__
+	#if __has_cpp_attribute(likely)
+		#define TOML_LIKELY [[likely]]
+	#endif
+	#if __has_cpp_attribute(unlikely)
+		#define TOML_UNLIKELY [[unlikely]]
+	#endif
+	#if __has_cpp_attribute(no_unique_address)
+		#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
+	#endif
+#endif //__INTELLISENSE__
+#ifndef TOML_LIKELY
+	#define TOML_LIKELY
+#endif
+#ifndef TOML_UNLIKELY
+	#define TOML_UNLIKELY
+#endif
+#ifndef TOML_NO_UNIQUE_ADDRESS
+	#define TOML_NO_UNIQUE_ADDRESS
+#endif
 
 #ifdef TOML_DEFAULT_ASSERT
 	TOML_DISABLE_WARNINGS
@@ -140,54 +177,15 @@
 	TOML_RESTORE_WARNINGS
 #endif
 
-#if __has_cpp_attribute(likely)
-	#define TOML_LIKELY [[likely]]
-#else
-	#define TOML_LIKELY
-#endif
-
-#if __has_cpp_attribute(unlikely)
-	#define TOML_UNLIKELY [[unlikely]]
-#else
-	#define TOML_UNLIKELY
-#endif
-
-#if __has_cpp_attribute(no_unique_address)
-	#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
-#else
-	#define TOML_NO_UNIQUE_ADDRESS
-#endif
-
-#if TOML_LANG >= 20
-	#define TOML_CONSTEVAL	consteval
-#else
-	#define TOML_CONSTEVAL	constexpr
-#endif
-
 #define TOML_SPEC_VERSION_MAJOR		0
 #define TOML_SPEC_VERSION_MINOR		5
 #define TOML_SPEC_VERSION_REVISION	0
 
-#ifndef TOML_INTERFACE
-	#define TOML_INTERFACE
+#if defined(_MSC_VER) && (defined(_DEBUG) || !defined(NDEBUG))
+	#define TOML_NOT_IMPLEMENTED_YET	__debugbreak()
+#else
+	#define TOML_NOT_IMPLEMENTED_YET	TOML_ASSERT(false && "Implement me")
 #endif
-#ifndef TOML_EMPTY_BASES
-	#define TOML_EMPTY_BASES
-#endif
-#ifndef TOML_ALWAYS_INLINE
-	#define TOML_ALWAYS_INLINE	inline
-#endif
-#ifndef TOML_ASSUME
-	#define TOML_ASSUME(cond)		(void)0
-#endif
-#ifndef TOML_UNREACHABLE
-	#define TOML_UNREACHABLE		(void)0
-#endif
-
-#define TOML_NO_DEFAULT_CASE		default: TOML_UNREACHABLE
-
-#define TOML_NOT_IMPLEMENTED_YET	TOML_ASSERT(false && "Implement me")
-
 //--------------------------------------------------------------------
 // INCLUDES
 //--------------------------------------------------------------------
@@ -199,14 +197,15 @@ TOML_DISABLE_WARNINGS
 #include <memory>
 #include <string_view>
 #include <string>
-#include <array>
 #include <vector>
-#include <algorithm>
 #include <map>
-#include <set>
-#include <iosfwd>
 #include <stdexcept>
-#include <filesystem>
+#include <iosfwd>
+#include <sstream>
+//#include <array>
+//#include <algorithm>
+//#include <set>
+//#include <filesystem>
 
 TOML_RESTORE_WARNINGS
 
@@ -217,7 +216,7 @@ TOML_RESTORE_WARNINGS
 
 namespace TOML_NAMESPACE
 {
-#	if TOML_LANG >= 20 || (defined(_MSC_VER) && defined(_HAS_CXX20))
+	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
 
 	template <typename T>
 	using remove_cvref_t = std::remove_cvref_t<T>;
@@ -286,8 +285,6 @@ namespace TOML_NAMESPACE
 
 	#endif
 
-	using path = std::filesystem::path;
-
 	template <typename T>
 	inline constexpr bool is_value_type =
 		std::is_same_v<T, string>
@@ -317,7 +314,7 @@ namespace TOML_NAMESPACE
 	{
 		document_position begin;
 		document_position end;
-		std::shared_ptr<const path> source_path;
+		std::shared_ptr<const string> source_path;
 	};
 
 	class TOML_INTERFACE node

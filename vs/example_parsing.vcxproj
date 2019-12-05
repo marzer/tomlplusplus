@@ -54,9 +54,9 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <Import Project="$(ProjectDir)\toml17.props" />
+  <Import Project="$(ProjectDir)\toml++.props" />
   <ItemGroup>
-    <ClCompile Include="..\examples\parsing.cpp" />
+    <ClCompile Include="..\examples\example_parsing.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

@@ -54,15 +54,15 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <Import Project="$(ProjectDir)\toml17.props" />
+  <Import Project="$(ProjectDir)\toml++.props" />
   <ItemGroup>
-    <ClInclude Include="..\include\toml17\toml.h" />
-    <ClInclude Include="..\include\toml17\toml_array.h" />
-    <ClInclude Include="..\include\toml17\toml_common.h" />
-    <ClInclude Include="..\include\toml17\toml_parser.h" />
-    <ClInclude Include="..\include\toml17\toml_table.h" />
-    <ClInclude Include="..\include\toml17\toml_table_array.h" />
-    <ClInclude Include="..\include\toml17\toml_value.h" />
+    <ClInclude Include="..\include\toml++\toml.h" />
+    <ClInclude Include="..\include\toml++\toml_array.h" />
+    <ClInclude Include="..\include\toml++\toml_common.h" />
+    <ClInclude Include="..\include\toml++\toml_parser.h" />
+    <ClInclude Include="..\include\toml++\toml_table.h" />
+    <ClInclude Include="..\include\toml++\toml_table_array.h" />
+    <ClInclude Include="..\include\toml++\toml_value.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

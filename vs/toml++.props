@@ -24,7 +24,7 @@
 			<WarningLevel>Level4</WarningLevel>
 			<LanguageStandard>stdcpplatest</LanguageStandard>
 			<DiagnosticsFormat>Caret</DiagnosticsFormat>
-			<AdditionalOptions>%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew /experimental:preprocessor</AdditionalOptions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_CONSOLE</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>

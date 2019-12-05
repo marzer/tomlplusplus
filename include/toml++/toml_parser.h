@@ -12,18 +12,18 @@ namespace TOML_NAMESPACE
 			document_region region_;
 
 		public:
-			parse_error(const std::string& what, document_region&& region) noexcept
-				: std::runtime_error{ what },
+			parse_error(std::string_view description, document_region&& region) noexcept
+				: std::runtime_error{ std::string{ description } },
 				region_{ std::move(region) }
 			{}
 
-			parse_error(const std::string& what, const document_position& position, const std::shared_ptr<const path>& source_path) noexcept
-				: std::runtime_error{ what },
+			parse_error(std::string_view description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+				: std::runtime_error{ std::string{ description } },
 				region_{ position, position, source_path }
 			{}
 
-			parse_error(const std::string& what, const document_position& position) noexcept
-				: std::runtime_error{ what },
+			parse_error(std::string_view description, const document_position& position) noexcept
+				: std::runtime_error{ std::string{ description } },
 				region_{ position, position }
 			{}
 
@@ -45,8 +45,8 @@ namespace TOML_NAMESPACE
 			uint32_t state{};
 			uint32_t codepoint{};
 
-			static constexpr auto state_table = std::array<uint8_t, 364>
-			{{
+			static constexpr uint8_t state_table[]
+			{
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -61,7 +61,7 @@ namespace TOML_NAMESPACE
 				12,12,12,12,12,12,12,24,12,12,12,12,	12,24,12,12,12,12,12,12,12,24,12,12,
 				12,12,12,12,12,12,12,36,12,36,12,12,	12,36,12,12,12,12,12,36,12,36,12,12,
 				12,36,12,12,12,12,12,12,12,12,12,12
-			}};
+			};
 
 			[[nodiscard]]
 			constexpr bool error() const noexcept
@@ -147,7 +147,7 @@ namespace TOML_NAMESPACE
 				{
 					if (*source)
 					{
-						static constexpr auto bom = std::array{
+						static constexpr uint8_t bom[] {
 							0xEF_u8,
 							0xBB_u8,
 							0xBF_u8
@@ -191,7 +191,15 @@ namespace TOML_NAMESPACE
 			char32_t value;
 			document_position position;
 			uint8_t byte_count;
-			std::array<uint8_t, 4> bytes;
+			uint8_t bytes[4];
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			std::string_view as_view() const noexcept
+			{
+				if (!byte_count)
+					return ""sv;
+				return std::string_view{ reinterpret_cast<const char* const>(bytes), byte_count };
+			}
 		};
 		static_assert(std::is_trivial_v<utf8_codepoint>);
 		static_assert(std::is_standard_layout_v<utf8_codepoint>);
@@ -199,7 +207,7 @@ namespace TOML_NAMESPACE
 		struct TOML_INTERFACE utf8_reader_interface
 		{
 			[[nodiscard]]
-			virtual const std::shared_ptr<const path>& source_path() noexcept = 0;
+			virtual const std::shared_ptr<const string>& source_path() noexcept = 0;
 
 			[[nodiscard]]
 			virtual const utf8_codepoint* next() = 0;
@@ -213,12 +221,12 @@ namespace TOML_NAMESPACE
 				utf8_byte_stream<T> stream;
 				utf8_decoder decoder;
 				utf8_codepoint prev{}, current{};
-				std::shared_ptr<const path> source_path_;
+				std::shared_ptr<const string> source_path_;
 
 			public:
 
 				template <typename U>
-				utf8_reader(U && source, const path& source_path = {})
+				utf8_reader(U && source, string_view source_path = {})
 					noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 					: stream{ std::forward<U>(source) }
 				{
@@ -226,11 +234,11 @@ namespace TOML_NAMESPACE
 					current.position.column = 1_sz;
 
 					if (!source_path.empty())
-						source_path_ = std::make_shared<const path>(source_path);
+						source_path_ = std::make_shared<const string>(source_path);
 				}
 
 				[[nodiscard]]
-				const std::shared_ptr<const path>& source_path() noexcept override
+				const std::shared_ptr<const string>& source_path() noexcept override
 				{
 					return source_path_;
 				}
@@ -300,10 +308,10 @@ namespace TOML_NAMESPACE
 		};
 
 		template <typename CHAR>
-		utf8_reader(std::basic_string_view<CHAR>, const path&) -> utf8_reader<std::basic_string_view<CHAR>>;
+		utf8_reader(std::basic_string_view<CHAR>, string_view) -> utf8_reader<std::basic_string_view<CHAR>>;
 
 		template <typename CHAR>
-		utf8_reader(std::basic_istream<CHAR>&, const path&) -> utf8_reader<std::basic_istream<CHAR>>;
+		utf8_reader(std::basic_istream<CHAR>&, string_view) -> utf8_reader<std::basic_istream<CHAR>>;
 
 		[[nodiscard]]
 		constexpr bool is_whitespace(char32_t codepoint) noexcept
@@ -376,8 +384,23 @@ namespace TOML_NAMESPACE
 				std::shared_ptr<table> root;
 				document_position prev_pos = { 1_sz, 1_sz };
 				const utf8_codepoint* cp = {};
-				std::set<table*> implicit_tables;
+				std::vector<table*> implicit_tables;
 				table* current_table;
+
+				template <typename... T>
+				[[noreturn]]
+				void throw_parse_error(T &&... message) const
+				{
+					const auto& pos = cp ? cp->position : prev_pos;
+					if constexpr (sizeof...(T) == 0_sz)
+						throw parse_error{ "An unspecified error occurred"s, pos, reader_.source_path() };
+					else
+					{
+						std::stringstream ss;
+						(ss << ... << std::forward<T>(message));
+						throw parse_error{ ss.str(), pos, reader_.source_path() };
+					}
+				}
 
 				void advance()
 				{
@@ -409,9 +432,9 @@ namespace TOML_NAMESPACE
 					{
 						advance();  //skip \r
 						if (!cp)
-							throw parse_error{ "Encountered EOF while consuming CRLF"s, prev_pos, reader_.source_path() };
+							throw_parse_error("Encountered EOF while consuming CRLF"sv);
 						if (cp->value != U'\n')
-							throw parse_error{ "Encountered unexpected character while consuming CRLF"s, cp->position, reader_.source_path() };
+							throw_parse_error("Encountered unexpected character while consuming CRLF"sv);
 					}
 					advance(); //skip \n
 					return true;
@@ -504,27 +527,27 @@ namespace TOML_NAMESPACE
 
 						//consume the first closing ]
 						if (cp->value != U']')
-							throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+							throw_parse_error("Encountered unexpected character while parsing table"sv, (header.is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, cp->as_view(), '\'');
 						advance();
 
 						//consume the second closing ]
 						if (header.is_array)
 						{
 							if (cp->value != U']')
-								throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+								throw_parse_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, cp->as_view(), '\'');
 							advance();
 						}
 
 						//handle the rest of the line after the table 
 						consume_leading_whitespace();
 						if ((!consume_comment() && !consume_line_ending()) && cp)
-							throw parse_error{ "Encountered unexpected character while parsing table header"s, prev_pos, reader_.source_path() };
+							throw_parse_error("Encountered unexpected character while parsing table"sv, (header.is_array ? " array"sv : ""sv), " header; expected a comment or whitespace, saw '"sv, cp->as_view(), '\'');
 
 						return header;
 					}
 					while (false);
 
-					throw parse_error{ "Encountered EOF while parsing table header"s, start_pos, reader_.source_path() };
+					throw_parse_error("Encountered EOF while parsing table header"sv);
 				}
 
 				void parse_key_value_pair()
@@ -538,7 +561,8 @@ namespace TOML_NAMESPACE
 				{
 					return node
 						&& node->is_table()
-						&& implicit_tables.find(node->reinterpret_as_table()) != implicit_tables.end();
+						&& !implicit_tables.empty()
+						&& std::find(implicit_tables.cbegin(), implicit_tables.cend(), node->reinterpret_as_table()) != implicit_tables.cend();
 				};
 
 				void parse_table_or_table_array()
@@ -566,7 +590,7 @@ namespace TOML_NAMESPACE
 									string{ header.key[i] },
 									std::make_shared<table>()
 								).first->second.get();
-								implicit_tables.insert(next_super->reinterpret_as_table());
+								implicit_tables.push_back(next_super->reinterpret_as_table());
 								next_super->region_ = { table_start_position, table_start_position, reader_.source_path() };
 							}
 							else if (!next_super->is_table())
@@ -594,7 +618,7 @@ namespace TOML_NAMESPACE
 								}
 
 								//table was implicit; promote it to explicit and update the region info so it matches the explicit definition
-								implicit_tables.erase(matching_node->reinterpret_as_table());
+								implicit_tables.erase(std::find(implicit_tables.cbegin(), implicit_tables.cend(), matching_node->reinterpret_as_table()));
 								matching_node->region_.begin = matching_node->region_.end = table_start_position;
 							}
 							else
@@ -622,7 +646,7 @@ namespace TOML_NAMESPACE
 							continue;
 
 						// [tables]
-						// [[array of tables]]
+						// [[table array]]
 						else if (cp->value == U'[')
 						{
 							parse_table_or_table_array();
@@ -638,7 +662,7 @@ namespace TOML_NAMESPACE
 						}
 
 						else //??
-							throw parse_error{ "Encountered unexpected character while parsing document"s, prev_pos, reader_.source_path() };
+							throw_parse_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, cp->as_view(), '\'');
 
 					}
 					while (cp);
@@ -667,7 +691,7 @@ namespace TOML_NAMESPACE
 	}
 
 	template <typename CHAR>
-	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, const path& source_path = {})
+	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -678,7 +702,7 @@ namespace TOML_NAMESPACE
 	}
 
 	template <typename CHAR>
-	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, const path& source_path = {})
+	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,

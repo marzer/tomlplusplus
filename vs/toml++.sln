@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.161
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toml17", "toml17.vcxproj", "{0E287B5A-1168-43FD-B067-F6BE8E182A57}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toml++", "toml++.vcxproj", "{0E287B5A-1168-43FD-B067-F6BE8E182A57}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "example_parsing", "example_parsing.vcxproj", "{259FCEE5-3442-4076-9547-2BA793ECA1CB}"
 EndProject
