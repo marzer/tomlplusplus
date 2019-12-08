@@ -8,6 +8,7 @@
     <ClInclude Include="..\include\toml++\toml_table_array.h" />
     <ClInclude Include="..\include\toml++\toml_common.h" />
     <ClInclude Include="..\include\toml++\toml.h" />
+    <ClInclude Include="..\include\toml++\toml_utf8.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

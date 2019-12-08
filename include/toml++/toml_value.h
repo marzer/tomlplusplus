@@ -65,14 +65,25 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
-			value(const T& val) noexcept
-				: value{ val }
-			{}
-
-			value(T&& val) noexcept
-				: value{ std::move(val) }
+			template <typename U>
+			value(U&& val) noexcept
+				: value{ std::forward<U>(val) }
 			{}
 
 			~value() noexcept = default;
 	};
+
+	value(const string_char*) -> value<string>;
+	value(string_view) -> value<string>;
+	value(string) -> value<string>;
+	value(bool) -> value<bool>;
+	value(float) -> value<double>;
+	value(double) -> value<double>;
+	value(int8_t) -> value<int64_t>;
+	value(int16_t) -> value<int64_t>;
+	value(int32_t) -> value<int64_t>;
+	value(int64_t) -> value<int64_t>;
+	value(uint8_t) -> value<int64_t>;
+	value(uint16_t) -> value<int64_t>;
+	value(uint32_t) -> value<int64_t>;
 }

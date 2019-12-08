@@ -186,6 +186,20 @@
 #else
 	#define TOML_NOT_IMPLEMENTED_YET	TOML_ASSERT(false && "Implement me")
 #endif
+
+#if TOML_USE_CHAR_8_IF_AVAILABLE && defined(__cpp_lib_char8_t)
+
+	#define TOML_CHAR_8	1
+	#define TOML_STRING_PREFIX_1(S) u8##S
+	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
+
+#else
+
+	#define TOML_CHAR_8	0
+	#define TOML_STRING_PREFIX(S) S
+
+#endif
+
 //--------------------------------------------------------------------
 // INCLUDES
 //--------------------------------------------------------------------
@@ -230,6 +244,9 @@ namespace TOML_NAMESPACE
 
 	namespace impl
 	{
+		using namespace std::literals::string_literals;
+		using namespace std::literals::string_view_literals;
+
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
 		{
@@ -273,17 +290,22 @@ namespace TOML_NAMESPACE
 		std::optional<time_offset> time_offset;
 	};
 
-	#if defined(__cpp_lib_char8_t) && TOML_USE_CHAR_8_IF_AVAILABLE
+	#if TOML_CHAR_8
 
+	using string_char = char8_t;
 	using string = std::u8string;
 	using string_view = std::u8string_view;
 
 	#else
 
+	using string_char = char;
 	using string = std::string;
 	using string_view = std::string_view;
 
 	#endif
+
+	template <typename T>
+	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
 
 	template <typename T>
 	inline constexpr bool is_value_type =
@@ -293,12 +315,8 @@ namespace TOML_NAMESPACE
 		|| std::is_same_v<T, bool>
 		|| std::is_same_v<T, datetime>;
 
-	template <typename T>	class value;
-	template <>				class value<string>;
-	template <>				class value<int64_t>;
-	template <>				class value<double>;
-	template <>				class value<bool>;
-	template <>				class value<datetime>;
+	template <typename T>
+	class value;
 	class array;
 	class table;
 	class table_array;
@@ -322,7 +340,7 @@ namespace TOML_NAMESPACE
 	{
 		private:
 			friend class impl::parser;
-			document_region region_;
+			document_region region_{};
 
 			[[nodiscard]] TOML_ALWAYS_INLINE value<string>* reinterpret_as_string() noexcept { return reinterpret_cast<value<string>*>(this); }
 			[[nodiscard]] TOML_ALWAYS_INLINE value<int64_t>* reinterpret_as_int() noexcept	{ return reinterpret_cast<value<int64_t>*>(this); }
@@ -344,7 +362,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual bool is_array() const noexcept = 0;
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
 			[[nodiscard]] virtual bool is_table_array() const noexcept = 0;
-
+			
 			[[nodiscard]] virtual std::shared_ptr<value<string>> as_string() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<value<int64_t>> as_int() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<value<double>> as_float() noexcept = 0;
@@ -370,5 +388,34 @@ namespace TOML_NAMESPACE
 			}
 
 			virtual ~node() noexcept = default;
+	};
+
+	class parse_error final
+		: public std::runtime_error
+	{
+		private:
+			document_region region;
+
+		public:
+			parse_error(const std::string& description, document_region&& region_) noexcept
+				: std::runtime_error{ description },
+				region{ std::move(region_) }
+			{}
+
+			parse_error(const std::string& description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+				: std::runtime_error{ description },
+				region{ position, position, source_path }
+			{}
+
+			parse_error(const std::string& description, const document_position& position) noexcept
+				: std::runtime_error{ description },
+				region{ position, position }
+			{}
+
+			[[nodiscard]]
+			const document_region& where() const noexcept
+			{
+				return region;
+			}
 	};
 }

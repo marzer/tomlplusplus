@@ -8,7 +8,7 @@ namespace TOML_NAMESPACE
 	{
 		private:
 			friend class impl::parser;
-			std::map<string, std::shared_ptr<node>, std::less<>> values;
+			string_map<std::shared_ptr<node>> values;
 
 			[[nodiscard]]
 			node* get(string_view key) noexcept
@@ -48,7 +48,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return std::static_pointer_cast<const table>(shared_from_this()); }
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
-			table() noexcept {};
+			table() noexcept {}
 
 			//std::shared_ptr<node> operator[] (string_view key) const noexcept
 			//{

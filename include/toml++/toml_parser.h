@@ -1,391 +1,21 @@
 #pragma once
+#include "toml_utf8.h"
 #include "toml_value.h"
 #include "toml_array.h"
 #include "toml_table_array.h"
 
 namespace TOML_NAMESPACE
 {
-	class parse_error final
-		: public std::runtime_error
-	{
-		private:
-			document_region region_;
-
-		public:
-			parse_error(std::string_view description, document_region&& region) noexcept
-				: std::runtime_error{ std::string{ description } },
-				region_{ std::move(region) }
-			{}
-
-			parse_error(std::string_view description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
-				: std::runtime_error{ std::string{ description } },
-				region_{ position, position, source_path }
-			{}
-
-			parse_error(std::string_view description, const document_position& position) noexcept
-				: std::runtime_error{ std::string{ description } },
-				region_{ position, position }
-			{}
-
-			[[nodiscard]]
-			const document_region& where() const noexcept
-			{
-				return region_;
-			}
-	};
-
 	namespace impl
 	{
-		using namespace std::literals::string_literals;
-		using namespace std::literals::string_view_literals;
-
-		//based on the decoder found here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-		struct utf8_decoder final
-		{
-			uint32_t state{};
-			uint32_t codepoint{};
-
-			static constexpr uint8_t state_table[]
-			{
-				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,		0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-				1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,		9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-				7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,		7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-				8,8,2,2,2,2,2,2,2,2,2,2,2,2,2,2,		2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-				10,3,3,3,3,3,3,3,3,3,3,3,3,4,3,3,		11,6,6,6,5,8,8,8,8,8,8,8,8,8,8,8,
-
-				0,12,24,36,60,96,84,12,12,12,48,72,		12,12,12,12,12,12,12,12,12,12,12,12,
-				12, 0,12,12,12,12,12, 0,12, 0,12,12,	12,24,12,12,12,12,12,24,12,24,12,12,
-				12,12,12,12,12,12,12,24,12,12,12,12,	12,24,12,12,12,12,12,12,12,24,12,12,
-				12,12,12,12,12,12,12,36,12,36,12,12,	12,36,12,12,12,12,12,36,12,36,12,12,
-				12,36,12,12,12,12,12,12,12,12,12,12
-			};
-
-			[[nodiscard]]
-			constexpr bool error() const noexcept
-			{
-				return state == 12u;
-			}
-
-			[[nodiscard]]
-			constexpr bool has_code_point() const noexcept
-			{
-				return state == 0u;
-			}
-
-			constexpr void operator () (uint8_t byte) noexcept
-			{
-				TOML_ASSERT(!error());
-
-				const auto type = state_table[byte];
-
-				codepoint = has_code_point()
-					? (0xFFu >> type) & byte
-					: (byte & 0x3Fu) | (codepoint << 6);
-
-				state = state_table[state + 256u + type];
-			};
-		};
-
-		template <typename T>
-		class utf8_byte_stream;
-
-		template <typename CHAR>
-		class utf8_byte_stream<std::basic_string_view<CHAR>> final
-		{
-			static_assert(sizeof(CHAR) == 1_sz);
-
-			private:
-				std::basic_string_view<CHAR> source;
-				size_t position = {};
-
-			public:
-				utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
-					: source{ sv }
-				{
-					if (source.length() >= 3_sz
-						&& static_cast<uint8_t>(source[0]) == 0xEF_u8
-						&& static_cast<uint8_t>(source[1]) == 0xBB_u8
-						&& static_cast<uint8_t>(source[2]) == 0xBF_u8)
-					{
-						position += 3_sz;
-					}
-				}
-
-				[[nodiscard]]
-				bool eof() const noexcept
-				{
-					return position >= source.length();
-				}
-
-				[[nodiscard]]
-				constexpr bool error() const noexcept
-				{
-					return false;
-				}
-
-				[[nodiscard]]
-				uint8_t operator() () noexcept
-				{
-					return static_cast<uint8_t>(source[position++]);
-				}
-		};
-
-		template <typename CHAR>
-		class utf8_byte_stream<std::basic_istream<CHAR>> final
-		{
-			static_assert(sizeof(CHAR) == 1_sz);
-
-			private:
-				std::basic_istream<CHAR>* source;
-
-			public:
-				utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
-					: source{ &stream }
-				{
-					if (*source)
-					{
-						static constexpr uint8_t bom[] {
-							0xEF_u8,
-							0xBB_u8,
-							0xBF_u8
-						};
-
-						using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
-						const auto initial_pos = source->tellg();
-						size_t bom_pos{};
-						auto bom_char = source->get();
-						while (*source && bom_char != stream_traits::eof && bom_char == bom[bom_pos])
-						{
-							bom_pos++;
-							bom_char = source->get();
-						}
-						if (!(*source) || bom_pos < 3_sz)
-							source->seekg(initial_pos);
-					}
-				}
-
-				[[nodiscard]]
-				bool eof() const noexcept
-				{
-					return source->eof();
-				}
-
-				[[nodiscard]]
-				bool error() const noexcept
-				{
-					return !(*source);
-				}
-
-				[[nodiscard]]
-				uint8_t operator() ()
-				{
-					return static_cast<uint8_t>(source->get());
-				}
-		};
-
-		struct utf8_codepoint final
-		{
-			char32_t value;
-			document_position position;
-			uint8_t byte_count;
-			uint8_t bytes[4];
-
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			std::string_view as_view() const noexcept
-			{
-				if (!byte_count)
-					return ""sv;
-				return std::string_view{ reinterpret_cast<const char* const>(bytes), byte_count };
-			}
-		};
-		static_assert(std::is_trivial_v<utf8_codepoint>);
-		static_assert(std::is_standard_layout_v<utf8_codepoint>);
-
-		struct TOML_INTERFACE utf8_reader_interface
-		{
-			[[nodiscard]]
-			virtual const std::shared_ptr<const string>& source_path() noexcept = 0;
-
-			[[nodiscard]]
-			virtual const utf8_codepoint* next() = 0;
-		};
-
-		template <typename T>
-		class TOML_EMPTY_BASES utf8_reader final
-			: public utf8_reader_interface
-		{
-			private:
-				utf8_byte_stream<T> stream;
-				utf8_decoder decoder;
-				utf8_codepoint prev{}, current{};
-				std::shared_ptr<const string> source_path_;
-
-			public:
-
-				template <typename U>
-				utf8_reader(U && source, string_view source_path = {})
-					noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
-					: stream{ std::forward<U>(source) }
-				{
-					current.position.line = 1_sz;
-					current.position.column = 1_sz;
-
-					if (!source_path.empty())
-						source_path_ = std::make_shared<const string>(source_path);
-				}
-
-				[[nodiscard]]
-				const std::shared_ptr<const string>& source_path() noexcept override
-				{
-					return source_path_;
-				}
-
-				[[nodiscard]]
-				const utf8_codepoint* next() override
-				{
-					if (stream.eof())
-						return nullptr;
-					if (stream.error())
-						throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
-					if (decoder.error())
-						throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
-
-					while (true)
-					{
-						uint8_t nextByte;
-						if constexpr (noexcept(stream()))
-						{
-							nextByte = stream();
-						}
-						else
-						{
-							try
-							{
-								nextByte = stream();
-							}
-							catch (const std::exception& exc)
-							{
-								throw parse_error{ exc.what(), prev.position, source_path_ };
-							}
-							catch (...)
-							{
-								throw parse_error{ "An unspecified error occurred"s, prev.position, source_path_ };
-							}
-						}
-						if (stream.error())
-							throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
-
-						decoder(nextByte);
-						if (decoder.error())
-							throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
-
-						current.bytes[current.byte_count++] = nextByte;
-						if (decoder.has_code_point())
-						{
-							prev = current;
-							prev.value = static_cast<char32_t>(decoder.codepoint);
-
-							current.byte_count = {};
-							current.position.index++;
-							if (prev.value == U'\n')
-							{
-								current.position.line++;
-								current.position.column = 1_sz;
-							}
-							else
-								current.position.column++;
-
-							return &prev;
-						}
-
-						if (stream.eof())
-							throw parse_error{ "Encountered EOF during incomplete utf-8 code point sequence"s, prev.position, source_path_ };
-					}
-				}
-		};
-
-		template <typename CHAR>
-		utf8_reader(std::basic_string_view<CHAR>, string_view) -> utf8_reader<std::basic_string_view<CHAR>>;
-
-		template <typename CHAR>
-		utf8_reader(std::basic_istream<CHAR>&, string_view) -> utf8_reader<std::basic_istream<CHAR>>;
-
-		[[nodiscard]]
-		constexpr bool is_whitespace(char32_t codepoint) noexcept
-		{
-			switch (codepoint)
-			{
-				case U'\t':		[[fallthrough]];
-				case U'\v':		[[fallthrough]]; 
-				case U'\f':		[[fallthrough]]; 
-				case U' ':		[[fallthrough]];
-				case U'\u0085':	[[fallthrough]]; //next line
-				case U'\u00A0':	[[fallthrough]]; //no-break space
-				case U'\u1680':	[[fallthrough]]; //ogham space mark
-				case U'\u2000':	[[fallthrough]]; //en quad
-				case U'\u2001':	[[fallthrough]]; //em quad
-				case U'\u2002':	[[fallthrough]]; //en space
-				case U'\u2003':	[[fallthrough]]; //em space
-				case U'\u2004':	[[fallthrough]]; //three-per-em space
-				case U'\u2005':	[[fallthrough]]; //four-per-em space
-				case U'\u2006':	[[fallthrough]]; //six-per-em space
-				case U'\u2007':	[[fallthrough]]; //figure space
-				case U'\u2008':	[[fallthrough]]; //punctuation space
-				case U'\u2009':	[[fallthrough]]; //thin space
-				case U'\u200A':	[[fallthrough]]; //hair space
-				case U'\u2028':	[[fallthrough]]; //line separator
-				case U'\u2029':	[[fallthrough]]; //paragraph separator
-				case U'\u202F':	[[fallthrough]]; //narrow no-break space
-				case U'\u205F':	[[fallthrough]]; //medium mathematical space
-				case U'\u3000':	                 //ideographic space
-					return true;
-			}
-			return false;
-		}
-
-		[[nodiscard]]
-		constexpr bool is_bare_key_character(char32_t codepoint) noexcept
-		{
-			return (codepoint >= U'a' && codepoint <= U'z')
-				|| (codepoint >= U'A' && codepoint <= U'Z')
-				|| (codepoint >= U'0' && codepoint <= U'9')
-				|| codepoint == U'-'
-				|| codepoint == U'_'
-				/*
-				|| (codepoint >= U'\u00E0' && codepoint <= U'\u00F6')	//LATIN SMALL LETTER A WITH GRAVE -> LATIN SMALL LETTER O WITH DIAERESIS
-				|| (codepoint >= U'\u00F8' && codepoint <= U'\u00FE')	//LATIN SMALL LETTER O WITH STROKE -> LATIN SMALL LETTER THORN
-				|| (codepoint >= U'\u00C0' && codepoint <= U'\u00D6')	//LATIN CAPITAL LETTER A WITH GRAVE -> LATIN CAPITAL LETTER O WITH DIAERESIS
-				|| (codepoint >= U'\u00D8' && codepoint <= U'\u00DE')	//LATIN CAPITAL LETTER O WITH STROKE -> LATIN CAPITAL LETTER THORN
-				*/
-			;
-		}
-
-		[[nodiscard]]
-		constexpr bool is_string_delimiter(char32_t codepoint) noexcept
-		{
-			return codepoint == U'"'
-				|| codepoint == U'\'';
-		}
-
-		[[nodiscard]]
-		constexpr bool is_line_ending(char32_t codepoint) noexcept
-		{
-			return codepoint == U'\r'
-				|| codepoint == U'\n';
-		}
-
 		class parser final
 		{
 			private:
-				utf8_reader_interface& reader_;
+				utf8_buffered_reader reader;
 				std::shared_ptr<table> root;
 				document_position prev_pos = { 1_sz, 1_sz };
 				const utf8_codepoint* cp = {};
 				std::vector<table*> implicit_tables;
-				table* current_table;
 
 				template <typename... T>
 				[[noreturn]]
@@ -393,13 +23,35 @@ namespace TOML_NAMESPACE
 				{
 					const auto& pos = cp ? cp->position : prev_pos;
 					if constexpr (sizeof...(T) == 0_sz)
-						throw parse_error{ "An unspecified error occurred"s, pos, reader_.source_path() };
+						throw parse_error{ "An unspecified error occurred"s, pos, reader.source_path() };
+					else if constexpr (sizeof...(T) == 1_sz)
+					{
+						using arg_type = remove_cvref_t<T&&...>;
+						if constexpr (std::is_same_v<arg_type, std::string>)
+							throw parse_error{ std::forward<T>(message)..., pos, reader.source_path() };
+						else if constexpr (std::is_convertible_v<arg_type, std::string>)
+							throw parse_error{ std::string{ std::forward<T>(message)... }, pos, reader.source_path() };
+						else
+						{
+							std::stringstream ss;
+							(ss << ... << std::forward<T>(message));
+							throw parse_error{ ss.str(), pos, reader.source_path() };
+						}
+					}
 					else
 					{
 						std::stringstream ss;
 						(ss << ... << std::forward<T>(message));
-						throw parse_error{ ss.str(), pos, reader_.source_path() };
+						throw parse_error{ ss.str(), pos, reader.source_path() };
 					}
+				}
+
+				void go_back(size_t count)
+				{
+					TOML_ASSERT(count);
+
+					cp = reader.step_back(count);
+					prev_pos = cp->position;
 				}
 
 				void advance()
@@ -407,36 +59,36 @@ namespace TOML_NAMESPACE
 					TOML_ASSERT(cp);
 
 					prev_pos = cp->position;
-					cp = reader_.next();
+					cp = reader.read_next();
 				}
 
 				bool consume_leading_whitespace()
 				{
-					if (!cp || !is_whitespace(cp->value))
+					if (!cp || !is_whitespace(*cp))
 						return false;
 
 					do
 					{
 						advance();
 					}
-					while (cp && is_whitespace(cp->value));
+					while (cp && is_whitespace(*cp));
 					return true;
 				}
 
 				bool consume_line_ending()
 				{
-					if (!cp || !is_line_ending(cp->value))
+					if (!cp || !is_line_ending(*cp))
 						return false;
 
-					if (cp->value == U'\r')
+					if (*cp == U'\r')
 					{
-						advance();  //skip \r
+						advance();  // skip \r
 						if (!cp)
 							throw_parse_error("Encountered EOF while consuming CRLF"sv);
-						if (cp->value != U'\n')
+						if (*cp != U'\n')
 							throw_parse_error("Encountered unexpected character while consuming CRLF"sv);
 					}
-					advance(); //skip \n
+					advance(); // skip \n
 					return true;
 				}
 
@@ -447,7 +99,7 @@ namespace TOML_NAMESPACE
 
 					do
 					{
-						if (is_line_ending(cp->value))
+						if (is_line_ending(*cp))
 							return consume_line_ending();
 						else
 							advance();
@@ -458,178 +110,892 @@ namespace TOML_NAMESPACE
 
 				bool consume_comment()
 				{
-					if (!cp || cp->value != U'#')
+					if (!cp || *cp != U'#')
 						return false;
 					return consume_rest_of_line();
 				}
 
+				bool consume_expected_sequence(std::u32string_view seq)
+				{
+					for (auto c : seq)
+					{
+						if (!cp || *cp != c)
+							return false;
+						advance();
+					}
+					return true;
+				}
+
+				template <bool MULTI_LINE>
+				[[nodiscard]]
+				string parse_basic_string()
+				{
+					TOML_ASSERT(cp && *cp == U'"');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string"sv);
+					};
+
+
+					// skip the '"'
+					advance();
+					eof_check();
+
+					string str;
+					bool escaped = false, skipping_whitespace = false;
+					while (cp)
+					{
+						if (escaped)
+						{
+							escaped = false;
+
+							// handle 'line ending slashes' in multi-line mode
+							if constexpr (MULTI_LINE)
+							{
+								if (is_line_ending(*cp))
+								{
+									consume_line_ending();
+									skipping_whitespace = true;
+									continue;
+								}
+							}
+
+							// skip the escaped character
+							const auto escaped_codepoint = cp->value;
+							advance();
+
+							switch (escaped_codepoint)
+							{
+								// 'regular' escape codes
+								case U'b': str += TOML_STRING_PREFIX('\b'); break;
+								case U'f': str += TOML_STRING_PREFIX('\f'); break;
+								case U'n': str += TOML_STRING_PREFIX('\n'); break;
+								case U'r': str += TOML_STRING_PREFIX('\r'); break;
+								case U't': str += TOML_STRING_PREFIX('\t'); break;
+								case U'"': str += TOML_STRING_PREFIX('"'); break;
+								case U'\\': str += TOML_STRING_PREFIX('\\'); break;
+
+								// unicode scalar sequences
+								case U'u': [[fallthrough]];
+								case U'U':
+								{
+									uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : 0x1000u;
+									uint32_t sequence_value{};
+									while (place_value)
+									{
+										eof_check();
+										if (!is_hex_digit(*cp))
+											throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; expected hex digit, saw '\\"sv, cp->as_view<char>(), "'"sv);
+										sequence_value += place_value * hex_digit_to_int(*cp);
+										place_value /= 16u;
+										advance();
+									}
+
+									if ((sequence_value > 0xD7FFu && sequence_value < 0xE000u) || sequence_value > 0x10FFFFu)
+										throw_parse_error("Unknown Unicode scalar sequence"sv);
+
+									if (sequence_value <= 0x7Fu) //ascii
+										str += static_cast<string_char>(sequence_value & 0x7Fu);
+									else if (sequence_value <= 0x7FFu)
+									{
+										str += static_cast<string_char>(0xC0u | ((sequence_value >> 6) & 0x1Fu));
+										str += static_cast<string_char>(0x80u | (sequence_value & 0x3Fu));
+									}
+									else if (sequence_value <= 0xFFFFu)
+									{
+										str += static_cast<string_char>(0xE0u | ((sequence_value >> 12) & 0x0Fu));
+										str += static_cast<string_char>(0x80u | ((sequence_value >> 6) & 0x1Fu));
+										str += static_cast<string_char>(0x80u | (sequence_value & 0x3Fu));
+									}
+									else
+									{
+										str += static_cast<string_char>(0xF0u | ((sequence_value >> 18) & 0x07u));
+										str += static_cast<string_char>(0x80u | ((sequence_value >> 12) & 0x3Fu));
+										str += static_cast<string_char>(0x80u | ((sequence_value >> 6) & 0x3Fu));
+										str += static_cast<string_char>(0x80u | (sequence_value & 0x3Fu));
+									}
+
+									break;
+								}
+
+								// ???
+								default:
+									throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; unknown escape sequence '\\"sv, cp->as_view<char>(), "'"sv);
+							}
+
+							
+						}
+						else TOML_LIKELY
+						{
+							// handle closing delimiters
+							if (*cp == U'"')
+							{
+								if constexpr (MULTI_LINE)
+								{
+									advance();
+									eof_check();
+									const auto second = cp->value;
+
+									advance();
+									eof_check();
+									const auto third = cp->value;
+
+									if (second == U'"' && third == U'"')
+									{
+										advance(); // skip the third closing delimiter
+										return str;
+									}
+									else
+									{
+										str += TOML_STRING_PREFIX('"');
+										go_back(1_sz);
+										skipping_whitespace = false;
+										continue;
+									}
+								}
+								else
+								{
+									advance(); // skip the closing delimiter
+									return str;
+								}
+							}
+
+							// handle escapes
+							if (*cp == U'\\')
+							{
+								advance(); // skip the '\'
+								skipping_whitespace = false;
+								escaped = true;
+								continue;
+							}
+
+							// handle line endings in multi-line mode
+							if constexpr (MULTI_LINE)
+							{
+								if (is_line_ending(*cp))
+								{
+									consume_line_ending();
+									if (!str.empty() && !skipping_whitespace)
+										str += TOML_STRING_PREFIX('\n');
+									continue;
+								}
+							}
+
+							// handle illegal characters
+							if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+								|| (*cp >= U'\u000A' && *cp <= U'\u001F')
+								|| *cp == U'\u007F')
+								throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; control characters must be escaped with back-slashes."sv);
+
+							if constexpr (MULTI_LINE)
+							{
+								if (!skipping_whitespace || !is_whitespace(*cp))
+								{
+									skipping_whitespace = false;
+									str.append(cp->as_view());
+								}
+							}
+							else
+								str.append(cp->as_view());
+
+							advance();
+						}
+					}
+
+					throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string"sv);
+				}
+
+				template <bool MULTI_LINE>
+				[[nodiscard]]
+				string parse_literal_string()
+				{
+					TOML_ASSERT(cp && *cp == U'\'');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string"sv);
+					};
+
+					// skip the delimiter
+					advance();
+					eof_check();
+
+					string str;
+					while (cp)
+					{
+						// handle closing delimiters
+						if (*cp == U'\'')
+						{
+							if constexpr (MULTI_LINE)
+							{
+								advance();
+								eof_check();
+								const auto second = cp->value;
+
+								advance();
+								eof_check();
+								const auto third = cp->value;
+
+								if (second == U'\'' && third == U'\'')
+								{
+									advance(); // skip the third closing delimiter
+									return str;
+								}
+								else
+								{
+									str += TOML_STRING_PREFIX('\'');
+									go_back(1_sz);
+									continue;
+								}
+							}
+							else
+							{
+								advance(); // skip the closing delimiter
+								return str;
+							}
+						}
+
+						// handle line endings in multi-line mode
+						if constexpr (MULTI_LINE)
+						{
+							if (is_line_ending(*cp))
+							{
+								consume_line_ending();
+								if (!str.empty())
+									str += TOML_STRING_PREFIX('\n');
+								continue;
+							}
+						}
+
+						// handle illegal characters
+						if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
+							|| *cp == U'\u007F')
+							throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string; control characters may not appear in literal strings"sv);
+
+						str.append(cp->as_view());
+						advance();
+					}
+
+					throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string"sv);
+				}
+
+				[[nodiscard]]
 				string parse_string()
 				{
-					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+					TOML_ASSERT(cp && is_string_delimiter(*cp));
 
-					TOML_NOT_IMPLEMENTED_YET;
+					// get the first three characters to determine the string type
+					const auto first = cp->value;
+					advance();
+					if (!cp)
+						throw_parse_error("Encountered EOF while parsing string"sv);
+					const auto second = cp->value;
+					advance();
+					const auto third = cp ? cp->value : U'\0';
+
+					// if we were eof at the third character then first and second need to be
+					// the same string character (otherwise it's an unterminated string)
+					if (!cp)
+					{
+						if (second == first)
+							return string{};
+						throw_parse_error("Encountered EOF while parsing string"sv);
+					}
+					
+					// if the first three characters are all the same string delimiter then
+					// it's a multi-line string.
+					if (first == second && first == third)
+					{
+						return first == U'\''
+							? parse_literal_string<true>()
+							: parse_basic_string<true>();
+					}
+
+					// otherwise it's just a regular string.
+					else
+					{
+						// step back two characters so that the current
+						// character is the string delimiter
+						go_back(2_sz);
+
+						return first == U'\''
+							? parse_literal_string<false>()
+							: parse_basic_string<false>();
+					}
 				}
 
+				[[nodiscard]]
 				string parse_bare_key_segment()
 				{
-					TOML_ASSERT(cp && is_string_delimiter(cp->value));
+					TOML_ASSERT(cp && is_bare_key_character(*cp));
 
-					TOML_NOT_IMPLEMENTED_YET;
+					string segment;
+
+					while (cp)
+					{
+						if (!is_bare_key_character(*cp))
+							break;
+
+						segment.append(cp->as_view());
+						advance();
+					}
+
+					return segment;
 				}
 
-				std::vector<string> parse_key()
+				[[nodiscard]]
+				bool parse_bool()
 				{
-					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
+					TOML_ASSERT(cp && (*cp == U't' || *cp == U'f'));
+
+					auto result = *cp == U't';
+					if (!consume_expected_sequence(result ? U"true"sv : U"false"sv))
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing boolean value"sv);
+						else
+							throw_parse_error("Encountered unexpected character while parsing boolean value; expected 'true' or 'false', saw '"sv, cp->as_view<char>(), '\'');
+					}
+					if (cp && !is_value_terminator(*cp))
+						throw_parse_error("Encountered unexpected character while parsing boolean value; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+
+					return result;
+				}
+
+				[[nodiscard]]
+				double parse_inf_or_nan()
+				{
+					TOML_ASSERT(cp && (*cp == U'i' || *cp == U'n' || *cp == U'+' || *cp == U'-'));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
+					};
+
+					const int sign = *cp == U'-' ? -1 : 1;
+					if (*cp == U'+' || *cp == U'-')
+					{
+						advance();
+						eof_check();
+					}
+
+					const bool inf = *cp == U'i';
+					if (!consume_expected_sequence(inf ? U"inf"sv : U"nan"sv))
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
+						else
+							throw_parse_error("Encountered unexpected character while parsing floating-point value; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, cp->as_view<char>(), '\'');
+					}
+					if (cp && !is_value_terminator(*cp))
+						throw_parse_error("Encountered unexpected character while parsing floating-point value; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+
+					return inf
+						? sign * std::numeric_limits<double>::infinity()
+						: std::numeric_limits<double>::quiet_NaN();
+				}
+
+				[[nodiscard]]
+				double parse_float()
+				{
+					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
+					};
 
 					TOML_NOT_IMPLEMENTED_YET;
 
 					return {};
 				}
 
-				struct table_header
+				[[nodiscard]]
+				int64_t parse_integer()
 				{
-					std::vector<string> key;
-					bool is_array;
-				};
+					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing integer value"sv);
+					};
 
-				table_header parse_table_header()
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
+				}
+
+				[[nodiscard]]
+				int64_t parse_binary_integer()
 				{
-					TOML_ASSERT(cp && cp->value == U'[');
+					TOML_ASSERT(cp && *cp == U'0');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing binary integer value"sv);
+					};
 
-					const auto start_pos = prev_pos;
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
+				}
+
+				[[nodiscard]]
+				int64_t parse_octal_integer()
+				{
+					TOML_ASSERT(cp && *cp == U'0');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing octal integer value"sv);
+					};
+
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
+				}
+
+				[[nodiscard]]
+				int64_t parse_hex_integer()
+				{
+					TOML_ASSERT(cp && *cp == U'0');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing hexadecimal integer value"sv);
+					};
+
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
+				}
+
+				[[nodiscard]]
+				std::shared_ptr<node> parse_value()
+				{
+					TOML_ASSERT(cp && !is_value_terminator(*cp));
+
+					const auto begin_pos = cp->position;
+					std::shared_ptr<node> val;
+
 					do
 					{
-						//skip first [
-						advance();
-						if (!cp)
+						// detect the value type and parse accordingly,
+						// starting with value types that can be detected
+						// unambiguously from just one character.
+
+						// strings
+						if (is_string_delimiter(*cp))
+							val = std::make_shared<value<string>>(parse_string());
+
+						// bools
+						else if (*cp == U't' || *cp == U'f')
+							val = std::make_shared<value<bool>>(parse_bool());
+
+						// arrays
+						else if (*cp == U'[')
+							TOML_NOT_IMPLEMENTED_YET;
+
+						// inline tables
+						else if (*cp == U'{')
+							TOML_NOT_IMPLEMENTED_YET;
+
+						// inf or nan
+						else if (*cp == U'i' || *cp == U'n')
+							val = std::make_shared<value<double>>(parse_inf_or_nan());
+
+						if (val)
 							break;
 
-						//skip second [ (if present)
-						table_header header{};
-						if (cp->value == U'[')
+						// value types from here down require more than one character
+						// to unambiguously identify, so scan ahead a bit.
+						constexpr size_t max_scan_chars = 32_sz;
+						char32_t chars[max_scan_chars]{ *cp };
+						size_t char_count = 1_sz;
+						bool eof_while_scanning = false;
+						for (size_t i = max_scan_chars-1_sz; i --> 0_sz;)
 						{
 							advance();
-							if (!cp)
+							if (!cp || is_value_terminator(*cp))
+							{
+								eof_while_scanning = !cp;
 								break;
-							header.is_array = true;
+							}
+							chars[char_count++] = *cp;
 						}
+						go_back(char_count);
 
-						//skip past any whitespace that followed the [
-						if (consume_leading_whitespace() && !cp)
-							break;
-
-						//get the actual key
-						header.key = parse_key();
-
-						//skip past any whitespace that followed the key
-						if (consume_leading_whitespace() && !cp)
-							break;
-
-						//consume the first closing ]
-						if (cp->value != U']')
-							throw_parse_error("Encountered unexpected character while parsing table"sv, (header.is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, cp->as_view(), '\'');
-						advance();
-
-						//consume the second closing ]
-						if (header.is_array)
+						// if after scanning ahead we still only have one value character,
+						// the only valid value type is an integer.
+						if (char_count == 1_sz)
 						{
-							if (cp->value != U']')
-								throw_parse_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, cp->as_view(), '\'');
-							advance();
+							if (is_digit(chars[0]))
+							{
+								val = std::make_shared<value<int64_t>>(static_cast<int64_t>(chars[0] - U'0'));
+								break;
+							}
+
+							//anything else would be ambiguous.
+							throw_parse_error(eof_while_scanning ? "Encountered EOF while parsing value"sv : "Could not determine value type"sv);
 						}
 
-						//handle the rest of the line after the table 
-						consume_leading_whitespace();
-						if ((!consume_comment() && !consume_line_ending()) && cp)
-							throw_parse_error("Encountered unexpected character while parsing table"sv, (header.is_array ? " array"sv : ""sv), " header; expected a comment or whitespace, saw '"sv, cp->as_view(), '\'');
+						// now things that can be identified from two characters
+						TOML_ASSERT(char_count >= 2_sz);
 
-						return header;
+						// numbers that begin with a sign
+						const auto begins_with_sign = chars[0] == U'+' || chars[0] == U'-';
+						const auto begins_with_digit = is_digit(chars[0]);
+						if (begins_with_sign)
+						{
+							if (chars[1] == U'i' || chars[1] == U'n')
+								val = std::make_shared<value<double>>(parse_inf_or_nan());
+							else if (is_digit(chars[1]) && (chars[2] == U'.' || chars[2] == U'e' || chars[2] == U'E'))
+								val = std::make_shared<value<double>>(parse_float()); break;
+						}
+
+						// numbers that begin with 0
+						else if (chars[0] == U'0')
+						{
+							switch (chars[1])
+							{
+								case U'E': [[fallthrough]];
+								case U'e': [[fallthrough]];
+								case U'.': val = std::make_shared<value<double>>(parse_float()); break;
+								case U'b': val = std::make_shared<value<int64_t>>(parse_binary_integer()); break;
+								case U'o': val = std::make_shared<value<int64_t>>(parse_octal_integer()); break;
+								case U'x': val = std::make_shared<value<int64_t>>(parse_hex_integer()); break;
+							}
+						}
+
+						//floats
+						else if (begins_with_digit && (chars[1] == U'.' || chars[1] == U'e' || chars[1] == U'E'))
+							val = std::make_shared<value<double>>(parse_float());
+
+						if (val || !(begins_with_sign || begins_with_digit))
+							break;
+
+						// if we get here then all the easy cases are taken care of, so we need to do a 'deeper dive'
+						// to figure out what the value type could possibly be.
+						bool can_be_int = true; // (only 'simple' integers can be matched here, prefixed ones have already been handled)
+						bool can_be_float = true;
+						bool can_be_datetime = begins_with_digit && char_count >= 8_sz; // strlen("HH:MM:SS") - shortest legal value
+						for (size_t i = 0; i < char_count; i++)
+						{
+							const auto digit = is_digit(chars[i]);
+							const auto sign = chars[i] == U'+' || chars[i] == U'-';
+
+							if (can_be_int)
+							{
+								can_be_int = digit
+									|| (i == 0_sz && sign)
+									|| chars[i] == U'_';
+							}
+
+							if (can_be_float)
+							{
+								can_be_float = digit
+									|| sign
+									|| chars[i] == U'_'
+									|| chars[i] == U'.'
+									|| chars[i] == U'e'
+									|| chars[i] == U'E';
+							}
+
+							if (can_be_datetime)
+							{
+								can_be_datetime = digit
+									|| (i >= 4_sz && sign)
+									|| chars[i] == U'T'
+									|| chars[i] == U'Z'
+									|| chars[i] == U':'
+									|| chars[i] == U'.';
+							}
+
+							if (!can_be_int && !can_be_float && !can_be_datetime)
+								break;
+						}
+
+						// resolve ambiguites
+						if (can_be_int && can_be_datetime)
+						{
+							can_be_datetime = chars[2] == U':' || chars[4] == U'-';
+							can_be_int = !can_be_datetime;
+						}
+						if (can_be_int && can_be_float)
+							can_be_float = false;
+
+						// can only be an integer
+						if (can_be_int && !can_be_float && !can_be_datetime)
+						{
+							TOML_NOT_IMPLEMENTED_YET;
+						}
+
+						// can only be a float
+						else if (!can_be_int && can_be_float && !can_be_datetime)
+						{
+							TOML_NOT_IMPLEMENTED_YET;
+						}
+
+						// can only be a datetime
+						else if (!can_be_int && !can_be_float && can_be_datetime)
+						{
+							TOML_NOT_IMPLEMENTED_YET;
+						}
 					}
 					while (false);
 
-					throw_parse_error("Encountered EOF while parsing table header"sv);
+					if (!val)
+						throw_parse_error("Could not determine value type"sv);
+
+					val->region_ = { begin_pos, cp ? cp->position : prev_pos, reader.source_path() };
+					return val;
 				}
 
-				void parse_key_value_pair()
+				struct key final
 				{
-					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
-
-					TOML_NOT_IMPLEMENTED_YET;
-				}
-
-				bool is_implicit_table(node* node) const noexcept
-				{
-					return node
-						&& node->is_table()
-						&& !implicit_tables.empty()
-						&& std::find(implicit_tables.cbegin(), implicit_tables.cend(), node->reinterpret_as_table()) != implicit_tables.cend();
+					std::vector<string> segments;
 				};
 
-				void parse_table_or_table_array()
+				[[nodiscard]]
+				key parse_key()
 				{
-					TOML_ASSERT(cp && cp->value == U'[');
+					TOML_ASSERT(cp && (is_bare_key_character(*cp) || is_string_delimiter(*cp)));
 
-					const auto table_start_position = prev_pos;
-					auto header = parse_table_header();
-					TOML_ASSERT(!header.key.empty());
+					key key;
 
-					if (header.is_array)
+					while (true)
 					{
-						TOML_NOT_IMPLEMENTED_YET;
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing key"sv);
+
+						// bare_key_segment
+						if (is_bare_key_character(*cp))
+							key.segments.push_back(parse_bare_key_segment());
+
+						// "quoted key segment"
+						else if (is_string_delimiter(*cp))
+							key.segments.push_back(parse_string());
+
+						// ???
+						else
+							throw_parse_error("Encountered unexpected character while parsing key; expected bare key character or string delimiter, saw '"sv, cp->as_view<char>(), '\'');
+						
+						consume_leading_whitespace();
+
+						// eof or no more key to come
+						if (!cp || *cp != U'.')
+							break;
+
+						// was a dotted key, so go around again to consume the next segment
+						TOML_ASSERT(*cp == U'.');
+						advance();
+						consume_leading_whitespace();
 					}
+
+					return key;
+				}
+
+				struct key_value_pair final
+				{
+					key key;
+					std::shared_ptr<node> value;
+				};
+
+				[[nodiscard]]
+				key_value_pair parse_key_value_pair()
+				{
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing key-value pair"sv);
+					};
+
+					// get the key
+					TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
+					auto key = parse_key();
+
+					// skip past any whitespace that followed the key
+					consume_leading_whitespace();
+					eof_check();
+
+					// consume the '='
+					if (*cp != U'=')
+						throw_parse_error("Encountered unexpected character while parsing key-value pair; expected '=', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// skip past any whitespace that followed the '='
+					consume_leading_whitespace();
+					eof_check();
+
+					// get the value
+					return { std::move(key), parse_value() };
+				}
+
+				[[nodiscard]]
+				table* parse_table_header()
+				{
+					TOML_ASSERT(cp && *cp == U'[');
+
+					const auto header_begin_pos = cp->position;
+					document_position header_end_pos;
+					key key;
+					bool is_array = false;
+
+					//parse header
+					{
+						const auto eof_check = [this]()
+						{
+							if (!cp)
+								throw_parse_error("Encountered EOF while parsing table header"sv);
+						};
+
+						// skip first '['
+						advance();
+						eof_check();
+
+						// skip second '[' (if present)
+						if (*cp == U'[')
+						{
+							advance();
+							eof_check();
+							is_array = true;
+						}
+
+						// skip past any whitespace that followed the '['
+						consume_leading_whitespace();
+						eof_check();
+
+						// get the actual key
+						key = parse_key();
+
+						// skip past any whitespace that followed the key
+						consume_leading_whitespace();
+						eof_check();
+
+						// consume the first closing ']'
+						if (*cp != U']')
+							throw_parse_error("Encountered unexpected character while parsing table"sv, (is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, cp->as_view<char>(), '\'');
+						advance();
+
+						// consume the second closing ']'
+						if (is_array)
+						{
+							eof_check();
+
+							if (*cp != U']')
+								throw_parse_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, cp->as_view<char>(), '\'');
+							advance();
+						}
+						header_end_pos = cp ? cp->position : prev_pos;
+
+						// handle the rest of the line after the header
+						consume_leading_whitespace();
+						if (cp)
+						{
+							if (!consume_comment() && !consume_line_ending())
+								throw_parse_error("Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv), " header; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
+						}
+					}
+					TOML_ASSERT(!key.segments.empty());
+
+					// check if each parent is a table/table array, or can be created implicitly as a table.
+					auto parent = root.get();
+					for (size_t i = 0; i < key.segments.size() - 1_sz; i++)
+					{
+						auto child = parent->get(key.segments[i]);
+						if (!child)
+						{
+							child = parent->values.emplace(
+								key.segments[i],
+								std::make_shared<table>()
+							).first->second.get();
+							implicit_tables.push_back(child->reinterpret_as_table());
+							child->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+						}
+						else if (child->is_table())
+						{
+							parent = child->reinterpret_as_table();
+						}
+						else if (child->is_table_array())
+						{
+							// table arrays are a special case;
+							// the spec dictates we select the most recently declared element in the array.
+							TOML_ASSERT(!child->reinterpret_as_table_array()->tables.empty());
+							parent = child->reinterpret_as_table_array()->tables.back().get();
+						}
+						else
+						{
+							TOML_NOT_IMPLEMENTED_YET;
+							throw_parse_error("FFFFFFFFFFFFF"sv);
+						}
+					}
+
+					// check the last parent table for a node matching the last key.
+					// if there was no matching node, then sweet;
+					// we can freely instantiate a new table/table array.
+					auto matching_node = parent->get(key.segments.back());
+					if (!matching_node)
+					{
+						// if it's an array we need to make the array and it's first table element, set the starting regions, and return the table element
+						if (is_array)
+						{
+							auto tab_arr = parent->values.emplace(
+								key.segments.back(),
+								std::make_shared<table_array>()
+							).first->second.get()->reinterpret_as_table_array();
+							tab_arr->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+						
+							tab_arr->tables.push_back(std::make_shared<table>());
+							tab_arr->tables.back()->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							return tab_arr->tables.back().get();
+						}
+
+						//otherwise we're just making a table
+						else
+						{
+							auto tab = parent->values.emplace(
+								key.segments.back(),
+								std::make_shared<table>()
+							).first->second.get()->reinterpret_as_table();
+							tab->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							return tab;
+						}
+					}
+
+					// if there was already a matching node some sanity checking is necessary;
+					// this is ok if we're making an array and the existing element is already an array (new element)
+					// or if we're making a table and the existing element is an implicitly-created table (promote it),
+					// otherwise this is a redefinition error.
 					else
 					{
-						auto super = root.get();
-						for (size_t i = 0; i < header.key.size() - 1_sz; i++)
+						if (is_array && matching_node->is_table_array())
 						{
-							//each super table must either not exist already, or be a table
-							auto next_super = super->get(header.key[i]);
-							if (!next_super)
-							{
-								next_super = super->values.emplace(
-									string{ header.key[i] },
-									std::make_shared<table>()
-								).first->second.get();
-								implicit_tables.push_back(next_super->reinterpret_as_table());
-								next_super->region_ = { table_start_position, table_start_position, reader_.source_path() };
-							}
-							else if (!next_super->is_table())
-							{
-								//throw parse_error{ "FFFFFFFFFFFFF"s, prev_pos, reader_.source_path() };
-								TOML_NOT_IMPLEMENTED_YET;
-							}
-							super = next_super->reinterpret_as_table();
+							auto tab_arr = matching_node->reinterpret_as_table_array();
+							tab_arr->tables.push_back(std::make_shared<table>());
+							tab_arr->tables.back()->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							return tab_arr->tables.back().get();
 						}
 
-						//the last table in the key must not exist already, or be a table that was created implicitly
+						else if (!is_array
+							&& matching_node->is_table()
+							&& !implicit_tables.empty())
 						{
-							auto matching_node = super->get(header.key.back());
-							if (matching_node)
+							auto tab = matching_node->reinterpret_as_table();
+							const auto iter = std::find(implicit_tables.cbegin(), implicit_tables.cend(), tab);
+							if (iter != implicit_tables.cend())
 							{
-								if (!matching_node->is_table())
-								{
-									//redefinition error
-									TOML_NOT_IMPLEMENTED_YET;
-								}
-								else if (!is_implicit_table(matching_node))
-								{
-									//invalid ordering error
-									TOML_NOT_IMPLEMENTED_YET;
-								}
-
-								//table was implicit; promote it to explicit and update the region info so it matches the explicit definition
-								implicit_tables.erase(std::find(implicit_tables.cbegin(), implicit_tables.cend(), matching_node->reinterpret_as_table()));
-								matching_node->region_.begin = matching_node->region_.end = table_start_position;
-							}
-							else
-							{
-								matching_node = super->values.emplace(
-									string{ header.key.back() },
-									std::make_shared<table>()
-								).first->second.get();
-								matching_node->region_ = { table_start_position, table_start_position, reader_.source_path() };
+								implicit_tables.erase(iter);
+								tab->region_.begin = header_begin_pos;
+								tab->region_.end = header_end_pos;
+								return tab;
 							}
 						}
+
+						//if we get here it's a redefinition error.
+						TOML_NOT_IMPLEMENTED_YET;
+						throw_parse_error( "FFFFFFFFFFFFF"sv );
 					}
 				}
 
@@ -637,6 +1003,8 @@ namespace TOML_NAMESPACE
 				{
 					TOML_ASSERT(cp);
 					
+					table* current_table = root.get();
+
 					do
 					{
 						// leading whitespace, line endings, comments
@@ -647,22 +1015,33 @@ namespace TOML_NAMESPACE
 
 						// [tables]
 						// [[table array]]
-						else if (cp->value == U'[')
+						else if (*cp == U'[')
 						{
-							parse_table_or_table_array();
+							current_table = parse_table_header();
 						}
 
 						// bare_keys
 						// dotted.keys
 						// "quoted keys"
-						else if (is_string_delimiter(cp->value)
-							|| is_bare_key_character(cp->value))
+						else if (is_bare_key_character(cp->value) || is_string_delimiter(cp->value))
 						{
-							parse_key_value_pair();
+							auto kvp = parse_key_value_pair();
+
+							//todo : check for collisions
+							//todo : handle dotted keys
+							
+							// handle the rest of the line after the kvp
+							// (this is not done in parse_key_value_pair() because that function is also used for inline tables)
+							consume_leading_whitespace();
+							if (cp)
+							{
+								if (!consume_comment() && !consume_line_ending())
+									throw_parse_error("Encountered unexpected character after key-value pair; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
+							}
 						}
 
-						else //??
-							throw_parse_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, cp->as_view(), '\'');
+						else // ??
+							throw_parse_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, cp->as_view<char>(), '\'');
 
 					}
 					while (cp);
@@ -670,14 +1049,13 @@ namespace TOML_NAMESPACE
 
 			public:
 
-				parser(utf8_reader_interface&& reader)
-					: reader_{ reader },
+				parser(utf8_reader_interface&& reader_)
+					: reader{ reader_ },
 					root{ std::make_shared<table>() }
 				{
-					root->region_ = { prev_pos, prev_pos, reader_.source_path() };
-					current_table = root.get();
+					root->region_ = { prev_pos, prev_pos, reader.source_path() };
 
-					cp = reader_.next();
+					cp = reader.read_next();
 					if (cp)
 						parse_document();
 				}
@@ -691,6 +1069,7 @@ namespace TOML_NAMESPACE
 	}
 
 	template <typename CHAR>
+	[[nodiscard]]
 	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
 	{
 		static_assert(
@@ -702,6 +1081,7 @@ namespace TOML_NAMESPACE
 	}
 
 	template <typename CHAR>
+	[[nodiscard]]
 	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
 	{
 		static_assert(

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "toml_common.h"
+#include "toml_utf8.h"
 #include "toml_value.h"
 #include "toml_array.h"
 #include "toml_table.h"
