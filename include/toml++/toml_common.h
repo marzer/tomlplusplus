@@ -7,6 +7,7 @@
 
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
+	#undef TOML_CONFIG_HEADER
 #endif
 
 #ifndef TOML_NAMESPACE
@@ -17,29 +18,27 @@
 	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
 #endif
 
-#ifndef TOML_ASSERT
-	#define TOML_DEFAULT_ASSERT
-#endif
+//#define TOML_ASSERT(expr)		my_custom_assert(expr)
 
 //--------------------------------------------------------------------
 // COMPILER & ENVIRONMENT STUFF
 //--------------------------------------------------------------------
 
 #ifndef __cplusplus
-	#error Toml++ is a C++ library.
+	#error toml++ is a C++ library.
 #endif
 
 #if defined(_MSC_VER) //or clang in msvc mode
 
-	#ifdef _CPPRTTI
-		#define TOML_RTTI_ENABLED
-	#endif
+	//#ifdef _CPPRTTI
+	//	#define TOML_RTTI_ENABLED
+	//#endif
 
 	#ifdef _CPPUNWIND
 		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML_LANG_VERSION		_MSVC_LANG
+	#define TOML_CPP_VERSION		_MSVC_LANG
 	#define TOML_DISABLE_WARNINGS	__pragma(warning(push, 0))
 	#define TOML_RESTORE_WARNINGS	__pragma(warning(pop, 0))
 	#define TOML_INTERFACE			__declspec(novtable)
@@ -50,9 +49,9 @@
 
 #elif defined(__clang__)
 
-	#if __has_feature(cxx_rtti)
-		#define TOML_RTTI_ENABLED
-	#endif
+	//#if __has_feature(cxx_rtti)
+	//	#define TOML_RTTI_ENABLED
+	//#endif
 
 	#ifdef __EXCEPTIONS
 		#define TOML_EXCEPTIONS_ENABLED
@@ -66,16 +65,16 @@
 	#define TOML_RESTORE_WARNINGS						\
 		_Pragma("clang diagnostic pop")
 
-	#define TOML_LANG_VERSION		__cplusplus
+	#define TOML_CPP_VERSION		__cplusplus
 	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
 	#define TOML_ASSUME(cond)		__builtin_assume(cond)
 	#define TOML_UNREACHABLE		__builtin_unreachable()
 
 #elif defined(__GNUC__)
 
-	#ifdef __GXX_RTTI
-		#define TOML_RTTI_ENABLED
-	#endif
+	//#ifdef __GXX_RTTI
+	//	#define TOML_RTTI_ENABLED
+	//#endif
 
 	#ifdef __EXCEPTIONS
 		#define TOML_EXCEPTIONS_ENABLED
@@ -88,32 +87,32 @@
 	#define TOML_RESTORE_WARNINGS						\
 		Pragma("GCC diagnostic pop")
 
-	#define TOML_LANG_VERSION		__cplusplus
+	#define TOML_CPP_VERSION		__cplusplus
 	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE		__builtin_unreachable()
 
 #endif
 
-#if TOML_LANG_VERSION < 201703L
-	#error Toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
+#if TOML_CPP_VERSION < 201703L
+	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
 #endif
 
 // #ifndef TOML_RTTI_ENABLED
-//     #error Toml++ requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
+//     #error toml++ requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
 // #endif
 
 #ifndef TOML_EXCEPTIONS_ENABLED
-	#error Toml++ currently requires that exceptions be enabled.
+	#error toml++ currently requires that exceptions be enabled.
 #endif
 
-#if TOML_LANG_VERSION >= 202600LL
-	#define TOML_LANG 26
-#elif TOML_LANG_VERSION >= 202300LL
-	#define TOML_LANG 23
-#elif TOML_LANG_VERSION >= 202000LL
-	#define TOML_LANG 20
+#if TOML_CPP_VERSION >= 202600LL
+	#define TOML_CPP 26
+#elif TOML_CPP_VERSION >= 202300LL
+	#define TOML_CPP 23
+#elif TOML_CPP_VERSION >= 202000LL
+	#define TOML_CPP 20
 #else
-	#define TOML_LANG 17
+	#define TOML_CPP 17
 #endif
 
 #ifndef TOML_DISABLE_WARNINGS
@@ -164,11 +163,11 @@
 	#define TOML_NO_UNIQUE_ADDRESS
 #endif
 
-#ifdef TOML_DEFAULT_ASSERT
+#ifndef TOML_ASSERT
 	TOML_DISABLE_WARNINGS
 	#include <cassert>
 	TOML_RESTORE_WARNINGS
-	#define TOML_ASSERT(cond)	assert(cond)
+	#define TOML_ASSERT(expr)	assert(expr)
 #endif
 
 #if __has_include(<version>)
@@ -285,8 +284,8 @@ namespace TOML_NAMESPACE
 
 	struct datetime final
 	{
-		std::optional<date> date;
-		std::optional<time> time;
+		date date;
+		time time;
 		std::optional<time_offset> time_offset;
 	};
 
@@ -313,6 +312,8 @@ namespace TOML_NAMESPACE
 		|| std::is_same_v<T, int64_t>
 		|| std::is_same_v<T, double>
 		|| std::is_same_v<T, bool>
+		|| std::is_same_v<T, date>
+		|| std::is_same_v<T, time>
 		|| std::is_same_v<T, datetime>;
 
 	template <typename T>
@@ -340,16 +341,7 @@ namespace TOML_NAMESPACE
 	{
 		private:
 			friend class impl::parser;
-			document_region region_{};
-
-			[[nodiscard]] TOML_ALWAYS_INLINE value<string>* reinterpret_as_string() noexcept { return reinterpret_cast<value<string>*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE value<int64_t>* reinterpret_as_int() noexcept	{ return reinterpret_cast<value<int64_t>*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE value<double>* reinterpret_as_float() noexcept { return reinterpret_cast<value<double>*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE value<bool>* reinterpret_as_bool() noexcept { return reinterpret_cast<value<bool>*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE value<datetime>* reinterpret_as_datetime() noexcept { return reinterpret_cast<value<datetime>*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE array* reinterpret_as_array() noexcept { return reinterpret_cast<array*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE table* reinterpret_as_table() noexcept { return reinterpret_cast<table*>(this); }
-			[[nodiscard]] TOML_ALWAYS_INLINE table_array* reinterpret_as_table_array() noexcept { return reinterpret_cast<table_array*>(this); }
+			document_region rgn{};
 
 		public:
 
@@ -358,6 +350,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual bool is_int() const noexcept = 0;
 			[[nodiscard]] virtual bool is_float() const noexcept = 0;
 			[[nodiscard]] virtual bool is_bool() const noexcept = 0;
+			[[nodiscard]] virtual bool is_date() const noexcept = 0;
+			[[nodiscard]] virtual bool is_time() const noexcept = 0;
 			[[nodiscard]] virtual bool is_datetime() const noexcept = 0;
 			[[nodiscard]] virtual bool is_array() const noexcept = 0;
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
@@ -367,6 +361,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual std::shared_ptr<value<int64_t>> as_int() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<value<double>> as_float() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<value<bool>> as_bool() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<date>> as_date() noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<value<time>> as_time() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<value<datetime>> as_datetime() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<array> as_array() noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<table> as_table() noexcept = 0;
@@ -376,6 +372,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual std::shared_ptr<const value<int64_t>> as_int() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const value<double>> as_float() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const value<bool>> as_bool() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<date>> as_date() const noexcept = 0;
+			[[nodiscard]] virtual std::shared_ptr<const value<time>> as_time() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const value<datetime>> as_datetime() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const array> as_array() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const table> as_table() const noexcept = 0;
@@ -384,7 +382,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]]
 			const document_region& region() const noexcept
 			{
-				return region_;
+				return rgn;
 			}
 
 			virtual ~node() noexcept = default;

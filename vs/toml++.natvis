@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<Type Name="::toml::date">
+		<DisplayString>{(int)year}-{(int)month}-{(int)day}</DisplayString>
+		<Expand>
+			<Item Name="year" ExcludeView="simple">year</Item>
+			<Item Name="month" ExcludeView="simple">month</Item>
+			<Item Name="day" ExcludeView="simple">day</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="::toml::time">
+		<DisplayString>{(int)hour}:{(int)minute}:{second + (microsecond / 1000000.0)}</DisplayString>
+		<Expand>
+			<Item Name="hour" ExcludeView="simple">hour</Item>
+			<Item Name="minute" ExcludeView="simple">minute</Item>
+			<Item Name="second" ExcludeView="simple">second</Item>
+			<Item Name="microsecond" ExcludeView="simple">microsecond</Item>
+		</Expand>
+	</Type>
+	
+	<Type Name="::toml::time_offset">
+		<DisplayString Condition="hours &gt;= 0 &amp;&amp; minutes &gt;= 0">{(int)hours}:{(int)minutes}</DisplayString>
+		<DisplayString Condition="hours &lt; 0 &amp;&amp; minutes &gt;= 0">-{-((int)hours)}:{(int)minutes}</DisplayString>
+		<DisplayString Condition="hours &lt; 0 &amp;&amp; minutes &lt; 0">-{-((int)hours)}:{-((int)minutes)}</DisplayString>
+		<DisplayString Condition="hours &gt;= 0 &amp;&amp; minutes &lt; 0">-{(int)hours}:{-((int)minutes)}</DisplayString>
+		<Expand>
+			<Item Name="hours" ExcludeView="simple">hours</Item>
+			<Item Name="minutes" ExcludeView="simple">minutes</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="::toml::value&lt;*&gt;">
+		<DisplayString>{{ {val_} }}</DisplayString>
+		<Expand>
+			<Item Name="val_" ExcludeView="simple">val_</Item>
+		</Expand>
+	</Type>
+
+</AutoVisualizer>

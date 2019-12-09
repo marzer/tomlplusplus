@@ -46,7 +46,7 @@ namespace TOML_NAMESPACE
 					}
 				}
 
-				void go_back(size_t count)
+				void go_back(size_t count = 1_sz)
 				{
 					TOML_ASSERT(count);
 
@@ -115,6 +115,7 @@ namespace TOML_NAMESPACE
 					return consume_rest_of_line();
 				}
 
+				[[nodiscard]]
 				bool consume_expected_sequence(std::u32string_view seq)
 				{
 					for (auto c : seq)
@@ -124,6 +125,35 @@ namespace TOML_NAMESPACE
 						advance();
 					}
 					return true;
+				}
+
+				template <typename T, size_t N>
+				[[nodiscard]]
+				bool consume_digit_sequence(T(&digits)[N])
+				{
+					for (size_t i = 0; i < N; i++)
+					{
+						if (!cp || !is_digit(*cp))
+							return false;
+						digits[i] = static_cast<T>(*cp - U'0');
+						advance();
+					}
+					return true;
+				}
+
+				template <typename T, size_t N>
+				[[nodiscard]]
+				size_t consume_variable_length_digit_sequence(T(&digits)[N])
+				{
+					size_t i = {};
+					for (; i < N; i++)
+					{
+						if (!cp || !is_digit(*cp))
+							break;
+						digits[i] = static_cast<T>(*cp - U'0');
+						advance();
+					}
+					return i;
 				}
 
 				template <bool MULTI_LINE>
@@ -454,12 +484,12 @@ namespace TOML_NAMESPACE
 					if (!consume_expected_sequence(result ? U"true"sv : U"false"sv))
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing boolean value"sv);
+							throw_parse_error("Encountered EOF while parsing boolean"sv);
 						else
-							throw_parse_error("Encountered unexpected character while parsing boolean value; expected 'true' or 'false', saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing boolean; expected 'true' or 'false', saw '"sv, cp->as_view<char>(), '\'');
 					}
 					if (cp && !is_value_terminator(*cp))
-						throw_parse_error("Encountered unexpected character while parsing boolean value; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing boolean; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
 
 					return result;
 				}
@@ -471,7 +501,7 @@ namespace TOML_NAMESPACE
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
+							throw_parse_error("Encountered EOF while parsing floating-point"sv);
 					};
 
 					const int sign = *cp == U'-' ? -1 : 1;
@@ -484,13 +514,11 @@ namespace TOML_NAMESPACE
 					const bool inf = *cp == U'i';
 					if (!consume_expected_sequence(inf ? U"inf"sv : U"nan"sv))
 					{
-						if (!cp)
-							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
-						else
-							throw_parse_error("Encountered unexpected character while parsing floating-point value; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, cp->as_view<char>(), '\'');
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing floating-point; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, cp->as_view<char>(), '\'');
 					}
 					if (cp && !is_value_terminator(*cp))
-						throw_parse_error("Encountered unexpected character while parsing floating-point value; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing floating-point; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
 
 					return inf
 						? sign * std::numeric_limits<double>::infinity()
@@ -504,7 +532,7 @@ namespace TOML_NAMESPACE
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing floating-point value"sv);
+							throw_parse_error("Encountered EOF while parsing floating-point"sv);
 					};
 
 					TOML_NOT_IMPLEMENTED_YET;
@@ -513,13 +541,13 @@ namespace TOML_NAMESPACE
 				}
 
 				[[nodiscard]]
-				int64_t parse_integer()
+				int64_t parse_decimal_integer()
 				{
 					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing integer value"sv);
+							throw_parse_error("Encountered EOF while parsing decimal integer"sv);
 					};
 
 					TOML_NOT_IMPLEMENTED_YET;
@@ -534,7 +562,7 @@ namespace TOML_NAMESPACE
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing binary integer value"sv);
+							throw_parse_error("Encountered EOF while parsing binary integer"sv);
 					};
 
 					TOML_NOT_IMPLEMENTED_YET;
@@ -549,7 +577,7 @@ namespace TOML_NAMESPACE
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing octal integer value"sv);
+							throw_parse_error("Encountered EOF while parsing octal integer"sv);
 					};
 
 					TOML_NOT_IMPLEMENTED_YET;
@@ -564,12 +592,279 @@ namespace TOML_NAMESPACE
 					const auto eof_check = [this]()
 					{
 						if (!cp)
-							throw_parse_error("Encountered EOF while parsing hexadecimal integer value"sv);
+							throw_parse_error("Encountered EOF while parsing hexadecimal integer"sv);
 					};
 
 					TOML_NOT_IMPLEMENTED_YET;
 
 					return {};
+				}
+
+				[[nodiscard]]
+				date parse_date(bool time_may_follow = false)
+				{
+					TOML_ASSERT(cp && is_digit(*cp));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing date"sv);
+					};
+
+					// "YYYY"
+					uint32_t year_digits[4];
+					if (!consume_digit_sequence(year_digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing date; expected 4-digit year, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto year = year_digits[3]
+						+ year_digits[2] * 10u
+						+ year_digits[1] * 100u
+						+ year_digits[0] * 1000u;
+					const auto is_leap_year = (year % 4u == 0u) && ((year % 100u != 0u) || (year % 400u == 0u));
+
+					// '-'
+					eof_check();
+					if (*cp != U'-')
+						throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// "MM"
+					uint32_t month_digits[2];
+					if (!consume_digit_sequence(month_digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit month, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto month = month_digits[1] + month_digits[0] * 10u;
+					if (month == 0u || month > 12u)
+						throw_parse_error("Month value out-of-range; expected 1-12 (inclusive), saw "sv, month);
+					const auto max_days_in_month =
+						month == 2u
+						? (is_leap_year ? 29u : 28u)
+						: (month == 4u || month == 6u || month == 9u || month == 11u ? 30u : 31u)
+					;
+
+					// '-'
+					eof_check();
+					if (*cp != U'-')
+						throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// "DD"
+					uint32_t day_digits[2];
+					if (!consume_digit_sequence(day_digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit day, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto day = day_digits[1] + day_digits[0] * 10u;
+					if (day == 0u || day > max_days_in_month)
+						throw_parse_error("Day value out-of-range; expected 1-"sv, max_days_in_month, " (inclusive), saw "sv, day);
+
+					if (!time_may_follow)
+					{
+						if (cp && !is_value_terminator(*cp))
+							throw_parse_error("Encountered unexpected character while parsing date; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					}
+
+					return
+					{
+						static_cast<uint16_t>(year),
+						static_cast<uint8_t>(month),
+						static_cast<uint8_t>(day)
+					};
+				}
+
+				[[nodiscard]]
+				time parse_time(bool offset_may_follow = false)
+				{
+					TOML_ASSERT(cp && is_digit(*cp));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing time"sv);
+					};
+
+					// "HH"
+					uint32_t digits[2];
+					if (!consume_digit_sequence(digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit hour, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto hour = digits[1] + digits[0] * 10u;
+					if (hour > 23u)
+						throw_parse_error("Hour value out-of-range; expected 0-23 (inclusive), saw "sv, hour);
+
+					// ':'
+					eof_check();
+					if (*cp != U':')
+						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// "MM"
+					if (!consume_digit_sequence(digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit minute, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto minute = digits[1] + digits[0] * 10u;
+					if (minute > 59u)
+						throw_parse_error("Minute value out-of-range; expected 0-59 (inclusive), saw "sv, minute);
+
+					// ':'
+					eof_check();
+					if (*cp != U':')
+						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// "SS"
+					if (!consume_digit_sequence(digits))
+					{
+						eof_check();
+						throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit second, saw '"sv, cp->as_view<char>(), '\'');
+					}
+					const auto second = digits[1] + digits[0] * 10u;
+					if (second > 59u)
+						throw_parse_error("Second value out-of-range; expected 0-59 (inclusive), saw "sv, second);
+
+					auto time = ::toml::time{
+						static_cast<uint8_t>(hour),
+						static_cast<uint8_t>(minute),
+						static_cast<uint8_t>(second),
+					};
+
+					if (cp && !is_value_terminator(*cp))
+					{
+						// ".FFFFFFFFFFFFF"
+
+						if (*cp == U'.')
+						{
+							advance();
+							eof_check();
+
+							uint32_t fractional_digits[24]; //surely that will be enough
+							auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
+							if (!digit_count)
+								throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, cp->as_view<char>(), '\'');
+							if (digit_count == 24_sz && cp && is_digit(*cp))
+								throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
+
+							uint64_t value = 0;
+							uint64_t place = 1;
+							for (; digit_count --> 0_sz;)
+							{
+								value += fractional_digits[digit_count] * place;
+								place *= 10u;
+							}
+							time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / place);
+						}
+
+						if (cp)
+						{
+							if (offset_may_follow)
+							{
+								if (!is_value_terminator(*cp)
+									&& *cp != U'+'
+									&& *cp != U'-'
+									&& *cp != U'Z'
+									&& *cp != U'z')
+									throw_parse_error("Encountered unexpected character after parsing time; expected offset or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+							}
+							else if (!is_value_terminator(*cp))
+								throw_parse_error("Encountered unexpected character after parsing time; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+						}
+					}
+
+					return time;
+				}
+
+				[[nodiscard]]
+				datetime parse_datetime()
+				{
+					TOML_ASSERT(cp && is_digit(*cp));
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing datetime"sv);
+					};
+
+					// "YYYY-MM-DD"
+					auto date = parse_date(true);
+
+					// ' ' or 'T'
+					eof_check();
+					if (*cp != U' ' && *cp != U'T' && *cp != U't')
+						throw_parse_error("Encountered unexpected character while parsing datetime; expected space or 'T', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+
+					// "HH:MM:SS.fractional"
+					
+					auto time = parse_time(true);
+
+					// offset
+					std::optional<time_offset> offset;
+					if (cp)
+					{
+						// zero offset ("Z")
+						if (*cp == U'Z' || *cp == U'z')
+						{
+							offset.emplace(time_offset{});
+							advance();
+						}
+
+						// explicit offset ("+/-HH:MM")
+						else if (*cp == U'+' || *cp == U'-')
+						{
+							// sign
+							int sign = *cp == U'-' ? -1 : 1;
+							advance();
+							eof_check();
+
+							// "HH"
+							uint32_t digits[2];
+							if (!consume_digit_sequence(digits))
+							{
+								eof_check();
+								throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit hour, saw '"sv, cp->as_view<char>(), '\'');
+							}
+							const auto hour = digits[1] + digits[0] * 10u;
+							if (hour > 23u)
+								throw_parse_error("Hour value out-of-range; expected 0-23 (inclusive), saw "sv, hour);
+
+							// ':'
+							eof_check();
+							if (*cp != U':')
+								throw_parse_error("Encountered unexpected character while parsing datetime offset; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+							advance();
+
+							// "MM"
+							if (!consume_digit_sequence(digits))
+							{
+								eof_check();
+								throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit minute, saw '"sv, cp->as_view<char>(), '\'');
+							}
+							const auto minute = digits[1] + digits[0] * 10u;
+							if (minute > 59u)
+								throw_parse_error("Minute value out-of-range; expected 0-59 (inclusive), saw "sv, minute);
+
+							offset.emplace(time_offset{
+								static_cast<int8_t>(static_cast<int>(hour) * sign),
+								static_cast<int8_t>(static_cast<int>(minute)* sign)
+							});
+						}
+					}
+
+					
+					if (cp && !is_value_terminator(*cp))
+						throw_parse_error("Encountered unexpected character while parsing datetime; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+
+					return {
+						date,
+						time,
+						offset
+					};
 				}
 
 				[[nodiscard]]
@@ -676,72 +971,103 @@ namespace TOML_NAMESPACE
 						if (val || !(begins_with_sign || begins_with_digit))
 							break;
 
-						// if we get here then all the easy cases are taken care of, so we need to do a 'deeper dive'
-						// to figure out what the value type could possibly be.
-						bool can_be_int = true; // (only 'simple' integers can be matched here, prefixed ones have already been handled)
-						bool can_be_float = true;
-						bool can_be_datetime = begins_with_digit && char_count >= 8_sz; // strlen("HH:MM:SS") - shortest legal value
+						// if we get here then all the easy cases are taken care of, so we need to do 
+						// a 'deeper dive' to figure out what the value type could possibly be.
+						// 
+						// note that the dive is actually not that deep, which is intentional; we want
+						// types to be 'loosely' determined here even if we could rule them out as being invalidly-formed
+						// so that the selected parse method can emit better diagnostics when parsing fails,
+						// e.g. "Failed to parse date-time; blah" instead of just "Could not determine value type".
+						
+						enum possible_value_types : int
+						{
+							impossibly_anything = 0,
+							possibly_int = 1,
+							possibly_float = 2,
+							possibly_datetime = 4,
+						};
+						auto possible_types =
+							possibly_int
+							| possibly_float
+							| (begins_with_digit && char_count >= 8_sz ? possibly_datetime : impossibly_anything) // strlen("HH:MM:SS")
+						;
+						std::optional<size_t> first_colon, first_minus;
 						for (size_t i = 0; i < char_count; i++)
 						{
 							const auto digit = is_digit(chars[i]);
-							const auto sign = chars[i] == U'+' || chars[i] == U'-';
+							const auto colon = chars[i] == U':';
+							const auto minus = chars[i] == U'-';
+							const auto sign = chars[i] == U'+' || minus;
 
-							if (can_be_int)
+							if (colon && !first_colon)
+								first_colon = i;
+							if (minus && !first_minus)
+								first_minus = i;
+
+							if ((possible_types & possibly_int))
 							{
-								can_be_int = digit
-									|| (i == 0_sz && sign)
-									|| chars[i] == U'_';
+								if (colon || !(digit || (i == 0_sz && sign) || chars[i] == U'_'))
+									possible_types &= ~possibly_int;
 							}
-
-							if (can_be_float)
+							if ((possible_types & possibly_float))
 							{
-								can_be_float = digit
-									|| sign
+								if (colon || !(digit || sign
 									|| chars[i] == U'_'
 									|| chars[i] == U'.'
 									|| chars[i] == U'e'
-									|| chars[i] == U'E';
+									|| chars[i] == U'E'))
+									possible_types &= ~possibly_float;
 							}
 
-							if (can_be_datetime)
+							if ((possible_types & possibly_datetime))
 							{
-								can_be_datetime = digit
-									|| (i >= 4_sz && sign)
+								if (!(digit || (i >= 4_sz && sign)
 									|| chars[i] == U'T'
 									|| chars[i] == U'Z'
+									|| chars[i] == U't'
+									|| chars[i] == U'z'
 									|| chars[i] == U':'
-									|| chars[i] == U'.';
+									|| chars[i] == U'.'))
+									possible_types &= ~possibly_datetime;
 							}
 
-							if (!can_be_int && !can_be_float && !can_be_datetime)
+							if (!possible_types)
 								break;
 						}
 
 						// resolve ambiguites
-						if (can_be_int && can_be_datetime)
+						if ((possible_types & (possibly_int | possibly_datetime)) == (possibly_int | possibly_datetime))
 						{
-							can_be_datetime = chars[2] == U':' || chars[4] == U'-';
-							can_be_int = !can_be_datetime;
+							possible_types &= first_colon || first_minus.value_or(0_sz) > 0_sz
+								? ~possibly_int
+								: ~possibly_datetime;
 						}
-						if (can_be_int && can_be_float)
-							can_be_float = false;
+						if ((possible_types & (possibly_int | possibly_float)) == (possibly_int | possibly_float))
+							possible_types &= ~possibly_float;
 
-						// can only be an integer
-						if (can_be_int && !can_be_float && !can_be_datetime)
+						// dispatch to appropriate parsing method
+						switch (possible_types)
 						{
-							TOML_NOT_IMPLEMENTED_YET;
-						}
+							case possibly_int:
+								val = std::make_shared<value<int64_t>>(parse_decimal_integer());
+								break;
 
-						// can only be a float
-						else if (!can_be_int && can_be_float && !can_be_datetime)
-						{
-							TOML_NOT_IMPLEMENTED_YET;
-						}
+							case possibly_float:
+								val = std::make_shared<value<double>>(parse_float());
+								break;
 
-						// can only be a datetime
-						else if (!can_be_int && !can_be_float && can_be_datetime)
-						{
-							TOML_NOT_IMPLEMENTED_YET;
+							case possibly_datetime:
+							{
+								if (first_colon && !first_minus)
+									val = std::make_shared<value<time>>(parse_time());
+								else if (!first_colon && first_minus)
+									val = std::make_shared<value<date>>(parse_date());
+								else
+									val = std::make_shared<value<datetime>>(parse_datetime());
+								break;
+							}
+
+							default: break; // ??? still ambiguous
 						}
 					}
 					while (false);
@@ -749,7 +1075,7 @@ namespace TOML_NAMESPACE
 					if (!val)
 						throw_parse_error("Could not determine value type"sv);
 
-					val->region_ = { begin_pos, cp ? cp->position : prev_pos, reader.source_path() };
+					val->rgn = { begin_pos, cp ? cp->position : prev_pos, reader.source_path() };
 					return val;
 				}
 
@@ -911,19 +1237,19 @@ namespace TOML_NAMESPACE
 								key.segments[i],
 								std::make_shared<table>()
 							).first->second.get();
-							implicit_tables.push_back(child->reinterpret_as_table());
-							child->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							implicit_tables.push_back(reinterpret_cast<table*>(child));
+							child->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						}
 						else if (child->is_table())
 						{
-							parent = child->reinterpret_as_table();
+							parent = reinterpret_cast<table*>(child);
 						}
 						else if (child->is_table_array())
 						{
 							// table arrays are a special case;
 							// the spec dictates we select the most recently declared element in the array.
-							TOML_ASSERT(!child->reinterpret_as_table_array()->tables.empty());
-							parent = child->reinterpret_as_table_array()->tables.back().get();
+							TOML_ASSERT(!reinterpret_cast<table_array*>(child)->tables.empty());
+							parent = reinterpret_cast<table_array*>(child)->tables.back().get();
 						}
 						else
 						{
@@ -941,25 +1267,29 @@ namespace TOML_NAMESPACE
 						// if it's an array we need to make the array and it's first table element, set the starting regions, and return the table element
 						if (is_array)
 						{
-							auto tab_arr = parent->values.emplace(
-								key.segments.back(),
-								std::make_shared<table_array>()
-							).first->second.get()->reinterpret_as_table_array();
-							tab_arr->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							auto tab_arr = reinterpret_cast<table_array*>(
+								parent->values.emplace(
+									key.segments.back(),
+									std::make_shared<table_array>()
+								).first->second.get()
+							);
+							tab_arr->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						
 							tab_arr->tables.push_back(std::make_shared<table>());
-							tab_arr->tables.back()->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 							return tab_arr->tables.back().get();
 						}
 
 						//otherwise we're just making a table
 						else
 						{
-							auto tab = parent->values.emplace(
-								key.segments.back(),
-								std::make_shared<table>()
-							).first->second.get()->reinterpret_as_table();
-							tab->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							auto tab = reinterpret_cast<table*>(
+								parent->values.emplace(
+									key.segments.back(),
+									std::make_shared<table>()
+								).first->second.get()
+							);
+							tab->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 							return tab;
 						}
 					}
@@ -972,9 +1302,9 @@ namespace TOML_NAMESPACE
 					{
 						if (is_array && matching_node->is_table_array())
 						{
-							auto tab_arr = matching_node->reinterpret_as_table_array();
+							auto tab_arr = reinterpret_cast<table_array*>(matching_node);
 							tab_arr->tables.push_back(std::make_shared<table>());
-							tab_arr->tables.back()->region_ = { header_begin_pos, header_end_pos, reader.source_path() };
+							tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 							return tab_arr->tables.back().get();
 						}
 
@@ -982,13 +1312,13 @@ namespace TOML_NAMESPACE
 							&& matching_node->is_table()
 							&& !implicit_tables.empty())
 						{
-							auto tab = matching_node->reinterpret_as_table();
+							auto tab = reinterpret_cast<table*>(matching_node);
 							const auto iter = std::find(implicit_tables.cbegin(), implicit_tables.cend(), tab);
 							if (iter != implicit_tables.cend())
 							{
 								implicit_tables.erase(iter);
-								tab->region_.begin = header_begin_pos;
-								tab->region_.end = header_end_pos;
+								tab->rgn.begin = header_begin_pos;
+								tab->rgn.end = header_end_pos;
 								return tab;
 							}
 						}
@@ -1053,7 +1383,7 @@ namespace TOML_NAMESPACE
 					: reader{ reader_ },
 					root{ std::make_shared<table>() }
 				{
-					root->region_ = { prev_pos, prev_pos, reader.source_path() };
+					root->rgn = { prev_pos, prev_pos, reader.source_path() };
 
 					cp = reader.read_next();
 					if (cp)

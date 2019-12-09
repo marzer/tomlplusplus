@@ -17,6 +17,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] bool is_int() const noexcept override { return false; }
 			[[nodiscard]] bool is_float() const noexcept override { return false; }
 			[[nodiscard]] bool is_bool() const noexcept override { return false; }
+			[[nodiscard]] bool is_date() const noexcept override { return false; }
+			[[nodiscard]] bool is_time() const noexcept override { return false; }
 			[[nodiscard]] bool is_datetime() const noexcept override { return false; }
 			[[nodiscard]] bool is_array() const noexcept override { return false; }
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
@@ -26,6 +28,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<value<int64_t>> as_int() noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<value<double>> as_float() noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<value<bool>> as_bool() noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<value<date>> as_date() noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<value<time>> as_time() noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<value<datetime>> as_datetime() noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<array> as_array() noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<table> as_table() noexcept override { return {}; }
@@ -35,6 +39,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const value<int64_t>> as_int() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const value<double>> as_float() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const value<bool>> as_bool() const noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<const value<date>> as_date() const noexcept override { return {}; }
+			[[nodiscard]] std::shared_ptr<const value<time>> as_time() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const value<datetime>> as_datetime() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const array> as_array() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }

@@ -61,5 +61,8 @@
   <ItemGroup>
     <None Include="..\.editorconfig" />
   </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="toml++.natvis" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

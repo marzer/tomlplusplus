@@ -168,9 +168,7 @@ namespace TOML_NAMESPACE
 					"The string view's underlying character type must be 1 byte in size."
 				);
 
-				return byte_count
-					? std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes), byte_count }
-					: std::basic_string_view<CHAR>{};
+				return std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes), byte_count };
 			}
 
 			[[nodiscard]]
@@ -406,21 +404,21 @@ namespace TOML_NAMESPACE
 			return false;
 		}
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 		{
 			return codepoint == U'"'
 				|| codepoint == U'\'';
 		}
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr bool is_line_ending(char32_t codepoint) noexcept
 		{
 			return codepoint == U'\r'
 				|| codepoint == U'\n';
 		}
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr bool is_digit(char32_t codepoint) noexcept
 		{
 			return (codepoint >= U'0' && codepoint <= U'9');
