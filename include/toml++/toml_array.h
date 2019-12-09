@@ -46,6 +46,23 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
+			[[nodiscard]] int type_id() const noexcept override { return 0; }
+
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using namespace impl; //_sz
+
+				if (values.size() <= 1_sz)
+					return true;
+
+				const auto id = values[0]->type_id();
+				for (size_t i = 1; i < values.size(); i++)
+					if (values[i]->type_id() != id)
+						return false;
+				return true;
+			}
+
 			array() noexcept {}
 	};
 }

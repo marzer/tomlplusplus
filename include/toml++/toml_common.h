@@ -213,6 +213,7 @@ TOML_DISABLE_WARNINGS
 #include <vector>
 #include <map>
 #include <stdexcept>
+#include <charconv>
 #include <iosfwd>
 #include <sstream>
 //#include <array>
@@ -378,6 +379,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual std::shared_ptr<const array> as_array() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const table> as_table() const noexcept = 0;
 			[[nodiscard]] virtual std::shared_ptr<const table_array> as_table_array() const noexcept = 0;
+
+			[[nodiscard]] virtual int type_id() const noexcept = 0;
 
 			[[nodiscard]]
 			const document_region& region() const noexcept

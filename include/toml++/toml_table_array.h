@@ -46,6 +46,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return std::static_pointer_cast<const table_array>(shared_from_this()); }
 
+			[[nodiscard]] int type_id() const noexcept override { return 2; }
+
 			table_array() noexcept {}
 	};
 }

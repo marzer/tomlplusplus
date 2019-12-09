@@ -72,6 +72,17 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table> as_table() const noexcept override { return {}; }
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
+			[[nodiscard]] int type_id() const noexcept override
+			{
+					 if constexpr (std::is_same_v<T, string>) return 3;
+				else if constexpr (std::is_same_v<T, int64_t>) return 4;
+				else if constexpr (std::is_same_v<T, double>) return 5;
+				else if constexpr (std::is_same_v<T, bool>) return 6;
+				else if constexpr (std::is_same_v<T, date>) return 7;
+				else if constexpr (std::is_same_v<T, time>) return 8;
+				else if constexpr (std::is_same_v<T, datetime>) return 9;
+			}
+
 			template <typename U>
 			value(U&& val) noexcept
 				: val_{ std::forward<U>(val) }
