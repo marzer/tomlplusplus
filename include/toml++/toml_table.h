@@ -9,6 +9,7 @@ namespace TOML_NAMESPACE
 		private:
 			friend class impl::parser;
 			string_map<std::shared_ptr<node>> values;
+			bool inline_ = false;
 
 			[[nodiscard]]
 			node* get(string_view key) noexcept
@@ -55,6 +56,8 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] std::shared_ptr<const table_array> as_table_array() const noexcept override { return {}; }
 
 			[[nodiscard]] int type_id() const noexcept override { return 1; }
+
+			[[nodiscard]] bool is_inline() const noexcept { return inline_; }
 
 			table() noexcept {}
 

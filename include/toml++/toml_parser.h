@@ -202,6 +202,7 @@ namespace TOML_NAMESPACE
 								case U'f': str += TOML_STRING_PREFIX('\f'); break;
 								case U'n': str += TOML_STRING_PREFIX('\n'); break;
 								case U'r': str += TOML_STRING_PREFIX('\r'); break;
+								case U's': str += TOML_STRING_PREFIX(' '); break;
 								case U't': str += TOML_STRING_PREFIX('\t'); break;
 								case U'"': str += TOML_STRING_PREFIX('"'); break;
 								case U'\\': str += TOML_STRING_PREFIX('\\'); break;
@@ -541,6 +542,21 @@ namespace TOML_NAMESPACE
 				}
 
 				[[nodiscard]]
+				double parse_hex_float()
+				{
+					TOML_ASSERT(cp && *cp == U'0');
+					const auto eof_check = [this]()
+					{
+						if (!cp)
+							throw_parse_error("Encountered EOF while parsing hexadecimal floating-point"sv);
+					};
+
+					TOML_NOT_IMPLEMENTED_YET;
+
+					return {};
+				}
+
+				[[nodiscard]]
 				int64_t parse_decimal_integer()
 				{
 					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
@@ -713,10 +729,19 @@ namespace TOML_NAMESPACE
 					if (minute > 59u)
 						throw_parse_error("Minute value out-of-range; expected 0-59 (inclusive), saw "sv, minute);
 
+					auto time = ::toml::time{
+						static_cast<uint8_t>(hour),
+						static_cast<uint8_t>(minute),
+					};
+
+					//early exit here if seconds are omitted
+					//(extension as per https://github.com/toml-lang/toml/issues/671)
+					if (cp && !is_value_terminator(*cp) && *cp != U':' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
+						throw_parse_error("Encountered unexpected character while parsing time; expected ':'"sv, (offset_may_follow ? ", offset"sv : ""sv), " or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					if (!cp || *cp != U':')
+						return time;
+
 					// ':'
-					eof_check();
-					if (*cp != U':')
-						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
 					advance();
 
 					// "SS"
@@ -728,54 +753,34 @@ namespace TOML_NAMESPACE
 					const auto second = digits[1] + digits[0] * 10u;
 					if (second > 59u)
 						throw_parse_error("Second value out-of-range; expected 0-59 (inclusive), saw "sv, second);
+					time.second = static_cast<uint8_t>(second);
 
-					auto time = ::toml::time{
-						static_cast<uint8_t>(hour),
-						static_cast<uint8_t>(minute),
-						static_cast<uint8_t>(second),
-					};
+					//early exit here if the fractional is omitted
+					if (cp && !is_value_terminator(*cp) && *cp != U'.' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
+						throw_parse_error("Encountered unexpected character while parsing time; expected fractional"sv, (offset_may_follow ? ", offset"sv : ""sv), " or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					if (!cp || *cp != U'.')
+						return time;
 
-					if (cp && !is_value_terminator(*cp))
+					// '.'
+					advance();
+					eof_check();
+
+					// ".FFFFFFFFFFFFF"
+					uint32_t fractional_digits[24]; //surely that will be enough
+					auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
+					if (!digit_count)
+						throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, cp->as_view<char>(), '\'');
+					if (digit_count == 24_sz && cp && is_digit(*cp))
+						throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
+
+					uint64_t value = 0;
+					uint64_t place = 1;
+					for (; digit_count --> 0_sz;)
 					{
-						// ".FFFFFFFFFFFFF"
-
-						if (*cp == U'.')
-						{
-							advance();
-							eof_check();
-
-							uint32_t fractional_digits[24]; //surely that will be enough
-							auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
-							if (!digit_count)
-								throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, cp->as_view<char>(), '\'');
-							if (digit_count == 24_sz && cp && is_digit(*cp))
-								throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
-
-							uint64_t value = 0;
-							uint64_t place = 1;
-							for (; digit_count --> 0_sz;)
-							{
-								value += fractional_digits[digit_count] * place;
-								place *= 10u;
-							}
-							time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / place);
-						}
-
-						if (cp)
-						{
-							if (offset_may_follow)
-							{
-								if (!is_value_terminator(*cp)
-									&& *cp != U'+'
-									&& *cp != U'-'
-									&& *cp != U'Z'
-									&& *cp != U'z')
-									throw_parse_error("Encountered unexpected character after parsing time; expected offset or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
-							}
-							else if (!is_value_terminator(*cp))
-								throw_parse_error("Encountered unexpected character after parsing time; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
-						}
+						value += fractional_digits[digit_count] * place;
+						place *= 10u;
 					}
+					time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / place);
 
 					return time;
 				}
@@ -868,6 +873,12 @@ namespace TOML_NAMESPACE
 				}
 
 				[[nodiscard]]
+				std::shared_ptr<array> parse_array();
+
+				[[nodiscard]]
+				std::shared_ptr<table> parse_inline_table();
+
+				[[nodiscard]]
 				std::shared_ptr<node> parse_value()
 				{
 					TOML_ASSERT(cp && !is_value_terminator(*cp));
@@ -891,11 +902,11 @@ namespace TOML_NAMESPACE
 
 						// arrays
 						else if (*cp == U'[')
-							TOML_NOT_IMPLEMENTED_YET;
+							val = parse_array();
 
 						// inline tables
 						else if (*cp == U'{')
-							TOML_NOT_IMPLEMENTED_YET;
+							val = parse_inline_table();
 
 						// inf or nan
 						else if (*cp == U'i' || *cp == U'n')
@@ -960,7 +971,15 @@ namespace TOML_NAMESPACE
 								case U'.': val = std::make_shared<value<double>>(parse_float()); break;
 								case U'b': val = std::make_shared<value<int64_t>>(parse_binary_integer()); break;
 								case U'o': val = std::make_shared<value<int64_t>>(parse_octal_integer()); break;
-								case U'x': val = std::make_shared<value<int64_t>>(parse_hex_integer()); break;
+								case U'x':
+								{
+									for (size_t i = char_count; i --> 2_sz && !val;)
+										if (chars[i] == U'p' || chars[i] == U'P')
+											val = std::make_shared<value<double>>(parse_hex_float());
+									if (!val)
+										val = std::make_shared<value<int64_t>>(parse_hex_integer());
+									break;
+								}
 							}
 						}
 
@@ -1396,6 +1415,108 @@ namespace TOML_NAMESPACE
 					return root;
 				}
 		};
+
+		std::shared_ptr<array> parser::parse_array()
+		{
+			TOML_ASSERT(cp && *cp == U'[');
+			const auto eof_check = [this]()
+			{
+				if (!cp)
+					throw_parse_error("Encountered EOF while parsing array"sv);
+			};
+
+			// skip opening '['
+			advance();
+			eof_check();
+
+			auto arr = std::make_shared<array>();
+			auto& vals = arr->values;
+
+			while (true)
+			{
+				while (consume_leading_whitespace()
+					|| consume_line_ending()
+					|| consume_comment())
+					continue;
+				eof_check();
+
+				// commas - only legal after a value
+				if (*cp == U',')
+				{
+					if (!vals.empty())
+					{
+						advance();
+						continue;
+					}
+					throw_parse_error("Encountered unexpected character while parsing array; expected value or closing ']', saw ','"sv);
+				}
+
+				// closing ']'
+				else if (*cp == U']')
+					break;
+
+				// must be a value
+				else
+					vals.push_back(parse_value());
+			}
+
+			return arr;
+		}
+
+		std::shared_ptr<table> parser::parse_inline_table()
+		{
+			TOML_ASSERT(cp && *cp == U'{');
+			const auto eof_check = [this]()
+			{
+				if (!cp)
+					throw_parse_error("Encountered EOF while parsing inline table"sv);
+			};
+
+			// skip opening '{'
+			advance();
+			eof_check();
+
+			auto tab = std::make_shared<table>();
+			tab->inline_ = true;
+			auto& vals = tab->values;
+
+			while (true)
+			{
+				while (consume_leading_whitespace()
+					|| consume_line_ending()
+					|| consume_comment())
+					continue;
+				eof_check();
+
+				// commas - only legal after a key-value pair
+				if (*cp == U',')
+				{
+					if (!vals.empty())
+					{
+						advance();
+						continue;
+					}
+					throw_parse_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw ','"sv);
+				}
+
+				// closing ']'
+				else if (*cp == U'}')
+					break;
+
+				// must be a key_value-pair
+				else
+				{
+					auto kvp = parse_key_value_pair();
+
+					//todo : check for collisions
+					//todo : handle dotted keys
+
+					TOML_NOT_IMPLEMENTED_YET;
+				}
+			}
+
+			return tab;
+		}
 	}
 
 	template <typename CHAR>

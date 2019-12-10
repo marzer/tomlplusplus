@@ -12,6 +12,7 @@
 #include "toml_table_array.h"
 #include "toml_parser.h"
 
+//macro hygiene
 #undef TOML_USE_CHAR_8_IF_AVAILABLE
 #undef TOML_ASSERT
 #undef TOML_CPP_VERSION
