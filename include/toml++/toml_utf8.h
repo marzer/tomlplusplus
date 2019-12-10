@@ -450,10 +450,10 @@ namespace TOML_NAMESPACE
 				|| codepoint == U'_'
 
 				// these ranges are not legal bare key characters in the TOML spec but Europe exists so *shrug*
-				|| (codepoint >= U'\u00E0' && codepoint <= U'\u00F6')	// LATIN SMALL LETTER A WITH GRAVE -> LATIN SMALL LETTER O WITH DIAERESIS
-				|| (codepoint >= U'\u00F8' && codepoint <= U'\u00FE')	// LATIN SMALL LETTER O WITH STROKE -> LATIN SMALL LETTER THORN
-				|| (codepoint >= U'\u00C0' && codepoint <= U'\u00D6')	// LATIN CAPITAL LETTER A WITH GRAVE -> LATIN CAPITAL LETTER O WITH DIAERESIS
-				|| (codepoint >= U'\u00D8' && codepoint <= U'\u00DE')	// LATIN CAPITAL LETTER O WITH STROKE -> LATIN CAPITAL LETTER THORN
+				|| (codepoint >= U'\u00C0' && codepoint <= U'\u00D6')
+				|| (codepoint >= U'\u00D8' && codepoint <= U'\u00F6')
+				|| (codepoint >= U'\u00F8' && codepoint <= U'\u00FF')
+				|| (codepoint >= U'\u0100' && codepoint <= U'\u017F')
 			;
 		}
 

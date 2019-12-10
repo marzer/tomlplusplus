@@ -18,6 +18,7 @@ of 'unreleased' features from the [TOML master](https://github.com/toml-lang/tom
 - [#622](https://github.com/toml-lang/toml/issues/622): Add short escaping alias `\s` for space (`\u0020`)
 - [#665](https://github.com/toml-lang/toml/issues/665): Make arrays heterogeneous
 - [#671](https://github.com/toml-lang/toml/issues/671): Local time of day format should support `09:30` as opposed to `09:30:00`
+- [#687](https://github.com/toml-lang/toml/issues/687): Relax bare key character restrictions to allow some additional 'letter-likes' 
 
 ### **🔹[0.5.0](https://github.com/toml-lang/toml/releases/tag/v0.5.0) and earlier:**
 - All features as of _&lt;`toml++` release date&gt;_
