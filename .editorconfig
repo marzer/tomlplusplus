@@ -1,9 +1,11 @@
 root = true
 
-[*.{cpp, h, c, cxx, hxx, hpp, inl, toml, natvis, xml, props}]
+[*]
 insert_final_newline = true
 indent_style = tab
 indent_size = 4
 tab_width = 4
+
+[*.{cpp, h, c, cxx, hxx, hpp, inl, toml, natvis, xml, props, py}]
 charset = utf-8
 trim_trailing_whitespace = true

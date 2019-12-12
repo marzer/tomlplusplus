@@ -105,11 +105,11 @@
 	#error toml++ currently requires that exceptions be enabled.
 #endif
 
-#if TOML_CPP_VERSION >= 202600LL
+#if TOML_CPP_VERSION >= 202600L
 	#define TOML_CPP 26
-#elif TOML_CPP_VERSION >= 202300LL
+#elif TOML_CPP_VERSION >= 202300L
 	#define TOML_CPP 23
-#elif TOML_CPP_VERSION >= 202000LL
+#elif TOML_CPP_VERSION >= 202000L
 	#define TOML_CPP 20
 #else
 	#define TOML_CPP 17
@@ -152,6 +152,9 @@
 	#if __has_cpp_attribute(no_unique_address)
 		#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
 	#endif
+	#if __has_cpp_attribute(nodiscard) >= 201907L
+		#define TOML_NODISCARD_CTOR [[nodiscard]]
+	#endif
 #endif //__INTELLISENSE__
 #ifndef TOML_LIKELY
 	#define TOML_LIKELY
@@ -161,6 +164,9 @@
 #endif
 #ifndef TOML_NO_UNIQUE_ADDRESS
 	#define TOML_NO_UNIQUE_ADDRESS
+#endif
+#ifndef TOML_NODISCARD_CTOR
+	#define TOML_NODISCARD_CTOR
 #endif
 
 #ifndef TOML_ASSERT
@@ -338,7 +344,6 @@ namespace TOML_NAMESPACE
 	};
 
 	class TOML_INTERFACE node
-		: public std::enable_shared_from_this<node>
 	{
 		private:
 			friend class impl::parser;
@@ -358,27 +363,27 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
 			[[nodiscard]] virtual bool is_table_array() const noexcept = 0;
 			
-			[[nodiscard]] virtual std::shared_ptr<value<string>> as_string() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<int64_t>> as_int() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<double>> as_float() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<bool>> as_bool() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<date>> as_date() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<time>> as_time() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<value<datetime>> as_datetime() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<array> as_array() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<table> as_table() noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<table_array> as_table_array() noexcept = 0;
+			[[nodiscard]] virtual value<string>* as_string() noexcept = 0;
+			[[nodiscard]] virtual value<int64_t>* as_int() noexcept = 0;
+			[[nodiscard]] virtual value<double>* as_float() noexcept = 0;
+			[[nodiscard]] virtual value<bool>* as_bool() noexcept = 0;
+			[[nodiscard]] virtual value<date>* as_date() noexcept = 0;
+			[[nodiscard]] virtual value<time>* as_time() noexcept = 0;
+			[[nodiscard]] virtual value<datetime>* as_datetime() noexcept = 0;
+			[[nodiscard]] virtual array* as_array() noexcept = 0;
+			[[nodiscard]] virtual table* as_table() noexcept = 0;
+			[[nodiscard]] virtual table_array* as_table_array() noexcept = 0;
 
-			[[nodiscard]] virtual std::shared_ptr<const value<string>> as_string() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<int64_t>> as_int() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<double>> as_float() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<bool>> as_bool() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<date>> as_date() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<time>> as_time() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const value<datetime>> as_datetime() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const array> as_array() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const table> as_table() const noexcept = 0;
-			[[nodiscard]] virtual std::shared_ptr<const table_array> as_table_array() const noexcept = 0;
+			[[nodiscard]] virtual const value<string>* as_string() const noexcept = 0;
+			[[nodiscard]] virtual const value<int64_t>* as_int() const noexcept = 0;
+			[[nodiscard]] virtual const value<double>* as_float() const noexcept = 0;
+			[[nodiscard]] virtual const value<bool>* as_bool() const noexcept = 0;
+			[[nodiscard]] virtual const value<date>* as_date() const noexcept = 0;
+			[[nodiscard]] virtual const value<time>* as_time() const noexcept = 0;
+			[[nodiscard]] virtual const value<datetime>* as_datetime() const noexcept = 0;
+			[[nodiscard]] virtual const array* as_array() const noexcept = 0;
+			[[nodiscard]] virtual const table* as_table() const noexcept = 0;
+			[[nodiscard]] virtual const table_array* as_table_array() const noexcept = 0;
 
 			[[nodiscard]] virtual int type_id() const noexcept = 0;
 

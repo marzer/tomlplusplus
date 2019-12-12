@@ -12,7 +12,7 @@ namespace TOML_NAMESPACE
 		{
 			private:
 				utf8_buffered_reader reader;
-				std::shared_ptr<table> root;
+				std::unique_ptr<table> root;
 				document_position prev_pos = { 1_sz, 1_sz };
 				const utf8_codepoint* cp = {};
 				std::vector<table*> implicit_tables;
@@ -873,18 +873,18 @@ namespace TOML_NAMESPACE
 				}
 
 				[[nodiscard]]
-				std::shared_ptr<array> parse_array();
+				std::unique_ptr<array> parse_array();
 
 				[[nodiscard]]
-				std::shared_ptr<table> parse_inline_table();
+				std::unique_ptr<table> parse_inline_table();
 
 				[[nodiscard]]
-				std::shared_ptr<node> parse_value()
+				std::unique_ptr<node> parse_value()
 				{
 					TOML_ASSERT(cp && !is_value_terminator(*cp));
 
 					const auto begin_pos = cp->position;
-					std::shared_ptr<node> val;
+					std::unique_ptr<node> val;
 
 					do
 					{
@@ -894,11 +894,11 @@ namespace TOML_NAMESPACE
 
 						// strings
 						if (is_string_delimiter(*cp))
-							val = std::make_shared<value<string>>(parse_string());
+							val = std::make_unique<value<string>>(parse_string());
 
 						// bools
 						else if (*cp == U't' || *cp == U'f')
-							val = std::make_shared<value<bool>>(parse_bool());
+							val = std::make_unique<value<bool>>(parse_bool());
 
 						// arrays
 						else if (*cp == U'[')
@@ -910,7 +910,7 @@ namespace TOML_NAMESPACE
 
 						// inf or nan
 						else if (*cp == U'i' || *cp == U'n')
-							val = std::make_shared<value<double>>(parse_inf_or_nan());
+							val = std::make_unique<value<double>>(parse_inf_or_nan());
 
 						if (val)
 							break;
@@ -939,7 +939,7 @@ namespace TOML_NAMESPACE
 						{
 							if (is_digit(chars[0]))
 							{
-								val = std::make_shared<value<int64_t>>(static_cast<int64_t>(chars[0] - U'0'));
+								val = std::make_unique<value<int64_t>>(static_cast<int64_t>(chars[0] - U'0'));
 								break;
 							}
 
@@ -956,9 +956,9 @@ namespace TOML_NAMESPACE
 						if (begins_with_sign)
 						{
 							if (chars[1] == U'i' || chars[1] == U'n')
-								val = std::make_shared<value<double>>(parse_inf_or_nan());
+								val = std::make_unique<value<double>>(parse_inf_or_nan());
 							else if (is_digit(chars[1]) && (chars[2] == U'.' || chars[2] == U'e' || chars[2] == U'E'))
-								val = std::make_shared<value<double>>(parse_float()); break;
+								val = std::make_unique<value<double>>(parse_float()); break;
 						}
 
 						// numbers that begin with 0
@@ -968,16 +968,16 @@ namespace TOML_NAMESPACE
 							{
 								case U'E': [[fallthrough]];
 								case U'e': [[fallthrough]];
-								case U'.': val = std::make_shared<value<double>>(parse_float()); break;
-								case U'b': val = std::make_shared<value<int64_t>>(parse_binary_integer()); break;
-								case U'o': val = std::make_shared<value<int64_t>>(parse_octal_integer()); break;
+								case U'.': val = std::make_unique<value<double>>(parse_float()); break;
+								case U'b': val = std::make_unique<value<int64_t>>(parse_binary_integer()); break;
+								case U'o': val = std::make_unique<value<int64_t>>(parse_octal_integer()); break;
 								case U'x':
 								{
 									for (size_t i = char_count; i --> 2_sz && !val;)
 										if (chars[i] == U'p' || chars[i] == U'P')
-											val = std::make_shared<value<double>>(parse_hex_float());
+											val = std::make_unique<value<double>>(parse_hex_float());
 									if (!val)
-										val = std::make_shared<value<int64_t>>(parse_hex_integer());
+										val = std::make_unique<value<int64_t>>(parse_hex_integer());
 									break;
 								}
 							}
@@ -985,7 +985,7 @@ namespace TOML_NAMESPACE
 
 						//floats
 						else if (begins_with_digit && (chars[1] == U'.' || chars[1] == U'e' || chars[1] == U'E'))
-							val = std::make_shared<value<double>>(parse_float());
+							val = std::make_unique<value<double>>(parse_float());
 
 						if (val || !(begins_with_sign || begins_with_digit))
 							break;
@@ -1068,21 +1068,21 @@ namespace TOML_NAMESPACE
 						switch (possible_types)
 						{
 							case possibly_int:
-								val = std::make_shared<value<int64_t>>(parse_decimal_integer());
+								val = std::make_unique<value<int64_t>>(parse_decimal_integer());
 								break;
 
 							case possibly_float:
-								val = std::make_shared<value<double>>(parse_float());
+								val = std::make_unique<value<double>>(parse_float());
 								break;
 
 							case possibly_datetime:
 							{
 								if (first_colon && !first_minus)
-									val = std::make_shared<value<time>>(parse_time());
+									val = std::make_unique<value<time>>(parse_time());
 								else if (!first_colon && first_minus)
-									val = std::make_shared<value<date>>(parse_date());
+									val = std::make_unique<value<date>>(parse_date());
 								else
-									val = std::make_shared<value<datetime>>(parse_datetime());
+									val = std::make_unique<value<datetime>>(parse_datetime());
 								break;
 							}
 
@@ -1145,7 +1145,7 @@ namespace TOML_NAMESPACE
 				struct key_value_pair final
 				{
 					key key;
-					std::shared_ptr<node> value;
+					std::unique_ptr<node> value;
 				};
 
 				[[nodiscard]]
@@ -1254,7 +1254,7 @@ namespace TOML_NAMESPACE
 						{
 							child = parent->values.emplace(
 								key.segments[i],
-								std::make_shared<table>()
+								std::make_unique<table>()
 							).first->second.get();
 							implicit_tables.push_back(reinterpret_cast<table*>(child));
 							child->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
@@ -1289,12 +1289,12 @@ namespace TOML_NAMESPACE
 							auto tab_arr = reinterpret_cast<table_array*>(
 								parent->values.emplace(
 									key.segments.back(),
-									std::make_shared<table_array>()
+									std::make_unique<table_array>()
 								).first->second.get()
 							);
 							tab_arr->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						
-							tab_arr->tables.push_back(std::make_shared<table>());
+							tab_arr->tables.push_back(std::make_unique<table>());
 							tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 							return tab_arr->tables.back().get();
 						}
@@ -1305,7 +1305,7 @@ namespace TOML_NAMESPACE
 							auto tab = reinterpret_cast<table*>(
 								parent->values.emplace(
 									key.segments.back(),
-									std::make_shared<table>()
+									std::make_unique<table>()
 								).first->second.get()
 							);
 							tab->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
@@ -1322,7 +1322,7 @@ namespace TOML_NAMESPACE
 						if (is_array && matching_node->is_table_array())
 						{
 							auto tab_arr = reinterpret_cast<table_array*>(matching_node);
-							tab_arr->tables.push_back(std::make_shared<table>());
+							tab_arr->tables.push_back(std::make_unique<table>());
 							tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 							return tab_arr->tables.back().get();
 						}
@@ -1400,7 +1400,7 @@ namespace TOML_NAMESPACE
 
 				parser(utf8_reader_interface&& reader_)
 					: reader{ reader_ },
-					root{ std::make_shared<table>() }
+					root{ std::make_unique<table>() }
 				{
 					root->rgn = { prev_pos, prev_pos, reader.source_path() };
 
@@ -1410,13 +1410,13 @@ namespace TOML_NAMESPACE
 				}
 
 				[[nodiscard]]
-				operator std::shared_ptr<table>() const noexcept
+				operator std::unique_ptr<table>() && noexcept
 				{
-					return root;
+					return std::move(root);
 				}
 		};
 
-		std::shared_ptr<array> parser::parse_array()
+		std::unique_ptr<array> parser::parse_array()
 		{
 			TOML_ASSERT(cp && *cp == U'[');
 			const auto eof_check = [this]()
@@ -1429,7 +1429,7 @@ namespace TOML_NAMESPACE
 			advance();
 			eof_check();
 
-			auto arr = std::make_shared<array>();
+			auto arr = std::make_unique<array>();
 			auto& vals = arr->values;
 
 			while (true)
@@ -1463,7 +1463,7 @@ namespace TOML_NAMESPACE
 			return arr;
 		}
 
-		std::shared_ptr<table> parser::parse_inline_table()
+		std::unique_ptr<table> parser::parse_inline_table()
 		{
 			TOML_ASSERT(cp && *cp == U'{');
 			const auto eof_check = [this]()
@@ -1476,7 +1476,7 @@ namespace TOML_NAMESPACE
 			advance();
 			eof_check();
 
-			auto tab = std::make_shared<table>();
+			auto tab = std::make_unique<table>();
 			tab->inline_ = true;
 			auto& vals = tab->values;
 
@@ -1521,7 +1521,7 @@ namespace TOML_NAMESPACE
 
 	template <typename CHAR>
 	[[nodiscard]]
-	inline std::shared_ptr<table> parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
+	inline std::unique_ptr<table> parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -1533,7 +1533,7 @@ namespace TOML_NAMESPACE
 
 	template <typename CHAR>
 	[[nodiscard]]
-	inline std::shared_ptr<table> parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
+	inline std::unique_ptr<table> parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,

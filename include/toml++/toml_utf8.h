@@ -68,7 +68,7 @@ namespace TOML_NAMESPACE
 				size_t position = {};
 
 			public:
-				constexpr utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
+				explicit constexpr utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
 					: source{ sv }
 				{
 					if (source.length() >= 3_sz
@@ -108,7 +108,7 @@ namespace TOML_NAMESPACE
 				std::basic_istream<CHAR>* source;
 
 			public:
-				utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
+				explicit utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
 					: source{ &stream }
 				{
 					if (*source)
@@ -207,8 +207,8 @@ namespace TOML_NAMESPACE
 
 			public:
 
-				template <typename U>
-				utf8_reader(U && source, string_view source_path = {})
+				template <typename U, typename STR = string_view>
+				explicit utf8_reader(U && source, STR&& source_path = {})
 					noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 					: stream{ std::forward<U>(source) }
 				{
@@ -216,7 +216,7 @@ namespace TOML_NAMESPACE
 					current.position.column = 1_sz;
 
 					if (!source_path.empty())
-						source_path_ = std::make_shared<const string>(source_path);
+						source_path_ = std::make_shared<const string>(std::forward<STR>(source_path));
 				}
 
 				[[nodiscard]]
@@ -312,7 +312,7 @@ namespace TOML_NAMESPACE
 
 			public:
 
-				utf8_buffered_reader(utf8_reader_interface& reader_)
+				explicit utf8_buffered_reader(utf8_reader_interface& reader_)
 					: reader{ reader_ }
 				{}
 
