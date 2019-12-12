@@ -64,20 +64,18 @@ namespace TOML_NAMESPACE
 
 				bool consume_leading_whitespace()
 				{
-					if (!cp || !is_whitespace(*cp))
-						return false;
-
-					do
+					bool consumed = false;
+					while (cp && is_whitespace(*cp))
 					{
+						consumed = true;
 						advance();
 					}
-					while (cp && is_whitespace(*cp));
-					return true;
+					return consumed;
 				}
 
-				bool consume_line_ending()
+				bool consume_line_break()
 				{
-					if (!cp || !is_line_ending(*cp))
+					if (!cp || !is_line_break(*cp))
 						return false;
 
 					if (*cp == U'\r')
@@ -88,7 +86,7 @@ namespace TOML_NAMESPACE
 						if (*cp != U'\n')
 							throw_parse_error("Encountered unexpected character while consuming CRLF"sv);
 					}
-					advance(); // skip \n
+					advance(); // skip \n (or other single-character line ending)
 					return true;
 				}
 
@@ -99,8 +97,8 @@ namespace TOML_NAMESPACE
 
 					do
 					{
-						if (is_line_ending(*cp))
-							return consume_line_ending();
+						if (is_line_break(*cp))
+							return consume_line_break();
 						else
 							advance();
 					}
@@ -133,7 +131,7 @@ namespace TOML_NAMESPACE
 				{
 					for (size_t i = 0; i < N; i++)
 					{
-						if (!cp || !is_digit(*cp))
+						if (!cp || !is_decimal_digit(*cp))
 							return false;
 						digits[i] = static_cast<T>(*cp - U'0');
 						advance();
@@ -148,7 +146,7 @@ namespace TOML_NAMESPACE
 					size_t i = {};
 					for (; i < N; i++)
 					{
-						if (!cp || !is_digit(*cp))
+						if (!cp || !is_decimal_digit(*cp))
 							break;
 						digits[i] = static_cast<T>(*cp - U'0');
 						advance();
@@ -183,9 +181,9 @@ namespace TOML_NAMESPACE
 							// handle 'line ending slashes' in multi-line mode
 							if constexpr (MULTI_LINE)
 							{
-								if (is_line_ending(*cp))
+								if (is_line_break(*cp))
 								{
-									consume_line_ending();
+									consume_line_break();
 									skipping_whitespace = true;
 									continue;
 								}
@@ -304,9 +302,9 @@ namespace TOML_NAMESPACE
 							// handle line endings in multi-line mode
 							if constexpr (MULTI_LINE)
 							{
-								if (is_line_ending(*cp))
+								if (is_line_break(*cp))
 								{
-									consume_line_ending();
+									consume_line_break();
 									if (!str.empty() && !skipping_whitespace)
 										str += TOML_STRING_PREFIX('\n');
 									continue;
@@ -390,9 +388,9 @@ namespace TOML_NAMESPACE
 						// handle line endings in multi-line mode
 						if constexpr (MULTI_LINE)
 						{
-							if (is_line_ending(*cp))
+							if (is_line_break(*cp))
 							{
-								consume_line_ending();
+								consume_line_break();
 								if (!str.empty())
 									str += TOML_STRING_PREFIX('\n');
 								continue;
@@ -529,7 +527,7 @@ namespace TOML_NAMESPACE
 				[[nodiscard]]
 				double parse_float()
 				{
-					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
+					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
@@ -559,7 +557,7 @@ namespace TOML_NAMESPACE
 				[[nodiscard]]
 				int64_t parse_decimal_integer()
 				{
-					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_digit(*cp)));
+					TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
@@ -619,7 +617,7 @@ namespace TOML_NAMESPACE
 				[[nodiscard]]
 				date parse_date(bool time_may_follow = false)
 				{
-					TOML_ASSERT(cp && is_digit(*cp));
+					TOML_ASSERT(cp && is_decimal_digit(*cp));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
@@ -695,7 +693,7 @@ namespace TOML_NAMESPACE
 				[[nodiscard]]
 				time parse_time(bool offset_may_follow = false)
 				{
-					TOML_ASSERT(cp && is_digit(*cp));
+					TOML_ASSERT(cp && is_decimal_digit(*cp));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
@@ -770,7 +768,7 @@ namespace TOML_NAMESPACE
 					auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 					if (!digit_count)
 						throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, cp->as_view<char>(), '\'');
-					if (digit_count == 24_sz && cp && is_digit(*cp))
+					if (digit_count == 24_sz && cp && is_decimal_digit(*cp))
 						throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
 
 					uint64_t value = 0;
@@ -788,7 +786,7 @@ namespace TOML_NAMESPACE
 				[[nodiscard]]
 				datetime parse_datetime()
 				{
-					TOML_ASSERT(cp && is_digit(*cp));
+					TOML_ASSERT(cp && is_decimal_digit(*cp));
 					const auto eof_check = [this]()
 					{
 						if (!cp)
@@ -937,7 +935,7 @@ namespace TOML_NAMESPACE
 						// the only valid value type is an integer.
 						if (char_count == 1_sz)
 						{
-							if (is_digit(chars[0]))
+							if (is_decimal_digit(chars[0]))
 							{
 								val = std::make_unique<value<int64_t>>(static_cast<int64_t>(chars[0] - U'0'));
 								break;
@@ -952,12 +950,12 @@ namespace TOML_NAMESPACE
 
 						// numbers that begin with a sign
 						const auto begins_with_sign = chars[0] == U'+' || chars[0] == U'-';
-						const auto begins_with_digit = is_digit(chars[0]);
+						const auto begins_with_digit = is_decimal_digit(chars[0]);
 						if (begins_with_sign)
 						{
 							if (chars[1] == U'i' || chars[1] == U'n')
 								val = std::make_unique<value<double>>(parse_inf_or_nan());
-							else if (is_digit(chars[1]) && (chars[2] == U'.' || chars[2] == U'e' || chars[2] == U'E'))
+							else if (is_decimal_digit(chars[1]) && (chars[2] == U'.' || chars[2] == U'e' || chars[2] == U'E'))
 								val = std::make_unique<value<double>>(parse_float()); break;
 						}
 
@@ -1013,7 +1011,7 @@ namespace TOML_NAMESPACE
 						std::optional<size_t> first_colon, first_minus;
 						for (size_t i = 0; i < char_count; i++)
 						{
-							const auto digit = is_digit(chars[i]);
+							const auto digit = is_decimal_digit(chars[i]);
 							const auto colon = chars[i] == U':';
 							const auto minus = chars[i] == U'-';
 							const auto sign = chars[i] == U'+' || minus;
@@ -1239,7 +1237,7 @@ namespace TOML_NAMESPACE
 						consume_leading_whitespace();
 						if (cp)
 						{
-							if (!consume_comment() && !consume_line_ending())
+							if (!consume_comment() && !consume_line_break())
 								throw_parse_error("Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv), " header; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
 						}
 					}
@@ -1358,7 +1356,7 @@ namespace TOML_NAMESPACE
 					{
 						// leading whitespace, line endings, comments
 						if (consume_leading_whitespace()
-							|| consume_line_ending()
+							|| consume_line_break()
 							|| consume_comment())
 							continue;
 
@@ -1384,7 +1382,7 @@ namespace TOML_NAMESPACE
 							consume_leading_whitespace();
 							if (cp)
 							{
-								if (!consume_comment() && !consume_line_ending())
+								if (!consume_comment() && !consume_line_break())
 									throw_parse_error("Encountered unexpected character after key-value pair; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
 							}
 						}
@@ -1435,7 +1433,7 @@ namespace TOML_NAMESPACE
 			while (true)
 			{
 				while (consume_leading_whitespace()
-					|| consume_line_ending()
+					|| consume_line_break()
 					|| consume_comment())
 					continue;
 				eof_check();
@@ -1483,7 +1481,7 @@ namespace TOML_NAMESPACE
 			while (true)
 			{
 				while (consume_leading_whitespace()
-					|| consume_line_ending()
+					|| consume_line_break()
 					|| consume_comment())
 					continue;
 				eof_check();

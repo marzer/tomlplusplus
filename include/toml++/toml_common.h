@@ -18,6 +18,10 @@
 	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
 #endif
 
+#ifndef TOML_STRICT
+	#define TOML_STRICT 0
+#endif
+
 //#define TOML_ASSERT(expr)		my_custom_assert(expr)
 
 //--------------------------------------------------------------------

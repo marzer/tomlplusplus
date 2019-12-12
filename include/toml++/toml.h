@@ -15,6 +15,7 @@
 //macro hygiene
 #undef TOML_USE_CHAR_8_IF_AVAILABLE
 #undef TOML_ASSERT
+#undef TOML_STRICT
 #undef TOML_CPP_VERSION
 #undef TOML_CPP
 #undef TOML_DISABLE_WARNINGS
