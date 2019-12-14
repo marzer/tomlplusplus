@@ -63,10 +63,12 @@
     <ClInclude Include="..\include\toml++\toml_table.h" />
     <ClInclude Include="..\include\toml++\toml_table_array.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
+    <ClInclude Include="..\include\toml++\toml_utf8_is_unicode_letter.h" />
     <ClInclude Include="..\include\toml++\toml_value.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
+    <None Include="generate_is_unicode_letter.py" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
