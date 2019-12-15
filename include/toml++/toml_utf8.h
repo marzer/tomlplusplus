@@ -6,16 +6,9 @@
 
 namespace TOML_NAMESPACE::impl
 {
-	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
+	[[nodiscard]]
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
-		#if TOML_STRICT
-
-		return codepoint == U'\t'
-			|| codepoint <= U' ';
-
-		#else
-
 		//see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		//(characters that don't say "is a line-break")
 
@@ -28,26 +21,12 @@ namespace TOML_NAMESPACE::impl
 			|| codepoint == U'\u205F' // medium mathematical space
 			|| codepoint == U'\u3000' // ideographic space
 		;
-
-		#endif
 	}
 
 	template <bool including_cr = true>
-	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
+	[[nodiscard]]
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
-		#if TOML_STRICT
-		
-		if constexpr (including_cr)
-		{
-			return codepoint == U'\n'
-				|| codepoint == U'\r';
-		}
-		else
-			return codepoint == U'\n';
-
-		#else
-
 		//see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		//(characters that say "is a line-break")
 
@@ -58,8 +37,6 @@ namespace TOML_NAMESPACE::impl
 			|| codepoint == U'\u2028' // line separator
 			|| codepoint == U'\u2029' // paragraph separator
 		;
-
-		#endif
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -84,6 +61,18 @@ namespace TOML_NAMESPACE::impl
 		#else
 		return is_ascii_letter(codepoint) || is_unicode_letter(codepoint);
 		#endif
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_binary_digit(char32_t codepoint) noexcept
+	{
+		return codepoint == U'0' || codepoint == U'1';
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_octal_digit(char32_t codepoint) noexcept
+	{
+		return (codepoint >= U'0' && codepoint <= U'7');
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -429,7 +418,7 @@ namespace TOML_NAMESPACE::impl
 			utf8_reader_interface& reader;
 			struct
 			{
-				static constexpr size_t capacity = 31; //+1 for the 'head' stored in the underlying reader
+				static constexpr size_t capacity = 255; //+1 for the 'head' stored in the underlying reader
 				utf8_codepoint buffer[capacity];
 				size_t count = {}, first = {};
 			}

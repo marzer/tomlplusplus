@@ -179,10 +179,11 @@
 #endif
 
 #ifndef TOML_ASSERT
-	TOML_DISABLE_WARNINGS
-	#include <cassert>
-	TOML_RESTORE_WARNINGS
-	#define TOML_ASSERT(expr)	assert(expr)
+	#ifdef assert
+		#define TOML_ASSERT(expr)	assert(expr)
+	#else
+		#define TOML_ASSERT(expr)	(void)0
+	#endif
 #endif
 
 #if __has_include(<version>)
@@ -415,6 +416,11 @@ namespace TOML_NAMESPACE
 			parse_error(const std::string& description, document_region&& region_) noexcept
 				: std::runtime_error{ description },
 				region{ std::move(region_) }
+			{}
+
+			parse_error(const std::string& description, const document_region& region_) noexcept
+				: std::runtime_error{ description },
+				region{ region_ }
 			{}
 
 			parse_error(const std::string& description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept

@@ -198,7 +198,9 @@ namespace TOML_NAMESPACE::impl
 							case U'f': str += TOML_STRING_PREFIX('\f'); break;
 							case U'n': str += TOML_STRING_PREFIX('\n'); break;
 							case U'r': str += TOML_STRING_PREFIX('\r'); break;
+							#if !TOML_STRICT
 							case U's': str += TOML_STRING_PREFIX(' '); break;
+							#endif
 							case U't': str += TOML_STRING_PREFIX('\t'); break;
 							case U'"': str += TOML_STRING_PREFIX('"'); break;
 							case U'\\': str += TOML_STRING_PREFIX('\\'); break;
@@ -522,6 +524,9 @@ namespace TOML_NAMESPACE::impl
 					: std::numeric_limits<double>::quiet_NaN();
 			}
 
+			#pragma warning(push)
+			#pragma warning(disable: 4063) //case '0' is not a valid value for switch of enum 'std::errc'
+
 			[[nodiscard]]
 			double parse_float()
 			{
@@ -532,10 +537,87 @@ namespace TOML_NAMESPACE::impl
 						throw_parse_error("Encountered EOF while parsing floating-point"sv);
 				};
 
-				TOML_NOT_IMPLEMENTED_YET;
+				// sign
+				const int sign = *cp == U'-' ? -1 : 1;
+				if (*cp == U'+' || *cp == U'-')
+				{
+					advance();
+					eof_check();
+				}
 
-				return {};
+				// consume value chars
+				char chars[128];
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					bool seen_decimal = false;
+					bool seen_exponent = false;
+					if (*cp == U'_')
+					{
+						if (!prev || !is_decimal_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing floating-point; underscores may only follow digits"sv);
+					}
+					else
+					{
+						if ((!prev || *prev == U'_') && !is_decimal_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, cp->as_view<char>(), '\'');
+						if (*cp == U'.')
+						{
+							if (seen_decimal)
+								throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may only appear once"sv);
+							if (seen_exponent)
+								throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
+							seen_decimal = true;
+						}
+						else if (*cp == U'e' || *cp == U'E')
+						{
+							if (seen_exponent)
+								throw_parse_error("Encountered unexpected character while parsing floating-point; exponents may only appear once"sv);
+							seen_exponent = true;
+						}
+
+						if (length + cp->byte_count > sizeof(chars))
+							throw_parse_error("Floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						memcpy(chars + length, cp->bytes, cp->byte_count);
+						length += cp->byte_count;
+
+					}
+					prev = cp;
+					advance();
+				}
+
+				// convert to double
+				double result;
+				auto parse_result = std::from_chars(chars, chars + length, result);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result * sign;
+
+					case std::errc::invalid_argument:
+						throw_parse_error("Error parsing floating-point; the character sequence could not be interpreted as a floating-point value"sv);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error(
+							"Error parsing floating-point; the character sequence contained a value not representable by a 64-bit floating-point"sv);
+
+					default: //??
+						throw_parse_error(
+							"Error parsing floating-point; an unspecified error occurred while trying to interpret the character sequence as a floating-point value"sv);
+				}
+				TOML_UNREACHABLE;
 			}
+
+			#if !TOML_STRICT
 
 			[[nodiscard]]
 			double parse_hex_float()
@@ -552,20 +634,7 @@ namespace TOML_NAMESPACE::impl
 				return {};
 			}
 
-			[[nodiscard]]
-			int64_t parse_decimal_integer()
-			{
-				TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
-				const auto eof_check = [this]()
-				{
-					if (!cp)
-						throw_parse_error("Encountered EOF while parsing decimal integer"sv);
-				};
-
-				TOML_NOT_IMPLEMENTED_YET;
-
-				return {};
-			}
+			#endif //!TOML_STRICT
 
 			[[nodiscard]]
 			int64_t parse_binary_integer()
@@ -577,9 +646,68 @@ namespace TOML_NAMESPACE::impl
 						throw_parse_error("Encountered EOF while parsing binary integer"sv);
 				};
 
-				TOML_NOT_IMPLEMENTED_YET;
+				// '0'
+				if (*cp != U'0')
+					throw_parse_error("Encountered unexpected character while parsing binary integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
 
-				return {};
+				// 'b' or 'B'
+				if (*cp != U'b' && *cp != U'B')
+					throw_parse_error("Encountered unexpected character while parsing binary integer; expected 'b' or 'B', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
+
+				// consume value chars
+				char chars[127]; //127 == strlen("0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0")
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					if (*cp == U'_')
+					{
+						if (!prev || !is_binary_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing binary integer; underscores may only follow digits");
+					}
+					else
+					{
+						if (!is_binary_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, cp->as_view<char>(), '\'');
+						TOML_ASSERT(cp->byte_count == 1_sz);
+						if (length == sizeof(chars))
+							throw_parse_error("Binary integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						chars[length++] = static_cast<char>(cp->bytes[0]);
+					}
+					prev = cp;
+					advance();
+				}
+
+				// convert to int
+				int64_t result;
+				auto parse_result = std::from_chars(chars, chars + length, result, 2);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result;
+
+					case std::errc::invalid_argument:
+						throw_parse_error("Error parsing binary integer; the character sequence could not be interpreted as a binary integer value"sv);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error("Error parsing binary integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+
+					default: //??
+						throw_parse_error("Error parsing binary integer; an unspecified error occurred while trying to interpret the character sequence as a binary integer value"sv);
+				}
+				TOML_UNREACHABLE;
 			}
 
 			[[nodiscard]]
@@ -592,9 +720,146 @@ namespace TOML_NAMESPACE::impl
 						throw_parse_error("Encountered EOF while parsing octal integer"sv);
 				};
 
-				TOML_NOT_IMPLEMENTED_YET;
+				// '0'
+				if (*cp != U'0')
+					throw_parse_error("Encountered unexpected character while parsing octal integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
 
-				return {};
+				// 'o'
+				if (*cp != U'o')
+					throw_parse_error("Encountered unexpected character while parsing octal integer; expected 'o', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
+
+				// consume value chars
+				char chars[41]; //41 == strlen("7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7")
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					if (*cp == U'_')
+					{
+						if (!prev || !is_octal_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing octal integer; underscores may only follow digits"sv);
+					}
+					else
+					{
+						if (!is_octal_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, cp->as_view<char>(), '\'');
+						TOML_ASSERT(cp->byte_count == 1_sz);
+						if (length == sizeof(chars))
+							throw_parse_error("Octal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						chars[length++] = static_cast<char>(cp->bytes[0]);
+					}
+					prev = cp;
+					advance();
+				}
+
+				// convert to int
+				int64_t result;
+				auto parse_result = std::from_chars(chars, chars + length, result, 8);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result;
+
+					case std::errc::invalid_argument:
+						throw_parse_error("Error parsing octal integer; the character sequence could not be interpreted as a octal integer value"sv);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error("Error parsing octal integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+
+					default: //??
+						throw_parse_error("Error parsing octal integer; an unspecified error occurred while trying to interpret the character sequence as a octal integer value"sv);
+				}
+				TOML_UNREACHABLE;
+			}
+
+			[[nodiscard]]
+			int64_t parse_decimal_integer()
+			{
+				TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
+				const auto eof_check = [this]()
+				{
+					if (!cp)
+						throw_parse_error("Encountered EOF while parsing integer"sv);
+				};
+
+				// sign
+				const int64_t sign = *cp == U'-' ? -1ll : 1ll;
+				if (*cp == U'+' || *cp == U'-')
+				{
+					advance();
+					eof_check();
+				}
+
+				// consume value chars
+				char chars[37]; //37 == strlen("9_2_2_3_3_7_2_0_3_6_8_5_4_7_7_5_8_0_7")
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					if (*cp == U'_')
+					{
+						if (!prev || !is_decimal_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing integer; underscores may only follow digits"sv);
+					}
+					else
+					{
+						if (!is_decimal_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, cp->as_view<char>(), '\'');
+						TOML_ASSERT(cp->byte_count == 1_sz);
+						if (length == sizeof(chars))
+							throw_parse_error("Integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						chars[length++] = static_cast<char>(cp->bytes[0]);
+					}
+					prev = cp;
+					advance();
+				}
+				TOML_ASSERT(length);
+
+				// check for leading zeroes etc
+				if (chars[0] == '0')
+					throw_parse_error("Encountered unexpected character while parsing integer; leading zeroes are not allowed"sv);
+
+				// convert to int
+				uint64_t result;
+				auto parse_result = std::from_chars(chars, chars + length, result);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				else if ((sign < 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1ull)
+					|| (sign > 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())))
+					parse_result.ec = std::errc::result_out_of_range;
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result * sign;
+
+					case std::errc::invalid_argument:
+						throw_parse_error("Error parsing integer; the character sequence could not be interpreted as an integer value"sv);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error("Error parsing integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+
+					default: //??
+						throw_parse_error("Error parsing integer; an unspecified error occurred while trying to interpret the character sequence as an integer value"sv);
+				}
+				TOML_UNREACHABLE;
 			}
 
 			[[nodiscard]]
@@ -607,10 +872,83 @@ namespace TOML_NAMESPACE::impl
 						throw_parse_error("Encountered EOF while parsing hexadecimal integer"sv);
 				};
 
-				TOML_NOT_IMPLEMENTED_YET;
+				// '0'
+				if (*cp != U'0')
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
 
-				return {};
+				// 'x' pr 'X'
+				if (*cp != U'x' && *cp != U'X')
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected 'x' or 'X', saw '"sv, cp->as_view<char>(), '\'');
+				advance();
+				eof_check();
+
+				// consume value chars
+				char chars[31]; //31 == strlen("0_0_1_1_2_2_3_3_A_A_B_B_C_C_D_D")
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					if (*cp == U'_')
+					{
+						if (!prev || !is_hex_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; underscores may only follow digits");
+					}
+					else
+					{
+						if (!is_hex_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, cp->as_view<char>(), '\'');
+						TOML_ASSERT(cp->byte_count == 1_sz);
+						if (length == sizeof(chars))
+							throw_parse_error("Hexadecimal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						chars[length++] = static_cast<char>(cp->bytes[0]);
+					}
+					prev = cp;
+					advance();
+				}
+
+				// convert to int
+				int64_t result;
+				auto parse_result = std::from_chars(chars, chars + length, result, 16);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result;
+
+					case std::errc::invalid_argument:
+						throw_parse_error(
+							"Error parsing hexadecimal integer; the character sequence '"sv,
+							std::string_view{ chars, length },
+							"' could not be interpreted as a hexadecimal integer value"
+						);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error(
+							"Error parsing hexadecimal integer; the character sequence '"sv,
+							std::string_view{ chars, length },
+							"' contained a value not representable by a signed 64-bit integer"
+						);
+
+					default: //??
+						throw_parse_error(
+							"Error parsing hexadecimal integer; an unspecified error occurred while trying to interpret the character sequence '"sv,
+							std::string_view{ chars, length },
+							"' as a hexadecimal integer value"
+						);
+				}
+				TOML_UNREACHABLE;
 			}
+
+			#pragma warning(pop) //disabled C4063: case '0' is not a valid value for switch of enum 'std::errc'
 
 			[[nodiscard]]
 			date parse_date(bool time_may_follow = false)
@@ -730,15 +1068,26 @@ namespace TOML_NAMESPACE::impl
 					static_cast<uint8_t>(minute),
 				};
 
-				//early exit here if seconds are omitted
-				//(extension as per https://github.com/toml-lang/toml/issues/671)
-				if (cp && !is_value_terminator(*cp) && *cp != U':' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
+				if constexpr (TOML_STRICT)
+				{
+					// ':'
+					eof_check();
+					if (*cp != U':')
+						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+					advance();
+				}
+				else
+				{
+					//early exit here if seconds are omitted
+					//(extension as per https://github.com/toml-lang/toml/issues/671)
+					if (cp && !is_value_terminator(*cp) && *cp != U':' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
 					throw_parse_error("Encountered unexpected character while parsing time; expected ':'"sv, (offset_may_follow ? ", offset"sv : ""sv), " or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
-				if (!cp || *cp != U':')
+					if (!cp || *cp != U':')
 					return time;
 
-				// ':'
-				advance();
+					// ':'
+					advance();
+				}
 
 				// "SS"
 				if (!consume_digit_sequence(digits))
@@ -898,7 +1247,14 @@ namespace TOML_NAMESPACE::impl
 
 					// arrays
 					else if (*cp == U'[')
+					{
 						val = parse_array();
+						if constexpr (TOML_STRICT)
+						{
+							if (!reinterpret_cast<array*>(val.get())->is_homogeneous())
+								throw parse_error{ "Arrays cannot contain values of different types"s, val->region() };
+						}
+					}
 
 					// inline tables
 					else if (*cp == U'{')
@@ -936,6 +1292,7 @@ namespace TOML_NAMESPACE::impl
 						if (is_decimal_digit(chars[0]))
 						{
 							val = std::make_unique<value<int64_t>>(static_cast<int64_t>(chars[0] - U'0'));
+							advance(); //skip the digit
 							break;
 						}
 
@@ -951,10 +1308,17 @@ namespace TOML_NAMESPACE::impl
 					const auto begins_with_digit = is_decimal_digit(chars[0]);
 					if (begins_with_sign)
 					{
-						if (chars[1] == U'i' || chars[1] == U'n')
+						if (char_count == 2_sz && is_decimal_digit(chars[1]))
+						{
+							val = std::make_unique<value<int64_t>>(static_cast<int64_t>(chars[1] - U'0')* (chars[1] == U'-' ? -1LL : 1LL));
+							advance(); //skip the sign
+							advance(); //skip the digit
+						}
+
+						else if (chars[1] == U'i' || chars[1] == U'n')
 							val = std::make_unique<value<double>>(parse_inf_or_nan());
 						else if (is_decimal_digit(chars[1]) && (chars[2] == U'.' || chars[2] == U'e' || chars[2] == U'E'))
-							val = std::make_unique<value<double>>(parse_float()); break;
+							val = std::make_unique<value<double>>(parse_float());
 					}
 
 					// numbers that begin with 0
@@ -967,13 +1331,23 @@ namespace TOML_NAMESPACE::impl
 							case U'.': val = std::make_unique<value<double>>(parse_float()); break;
 							case U'b': val = std::make_unique<value<int64_t>>(parse_binary_integer()); break;
 							case U'o': val = std::make_unique<value<int64_t>>(parse_octal_integer()); break;
+							case U'X': [[fallthrough]];
 							case U'x':
 							{
-								for (size_t i = char_count; i --> 2_sz && !val;)
+								#if !TOML_STRICT
+								for (size_t i = char_count; i-- > 2_sz;)
+								{
 									if (chars[i] == U'p' || chars[i] == U'P')
+									{
 										val = std::make_unique<value<double>>(parse_hex_float());
-								if (!val)
-									val = std::make_unique<value<int64_t>>(parse_hex_integer());
+										break;
+									}
+								}
+								if (val)
+									break;
+								#endif //!TOML_STRICT
+
+								val = std::make_unique<value<int64_t>>(parse_hex_integer());
 								break;
 							}
 						}
@@ -1449,7 +1823,10 @@ namespace TOML_NAMESPACE::impl
 
 			// closing ']'
 			else if (*cp == U']')
+			{
+				advance();
 				break;
+			}
 
 			// must be a value
 			else
@@ -1495,9 +1872,12 @@ namespace TOML_NAMESPACE::impl
 				throw_parse_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw ','"sv);
 			}
 
-			// closing ']'
+			// closing '}'
 			else if (*cp == U'}')
+			{
+				advance();
 				break;
+			}
 
 			// must be a key_value-pair
 			else

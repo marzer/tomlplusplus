@@ -14,5 +14,6 @@
   <ItemGroup>
     <None Include="..\.editorconfig" />
     <None Include="generate_is_unicode_letter.py" />
+    <None Include="..\README.md" />
   </ItemGroup>
 </Project>

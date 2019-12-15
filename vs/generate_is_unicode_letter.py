@@ -25,12 +25,21 @@ def make_literal(codepoint):
 
 def calculate_subdivisions(span_size):
 
-	# start by trying to find a divisor that will yield a power-of-2 size
+	# if it's a relatively small span, divide it such the effective size of each subchunk
+	# would be less than or equal to 64 (so we'll generate bitmask ops)
+	if (64 < span_size <= 4096):
+		subdiv_count = int(math.ceil(span_size / 64))
+		return subdiv_count
+
+	if (4096 < span_size <= 262144):
+		subdiv_count = int(math.ceil(span_size / 4096))
+		return subdiv_count
+
+	# try to find a divisor that will yield a power-of-2 size
 	subdiv_count = 2
 	subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
 	while (subdiv_count <= 64):
 		if (subdiv_size > 0 and subdiv_size < span_size and (subdiv_size & (subdiv_size-1) == 0)):
-			print("pow2")
 			return subdiv_count
 		subdiv_count += 1
 		subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
@@ -53,37 +62,37 @@ class Chunk:
 	def __init__(self, first, last):
 		self.first = int(first)
 		self.last = int(last)
-		self.span_size = self.last - self.first + 1
+		self.span_size = (self.last - self.first) + 1
 		self.count = 0
 		self.ranges = []
 		self.subchunks = None
 		self.subchunk_count = 0
 		self.subchunk_size = 0
+		self.low_range_mask = 0 # first 64 only
 
 	def add(self, first, last = None):
+		f = int(first)
+		num_added = 0
 		if (last is None or first == last):
-			self.ranges.append(int(first))
-			self.count += 1
+			self.ranges.append(f)
+			num_added = 1
 		else:
-			self.ranges.append((int(first), int(last)))
-			self.count += (self.ranges[-1][1] - self.ranges[-1][0] + 1)
-
-	def bounded(self):
-		if self.count == self.span_size:
-			return True;
-		elif self.count == 0:
-			return False;
-		elif self.subchunks is not None:
-			return self.subchunks[0].bounded() and (True if len(self.subchunks) == 1 else self.subchunks[-1].bounded())
-		else:
-			return ((self.ranges[0] if isinstance(self.ranges[0], int) else self.ranges[0][0]) == self.first
-					and (self.ranges[-1] if isinstance(self.ranges[-1], int) else self.ranges[-1][1]) == self.last)
+			l = int(last)
+			self.ranges.append((f, l))
+			num_added = (l - f) + 1
+		self.count += num_added
+		first_offset = f - self.first
+		while (0 <= first_offset <= 63 and num_added > 0):
+			self.low_range_mask |= (1 << first_offset)
+			first_offset += 1
+			num_added -= 1
 
 	def subdivide(self):
 		if (self.subchunks is not None
 			or self.count == self.span_size
 			or self.count == 0
-			or len(self.ranges) <= 4):
+			or len(self.ranges) <= 3
+			):
 			return
 		subchunk_count = calculate_subdivisions(self.span_size)
 		if (subchunk_count <= 1):
@@ -115,7 +124,7 @@ class Chunk:
 						max(r[0], self.subchunks[subchunk][1].first),
 						min(r[1], self.subchunks[subchunk][1].last),
 					)
-		self.ranges = None
+		#self.ranges = None
 		for subchunk in self.subchunks:
 			subchunk[1].subdivide()
 
@@ -124,10 +133,10 @@ class Chunk:
 		if (subchunk.count == subchunk.span_size):
 			subchunk.print(output_file, level + 1)
 		else:
-			if (subchunk.subchunks is not None):
+			if (subchunk.subchunks is not None and subchunk.span_size > 64):
 				print("\n{}\t{{".format(indent), file=output_file)
 			subchunk.print(output_file, level + 1)
-			if (subchunk.subchunks is not None):
+			if (subchunk.subchunks is not None and subchunk.span_size > 64):
 				print("{}\t}}".format(indent), file=output_file)
 
 	def print(self, output_file, level = 0):
@@ -141,6 +150,18 @@ class Chunk:
 		elif (self.count == 0):
 			print("return false;", file=output_file)
 			
+		# return cp == A
+		elif (self.count == 1):
+			print('return codepoint == {};'.format(make_literal(self.ranges[0])), file=output_file)
+
+		# return cp & 0b000000000 (32-bit)
+		elif (self.span_size <= 32):
+			print('return (1u << (static_cast<uint32_t>(codepoint) - 0x{:X}u)) & 0b{:032b}u;'.format(self.first, self.low_range_mask), file=output_file)
+
+		# return cp & 0b000000000 (64-bit)
+		elif (self.span_size <= 64):
+			print('return (1ull << (static_cast<uint64_t>(codepoint) - 0x{:X}ull)) & 0b{:064b}ull;'.format(self.first, self.low_range_mask), file=output_file)
+
 		# switch (cp)
 		elif (self.subchunks is not None):
 			print("{}TOML_ASSUME(codepoint >= {});".format(indent, make_literal(self.first)), file=output_file)
