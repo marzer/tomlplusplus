@@ -458,7 +458,7 @@ namespace TOML_NAMESPACE::impl
 			[[nodiscard]]
 			string parse_bare_key_segment()
 			{
-				TOML_ASSERT(cp && is_bare_key_character(*cp));
+				TOML_ASSERT(cp && is_bare_key_start_character(*cp));
 
 				string segment;
 
@@ -1476,7 +1476,7 @@ namespace TOML_NAMESPACE::impl
 			[[nodiscard]]
 			key parse_key()
 			{
-				TOML_ASSERT(cp && (is_bare_key_character(*cp) || is_string_delimiter(*cp)));
+				TOML_ASSERT(cp && (is_bare_key_start_character(*cp) || is_string_delimiter(*cp)));
 
 				key key;
 
@@ -1486,7 +1486,11 @@ namespace TOML_NAMESPACE::impl
 						throw_parse_error("Encountered EOF while parsing key"sv);
 
 					// bare_key_segment
-					if (is_bare_key_character(*cp))
+					#if !TOML_STRICT
+					if (is_unicode_combining_mark(*cp))
+						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, cp->as_view<char>(), '\'');
+					#endif
+					if (is_bare_key_start_character(*cp))
 						key.segments.push_back(parse_bare_key_segment());
 
 					// "quoted key segment"
@@ -1495,7 +1499,7 @@ namespace TOML_NAMESPACE::impl
 
 					// ???
 					else
-						throw_parse_error("Encountered unexpected character while parsing key; expected bare key character or string delimiter, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw '"sv, cp->as_view<char>(), '\'');
 						
 					consume_leading_whitespace();
 
@@ -1528,7 +1532,7 @@ namespace TOML_NAMESPACE::impl
 				};
 
 				// get the key
-				TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_character(cp->value)));
+				TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_start_character(cp->value)));
 				auto key = parse_key();
 
 				// skip past any whitespace that followed the key
@@ -1739,10 +1743,15 @@ namespace TOML_NAMESPACE::impl
 						current_table = parse_table_header();
 					}
 
+
 					// bare_keys
 					// dotted.keys
 					// "quoted keys"
-					else if (is_bare_key_character(cp->value) || is_string_delimiter(cp->value))
+					#if !TOML_STRICT
+					else if (is_unicode_combining_mark(*cp))
+						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, cp->as_view<char>(), '\'');
+					#endif
+					else if (is_bare_key_start_character(cp->value) || is_string_delimiter(cp->value))
 					{
 						auto kvp = parse_key_value_pair();
 

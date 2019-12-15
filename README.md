@@ -1,10 +1,13 @@
 # toml++ (tomlplusplus)
 Header-only TOML parsing lib for C++17 and later.
 
-## Goals & Non-Goals
+## Configuration and Usage
 TBA.
 
 ## Contributing
+TBA.
+
+#### Goals & Non-Goals
 TBA.
 
 ## TOML Support
@@ -20,9 +23,8 @@ of 'unreleased' features from the [TOML master](https://github.com/toml-lang/tom
 - [#665](https://github.com/toml-lang/toml/issues/665): Make arrays heterogeneous
 - [#671](https://github.com/toml-lang/toml/issues/671): Local time of day format should support `09:30` as opposed to `09:30:00`
 - [#687](https://github.com/toml-lang/toml/issues/687): Relax bare key restrictions to allow additional unicode characters
+_These can be disabled by specifying `TOML_STRICT = 1` (see Configuration and Usage)_
 
 ### **🔹[0.5.0](https://github.com/toml-lang/toml/releases/tag/v0.5.0) and earlier:**
 - All features as of _&lt;`toml++` release date&gt;_
 
-## Usage/API
-TBA.

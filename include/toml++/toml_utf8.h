@@ -53,16 +53,6 @@ namespace TOML_NAMESPACE::impl
 			|| (codepoint >= U'A' && codepoint <= U'Z');
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
-	constexpr bool is_letter(char32_t codepoint) noexcept
-	{
-		#if TOML_STRICT
-		return is_ascii_letter(codepoint);
-		#else
-		return is_ascii_letter(codepoint) || is_unicode_letter(codepoint);
-		#endif
-	}
-
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
@@ -97,13 +87,27 @@ namespace TOML_NAMESPACE::impl
 		return 10u + static_cast<uint32_t>(codepoint - ((codepoint >= U'a' && codepoint <= U'f') ? U'a' : U'A'));
 	}
 
-	[[nodiscard]]
-	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
+	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
+	constexpr bool is_bare_key_start_character(char32_t codepoint) noexcept
 	{
-		return is_decimal_digit(codepoint)
+		return is_ascii_letter(codepoint)
+			|| is_decimal_digit(codepoint)
 			|| codepoint == U'-'
 			|| codepoint == U'_'
-			|| is_letter(codepoint)
+			#if !TOML_STRICT
+			|| is_unicode_letter(codepoint)
+			|| is_unicode_number(codepoint)
+			#endif
+		;
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
+	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
+	{
+		return is_bare_key_start_character(codepoint)
+			#if !TOML_STRICT
+			|| is_unicode_combining_mark(codepoint)
+			#endif
 		;
 	}
 
