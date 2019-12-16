@@ -17,30 +17,43 @@ namespace TOML_NAMESPACE::impl
 
 			template <typename... T>
 			[[noreturn]]
-			void throw_parse_error(T &&... message) const
+			void throw_parse_error(T &&... args) const
 			{
 				const auto& pos = cp ? cp->position : prev_pos;
 				if constexpr (sizeof...(T) == 0_sz)
 					throw parse_error{ "An unspecified error occurred"s, pos, reader.source_path() };
-				else if constexpr (sizeof...(T) == 1_sz)
-				{
-					using arg_type = remove_cvref_t<T&&...>;
-					if constexpr (std::is_same_v<arg_type, std::string>)
-						throw parse_error{ std::forward<T>(message)..., pos, reader.source_path() };
-					else if constexpr (std::is_convertible_v<arg_type, std::string>)
-						throw parse_error{ std::string{ std::forward<T>(message)... }, pos, reader.source_path() };
-					else
-					{
-						std::stringstream ss;
-						(ss << ... << std::forward<T>(message));
-						throw parse_error{ ss.str(), pos, reader.source_path() };
-					}
-				}
 				else
 				{
-					std::stringstream ss;
-					(ss << ... << std::forward<T>(message));
-					throw parse_error{ ss.str(), pos, reader.source_path() };
+					std::string str;
+					static constexpr auto concatenator = [&](std::string& s, auto&& arg) noexcept //a.k.a. "no stringstreams, thanks"
+					{
+						using arg_t = remove_cvref_t<decltype(arg)>;
+						if constexpr (std::is_same_v<arg_t, std::string_view> || std::is_same_v<arg_t, std::string>)
+						{
+							s.append(std::forward<decltype(arg)>(arg));
+						}
+						else if constexpr (std::is_same_v<arg_t, char>)
+						{
+							s += arg;
+						}
+						else if constexpr (std::is_same_v<arg_t, bool>)
+						{
+							s.append(arg ? "true"sv : "false"sv);
+						}
+						else if constexpr (std::is_arithmetic_v<arg_t>)
+						{
+							char buf[64];
+							std::to_chars_result result;
+							if constexpr (std::is_floating_point_v<arg_t>)
+								result = std::to_chars(buf, buf + sizeof(buf), arg, std::chars_format::general);
+							else if constexpr (std::is_integral_v<arg_t>)
+								result = std::to_chars(buf, buf + sizeof(buf), arg); {
+							}
+							s.append(std::string_view{ buf, static_cast<size_t>(result.ptr - buf) });
+						}
+					};
+					(concatenator(str, std::forward<T>(args)), ...);
+					throw parse_error{ str, pos, reader.source_path() };
 				}
 			}
 
@@ -670,7 +683,7 @@ namespace TOML_NAMESPACE::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_binary_digit(*prev))
-							throw_parse_error("Encountered unexpected character while parsing binary integer; underscores may only follow digits");
+							throw_parse_error("Encountered unexpected character while parsing binary integer; underscores may only follow digits"sv);
 					}
 					else
 					{

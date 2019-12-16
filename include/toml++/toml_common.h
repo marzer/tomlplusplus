@@ -231,11 +231,6 @@ TOML_DISABLE_WARNINGS
 #include <stdexcept>
 #include <charconv>
 #include <iosfwd>
-#include <sstream>
-//#include <array>
-//#include <algorithm>
-//#include <set>
-//#include <filesystem>
 
 TOML_RESTORE_WARNINGS
 
