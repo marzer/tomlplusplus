@@ -21,39 +21,43 @@ namespace TOML_NAMESPACE::impl
 			{
 				const auto& pos = cp ? cp->position : prev_pos;
 				if constexpr (sizeof...(T) == 0_sz)
-					throw parse_error{ "An unspecified error occurred"s, pos, reader.source_path() };
+					throw parse_error{ "An unspecified error occurred", pos, reader.source_path() };
 				else
 				{
-					std::string str;
-					static constexpr auto concatenator = [&](std::string& s, auto&& arg) noexcept //a.k.a. "no stringstreams, thanks"
+					static constexpr auto buf_size = 512_sz;
+					char buf[buf_size];
+					auto ptr = buf;
+					const auto concatenator = [&](auto&& arg) noexcept //a.k.a. "no stringstreams, thanks"
 					{
 						using arg_t = remove_cvref_t<decltype(arg)>;
 						if constexpr (std::is_same_v<arg_t, std::string_view> || std::is_same_v<arg_t, std::string>)
 						{
-							s.append(std::forward<decltype(arg)>(arg));
+							memcpy(ptr, arg.data(), arg.length());
+							ptr += arg.length();
 						}
 						else if constexpr (std::is_same_v<arg_t, char>)
 						{
-							s += arg;
+							*ptr++ = arg;
 						}
 						else if constexpr (std::is_same_v<arg_t, bool>)
 						{
-							s.append(arg ? "true"sv : "false"sv);
+							const auto boolval = arg ? "true"sv : "false"sv;
+							memcpy(ptr, boolval.data(), boolval.length());
+							ptr += boolval.length();
 						}
 						else if constexpr (std::is_arithmetic_v<arg_t>)
 						{
-							char buf[64];
 							std::to_chars_result result;
 							if constexpr (std::is_floating_point_v<arg_t>)
-								result = std::to_chars(buf, buf + sizeof(buf), arg, std::chars_format::general);
+								result = std::to_chars(ptr, buf + buf_size, arg, std::chars_format::general);
 							else if constexpr (std::is_integral_v<arg_t>)
-								result = std::to_chars(buf, buf + sizeof(buf), arg); {
-							}
-							s.append(std::string_view{ buf, static_cast<size_t>(result.ptr - buf) });
+								result = std::to_chars(ptr, buf + buf_size, arg);
+							ptr = result.ptr;
 						}
 					};
-					(concatenator(str, std::forward<T>(args)), ...);
-					throw parse_error{ str, pos, reader.source_path() };
+					(concatenator(std::forward<T>(args)), ...);
+					*ptr = '\0';
+					throw parse_error{ buf, pos, reader.source_path() };
 				}
 			}
 
@@ -1265,7 +1269,7 @@ namespace TOML_NAMESPACE::impl
 						if constexpr (TOML_STRICT)
 						{
 							if (!reinterpret_cast<array*>(val.get())->is_homogeneous())
-								throw parse_error{ "Arrays cannot contain values of different types"s, val->region() };
+								throw parse_error{ "Arrays cannot contain values of different types", val->region() };
 						}
 					}
 

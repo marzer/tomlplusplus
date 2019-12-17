@@ -408,22 +408,22 @@ namespace TOML_NAMESPACE
 			document_region region;
 
 		public:
-			parse_error(const std::string& description, document_region&& region_) noexcept
+			parse_error(const char* description, document_region&& region_) noexcept
 				: std::runtime_error{ description },
 				region{ std::move(region_) }
 			{}
 
-			parse_error(const std::string& description, const document_region& region_) noexcept
+			parse_error(const char* description, const document_region& region_) noexcept
 				: std::runtime_error{ description },
 				region{ region_ }
 			{}
 
-			parse_error(const std::string& description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+			parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
 				: std::runtime_error{ description },
 				region{ position, position, source_path }
 			{}
 
-			parse_error(const std::string& description, const document_position& position) noexcept
+			parse_error(const char* description, const document_position& position) noexcept
 				: std::runtime_error{ description },
 				region{ position, position }
 			{}

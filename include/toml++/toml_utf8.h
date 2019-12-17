@@ -349,9 +349,9 @@ namespace TOML_NAMESPACE::impl
 				if (stream.eof())
 					return nullptr;
 				if (stream.error())
-					throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
+					throw parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
 				if (decoder.error())
-					throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
+					throw parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
 
 				while (true)
 				{
@@ -372,15 +372,15 @@ namespace TOML_NAMESPACE::impl
 						}
 						catch (...)
 						{
-							throw parse_error{ "An unspecified error occurred"s, prev.position, source_path_ };
+							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
 						}
 					}
 					if (stream.error())
-						throw parse_error{ "The underlying stream entered an error state"s, prev.position, source_path_ };
+						throw parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
 
 					decoder(nextByte);
 					if (decoder.error())
-						throw parse_error{ "Encountered invalid utf-8 sequence"s, prev.position, source_path_ };
+						throw parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
 
 					current.bytes[current.byte_count++] = nextByte;
 					if (decoder.has_code_point())
@@ -398,13 +398,11 @@ namespace TOML_NAMESPACE::impl
 						else
 							current.position.column++;
 
-						#undef TOML_NEW_LINE_TEST
-
 						return &prev;
 					}
 
 					if (stream.eof())
-						throw parse_error{ "Encountered EOF during incomplete utf-8 code point sequence"s, prev.position, source_path_ };
+						throw parse_error{ "Encountered EOF during incomplete utf-8 code point sequence", prev.position, source_path_ };
 				}
 			}
 	};
