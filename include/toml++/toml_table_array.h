@@ -46,7 +46,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] const table* as_table() const noexcept override { return nullptr; }
 			[[nodiscard]] const table_array* as_table_array() const noexcept override { return this; }
 
-			[[nodiscard]] int type_id() const noexcept override { return 2; }
+			[[nodiscard]] node_type type() const noexcept override { return node_type::table_array; }
 
 			TOML_NODISCARD_CTOR
 			table_array() noexcept = default;

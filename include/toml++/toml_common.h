@@ -348,6 +348,20 @@ namespace TOML_NAMESPACE
 		std::shared_ptr<const string> source_path;
 	};
 
+	enum class node_type : uint8_t
+	{
+		array,
+		table,
+		table_array,
+		string,
+		integer,
+		floating_point,
+		boolean,
+		date,
+		time,
+		datetime
+	};
+
 	class TOML_INTERFACE node
 	{
 		private:
@@ -390,7 +404,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] virtual const table* as_table() const noexcept = 0;
 			[[nodiscard]] virtual const table_array* as_table_array() const noexcept = 0;
 
-			[[nodiscard]] virtual int type_id() const noexcept = 0;
+			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
 			[[nodiscard]]
 			const document_region& region() const noexcept

@@ -1,11 +1,6 @@
 #pragma once
 
-//* note that we don't actually need to explicitly include all the internal headers here;
-//* it's done for tooling purposes, since this file is used as the input to a script
-//* that generates the single-header version of toml++.
-
 #include "toml_common.h"
-#include "toml_utf8.h"
 #include "toml_value.h"
 #include "toml_array.h"
 #include "toml_table.h"

@@ -72,15 +72,15 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] const table* as_table() const noexcept override { return nullptr; }
 			[[nodiscard]] const table_array* as_table_array() const noexcept override { return nullptr; }
 
-			[[nodiscard]] int type_id() const noexcept override
+			[[nodiscard]] node_type type() const noexcept override
 			{
-					 if constexpr (std::is_same_v<T, string>) return 3;
-				else if constexpr (std::is_same_v<T, int64_t>) return 4;
-				else if constexpr (std::is_same_v<T, double>) return 5;
-				else if constexpr (std::is_same_v<T, bool>) return 6;
-				else if constexpr (std::is_same_v<T, date>) return 7;
-				else if constexpr (std::is_same_v<T, time>) return 8;
-				else if constexpr (std::is_same_v<T, datetime>) return 9;
+					 if constexpr (std::is_same_v<T, string>) return node_type::string;
+				else if constexpr (std::is_same_v<T, int64_t>) return node_type::integer;
+				else if constexpr (std::is_same_v<T, double>) return node_type::floating_point;
+				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
+				else if constexpr (std::is_same_v<T, date>) return node_type::date;
+				else if constexpr (std::is_same_v<T, time>) return node_type::time;
+				else if constexpr (std::is_same_v<T, datetime>) return node_type::datetime;
 			}
 
 			template <typename... U>

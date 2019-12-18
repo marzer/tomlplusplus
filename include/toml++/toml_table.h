@@ -55,7 +55,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] const table* as_table() const noexcept override { return this; }
 			[[nodiscard]] const table_array* as_table_array() const noexcept override { return nullptr; }
 
-			[[nodiscard]] int type_id() const noexcept override { return 1; }
+			[[nodiscard]] node_type type() const noexcept override { return node_type::table; }
 
 			[[nodiscard]] bool is_inline() const noexcept { return inline_; }
 

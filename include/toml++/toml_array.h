@@ -46,7 +46,7 @@ namespace TOML_NAMESPACE
 			[[nodiscard]] const table* as_table() const noexcept override { return nullptr; }
 			[[nodiscard]] const table_array* as_table_array() const noexcept override { return nullptr; }
 
-			[[nodiscard]] int type_id() const noexcept override { return 0; }
+			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
 
 			[[nodiscard]]
 			bool is_homogeneous() const noexcept
@@ -56,9 +56,9 @@ namespace TOML_NAMESPACE
 				if (values.size() <= 1_sz)
 					return true;
 
-				const auto id = values[0]->type_id();
+				const auto id = values[0]->type();
 				for (size_t i = 1; i < values.size(); i++)
-					if (values[i]->type_id() != id)
+					if (values[i]->type() != id)
 						return false;
 				return true;
 			}
