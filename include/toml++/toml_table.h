@@ -61,12 +61,5 @@ namespace TOML_NAMESPACE
 
 			TOML_NODISCARD_CTOR
 			table() noexcept {}
-
-			//std::shared_ptr<node> operator[] (string_view key) const noexcept
-			//{
-			//	if (auto it = values.find(key); it != values.end())
-			//		return it->second;
-			//	return {};
-			//}
 	};
 }

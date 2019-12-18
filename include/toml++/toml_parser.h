@@ -14,6 +14,7 @@ namespace TOML_NAMESPACE::impl
 			document_position prev_pos = { 1_sz, 1_sz };
 			const utf8_codepoint* cp = {};
 			std::vector<table*> implicit_tables;
+			std::vector<table*> dotted_key_tables;
 
 			template <typename... T>
 			[[noreturn]]
@@ -35,6 +36,11 @@ namespace TOML_NAMESPACE::impl
 							memcpy(ptr, arg.data(), arg.length());
 							ptr += arg.length();
 						}
+						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
+						{
+							memcpy(ptr, arg.bytes, arg.byte_count);
+							ptr += arg.byte_count;
+						}
 						else if constexpr (std::is_same_v<arg_t, char>)
 						{
 							*ptr++ = arg;
@@ -44,6 +50,26 @@ namespace TOML_NAMESPACE::impl
 							const auto boolval = arg ? "true"sv : "false"sv;
 							memcpy(ptr, boolval.data(), boolval.length());
 							ptr += boolval.length();
+						}
+						else if constexpr (std::is_same_v<arg_t, node_type>)
+						{
+							std::string_view type;
+							switch (arg)
+							{
+								case node_type::array: type = "array"sv; break;
+								case node_type::table: type = "table"sv; break;
+								case node_type::table_array: type = "table array"sv; break;
+								case node_type::string: type = "string"sv; break;
+								case node_type::integer: type = "integer"sv; break;
+								case node_type::floating_point: type = "floating-point"sv; break;
+								case node_type::boolean: type = "boolean"sv; break;
+								case node_type::date: type = "date"sv; break;
+								case node_type::time: type = "time"sv; break;
+								case node_type::datetime: type = "date-time"sv; break;
+								TOML_NO_DEFAULT_CASE;
+							}
+							memcpy(ptr, type.data(), type.length());
+							ptr += type.length();
 						}
 						else if constexpr (std::is_arithmetic_v<arg_t>)
 						{
@@ -232,7 +258,10 @@ namespace TOML_NAMESPACE::impl
 								{
 									eof_check();
 									if (!is_hex_digit(*cp))
-										throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; expected hex digit, saw '\\"sv, cp->as_view<char>(), "'"sv);
+										throw_parse_error(
+											"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+											" string; expected hex digit, saw '\\"sv, *cp, "'"sv
+										);
 									sequence_value += place_value * hex_digit_to_int(*cp);
 									place_value /= 16u;
 									advance();
@@ -267,7 +296,10 @@ namespace TOML_NAMESPACE::impl
 
 							// ???
 							default:
-								throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; unknown escape sequence '\\"sv, cp->as_view<char>(), "'"sv);
+								throw_parse_error(
+									"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+									" string; unknown escape sequence '\\"sv, *cp, "'"sv
+								);
 						}
 
 							
@@ -332,7 +364,10 @@ namespace TOML_NAMESPACE::impl
 						if ((*cp >= U'\u0000' && *cp <= U'\u0008')
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 							|| *cp == U'\u007F')
-							throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string; control characters must be escaped with back-slashes."sv);
+							throw_parse_error(
+								"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+								" string; control characters must be escaped with back-slashes."sv
+							);
 
 						if constexpr (MULTI_LINE)
 						{
@@ -418,7 +453,10 @@ namespace TOML_NAMESPACE::impl
 					if ((*cp >= U'\u0000' && *cp <= U'\u0008')
 						|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 						|| *cp == U'\u007F')
-						throw_parse_error("Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string; control characters may not appear in literal strings"sv);
+						throw_parse_error(
+							"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+							" literal string; control characters may not appear in literal strings"sv
+						);
 
 					str.append(cp->as_view());
 					advance();
@@ -502,10 +540,10 @@ namespace TOML_NAMESPACE::impl
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing boolean"sv);
 					else
-						throw_parse_error("Encountered unexpected character while parsing boolean; expected 'true' or 'false', saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing boolean; expected 'true' or 'false', saw '"sv, *cp, '\'');
 				}
 				if (cp && !is_value_terminator(*cp))
-					throw_parse_error("Encountered unexpected character while parsing boolean; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing boolean; expected value-terminator, saw '"sv, *cp, '\'');
 
 				return result;
 			}
@@ -531,10 +569,10 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_expected_sequence(inf ? U"inf"sv : U"nan"sv))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing floating-point; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing floating-point; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, *cp, '\'');
 				}
 				if (cp && !is_value_terminator(*cp))
-					throw_parse_error("Encountered unexpected character while parsing floating-point; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing floating-point; expected value-terminator, saw '"sv, *cp, '\'');
 
 				return inf
 					? sign * std::numeric_limits<double>::infinity()
@@ -581,7 +619,7 @@ namespace TOML_NAMESPACE::impl
 					else
 					{
 						if ((!prev || *prev == U'_') && !is_decimal_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
 						if (*cp == U'.')
 						{
 							if (seen_decimal)
@@ -665,13 +703,13 @@ namespace TOML_NAMESPACE::impl
 
 				// '0'
 				if (*cp != U'0')
-					throw_parse_error("Encountered unexpected character while parsing binary integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing binary integer; expected '0', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
 				// 'b' or 'B'
 				if (*cp != U'b' && *cp != U'B')
-					throw_parse_error("Encountered unexpected character while parsing binary integer; expected 'b' or 'B', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing binary integer; expected 'b' or 'B', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
@@ -692,7 +730,7 @@ namespace TOML_NAMESPACE::impl
 					else
 					{
 						if (!is_binary_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, *cp, '\'');
 						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Binary integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
@@ -739,13 +777,13 @@ namespace TOML_NAMESPACE::impl
 
 				// '0'
 				if (*cp != U'0')
-					throw_parse_error("Encountered unexpected character while parsing octal integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing octal integer; expected '0', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
 				// 'o'
 				if (*cp != U'o')
-					throw_parse_error("Encountered unexpected character while parsing octal integer; expected 'o', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing octal integer; expected 'o', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
@@ -766,7 +804,7 @@ namespace TOML_NAMESPACE::impl
 					else
 					{
 						if (!is_octal_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, *cp, '\'');
 						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Octal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
@@ -836,7 +874,7 @@ namespace TOML_NAMESPACE::impl
 					else
 					{
 						if (!is_decimal_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, *cp, '\'');
 						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
@@ -891,13 +929,13 @@ namespace TOML_NAMESPACE::impl
 
 				// '0'
 				if (*cp != U'0')
-					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected '0', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected '0', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
 				// 'x' pr 'X'
 				if (*cp != U'x' && *cp != U'X')
-					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected 'x' or 'X', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected 'x' or 'X', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
@@ -918,7 +956,7 @@ namespace TOML_NAMESPACE::impl
 					else
 					{
 						if (!is_hex_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, *cp, '\'');
 						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Hexadecimal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
@@ -982,7 +1020,7 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_digit_sequence(year_digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing date; expected 4-digit year, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing date; expected 4-digit year, saw '"sv, *cp, '\'');
 				}
 				const auto year = year_digits[3]
 					+ year_digits[2] * 10u
@@ -993,7 +1031,7 @@ namespace TOML_NAMESPACE::impl
 				// '-'
 				eof_check();
 				if (*cp != U'-')
-					throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, *cp, '\'');
 				advance();
 
 				// "MM"
@@ -1001,7 +1039,7 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_digit_sequence(month_digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit month, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit month, saw '"sv, *cp, '\'');
 				}
 				const auto month = month_digits[1] + month_digits[0] * 10u;
 				if (month == 0u || month > 12u)
@@ -1015,7 +1053,7 @@ namespace TOML_NAMESPACE::impl
 				// '-'
 				eof_check();
 				if (*cp != U'-')
-					throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, *cp, '\'');
 				advance();
 
 				// "DD"
@@ -1023,7 +1061,7 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_digit_sequence(day_digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit day, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing date; expected 2-digit day, saw '"sv, *cp, '\'');
 				}
 				const auto day = day_digits[1] + day_digits[0] * 10u;
 				if (day == 0u || day > max_days_in_month)
@@ -1032,7 +1070,7 @@ namespace TOML_NAMESPACE::impl
 				if (!time_may_follow)
 				{
 					if (cp && !is_value_terminator(*cp))
-						throw_parse_error("Encountered unexpected character while parsing date; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing date; expected value-terminator, saw '"sv, *cp, '\'');
 				}
 
 				return
@@ -1058,7 +1096,7 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit hour, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit hour, saw '"sv, *cp, '\'');
 				}
 				const auto hour = digits[1] + digits[0] * 10u;
 				if (hour > 23u)
@@ -1067,14 +1105,14 @@ namespace TOML_NAMESPACE::impl
 				// ':'
 				eof_check();
 				if (*cp != U':')
-					throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\'');
 				advance();
 
 				// "MM"
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit minute, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit minute, saw '"sv, *cp, '\'');
 				}
 				const auto minute = digits[1] + digits[0] * 10u;
 				if (minute > 59u)
@@ -1090,7 +1128,7 @@ namespace TOML_NAMESPACE::impl
 					// ':'
 					eof_check();
 					if (*cp != U':')
-						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\'');
 					advance();
 				}
 				else
@@ -1098,7 +1136,10 @@ namespace TOML_NAMESPACE::impl
 					//early exit here if seconds are omitted
 					//(extension as per https://github.com/toml-lang/toml/issues/671)
 					if (cp && !is_value_terminator(*cp) && *cp != U':' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
-					throw_parse_error("Encountered unexpected character while parsing time; expected ':'"sv, (offset_may_follow ? ", offset"sv : ""sv), " or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error(
+							"Encountered unexpected character while parsing time; expected ':'"sv, (offset_may_follow ? ", offset"sv : ""sv),
+							" or value-terminator, saw '"sv, *cp, '\''
+						);
 					if (!cp || *cp != U':')
 					return time;
 
@@ -1110,7 +1151,7 @@ namespace TOML_NAMESPACE::impl
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit second, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing time; expected 2-digit second, saw '"sv, *cp, '\'');
 				}
 				const auto second = digits[1] + digits[0] * 10u;
 				if (second > 59u)
@@ -1119,7 +1160,10 @@ namespace TOML_NAMESPACE::impl
 
 				//early exit here if the fractional is omitted
 				if (cp && !is_value_terminator(*cp) && *cp != U'.' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
-					throw_parse_error("Encountered unexpected character while parsing time; expected fractional"sv, (offset_may_follow ? ", offset"sv : ""sv), " or value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error(
+						"Encountered unexpected character while parsing time; expected fractional"sv, (offset_may_follow ? ", offset"sv : ""sv),
+						" or value-terminator, saw '"sv, *cp, '\''
+					);
 				if (!cp || *cp != U'.')
 					return time;
 
@@ -1131,7 +1175,7 @@ namespace TOML_NAMESPACE::impl
 				uint32_t fractional_digits[24]; //surely that will be enough
 				auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 				if (!digit_count)
-					throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, *cp, '\'');
 				if (digit_count == 24_sz && cp && is_decimal_digit(*cp))
 					throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
 
@@ -1163,7 +1207,7 @@ namespace TOML_NAMESPACE::impl
 				// ' ' or 'T'
 				eof_check();
 				if (*cp != U' ' && *cp != U'T' && *cp != U't')
-					throw_parse_error("Encountered unexpected character while parsing datetime; expected space or 'T', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing datetime; expected space or 'T', saw '"sv, *cp, '\'');
 				advance();
 
 				// "HH:MM:SS.fractional"
@@ -1194,7 +1238,7 @@ namespace TOML_NAMESPACE::impl
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit hour, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit hour, saw '"sv, *cp, '\'');
 						}
 						const auto hour = digits[1] + digits[0] * 10u;
 						if (hour > 23u)
@@ -1203,14 +1247,14 @@ namespace TOML_NAMESPACE::impl
 						// ':'
 						eof_check();
 						if (*cp != U':')
-							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected ':', saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected ':', saw '"sv, *cp, '\'');
 						advance();
 
 						// "MM"
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit minute, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing datetime offset; expected 2-digit minute, saw '"sv, *cp, '\'');
 						}
 						const auto minute = digits[1] + digits[0] * 10u;
 						if (minute > 59u)
@@ -1225,7 +1269,7 @@ namespace TOML_NAMESPACE::impl
 
 					
 				if (cp && !is_value_terminator(*cp))
-					throw_parse_error("Encountered unexpected character while parsing datetime; expected value-terminator, saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing datetime; expected value-terminator, saw '"sv, *cp, '\'');
 
 				return {
 					date,
@@ -1505,7 +1549,9 @@ namespace TOML_NAMESPACE::impl
 					// bare_key_segment
 					#if !TOML_STRICT
 					if (is_unicode_combining_mark(*cp))
-						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error(
+							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
+						);
 					#endif
 					if (is_bare_key_start_character(*cp))
 						key.segments.push_back(parse_bare_key_segment());
@@ -1516,7 +1562,7 @@ namespace TOML_NAMESPACE::impl
 
 					// ???
 					else
-						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw '"sv, *cp, '\'');
 						
 					consume_leading_whitespace();
 
@@ -1558,7 +1604,7 @@ namespace TOML_NAMESPACE::impl
 
 				// consume the '='
 				if (*cp != U'=')
-					throw_parse_error("Encountered unexpected character while parsing key-value pair; expected '=', saw '"sv, cp->as_view<char>(), '\'');
+					throw_parse_error("Encountered unexpected character while parsing key-value pair; expected '=', saw '"sv, *cp, '\'');
 				advance();
 
 				// skip past any whitespace that followed the '='
@@ -1612,7 +1658,7 @@ namespace TOML_NAMESPACE::impl
 
 					// consume the first closing ']'
 					if (*cp != U']')
-						throw_parse_error("Encountered unexpected character while parsing table"sv, (is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing table"sv, (is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\'');
 					advance();
 
 					// consume the second closing ']'
@@ -1621,7 +1667,7 @@ namespace TOML_NAMESPACE::impl
 						eof_check();
 
 						if (*cp != U']')
-							throw_parse_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, *cp, '\'');
 						advance();
 					}
 					header_end_pos = cp ? cp->position : prev_pos;
@@ -1631,7 +1677,10 @@ namespace TOML_NAMESPACE::impl
 					if (cp)
 					{
 						if (!consume_comment() && !consume_line_break())
-							throw_parse_error("Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv), " header; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
+							throw_parse_error(
+								"Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv),
+								" header; expected a comment or whitespace, saw '"sv, *cp, '\''
+							);
 					}
 				}
 				TOML_ASSERT(!key.segments.empty());
@@ -1663,8 +1712,7 @@ namespace TOML_NAMESPACE::impl
 					}
 					else
 					{
-						TOML_NOT_IMPLEMENTED_YET;
-						throw_parse_error("FFFFFFFFFFFFF"sv);
+						throw_parse_error("Attempt to redefine "sv, child->type(), " as "sv, is_array ? node_type::table_array : node_type::table);
 					}
 				}
 
@@ -1734,10 +1782,48 @@ namespace TOML_NAMESPACE::impl
 					}
 
 					//if we get here it's a redefinition error.
-					TOML_NOT_IMPLEMENTED_YET;
-					throw_parse_error( "FFFFFFFFFFFFF"sv );
+					throw_parse_error("Attempt to redefine "sv, matching_node->type(), " as "sv, is_array ? node_type::table_array : node_type::table);
 				}
 			}
+
+			void insert_kvp(table* tab, key_value_pair&& kvp)
+			{
+				TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
+
+				if (kvp.key.segments.size() > 1_sz)
+				{
+					for (size_t i = 0; i < kvp.key.segments.size() - 1_sz; i++)
+					{
+						auto child = tab->get(kvp.key.segments[i]);
+						if (!child)
+						{
+							child = tab->values.emplace(
+								std::move(kvp.key.segments[i]),
+								std::make_unique<table>()
+							).first->second.get();
+							dotted_key_tables.push_back(reinterpret_cast<table*>(child));
+							dotted_key_tables.back()->inline_ = true;
+							child->rgn = kvp.value->rgn;
+						}
+						else if (!child->is_table() || std::find(dotted_key_tables.begin(), dotted_key_tables.end(), reinterpret_cast<table*>(child)) == dotted_key_tables.end())
+						{
+							throw_parse_error("Attempt to redefine "sv, child->type(), " as dotted key-value pair"sv);
+						}
+						else
+							child->rgn.end = kvp.value->rgn.end;
+						tab = reinterpret_cast<table*>(child);
+					}
+				}
+
+				if (auto conflicting_node = tab->get(kvp.key.segments.back()))
+					throw_parse_error("Attempt to redefine "sv, conflicting_node->type(), " as "sv, kvp.value->type());
+
+				tab->values.emplace(
+					std::move(kvp.key.segments.back()),
+					std::move(kvp.value)
+				);
+			}
+
 
 			void parse_document()
 			{
@@ -1760,33 +1846,31 @@ namespace TOML_NAMESPACE::impl
 						current_table = parse_table_header();
 					}
 
-
 					// bare_keys
 					// dotted.keys
 					// "quoted keys"
 					#if !TOML_STRICT
 					else if (is_unicode_combining_mark(*cp))
-						throw_parse_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error(
+							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
+						);
 					#endif
 					else if (is_bare_key_start_character(cp->value) || is_string_delimiter(cp->value))
 					{
-						auto kvp = parse_key_value_pair();
+						insert_kvp(current_table, parse_key_value_pair());
 
-						//todo : check for collisions
-						//todo : handle dotted keys
-							
 						// handle the rest of the line after the kvp
 						// (this is not done in parse_key_value_pair() because that function is also used for inline tables)
 						consume_leading_whitespace();
 						if (cp)
 						{
 							if (!consume_comment() && !consume_line_break())
-								throw_parse_error("Encountered unexpected character after key-value pair; expected a comment or whitespace, saw '"sv, cp->as_view<char>(), '\'');
+								throw_parse_error("Encountered unexpected character after key-value pair; expected a comment or whitespace, saw '"sv, *cp, '\'');
 						}
 					}
 
 					else // ??
-						throw_parse_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, cp->as_view<char>(), '\'');
+						throw_parse_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, *cp, '\'');
 
 				}
 				while (cp);
@@ -1908,12 +1992,7 @@ namespace TOML_NAMESPACE::impl
 			// must be a key_value-pair
 			else
 			{
-				auto kvp = parse_key_value_pair();
-
-				//todo : check for collisions
-				//todo : handle dotted keys
-
-				TOML_NOT_IMPLEMENTED_YET;
+				insert_kvp(tab.get(), parse_key_value_pair());
 			}
 		}
 
