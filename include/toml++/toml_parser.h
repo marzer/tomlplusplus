@@ -4,17 +4,19 @@
 #include "toml_array.h"
 #include "toml_table_array.h"
 
-namespace TOML_NAMESPACE::impl
+namespace toml::impl
 {
 	class parser final
 	{
 		private:
 			utf8_buffered_reader reader;
 			std::unique_ptr<table> root;
-			document_position prev_pos = { 1_sz, 1_sz };
+			document_position prev_pos = { 1u, 1u };
 			const utf8_codepoint* cp = {};
 			std::vector<table*> implicit_tables;
 			std::vector<table*> dotted_key_tables;
+			std::string recording_buffer; //for diagnostics 
+			bool recording = false;
 
 			template <typename... T>
 			[[noreturn]]
@@ -38,8 +40,9 @@ namespace TOML_NAMESPACE::impl
 						}
 						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 						{
-							memcpy(ptr, arg.bytes, arg.byte_count);
-							ptr += arg.byte_count;
+							const auto cp_view = arg.as_view<char>();
+							memcpy(ptr, cp_view.data(), cp_view.length());
+							ptr += cp_view.length();
 						}
 						else if constexpr (std::is_same_v<arg_t, char>)
 						{
@@ -101,6 +104,28 @@ namespace TOML_NAMESPACE::impl
 
 				prev_pos = cp->position;
 				cp = reader.read_next();
+				if (recording && cp)
+					recording_buffer.append(cp->as_view<char>());
+			}
+
+			void start_recording(bool include_current = true) noexcept
+			{
+				recording = true;
+				recording_buffer.clear();
+				if (include_current && cp)
+					recording_buffer.append(cp->as_view<char>());
+			}
+
+			void stop_recording(size_t pop_bytes = 0_sz) noexcept
+			{
+				recording = false;
+				if (pop_bytes)
+				{
+					if (pop_bytes >= recording_buffer.length())
+						recording_buffer.clear();
+					else
+						recording_buffer.erase(recording_buffer.cbegin() + (recording_buffer.length() - pop_bytes), recording_buffer.cend());
+				}
 			}
 
 			bool consume_leading_whitespace()
@@ -635,10 +660,11 @@ namespace TOML_NAMESPACE::impl
 							seen_exponent = true;
 						}
 
-						if (length + cp->byte_count > sizeof(chars))
+						const auto cp_view = cp->as_view();
+						if (length + cp_view.length() > sizeof(chars))
 							throw_parse_error("Floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
-						memcpy(chars + length, cp->bytes, cp->byte_count);
-						length += cp->byte_count;
+						memcpy(chars + length, cp_view.data(), cp_view.length());
+						length += cp_view.length();
 
 					}
 					prev = cp;
@@ -731,7 +757,6 @@ namespace TOML_NAMESPACE::impl
 					{
 						if (!is_binary_digit(*cp))
 							throw_parse_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, *cp, '\'');
-						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Binary integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
@@ -805,7 +830,6 @@ namespace TOML_NAMESPACE::impl
 					{
 						if (!is_octal_digit(*cp))
 							throw_parse_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, *cp, '\'');
-						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Octal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
@@ -875,7 +899,6 @@ namespace TOML_NAMESPACE::impl
 					{
 						if (!is_decimal_digit(*cp))
 							throw_parse_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, *cp, '\'');
-						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
@@ -957,7 +980,6 @@ namespace TOML_NAMESPACE::impl
 					{
 						if (!is_hex_digit(*cp))
 							throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, *cp, '\'');
-						TOML_ASSERT(cp->byte_count == 1_sz);
 						if (length == sizeof(chars))
 							throw_parse_error("Hexadecimal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
@@ -1567,8 +1589,14 @@ namespace TOML_NAMESPACE::impl
 					consume_leading_whitespace();
 
 					// eof or no more key to come
-					if (!cp || *cp != U'.')
+					if (!cp)
 						break;
+					if (*cp != U'.')
+					{
+						if (recording)
+							stop_recording(1_sz);
+						break;
+					}
 
 					// was a dotted key, so go around again to consume the next segment
 					TOML_ASSERT(*cp == U'.');
@@ -1596,7 +1624,8 @@ namespace TOML_NAMESPACE::impl
 
 				// get the key
 				TOML_ASSERT(cp && (is_string_delimiter(cp->value) || is_bare_key_start_character(cp->value)));
-				auto key = parse_key();
+				start_recording();
+				auto key = parse_key(); //parse_key() calls stop_recording()
 
 				// skip past any whitespace that followed the key
 				consume_leading_whitespace();
@@ -1650,7 +1679,8 @@ namespace TOML_NAMESPACE::impl
 					eof_check();
 
 					// get the actual key
-					key = parse_key();
+					start_recording();
+					key = parse_key(); //parse_key() calls stop_recording()
 
 					// skip past any whitespace that followed the key
 					consume_leading_whitespace();
@@ -1712,7 +1742,14 @@ namespace TOML_NAMESPACE::impl
 					}
 					else
 					{
-						throw_parse_error("Attempt to redefine "sv, child->type(), " as "sv, is_array ? node_type::table_array : node_type::table);
+						if (!is_array && child->type() == node_type::table)
+							throw_parse_error("Attempt to redefine existing table '"sv, recording_buffer);
+						else
+							throw_parse_error(
+								"Attempt to redefine existing "sv, child->type(),
+								" '"sv, recording_buffer,
+								"' as "sv, is_array ? node_type::table_array : node_type::table
+							);
 					}
 				}
 
@@ -1782,12 +1819,20 @@ namespace TOML_NAMESPACE::impl
 					}
 
 					//if we get here it's a redefinition error.
-					throw_parse_error("Attempt to redefine "sv, matching_node->type(), " as "sv, is_array ? node_type::table_array : node_type::table);
+					if (!is_array && matching_node->type() == node_type::table)
+						throw_parse_error("Attempt to redefine existing table '"sv, recording_buffer);
+					else
+						throw_parse_error(
+							"Attempt to redefine existing "sv, matching_node->type(),
+							" '"sv, recording_buffer,
+							"' as "sv, is_array ? node_type::table_array : node_type::table
+						);
 				}
 			}
 
-			void insert_kvp(table* tab, key_value_pair&& kvp)
+			void parse_key_value_pair_and_insert(table* tab)
 			{
+				auto kvp = parse_key_value_pair();
 				TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
 
 				if (kvp.key.segments.size() > 1_sz)
@@ -1816,7 +1861,16 @@ namespace TOML_NAMESPACE::impl
 				}
 
 				if (auto conflicting_node = tab->get(kvp.key.segments.back()))
-					throw_parse_error("Attempt to redefine "sv, conflicting_node->type(), " as "sv, kvp.value->type());
+				{
+					if (conflicting_node->type() == kvp.value->type())
+						throw_parse_error("Attempt to redefine "sv, conflicting_node->type(), " '"sv, recording_buffer, '\'');
+					else
+						throw_parse_error(
+							"Attempt to redefine "sv, conflicting_node->type(),
+							" '"sv, recording_buffer,
+							"' as "sv, kvp.value->type()
+						);
+				}
 
 				tab->values.emplace(
 					std::move(kvp.key.segments.back()),
@@ -1857,7 +1911,7 @@ namespace TOML_NAMESPACE::impl
 					#endif
 					else if (is_bare_key_start_character(cp->value) || is_string_delimiter(cp->value))
 					{
-						insert_kvp(current_table, parse_key_value_pair());
+						parse_key_value_pair_and_insert(current_table);
 
 						// handle the rest of the line after the kvp
 						// (this is not done in parse_key_value_pair() because that function is also used for inline tables)
@@ -1992,7 +2046,7 @@ namespace TOML_NAMESPACE::impl
 			// must be a key_value-pair
 			else
 			{
-				insert_kvp(tab.get(), parse_key_value_pair());
+				parse_key_value_pair_and_insert(tab.get());
 			}
 		}
 
@@ -2000,7 +2054,7 @@ namespace TOML_NAMESPACE::impl
 	}
 }
 
-namespace TOML_NAMESPACE
+namespace toml
 {
 	template <typename CHAR>
 	[[nodiscard]]

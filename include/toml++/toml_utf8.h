@@ -4,7 +4,7 @@
 #include "toml_utf8_is_unicode_letter.h"
 #endif
 
-namespace TOML_NAMESPACE::impl
+namespace toml::impl
 {
 	[[nodiscard]]
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
@@ -273,11 +273,10 @@ namespace TOML_NAMESPACE::impl
 	struct utf8_codepoint final
 	{
 		char32_t value;
-		TOML_NAMESPACE::document_position position;
-		uint8_t byte_count;
 		uint8_t bytes[4];
+		toml::document_position position;
 
-		template <typename CHAR = TOML_NAMESPACE::string_char>
+		template <typename CHAR = toml::string_char>
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		std::basic_string_view<CHAR> as_view() const noexcept
 		{
@@ -286,7 +285,9 @@ namespace TOML_NAMESPACE::impl
 				"The string view's underlying character type must be 1 byte in size."
 			);
 
-			return std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes), byte_count };
+			return bytes[3]
+				? std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes), 4_sz }
+				: std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes) };
 		}
 
 		[[nodiscard]]
@@ -307,7 +308,7 @@ namespace TOML_NAMESPACE::impl
 	struct TOML_INTERFACE utf8_reader_interface
 	{
 		[[nodiscard]]
-		virtual const std::shared_ptr<const TOML_NAMESPACE::string>& source_path() const noexcept = 0;
+		virtual const std::shared_ptr<const toml::string>& source_path() const noexcept = 0;
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() = 0;
@@ -321,6 +322,7 @@ namespace TOML_NAMESPACE::impl
 			utf8_byte_stream<T> stream;
 			utf8_decoder decoder;
 			utf8_codepoint prev{}, current{};
+			uint8_t current_byte_count{};
 			std::shared_ptr<const string> source_path_;
 
 		public:
@@ -330,8 +332,7 @@ namespace TOML_NAMESPACE::impl
 				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
-				current.position.line = 1_sz;
-				current.position.column = 1_sz;
+				current.position = { 1u, 1u };
 
 				if (!source_path.empty())
 					source_path_ = std::make_shared<const string>(std::forward<STR>(source_path));
@@ -382,18 +383,17 @@ namespace TOML_NAMESPACE::impl
 					if (decoder.error())
 						throw parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
 
-					current.bytes[current.byte_count++] = nextByte;
+					current.bytes[current_byte_count++] = nextByte;
 					if (decoder.has_code_point())
 					{
 						prev = current;
 						prev.value = static_cast<char32_t>(decoder.codepoint);
-						current.byte_count = {};
-						current.position.index++;
+						current_byte_count = {};
 
 						if (is_line_break<false>(prev.value))
 						{
 							current.position.line++;
-							current.position.column = 1_sz;
+							current.position.column = 1u;
 						}
 						else
 							current.position.column++;
@@ -408,10 +408,10 @@ namespace TOML_NAMESPACE::impl
 	};
 
 	template <typename CHAR>
-	utf8_reader(std::basic_string_view<CHAR>, TOML_NAMESPACE::string_view) -> utf8_reader<std::basic_string_view<CHAR>>;
+	utf8_reader(std::basic_string_view<CHAR>, toml::string_view) -> utf8_reader<std::basic_string_view<CHAR>>;
 
 	template <typename CHAR>
-	utf8_reader(std::basic_istream<CHAR>&, TOML_NAMESPACE::string_view) -> utf8_reader<std::basic_istream<CHAR>>;
+	utf8_reader(std::basic_istream<CHAR>&, toml::string_view) -> utf8_reader<std::basic_istream<CHAR>>;
 
 	class TOML_EMPTY_BASES utf8_buffered_reader final
 		: public utf8_reader_interface
@@ -420,7 +420,7 @@ namespace TOML_NAMESPACE::impl
 			utf8_reader_interface& reader;
 			struct
 			{
-				static constexpr size_t capacity = 255; //+1 for the 'head' stored in the underlying reader
+				static constexpr size_t capacity = 63; //+1 for the 'head' stored in the underlying reader
 				utf8_codepoint buffer[capacity];
 				size_t count = {}, first = {};
 			}
@@ -435,7 +435,7 @@ namespace TOML_NAMESPACE::impl
 			{}
 
 			[[nodiscard]]
-			const std::shared_ptr<const TOML_NAMESPACE::string>& source_path() const noexcept override
+			const std::shared_ptr<const toml::string>& source_path() const noexcept override
 			{
 				return reader.source_path();
 			}

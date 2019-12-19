@@ -10,10 +10,6 @@
 	#undef TOML_CONFIG_HEADER
 #endif
 
-#ifndef TOML_NAMESPACE
-	#define TOML_NAMESPACE toml
-#endif
-
 #ifndef TOML_USE_CHAR_8_IF_AVAILABLE
 	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
 #endif
@@ -239,7 +235,7 @@ TOML_RESTORE_WARNINGS
 //--------------------------------------------------------------------
 // clang-format on
 
-namespace TOML_NAMESPACE
+namespace toml
 {
 	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
 
@@ -336,9 +332,8 @@ namespace TOML_NAMESPACE
 
 	struct document_position
 	{
-		size_t line;	//begins at 1
-		size_t column;	//begins at 1
-		size_t index;	//begins at 0
+		uint32_t line;		//begins at 1
+		uint32_t column;	//begins at 1
 	};
 
 	struct document_region

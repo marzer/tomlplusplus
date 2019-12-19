@@ -469,7 +469,7 @@ def main():
 	print('#pragma once', file=output_file)
 	print('#include "toml_common.h"', file=output_file)
 	print('\n#define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)	TOML_ASSUME(codepoint >= first); TOML_ASSUME(codepoint <= last)', file=output_file)
-	print('\nnamespace TOML_NAMESPACE::impl\n{', file=output_file, end='')
+	print('\nnamespace toml::impl\n{', file=output_file, end='')
 	emit_function('is_unicode_letter', ('Ll', 'Lm', 'Lo', 'Lt', 'Lu'), output_file, codepoints)
 	emit_function('is_unicode_number', ('Nd', 'Nl'), output_file, codepoints)
 	emit_function('is_unicode_combining_mark', ('Mn', 'Mc'), output_file, codepoints)

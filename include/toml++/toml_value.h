@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_common.h"
 
-namespace TOML_NAMESPACE
+namespace toml
 {
 	template <typename T>
 	class value final

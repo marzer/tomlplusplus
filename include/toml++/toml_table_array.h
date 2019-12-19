@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_table.h"
 
-namespace TOML_NAMESPACE
+namespace toml
 {
 	class table_array final
 		: public node

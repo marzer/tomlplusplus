@@ -4,7 +4,7 @@
 
 #define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)	TOML_ASSUME(codepoint >= first); TOML_ASSUME(codepoint <= last)
 
-namespace TOML_NAMESPACE::impl
+namespace toml::impl
 {
 	/// \brief Returns true if a codepoint is any of these categories: Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
