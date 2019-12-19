@@ -39,6 +39,13 @@ def make_bitmask(codepoint, size=64):
 			return "0x{:X}u".format(codepoint)
 
 
+def make_mask_from_indices(indices):
+	mask = 0
+	for i in indices:
+		mask = mask | (1 << i)
+	return mask;
+
+
 
 def range_first(r):
 	if isinstance(r, int):
@@ -98,7 +105,6 @@ class Chunk:
 		self.count = 0
 		self.ranges = []
 		self.subchunks = None
-		self.subchunk_count = 0
 		self.subchunk_size = 0
 		self.first_set = self.last + 1
 		self.last_set = -1
@@ -181,32 +187,30 @@ class Chunk:
 			return
 
 		self.subchunks = []
-		self.subchunk_count = subchunk_count
 		self.subchunk_size = subchunk_size
 		for subchunk in range(subchunk_count):
-			self.subchunks.append((
-				subchunk,
+			self.subchunks.append(
 				Chunk(
 					self.first + (subchunk * self.subchunk_size),
 					min(self.first + (((subchunk + 1) * self.subchunk_size) - 1), self.last)
 				)
-			))
+			)
 		for r in self.ranges:
 			if (isinstance(r, int)):
 				subchunk = int((r - self.first) / self.subchunk_size)
-				self.subchunks[subchunk][1].add(r)
+				self.subchunks[subchunk].add(r)
 			else:
 				start_chunk = int((r[0] - self.first) / self.subchunk_size)
 				end_chunk = int((r[1] - self.first) / self.subchunk_size)
 				for subchunk in range(start_chunk, end_chunk+1):
-					self.subchunks[subchunk][1].add(
-						max(r[0], self.subchunks[subchunk][1].first),
-						min(r[1], self.subchunks[subchunk][1].last),
+					self.subchunks[subchunk].add(
+						max(r[0], self.subchunks[subchunk].first),
+						min(r[1], self.subchunks[subchunk].last),
 					)
 		#self.ranges = None
 		for subchunk in self.subchunks:
-			subchunk[1].trim()
-			subchunk[1].subdivide()
+			subchunk.trim()
+			subchunk.subdivide()
 
 
 	def always_returns_true(self):
@@ -217,15 +221,15 @@ class Chunk:
 		return self.count == 0;
 
 
-	def print_subchunk(self, subchunk, subchunk_index, output_file, level, indent):
-		print("{}\tcase {}u: ".format(indent, subchunk_index), end='', file=output_file)
-		if (subchunk.count == subchunk.span_size):
-			subchunk.print(output_file, level + 1, (self.first, self.last))
+	def print_subchunk(self, subchunk_index, output_file, level, indent):
+		print("{}\tcase {}: ".format(indent, subchunk_index), end='', file=output_file)
+		if (self.subchunks[subchunk_index].count == self.subchunks[subchunk_index].span_size):
+			self.subchunks[subchunk_index].print(output_file, level + 1, (self.first, self.last))
 		else:
-			if (subchunk.subchunks is not None and subchunk.span_size > 64):
+			if (self.subchunks[subchunk_index].subchunks is not None and self.subchunks[subchunk_index].span_size > 64):
 				print("\n{}\t{{".format(indent), file=output_file)
-			subchunk.print(output_file, level + 1, (self.first, self.last))
-			if (subchunk.subchunks is not None and subchunk.span_size > 64):
+			self.subchunks[subchunk_index].print(output_file, level + 1, (self.first, self.last))
+			if (self.subchunks[subchunk_index].subchunks is not None and self.subchunks[subchunk_index].span_size > 64):
 				print("{}\t}}".format(indent), file=output_file)
 
 
@@ -290,39 +294,66 @@ class Chunk:
 				print("{}if (codepoint < {})\n{}\treturn false;\n".format(indent, make_literal(self.first), indent), file=output_file)
 			elif (self.last < parent_range[1]):
 				print("{}if (codepoint > {})\n{}\treturn false;\n".format(indent, make_literal(self.last), indent), file=output_file)
-			print("{}TOML_ASSUME_CODEPOINT_BETWEEN({}, {});".format(indent, make_literal(self.first), make_literal(self.last)), file=output_file)
 
-			always_true = 0
-			always_false = 0
-			for subchunk_index, subchunk in self.subchunks:
-				if subchunk.always_returns_true():
-					always_true += 1
-				elif subchunk.always_returns_false():
-					always_false += 1
+			# see if we can avoid emitting a switch altogether
+			always_true = []
+			always_false = []
+			not_always_true_or_false = []
+			all_true_even = True
+			all_true_odd = True
+			all_false_even = True
+			all_false_odd = True
+			for subchunk_index in range(len(self.subchunks)):
+				even = (subchunk_index % 2) == 0
+				if self.subchunks[subchunk_index].always_returns_true():
+					always_true.append(subchunk_index)
+					all_true_even = all_true_even and even
+					all_true_odd = all_true_odd and not even
+				elif self.subchunks[subchunk_index].always_returns_false():
+					always_false.append(subchunk_index)
+					all_false_even = all_false_even and even
+					all_false_odd = all_false_odd and not even
+				else:
+					not_always_true_or_false.append(subchunk_index)
 
-			print("{}switch ((static_cast<uint32_t>(codepoint) - 0x{:X}u) / {}u)\n{}{{".format(
-					indent,
-					self.first,
-					self.subchunk_size,
-					indent
-				),
-				file=output_file
-			)
-			if (always_true == 0 and always_false == 0):
-				for subchunk_index, subchunk in self.subchunks:
-					self.print_subchunk(subchunk, subchunk_index, output_file, level, indent)
-				print("{}\tTOML_NO_DEFAULT_CASE;".format(indent), file=output_file)
-			elif (always_true > always_false):
-				for subchunk_index, subchunk in self.subchunks:
-					if not subchunk.always_returns_true():
-						self.print_subchunk(subchunk, subchunk_index, output_file, level, indent)
-				print("{}\tdefault: return true;".format(indent), file=output_file)
+			selector = '(static_cast<uint32_t>(codepoint) - 0x{:X}u) / {}u'.format(self.first, self.subchunk_size)
+
+			# return selector & mask
+			if (len(always_true) + len(always_false) == len(self.subchunks) and len(self.subchunks) <= 64):
+				print("{}return ({}) & {};".format(indent, selector, make_bitmask(make_mask_from_indices(always_true))), file=output_file)
+
+			# return selector == A ? true : selector & mask
+			elif (len(not_always_true_or_false) == 1
+				and (len(always_true) + len(always_false)) == len(self.subchunks)-1
+				and len(self.subchunks) <= 64):
+				print('{}const auto selector = {}; //kek'.format(indent, selector), file=output_file)
+				print('{}return selector == {}u ? true : selector & {};'.format(
+						indent,
+						not_always_true_or_false[0],
+						make_bitmask(make_mask_from_indices(always_true))
+					),
+					file=output_file
+				)
+
+			# switch(selector)
 			else:
-				for subchunk_index, subchunk in self.subchunks:
-					if not subchunk.always_returns_false():
-						self.print_subchunk(subchunk, subchunk_index, output_file, level, indent)
-				print("{}\tdefault: return false;".format(indent), file=output_file)
-			print("{}}}".format(indent), file=output_file)
+				print("{}TOML_ASSUME_CODEPOINT_BETWEEN({}, {});".format(indent, make_literal(self.first), make_literal(self.last)), file=output_file)
+				print("{}switch ({})\n{}{{".format(indent, selector, indent), file=output_file)
+				if (len(always_true) == 0 and len(always_false) == 0):
+					for subchunk_index in range(len(self.subchunks)):
+						self.print_subchunk(subchunk_index, output_file, level, indent)
+					print("{}\tTOML_NO_DEFAULT_CASE;".format(indent), file=output_file)
+				elif (len(always_true) > len(always_false)):
+					for subchunk_index in range(len(self.subchunks)):
+						if not self.subchunks[subchunk_index].always_returns_true():
+							self.print_subchunk(subchunk_index, output_file, level, indent)
+					print("{}\tdefault: return true;".format(indent), file=output_file)
+				else:
+					for subchunk_index in range(len(self.subchunks)):
+						if not self.subchunks[subchunk_index].always_returns_false():
+							self.print_subchunk(subchunk_index, output_file, level, indent)
+					print("{}\tdefault: return false;".format(indent), file=output_file)
+				print("{}}}".format(indent), file=output_file)
 			print("{}// chunk summary: {} codepoints from {} ranges (spanning a search area of {})".format(indent, self.count, len(self.ranges), self.span_size), file=output_file)
 
 		# return cp == A || cp == B ...
