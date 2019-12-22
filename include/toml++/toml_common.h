@@ -18,7 +18,13 @@
 	#define TOML_STRICT 0
 #endif
 
-//#define TOML_ASSERT(expr)		my_custom_assert(expr)
+#ifndef TOML_ASSERT
+	#ifdef assert
+		#define TOML_ASSERT(expr)	assert(expr)
+	#else
+		#define TOML_ASSERT(expr)	(void)0
+	#endif
+#endif
 
 //--------------------------------------------------------------------
 // COMPILER & ENVIRONMENT STUFF
@@ -28,81 +34,51 @@
 	#error toml++ is a C++ library.
 #endif
 
-#if defined(_MSC_VER) //or clang in msvc mode
+#ifdef __clang__
 
-	//#ifdef _CPPRTTI
-	//	#define TOML_RTTI_ENABLED
-	//#endif
+	#ifdef __cpp_exceptions
+	#define TOML_EXCEPTIONS_ENABLED
+	#endif
+
+	#define TOML_PUSH_WARNINGS			_Pragma("clang diagnostic push")
+	#define TOML_DISABLE_ALL_WARNINGS	_Pragma("clang diagnostic ignored \"-Wall\"")	\
+										_Pragma("clang diagnostic ignored \"-Wextra\"")
+	#define TOML_POP_WARNINGS			_Pragma("clang diagnostic pop")
+	#define TOML_CPP_VERSION			__cplusplus
+	#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
+	#define TOML_ASSUME(cond)			__builtin_assume(cond)
+	#define TOML_UNREACHABLE			__builtin_unreachable()
+
+#elif defined(_MSC_VER)
 
 	#ifdef _CPPUNWIND
 		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML_CPP_VERSION		_MSVC_LANG
-	#define TOML_DISABLE_WARNINGS	__pragma(warning(push, 0))
-	#define TOML_RESTORE_WARNINGS	__pragma(warning(pop, 0))
-	#define TOML_INTERFACE			__declspec(novtable)
-	#define TOML_EMPTY_BASES		__declspec(empty_bases)
-	#define TOML_ALWAYS_INLINE		__forceinline
-	#define TOML_ASSUME(cond)		__assume(cond)
-	#define TOML_UNREACHABLE		__assume(0)
-
-#elif defined(__clang__)
-
-	//#if __has_feature(cxx_rtti)
-	//	#define TOML_RTTI_ENABLED
-	//#endif
-
-	#ifdef __EXCEPTIONS
-		#define TOML_EXCEPTIONS_ENABLED
-	#endif
-
-	#define TOML_DISABLE_WARNINGS						\
-		_Pragma("clang diagnostic push")				\
-		_Pragma("clang diagnostic ignored \"-Wall\"")	\
-		_Pragma("clang diagnostic ignored \"-Wextra\"")
-
-	#define TOML_RESTORE_WARNINGS						\
-		_Pragma("clang diagnostic pop")
-
-	#define TOML_CPP_VERSION		__cplusplus
-	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML_ASSUME(cond)		__builtin_assume(cond)
-	#define TOML_UNREACHABLE		__builtin_unreachable()
+	#define TOML_CPP_VERSION			_MSVC_LANG
+	#define TOML_PUSH_WARNINGS			__pragma(warning(push))
+	#define TOML_DISABLE_ALL_WARNINGS	__pragma(warning(pop))	\
+										__pragma(warning(push, 0))
+	#define TOML_POP_WARNINGS			__pragma(warning(pop))
+	#define TOML_INTERFACE				__declspec(novtable)
+	#define TOML_EMPTY_BASES			__declspec(empty_bases)
+	#define TOML_ALWAYS_INLINE			__forceinline
+	#define TOML_ASSUME(cond)			__assume(cond)
+	#define TOML_UNREACHABLE			__assume(0)
 
 #elif defined(__GNUC__)
 
-	//#ifdef __GXX_RTTI
-	//	#define TOML_RTTI_ENABLED
-	//#endif
-
-	#ifdef __EXCEPTIONS
+	#ifdef __cpp_exceptions
 		#define TOML_EXCEPTIONS_ENABLED
 	#endif
 
-	#define TOML_DISABLE_WARNINGS						\
-		Pragma("GCC diagnostic push")					\
-		Pragma("GCC diagnostic ignored \"-Wall\"")
+	#define TOML_PUSH_WARNINGS			Pragma("GCC diagnostic push")
+	#define TOML_DISABLE_ALL_WARNINGS	Pragma("GCC diagnostic ignored \"-Wall\"")
+	#define TOML_POP_WARNINGS			Pragma("GCC diagnostic pop")
+	#define TOML_CPP_VERSION			__cplusplus
+	#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
+	#define TOML_UNREACHABLE			__builtin_unreachable()
 
-	#define TOML_RESTORE_WARNINGS						\
-		Pragma("GCC diagnostic pop")
-
-	#define TOML_CPP_VERSION		__cplusplus
-	#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-	#define TOML_UNREACHABLE		__builtin_unreachable()
-
-#endif
-
-#if TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
-#endif
-
-// #ifndef TOML_RTTI_ENABLED
-//     #error toml++ requires requires RTTI be enabled. For a C++ TOML parser that supports disabling RTTI see https://github.com/skystrife/cpptoml
-// #endif
-
-#ifndef TOML_EXCEPTIONS_ENABLED
-	#error toml++ currently requires that exceptions be enabled.
 #endif
 
 #if TOML_CPP_VERSION >= 202600L
@@ -111,15 +87,25 @@
 	#define TOML_CPP 23
 #elif TOML_CPP_VERSION >= 202000L
 	#define TOML_CPP 20
-#else
+#elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
+#else
+	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
 #endif
 
-#ifndef TOML_DISABLE_WARNINGS
-	#define TOML_DISABLE_WARNINGS
+#ifndef TOML_EXCEPTIONS_ENABLED
+#error toml++ currently requires that exceptions be enabled.
 #endif
-#ifndef TOML_RESTORE_WARNINGS
-	#define TOML_RESTORE_WARNINGS
+#undef TOML_EXCEPTIONS_ENABLED
+
+#ifndef TOML_PUSH_WARNINGS
+	#define TOML_PUSH_WARNINGS
+#endif
+#ifndef TOML_DISABLE_ALL_WARNINGS
+	#define TOML_DISABLE_ALL_WARNINGS
+#endif
+#ifndef TOML_POP_WARNINGS
+	#define TOML_POP_WARNINGS
 #endif
 #ifndef TOML_INTERFACE
 	#define TOML_INTERFACE
@@ -174,29 +160,29 @@
 	#define TOML_ALWAYS_INLINE_WHEN_STRICT inline
 #endif
 
-#ifndef TOML_ASSERT
-	#ifdef assert
-		#define TOML_ASSERT(expr)	assert(expr)
-	#else
-		#define TOML_ASSERT(expr)	(void)0
-	#endif
-#endif
-
-#if __has_include(<version>)
-	TOML_DISABLE_WARNINGS
-	#include <version>
-	TOML_RESTORE_WARNINGS
-#endif
-
 #define TOML_SPEC_VERSION_MAJOR		0
 #define TOML_SPEC_VERSION_MINOR		5
 #define TOML_SPEC_VERSION_REVISION	0
 
-#if defined(_MSC_VER) && (defined(_DEBUG) || !defined(NDEBUG))
-	#define TOML_NOT_IMPLEMENTED_YET	__debugbreak()
-#else
-	#define TOML_NOT_IMPLEMENTED_YET	TOML_ASSERT(false && "Implement me")
-#endif
+//--------------------------------------------------------------------
+// INCLUDES
+//--------------------------------------------------------------------
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+
+#include <cstdint>
+#include <optional>
+#include <memory>
+#include <string_view>
+#include <string>
+#include <vector>
+#include <map>
+#include <stdexcept>
+#include <charconv>
+#include <iosfwd>
+
+TOML_POP_WARNINGS
 
 #if TOML_USE_CHAR_8_IF_AVAILABLE && defined(__cpp_lib_char8_t)
 
@@ -210,25 +196,6 @@
 	#define TOML_STRING_PREFIX(S) S
 
 #endif
-
-//--------------------------------------------------------------------
-// INCLUDES
-//--------------------------------------------------------------------
-
-TOML_DISABLE_WARNINGS
-
-#include <cstdint>
-#include <optional>
-#include <memory>
-#include <string_view>
-#include <string>
-#include <vector>
-#include <map>
-#include <stdexcept>
-#include <charconv>
-#include <iosfwd>
-
-TOML_RESTORE_WARNINGS
 
 //--------------------------------------------------------------------
 // FORWARD DECLARATIONS & TYPEDEFS
@@ -267,6 +234,7 @@ namespace toml
 		}
 
 		class parser;
+		class writer;
 	}
 
 	struct date final

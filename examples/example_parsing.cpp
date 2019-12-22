@@ -1,4 +1,5 @@
 #include <toml++/toml.h>
+#include <iostream>
 
 using namespace std::literals::string_view_literals;
 
@@ -59,6 +60,8 @@ hosts = [
 int main(int /*argc*/, char** /*argv*/)
 {
 	const auto table = toml::parse(toml_document);
+
+	std::cout << *table << std::endl;
 
 	return 0;
 }

@@ -429,7 +429,7 @@ def emit_function(name, categories, file, codepoints):
 
 	# write the function
 
-	print('\n\t/// \\brief Returns true if a codepoint is any of these categories: {}'.format(', '.join(categories)), file=file)
+	print('\n\t/// \\brief Returns true if a codepoint belongs to any of these categories: {}'.format(', '.join(categories)), file=file)
 	print('\t[[nodiscard]]', file=file)
 	print('\tconstexpr bool {}(char32_t codepoint) noexcept\n\t{{'.format(name), file=file)
 	root_chunk.print(file)

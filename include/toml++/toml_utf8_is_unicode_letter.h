@@ -6,7 +6,7 @@
 
 namespace toml::impl
 {
-	/// \brief Returns true if a codepoint is any of these categories: Ll, Lm, Lo, Lt, Lu
+	/// \brief Returns true if a codepoint belongs to any of these categories: Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
 	constexpr bool is_unicode_letter(char32_t codepoint) noexcept
 	{
@@ -460,7 +460,7 @@ namespace toml::impl
 		// chunk summary: 125582 codepoints from 607 ranges (spanning a search area of 194932)
 	}
 
-	/// \brief Returns true if a codepoint is any of these categories: Nd, Nl
+	/// \brief Returns true if a codepoint belongs to any of these categories: Nd, Nl
 	[[nodiscard]]
 	constexpr bool is_unicode_number(char32_t codepoint) noexcept
 	{
@@ -573,7 +573,7 @@ namespace toml::impl
 		// chunk summary: 856 codepoints from 70 ranges (spanning a search area of 123642)
 	}
 
-	/// \brief Returns true if a codepoint is any of these categories: Mn, Mc
+	/// \brief Returns true if a codepoint belongs to any of these categories: Mn, Mc
 	[[nodiscard]]
 	constexpr bool is_unicode_combining_mark(char32_t codepoint) noexcept
 	{

@@ -8,6 +8,7 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
+			friend class impl::writer;
 			std::vector<std::unique_ptr<table>> tables;
 
 		public:

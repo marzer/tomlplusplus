@@ -8,6 +8,7 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
+			friend class impl::writer;
 			string_map<std::unique_ptr<node>> values;
 			bool inline_ = false;
 

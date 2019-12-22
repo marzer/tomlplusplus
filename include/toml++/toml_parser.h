@@ -40,7 +40,7 @@ namespace toml::impl
 						}
 						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 						{
-							const auto cp_view = arg.as_view<char>();
+							const auto cp_view = arg.template as_view<char>();
 							memcpy(ptr, cp_view.data(), cp_view.length());
 							ptr += cp_view.length();
 						}
@@ -124,7 +124,7 @@ namespace toml::impl
 					if (pop_bytes >= recording_buffer.length())
 						recording_buffer.clear();
 					else
-						recording_buffer.erase(recording_buffer.cbegin() + (recording_buffer.length() - pop_bytes), recording_buffer.cend());
+						recording_buffer.erase(recording_buffer.cbegin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes), recording_buffer.cend());
 				}
 			}
 
@@ -186,7 +186,7 @@ namespace toml::impl
 					else
 					{
 						#if !TOML_STRICT
-						if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+						if (*cp <= U'\u0008'
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 							|| *cp == U'\u007F')
 							throw_parse_error("Encountered unexpected character while parsing comment; control characters U+0000-U+0008, U+000A-U+001F and U+007F are explicitly prohibited from appearing in comments."sv);
@@ -410,7 +410,7 @@ namespace toml::impl
 						}
 
 						// handle illegal characters
-						if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+						if (*cp <= U'\u0008'
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 							|| *cp == U'\u007F')
 							throw_parse_error(
@@ -499,7 +499,7 @@ namespace toml::impl
 					}
 
 					// handle illegal characters
-					if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+					if (*cp <= U'\u0008'
 						|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 						|| *cp == U'\u007F')
 						throw_parse_error(
@@ -628,8 +628,12 @@ namespace toml::impl
 					: std::numeric_limits<double>::quiet_NaN();
 			}
 
-			#pragma warning(push)
+			TOML_PUSH_WARNINGS
+			#ifdef __clang__
+			#pragma clang diagnostic ignored "-Wswitch"
+			#elif defined(_MSC_VER)
 			#pragma warning(disable: 4063) //case '0' is not a valid value for switch of enum 'std::errc'
+			#endif
 
 			[[nodiscard]]
 			double parse_float()
@@ -1085,7 +1089,7 @@ namespace toml::impl
 				switch (parse_result.ec)
 				{
 					case std::errc{}: //ok
-						return result * sign;
+						return static_cast<int64_t>(result) * sign;
 
 					case std::errc::invalid_argument:
 						throw_parse_error("Error parsing integer; the character sequence could not be interpreted as an integer value"sv);
@@ -1196,7 +1200,7 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
-			#pragma warning(pop) //disabled C4063: case '0' is not a valid value for switch of enum 'std::errc'
+			TOML_POP_WARNINGS
 
 			[[nodiscard]]
 			date parse_date(bool time_may_follow = false)
@@ -1365,12 +1369,13 @@ namespace toml::impl
 				eof_check();
 
 				// ".FFFFFFFFFFFFF"
-				uint32_t fractional_digits[24]; //surely that will be enough
+				static constexpr auto max_fractional_digits = 24_sz;
+				uint32_t fractional_digits[max_fractional_digits]; //surely that will be enough
 				auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 				if (!digit_count)
 					throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, *cp, '\'');
-				if (digit_count == 24_sz && cp && is_decimal_digit(*cp))
-					throw_parse_error("Fractional value out-of-range; exceeds maximum precision of 24"sv, second);
+				if (digit_count == max_fractional_digits && cp && is_decimal_digit(*cp))
+					throw_parse_error("Fractional value out-of-range; exceeds maximum precision of "sv, max_fractional_digits);
 
 				uint64_t value = 0;
 				uint64_t place = 1;
@@ -1379,7 +1384,7 @@ namespace toml::impl
 					value += fractional_digits[digit_count] * place;
 					place *= 10u;
 				}
-				time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / place);
+				time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / static_cast<double>(place));
 
 				return time;
 			}
@@ -1472,10 +1477,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			std::unique_ptr<array> parse_array();
+			std::unique_ptr<toml::array> parse_array();
 
 			[[nodiscard]]
-			std::unique_ptr<table> parse_inline_table();
+			std::unique_ptr<toml::table> parse_inline_table();
 
 			[[nodiscard]]
 			std::unique_ptr<node> parse_value()
@@ -1523,11 +1528,11 @@ namespace toml::impl
 
 					// value types from here down require more than one character
 					// to unambiguously identify, so scan ahead a bit.
-					constexpr size_t max_scan_chars = 32_sz;
-					char32_t chars[max_scan_chars]{ *cp };
+					char32_t chars[utf8_buffered_reader::max_history_length];
+					chars[0] = *cp;
 					size_t char_count = 1_sz;
 					bool eof_while_scanning = false;
-					for (size_t i = max_scan_chars-1_sz; i --> 0_sz;)
+					for (size_t i = utf8_buffered_reader::max_history_length - 1_sz; i --> 0_sz;)
 					{
 						advance();
 						if (!cp || is_value_terminator(*cp))
@@ -2049,7 +2054,6 @@ namespace toml::impl
 				);
 			}
 
-
 			void parse_document()
 			{
 				TOML_ASSERT(cp);
@@ -2121,7 +2125,7 @@ namespace toml::impl
 			}
 	};
 
-	std::unique_ptr<array> parser::parse_array()
+	std::unique_ptr<toml::array> parser::parse_array()
 	{
 		TOML_ASSERT(cp && *cp == U'[');
 		const auto eof_check = [this]()
@@ -2171,7 +2175,7 @@ namespace toml::impl
 		return arr;
 	}
 
-	std::unique_ptr<table> parser::parse_inline_table()
+	std::unique_ptr<toml::table> parser::parse_inline_table()
 	{
 		TOML_ASSERT(cp && *cp == U'{');
 		const auto eof_check = [this]()

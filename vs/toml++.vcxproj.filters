@@ -10,6 +10,7 @@
     <ClInclude Include="..\include\toml++\toml.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
     <ClInclude Include="..\include\toml++\toml_utf8_is_unicode_letter.h" />
+    <ClInclude Include="..\include\toml++\toml_writer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

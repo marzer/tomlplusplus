@@ -162,7 +162,7 @@ namespace toml::impl
 				: (byte & 0x3Fu) | (codepoint << 6);
 
 			state = state_table[state + 256u + type];
-		};
+		}
 	};
 
 	template <typename T>
@@ -304,6 +304,8 @@ namespace toml::impl
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() = 0;
+
+		virtual ~utf8_reader_interface() noexcept = default;
 	};
 
 	template <typename T>
@@ -412,11 +414,12 @@ namespace toml::impl
 			static constexpr auto max_history_length = 64_sz;
 
 		private:
+			static constexpr auto history_buffer_size = max_history_length - 1_sz; //the 'head' is stored in the underlying reader
 			utf8_reader_interface& reader;
 			struct
 			{
-				static constexpr auto buffer_size = max_history_length - 1_sz; //the 'head' is stored in the underlying reader
-				utf8_codepoint buffer[buffer_size];
+				
+				utf8_codepoint buffer[history_buffer_size];
 				size_t count = {}, first = {};
 			}
 			history;
@@ -448,7 +451,7 @@ namespace toml::impl
 
 					// otherwise step back into the history buffer
 					else
-						return history.buffer + ((history.first + history.count - negative_offset) % decltype(history)::buffer_size);
+						return history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size);
 				}
 				else
 				{
@@ -459,10 +462,10 @@ namespace toml::impl
 					// subsequent characters and not eof
 					else if (head)
 					{
-						if (history.count < decltype(history)::buffer_size) TOML_UNLIKELY
+						if (history.count < history_buffer_size) TOML_UNLIKELY
 							history.buffer[history.count++] = *head;
 						else
-							history.buffer[(history.first++ + decltype(history)::buffer_size) % decltype(history)::buffer_size] = *head;
+							history.buffer[(history.first++ + history_buffer_size) % history_buffer_size] = *head;
 
 						head = reader.read_next();
 					}
@@ -479,7 +482,7 @@ namespace toml::impl
 				negative_offset += count;
 
 				return negative_offset
-					? history.buffer + ((history.first + history.count - negative_offset) % decltype(history)::buffer_size)
+					? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
 					: head;
 			}
 	};
