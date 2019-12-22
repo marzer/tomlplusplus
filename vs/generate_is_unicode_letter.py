@@ -323,17 +323,17 @@ class Chunk:
 				print("{}return ({}) & {};".format(indent, selector, make_bitmask(make_mask_from_indices(always_true))), file=output_file)
 
 			# return selector == A ? true : selector & mask
-			elif (len(not_always_true_or_false) == 1
-				and (len(always_true) + len(always_false)) == len(self.subchunks)-1
-				and len(self.subchunks) <= 64):
-				print('{}const auto selector = {}; //kek'.format(indent, selector), file=output_file)
-				print('{}return selector == {}u ? true : selector & {};'.format(
-						indent,
-						not_always_true_or_false[0],
-						make_bitmask(make_mask_from_indices(always_true))
-					),
-					file=output_file
-				)
+			#elif (len(not_always_true_or_false) == 1
+			#	and (len(always_true) + len(always_false)) == len(self.subchunks)-1
+			#	and len(self.subchunks) <= 64):
+			#	print('{}const auto selector = {}; //kek'.format(indent, selector), file=output_file)
+			#	print('{}return selector == {}u ? true : selector & {};'.format(
+			#			indent,
+			#			not_always_true_or_false[0],
+			#			make_bitmask(make_mask_from_indices(always_true))
+			#		),
+			#		file=output_file
+			#	)
 
 			# switch(selector)
 			else:

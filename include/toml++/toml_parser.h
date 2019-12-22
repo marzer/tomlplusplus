@@ -176,7 +176,27 @@ namespace toml::impl
 			{
 				if (!cp || *cp != U'#')
 					return false;
-				return consume_rest_of_line();
+
+				advance(); //skip the '#'
+
+				while (cp)
+				{
+					if (consume_line_break())
+						return true;
+					else
+					{
+						#if !TOML_STRICT
+						if ((*cp >= U'\u0000' && *cp <= U'\u0008')
+							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
+							|| *cp == U'\u007F')
+							throw_parse_error("Encountered unexpected character while parsing comment; control characters U+0000-U+0008, U+000A-U+001F and U+007F are explicitly prohibited from appearing in comments."sv);
+						#endif
+
+						advance();
+					}
+				}
+
+				return true;
 			}
 
 			[[nodiscard]]
@@ -287,7 +307,11 @@ namespace toml::impl
 											"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
 											" string; expected hex digit, saw '\\"sv, *cp, "'"sv
 										);
-									sequence_value += place_value * hex_digit_to_int(*cp);
+									sequence_value += place_value * (
+										*cp >= U'A'
+											? 10u + static_cast<uint32_t>(*cp - (*cp >= U'a' ? U'a' : U'A'))
+											: static_cast<uint32_t>(*cp - U'0')
+										);
 									place_value /= 16u;
 									advance();
 								}
@@ -626,49 +650,59 @@ namespace toml::impl
 				}
 
 				// consume value chars
-				char chars[128];
+				char chars[64];
 				size_t length = {};
 				const utf8_codepoint* prev = {};
+				bool seen_decimal = false, seen_exponent_sign = false, seen_exponent = false;
 				while (true)
 				{
 					if (!cp || is_value_terminator(*cp))
 						break;
 
-					bool seen_decimal = false;
-					bool seen_exponent = false;
 					if (*cp == U'_')
 					{
 						if (!prev || !is_decimal_digit(*prev))
 							throw_parse_error("Encountered unexpected character while parsing floating-point; underscores may only follow digits"sv);
+						prev = cp;
+						advance();
+						continue;
 					}
-					else
+
+					if (*cp == U'.')
 					{
-						if ((!prev || *prev == U'_') && !is_decimal_digit(*cp))
-							throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
-						if (*cp == U'.')
-						{
-							if (seen_decimal)
-								throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may only appear once"sv);
-							if (seen_exponent)
-								throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
-							seen_decimal = true;
-						}
-						else if (*cp == U'e' || *cp == U'E')
-						{
-							if (seen_exponent)
-								throw_parse_error("Encountered unexpected character while parsing floating-point; exponents may only appear once"sv);
-							seen_exponent = true;
-						}
-
-						const auto cp_view = cp->as_view();
-						if (length + cp_view.length() > sizeof(chars))
-							throw_parse_error("Floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
-						memcpy(chars + length, cp_view.data(), cp_view.length());
-						length += cp_view.length();
-
+						if (seen_decimal)
+							throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may appear only once");
+						if (seen_exponent)
+							throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
+						seen_decimal = true;
 					}
+					else if (*cp == U'e' || *cp == U'E')
+					{
+						if (seen_exponent)
+							throw_parse_error("Encountered unexpected character while parsing floating-point; exponents may appear only once");
+						seen_exponent = true;
+					}
+					else if (*cp == U'+' || *cp == U'-')
+					{
+						if (!seen_exponent || !(*prev == U'e' || *prev == U'E'))
+							throw_parse_error("Encountered unexpected character while parsing floating-point; exponent signs must immediately follow 'e'"sv);
+						if (seen_exponent_sign)
+							throw_parse_error("Encountered unexpected character while parsing floating-point; exponents signs may appear only once");
+						seen_exponent_sign = true;
+					}
+					else if (!is_decimal_digit(*cp))
+						throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
+						
+					if (length == sizeof(chars))
+						throw_parse_error("Floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
 					advance();
+				}
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					throw_parse_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
 				}
 
 				// convert to double
@@ -710,9 +744,109 @@ namespace toml::impl
 						throw_parse_error("Encountered EOF while parsing hexadecimal floating-point"sv);
 				};
 
-				TOML_NOT_IMPLEMENTED_YET;
+				// '0'
+				if (*cp != U'0')
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; expected '0', saw '"sv, *cp, '\'');
+				advance();
+				eof_check();
 
-				return {};
+				// 'x' or 'X'
+				if (*cp != U'x' && *cp != U'X')
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; expected 'x' or 'X', saw '"sv, *cp, '\'');
+				advance();
+				eof_check();
+
+				// consume value chars
+				char chars[23]; //23 = strlen("1.0123456789ABCDEFp+999")
+				size_t length = {};
+				const utf8_codepoint* prev = {};
+				bool seen_decimal = false, seen_exponent_sign = false, seen_exponent = false;
+				while (true)
+				{
+					if (!cp || is_value_terminator(*cp))
+						break;
+
+					if (*cp == U'_')
+					{
+						if (!prev || !is_hex_digit(*prev))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; underscores may only follow digits");
+						prev = cp;
+						advance();
+						continue;
+					}
+					
+					if (*cp == U'.')
+					{
+						if (seen_decimal)
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; decimal points may appear only once");
+						if (seen_exponent)
+							throw_parse_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
+						seen_decimal = true;
+					}
+					else if (*cp == U'p' || *cp == U'P')
+					{
+						if (seen_exponent)
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents may appear only once");
+						if (!seen_decimal)
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents may not appear before decimal points");
+						seen_exponent = true;
+					}
+					else if (*cp == U'+' || *cp == U'-')
+					{
+						if (!seen_exponent || !(*prev == U'p' || *prev == U'P'))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; exponent signs must immediately follow 'p'"sv);
+						if (seen_exponent_sign)
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents signs may appear only once");
+						seen_exponent_sign = true;
+					}
+					else
+					{
+						if (!seen_exponent && !is_hex_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; expected hexadecimal digit, saw '"sv, *cp, '\'');
+						else if (seen_exponent && !is_decimal_digit(*cp))
+							throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point exponent; expected decimal digit, saw '"sv, *cp, '\'');
+					}
+
+					if (length == sizeof(chars))
+						throw_parse_error("Hexadecimal floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+					chars[length++] = static_cast<char>(cp->bytes[0]);
+					prev = cp;
+					advance();
+				}
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					if (seen_exponent)
+						throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point exponent; expected decimal digit, saw '"sv, *cp, '\'');
+					else
+						throw_parse_error("Encountered unexpected character while parsing hexadecimal floating-point; expected hexadecimal digit, saw '"sv, *cp, '\'');
+				}
+
+				// convert to double
+				double result;
+				auto parse_result = std::from_chars(chars, chars + length, result, std::chars_format::hex);
+				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
+				{
+					eof_check();
+					parse_result.ec = std::errc::invalid_argument;
+				}
+				switch (parse_result.ec)
+				{
+					case std::errc{}: //ok
+						return result;
+
+					case std::errc::invalid_argument:
+						throw_parse_error("Error parsing hexadecimal floating-point; the character sequence could not be interpreted as a hexadecimal floating-point value"sv);
+
+					case std::errc::result_out_of_range:
+						throw_parse_error(
+							"Error parsing hexadecimal floating-point; the character sequence contained a value not representable by a 64-bit floating-point"sv);
+
+					default: //??
+						throw_parse_error(
+							"Error parsing hexadecimal floating-point; an unspecified error occurred while trying to interpret the character sequence as a hexadecimal floating-point value"sv);
+				}
+				TOML_UNREACHABLE;
 			}
 
 			#endif //!TOML_STRICT
@@ -740,7 +874,7 @@ namespace toml::impl
 				eof_check();
 
 				// consume value chars
-				char chars[127]; //127 == strlen("0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0_0")
+				char chars[64];
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -761,11 +895,21 @@ namespace toml::impl
 							throw_parse_error("Binary integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
+
 					prev = cp;
 					advance();
 				}
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					throw_parse_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, *cp, '\'');
+				}
 
-				// convert to int
+				// single digits can be converted directly
+				if (length == 1_sz)
+					return chars[0] == '1' ? 1ull : 0ull;
+
+				// otherwise invoke charconv
 				int64_t result;
 				auto parse_result = std::from_chars(chars, chars + length, result, 2);
 				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
@@ -813,7 +957,7 @@ namespace toml::impl
 				eof_check();
 
 				// consume value chars
-				char chars[41]; //41 == strlen("7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7_7")
+				char chars[21]; //21 == strlen("777777777777777777777") (max 64-bit uint)
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -834,11 +978,21 @@ namespace toml::impl
 							throw_parse_error("Octal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
+
 					prev = cp;
 					advance();
 				}
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					throw_parse_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, *cp, '\'');
+				}
 
-				// convert to int
+				// single digits can be converted directly
+				if (length == 1_sz)
+					return static_cast<int64_t>(chars[0] - '0');
+
+				// otherwise invoke charconv
 				int64_t result;
 				auto parse_result = std::from_chars(chars, chars + length, result, 8);
 				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))
@@ -882,7 +1036,7 @@ namespace toml::impl
 				}
 
 				// consume value chars
-				char chars[37]; //37 == strlen("9_2_2_3_3_7_2_0_3_6_8_5_4_7_7_5_8_0_7")
+				char chars[19]; //19 == strlen("9223372036854775807") (max 64-bit uint)
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -903,10 +1057,15 @@ namespace toml::impl
 							throw_parse_error("Integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
+
 					prev = cp;
 					advance();
 				}
-				TOML_ASSERT(length);
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					throw_parse_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, *cp, '\'');
+				}
 
 				// check for leading zeroes etc
 				if (chars[0] == '0')
@@ -956,14 +1115,14 @@ namespace toml::impl
 				advance();
 				eof_check();
 
-				// 'x' pr 'X'
+				// 'x' or 'X'
 				if (*cp != U'x' && *cp != U'X')
 					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected 'x' or 'X', saw '"sv, *cp, '\'');
 				advance();
 				eof_check();
 
 				// consume value chars
-				char chars[31]; //31 == strlen("0_0_1_1_2_2_3_3_A_A_B_B_C_C_D_D")
+				char chars[16]; //16 == strlen("FFFFFFFFFFFFFFFF") (max 64-bit uint)
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -984,11 +1143,23 @@ namespace toml::impl
 							throw_parse_error("Hexadecimal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
+
 					prev = cp;
 					advance();
 				}
+				if (prev && *prev == U'_')
+				{
+					eof_check();
+					throw_parse_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, *cp, '\'');
+				}
 
-				// convert to int
+				// single digits can be converted directly
+				if (length == 1_sz)
+					return chars[0] >= 'A'
+						? static_cast<int64_t>(10 + (chars[0] - (chars[0] >= 'a' ? 'a' : 'A')))
+						: static_cast<int64_t>(chars[0] - '0');
+
+				// otherwise invoke charconv
 				int64_t result;
 				auto parse_result = std::from_chars(chars, chars + length, result, 16);
 				if (parse_result.ec == std::errc{} && parse_result.ptr < (chars + length))

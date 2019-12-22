@@ -422,8 +422,16 @@ namespace toml::impl
 				if (codepoint < U'\U0001E100' || codepoint > U'\U0001E87F')
 					return false;
 
-				const auto selector = (static_cast<uint32_t>(codepoint) - 0x1E100u) / 64u; //kek
-				return selector == 0u ? true : selector & 0x30000082ull;
+				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001E100', U'\U0001E87F');
+				switch ((static_cast<uint32_t>(codepoint) - 0x1E100u) / 64u)
+				{
+					case 0: return codepoint <= U'\U0001E12C' || codepoint >= U'\U0001E137';
+					case 1: return true;
+					case 7: return true;
+					case 28: return true;
+					case 29: return true;
+					default: return false;
+				}
 				// chunk summary: 225 codepoints from 5 ranges (spanning a search area of 1920)
 			}
 			case 41: 
@@ -527,8 +535,15 @@ namespace toml::impl
 				if (codepoint < U'\U00010140' || codepoint > U'\U000104A9')
 					return false;
 
-				const auto selector = (static_cast<uint32_t>(codepoint) - 0x10140u) / 63u; //kek
-				return selector == 8u ? true : selector & 0x2401ull;
+				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010140', U'\U000104A9');
+				switch ((static_cast<uint32_t>(codepoint) - 0x10140u) / 63u)
+				{
+					case 0: return true;
+					case 8: return codepoint <= U'\U00010341' || codepoint >= U'\U0001034A';
+					case 10: return true;
+					case 13: return true;
+					default: return false;
+				}
 				// chunk summary: 70 codepoints from 5 ranges (spanning a search area of 874)
 			}
 			case 34: return true;
@@ -601,8 +616,12 @@ namespace toml::impl
 						if (codepoint < U'\u0816' || codepoint > U'\u085B')
 							return false;
 
-						const auto selector = (static_cast<uint32_t>(codepoint) - 0x816u) / 35u; //kek
-						return selector == 0u ? true : selector & 0x2ull;
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0816', U'\u085B');
+						switch ((static_cast<uint32_t>(codepoint) - 0x816u) / 35u)
+						{
+							case 0: return (1u << (static_cast<uint32_t>(codepoint) - 0x816u)) & 0xFBBFEFu;
+							default: return true;
+						}
 						// chunk summary: 24 codepoints from 5 ranges (spanning a search area of 70)
 					}
 					case 8: 
@@ -853,8 +872,12 @@ namespace toml::impl
 						if (codepoint < U'\U00011A33')
 							return false;
 
-						const auto selector = (static_cast<uint32_t>(codepoint) - 0x11A33u) / 52u; //kek
-						return selector == 0u ? true : selector & 0x2ull;
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00011A33', U'\U00011A99');
+						switch ((static_cast<uint32_t>(codepoint) - 0x11A33u) / 52u)
+						{
+							case 0: return (1ull << (static_cast<uint64_t>(codepoint) - 0x11A33ull)) & 0x1FFC0100F7Full;
+							default: return true;
+						}
 						// chunk summary: 39 codepoints from 5 ranges (spanning a search area of 103)
 					}
 					default: return false;

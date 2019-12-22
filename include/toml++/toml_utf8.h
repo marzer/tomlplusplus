@@ -79,14 +79,6 @@ namespace toml::impl
 			|| is_decimal_digit(codepoint);
 	}
 
-	[[nodiscard]]
-	constexpr uint32_t hex_digit_to_int(char32_t codepoint) noexcept
-	{
-		if (is_decimal_digit(codepoint))
-			return static_cast<uint32_t>(codepoint - U'0');
-		return 10u + static_cast<uint32_t>(codepoint - ((codepoint >= U'a' && codepoint <= U'f') ? U'a' : U'A'));
-	}
-
 	[[nodiscard]] TOML_ALWAYS_INLINE_WHEN_STRICT
 	constexpr bool is_bare_key_start_character(char32_t codepoint) noexcept
 	{
@@ -416,12 +408,15 @@ namespace toml::impl
 	class TOML_EMPTY_BASES utf8_buffered_reader final
 		: public utf8_reader_interface
 	{
+		public:
+			static constexpr auto max_history_length = 64_sz;
+
 		private:
 			utf8_reader_interface& reader;
 			struct
 			{
-				static constexpr size_t capacity = 63; //+1 for the 'head' stored in the underlying reader
-				utf8_codepoint buffer[capacity];
+				static constexpr auto buffer_size = max_history_length - 1_sz; //the 'head' is stored in the underlying reader
+				utf8_codepoint buffer[buffer_size];
 				size_t count = {}, first = {};
 			}
 			history;
@@ -453,7 +448,7 @@ namespace toml::impl
 
 					// otherwise step back into the history buffer
 					else
-						return history.buffer + ((history.first + history.count - negative_offset) % history.capacity);
+						return history.buffer + ((history.first + history.count - negative_offset) % decltype(history)::buffer_size);
 				}
 				else
 				{
@@ -464,10 +459,10 @@ namespace toml::impl
 					// subsequent characters and not eof
 					else if (head)
 					{
-						if (history.count < history.capacity) TOML_UNLIKELY
+						if (history.count < decltype(history)::buffer_size) TOML_UNLIKELY
 							history.buffer[history.count++] = *head;
 						else
-							history.buffer[(history.first++ + history.capacity) % history.capacity] = *head;
+							history.buffer[(history.first++ + decltype(history)::buffer_size) % decltype(history)::buffer_size] = *head;
 
 						head = reader.read_next();
 					}
@@ -484,7 +479,7 @@ namespace toml::impl
 				negative_offset += count;
 
 				return negative_offset
-					? history.buffer + ((history.first + history.count - negative_offset) % history.capacity)
+					? history.buffer + ((history.first + history.count - negative_offset) % decltype(history)::buffer_size)
 					: head;
 			}
 	};

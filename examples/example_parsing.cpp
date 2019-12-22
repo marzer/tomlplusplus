@@ -1,6 +1,6 @@
 #include <toml++/toml.h>
 
-using namespace std::literals;
+using namespace std::literals::string_view_literals;
 
 inline constexpr auto toml_document =
 R"(# This is a TOML document.
@@ -21,7 +21,10 @@ oct1 = 0o01234567
 oct2 = 0o755 # useful for Unix file permissions
 
 # binary with prefix `0b`
-bin1 = 0b11010110
+bin1 = 0b11010110 # 214
+
+# hexfloats
+hexf = 0x1.2p3 # 9.0 in hex
 
 [owner]
 name = "Mark Gillard"
