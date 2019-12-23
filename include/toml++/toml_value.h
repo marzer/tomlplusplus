@@ -13,7 +13,7 @@ namespace toml
 		);
 
 		private:
-			friend class impl::writer;
+			friend class impl::writer<void>;
 
 			template <typename U>
 			[[nodiscard]] TOML_ALWAYS_INLINE

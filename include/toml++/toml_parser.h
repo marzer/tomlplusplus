@@ -1368,23 +1368,25 @@ namespace toml::impl
 				advance();
 				eof_check();
 
-				// ".FFFFFFFFFFFFF"
-				static constexpr auto max_fractional_digits = 24_sz;
-				uint32_t fractional_digits[max_fractional_digits]; //surely that will be enough
+				// ".FFFFFFFFF"
+				static constexpr auto max_fractional_digits = 9_sz;
+				uint32_t fractional_digits[max_fractional_digits];
 				auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 				if (!digit_count)
 					throw_parse_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, *cp, '\'');
 				if (digit_count == max_fractional_digits && cp && is_decimal_digit(*cp))
 					throw_parse_error("Fractional value out-of-range; exceeds maximum precision of "sv, max_fractional_digits);
 
-				uint64_t value = 0;
-				uint64_t place = 1;
-				for (; digit_count --> 0_sz;)
+				uint32_t value = 0u;
+				uint32_t place = 1u;
+				for (auto i = digit_count; i --> 0_sz;)
 				{
-					value += fractional_digits[digit_count] * place;
+					value += fractional_digits[i] * place;
 					place *= 10u;
 				}
-				time.microsecond = static_cast<uint32_t>(static_cast<double>(1000000ull * value) / static_cast<double>(place));
+				for (auto i = digit_count; i < max_fractional_digits; i++) //implicit zeros
+					value *= 10u;
+				time.nanosecond = value;
 
 				return time;
 			}
@@ -1529,20 +1531,49 @@ namespace toml::impl
 					// value types from here down require more than one character
 					// to unambiguously identify, so scan ahead a bit.
 					char32_t chars[utf8_buffered_reader::max_history_length];
-					chars[0] = *cp;
-					size_t char_count = 1_sz;
+					size_t char_count = {}, advance_count = {};
 					bool eof_while_scanning = false;
-					for (size_t i = utf8_buffered_reader::max_history_length - 1_sz; i --> 0_sz;)
+					const auto scan = [&]()
 					{
-						advance();
-						if (!cp || is_value_terminator(*cp))
+						while (advance_count < utf8_buffered_reader::max_history_length)
 						{
-							eof_while_scanning = !cp;
-							break;
+							if (!cp || is_value_terminator(*cp))
+							{
+								eof_while_scanning = !cp;
+								break;
+							}
+
+							if (*cp != U'_')
+								chars[char_count++] = *cp;
+							advance();
+							advance_count++;
 						}
+					};
+					scan();
+
+					//force further scanning if this could have been a date-time with a space instead of a T
+					if (char_count == 10_sz && chars[4] == U'-' && chars[7] == U'-' && is_decimal_digit(chars[9]) && cp && *cp == U' ')
+					{
 						chars[char_count++] = *cp;
+						const auto pre_advance_count = advance_count;
+
+						advance();
+						advance_count++;
+
+						scan();
+
+						if (char_count == 11_sz) //backpedal if we found nothing useful after the space
+						{
+							const auto delta = advance_count - pre_advance_count;
+							go_back(delta);
+							advance_count -= delta;
+						}
 					}
-					go_back(char_count);
+
+					//set the reader back to where we started
+					go_back(advance_count);
+					if (char_count < utf8_buffered_reader::max_history_length - 1_sz)
+						chars[char_count] = U'\0';
 
 					// if after scanning ahead we still only have one value character,
 					// the only valid value type is an integer.
@@ -1619,6 +1650,29 @@ namespace toml::impl
 					if (val || !(begins_with_sign || begins_with_digit))
 						break;
 
+					// dates, times, datetimes
+					if (begins_with_digit)
+					{
+						//1987-03-16
+						//1987-03-16 10:20:00
+						//1987-03-16T10:20:00 ... etc.
+						if (char_count >= 8_sz && chars[4] == U'-' && chars[7] == U'-')
+						{
+							if (char_count > 10_sz)
+								val = std::make_unique<value<datetime>>(parse_datetime());
+							else
+								val = std::make_unique<value<date>>(parse_date());
+						}
+						
+						//10:20:00
+						//10:20:00.87234
+						if (!val && char_count >= 6_sz && chars[2] == U':' && chars[5] == U':')
+							val = std::make_unique<value<time>>(parse_time());
+					}
+
+					if (val)
+						break;
+
 					// if we get here then all the easy cases are taken care of, so we need to do 
 					// a 'deeper dive' to figure out what the value type could possibly be.
 					// 
@@ -1629,7 +1683,7 @@ namespace toml::impl
 						
 					enum possible_value_types : int
 					{
-						impossibly_anything = 0,
+						nothing = 0,
 						possibly_int = 1,
 						possibly_float = 2,
 						possibly_datetime = 4,
@@ -1637,7 +1691,7 @@ namespace toml::impl
 					auto possible_types =
 						possibly_int
 						| possibly_float
-						| (begins_with_digit && char_count >= 8_sz ? possibly_datetime : impossibly_anything) // strlen("HH:MM:SS")
+						| (begins_with_digit && char_count >= 8_sz ? possibly_datetime : nothing) // strlen("HH:MM:SS")
 					;
 					std::optional<size_t> first_colon, first_minus;
 					for (size_t i = 0; i < char_count; i++)
@@ -1654,13 +1708,12 @@ namespace toml::impl
 
 						if ((possible_types & possibly_int))
 						{
-							if (colon || !(digit || (i == 0_sz && sign) || chars[i] == U'_'))
+							if (colon || !(digit || (i == 0_sz && sign)))
 								possible_types &= ~possibly_int;
 						}
 						if ((possible_types & possibly_float))
 						{
 							if (colon || !(digit || sign
-								|| chars[i] == U'_'
 								|| chars[i] == U'.'
 								|| chars[i] == U'e'
 								|| chars[i] == U'E'))

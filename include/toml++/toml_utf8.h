@@ -118,8 +118,8 @@ namespace toml::impl
 	// based on the decoder found here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 	struct utf8_decoder final
 	{
-		uint32_t state{};
-		uint32_t codepoint{};
+		uint_least32_t state{};
+		char32_t codepoint{};
 
 		static constexpr uint8_t state_table[]
 		{
@@ -142,13 +142,13 @@ namespace toml::impl
 		[[nodiscard]]
 		constexpr bool error() const noexcept
 		{
-			return state == 12u;
+			return state == uint_least32_t{ 12u };
 		}
 
 		[[nodiscard]]
 		constexpr bool has_code_point() const noexcept
 		{
-			return state == 0u;
+			return state == uint_least32_t{};
 		}
 
 		constexpr void operator () (uint8_t byte) noexcept
@@ -157,11 +157,13 @@ namespace toml::impl
 
 			const auto type = state_table[byte];
 
-			codepoint = has_code_point()
-				? (0xFFu >> type) & byte
-				: (byte & 0x3Fu) | (codepoint << 6);
+			codepoint = static_cast<char32_t>(
+				has_code_point()
+					? (uint_least32_t{ 255u } >> type) & byte
+					: (byte & uint_least32_t{ 63u }) | (static_cast<uint_least32_t>(codepoint) << 6)
+				);
 
-			state = state_table[state + 256u + type];
+			state = state_table[state + uint_least32_t{ 256u } + type];
 		}
 	};
 
@@ -381,7 +383,7 @@ namespace toml::impl
 					if (decoder.has_code_point())
 					{
 						prev = current;
-						prev.value = static_cast<char32_t>(decoder.codepoint);
+						prev.value = decoder.codepoint;
 						current_byte_count = {};
 
 						if (is_line_break<false>(prev.value))

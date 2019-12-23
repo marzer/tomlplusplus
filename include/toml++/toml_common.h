@@ -234,6 +234,7 @@ namespace toml
 		}
 
 		class parser;
+		template <typename T>
 		class writer;
 	}
 
@@ -249,7 +250,7 @@ namespace toml
 		uint8_t hour;
 		uint8_t minute;
 		uint8_t second;
-		uint32_t microsecond;
+		uint32_t nanosecond;
 	};
 
 	struct time_offset final
@@ -313,9 +314,9 @@ namespace toml
 
 	enum class node_type : uint8_t
 	{
-		array,
-		table,
 		table_array,
+		table,
+		array,
 		string,
 		integer,
 		floating_point,
