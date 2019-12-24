@@ -2,9 +2,7 @@
 Header-only TOML parsing lib for C++17 and later.
 
 # Usage
-Single-header libraries are the hip thing at the moment but are pretty unergonomic to develop.  
-Multi-header libraries are easier to develop but can't necessarily just be dropped in your source tree.  
-`toml++` provides both flavours:
+Single-header libraries are the hip thing at the moment but are pretty unergonomic to develop. Multi-header libraries are easier to develop but can't always be dropped in your source tree with ease. `toml++` provides both flavours.
 
 #### 'Single-header' mode
 1. Drop `toml.hpp` somewhere in your source tree
@@ -15,14 +13,15 @@ Multi-header libraries are easier to develop but can't necessarily just be dropp
 2. Include `toml++/toml.h`
 
 # Configuration
-A number of of configurable options are exposed in the form of preprocessor macros. Most likely you won't need to mess
+A number of configurable options are exposed in the form of preprocessor macros. Most likely you won't need to mess
 with these at all, but in the event you do, set your overrides prior to including toml++.
-| Option               | Type             | Default                                     | Description |
-|----------------------|:----------------:|--------------------------------------------|-------------|
-| `TOML_CONFIG_HEADER` | string literal   | undefined                                   | Includes the given header file before the rest of toml++.     |
-| `TOML_ASSERT(expr)`  | function macro   | `assert(expr)`<br>(if `assert` is defined)  | Sets the assert function used by the library.            |
-| `TOML_STRICT`        | boolean | `0`                                         | Disables support for language features not yet released in a [numbered version](https://github.com/toml-lang/toml/releases). |
-| `TOML_USE_CHAR_8_IF_AVAILABLE`  | boolean   | `0`                            | Uses [char8_t](https://en.cppreference.com/w/cpp/keyword/char8_t)-based strings if supported by your compiler and standard library.<br>`TOML_CHAR_8` will be set to `1` if support is detected.             |
+
+| Option                         |      Type      | Default                                    | Description                                                                                                                                                                                     |
+|--------------------------------|:--------------:|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `TOML_CONFIG_HEADER`           | string literal | undefined                                  | Includes the given header file before the rest of toml++.                                                                                                                                       |
+| `TOML_ASSERT(expr)`            | function macro | `assert(expr)` (or undefined)              | Sets the assert function used by the library.                                                                                                                                                   |
+| `TOML_STRICT`                  |     boolean    | `0`                                        | Disables support for language features not yet released in a [numbered version](https://github.com/toml-lang/toml/releases).                                                                    |
+| `TOML_USE_CHAR_8_IF_AVAILABLE` |     boolean    | `0`                                        | Uses [char8_t](https://en.cppreference.com/w/cpp/keyword/char8_t)-based strings if supported by your compiler and standard library. `TOML_CHAR_8` will be set to `1` if support is detected. |
 
 # Contributing
 TBA.
