@@ -2,7 +2,6 @@
 #include "toml_utf8.h"
 #include "toml_value.h"
 #include "toml_array.h"
-#include "toml_table_array.h"
 
 namespace toml::impl
 {
@@ -15,12 +14,13 @@ namespace toml::impl
 			const utf8_codepoint* cp = {};
 			std::vector<table*> implicit_tables;
 			std::vector<table*> dotted_key_tables;
+			std::vector<array*> table_arrays;
 			std::string recording_buffer; //for diagnostics 
 			bool recording = false;
 
 			template <typename... T>
 			[[noreturn]]
-			void throw_parse_error(T &&... args) const
+			void throw_parse_error(T &&... args) const TOML_MAY_THROW
 			{
 				const auto& pos = cp ? cp->position : prev_pos;
 				if constexpr (sizeof...(T) == 0_sz)
@@ -61,7 +61,6 @@ namespace toml::impl
 							{
 								case node_type::array: type = "array"sv; break;
 								case node_type::table: type = "table"sv; break;
-								case node_type::table_array: type = "table array"sv; break;
 								case node_type::string: type = "string"sv; break;
 								case node_type::integer: type = "integer"sv; break;
 								case node_type::floating_point: type = "floating-point"sv; break;
@@ -90,7 +89,7 @@ namespace toml::impl
 				}
 			}
 
-			void go_back(size_t count = 1_sz)
+			void go_back(size_t count = 1_sz) noexcept
 			{
 				TOML_ASSERT(count);
 
@@ -98,7 +97,7 @@ namespace toml::impl
 				prev_pos = cp->position;
 			}
 
-			void advance()
+			void advance() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp);
 
@@ -128,7 +127,7 @@ namespace toml::impl
 				}
 			}
 
-			bool consume_leading_whitespace()
+			bool consume_leading_whitespace() TOML_MAY_THROW
 			{
 				bool consumed = false;
 				while (cp && is_whitespace(*cp))
@@ -139,7 +138,7 @@ namespace toml::impl
 				return consumed;
 			}
 
-			bool consume_line_break()
+			bool consume_line_break() TOML_MAY_THROW
 			{
 				if (!cp || !is_line_break(*cp))
 					return false;
@@ -156,7 +155,7 @@ namespace toml::impl
 				return true;
 			}
 
-			bool consume_rest_of_line()
+			bool consume_rest_of_line() TOML_MAY_THROW
 			{
 				if (!cp)
 					return false;
@@ -172,7 +171,7 @@ namespace toml::impl
 				return true;
 			}
 
-			bool consume_comment()
+			bool consume_comment() TOML_MAY_THROW
 			{
 				if (!cp || *cp != U'#')
 					return false;
@@ -200,7 +199,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			bool consume_expected_sequence(std::u32string_view seq)
+			bool consume_expected_sequence(std::u32string_view seq) TOML_MAY_THROW
 			{
 				for (auto c : seq)
 				{
@@ -213,7 +212,7 @@ namespace toml::impl
 
 			template <typename T, size_t N>
 			[[nodiscard]]
-			bool consume_digit_sequence(T(&digits)[N])
+			bool consume_digit_sequence(T(&digits)[N]) TOML_MAY_THROW
 			{
 				for (size_t i = 0; i < N; i++)
 				{
@@ -227,14 +226,14 @@ namespace toml::impl
 
 			template <typename T, size_t N>
 			[[nodiscard]]
-			size_t consume_variable_length_digit_sequence(T(&digits)[N])
+			size_t consume_variable_length_digit_sequence(T(&buffer)[N]) TOML_MAY_THROW
 			{
 				size_t i = {};
 				for (; i < N; i++)
 				{
 					if (!cp || !is_decimal_digit(*cp))
 						break;
-					digits[i] = static_cast<T>(*cp - U'0');
+					buffer[i] = static_cast<T>(*cp - U'0');
 					advance();
 				}
 				return i;
@@ -242,15 +241,14 @@ namespace toml::impl
 
 			template <bool MULTI_LINE>
 			[[nodiscard]]
-			string parse_basic_string()
+			string parse_basic_string() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'"');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string"sv);
 				};
-
 
 				// skip the '"'
 				advance();
@@ -438,10 +436,10 @@ namespace toml::impl
 
 			template <bool MULTI_LINE>
 			[[nodiscard]]
-			string parse_literal_string()
+			string parse_literal_string() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'\'');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string"sv);
@@ -515,7 +513,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			string parse_string()
+			string parse_string() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && is_string_delimiter(*cp));
 
@@ -560,7 +558,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			string parse_bare_key_segment()
+			string parse_bare_key_segment() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && is_bare_key_start_character(*cp));
 
@@ -579,7 +577,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			bool parse_bool()
+			bool parse_bool() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && (*cp == U't' || *cp == U'f'));
 
@@ -598,10 +596,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			double parse_inf_or_nan()
+			double parse_inf_or_nan() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && (*cp == U'i' || *cp == U'n' || *cp == U'+' || *cp == U'-'));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing floating-point"sv);
@@ -636,10 +634,10 @@ namespace toml::impl
 			#endif
 
 			[[nodiscard]]
-			double parse_float()
+			double parse_float() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing floating-point"sv);
@@ -739,10 +737,10 @@ namespace toml::impl
 			#if !TOML_STRICT
 
 			[[nodiscard]]
-			double parse_hex_float()
+			double parse_hex_float() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'0');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing hexadecimal floating-point"sv);
@@ -853,13 +851,13 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
-			#endif //!TOML_STRICT
+			#endif // !TOML_STRICT
 
 			[[nodiscard]]
-			int64_t parse_binary_integer()
+			int64_t parse_binary_integer() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'0');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing binary integer"sv);
@@ -939,10 +937,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			int64_t parse_octal_integer()
+			int64_t parse_octal_integer() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'0');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing octal integer"sv);
@@ -1022,10 +1020,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			int64_t parse_decimal_integer()
+			int64_t parse_decimal_integer() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing integer"sv);
@@ -1104,10 +1102,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			int64_t parse_hex_integer()
+			int64_t parse_hex_integer() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'0');
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing hexadecimal integer"sv);
@@ -1200,13 +1198,13 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
-			TOML_POP_WARNINGS
+			TOML_POP_WARNINGS // case '0' is not a valid value for switch of enum 'std::errc'
 
 			[[nodiscard]]
-			date parse_date(bool time_may_follow = false)
+			date parse_date(bool time_may_follow = false) TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && is_decimal_digit(*cp));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing date"sv);
@@ -1279,10 +1277,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			time parse_time(bool offset_may_follow = false)
+			time parse_time(bool offset_may_follow = false) TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && is_decimal_digit(*cp));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing time"sv);
@@ -1392,10 +1390,10 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			datetime parse_datetime()
+			datetime parse_datetime() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && is_decimal_digit(*cp));
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing datetime"sv);
@@ -1479,13 +1477,13 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			std::unique_ptr<toml::array> parse_array();
+			std::unique_ptr<toml::array> parse_array() TOML_MAY_THROW;
 
 			[[nodiscard]]
-			std::unique_ptr<toml::table> parse_inline_table();
+			std::unique_ptr<toml::table> parse_inline_table() TOML_MAY_THROW;
 
 			[[nodiscard]]
-			std::unique_ptr<node> parse_value()
+			std::unique_ptr<node> parse_value() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && !is_value_terminator(*cp));
 
@@ -1533,7 +1531,7 @@ namespace toml::impl
 					char32_t chars[utf8_buffered_reader::max_history_length];
 					size_t char_count = {}, advance_count = {};
 					bool eof_while_scanning = false;
-					const auto scan = [&]()
+					const auto scan = [&]() TOML_MAY_THROW
 					{
 						while (advance_count < utf8_buffered_reader::max_history_length)
 						{
@@ -1635,7 +1633,7 @@ namespace toml::impl
 								}
 								if (val)
 									break;
-								#endif //!TOML_STRICT
+								#endif // !TOML_STRICT
 
 								val = std::make_unique<value<int64_t>>(parse_hex_integer());
 								break;
@@ -1786,7 +1784,7 @@ namespace toml::impl
 			};
 
 			[[nodiscard]]
-			key parse_key()
+			key parse_key() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && (is_bare_key_start_character(*cp) || is_string_delimiter(*cp)));
 
@@ -1843,9 +1841,9 @@ namespace toml::impl
 			};
 
 			[[nodiscard]]
-			key_value_pair parse_key_value_pair()
+			key_value_pair parse_key_value_pair() TOML_MAY_THROW
 			{
-				const auto eof_check = [this]()
+				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					if (!cp)
 						throw_parse_error("Encountered EOF while parsing key-value pair"sv);
@@ -1874,7 +1872,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			table* parse_table_header()
+			table* parse_table_header() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp && *cp == U'[');
 
@@ -1885,7 +1883,7 @@ namespace toml::impl
 
 				//parse header
 				{
-					const auto eof_check = [this]()
+					const auto eof_check = [this]() TOML_MAY_THROW
 					{
 						if (!cp)
 							throw_parse_error("Encountered EOF while parsing table header"sv);
@@ -1962,12 +1960,13 @@ namespace toml::impl
 					{
 						parent = reinterpret_cast<table*>(child);
 					}
-					else if (child->is_table_array())
+					else if (child->is_array() && std::find(table_arrays.cbegin(), table_arrays.cend(), reinterpret_cast<array*>(child)) != table_arrays.cend())
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!reinterpret_cast<table_array*>(child)->tables.empty());
-						parent = reinterpret_cast<table_array*>(child)->tables.back().get();
+						TOML_ASSERT(!reinterpret_cast<array*>(child)->values.empty());
+						TOML_ASSERT(!reinterpret_cast<array*>(child)->values.back()->is_table());
+						parent = reinterpret_cast<table*>(reinterpret_cast<array*>(child)->values.back().get());
 					}
 					else
 					{
@@ -1977,7 +1976,7 @@ namespace toml::impl
 							throw_parse_error(
 								"Attempt to redefine existing "sv, child->type(),
 								" '"sv, recording_buffer,
-								"' as "sv, is_array ? node_type::table_array : node_type::table
+								"' as "sv, is_array ? "array-of-tables"sv : "table"sv
 							);
 					}
 				}
@@ -1991,17 +1990,18 @@ namespace toml::impl
 					// if it's an array we need to make the array and it's first table element, set the starting regions, and return the table element
 					if (is_array)
 					{
-						auto tab_arr = reinterpret_cast<table_array*>(
+						auto tab_arr = reinterpret_cast<array*>(
 							parent->values.emplace(
 								key.segments.back(),
-								std::make_unique<table_array>()
+								std::make_unique<array>()
 							).first->second.get()
 						);
+						table_arrays.push_back(tab_arr);
 						tab_arr->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						
-						tab_arr->tables.push_back(std::make_unique<table>());
-						tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->tables.back().get();
+						tab_arr->values.push_back(std::make_unique<table>());
+						tab_arr->values.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
+						return reinterpret_cast<table*>(tab_arr->values.back().get());
 					}
 
 					//otherwise we're just making a table
@@ -2024,12 +2024,12 @@ namespace toml::impl
 				// otherwise this is a redefinition error.
 				else
 				{
-					if (is_array && matching_node->is_table_array())
+					if (is_array && matching_node->is_array() && std::find(table_arrays.cbegin(), table_arrays.cend(), reinterpret_cast<array*>(matching_node)) != table_arrays.cend())
 					{
-						auto tab_arr = reinterpret_cast<table_array*>(matching_node);
-						tab_arr->tables.push_back(std::make_unique<table>());
-						tab_arr->tables.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->tables.back().get();
+						auto tab_arr = reinterpret_cast<array*>(matching_node);
+						tab_arr->values.push_back(std::make_unique<table>());
+						tab_arr->values.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
+						return reinterpret_cast<table*>(tab_arr->values.back().get());
 					}
 
 					else if (!is_array
@@ -2054,12 +2054,12 @@ namespace toml::impl
 						throw_parse_error(
 							"Attempt to redefine existing "sv, matching_node->type(),
 							" '"sv, recording_buffer,
-							"' as "sv, is_array ? node_type::table_array : node_type::table
+							"' as "sv, is_array ? "array-of-tables"sv : "table"sv
 						);
 				}
 			}
 
-			void parse_key_value_pair_and_insert(table* tab)
+			void parse_key_value_pair_and_insert(table* tab) TOML_MAY_THROW
 			{
 				auto kvp = parse_key_value_pair();
 				TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
@@ -2107,7 +2107,7 @@ namespace toml::impl
 				);
 			}
 
-			void parse_document()
+			void parse_document() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp);
 					
@@ -2160,7 +2160,7 @@ namespace toml::impl
 
 		public:
 
-			parser(utf8_reader_interface&& reader_)
+			parser(utf8_reader_interface&& reader_) TOML_MAY_THROW
 				: reader{ reader_ },
 				root{ std::make_unique<table>() }
 			{
@@ -2172,16 +2172,16 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			operator std::unique_ptr<table>() && noexcept
+			operator parse_result() && noexcept
 			{
 				return std::move(root);
 			}
 	};
 
-	std::unique_ptr<toml::array> parser::parse_array()
+	std::unique_ptr<toml::array> parser::parse_array() TOML_MAY_THROW
 	{
 		TOML_ASSERT(cp && *cp == U'[');
-		const auto eof_check = [this]()
+		const auto eof_check = [this]() TOML_MAY_THROW
 		{
 			if (!cp)
 				throw_parse_error("Encountered EOF while parsing array"sv);
@@ -2228,10 +2228,10 @@ namespace toml::impl
 		return arr;
 	}
 
-	std::unique_ptr<toml::table> parser::parse_inline_table()
+	std::unique_ptr<toml::table> parser::parse_inline_table() TOML_MAY_THROW
 	{
 		TOML_ASSERT(cp && *cp == U'{');
-		const auto eof_check = [this]()
+		const auto eof_check = [this]() TOML_MAY_THROW
 		{
 			if (!cp)
 				throw_parse_error("Encountered EOF while parsing inline table"sv);
@@ -2286,7 +2286,7 @@ namespace toml
 {
 	template <typename CHAR>
 	[[nodiscard]]
-	inline std::unique_ptr<table> parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
+	inline parse_result parse(std::basic_string_view<CHAR> doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -2298,7 +2298,7 @@ namespace toml
 
 	template <typename CHAR>
 	[[nodiscard]]
-	inline std::unique_ptr<table> parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
+	inline parse_result parse(std::basic_istream<CHAR>& doc, string_view source_path = {})
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -2306,5 +2306,12 @@ namespace toml
 		);
 
 		return impl::parser{ impl::utf8_reader{ doc, source_path } };
+	}
+
+	template <typename CHAR>
+	[[nodiscard]]
+	inline parse_result parse(std::basic_istream<CHAR>&& doc, string_view source_path = {})
+	{
+		return parse(doc, source_path);
 	}
 }

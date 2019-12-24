@@ -5,7 +5,6 @@
     <ClInclude Include="..\include\toml++\toml_value.h" />
     <ClInclude Include="..\include\toml++\toml_parser.h" />
     <ClInclude Include="..\include\toml++\toml_table.h" />
-    <ClInclude Include="..\include\toml++\toml_table_array.h" />
     <ClInclude Include="..\include\toml++\toml_common.h" />
     <ClInclude Include="..\include\toml++\toml.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
@@ -16,5 +15,6 @@
     <None Include="..\.editorconfig" />
     <None Include="generate_is_unicode_letter.py" />
     <None Include="..\README.md" />
+    <None Include="generate_single_header.py" />
   </ItemGroup>
 </Project>

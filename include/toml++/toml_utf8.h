@@ -2,7 +2,7 @@
 #include "toml_common.h"
 #if !TOML_STRICT
 #include "toml_utf8_is_unicode_letter.h"
-#endif
+#endif // !TOML_STRICT
 
 namespace toml::impl
 {
@@ -151,6 +151,12 @@ namespace toml::impl
 			return state == uint_least32_t{};
 		}
 
+		[[nodiscard]]
+		constexpr bool needs_more_input() const noexcept
+		{
+			return state > uint_least32_t{} && state != uint_least32_t{ 12u };
+		}
+
 		constexpr void operator () (uint8_t byte) noexcept
 		{
 			TOML_ASSERT(!error());
@@ -220,7 +226,7 @@ namespace toml::impl
 			std::basic_istream<CHAR>* source;
 
 		public:
-			explicit utf8_byte_stream(std::basic_istream<CHAR>& stream) noexcept
+			explicit utf8_byte_stream(std::basic_istream<CHAR>& stream) TOML_MAY_THROW
 				: source{ &stream }
 			{
 				if (*source)
@@ -235,7 +241,7 @@ namespace toml::impl
 					const auto initial_pos = source->tellg();
 					size_t bom_pos{};
 					auto bom_char = source->get();
-					while (*source && bom_char != stream_traits::eof && bom_char == bom[bom_pos])
+					while (*source && bom_char != stream_traits::eof() && bom_char == bom[bom_pos])
 					{
 						bom_pos++;
 						bom_char = source->get();
@@ -258,7 +264,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			uint8_t operator() ()
+			uint8_t operator() () TOML_MAY_THROW
 			{
 				return static_cast<uint8_t>(source->get());
 			}
@@ -305,7 +311,7 @@ namespace toml::impl
 		virtual const std::shared_ptr<const toml::string>& source_path() const noexcept = 0;
 
 		[[nodiscard]]
-		virtual const utf8_codepoint* read_next() = 0;
+		virtual const utf8_codepoint* read_next() TOML_MAY_THROW = 0;
 
 		virtual ~utf8_reader_interface() noexcept = default;
 	};
@@ -319,44 +325,44 @@ namespace toml::impl
 			utf8_decoder decoder;
 			utf8_codepoint prev{}, current{};
 			uint8_t current_byte_count{};
-			std::shared_ptr<const string> source_path_;
+			std::shared_ptr<const toml::string> source_path_;
 
 		public:
 
-			template <typename U, typename STR = string_view>
-			explicit utf8_reader(U && source, STR&& source_path = {})
-				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+			template <typename U, typename STR = toml::string_view>
+			explicit utf8_reader(U && source, STR&& source_path = {}) TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				current.position = { 1u, 1u };
 
 				if (!source_path.empty())
-					source_path_ = std::make_shared<const string>(std::forward<STR>(source_path));
+					source_path_ = std::make_shared<const toml::string>(std::forward<STR>(source_path));
 			}
 
 			[[nodiscard]]
-			const std::shared_ptr<const string>& source_path() const noexcept override
+			const std::shared_ptr<const toml::string>& source_path() const noexcept override
 			{
 				return source_path_;
 			}
 
 			[[nodiscard]]
-			const utf8_codepoint* read_next() override
+			const utf8_codepoint* read_next() TOML_MAY_THROW override
 			{
 				if (stream.eof())
 					return nullptr;
 				if (stream.error())
-					throw parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
+					throw toml::parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
 				if (decoder.error())
-					throw parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
+					throw toml::parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
 
 				while (true)
 				{
 					uint8_t nextByte;
-					if constexpr (noexcept(stream()))
+					if constexpr (!TOML_EXCEPTIONS || noexcept(stream()))
 					{
 						nextByte = stream();
 					}
+					#if TOML_EXCEPTIONS
 					else
 					{
 						try
@@ -365,25 +371,33 @@ namespace toml::impl
 						}
 						catch (const std::exception& exc)
 						{
-							throw parse_error{ exc.what(), prev.position, source_path_ };
+							throw toml::parse_error{ exc.what(), prev.position, source_path_ };
 						}
 						catch (...)
 						{
-							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
+							throw toml::parse_error{ "An unspecified error occurred", prev.position, source_path_ };
 						}
 					}
+					#endif
+
+					if (stream.eof())
+					{
+						if (decoder.needs_more_input())
+							throw toml::parse_error{ "Encountered EOF during incomplete utf-8 code point sequence", prev.position, source_path_ };
+						return nullptr;
+					}
 					if (stream.error())
-						throw parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
+						throw toml::parse_error{ "The underlying stream entered an error state", prev.position, source_path_ };
 
 					decoder(nextByte);
 					if (decoder.error())
-						throw parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
+						throw toml::parse_error{ "Encountered invalid utf-8 sequence", prev.position, source_path_ };
 
 					current.bytes[current_byte_count++] = nextByte;
 					if (decoder.has_code_point())
 					{
+						current.value = decoder.codepoint;
 						prev = current;
-						prev.value = decoder.codepoint;
 						current_byte_count = {};
 
 						if (is_line_break<false>(prev.value))
@@ -396,9 +410,6 @@ namespace toml::impl
 
 						return &prev;
 					}
-
-					if (stream.eof())
-						throw parse_error{ "Encountered EOF during incomplete utf-8 code point sequence", prev.position, source_path_ };
 				}
 			}
 	};
@@ -430,7 +441,7 @@ namespace toml::impl
 
 		public:
 
-			explicit utf8_buffered_reader(utf8_reader_interface& reader_)
+			explicit utf8_buffered_reader(utf8_reader_interface& reader_) noexcept
 				: reader{ reader_ }
 			{}
 
@@ -441,7 +452,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			const utf8_codepoint* read_next() override
+			const utf8_codepoint* read_next() TOML_MAY_THROW override
 			{
 				if (negative_offset)
 				{

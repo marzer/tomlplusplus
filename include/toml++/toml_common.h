@@ -1,8 +1,6 @@
 #pragma once
 
-//--------------------------------------------------------------------
-// CONFIGURATION
-//--------------------------------------------------------------------
+////////// CONFIGURATION
 // clang-format off
 
 #ifdef TOML_CONFIG_HEADER
@@ -26,9 +24,7 @@
 	#endif
 #endif
 
-//--------------------------------------------------------------------
-// COMPILER & ENVIRONMENT STUFF
-//--------------------------------------------------------------------
+////////// COMPILER & ENVIRONMENT STUFF
 
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
@@ -37,22 +33,30 @@
 #ifdef __clang__
 
 	#ifdef __cpp_exceptions
-	#define TOML_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS	1
 	#endif
 
+	#define TOML_CPP_VERSION			__cplusplus
 	#define TOML_PUSH_WARNINGS			_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_ALL_WARNINGS	_Pragma("clang diagnostic ignored \"-Wall\"")	\
 										_Pragma("clang diagnostic ignored \"-Wextra\"")
 	#define TOML_POP_WARNINGS			_Pragma("clang diagnostic pop")
-	#define TOML_CPP_VERSION			__cplusplus
 	#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
 	#define TOML_ASSUME(cond)			__builtin_assume(cond)
 	#define TOML_UNREACHABLE			__builtin_unreachable()
 
+	#if __has_declspec_attribute(novtable)
+		#define TOML_INTERFACE			__declspec(novtable)
+	#endif
+
+	#if __has_declspec_attribute(empty_bases)
+		#define TOML_EMPTY_BASES		__declspec(empty_bases)
+	#endif
+
 #elif defined(_MSC_VER)
 
 	#ifdef _CPPUNWIND
-		#define TOML_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS	1
 	#endif
 
 	#define TOML_CPP_VERSION			_MSVC_LANG
@@ -60,22 +64,22 @@
 	#define TOML_DISABLE_ALL_WARNINGS	__pragma(warning(pop))	\
 										__pragma(warning(push, 0))
 	#define TOML_POP_WARNINGS			__pragma(warning(pop))
-	#define TOML_INTERFACE				__declspec(novtable)
-	#define TOML_EMPTY_BASES			__declspec(empty_bases)
 	#define TOML_ALWAYS_INLINE			__forceinline
 	#define TOML_ASSUME(cond)			__assume(cond)
 	#define TOML_UNREACHABLE			__assume(0)
+	#define TOML_INTERFACE				__declspec(novtable)
+	#define TOML_EMPTY_BASES			__declspec(empty_bases)
 
 #elif defined(__GNUC__)
 
 	#ifdef __cpp_exceptions
-		#define TOML_EXCEPTIONS_ENABLED
+		#define TOML_EXCEPTIONS	1
 	#endif
 
+	#define TOML_CPP_VERSION			__cplusplus
 	#define TOML_PUSH_WARNINGS			Pragma("GCC diagnostic push")
 	#define TOML_DISABLE_ALL_WARNINGS	Pragma("GCC diagnostic ignored \"-Wall\"")
 	#define TOML_POP_WARNINGS			Pragma("GCC diagnostic pop")
-	#define TOML_CPP_VERSION			__cplusplus
 	#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE			__builtin_unreachable()
 
@@ -93,10 +97,19 @@
 	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
 #endif
 
-#ifndef TOML_EXCEPTIONS_ENABLED
-#error toml++ currently requires that exceptions be enabled.
+#ifndef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS 0
 #endif
-#undef TOML_EXCEPTIONS_ENABLED
+#if TOML_EXCEPTIONS
+	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept(__VA_ARGS__)
+	#define TOML_MAY_THROW
+#else
+	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept
+	#define TOML_MAY_THROW					noexcept
+#endif
+#if !TOML_EXCEPTIONS
+	#error toml++ currently requires that exceptions be enabled in your compiler. This restriction will be lifted eventually!
+#endif
 
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
@@ -160,13 +173,11 @@
 	#define TOML_ALWAYS_INLINE_WHEN_STRICT inline
 #endif
 
-#define TOML_SPEC_VERSION_MAJOR		0
-#define TOML_SPEC_VERSION_MINOR		5
-#define TOML_SPEC_VERSION_REVISION	0
+#define TOML_LANG_MAJOR		0
+#define TOML_LANG_MINOR		5
+#define TOML_LANG_REVISION	0
 
-//--------------------------------------------------------------------
-// INCLUDES
-//--------------------------------------------------------------------
+////////// INCLUDES
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -178,46 +189,43 @@ TOML_DISABLE_ALL_WARNINGS
 #include <string>
 #include <vector>
 #include <map>
-#include <stdexcept>
 #include <charconv>
 #include <iosfwd>
+#if TOML_EXCEPTIONS
+	#include <stdexcept>
+#endif
 
 TOML_POP_WARNINGS
 
 #if TOML_USE_CHAR_8_IF_AVAILABLE && defined(__cpp_lib_char8_t)
-
 	#define TOML_CHAR_8	1
 	#define TOML_STRING_PREFIX_1(S) u8##S
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
-
 #else
-
 	#define TOML_CHAR_8	0
 	#define TOML_STRING_PREFIX(S) S
-
 #endif
+#undef TOML_USE_CHAR_8_IF_AVAILABLE
 
-//--------------------------------------------------------------------
-// FORWARD DECLARATIONS & TYPEDEFS
-//--------------------------------------------------------------------
+////////// FORWARD DECLARATIONS & TYPEDEFS
 // clang-format on
 
 namespace toml
 {
-	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
-
-	template <typename T>
-	using remove_cvref_t = std::remove_cvref_t<T>;
-
-	#else
-
-	template <typename T>
-	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-	#endif
-
 	namespace impl
 	{
+		#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
+
+		template <typename T>
+		using remove_cvref_t = std::remove_cvref_t<T>;
+
+		#else
+
+		template <typename T>
+		using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+		#endif
+
 		using namespace std::literals::string_literals;
 		using namespace std::literals::string_view_literals;
 
@@ -282,22 +290,24 @@ namespace toml
 
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
-
-	template <typename T>
-	inline constexpr bool is_value_type =
-		std::is_same_v<T, string>
-		|| std::is_same_v<T, int64_t>
-		|| std::is_same_v<T, double>
-		|| std::is_same_v<T, bool>
-		|| std::is_same_v<T, date>
-		|| std::is_same_v<T, time>
-		|| std::is_same_v<T, datetime>;
+	
+	namespace impl
+	{
+		template <typename T>
+		inline constexpr bool is_value_type =
+			std::is_same_v<T, string>
+			|| std::is_same_v<T, int64_t>
+			|| std::is_same_v<T, double>
+			|| std::is_same_v<T, bool>
+			|| std::is_same_v<T, date>
+			|| std::is_same_v<T, time>
+			|| std::is_same_v<T, datetime>;
+	}
 
 	template <typename T>
 	class value;
 	class array;
 	class table;
-	class table_array;
 
 	struct document_position
 	{
@@ -314,7 +324,6 @@ namespace toml
 
 	enum class node_type : uint8_t
 	{
-		table_array,
 		table,
 		array,
 		string,
@@ -334,39 +343,37 @@ namespace toml
 
 		public:
 
-			[[nodiscard]] virtual bool is_value() const noexcept = 0;
-			[[nodiscard]] virtual bool is_string() const noexcept = 0;
-			[[nodiscard]] virtual bool is_int() const noexcept = 0;
-			[[nodiscard]] virtual bool is_float() const noexcept = 0;
-			[[nodiscard]] virtual bool is_bool() const noexcept = 0;
-			[[nodiscard]] virtual bool is_date() const noexcept = 0;
-			[[nodiscard]] virtual bool is_time() const noexcept = 0;
-			[[nodiscard]] virtual bool is_datetime() const noexcept = 0;
-			[[nodiscard]] virtual bool is_array() const noexcept = 0;
-			[[nodiscard]] virtual bool is_table() const noexcept = 0;
-			[[nodiscard]] virtual bool is_table_array() const noexcept = 0;
+			[[nodiscard]] virtual bool is_value() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_int() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_float() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_bool() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_datetime() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_array() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_table() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_array_of_tables() const noexcept { return false; }
 			
-			[[nodiscard]] virtual value<string>* as_string() noexcept = 0;
-			[[nodiscard]] virtual value<int64_t>* as_int() noexcept = 0;
-			[[nodiscard]] virtual value<double>* as_float() noexcept = 0;
-			[[nodiscard]] virtual value<bool>* as_bool() noexcept = 0;
-			[[nodiscard]] virtual value<date>* as_date() noexcept = 0;
-			[[nodiscard]] virtual value<time>* as_time() noexcept = 0;
-			[[nodiscard]] virtual value<datetime>* as_datetime() noexcept = 0;
-			[[nodiscard]] virtual array* as_array() noexcept = 0;
-			[[nodiscard]] virtual table* as_table() noexcept = 0;
-			[[nodiscard]] virtual table_array* as_table_array() noexcept = 0;
+			[[nodiscard]] virtual value<string>* as_string() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<int64_t>* as_int() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<double>* as_float() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<bool>* as_bool() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<date>* as_date() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<time>* as_time() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<datetime>* as_datetime() noexcept { return nullptr; }
+			[[nodiscard]] virtual array* as_array() noexcept { return nullptr; }
+			[[nodiscard]] virtual table* as_table() noexcept { return nullptr; }
 
-			[[nodiscard]] virtual const value<string>* as_string() const noexcept = 0;
-			[[nodiscard]] virtual const value<int64_t>* as_int() const noexcept = 0;
-			[[nodiscard]] virtual const value<double>* as_float() const noexcept = 0;
-			[[nodiscard]] virtual const value<bool>* as_bool() const noexcept = 0;
-			[[nodiscard]] virtual const value<date>* as_date() const noexcept = 0;
-			[[nodiscard]] virtual const value<time>* as_time() const noexcept = 0;
-			[[nodiscard]] virtual const value<datetime>* as_datetime() const noexcept = 0;
-			[[nodiscard]] virtual const array* as_array() const noexcept = 0;
-			[[nodiscard]] virtual const table* as_table() const noexcept = 0;
-			[[nodiscard]] virtual const table_array* as_table_array() const noexcept = 0;
+			[[nodiscard]] virtual const value<string>* as_string() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<int64_t>* as_int() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<double>* as_float() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<bool>* as_bool() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<date>* as_date() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<time>* as_time() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<datetime>* as_datetime() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const array* as_array() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
 
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
@@ -379,37 +386,45 @@ namespace toml
 			virtual ~node() noexcept = default;
 	};
 
+	#if TOML_EXCEPTIONS
+
 	class parse_error final
 		: public std::runtime_error
 	{
 		private:
-			document_region region;
+			document_region rgn;
 
 		public:
-			parse_error(const char* description, document_region&& region_) noexcept
+			parse_error(const char* description, document_region&& region) noexcept
 				: std::runtime_error{ description },
-				region{ std::move(region_) }
+				rgn{ std::move(region) }
 			{}
 
-			parse_error(const char* description, const document_region& region_) noexcept
+			parse_error(const char* description, const document_region& region) noexcept
 				: std::runtime_error{ description },
-				region{ region_ }
+				rgn{ region }
 			{}
 
 			parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
 				: std::runtime_error{ description },
-				region{ position, position, source_path }
+				rgn{ position, position, source_path }
 			{}
 
 			parse_error(const char* description, const document_position& position) noexcept
 				: std::runtime_error{ description },
-				region{ position, position }
+				rgn{ position, position }
 			{}
 
 			[[nodiscard]]
 			const document_region& where() const noexcept
 			{
-				return region;
+				return rgn;
 			}
 	};
+
+	using parse_result = std::unique_ptr<table>;
+
+	#else
+
+	#endif
 }

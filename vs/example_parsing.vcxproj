@@ -60,6 +60,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
+    <None Include="..\examples\example.toml" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />
