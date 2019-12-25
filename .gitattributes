@@ -1,0 +1,16 @@
+*           text=auto   encoding=UTF-8
+*.c         text=auto   encoding=UTF-8
+*.cpp       text=auto   encoding=UTF-8
+*.cxx       text=auto   encoding=UTF-8
+*.h         text=auto   encoding=UTF-8
+*.hpp       text=auto   encoding=UTF-8
+*.hxx       text=auto   encoding=UTF-8
+*.inl       text=auto   encoding=UTF-8
+*.toml      text=auto   encoding=UTF-8
+*.xml       text=auto   encoding=UTF-8
+*.py        text=auto   encoding=UTF-8
+*.natvis    text        encoding=UTF-8      eol=crlf
+*.props     text        encoding=UTF-8      eol=crlf
+*.vcxproj   text        encoding=UTF-8      eol=crlf
+*.sln       text        encoding=UTF-8-BOM  eol=crlf
+*.md        text        encoding=UTF-8      eol=lf

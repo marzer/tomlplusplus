@@ -16,7 +16,14 @@ namespace toml::impl
 			int indent;
 			bool naked_newline;
 			std::vector<string> key_path;
-			static constexpr auto indent_string = "    "sv;
+			static constexpr std::string_view indent_string = TOML_INDENT;
+			static constexpr auto indent_string_columns = ([](auto str) noexcept
+			{   
+				size_t cols = {};
+				for (auto c : str)
+					cols += c == '\t' ? 4_sz : 1_sz;
+				return cols;
+			})(indent_string);
 
 			template <typename CHAR>
 			TOML_ALWAYS_INLINE
@@ -381,7 +388,7 @@ namespace toml::impl
 
 			static bool forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
 			{
-				return (inline_columns(node) + starting_column_bias) > 100_sz;
+				return (inline_columns(node) + starting_column_bias) > 80_sz;
 			}
 
 			void write(const array& arr) TOML_MAY_THROW
@@ -390,7 +397,7 @@ namespace toml::impl
 					write("[]"sv);
 				else
 				{
-					const auto multiline = forces_multiline(arr, indent_string.length() * static_cast<size_t>(indent < 0 ? 0 : indent));
+					const auto multiline = forces_multiline(arr, indent_string_columns * static_cast<size_t>(indent < 0 ? 0 : indent));
 					const auto original_indent = indent;
 					write("["sv);
 					if (multiline)

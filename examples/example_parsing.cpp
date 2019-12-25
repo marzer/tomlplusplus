@@ -10,7 +10,7 @@ int main(int /*argc*/, char** /*argv*/)
 	{
 		const auto table = toml::parse(std::ifstream{ "example.toml" });
 
-		std::cout << *table << std::endl;
+		std::cout << table << std::endl;
 	}
 	catch (const toml::parse_error& err)
 	{

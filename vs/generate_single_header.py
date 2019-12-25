@@ -7,6 +7,8 @@ import os.path
 import traceback
 
 
+
+
 def get_script_folder():
 	return os.path.dirname(os.path.realpath(sys.argv[0]))
 
@@ -21,11 +23,25 @@ def read_all_text_from_file(path):
 
 
 
+def make_divider(text = None, text_col = 40):
+	if (text is None):
+		return "//" + ('-' * 98)
+	else:
+		text = "//{}  {}  ".format('-' * (text_col - 2),text);
+		if (len(text) < 100):
+			return text + ('-' * (100 - len(text)))
+		else:
+			return text
+
+
+
+preprocessed_include_headers = 0
 preprocessed_includes = []
 preprocess_include_level = -1
 def preprocess(match):
 	global preprocessed_includes
 	global preprocess_include_level
+	global preprocessed_include_headers
 
 	raw_incl = match if isinstance(match, str) else match.group(1)
 	incl = raw_incl.strip().lower()
@@ -44,14 +60,16 @@ def preprocess(match):
 	preprocess_include_level -= 1
 
 	if (preprocess_include_level == 0):
+		lpad = 35 + (preprocessed_include_headers % 3) * 20
+		preprocessed_include_headers += 1
 		return '''
-//------------------------------------------------------------------------------
+{}
 #pragma region {}
 
 {}
 
 #pragma endregion {}
-//------------------------------------------------------------------------------'''.format(raw_incl, text, raw_incl)
+{}'''.format(make_divider('↓ ' + raw_incl, lpad), raw_incl, text, raw_incl, make_divider('↑ ' + raw_incl, lpad))
 	else:
 		return text
 
@@ -78,9 +96,9 @@ v0.5.0: https://github.com/toml-lang/toml/tree/v0.5.0''')
 	# write the output file
 	output_file_path = os.path.join(get_script_folder(), r'..\toml.hpp')
 	print("Writing to {}".format(output_file_path))
-	output_file = open(output_file_path,'w')
+	output_file = open(output_file_path,'w', encoding='utf-8')
 	if (len(preamble) > 0):
-		print('//------------------------------------------------------------------------------', file=output_file)
+		print(make_divider(), file=output_file)
 	for pre in preamble:
 		print('//', file=output_file)
 		for line in pre.splitlines():
@@ -90,7 +108,8 @@ v0.5.0: https://github.com/toml-lang/toml/tree/v0.5.0''')
 				print(line, file=output_file)
 			else:
 				print('\n', file=output_file, end = '')
-		print('//\n//------------------------------------------------------------------------------', file=output_file)
+		print('//', file=output_file)
+		print(make_divider(), file=output_file)
 	print(source_text, file=output_file)
 	output_file.close()
 

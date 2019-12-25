@@ -1,5 +1,5 @@
 #pragma once
-#include "toml_common.h"
+#include "toml_node.h"
 
 namespace toml
 {

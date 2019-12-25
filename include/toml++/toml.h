@@ -5,6 +5,7 @@
 //# is used as the source for generate_single_header.py.
 
 #include "toml_common.h"
+#include "toml_node.h"
 #include "toml_table.h"
 #include "toml_array.h"
 #include "toml_value.h"
@@ -23,7 +24,6 @@
 #undef TOML_INTERFACE
 #undef TOML_EMPTY_BASES
 #undef TOML_ALWAYS_INLINE
-#undef TOML_ALWAYS_INLINE_WHEN_STRICT
 #undef TOML_ASSUME
 #undef TOML_UNREACHABLE
 #undef TOML_NO_DEFAULT_CASE
@@ -36,3 +36,5 @@
 #undef TOML_STRING_PREFIX
 #undef TOML_CONDITIONAL_NOEXCEPT
 #undef TOML_MAY_THROW
+#undef TOML_LANG_HIGHER_THAN
+#undef TOML_INDENT

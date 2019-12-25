@@ -18,10 +18,11 @@ with these at all, but in the event you do, set your overrides prior to includin
 
 | Option                         |      Type      | Default                                    | Description                                                                                                                                                                                     |
 |--------------------------------|:--------------:|--------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `TOML_CONFIG_HEADER`           | string literal | undefined                                  | Includes the given header file before the rest of toml++.                                                                                                                                       |
 | `TOML_ASSERT(expr)`            | function macro | `assert(expr)` (or undefined)              | Sets the assert function used by the library.                                                                                                                                                   |
+| `TOML_CONFIG_HEADER`           | string literal | undefined                                  | Includes the given header file before the rest of the library.                                                                                                                                       |
+| `TOML_INDENT`                  | string literal | `"    "` (4 spaces)                        | Sets the indent used when printing tables out to strings and streams.                                                                                                                    |
 | `TOML_STRICT`                  |     boolean    | `0`                                        | Disables support for language features not yet released in a [numbered version](https://github.com/toml-lang/toml/releases).                                                                    |
-| `TOML_USE_CHAR_8_IF_AVAILABLE` |     boolean    | `0`                                        | Uses [char8_t](https://en.cppreference.com/w/cpp/keyword/char8_t)-based strings if supported by your compiler and standard library. `TOML_CHAR_8` will be set to `1` if support is detected. |
+| `TOML_USE_CHAR_8_IF_AVAILABLE` |     boolean    | `0`                                        | Uses [char8_t](https://en.cppreference.com/w/cpp/keyword/char8_t)-based strings if supported by your compiler and standard library. `TOML_CHAR_8` will be set to `1` if support is detected.    |
 
 # Contributing
 TBA.

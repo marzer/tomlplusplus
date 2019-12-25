@@ -24,6 +24,10 @@
 	#endif
 #endif
 
+#ifndef TOML_INDENT
+	#define TOML_INDENT "    "
+#endif
+
 ////////// COMPILER & ENVIRONMENT STUFF
 
 #ifndef __cplusplus
@@ -107,9 +111,6 @@
 	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept
 	#define TOML_MAY_THROW					noexcept
 #endif
-#if !TOML_EXCEPTIONS
-	#error toml++ currently requires that exceptions be enabled in your compiler. This restriction will be lifted eventually!
-#endif
 
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
@@ -167,15 +168,14 @@
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
 #endif
-#if TOML_STRICT
-	#define TOML_ALWAYS_INLINE_WHEN_STRICT TOML_ALWAYS_INLINE
-#else
-	#define TOML_ALWAYS_INLINE_WHEN_STRICT inline
-#endif
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
 #define TOML_LANG_REVISION	0
+
+#define TOML_LANG_HIGHER_THAN(maj, min, rev)									\
+	((TOML_LANG_MAJOR * 10000 + TOML_LANG_MINOR * 100 + TOML_LANG_REVISION)	>	\
+	 ((maj) * 10000 + (min) * 100 + (rev)))
 
 ////////// INCLUDES
 
@@ -335,57 +335,6 @@ namespace toml
 		datetime
 	};
 
-	class TOML_INTERFACE node
-	{
-		private:
-			friend class impl::parser;
-			document_region rgn{};
-
-		public:
-
-			[[nodiscard]] virtual bool is_value() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_int() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_float() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_bool() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_datetime() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_array() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_table() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_array_of_tables() const noexcept { return false; }
-			
-			[[nodiscard]] virtual value<string>* as_string() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<int64_t>* as_int() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<double>* as_float() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<bool>* as_bool() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<date>* as_date() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<time>* as_time() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<datetime>* as_datetime() noexcept { return nullptr; }
-			[[nodiscard]] virtual array* as_array() noexcept { return nullptr; }
-			[[nodiscard]] virtual table* as_table() noexcept { return nullptr; }
-
-			[[nodiscard]] virtual const value<string>* as_string() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<int64_t>* as_int() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<double>* as_float() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<bool>* as_bool() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<date>* as_date() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<time>* as_time() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<datetime>* as_datetime() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const array* as_array() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
-
-			[[nodiscard]] virtual node_type type() const noexcept = 0;
-
-			[[nodiscard]]
-			const document_region& region() const noexcept
-			{
-				return rgn;
-			}
-
-			virtual ~node() noexcept = default;
-	};
-
 	#if TOML_EXCEPTIONS
 
 	class parse_error final
@@ -422,9 +371,37 @@ namespace toml
 			}
 	};
 
-	using parse_result = std::unique_ptr<table>;
+
 
 	#else
+
+	struct parse_error final
+	{
+		std::string what;
+		document_region where;
+
+		parse_error() noexcept = default;
+
+		parse_error(const char* description, document_region&& region) noexcept
+			: what{ description },
+			where{ std::move(region) }
+		{}
+
+		parse_error(const char* description, const document_region& region) noexcept
+			: what{ description },
+			where{ region }
+		{}
+
+		parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+			: what{ description },
+			where{ position, position, source_path }
+		{}
+
+		parse_error(const char* description, const document_position& position) noexcept
+			: what{ description },
+			where{ position, position }
+		{}
+	};
 
 	#endif
 }
