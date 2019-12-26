@@ -113,7 +113,7 @@ namespace toml::impl
 			static string make_key_segment(const string& str) noexcept
 			{
 				if (str.empty())
-					return TOML_STRING_PREFIX("\"\""s);
+					return TOML_STRING_PREFIX("''"s);
 				else
 				{
 					bool requiresQuotes = false;
@@ -286,7 +286,7 @@ namespace toml::impl
 				write_zero_padded_integer(dt.day, 2_sz);
 			}
 
-			void write(const datetime& dt) TOML_MAY_THROW
+			void write(const date_time& dt) TOML_MAY_THROW
 			{
 				write(dt.date);
 				write('T');
@@ -316,7 +316,7 @@ namespace toml::impl
 				write(val.val_);
 			}
 
-			void write(const value<datetime>& val) TOML_MAY_THROW
+			void write(const value<date_time>& val) TOML_MAY_THROW
 			{
 				write(val.val_);
 			}
@@ -361,7 +361,7 @@ namespace toml::impl
 							weight += 1;
 							v *= -1;
 						}
-						return static_cast<size_t>(log10(static_cast<double>(v)));
+						return weight + static_cast<size_t>(log10(static_cast<double>(v)));
 					}
 
 					case node_type::floating_point:
@@ -375,20 +375,20 @@ namespace toml::impl
 							weight += 1;
 							v *= -1.0;
 						}
-						return static_cast<size_t>(log10(v));
+						return weight + static_cast<size_t>(log10(v));
 					}
 
 					case node_type::boolean: return 5_sz;
 					case node_type::date: [[fallthrough]];
 					case node_type::time: return 10_sz;
-					case node_type::datetime: return 30_sz;
+					case node_type::date_time: return 30_sz;
 					TOML_NO_DEFAULT_CASE;
 				}
 			}
 
 			static bool forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
 			{
-				return (inline_columns(node) + starting_column_bias) > 80_sz;
+				return (inline_columns(node) + starting_column_bias) > 100_sz;
 			}
 
 			void write(const array& arr) TOML_MAY_THROW
@@ -435,7 +435,7 @@ namespace toml::impl
 							case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 							case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 							case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-							case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+							case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 							TOML_NO_DEFAULT_CASE;
 						}
 
@@ -477,7 +477,7 @@ namespace toml::impl
 						case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 						case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 						case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-						case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+						case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 						TOML_NO_DEFAULT_CASE;
 					}
 				}
@@ -577,7 +577,7 @@ namespace toml::impl
 					case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 					case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 					case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-					case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+					case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 					TOML_NO_DEFAULT_CASE;
 				}
 

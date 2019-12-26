@@ -42,7 +42,7 @@ namespace toml::impl
 		private:
 			utf8_buffered_reader reader;
 			table root;
-			document_position prev_pos = { 1u, 1u };
+			source_position prev_pos = { 1u, 1u };
 			const utf8_codepoint* cp = {};
 			std::vector<table*> implicit_tables;
 			std::vector<table*> dotted_key_tables;
@@ -79,7 +79,46 @@ namespace toml::impl
 						}
 						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 						{
-							const auto cp_view = arg.template as_view<char>();
+							std::string_view cp_view;
+							switch (arg.value)
+							{
+								case U'\x00': cp_view = "\\u0000"sv; break;
+								case U'\x01': cp_view = "\\u0001"sv; break;
+								case U'\x02': cp_view = "\\u0002"sv; break;
+								case U'\x03': cp_view = "\\u0003"sv; break;
+								case U'\x04': cp_view = "\\u0004"sv; break;
+								case U'\x05': cp_view = "\\u0005"sv; break;
+								case U'\x06': cp_view = "\\u0006"sv; break;
+								case U'\x07': cp_view = "\\u0007"sv; break;
+								case U'\x08': cp_view = "\\b"sv; break;
+								case U'\x09': cp_view = "\\t"sv; break;
+								case U'\x0A': cp_view = "\\n"sv; break;
+								case U'\x0B': cp_view = "\\u000B"sv; break;
+								case U'\x0C': cp_view = "\\f"sv; break;
+								case U'\x0D': cp_view = "\\r"sv; break;
+								case U'\x0E': cp_view = "\\u000E"sv; break;
+								case U'\x0F': cp_view = "\\u000F"sv; break;
+								case U'\x10': cp_view = "\\u0010"sv; break;
+								case U'\x11': cp_view = "\\u0011"sv; break;
+								case U'\x12': cp_view = "\\u0012"sv; break;
+								case U'\x13': cp_view = "\\u0013"sv; break;
+								case U'\x14': cp_view = "\\u0014"sv; break;
+								case U'\x15': cp_view = "\\u0015"sv; break;
+								case U'\x16': cp_view = "\\u0016"sv; break;
+								case U'\x17': cp_view = "\\u0017"sv; break;
+								case U'\x18': cp_view = "\\u0018"sv; break;
+								case U'\x19': cp_view = "\\u0019"sv; break;
+								case U'\x1A': cp_view = "\\u001A"sv; break;
+								case U'\x1B': cp_view = "\\u001B"sv; break;
+								case U'\x1C': cp_view = "\\u001C"sv; break;
+								case U'\x1D': cp_view = "\\u001D"sv; break;
+								case U'\x1E': cp_view = "\\u001E"sv; break;
+								case U'\x1F': cp_view = "\\u001F"sv; break;
+								case U'\x7F': cp_view = "\\u007F"sv; break;
+
+								default:
+									cp_view = arg.template as_view<char>();
+							}
 							memcpy(ptr, cp_view.data(), cp_view.length());
 							ptr += cp_view.length();
 						}
@@ -106,7 +145,7 @@ namespace toml::impl
 								case node_type::boolean: type = "boolean"sv; break;
 								case node_type::date: type = "date"sv; break;
 								case node_type::time: type = "time"sv; break;
-								case node_type::datetime: type = "date-time"sv; break;
+								case node_type::date_time: type = "date-time"sv; break;
 								TOML_NO_DEFAULT_CASE;
 							}
 							memcpy(ptr, type.data(), type.length());
@@ -253,7 +292,7 @@ namespace toml::impl
 					if (consume_line_break())
 						return true;
 
-					if constexpr (!TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0))
+					if constexpr (TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/567
 					{
 						if (*cp <= U'\u0008'
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
@@ -373,7 +412,7 @@ namespace toml::impl
 
 							case U's':
 							{
-								if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+								if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/622
 									abort_with_error( "Escape sequence '\\s' (Space, U+0020) is not supported in TOML 0.5.0 and earlier."sv );
 								else
 								{
@@ -1519,7 +1558,7 @@ namespace toml::impl
 					static_cast<uint8_t>(minute),
 				};
 
-				if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+				if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/671
 				{
 					// ':'
 					eof_check();
@@ -1596,7 +1635,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			datetime parse_datetime() TOML_MAY_THROW
+			date_time parse_date_time() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
 				TOML_ASSERT(cp && is_decimal_digit(*cp));
@@ -1605,7 +1644,7 @@ namespace toml::impl
 				{
 					TOML_ERROR_CHECK();
 					if (!cp)
-						abort_with_error("Encountered EOF while parsing datetime"sv);
+						abort_with_error("Encountered EOF while parsing date-time"sv);
 				};
 
 				// "YYYY-MM-DD"
@@ -1615,7 +1654,7 @@ namespace toml::impl
 				// ' ' or 'T'
 				eof_check();
 				if (*cp != U' ' && *cp != U'T' && *cp != U't')
-					abort_with_error("Encountered unexpected character while parsing datetime; expected space or 'T', saw '"sv, *cp, '\'');
+					abort_with_error("Encountered unexpected character while parsing date-time; expected space or 'T', saw '"sv, *cp, '\'');
 				advance();
 
 				// "HH:MM:SS.fractional"
@@ -1647,7 +1686,7 @@ namespace toml::impl
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected 2-digit hour, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit hour, saw '"sv, *cp, '\'');
 						}
 						const auto hour = digits[1] + digits[0] * 10u;
 						if (hour > 23u)
@@ -1656,14 +1695,14 @@ namespace toml::impl
 						// ':'
 						eof_check();
 						if (*cp != U':')
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected ':', saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected ':', saw '"sv, *cp, '\'');
 						advance();
 
 						// "MM"
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected 2-digit minute, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit minute, saw '"sv, *cp, '\'');
 						}
 						const auto minute = digits[1] + digits[0] * 10u;
 						if (minute > 59u)
@@ -1678,7 +1717,7 @@ namespace toml::impl
 
 					
 				if (cp && !is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing datetime; expected value-terminator, saw '"sv, *cp, '\'');
+					abort_with_error("Encountered unexpected character while parsing date-time; expected value-terminator, saw '"sv, *cp, '\'');
 
 				TOML_ERROR_CHECK({});
 				return {
@@ -1721,7 +1760,7 @@ namespace toml::impl
 					else if (*cp == U'[')
 					{
 						val = parse_array();
-						if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+						if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/665
 						{
 							// arrays must be homogenous in toml 0.5.0 and earlier,
 							// but an exception is made for ints and floats (everything is coerced to float)
@@ -1754,7 +1793,7 @@ namespace toml::impl
 									for (size_t i = 0; i < arr.values.size(); i++)
 									{
 										auto& elem = arr.values[i];
-										if (auto intval = elem->as_int())
+										if (auto intval = elem->as_integer())
 										{
 											auto rgn = elem->rgn;
 											elem = std::make_unique<value<double>>(static_cast<double>(intval->val_));
@@ -1886,7 +1925,7 @@ namespace toml::impl
 								{
 									if (chars[i] == U'p' || chars[i] == U'P')
 									{
-										if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+										if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/562
 											TOML_ERROR( "Hexadecimal floating-point values are not supported in TOML 0.5.0 and earlier.", begin_pos );
 										else
 										{
@@ -1913,7 +1952,7 @@ namespace toml::impl
 					if (val || !(begins_with_sign || begins_with_digit))
 						break;
 
-					// dates, times, datetimes
+					// dates, times, date-times
 					if (begins_with_digit)
 					{
 						//1987-03-16
@@ -1922,7 +1961,7 @@ namespace toml::impl
 						if (char_count >= 8_sz && chars[4] == U'-' && chars[7] == U'-')
 						{
 							if (char_count > 10_sz)
-								val = std::make_unique<value<datetime>>(parse_datetime());
+								val = std::make_unique<value<date_time>>(parse_date_time());
 							else
 								val = std::make_unique<value<date>>(parse_date());
 						}
@@ -1950,12 +1989,12 @@ namespace toml::impl
 						nothing = 0,
 						possibly_int = 1,
 						possibly_float = 2,
-						possibly_datetime = 4,
+						possibly_date_time = 4,
 					};
 					auto possible_types =
 						possibly_int
 						| possibly_float
-						| (begins_with_digit && char_count >= 8_sz ? possibly_datetime : nothing) // strlen("HH:MM:SS")
+						| (begins_with_digit && char_count >= 8_sz ? possibly_date_time : nothing) // strlen("HH:MM:SS")
 					;
 					std::optional<size_t> first_colon, first_minus;
 					for (size_t i = 0; i < char_count; i++)
@@ -1984,7 +2023,7 @@ namespace toml::impl
 								possible_types &= ~possibly_float;
 						}
 
-						if ((possible_types & possibly_datetime))
+						if ((possible_types & possibly_date_time))
 						{
 							if (!(digit || (i >= 4_sz && sign)
 								|| chars[i] == U'T'
@@ -1993,7 +2032,7 @@ namespace toml::impl
 								|| chars[i] == U'z'
 								|| chars[i] == U':'
 								|| chars[i] == U'.'))
-								possible_types &= ~possibly_datetime;
+								possible_types &= ~possibly_date_time;
 						}
 
 						if (!possible_types)
@@ -2001,11 +2040,11 @@ namespace toml::impl
 					}
 
 					// resolve ambiguites
-					if ((possible_types & (possibly_int | possibly_datetime)) == (possibly_int | possibly_datetime))
+					if ((possible_types & (possibly_int | possibly_date_time)) == (possibly_int | possibly_date_time))
 					{
 						possible_types &= first_colon || first_minus.value_or(0_sz) > 0_sz
 							? ~possibly_int
-							: ~possibly_datetime;
+							: ~possibly_date_time;
 					}
 					if ((possible_types & (possibly_int | possibly_float)) == (possibly_int | possibly_float))
 						possible_types &= ~possibly_float;
@@ -2021,14 +2060,14 @@ namespace toml::impl
 							val = std::make_unique<value<double>>(parse_float());
 							break;
 
-						case possibly_datetime:
+						case possibly_date_time:
 						{
 							if (first_colon && !first_minus)
 								val = std::make_unique<value<time>>(parse_time());
 							else if (!first_colon && first_minus)
 								val = std::make_unique<value<date>>(parse_date());
 							else
-								val = std::make_unique<value<datetime>>(parse_datetime());
+								val = std::make_unique<value<date_time>>(parse_date_time());
 							break;
 						}
 
@@ -2064,7 +2103,7 @@ namespace toml::impl
 						abort_with_error("Encountered EOF while parsing key"sv);
 
 					// bare_key_segment
-					#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+					#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 					if (is_unicode_combining_mark(*cp))
 						abort_with_error(
 							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
@@ -2150,7 +2189,7 @@ namespace toml::impl
 				TOML_ASSERT(cp && *cp == U'[');
 
 				const auto header_begin_pos = cp->position;
-				document_position header_end_pos;
+				source_position header_end_pos;
 				key key;
 				bool is_array = false;
 
@@ -2246,7 +2285,7 @@ namespace toml::impl
 					else
 					{
 						if (!is_array && child->type() == node_type::table)
-							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer);
+							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 						else
 							abort_with_error(
 								"Attempt to redefine existing "sv, child->type(),
@@ -2325,7 +2364,7 @@ namespace toml::impl
 
 					//if we get here it's a redefinition error.
 					if (!is_array && matching_node->type() == node_type::table)
-						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer);
+						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 					else
 						abort_with_error(
 							"Attempt to redefine existing "sv, matching_node->type(),
@@ -2415,7 +2454,7 @@ namespace toml::impl
 					// bare_keys
 					// dotted.keys
 					// "quoted keys"
-					#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+					#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 					else if (is_unicode_combining_mark(*cp))
 						abort_with_error(
 							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
@@ -2502,6 +2541,14 @@ namespace toml::impl
 		auto arr = std::make_unique<array>();
 		auto& vals = arr->values;
 
+		enum parse_elem : int
+		{
+			none,
+			comma,
+			val
+		};
+		parse_elem prev = none;
+
 		while (true)
 		{
 			TOML_ERROR_CHECK({});
@@ -2515,12 +2562,13 @@ namespace toml::impl
 			// commas - only legal after a value
 			if (*cp == U',')
 			{
-				if (!vals.empty())
+				if (prev == val)
 				{
+					prev = comma;
 					advance();
 					continue;
 				}
-				abort_with_error("Encountered unexpected character while parsing array; expected value or closing ']', saw ','"sv);
+				abort_with_error("Encountered unexpected character while parsing array; expected value or closing ']', saw comma"sv);
 			}
 
 			// closing ']'
@@ -2532,7 +2580,16 @@ namespace toml::impl
 
 			// must be a value
 			else
+			{
+				if (prev == val)
+				{
+					abort_with_error("Encountered unexpected character while parsing array; expected comma or closing ']', saw '"sv, *cp, '\'');
+					continue;
+				}
+				prev = val;
+
 				vals.push_back(parse_value());
+			}
 		}
 
 		TOML_ERROR_CHECK({});
@@ -2558,32 +2615,55 @@ namespace toml::impl
 
 		auto tab = std::make_unique<table>();
 		tab->inline_ = true;
-		auto& vals = tab->values;
+
+		enum parse_elem : int
+		{
+			none,
+			comma,
+			kvp
+		};
+		parse_elem prev = none;
 
 		while (true)
 		{
 			TOML_ERROR_CHECK({});
 
-			while (consume_leading_whitespace()
-				|| consume_line_break()
-				|| consume_comment())
+			while (consume_leading_whitespace())
 				continue;
+
+			if constexpr (TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/516
+			{
+				while (consume_line_break() || consume_comment())
+					continue;
+			}
+
 			eof_check();
 
 			// commas - only legal after a key-value pair
 			if (*cp == U',')
 			{
-				if (!vals.empty())
+				if (prev == kvp)
 				{
+					prev = comma;
 					advance();
 					continue;
 				}
-				abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw ','"sv);
+
+				abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw comma"sv);
 			}
 
 			// closing '}'
 			else if (*cp == U'}')
 			{
+				if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/516
+				{
+					if (prev == comma)
+					{
+						abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair, saw closing '}' (dangling comma)"sv);
+						continue;
+					}
+				}
+
 				advance();
 				break;
 			}
@@ -2591,6 +2671,12 @@ namespace toml::impl
 			// must be a key_value-pair
 			else
 			{
+				if (prev == kvp)
+				{
+					abort_with_error("Encountered unexpected character while parsing inline table; expected comma or closing '}', saw '"sv, *cp, '\'');
+					continue;
+				}
+				prev = kvp;
 				parse_key_value_pair_and_insert(tab.get());
 			}
 		}

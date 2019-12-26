@@ -8,12 +8,12 @@
 	#undef TOML_CONFIG_HEADER
 #endif
 
-#ifndef TOML_USE_CHAR_8_IF_AVAILABLE
-	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
+#ifndef TOML_CHAR_8_STRINGS
+	#define TOML_CHAR_8_STRINGS 0
 #endif
 
-#ifndef TOML_STRICT
-	#define TOML_STRICT 0
+#ifndef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 1
 #endif
 
 #ifndef TOML_ASSERT
@@ -97,8 +97,17 @@
 	#define TOML_CPP 20
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
+#elif TOML_CPP_VERSION >= 201400L
+	#define TOML_CPP 14
+#elif TOML_CPP_VERSION >= 201100L
+	#define TOML_CPP 11
 #else
-	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
+	#define TOML_CPP 3
+#endif
+#if TOML_CPP == 11 ||  TOML_CPP == 14
+	#error toml++ requires C++17 or higher. For a TOML parser that supports C++11 see https://github.com/skystrife/cpptoml
+#elif TOML_CPP < 11
+	#error toml++ requires C++17 or higher. For a TOML parser that supports pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #endif
 
 #ifndef TOML_EXCEPTIONS
@@ -173,9 +182,22 @@
 #define TOML_LANG_MINOR		5
 #define TOML_LANG_REVISION	0
 
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)									\
-	((TOML_LANG_MAJOR * 10000 + TOML_LANG_MINOR * 100 + TOML_LANG_REVISION)	>	\
-	 ((maj) * 10000 + (min) * 100 + (rev)))
+#define TOML_LANG_MAKE_VERSION(maj, min, rev)												\
+		((maj) * 1000 + (min) * 25 + (rev))
+
+#define TOML_LANG_HIGHER_THAN(maj, min, rev)												\
+		(TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION) 		\
+		> TOML_LANG_MAKE_VERSION(maj, min, rev))
+
+#define TOML_LANG_AT_LEAST(maj, min, rev)													\
+		(TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION) 		\
+		>= TOML_LANG_MAKE_VERSION(maj, min, rev))
+
+#if TOML_UNRELEASED_FEATURES
+    #define TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(maj, min, rev)	1
+#else
+	#define TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(maj, min, rev)	TOML_LANG_HIGHER_THAN(min, maj, rev)
+#endif
 
 ////////// INCLUDES
 
@@ -197,15 +219,17 @@ TOML_DISABLE_ALL_WARNINGS
 
 TOML_POP_WARNINGS
 
-#if TOML_USE_CHAR_8_IF_AVAILABLE && defined(__cpp_lib_char8_t)
-	#define TOML_CHAR_8	1
+#if TOML_CHAR_8_STRINGS
+	#if !defined(__cpp_lib_char8_t)
+		#error toml++ requires implementation support to use char8_t strings, but yours doesn't provide it.
+	#endif
+
 	#define TOML_STRING_PREFIX_1(S) u8##S
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
 #else
-	#define TOML_CHAR_8	0
 	#define TOML_STRING_PREFIX(S) S
 #endif
-#undef TOML_USE_CHAR_8_IF_AVAILABLE
+#undef TOML_CHAR_8_STRINGS
 
 ////////// FORWARD DECLARATIONS & TYPEDEFS
 // clang-format on
@@ -267,14 +291,14 @@ namespace toml
 		int8_t minutes;
 	};
 
-	struct datetime final
+	struct date_time final
 	{
 		date date;
 		time time;
 		std::optional<time_offset> time_offset;
 	};
 
-	#if TOML_CHAR_8
+	#if TOML_CHAR_8_STRINGS
 
 	using string_char = char8_t;
 	using string = std::u8string;
@@ -301,7 +325,7 @@ namespace toml
 			|| std::is_same_v<T, bool>
 			|| std::is_same_v<T, date>
 			|| std::is_same_v<T, time>
-			|| std::is_same_v<T, datetime>;
+			|| std::is_same_v<T, date_time>;
 	}
 
 	template <typename T>
@@ -309,17 +333,17 @@ namespace toml
 	class array;
 	class table;
 
-	struct document_position
+	struct source_position
 	{
 		uint32_t line;		//begins at 1
 		uint32_t column;	//begins at 1
 	};
 
-	struct document_region
+	struct source_region
 	{
-		document_position begin;
-		document_position end;
-		std::shared_ptr<const string> source_path;
+		source_position begin;
+		source_position end;
+		std::shared_ptr<const string> path;
 	};
 
 	enum class node_type : uint8_t
@@ -332,7 +356,7 @@ namespace toml
 		boolean,
 		date,
 		time,
-		datetime
+		date_time
 	};
 
 	#if TOML_EXCEPTIONS
@@ -341,31 +365,31 @@ namespace toml
 		: public std::runtime_error
 	{
 		private:
-			document_region rgn;
+			source_region rgn;
 
 		public:
-			parse_error(const char* description, document_region&& region) noexcept
+			parse_error(const char* description, source_region&& region) noexcept
 				: std::runtime_error{ description },
 				rgn{ std::move(region) }
 			{}
 
-			parse_error(const char* description, const document_region& region) noexcept
+			parse_error(const char* description, const source_region& region) noexcept
 				: std::runtime_error{ description },
 				rgn{ region }
 			{}
 
-			parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+			parse_error(const char* description, const source_position& position, const std::shared_ptr<const string>& source_path) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position, source_path }
 			{}
 
-			parse_error(const char* description, const document_position& position) noexcept
+			parse_error(const char* description, const source_position& position) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position }
 			{}
 
 			[[nodiscard]]
-			const document_region& where() const noexcept
+			const source_region& where() const noexcept
 			{
 				return rgn;
 			}
@@ -378,26 +402,26 @@ namespace toml
 	struct parse_error final
 	{
 		std::string what;
-		document_region where;
+		source_region where;
 
 		parse_error() noexcept = default;
 
-		parse_error(const char* description, document_region&& region) noexcept
+		parse_error(const char* description, source_region&& region) noexcept
 			: what{ description },
 			where{ std::move(region) }
 		{}
 
-		parse_error(const char* description, const document_region& region) noexcept
+		parse_error(const char* description, const source_region& region) noexcept
 			: what{ description },
 			where{ region }
 		{}
 
-		parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+		parse_error(const char* description, const source_position& position, const std::shared_ptr<const string>& source_path) noexcept
 			: what{ description },
 			where{ position, position, source_path }
 		{}
 
-		parse_error(const char* description, const document_position& position) noexcept
+		parse_error(const char* description, const source_position& position) noexcept
 			: what{ description },
 			where{ position, position }
 		{}

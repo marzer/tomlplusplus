@@ -1,11 +1,8 @@
 #pragma once
 #include "toml_common.h"
-#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 #include "toml_utf8_is_unicode_letter.h"
-#define TOML_ALWAYS_INLINE_IF_NOT_UNICODE inline
-#else
-#define TOML_ALWAYS_INLINE_IF_NOT_UNICODE TOML_ALWAYS_INLINE
-#endif // !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+#endif // TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)
 
 namespace toml::impl
 {
@@ -82,25 +79,26 @@ namespace toml::impl
 			|| is_decimal_digit(codepoint);
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE_IF_NOT_UNICODE
+	[[nodiscard]]
 	constexpr bool is_bare_key_start_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint)
 			|| is_decimal_digit(codepoint)
 			|| codepoint == U'-'
 			|| codepoint == U'_'
-			#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+			#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/644 & toml/issues/687
+            || codepoint == U'+'
 			|| is_unicode_letter(codepoint)
 			|| is_unicode_number(codepoint)
 			#endif
 		;
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE_IF_NOT_UNICODE
+	[[nodiscard]]
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_bare_key_start_character(codepoint)
-			#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+			#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 			|| is_unicode_combining_mark(codepoint)
 			#endif
 		;
@@ -118,9 +116,30 @@ namespace toml::impl
 		;
 	}
 
-	// based on the decoder found here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 	struct utf8_decoder final
 	{
+		// This decoder is based on code from here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+		// 
+		// License:
+		// 
+		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+		// 
+		// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+		// software and associated documentation files (the "Software"), to deal in the Software
+		// without restriction, including without limitation the rights to use, copy, modify, merge,
+		// publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+		// persons to whom the Software is furnished to do so, subject to the following conditions:
+		// 
+		// The above copyright notice and this permission notice shall be included in all copies
+		// or substantial portions of the Software.
+		// 
+		// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+		// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+		// PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+		// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+		// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+		// DEALINGS IN THE SOFTWARE.
+
 		uint_least32_t state{};
 		char32_t codepoint{};
 
@@ -277,7 +296,7 @@ namespace toml::impl
 	{
 		char32_t value;
 		uint8_t bytes[4];
-		toml::document_position position;
+		toml::source_position position;
 
 		template <typename CHAR = toml::string_char>
 		[[nodiscard]] TOML_ALWAYS_INLINE
@@ -351,7 +370,8 @@ namespace toml::impl
 		public:
 
 			template <typename U, typename STR = toml::string_view>
-			explicit utf8_reader(U && source, STR&& source_path = {}) TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+			explicit utf8_reader(U && source, STR&& source_path = {})
+				TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				current.position = { 1u, 1u };
@@ -563,4 +583,3 @@ namespace toml::impl
 	#undef TOML_ERROR
 }
 
-#undef TOML_ALWAYS_INLINE_IF_NOT_UNICODE

@@ -31,7 +31,7 @@ tim1 = 07:32:00
 tim2 = 00:32:00.100000000
 dat1 = 1979-05-27
 
-# offset datetimes 
+# offset date-times 
 odt1 = 1979-05-27T07:32:00Z
 odt2 = 1979-05-27T00:32:00-07:00
 odt3 = 1979-05-27T00:32:00.999999-07:00
@@ -39,6 +39,9 @@ odt3 = 1979-05-27T00:32:00.999999-07:00
 arr = [ 'this', 'is', 'a', 'long', 'array', 'with', 16, 'elements.', 'it', 'should', 'be', 'printed', 'as', 'a', 'multiline', 'array.']
 
 tab = { this = 'is', an = 'inline', table = 'yay'}
+
+dotted.keys.are = "supported"
+dotted.and = "implemented as tables"
 
 [owner]
 name = "Mark Gillard"

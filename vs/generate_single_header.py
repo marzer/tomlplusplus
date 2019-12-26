@@ -53,10 +53,9 @@ def preprocess(match):
 
 	if preprocess_include_level >= 0:
 		text = re.sub(r'^\s*#\s*pragma\s*once\s*$', '', text, 0, re.I | re.M)
-	text = re.sub(r'^//[#!].+?$', '', text, 0, re.I | re.M)
 
 	preprocess_include_level += 1
-	text = re.sub(r'^\s*#\s*include\s+"(.+?)"', preprocess, text.strip(), 0, re.I | re.M).strip()
+	text = re.sub(r'^\s*#\s*include\s+"(.+?)"', preprocess, text, 0, re.I | re.M)
 	preprocess_include_level -= 1
 
 	if (preprocess_include_level == 0):
@@ -92,6 +91,11 @@ v0.5.0: https://github.com/toml-lang/toml/tree/v0.5.0''')
 
 	# preprocess header(s)
 	source_text = preprocess('toml.h')
+	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M)
+	source_text = re.sub(r'^[ \t]*//[/#!].+?$', '', source_text, 0, re.I | re.M)
+	source_text = re.sub('\n([ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M)
+	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M)
+	source_text = source_text.strip()
 	
 	# write the output file
 	output_file_path = os.path.join(get_script_folder(), r'..\toml.hpp')

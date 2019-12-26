@@ -370,7 +370,7 @@ class Chunk:
 					else 2
 				)
 				needs_space = True
-				if ((line_weight + range_weight) > (5 - (1 if first_line else 0))):
+				if ((line_weight + range_weight) > (4 - (1 if first_line else 0))):
 					print("\n\t{}".format(indent), end='', file=output_file)
 					line_weight = range_weight
 					needs_space = False

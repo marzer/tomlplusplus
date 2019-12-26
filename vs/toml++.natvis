@@ -38,7 +38,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="::toml::document_position">
+	<Type Name="::toml::source_position">
 		<DisplayString>line {line}, column {column}</DisplayString>
 		<Expand>
 			<Item Name="line" ExcludeView="simple">line</Item>

@@ -46,7 +46,6 @@
 //---------------------------------  ↓ toml_common.h  ----------------------------------------------
 #pragma region toml_common.h
 
-////////// CONFIGURATION
 // clang-format off
 
 #ifdef TOML_CONFIG_HEADER
@@ -54,12 +53,12 @@
 	#undef TOML_CONFIG_HEADER
 #endif
 
-#ifndef TOML_USE_CHAR_8_IF_AVAILABLE
-	#define TOML_USE_CHAR_8_IF_AVAILABLE 0
+#ifndef TOML_CHAR_8_STRINGS
+	#define TOML_CHAR_8_STRINGS 0
 #endif
 
-#ifndef TOML_STRICT
-	#define TOML_STRICT 0
+#ifndef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 1
 #endif
 
 #ifndef TOML_ASSERT
@@ -73,8 +72,6 @@
 #ifndef TOML_INDENT
 	#define TOML_INDENT "    "
 #endif
-
-////////// COMPILER & ENVIRONMENT STUFF
 
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
@@ -143,8 +140,17 @@
 	#define TOML_CPP 20
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
+#elif TOML_CPP_VERSION >= 201400L
+	#define TOML_CPP 14
+#elif TOML_CPP_VERSION >= 201100L
+	#define TOML_CPP 11
 #else
-	#error toml++ requires C++17 or higher. For a C++ TOML parser that supports as low as C++11 see https://github.com/skystrife/cpptoml
+	#define TOML_CPP 3
+#endif
+#if TOML_CPP == 11 ||  TOML_CPP == 14
+	#error toml++ requires C++17 or higher. For a TOML parser that supports C++11 see https://github.com/skystrife/cpptoml
+#elif TOML_CPP < 11
+	#error toml++ requires C++17 or higher. For a TOML parser that supports pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #endif
 
 #ifndef TOML_EXCEPTIONS
@@ -219,11 +225,22 @@
 #define TOML_LANG_MINOR		5
 #define TOML_LANG_REVISION	0
 
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)									\
-	((TOML_LANG_MAJOR * 10000 + TOML_LANG_MINOR * 100 + TOML_LANG_REVISION)	>	\
-	 ((maj) * 10000 + (min) * 100 + (rev)))
+#define TOML_LANG_MAKE_VERSION(maj, min, rev)												\
+		((maj) * 1000 + (min) * 25 + (rev))
 
-////////// INCLUDES
+#define TOML_LANG_HIGHER_THAN(maj, min, rev)												\
+		(TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION) 		\
+		> TOML_LANG_MAKE_VERSION(maj, min, rev))
+
+#define TOML_LANG_AT_LEAST(maj, min, rev)													\
+		(TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION) 		\
+		>= TOML_LANG_MAKE_VERSION(maj, min, rev))
+
+#if TOML_UNRELEASED_FEATURES
+    #define TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(maj, min, rev)	1
+#else
+	#define TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(maj, min, rev)	TOML_LANG_HIGHER_THAN(min, maj, rev)
+#endif
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -243,17 +260,18 @@ TOML_DISABLE_ALL_WARNINGS
 
 TOML_POP_WARNINGS
 
-#if TOML_USE_CHAR_8_IF_AVAILABLE && defined(__cpp_lib_char8_t)
-	#define TOML_CHAR_8	1
+#if TOML_CHAR_8_STRINGS
+	#if !defined(__cpp_lib_char8_t)
+		#error toml++ requires implementation support to use char8_t strings, but yours doesn't provide it.
+	#endif
+
 	#define TOML_STRING_PREFIX_1(S) u8##S
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
 #else
-	#define TOML_CHAR_8	0
 	#define TOML_STRING_PREFIX(S) S
 #endif
-#undef TOML_USE_CHAR_8_IF_AVAILABLE
+#undef TOML_CHAR_8_STRINGS
 
-////////// FORWARD DECLARATIONS & TYPEDEFS
 // clang-format on
 
 namespace toml
@@ -313,14 +331,14 @@ namespace toml
 		int8_t minutes;
 	};
 
-	struct datetime final
+	struct date_time final
 	{
 		date date;
 		time time;
 		std::optional<time_offset> time_offset;
 	};
 
-	#if TOML_CHAR_8
+	#if TOML_CHAR_8_STRINGS
 
 	using string_char = char8_t;
 	using string = std::u8string;
@@ -336,7 +354,7 @@ namespace toml
 
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
-	
+
 	namespace impl
 	{
 		template <typename T>
@@ -347,7 +365,7 @@ namespace toml
 			|| std::is_same_v<T, bool>
 			|| std::is_same_v<T, date>
 			|| std::is_same_v<T, time>
-			|| std::is_same_v<T, datetime>;
+			|| std::is_same_v<T, date_time>;
 	}
 
 	template <typename T>
@@ -355,17 +373,17 @@ namespace toml
 	class array;
 	class table;
 
-	struct document_position
+	struct source_position
 	{
 		uint32_t line;		//begins at 1
 		uint32_t column;	//begins at 1
 	};
 
-	struct document_region
+	struct source_region
 	{
-		document_position begin;
-		document_position end;
-		std::shared_ptr<const string> source_path;
+		source_position begin;
+		source_position end;
+		std::shared_ptr<const string> path;
 	};
 
 	enum class node_type : uint8_t
@@ -378,7 +396,7 @@ namespace toml
 		boolean,
 		date,
 		time,
-		datetime
+		date_time
 	};
 
 	#if TOML_EXCEPTIONS
@@ -387,63 +405,61 @@ namespace toml
 		: public std::runtime_error
 	{
 		private:
-			document_region rgn;
+			source_region rgn;
 
 		public:
-			parse_error(const char* description, document_region&& region) noexcept
+			parse_error(const char* description, source_region&& region) noexcept
 				: std::runtime_error{ description },
 				rgn{ std::move(region) }
 			{}
 
-			parse_error(const char* description, const document_region& region) noexcept
+			parse_error(const char* description, const source_region& region) noexcept
 				: std::runtime_error{ description },
 				rgn{ region }
 			{}
 
-			parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+			parse_error(const char* description, const source_position& position, const std::shared_ptr<const string>& source_path) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position, source_path }
 			{}
 
-			parse_error(const char* description, const document_position& position) noexcept
+			parse_error(const char* description, const source_position& position) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position }
 			{}
 
 			[[nodiscard]]
-			const document_region& where() const noexcept
+			const source_region& where() const noexcept
 			{
 				return rgn;
 			}
 	};
-
-
 
 	#else
 
 	struct parse_error final
 	{
 		std::string what;
-		document_region where;
+		source_region where;
 
 		parse_error() noexcept = default;
 
-		parse_error(const char* description, document_region&& region) noexcept
+		parse_error(const char* description, source_region&& region) noexcept
 			: what{ description },
 			where{ std::move(region) }
 		{}
 
-		parse_error(const char* description, const document_region& region) noexcept
+		parse_error(const char* description, const source_region& region) noexcept
 			: what{ description },
 			where{ region }
 		{}
 
-		parse_error(const char* description, const document_position& position, const std::shared_ptr<const string>& source_path) noexcept
+		parse_error(const char* description, const source_position& position, const std::shared_ptr<const string>& source_path) noexcept
 			: what{ description },
 			where{ position, position, source_path }
 		{}
 
-		parse_error(const char* description, const document_position& position) noexcept
+		parse_error(const char* description, const source_position& position) noexcept
 			: what{ description },
 			where{ position, position }
 		{}
@@ -464,46 +480,46 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
-			document_region rgn{};
+			source_region rgn{};
 
 		public:
 
 			[[nodiscard]] virtual bool is_value() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_int() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_float() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_integer() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_floating_point() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_bool() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
-			[[nodiscard]] virtual bool is_datetime() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_date_time() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_array() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_table() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_array_of_tables() const noexcept { return false; }
-			
+
 			[[nodiscard]] virtual value<string>* as_string() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<int64_t>* as_int() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<double>* as_float() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<int64_t>* as_integer() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<double>* as_floating_point() noexcept { return nullptr; }
 			[[nodiscard]] virtual value<bool>* as_bool() noexcept { return nullptr; }
 			[[nodiscard]] virtual value<date>* as_date() noexcept { return nullptr; }
 			[[nodiscard]] virtual value<time>* as_time() noexcept { return nullptr; }
-			[[nodiscard]] virtual value<datetime>* as_datetime() noexcept { return nullptr; }
+			[[nodiscard]] virtual value<date_time>* as_date_time() noexcept { return nullptr; }
 			[[nodiscard]] virtual array* as_array() noexcept { return nullptr; }
 			[[nodiscard]] virtual table* as_table() noexcept { return nullptr; }
 
 			[[nodiscard]] virtual const value<string>* as_string() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<int64_t>* as_int() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<double>* as_float() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<int64_t>* as_integer() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<double>* as_floating_point() const noexcept { return nullptr; }
 			[[nodiscard]] virtual const value<bool>* as_bool() const noexcept { return nullptr; }
 			[[nodiscard]] virtual const value<date>* as_date() const noexcept { return nullptr; }
 			[[nodiscard]] virtual const value<time>* as_time() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<datetime>* as_datetime() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const value<date_time>* as_date_time() const noexcept { return nullptr; }
 			[[nodiscard]] virtual const array* as_array() const noexcept { return nullptr; }
 			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
 
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
 			[[nodiscard]]
-			const document_region& region() const noexcept
+			const source_region& region() const noexcept
 			{
 				return rgn;
 			}
@@ -538,7 +554,7 @@ namespace toml
 			}
 
 		public:
-			
+
 			[[nodiscard]] bool is_table() const noexcept override { return true; }
 
 			[[nodiscard]] table* as_table() noexcept override { return this; }
@@ -571,7 +587,7 @@ namespace toml
 			std::vector<std::unique_ptr<node>> values;
 
 		public:
-			
+
 			[[nodiscard]] bool is_array() const noexcept override { return true; }
 
 			[[nodiscard]] bool is_array_of_tables() const noexcept override
@@ -658,28 +674,28 @@ namespace toml
 		public:
 
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
-			[[nodiscard]] bool is_int() const noexcept override { return std::is_same_v<T, int64_t>; }
-			[[nodiscard]] bool is_float() const noexcept override { return std::is_same_v<T, double>; }
+			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
+			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
 			[[nodiscard]] bool is_bool() const noexcept override { return std::is_same_v<T, bool>; }
 			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
-			[[nodiscard]] bool is_datetime() const noexcept override { return std::is_same_v<T, datetime>; }
+			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
 
-			[[nodiscard]] toml::value<string>* as_string() noexcept override { return value_ptr_from_base<string>(); }
-			[[nodiscard]] toml::value<int64_t>* as_int() noexcept override { return value_ptr_from_base<int64_t>(); }
-			[[nodiscard]] toml::value<double>* as_float() noexcept override { return value_ptr_from_base<double>(); }
-			[[nodiscard]] toml::value<bool>* as_bool() noexcept override { return value_ptr_from_base<bool>(); }
-			[[nodiscard]] toml::value<date>* as_date() noexcept override { return value_ptr_from_base<date>(); }
-			[[nodiscard]] toml::value<time>* as_time() noexcept override { return value_ptr_from_base<time>(); }
-			[[nodiscard]] toml::value<datetime>* as_datetime() noexcept override { return value_ptr_from_base<datetime>(); }
+			[[nodiscard]] value<string>* as_string() noexcept override { return value_ptr_from_base<string>(); }
+			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return value_ptr_from_base<int64_t>(); }
+			[[nodiscard]] value<double>* as_floating_point() noexcept override { return value_ptr_from_base<double>(); }
+			[[nodiscard]] value<bool>* as_bool() noexcept override { return value_ptr_from_base<bool>(); }
+			[[nodiscard]] value<date>* as_date() noexcept override { return value_ptr_from_base<date>(); }
+			[[nodiscard]] value<time>* as_time() noexcept override { return value_ptr_from_base<time>(); }
+			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return value_ptr_from_base<date_time>(); }
 
-			[[nodiscard]] const toml::value<string>* as_string() const noexcept override { return value_ptr_from_base<string>(); }
-			[[nodiscard]] const toml::value<int64_t>* as_int() const noexcept override { return value_ptr_from_base<int64_t>(); }
-			[[nodiscard]] const toml::value<double>* as_float() const noexcept override { return value_ptr_from_base<double>(); }
-			[[nodiscard]] const toml::value<bool>* as_bool() const noexcept override { return value_ptr_from_base<bool>(); }
-			[[nodiscard]] const toml::value<date>* as_date() const noexcept override { return value_ptr_from_base<date>(); }
-			[[nodiscard]] const toml::value<time>* as_time() const noexcept override { return value_ptr_from_base<time>(); }
-			[[nodiscard]] const toml::value<datetime>* as_datetime() const noexcept override { return value_ptr_from_base<datetime>(); }
+			[[nodiscard]] const value<string>* as_string() const noexcept override { return value_ptr_from_base<string>(); }
+			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return value_ptr_from_base<int64_t>(); }
+			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return value_ptr_from_base<double>(); }
+			[[nodiscard]] const value<bool>* as_bool() const noexcept override { return value_ptr_from_base<bool>(); }
+			[[nodiscard]] const value<date>* as_date() const noexcept override { return value_ptr_from_base<date>(); }
+			[[nodiscard]] const value<time>* as_time() const noexcept override { return value_ptr_from_base<time>(); }
+			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return value_ptr_from_base<date_time>(); }
 
 			[[nodiscard]] node_type type() const noexcept override
 			{
@@ -689,7 +705,7 @@ namespace toml
 				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
 				else if constexpr (std::is_same_v<T, date>) return node_type::date;
 				else if constexpr (std::is_same_v<T, time>) return node_type::time;
-				else if constexpr (std::is_same_v<T, datetime>) return node_type::datetime;
+				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
 			}
 
 			template <typename... U>
@@ -722,14 +738,15 @@ namespace toml
 //-------------------------------------------------------------------------  ↓ toml_utf8.h  --------
 #pragma region toml_utf8.h
 
-#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
+
 #define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)	\
 	TOML_ASSUME(codepoint >= first);				\
 	TOML_ASSUME(codepoint <= last)
 
 namespace toml::impl
 {
-	/// \brief Returns true if a codepoint belongs to any of these categories: Ll, Lm, Lo, Lt, Lu
+
 	[[nodiscard]]
 	constexpr bool is_unicode_letter(char32_t codepoint) noexcept
 	{
@@ -739,7 +756,7 @@ namespace toml::impl
 		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u00AA', U'\U0002FA1D');
 		switch ((static_cast<uint_least32_t>(codepoint) - 0xAAu) / 3046u)
 		{
-			case 0: 
+			case 0:
 			{
 				if (codepoint > U'\u0C8F')
 					return false;
@@ -784,7 +801,7 @@ namespace toml::impl
 				}
 				// chunk summary: 1867 codepoints from 117 ranges (spanning a search area of 3046)
 			}
-			case 1: 
+			case 1:
 			{
 				if (codepoint < U'\u0C90' || codepoint > U'\u1875')
 					return false;
@@ -825,7 +842,7 @@ namespace toml::impl
 				}
 				// chunk summary: 2139 codepoints from 86 ranges (spanning a search area of 3046)
 			}
-			case 2: 
+			case 2:
 			{
 				if (codepoint < U'\u1876' || codepoint > U'\u2184')
 					return false;
@@ -858,7 +875,7 @@ namespace toml::impl
 				}
 				// chunk summary: 1328 codepoints from 65 ranges (spanning a search area of 2319)
 			}
-			case 3: 
+			case 3:
 			{
 				if (codepoint < U'\u2C00' || codepoint > U'\u3041')
 					return false;
@@ -881,7 +898,7 @@ namespace toml::impl
 				}
 				// chunk summary: 420 codepoints from 24 ranges (spanning a search area of 1090)
 			}
-			case 4: 
+			case 4:
 			{
 				if (codepoint < U'\u3042' || codepoint > U'\u3C27')
 					return false;
@@ -905,7 +922,7 @@ namespace toml::impl
 				// chunk summary: 2450 codepoints from 9 ranges (spanning a search area of 3046)
 			}
 			case 6: return codepoint <= U'\u4DB4' || codepoint >= U'\u4E00';
-			case 13: 
+			case 13:
 			{
 				if (codepoint < U'\u9B58' || codepoint > U'\uA73D')
 					return false;
@@ -925,7 +942,7 @@ namespace toml::impl
 				}
 				// chunk summary: 2858 codepoints from 11 ranges (spanning a search area of 3046)
 			}
-			case 14: 
+			case 14:
 			{
 				if (codepoint < U'\uA73E' || codepoint > U'\uB323')
 					return false;
@@ -950,10 +967,11 @@ namespace toml::impl
 				}
 				// chunk summary: 2616 codepoints from 43 ranges (spanning a search area of 3046)
 			}
-			case 18: return codepoint <= U'\uD7A2' || (codepoint >= U'\uD7B0' && codepoint <= U'\uD7C6') || codepoint >= U'\uD7CB';
+			case 18: return codepoint <= U'\uD7A2' || (codepoint >= U'\uD7B0' && codepoint <= U'\uD7C6')
+					|| codepoint >= U'\uD7CB';
 			case 19: return false;
 			case 20: return codepoint <= U'\uFA6D' || codepoint >= U'\uFA70';
-			case 21: 
+			case 21:
 			{
 				if (codepoint < U'\uFA88' || codepoint > U'\U0001066D')
 					return false;
@@ -991,7 +1009,7 @@ namespace toml::impl
 				}
 				// chunk summary: 1924 codepoints from 46 ranges (spanning a search area of 3046)
 			}
-			case 22: 
+			case 22:
 			{
 				if (codepoint < U'\U0001066E' || codepoint > U'\U0001122B')
 					return false;
@@ -1035,7 +1053,7 @@ namespace toml::impl
 				}
 				// chunk summary: 1312 codepoints from 50 ranges (spanning a search area of 3006)
 			}
-			case 23: 
+			case 23:
 			{
 				if (codepoint < U'\U00011280' || codepoint > U'\U00011D98')
 					return false;
@@ -1076,11 +1094,12 @@ namespace toml::impl
 				}
 				// chunk summary: 888 codepoints from 54 ranges (spanning a search area of 2841)
 			}
-			case 24: return codepoint <= U'\U00011EF2' || (codepoint >= U'\U00012000' && codepoint <= U'\U00012399') || codepoint >= U'\U00012480';
+			case 24: return codepoint <= U'\U00011EF2' || (codepoint >= U'\U00012000' && codepoint <= U'\U00012399')
+					|| codepoint >= U'\U00012480';
 			case 26: return false;
 			case 28: return false;
 			case 29: return false;
-			case 30: 
+			case 30:
 			{
 				if (codepoint < U'\U00016800' || codepoint > U'\U00017183')
 					return false;
@@ -1118,7 +1137,7 @@ namespace toml::impl
 			case 37: return codepoint <= U'\U0001BC6A' || (codepoint >= U'\U0001BC70' && codepoint <= U'\U0001BC7C')
 					|| (codepoint >= U'\U0001BC80' && codepoint <= U'\U0001BC88') || codepoint >= U'\U0001BC90';
 			case 38: return false;
-			case 39: 
+			case 39:
 			{
 				if (codepoint < U'\U0001D400' || codepoint > U'\U0001D7CB')
 					return false;
@@ -1140,7 +1159,7 @@ namespace toml::impl
 				}
 				// chunk summary: 936 codepoints from 30 ranges (spanning a search area of 972)
 			}
-			case 40: 
+			case 40:
 			{
 				if (codepoint < U'\U0001E100' || codepoint > U'\U0001E87F')
 					return false;
@@ -1157,7 +1176,7 @@ namespace toml::impl
 				}
 				// chunk summary: 225 codepoints from 5 ranges (spanning a search area of 1920)
 			}
-			case 41: 
+			case 41:
 			{
 				if (codepoint < U'\U0001E880' || codepoint > U'\U0001EEBB')
 					return false;
@@ -1176,14 +1195,14 @@ namespace toml::impl
 				}
 				// chunk summary: 279 codepoints from 36 ranges (spanning a search area of 1596)
 			}
-			case 58: return codepoint <= U'\U0002B733' || (codepoint >= U'\U0002B740' && codepoint <= U'\U0002B81C') || codepoint >= U'\U0002B820';
+			case 58: return codepoint <= U'\U0002B733' || (codepoint >= U'\U0002B740' && codepoint <= U'\U0002B81C')
+					|| codepoint >= U'\U0002B820';
 			case 60: return codepoint <= U'\U0002CEA0' || codepoint >= U'\U0002CEB0';
 			default: return true;
 		}
 		// chunk summary: 125582 codepoints from 607 ranges (spanning a search area of 194932)
 	}
 
-	/// \brief Returns true if a codepoint belongs to any of these categories: Nd, Nl
 	[[nodiscard]]
 	constexpr bool is_unicode_number(char32_t codepoint) noexcept
 	{
@@ -1193,7 +1212,7 @@ namespace toml::impl
 		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0660', U'\U0001E959');
 		switch ((static_cast<uint_least32_t>(codepoint) - 0x660u) / 1932u)
 		{
-			case 0: 
+			case 0:
 			{
 				if (codepoint > U'\u0DEB')
 					return false;
@@ -1201,7 +1220,7 @@ namespace toml::impl
 				return ((static_cast<uint_least32_t>(codepoint) - 0x660u) / 63u) & 0x55555025ull;
 				// chunk summary: 126 codepoints from 13 ranges (spanning a search area of 1932)
 			}
-			case 1: 
+			case 1:
 			{
 				if (codepoint < U'\u0DEC' || codepoint > U'\u1099')
 					return false;
@@ -1209,7 +1228,7 @@ namespace toml::impl
 				return ((static_cast<uint_least32_t>(codepoint) - 0xDECu) / 63u) & 0x63Bull;
 				// chunk summary: 54 codepoints from 6 ranges (spanning a search area of 686)
 			}
-			case 2: 
+			case 2:
 			{
 				if (codepoint < U'\u16EE' || codepoint > U'\u1C59')
 					return false;
@@ -1232,7 +1251,7 @@ namespace toml::impl
 			}
 			case 3: return codepoint <= U'\u2182' || codepoint >= U'\u2185';
 			case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x3007ull)) & 0xE0007FC000001ull;
-			case 21: 
+			case 21:
 			{
 				if (codepoint < U'\uA620' || codepoint > U'\uABF9')
 					return false;
@@ -1253,7 +1272,7 @@ namespace toml::impl
 				// chunk summary: 80 codepoints from 8 ranges (spanning a search area of 1498)
 			}
 			case 32: return true;
-			case 33: 
+			case 33:
 			{
 				if (codepoint < U'\U00010140' || codepoint > U'\U000104A9')
 					return false;
@@ -1270,7 +1289,7 @@ namespace toml::impl
 				// chunk summary: 70 codepoints from 5 ranges (spanning a search area of 874)
 			}
 			case 34: return true;
-			case 35: 
+			case 35:
 			{
 				if (codepoint < U'\U00011066' || codepoint > U'\U000114D9')
 					return false;
@@ -1278,7 +1297,7 @@ namespace toml::impl
 				return ((static_cast<uint_least32_t>(codepoint) - 0x11066u) / 64u) & 0x2842Dull;
 				// chunk summary: 70 codepoints from 7 ranges (spanning a search area of 1140)
 			}
-			case 36: 
+			case 36:
 			{
 				if (codepoint < U'\U00011650' || codepoint > U'\U00011D59')
 					return false;
@@ -1296,7 +1315,6 @@ namespace toml::impl
 		// chunk summary: 856 codepoints from 70 ranges (spanning a search area of 123642)
 	}
 
-	/// \brief Returns true if a codepoint belongs to any of these categories: Mn, Mc
 	[[nodiscard]]
 	constexpr bool is_unicode_combining_mark(char32_t codepoint) noexcept
 	{
@@ -1306,7 +1324,7 @@ namespace toml::impl
 		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\U000E01EF');
 		switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 14332u)
 		{
-			case 0: 
+			case 0:
 			{
 				if (codepoint > U'\u309A')
 					return false;
@@ -1317,8 +1335,9 @@ namespace toml::impl
 					case 0: return true;
 					case 2: return true;
 					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x591ull)) & 0x5B5FFFFFFFFFFFull;
-					case 4: return codepoint <= U'\u061A' || (codepoint >= U'\u064B' && codepoint <= U'\u065F') || codepoint == U'\u0670';
-					case 5: 
+					case 4: return codepoint <= U'\u061A' || (codepoint >= U'\u064B' && codepoint <= U'\u065F')
+							|| codepoint == U'\u0670';
+					case 5:
 					{
 						if (codepoint < U'\u06D6' || codepoint > U'\u0749')
 							return false;
@@ -1334,7 +1353,7 @@ namespace toml::impl
 					}
 					case 6: return codepoint == U'\u074A' || (codepoint >= U'\u07A6' && codepoint <= U'\u07B0')
 							|| (codepoint >= U'\u07EB' && codepoint <= U'\u07F3') || codepoint == U'\u07FD';
-					case 7: 
+					case 7:
 					{
 						if (codepoint < U'\u0816' || codepoint > U'\u085B')
 							return false;
@@ -1347,7 +1366,7 @@ namespace toml::impl
 						}
 						// chunk summary: 24 codepoints from 5 ranges (spanning a search area of 70)
 					}
-					case 8: 
+					case 8:
 					{
 						if (codepoint < U'\u08D3' || codepoint > U'\u0963')
 							return false;
@@ -1361,7 +1380,7 @@ namespace toml::impl
 						}
 						// chunk summary: 78 codepoints from 6 ranges (spanning a search area of 145)
 					}
-					case 9: 
+					case 9:
 					{
 						if (codepoint < U'\u0981' || codepoint > U'\u0A03')
 							return false;
@@ -1375,7 +1394,7 @@ namespace toml::impl
 						}
 						// chunk summary: 23 codepoints from 9 ranges (spanning a search area of 131)
 					}
-					case 10: 
+					case 10:
 					{
 						if (codepoint < U'\u0A3C' || codepoint > U'\u0ACD')
 							return false;
@@ -1390,7 +1409,7 @@ namespace toml::impl
 						}
 						// chunk summary: 33 codepoints from 12 ranges (spanning a search area of 146)
 					}
-					case 11: 
+					case 11:
 					{
 						if (codepoint < U'\u0AE2' || codepoint > U'\u0B82')
 							return false;
@@ -1405,7 +1424,7 @@ namespace toml::impl
 						}
 						// chunk summary: 29 codepoints from 10 ranges (spanning a search area of 161)
 					}
-					case 12: 
+					case 12:
 					{
 						if (codepoint < U'\u0BBE' || codepoint > U'\u0C4A')
 							return false;
@@ -1419,7 +1438,7 @@ namespace toml::impl
 						}
 						// chunk summary: 29 codepoints from 8 ranges (spanning a search area of 141)
 					}
-					case 13: 
+					case 13:
 					{
 						if (codepoint < U'\u0C4B' || codepoint > U'\u0D01')
 							return false;
@@ -1434,7 +1453,7 @@ namespace toml::impl
 						}
 						// chunk summary: 31 codepoints from 11 ranges (spanning a search area of 183)
 					}
-					case 14: 
+					case 14:
 					{
 						if (codepoint < U'\u0D02' || codepoint > U'\u0D83')
 							return false;
@@ -1448,7 +1467,7 @@ namespace toml::impl
 						}
 						// chunk summary: 23 codepoints from 8 ranges (spanning a search area of 130)
 					}
-					case 15: 
+					case 15:
 					{
 						if (codepoint < U'\u0DCA' || codepoint > U'\u0E4E')
 							return false;
@@ -1464,7 +1483,7 @@ namespace toml::impl
 					}
 					case 16: return codepoint == U'\u0EB1' || (codepoint >= U'\u0EB4' && codepoint <= U'\u0EBC')
 							|| (codepoint >= U'\u0EC8' && codepoint <= U'\u0ECD') || codepoint >= U'\u0F18';
-					case 17: 
+					case 17:
 					{
 						if (codepoint < U'\u0F35' || codepoint > U'\u0FC6')
 							return false;
@@ -1479,7 +1498,7 @@ namespace toml::impl
 						}
 						// chunk summary: 75 codepoints from 9 ranges (spanning a search area of 146)
 					}
-					case 18: 
+					case 18:
 					{
 						if (codepoint < U'\u102B' || codepoint > U'\u108F')
 							return false;
@@ -1495,7 +1514,7 @@ namespace toml::impl
 					}
 					case 19: return true;
 					case 22: return true;
-					case 28: 
+					case 28:
 					{
 						if (codepoint < U'\u1712' || codepoint > U'\u17BA')
 							return false;
@@ -1514,7 +1533,8 @@ namespace toml::impl
 					case 31: return codepoint <= U'\u192B' || codepoint >= U'\u1930';
 					case 32: return codepoint <= U'\u1A1B' || (codepoint >= U'\u1A55' && codepoint <= U'\u1A5E')
 							|| (codepoint >= U'\u1A60' && codepoint <= U'\u1A7C') || codepoint == U'\u1A7F';
-					case 33: return codepoint <= U'\u1ABD' || (codepoint >= U'\u1B00' && codepoint <= U'\u1B04') || codepoint >= U'\u1B34';
+					case 33: return codepoint <= U'\u1ABD' || (codepoint >= U'\u1B00' && codepoint <= U'\u1B04')
+							|| codepoint >= U'\u1B34';
 					case 34: return codepoint <= U'\u1B73' || (codepoint >= U'\u1B80' && codepoint <= U'\u1B82')
 							|| (codepoint >= U'\u1BA1' && codepoint <= U'\u1BAD') || codepoint >= U'\u1BE6';
 					case 35: return true;
@@ -1529,7 +1549,7 @@ namespace toml::impl
 				}
 				// chunk summary: 1102 codepoints from 155 ranges (spanning a search area of 11675)
 			}
-			case 2: 
+			case 2:
 			{
 				if (codepoint < U'\uA66F' || codepoint > U'\uAAEF')
 					return false;
@@ -1553,8 +1573,9 @@ namespace toml::impl
 				}
 				// chunk summary: 136 codepoints from 27 ranges (spanning a search area of 1153)
 			}
-			case 3: return codepoint <= U'\uAAF6' || (codepoint >= U'\uABE3' && codepoint <= U'\uABEA') || codepoint >= U'\uABEC';
-			case 4: 
+			case 3: return codepoint <= U'\uAAF6' || (codepoint >= U'\uABE3' && codepoint <= U'\uABEA')
+					|| codepoint >= U'\uABEC';
+			case 4:
 			{
 				if (codepoint < U'\uFB1E' || codepoint > U'\U00011A99')
 					return false;
@@ -1576,8 +1597,8 @@ namespace toml::impl
 					case 41: return true;
 					case 42: return codepoint <= U'\U00011046' || codepoint >= U'\U0001107F';
 					case 43: return codepoint <= U'\U000110BA' || codepoint >= U'\U00011100';
-					case 44: return codepoint <= U'\U00011134' || (codepoint >= U'\U00011145' && codepoint <= U'\U00011146') || codepoint == U'\U00011173'
-							|| codepoint >= U'\U00011180';
+					case 44: return codepoint <= U'\U00011134' || (codepoint >= U'\U00011145' && codepoint <= U'\U00011146')
+							|| codepoint == U'\U00011173' || codepoint >= U'\U00011180';
 					case 45: return codepoint <= U'\U000111C0' || codepoint >= U'\U000111C9';
 					case 46: return codepoint <= U'\U00011237' || codepoint >= U'\U0001123E';
 					case 47: return codepoint <= U'\U000112EA' || codepoint >= U'\U00011300';
@@ -1590,7 +1611,7 @@ namespace toml::impl
 					case 56: return true;
 					case 58: return true;
 					case 61: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x119D1ull)) & 0x3FF00000008FE7Full;
-					case 62: 
+					case 62:
 					{
 						if (codepoint < U'\U00011A33')
 							return false;
@@ -1607,7 +1628,7 @@ namespace toml::impl
 				}
 				// chunk summary: 383 codepoints from 56 ranges (spanning a search area of 8060)
 			}
-			case 5: 
+			case 5:
 			{
 				if (codepoint < U'\U00011C2F' || codepoint > U'\U00011EF6')
 					return false;
@@ -1626,7 +1647,7 @@ namespace toml::impl
 				}
 				// chunk summary: 85 codepoints from 13 ranges (spanning a search area of 712)
 			}
-			case 6: 
+			case 6:
 			{
 				if (codepoint < U'\U00016AF0' || codepoint > U'\U00016F92')
 					return false;
@@ -1643,7 +1664,7 @@ namespace toml::impl
 				// chunk summary: 72 codepoints from 5 ranges (spanning a search area of 1187)
 			}
 			case 7: return true;
-			case 8: 
+			case 8:
 			{
 				if (codepoint < U'\U0001D165' || codepoint > U'\U0001E94A')
 					return false;
@@ -1651,7 +1672,7 @@ namespace toml::impl
 				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001E94A');
 				switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 128u)
 				{
-					case 0: 
+					case 0:
 					{
 						if (codepoint > U'\U0001D1AD')
 							return false;
@@ -1667,7 +1688,7 @@ namespace toml::impl
 					}
 					case 1: return true;
 					case 17: return codepoint <= U'\U0001DA36' || codepoint >= U'\U0001DA3B';
-					case 18: 
+					case 18:
 					{
 						if (codepoint < U'\U0001DA65' || codepoint > U'\U0001DAAF')
 							return false;
@@ -1698,10 +1719,8 @@ namespace toml::impl
 }
 
 #undef TOML_ASSUME_CODEPOINT_BETWEEN
-#define TOML_ALWAYS_INLINE_IF_NOT_UNICODE inline
-#else
-#define TOML_ALWAYS_INLINE_IF_NOT_UNICODE TOML_ALWAYS_INLINE
-#endif // !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+
+#endif // TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)
 
 namespace toml::impl
 {
@@ -1778,25 +1797,26 @@ namespace toml::impl
 			|| is_decimal_digit(codepoint);
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE_IF_NOT_UNICODE
+	[[nodiscard]]
 	constexpr bool is_bare_key_start_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint)
 			|| is_decimal_digit(codepoint)
 			|| codepoint == U'-'
 			|| codepoint == U'_'
-			#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+			#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/644 & toml/issues/687
+            || codepoint == U'+'
 			|| is_unicode_letter(codepoint)
 			|| is_unicode_number(codepoint)
 			#endif
 		;
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE_IF_NOT_UNICODE
+	[[nodiscard]]
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_bare_key_start_character(codepoint)
-			#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+			#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 			|| is_unicode_combining_mark(codepoint)
 			#endif
 		;
@@ -1814,9 +1834,30 @@ namespace toml::impl
 		;
 	}
 
-	// based on the decoder found here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 	struct utf8_decoder final
 	{
+		// This decoder is based on code from here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+		//
+		// License:
+		//
+		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+		//
+		// Permission is hereby granted, free of charge, to any person obtaining a copy of this
+		// software and associated documentation files (the "Software"), to deal in the Software
+		// without restriction, including without limitation the rights to use, copy, modify, merge,
+		// publish, distribute, sublicense, and/or sell copies of the Software, and to permit
+		// persons to whom the Software is furnished to do so, subject to the following conditions:
+		//
+		// The above copyright notice and this permission notice shall be included in all copies
+		// or substantial portions of the Software.
+		//
+		// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+		// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+		// PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
+		// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+		// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+		// DEALINGS IN THE SOFTWARE.
+
 		uint_least32_t state{};
 		char32_t codepoint{};
 
@@ -1973,7 +2014,7 @@ namespace toml::impl
 	{
 		char32_t value;
 		uint8_t bytes[4];
-		toml::document_position position;
+		toml::source_position position;
 
 		template <typename CHAR = toml::string_char>
 		[[nodiscard]] TOML_ALWAYS_INLINE
@@ -2047,7 +2088,8 @@ namespace toml::impl
 		public:
 
 			template <typename U, typename STR = toml::string_view>
-			explicit utf8_reader(U && source, STR&& source_path = {}) TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+			explicit utf8_reader(U && source, STR&& source_path = {})
+				TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				current.position = { 1u, 1u };
@@ -2138,7 +2180,6 @@ namespace toml::impl
 				}
 			}
 
-
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
@@ -2172,7 +2213,7 @@ namespace toml::impl
 			utf8_reader_interface& reader;
 			struct
 			{
-				
+
 				utf8_codepoint buffer[history_buffer_size];
 				size_t count = {}, first = {};
 			}
@@ -2202,7 +2243,7 @@ namespace toml::impl
 					negative_offset--;
 
 					// an entry negative offset of 1 just means "replay the current head"
-					if (!negative_offset) 
+					if (!negative_offset)
 						return head;
 
 					// otherwise step back into the history buffer
@@ -2259,8 +2300,6 @@ namespace toml::impl
 	#undef TOML_ERROR
 }
 
-#undef TOML_ALWAYS_INLINE_IF_NOT_UNICODE
-
 #pragma endregion toml_utf8.h
 //-------------------------------------------------------------------------  ↑ toml_utf8.h  --------
 
@@ -2305,12 +2344,12 @@ namespace toml::impl
 		private:
 			utf8_buffered_reader reader;
 			table root;
-			document_position prev_pos = { 1u, 1u };
+			source_position prev_pos = { 1u, 1u };
 			const utf8_codepoint* cp = {};
 			std::vector<table*> implicit_tables;
 			std::vector<table*> dotted_key_tables;
 			std::vector<array*> table_arrays;
-			std::string recording_buffer; //for diagnostics 
+			std::string recording_buffer; //for diagnostics
 			bool recording = false;
 			#if !TOML_EXCEPTIONS
 			mutable std::optional<toml::parse_error> err;
@@ -2342,7 +2381,46 @@ namespace toml::impl
 						}
 						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 						{
-							const auto cp_view = arg.template as_view<char>();
+							std::string_view cp_view;
+							switch (arg.value)
+							{
+								case U'\x00': cp_view = "\\u0000"sv; break;
+								case U'\x01': cp_view = "\\u0001"sv; break;
+								case U'\x02': cp_view = "\\u0002"sv; break;
+								case U'\x03': cp_view = "\\u0003"sv; break;
+								case U'\x04': cp_view = "\\u0004"sv; break;
+								case U'\x05': cp_view = "\\u0005"sv; break;
+								case U'\x06': cp_view = "\\u0006"sv; break;
+								case U'\x07': cp_view = "\\u0007"sv; break;
+								case U'\x08': cp_view = "\\b"sv; break;
+								case U'\x09': cp_view = "\\t"sv; break;
+								case U'\x0A': cp_view = "\\n"sv; break;
+								case U'\x0B': cp_view = "\\u000B"sv; break;
+								case U'\x0C': cp_view = "\\f"sv; break;
+								case U'\x0D': cp_view = "\\r"sv; break;
+								case U'\x0E': cp_view = "\\u000E"sv; break;
+								case U'\x0F': cp_view = "\\u000F"sv; break;
+								case U'\x10': cp_view = "\\u0010"sv; break;
+								case U'\x11': cp_view = "\\u0011"sv; break;
+								case U'\x12': cp_view = "\\u0012"sv; break;
+								case U'\x13': cp_view = "\\u0013"sv; break;
+								case U'\x14': cp_view = "\\u0014"sv; break;
+								case U'\x15': cp_view = "\\u0015"sv; break;
+								case U'\x16': cp_view = "\\u0016"sv; break;
+								case U'\x17': cp_view = "\\u0017"sv; break;
+								case U'\x18': cp_view = "\\u0018"sv; break;
+								case U'\x19': cp_view = "\\u0019"sv; break;
+								case U'\x1A': cp_view = "\\u001A"sv; break;
+								case U'\x1B': cp_view = "\\u001B"sv; break;
+								case U'\x1C': cp_view = "\\u001C"sv; break;
+								case U'\x1D': cp_view = "\\u001D"sv; break;
+								case U'\x1E': cp_view = "\\u001E"sv; break;
+								case U'\x1F': cp_view = "\\u001F"sv; break;
+								case U'\x7F': cp_view = "\\u007F"sv; break;
+
+								default:
+									cp_view = arg.template as_view<char>();
+							}
 							memcpy(ptr, cp_view.data(), cp_view.length());
 							ptr += cp_view.length();
 						}
@@ -2369,7 +2447,7 @@ namespace toml::impl
 								case node_type::boolean: type = "boolean"sv; break;
 								case node_type::date: type = "date"sv; break;
 								case node_type::time: type = "time"sv; break;
-								case node_type::datetime: type = "date-time"sv; break;
+								case node_type::date_time: type = "date-time"sv; break;
 								TOML_NO_DEFAULT_CASE;
 							}
 							memcpy(ptr, type.data(), type.length());
@@ -2516,7 +2594,7 @@ namespace toml::impl
 					if (consume_line_break())
 						return true;
 
-					if constexpr (!TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0))
+					if constexpr (TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/567
 					{
 						if (*cp <= U'\u0008'
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
@@ -2636,7 +2714,7 @@ namespace toml::impl
 
 							case U's':
 							{
-								if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+								if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/622
 									abort_with_error( "Escape sequence '\\s' (Space, U+0020) is not supported in TOML 0.5.0 and earlier."sv );
 								else
 								{
@@ -2644,7 +2722,7 @@ namespace toml::impl
 									break;
 								}
 							}
-							 
+
 							case U't': str += TOML_STRING_PREFIX('\t'); break;
 							case U'"': str += TOML_STRING_PREFIX('"'); break;
 							case U'\\': str += TOML_STRING_PREFIX('\\'); break;
@@ -2709,7 +2787,6 @@ namespace toml::impl
 								);
 						}
 
-							
 					}
 					else TOML_LIKELY
 					{
@@ -2918,7 +2995,7 @@ namespace toml::impl
 						return string{};
 					abort_with_error("Encountered EOF while parsing string"sv);
 				}
-					
+
 				// if the first three characters are all the same string delimiter then
 				// it's a multi-line string.
 				if (first == second && first == third)
@@ -3188,7 +3265,7 @@ namespace toml::impl
 						TOML_ERROR_CHECK({});
 						continue;
 					}
-					
+
 					if (*cp == U'.')
 					{
 						if (seen_decimal)
@@ -3782,7 +3859,7 @@ namespace toml::impl
 					static_cast<uint8_t>(minute),
 				};
 
-				if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+				if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/671
 				{
 					// ':'
 					eof_check();
@@ -3859,7 +3936,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			datetime parse_datetime() TOML_MAY_THROW
+			date_time parse_date_time() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
 				TOML_ASSERT(cp && is_decimal_digit(*cp));
@@ -3868,7 +3945,7 @@ namespace toml::impl
 				{
 					TOML_ERROR_CHECK();
 					if (!cp)
-						abort_with_error("Encountered EOF while parsing datetime"sv);
+						abort_with_error("Encountered EOF while parsing date-time"sv);
 				};
 
 				// "YYYY-MM-DD"
@@ -3878,11 +3955,11 @@ namespace toml::impl
 				// ' ' or 'T'
 				eof_check();
 				if (*cp != U' ' && *cp != U'T' && *cp != U't')
-					abort_with_error("Encountered unexpected character while parsing datetime; expected space or 'T', saw '"sv, *cp, '\'');
+					abort_with_error("Encountered unexpected character while parsing date-time; expected space or 'T', saw '"sv, *cp, '\'');
 				advance();
 
 				// "HH:MM:SS.fractional"
-					
+
 				auto time = parse_time(true);
 				TOML_ERROR_CHECK({});
 
@@ -3910,7 +3987,7 @@ namespace toml::impl
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected 2-digit hour, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit hour, saw '"sv, *cp, '\'');
 						}
 						const auto hour = digits[1] + digits[0] * 10u;
 						if (hour > 23u)
@@ -3919,14 +3996,14 @@ namespace toml::impl
 						// ':'
 						eof_check();
 						if (*cp != U':')
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected ':', saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected ':', saw '"sv, *cp, '\'');
 						advance();
 
 						// "MM"
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing datetime offset; expected 2-digit minute, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit minute, saw '"sv, *cp, '\'');
 						}
 						const auto minute = digits[1] + digits[0] * 10u;
 						if (minute > 59u)
@@ -3939,9 +4016,8 @@ namespace toml::impl
 					}
 				}
 
-					
 				if (cp && !is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing datetime; expected value-terminator, saw '"sv, *cp, '\'');
+					abort_with_error("Encountered unexpected character while parsing date-time; expected value-terminator, saw '"sv, *cp, '\'');
 
 				TOML_ERROR_CHECK({});
 				return {
@@ -3984,7 +4060,7 @@ namespace toml::impl
 					else if (*cp == U'[')
 					{
 						val = parse_array();
-						if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+						if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/665
 						{
 							// arrays must be homogenous in toml 0.5.0 and earlier,
 							// but an exception is made for ints and floats (everything is coerced to float)
@@ -4017,7 +4093,7 @@ namespace toml::impl
 									for (size_t i = 0; i < arr.values.size(); i++)
 									{
 										auto& elem = arr.values[i];
-										if (auto intval = elem->as_int())
+										if (auto intval = elem->as_integer())
 										{
 											auto rgn = elem->rgn;
 											elem = std::make_unique<value<double>>(static_cast<double>(intval->val_));
@@ -4149,7 +4225,7 @@ namespace toml::impl
 								{
 									if (chars[i] == U'p' || chars[i] == U'P')
 									{
-										if constexpr (TOML_STRICT && !TOML_LANG_HIGHER_THAN(0, 5, 0))
+										if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/562
 											TOML_ERROR( "Hexadecimal floating-point values are not supported in TOML 0.5.0 and earlier.", begin_pos );
 										else
 										{
@@ -4176,7 +4252,7 @@ namespace toml::impl
 					if (val || !(begins_with_sign || begins_with_digit))
 						break;
 
-					// dates, times, datetimes
+					// dates, times, date-times
 					if (begins_with_digit)
 					{
 						//1987-03-16
@@ -4185,11 +4261,11 @@ namespace toml::impl
 						if (char_count >= 8_sz && chars[4] == U'-' && chars[7] == U'-')
 						{
 							if (char_count > 10_sz)
-								val = std::make_unique<value<datetime>>(parse_datetime());
+								val = std::make_unique<value<date_time>>(parse_date_time());
 							else
 								val = std::make_unique<value<date>>(parse_date());
 						}
-						
+
 						//10:20:00
 						//10:20:00.87234
 						if (!val && char_count >= 6_sz && chars[2] == U':' && chars[5] == U':')
@@ -4200,25 +4276,25 @@ namespace toml::impl
 					if (val)
 						break;
 
-					// if we get here then all the easy cases are taken care of, so we need to do 
+					// if we get here then all the easy cases are taken care of, so we need to do
 					// a 'deeper dive' to figure out what the value type could possibly be.
-					// 
+					//
 					// note that the dive is actually not that deep, which is intentional; we want
 					// types to be 'loosely' determined here even if we could rule them out as being invalidly-formed
 					// so that the selected parse method can emit better diagnostics when parsing fails,
 					// e.g. "Failed to parse date-time; blah" instead of just "Could not determine value type".
-						
+
 					enum possible_value_types : int
 					{
 						nothing = 0,
 						possibly_int = 1,
 						possibly_float = 2,
-						possibly_datetime = 4,
+						possibly_date_time = 4,
 					};
 					auto possible_types =
 						possibly_int
 						| possibly_float
-						| (begins_with_digit && char_count >= 8_sz ? possibly_datetime : nothing) // strlen("HH:MM:SS")
+						| (begins_with_digit && char_count >= 8_sz ? possibly_date_time : nothing) // strlen("HH:MM:SS")
 					;
 					std::optional<size_t> first_colon, first_minus;
 					for (size_t i = 0; i < char_count; i++)
@@ -4247,7 +4323,7 @@ namespace toml::impl
 								possible_types &= ~possibly_float;
 						}
 
-						if ((possible_types & possibly_datetime))
+						if ((possible_types & possibly_date_time))
 						{
 							if (!(digit || (i >= 4_sz && sign)
 								|| chars[i] == U'T'
@@ -4256,7 +4332,7 @@ namespace toml::impl
 								|| chars[i] == U'z'
 								|| chars[i] == U':'
 								|| chars[i] == U'.'))
-								possible_types &= ~possibly_datetime;
+								possible_types &= ~possibly_date_time;
 						}
 
 						if (!possible_types)
@@ -4264,11 +4340,11 @@ namespace toml::impl
 					}
 
 					// resolve ambiguites
-					if ((possible_types & (possibly_int | possibly_datetime)) == (possibly_int | possibly_datetime))
+					if ((possible_types & (possibly_int | possibly_date_time)) == (possibly_int | possibly_date_time))
 					{
 						possible_types &= first_colon || first_minus.value_or(0_sz) > 0_sz
 							? ~possibly_int
-							: ~possibly_datetime;
+							: ~possibly_date_time;
 					}
 					if ((possible_types & (possibly_int | possibly_float)) == (possibly_int | possibly_float))
 						possible_types &= ~possibly_float;
@@ -4284,14 +4360,14 @@ namespace toml::impl
 							val = std::make_unique<value<double>>(parse_float());
 							break;
 
-						case possibly_datetime:
+						case possibly_date_time:
 						{
 							if (first_colon && !first_minus)
 								val = std::make_unique<value<time>>(parse_time());
 							else if (!first_colon && first_minus)
 								val = std::make_unique<value<date>>(parse_date());
 							else
-								val = std::make_unique<value<datetime>>(parse_datetime());
+								val = std::make_unique<value<date_time>>(parse_date_time());
 							break;
 						}
 
@@ -4327,7 +4403,7 @@ namespace toml::impl
 						abort_with_error("Encountered EOF while parsing key"sv);
 
 					// bare_key_segment
-					#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+					#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 					if (is_unicode_combining_mark(*cp))
 						abort_with_error(
 							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
@@ -4343,7 +4419,7 @@ namespace toml::impl
 					// ???
 					else
 						abort_with_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw '"sv, *cp, '\'');
-						
+
 					consume_leading_whitespace();
 
 					// eof or no more key to come
@@ -4413,7 +4489,7 @@ namespace toml::impl
 				TOML_ASSERT(cp && *cp == U'[');
 
 				const auto header_begin_pos = cp->position;
-				document_position header_end_pos;
+				source_position header_end_pos;
 				key key;
 				bool is_array = false;
 
@@ -4509,7 +4585,7 @@ namespace toml::impl
 					else
 					{
 						if (!is_array && child->type() == node_type::table)
-							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer);
+							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 						else
 							abort_with_error(
 								"Attempt to redefine existing "sv, child->type(),
@@ -4537,7 +4613,7 @@ namespace toml::impl
 						);
 						table_arrays.push_back(tab_arr);
 						tab_arr->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						
+
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						return reinterpret_cast<table*>(tab_arr->values.back().get());
@@ -4588,7 +4664,7 @@ namespace toml::impl
 
 					//if we get here it's a redefinition error.
 					if (!is_array && matching_node->type() == node_type::table)
-						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer);
+						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 					else
 						abort_with_error(
 							"Attempt to redefine existing "sv, matching_node->type(),
@@ -4655,7 +4731,7 @@ namespace toml::impl
 			void parse_document() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp);
-					
+
 				table* current_table = &root;
 
 				do
@@ -4678,7 +4754,7 @@ namespace toml::impl
 					// bare_keys
 					// dotted.keys
 					// "quoted keys"
-					#if !TOML_STRICT || TOML_LANG_HIGHER_THAN(0, 5, 0)
+					#if TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0) // toml/issues/687
 					else if (is_unicode_combining_mark(*cp))
 						abort_with_error(
 							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
@@ -4765,6 +4841,14 @@ namespace toml::impl
 		auto arr = std::make_unique<array>();
 		auto& vals = arr->values;
 
+		enum parse_elem : int
+		{
+			none,
+			comma,
+			val
+		};
+		parse_elem prev = none;
+
 		while (true)
 		{
 			TOML_ERROR_CHECK({});
@@ -4778,12 +4862,13 @@ namespace toml::impl
 			// commas - only legal after a value
 			if (*cp == U',')
 			{
-				if (!vals.empty())
+				if (prev == val)
 				{
+					prev = comma;
 					advance();
 					continue;
 				}
-				abort_with_error("Encountered unexpected character while parsing array; expected value or closing ']', saw ','"sv);
+				abort_with_error("Encountered unexpected character while parsing array; expected value or closing ']', saw comma"sv);
 			}
 
 			// closing ']'
@@ -4795,7 +4880,16 @@ namespace toml::impl
 
 			// must be a value
 			else
+			{
+				if (prev == val)
+				{
+					abort_with_error("Encountered unexpected character while parsing array; expected comma or closing ']', saw '"sv, *cp, '\'');
+					continue;
+				}
+				prev = val;
+
 				vals.push_back(parse_value());
+			}
 		}
 
 		TOML_ERROR_CHECK({});
@@ -4821,32 +4915,55 @@ namespace toml::impl
 
 		auto tab = std::make_unique<table>();
 		tab->inline_ = true;
-		auto& vals = tab->values;
+
+		enum parse_elem : int
+		{
+			none,
+			comma,
+			kvp
+		};
+		parse_elem prev = none;
 
 		while (true)
 		{
 			TOML_ERROR_CHECK({});
 
-			while (consume_leading_whitespace()
-				|| consume_line_break()
-				|| consume_comment())
+			while (consume_leading_whitespace())
 				continue;
+
+			if constexpr (TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/516
+			{
+				while (consume_line_break() || consume_comment())
+					continue;
+			}
+
 			eof_check();
 
 			// commas - only legal after a key-value pair
 			if (*cp == U',')
 			{
-				if (!vals.empty())
+				if (prev == kvp)
 				{
+					prev = comma;
 					advance();
 					continue;
 				}
-				abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw ','"sv);
+
+				abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw comma"sv);
 			}
 
 			// closing '}'
 			else if (*cp == U'}')
 			{
+				if constexpr (!TOML_ENABLE_FEATURES_UNRELEASED_AS_OF(0, 5, 0)) // toml/issues/516
+				{
+					if (prev == comma)
+					{
+						abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair, saw closing '}' (dangling comma)"sv);
+						continue;
+					}
+				}
+
 				advance();
 				break;
 			}
@@ -4854,6 +4971,12 @@ namespace toml::impl
 			// must be a key_value-pair
 			else
 			{
+				if (prev == kvp)
+				{
+					abort_with_error("Encountered unexpected character while parsing inline table; expected comma or closing '}', saw '"sv, *cp, '\'');
+					continue;
+				}
+				prev = kvp;
 				parse_key_value_pair_and_insert(tab.get());
 			}
 		}
@@ -4921,7 +5044,7 @@ namespace toml::impl
 			std::vector<string> key_path;
 			static constexpr std::string_view indent_string = TOML_INDENT;
 			static constexpr auto indent_string_columns = ([](auto str) noexcept
-			{   
+			{
 				size_t cols = {};
 				for (auto c : str)
 					cols += c == '\t' ? 4_sz : 1_sz;
@@ -5016,7 +5139,7 @@ namespace toml::impl
 			static string make_key_segment(const string& str) noexcept
 			{
 				if (str.empty())
-					return TOML_STRING_PREFIX("\"\""s);
+					return TOML_STRING_PREFIX("''"s);
 				else
 				{
 					bool requiresQuotes = false;
@@ -5189,7 +5312,7 @@ namespace toml::impl
 				write_zero_padded_integer(dt.day, 2_sz);
 			}
 
-			void write(const datetime& dt) TOML_MAY_THROW
+			void write(const date_time& dt) TOML_MAY_THROW
 			{
 				write(dt.date);
 				write('T');
@@ -5219,7 +5342,7 @@ namespace toml::impl
 				write(val.val_);
 			}
 
-			void write(const value<datetime>& val) TOML_MAY_THROW
+			void write(const value<date_time>& val) TOML_MAY_THROW
 			{
 				write(val.val_);
 			}
@@ -5264,7 +5387,7 @@ namespace toml::impl
 							weight += 1;
 							v *= -1;
 						}
-						return static_cast<size_t>(log10(static_cast<double>(v)));
+						return weight + static_cast<size_t>(log10(static_cast<double>(v)));
 					}
 
 					case node_type::floating_point:
@@ -5278,20 +5401,20 @@ namespace toml::impl
 							weight += 1;
 							v *= -1.0;
 						}
-						return static_cast<size_t>(log10(v));
+						return weight + static_cast<size_t>(log10(v));
 					}
 
 					case node_type::boolean: return 5_sz;
 					case node_type::date: [[fallthrough]];
 					case node_type::time: return 10_sz;
-					case node_type::datetime: return 30_sz;
+					case node_type::date_time: return 30_sz;
 					TOML_NO_DEFAULT_CASE;
 				}
 			}
 
 			static bool forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
 			{
-				return (inline_columns(node) + starting_column_bias) > 80_sz;
+				return (inline_columns(node) + starting_column_bias) > 100_sz;
 			}
 
 			void write(const array& arr) TOML_MAY_THROW
@@ -5338,7 +5461,7 @@ namespace toml::impl
 							case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 							case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 							case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-							case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+							case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 							TOML_NO_DEFAULT_CASE;
 						}
 
@@ -5380,7 +5503,7 @@ namespace toml::impl
 						case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 						case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 						case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-						case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+						case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 						TOML_NO_DEFAULT_CASE;
 					}
 				}
@@ -5480,7 +5603,7 @@ namespace toml::impl
 					case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
 					case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
 					case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-					case node_type::datetime: write(*reinterpret_cast<const value<datetime>*>(v.get())); break;
+					case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
 					TOML_NO_DEFAULT_CASE;
 				}
 
@@ -5570,7 +5693,7 @@ namespace toml
 
 //macro hygiene
 #undef TOML_ASSERT
-#undef TOML_STRICT
+#undef TOML_UNRELEASED_FEATURES
 #undef TOML_CPP_VERSION
 #undef TOML_CPP
 #undef TOML_PUSH_WARNINGS
@@ -5593,3 +5716,6 @@ namespace toml
 #undef TOML_MAY_THROW
 #undef TOML_LANG_HIGHER_THAN
 #undef TOML_INDENT
+#undef TOML_LANG_MAKE_VERSION
+#undef TOML_LANG_AT_LEAST
+#undef TOML_ENABLE_FEATURES_UNRELEASED_AS_OF

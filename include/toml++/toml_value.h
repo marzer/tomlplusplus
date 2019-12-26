@@ -41,28 +41,28 @@ namespace toml
 		public:
 
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
-			[[nodiscard]] bool is_int() const noexcept override { return std::is_same_v<T, int64_t>; }
-			[[nodiscard]] bool is_float() const noexcept override { return std::is_same_v<T, double>; }
+			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
+			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
 			[[nodiscard]] bool is_bool() const noexcept override { return std::is_same_v<T, bool>; }
 			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
-			[[nodiscard]] bool is_datetime() const noexcept override { return std::is_same_v<T, datetime>; }
+			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
 
-			[[nodiscard]] toml::value<string>* as_string() noexcept override { return value_ptr_from_base<string>(); }
-			[[nodiscard]] toml::value<int64_t>* as_int() noexcept override { return value_ptr_from_base<int64_t>(); }
-			[[nodiscard]] toml::value<double>* as_float() noexcept override { return value_ptr_from_base<double>(); }
-			[[nodiscard]] toml::value<bool>* as_bool() noexcept override { return value_ptr_from_base<bool>(); }
-			[[nodiscard]] toml::value<date>* as_date() noexcept override { return value_ptr_from_base<date>(); }
-			[[nodiscard]] toml::value<time>* as_time() noexcept override { return value_ptr_from_base<time>(); }
-			[[nodiscard]] toml::value<datetime>* as_datetime() noexcept override { return value_ptr_from_base<datetime>(); }
+			[[nodiscard]] value<string>* as_string() noexcept override { return value_ptr_from_base<string>(); }
+			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return value_ptr_from_base<int64_t>(); }
+			[[nodiscard]] value<double>* as_floating_point() noexcept override { return value_ptr_from_base<double>(); }
+			[[nodiscard]] value<bool>* as_bool() noexcept override { return value_ptr_from_base<bool>(); }
+			[[nodiscard]] value<date>* as_date() noexcept override { return value_ptr_from_base<date>(); }
+			[[nodiscard]] value<time>* as_time() noexcept override { return value_ptr_from_base<time>(); }
+			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return value_ptr_from_base<date_time>(); }
 
-			[[nodiscard]] const toml::value<string>* as_string() const noexcept override { return value_ptr_from_base<string>(); }
-			[[nodiscard]] const toml::value<int64_t>* as_int() const noexcept override { return value_ptr_from_base<int64_t>(); }
-			[[nodiscard]] const toml::value<double>* as_float() const noexcept override { return value_ptr_from_base<double>(); }
-			[[nodiscard]] const toml::value<bool>* as_bool() const noexcept override { return value_ptr_from_base<bool>(); }
-			[[nodiscard]] const toml::value<date>* as_date() const noexcept override { return value_ptr_from_base<date>(); }
-			[[nodiscard]] const toml::value<time>* as_time() const noexcept override { return value_ptr_from_base<time>(); }
-			[[nodiscard]] const toml::value<datetime>* as_datetime() const noexcept override { return value_ptr_from_base<datetime>(); }
+			[[nodiscard]] const value<string>* as_string() const noexcept override { return value_ptr_from_base<string>(); }
+			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return value_ptr_from_base<int64_t>(); }
+			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return value_ptr_from_base<double>(); }
+			[[nodiscard]] const value<bool>* as_bool() const noexcept override { return value_ptr_from_base<bool>(); }
+			[[nodiscard]] const value<date>* as_date() const noexcept override { return value_ptr_from_base<date>(); }
+			[[nodiscard]] const value<time>* as_time() const noexcept override { return value_ptr_from_base<time>(); }
+			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return value_ptr_from_base<date_time>(); }
 
 			[[nodiscard]] node_type type() const noexcept override
 			{
@@ -72,7 +72,7 @@ namespace toml
 				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
 				else if constexpr (std::is_same_v<T, date>) return node_type::date;
 				else if constexpr (std::is_same_v<T, time>) return node_type::time;
-				else if constexpr (std::is_same_v<T, datetime>) return node_type::datetime;
+				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
 			}
 
 			template <typename... U>

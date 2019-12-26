@@ -229,7 +229,8 @@ namespace toml::impl
 				}
 				// chunk summary: 2616 codepoints from 43 ranges (spanning a search area of 3046)
 			}
-			case 18: return codepoint <= U'\uD7A2' || (codepoint >= U'\uD7B0' && codepoint <= U'\uD7C6') || codepoint >= U'\uD7CB';
+			case 18: return codepoint <= U'\uD7A2' || (codepoint >= U'\uD7B0' && codepoint <= U'\uD7C6')
+					|| codepoint >= U'\uD7CB';
 			case 19: return false;
 			case 20: return codepoint <= U'\uFA6D' || codepoint >= U'\uFA70';
 			case 21: 
@@ -355,7 +356,8 @@ namespace toml::impl
 				}
 				// chunk summary: 888 codepoints from 54 ranges (spanning a search area of 2841)
 			}
-			case 24: return codepoint <= U'\U00011EF2' || (codepoint >= U'\U00012000' && codepoint <= U'\U00012399') || codepoint >= U'\U00012480';
+			case 24: return codepoint <= U'\U00011EF2' || (codepoint >= U'\U00012000' && codepoint <= U'\U00012399')
+					|| codepoint >= U'\U00012480';
 			case 26: return false;
 			case 28: return false;
 			case 29: return false;
@@ -455,7 +457,8 @@ namespace toml::impl
 				}
 				// chunk summary: 279 codepoints from 36 ranges (spanning a search area of 1596)
 			}
-			case 58: return codepoint <= U'\U0002B733' || (codepoint >= U'\U0002B740' && codepoint <= U'\U0002B81C') || codepoint >= U'\U0002B820';
+			case 58: return codepoint <= U'\U0002B733' || (codepoint >= U'\U0002B740' && codepoint <= U'\U0002B81C')
+					|| codepoint >= U'\U0002B820';
 			case 60: return codepoint <= U'\U0002CEA0' || codepoint >= U'\U0002CEB0';
 			default: return true;
 		}
@@ -596,7 +599,8 @@ namespace toml::impl
 					case 0: return true;
 					case 2: return true;
 					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x591ull)) & 0x5B5FFFFFFFFFFFull;
-					case 4: return codepoint <= U'\u061A' || (codepoint >= U'\u064B' && codepoint <= U'\u065F') || codepoint == U'\u0670';
+					case 4: return codepoint <= U'\u061A' || (codepoint >= U'\u064B' && codepoint <= U'\u065F')
+							|| codepoint == U'\u0670';
 					case 5: 
 					{
 						if (codepoint < U'\u06D6' || codepoint > U'\u0749')
@@ -793,7 +797,8 @@ namespace toml::impl
 					case 31: return codepoint <= U'\u192B' || codepoint >= U'\u1930';
 					case 32: return codepoint <= U'\u1A1B' || (codepoint >= U'\u1A55' && codepoint <= U'\u1A5E')
 							|| (codepoint >= U'\u1A60' && codepoint <= U'\u1A7C') || codepoint == U'\u1A7F';
-					case 33: return codepoint <= U'\u1ABD' || (codepoint >= U'\u1B00' && codepoint <= U'\u1B04') || codepoint >= U'\u1B34';
+					case 33: return codepoint <= U'\u1ABD' || (codepoint >= U'\u1B00' && codepoint <= U'\u1B04')
+							|| codepoint >= U'\u1B34';
 					case 34: return codepoint <= U'\u1B73' || (codepoint >= U'\u1B80' && codepoint <= U'\u1B82')
 							|| (codepoint >= U'\u1BA1' && codepoint <= U'\u1BAD') || codepoint >= U'\u1BE6';
 					case 35: return true;
@@ -832,7 +837,8 @@ namespace toml::impl
 				}
 				// chunk summary: 136 codepoints from 27 ranges (spanning a search area of 1153)
 			}
-			case 3: return codepoint <= U'\uAAF6' || (codepoint >= U'\uABE3' && codepoint <= U'\uABEA') || codepoint >= U'\uABEC';
+			case 3: return codepoint <= U'\uAAF6' || (codepoint >= U'\uABE3' && codepoint <= U'\uABEA')
+					|| codepoint >= U'\uABEC';
 			case 4: 
 			{
 				if (codepoint < U'\uFB1E' || codepoint > U'\U00011A99')
@@ -855,8 +861,8 @@ namespace toml::impl
 					case 41: return true;
 					case 42: return codepoint <= U'\U00011046' || codepoint >= U'\U0001107F';
 					case 43: return codepoint <= U'\U000110BA' || codepoint >= U'\U00011100';
-					case 44: return codepoint <= U'\U00011134' || (codepoint >= U'\U00011145' && codepoint <= U'\U00011146') || codepoint == U'\U00011173'
-							|| codepoint >= U'\U00011180';
+					case 44: return codepoint <= U'\U00011134' || (codepoint >= U'\U00011145' && codepoint <= U'\U00011146')
+							|| codepoint == U'\U00011173' || codepoint >= U'\U00011180';
 					case 45: return codepoint <= U'\U000111C0' || codepoint >= U'\U000111C9';
 					case 46: return codepoint <= U'\U00011237' || codepoint >= U'\U0001123E';
 					case 47: return codepoint <= U'\U000112EA' || codepoint >= U'\U00011300';
