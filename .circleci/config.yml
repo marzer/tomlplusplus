@@ -1,0 +1,45 @@
+version: 2.1
+
+jobs:
+    linux_build:
+        docker:
+            - image: "debian:bullseye"
+        steps:
+            - checkout
+            - run:
+                name: Installing python
+                command: |
+                    apt-get -qq update && apt-get install -y python3
+            - run:
+                name: Checking toml.hpp
+                command: |
+                    cd python && python3 ci_single_header_check.py
+            - run:
+                name: Installing applications
+                command: |
+                    apt-get -qq update && apt-get install -y git clang-9 g++-9 python3-pip ninja-build
+                    pip3 install meson
+            - run:
+                name: Pulling submodules
+                command: |
+                    git submodule update --init --recursive
+            - run:
+                name: Building with clang
+                command: |
+                    CXX=clang++-9 meson build-clang
+                    cd build-clang && ninja -v -j 4
+            - run:
+                name: Building with gcc
+                command: |
+                    CXX=g++-9 meson build-gcc
+                    cd build-gcc && ninja -v -j 4
+            - run:
+                name: Running tests
+                command: |
+                    cd build-clang && ninja test && cd ../build-gcc && ninja test
+
+workflows:
+    version: 2
+    build:
+        jobs:
+            - linux_build

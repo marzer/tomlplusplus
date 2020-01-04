@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+   <!-- Configurations that affect the Test Framework -->
+   <RunConfiguration>
+       <MaxCpuCount>1</MaxCpuCount>
+       <ResultsDirectory>..\build\TestResults</ResultsDirectory><!-- Path relative to solution directory -->
+       <TestSessionTimeout>60000</TestSessionTimeout><!-- Milliseconds -->
+   </RunConfiguration>
+
+   <!-- Adapter Specific sections -->
+   <Catch2Adapter>
+       <DebugBreak>on</DebugBreak><!-- Introduced in v1.1.0 -->
+	   <DiscoverCommandLine>--verbosity high --list-test-names-only</DiscoverCommandLine>
+       <DiscoverTimeout>500</DiscoverTimeout><!-- Milliseconds -->
+	   <FilenameFilter>(?i:test)</FilenameFilter>
+	   <Logging>debug</Logging>
+       <WorkingDirectoryRoot>Solution</WorkingDirectoryRoot>
+       <WorkingDirectory>..\tests\</WorkingDirectory>
+   </Catch2Adapter>
+
+</RunSettings>

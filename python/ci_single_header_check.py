@@ -1,0 +1,64 @@
+#!/usr/bin/env python3
+
+import sys
+import os
+import os.path
+import traceback
+import hashlib
+import subprocess
+from shutil import which
+
+
+
+def is_tool(name):
+	return which(name) is not None
+
+
+
+def get_script_folder():
+	return os.path.dirname(os.path.realpath(sys.argv[0]))
+
+
+
+def read_all_text_from_file(path):
+	print("Reading {}".format(path))
+	file = open(path, 'r')
+	text = file.read()
+	file.close()
+	return text
+
+
+
+def main():
+	hpp_path = os.path.join(get_script_folder(), '..', 'toml.hpp')
+	hash1 = hashlib.sha1(read_all_text_from_file(hpp_path).encode('utf-8')).hexdigest()
+	print("Hash 1: {}".format(hash1))
+	subprocess.check_call(
+		['py' if is_tool('py') else 'python3', 'generate_single_header.py']
+	)
+	hash2 = hashlib.sha1(read_all_text_from_file(hpp_path).encode('utf-8')).hexdigest()
+	print("Hash 2: {}".format(hash2))
+	if (hash1 != hash2):
+		print(
+			"toml.hpp wasn't up-to-date!\nRun generate_single_header.py before your commit to prevent this error.",
+			file=sys.stderr
+		)
+		return 1
+	print("toml.hpp was up-to-date")
+	return 0
+
+
+
+if __name__ == '__main__':
+	try:
+		sys.exit(main())
+	except Exception as err:
+		print(
+			'Fatal error: [{}] {}'.format(
+				type(err).__name__,
+				str(err)
+			),
+			file=sys.stderr
+		)
+		traceback.print_exc(file=sys.stderr)
+		sys.exit(-1)

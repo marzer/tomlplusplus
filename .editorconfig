@@ -1,0 +1,17 @@
+root = true
+
+[*]
+insert_final_newline = true
+indent_style = tab
+indent_size = 4
+tab_width = 4
+
+[*.{gitattributes, yml}]
+indent_style = space
+
+[*.{c, cpp, cxx, h, hpp, hxx, inl, toml, xml, py, natvis, props, build, yml}]
+charset = utf-8
+trim_trailing_whitespace = true
+
+[*.{c, cpp, cxx, h, hpp, hxx, inl, py, md}]
+end_of_line = lf
