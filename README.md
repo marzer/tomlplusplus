@@ -1,6 +1,5 @@
 # toml++ (tomlplusplus)
 Header-only [TOML v0.5.0] parsing lib for C++17 and later.  
-  
 [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
 
 <br>

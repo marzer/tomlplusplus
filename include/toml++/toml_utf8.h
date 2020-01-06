@@ -334,7 +334,7 @@ namespace toml::impl
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
-		#define TOML_ERROR(...)		throw toml::parse_error( __VA_ARGS__ )
+		#define TOML_ERROR(...)		throw toml::parse_error{ __VA_ARGS__ }
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR(...)		err.emplace( __VA_ARGS__ )
@@ -435,11 +435,13 @@ namespace toml::impl
 						if (stream.eof())
 						{
 							if (decoder.needs_more_input())
-								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence", prev.position, source_path_);
+								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
+									prev.position, source_path_);
 							return nullptr;
 						}
 						else
-							TOML_ERROR("An error occurred while reading from the underlying stream", prev.position, source_path_);
+							TOML_ERROR("An error occurred while reading from the underlying stream",
+								prev.position, source_path_);
 					}
 
 					TOML_ERROR_CHECK;
@@ -507,7 +509,7 @@ namespace toml::impl
 			static constexpr auto max_history_length = 64_sz;
 
 		private:
-			static constexpr auto history_buffer_size = max_history_length - 1_sz; //the 'head' is stored in the underlying reader
+			static constexpr auto history_buffer_size = max_history_length - 1_sz; //'head' is stored in the reader
 			utf8_reader_interface& reader;
 			struct
 			{

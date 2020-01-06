@@ -7,5 +7,5 @@ int main(int argc, char* argv[])
 	SetConsoleOutputCP(65001);
 	#endif
 
-	return Catch::Session().run(argc, argv);;
+	return Catch::Session().run(argc, argv);
 }

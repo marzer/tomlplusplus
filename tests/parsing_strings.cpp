@@ -117,4 +117,25 @@ str = ''''That's still pointless', she said.'''
 	parse_expected_value(
 	  R"('''The quick brown fox jumps over the lazy dog''')"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));
+	parse_expected_value(
+		R"("Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #")"sv,
+	   S(R"(Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #)"sv));
+	parse_expected_value(
+		R"(" Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \"")"sv,
+	   S(R"( Âñδ ωλèñ "'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # ")"sv));
+	parse_expected_value(
+		R"("Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?")"sv,
+	   S(R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv));
+	parse_expected_value(
+		R"("\"\u03B1\u03B2\u03B3\"")"sv,
+	     S("\"\u03B1\u03B2\u03B3\""sv));
+
+	// toml/issues/622 - escaping alias for spaces
+	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	parse_expected_value(
+		R"("The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv,
+		 S("The quick brown fox jumps over the lazy dog"sv));
+	#else
+	parsing_should_fail(R"(str = "The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv);
+	#endif
 }

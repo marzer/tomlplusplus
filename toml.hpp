@@ -1,51 +1,52 @@
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 //
-// toml++
+// toml++ v0.1.0
 // https://github.com/marzer/tomlplusplus
 //
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 //
-// *** THIS FILE WAS ASSEMBLED FROM MULTIPLE FILES PROGRAMMATICALLY - DON'T CHANGE IT DIRECTLY ***
+// -          THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY           -
 //
-// If you wish to submit a change to toml++, hooray and thanks! But please be aware that this file
-// is assembled programmatically by a script and should not be edited directly. You should instead
-// make your changes in the relevant source file. The filenames of the source files are indicated at
-// the beginning and end of the relevant subregions.
+// If you wish to submit a contribution to toml++, hooray and thanks! Before you crack on, please be aware that this
+// file was assembled from a number of smaller files by a python script, and code contributions should not be made
+// against it directly. You should instead make your changes in the relevant source file(s). The file names of the files
+// that contributed to this header can be found at the beginnings and ends of the corresponding sections of this file.
 //
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 //
-// TOML language documentation:
-// Latest: https://github.com/toml-lang/toml
-// v0.5.0: https://github.com/toml-lang/toml/tree/v0.5.0
+// TOML language specification:
+// Latest: https://github.com/toml-lang/toml/blob/master/README.md
+// v0.5.0: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 //
-//--------------------------------------------------------------------------------------------------
+//----------------------------------------------------------------------------------------------------------------------
 //
 // MIT License
 //
 // Copyright (c) 2019 Mark Gillard
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and
-// associated documentation files (the "Software"), to deal in the Software without restriction,
-// including without limitation the rights to use, copy, modify, merge, publish, distribute,
-// sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to the following conditions:
 //
-// The above copyright notice and this permission notice shall be included in all copies or
-// substantial portions of the Software.
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+// Software.
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT
-// NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
-// DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
-//--------------------------------------------------------------------------------------------------
-#pragma once
-
-//---------------------------------  ↓ toml_common.h  ----------------------------------------------
-#pragma region toml_common.h
-
+//----------------------------------------------------------------------------------------------------------------------
 // clang-format off
+#pragma once
+#ifdef __GNUC__
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
+#endif
+
+//-------------  ↓ toml_common.h  --------------------------------------------------------------------------------------
+#pragma region
 
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
@@ -132,7 +133,11 @@
 	#define TOML_DISABLE_SWITCH_WARNING		_Pragma("GCC diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_FIELD_INIT_WARNING	_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")
 	#define TOML_DISABLE_VAR_INIT_WARNING	_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")
+	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")				\
+											_Pragma("GCC diagnostic ignored \"-Wextra\"")			\
+											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")	\
+											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
@@ -156,9 +161,9 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #elif TOML_CPP_VERSION >= 201100L
-	#error toml++ requires C++17 or higher. For a TOML parser that supports C++11 see https://github.com/skystrife/cpptoml
+	#error toml++ requires C++17 or higher. For a TOML parser supporting C++11 see https://github.com/skystrife/cpptoml
 #else
-	#error toml++ requires C++17 or higher. For a TOML parser that supports pre-C++11 see https://github.com/ToruNiina/Boost.toml
+	#error toml++ requires C++17 or higher. For a TOML parser supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #endif
 #undef TOML_CPP_VERSION
 
@@ -204,7 +209,7 @@
 	#define TOML_ASSUME(cond)	(void)0
 #endif
 #ifndef TOML_UNREACHABLE
-	#define TOML_UNREACHABLE	(void)0
+	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 #ifdef __cpp_consteval
@@ -239,29 +244,33 @@
 	#define TOML_NODISCARD_CTOR
 #endif
 
+#define TOML_LIB_MAJOR		0
+#define TOML_LIB_MINOR		1
+#define TOML_LIB_REVISION	0
+
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
 #define TOML_LANG_REVISION	0
 
-#define TOML_LANG_MAKE_VERSION(maj, min, rev)												\
+#define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))
 
 #if TOML_UNRELEASED_FEATURES
-	#define TOML_LANG_EFFECTIVE_VERSION														\
-		TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION+1)
+	#define TOML_LANG_EFFECTIVE_VERSION												\
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION+1)
 #else
-	#define TOML_LANG_EFFECTIVE_VERSION														\
-		TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION)
+	#define TOML_LANG_EFFECTIVE_VERSION												\
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION)
 #endif
 
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)												\
-		(TOML_LANG_EFFECTIVE_VERSION > TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
+		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
 
-#define TOML_LANG_AT_LEAST(maj, min, rev)													\
-		(TOML_LANG_EFFECTIVE_VERSION >= TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_AT_LEAST(maj, min, rev)											\
+		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(maj, min, rev))
 
-#define TOML_LANG_EXACTLY(maj, min, rev)													\
-		(TOML_LANG_EFFECTIVE_VERSION == TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_EXACTLY(maj, min, rev)											\
+		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -297,8 +306,6 @@ TOML_POP_WARNINGS
 	#define TOML_STRING_PREFIX(S) S
 #endif
 
-// clang-format on
-
 namespace toml
 {
 	inline namespace literals
@@ -326,7 +333,7 @@ namespace toml
 		uint8_t day;
 
 		[[nodiscard]]
-		friend bool operator == (date lhs, date rhs) noexcept
+		friend constexpr bool operator == (date lhs, date rhs) noexcept
 		{
 			return lhs.year == rhs.year
 				&& lhs.month == rhs.month
@@ -334,7 +341,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (date lhs, date rhs) noexcept
+		friend constexpr bool operator != (date lhs, date rhs) noexcept
 		{
 			return lhs.year != rhs.year
 				|| lhs.month != rhs.month
@@ -350,7 +357,7 @@ namespace toml
 		uint32_t nanosecond;
 
 		[[nodiscard]]
-		friend bool operator == (time lhs, time rhs) noexcept
+		friend constexpr bool operator == (time lhs, time rhs) noexcept
 		{
 			return lhs.hour == rhs.hour
 				&& lhs.minute == rhs.minute
@@ -359,7 +366,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (time lhs, time rhs) noexcept
+		friend constexpr bool operator != (time lhs, time rhs) noexcept
 		{
 			return lhs.hour != rhs.hour
 				|| lhs.minute != rhs.minute
@@ -374,14 +381,14 @@ namespace toml
 		int8_t minutes;
 
 		[[nodiscard]]
-		friend bool operator == (time_offset lhs, time_offset rhs) noexcept
+		friend constexpr bool operator == (time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.hours == rhs.hours
 				&& lhs.minutes == rhs.minutes;
 		}
 
 		[[nodiscard]]
-		friend bool operator != (time_offset lhs, time_offset rhs) noexcept
+		friend constexpr bool operator != (time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.hours != rhs.hours
 				|| lhs.minutes != rhs.minutes;
@@ -395,7 +402,7 @@ namespace toml
 		std::optional<toml::time_offset> time_offset;
 
 		[[nodiscard]]
-		friend bool operator == (const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator == (const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return lhs.date == rhs.date
 				&& lhs.time == rhs.time
@@ -403,7 +410,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator != (const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return lhs.date != rhs.date
 				|| lhs.time != rhs.time
@@ -437,6 +444,7 @@ namespace toml
 	class table;
 
 	class default_formatter;
+	class json_formatter;
 
 	namespace impl
 	{
@@ -452,7 +460,22 @@ namespace toml
 
 		#endif
 
+		template <typename T>
+		struct is_generic_invocable
+		{
+			template <typename U>
+			static constexpr auto test(U&&) -> decltype(std::declval<T>()(std::declval<U&&>()), std::true_type{});
+			static constexpr std::false_type test(...);
+
+			struct tester {};
+			static constexpr auto value = decltype(test(tester{}))::value;
+		};
+
+		template <typename T>
+		inline constexpr bool is_generic_invocable_v = is_generic_invocable<T>::value;
+
 		class parser;
+		class formatter;
 
 		template <typename T>
 		inline constexpr bool is_value =
@@ -528,39 +551,54 @@ namespace toml
 		uint32_t column;	//begins at 1
 
 		[[nodiscard]]
-		friend bool operator == (const source_position& lhs, const source_position& rhs) noexcept
+		explicit constexpr operator bool () const noexcept
+		{
+			return line > 0u && column > 0u;
+		}
+
+		[[nodiscard]]
+		friend constexpr bool operator == (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line == rhs.line
 				&& lhs.column == rhs.column;
 		}
 
 		[[nodiscard]]
-		friend bool operator != (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator != (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line != rhs.line
 				|| lhs.column != rhs.column;
 		}
 
 		[[nodiscard]]
-		friend bool operator < (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator < (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line
 				|| (lhs.line == rhs.line && lhs.column < rhs.column);
 		}
 
 		[[nodiscard]]
-		friend bool operator <= (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator <= (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line
 				|| (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
+
+		template <typename CHAR>
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
+			TOML_MAY_THROW
+		{
+			return lhs << "line " << rhs.line << ", column " << rhs.column;
+		}
 	};
+
+	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	struct source_region
 	{
 		source_position begin;
 		source_position end;
-		std::shared_ptr<const std::string> path;
+		source_path_ptr path;
 	};
 
 	enum class node_type : uint8_t
@@ -602,7 +640,7 @@ namespace toml
 			{}
 
 			TOML_NODISCARD_CTOR
-			parse_error(const char* description, const source_position& position, const std::shared_ptr<const std::string>& source_path) noexcept
+			parse_error(const char* description, const source_position& position, const source_path_ptr& source_path) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position, source_path }
 			{}
@@ -643,7 +681,7 @@ namespace toml
 		{}
 
 		TOML_NODISCARD_CTOR
-		parse_error(const char* description, const source_position& position, const std::shared_ptr<const std::string>& source_path) noexcept
+		parse_error(const char* description, const source_position& position, const source_path_ptr& source_path) noexcept
 			: what{ description },
 			where{ position, position, source_path }
 		{}
@@ -660,11 +698,11 @@ namespace toml
 	TOML_POP_WARNINGS
 }
 
-#pragma endregion toml_common.h
-//---------------------------------  ↑ toml_common.h  ----------------------------------------------
+#pragma endregion
+//-------------  ↑ toml_common.h  --------------------------------------------------------------------------------------
 
-//-----------------------------------------------------  ↓ toml_node.h  ----------------------------
-#pragma region toml_node.h
+//-------------------------------  ↓ toml_node.h  ----------------------------------------------------------------------
+#pragma region
 
 namespace toml
 {
@@ -672,6 +710,7 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
+			friend class impl::formatter;
 			source_region rgn{};
 
 		protected:
@@ -684,6 +723,20 @@ namespace toml
 			{
 				rgn = std::move(rhs.rgn);
 				return *this;
+			}
+
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			node_of<T>* reinterpret_as() noexcept
+			{
+				return reinterpret_cast<node_of<T>*>(this);
+			}
+
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const node_of<T>* reinterpret_as() const noexcept
+			{
+				return reinterpret_cast<const node_of<T>*>(this);
 			}
 
 		public:
@@ -746,7 +799,8 @@ namespace toml
 			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
 
 			template <typename T>
-			[[nodiscard]] node_of<T>* as() noexcept
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			node_of<T>* as() noexcept
 			{
 				using type = T;
 				static_assert(
@@ -766,7 +820,8 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]] const node_of<T>* as() const noexcept
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const node_of<T>* as() const noexcept
 			{
 				using type = T;
 				static_assert(
@@ -787,19 +842,120 @@ namespace toml
 
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
-			[[nodiscard]]
-			const source_region& region() const noexcept
+			[[nodiscard]] const source_region& region() const noexcept
 			{
 				return rgn;
+			}
+
+		private:
+
+			// this is done using a static helper to preserve const categories
+			// (otherwise I'd have to implement this function twice)
+			// (const propagation in C++: a modern horror story)
+			template <typename N, typename FUNC>
+			static decltype(auto) do_visit(N* node, FUNC&& visitor) TOML_MAY_THROW
+			{
+				static_assert(
+					impl::is_generic_invocable_v<FUNC&&>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>,
+					"Visitors must be invocable for at least one of the toml::node specializations"
+				);
+
+				static constexpr auto is_exhaustive = impl::is_generic_invocable_v<FUNC&&> || (
+					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>
+				);
+
+				switch (node->type())
+				{
+					case node_type::table:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<table>());
+						break;
+					case node_type::array:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<array>());
+						break;
+					case node_type::string:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<string>());
+						break;
+					case node_type::integer:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<int64_t>());
+						break;
+					case node_type::floating_point:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<double>());
+						break;
+					case node_type::boolean:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<bool>());
+						break;
+					case node_type::date:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date>());
+						break;
+					case node_type::time:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<time>());
+						break;
+					case node_type::date_time:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date_time>());
+						break;
+					TOML_NO_DEFAULT_CASE;
+				}
+
+				if constexpr (is_exhaustive)
+					TOML_UNREACHABLE;
+			}
+
+		public:
+
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) TOML_MAY_THROW
+			{
+				return do_visit(this, std::forward<FUNC>(visitor));
+			}
+
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) const TOML_MAY_THROW
+			{
+				return do_visit(this, std::forward<FUNC>(visitor));
 			}
 	};
 }
 
-#pragma endregion toml_node.h
-//-----------------------------------------------------  ↑ toml_node.h  ----------------------------
+#pragma endregion
+//-------------------------------  ↑ toml_node.h  ----------------------------------------------------------------------
 
-//-------------------------------------------------------------------------  ↓ toml_table.h  -------
-#pragma region toml_table.h
+//-------------------------------------------------  ↓ toml_table.h  ---------------------------------------------------
+#pragma region
 
 namespace toml
 {
@@ -809,6 +965,7 @@ namespace toml
 		private:
 			friend class impl::parser;
 			friend class default_formatter;
+			friend class json_formatter;
 			friend class node_view<table>;
 
 			string_map<std::unique_ptr<node>> values;
@@ -842,18 +999,18 @@ namespace toml
 
 			[[nodiscard]] node_type type() const noexcept override { return node_type::table; }
 
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
 
-			[[nodiscard]]
-			node* get(string_view key) noexcept
+			[[nodiscard]] node* get(string_view key) noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
 					return it->second.get();
 				return nullptr;
 			}
 
-			[[nodiscard]]
-			const node* get(string_view key) const noexcept
+			[[nodiscard]] const node* get(string_view key) const noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
 					return it->second.get();
@@ -861,16 +1018,14 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			node_of<T>* get_as(string_view key) noexcept
+			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept
 			{
 				const auto node = get(key);
 				return node ? node->as<T>() : nullptr;
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			const node_of<T>* get_as(string_view key) const noexcept
+			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept
 			{
 				const auto node = get(key);
 				return node ? node->as<T>() : nullptr;
@@ -881,11 +1036,11 @@ namespace toml
 	};
 }
 
-#pragma endregion toml_table.h
-//-------------------------------------------------------------------------  ↑ toml_table.h  -------
+#pragma endregion
+//-------------------------------------------------  ↑ toml_table.h  ---------------------------------------------------
 
-//---------------------------------  ↓ toml_array.h  -----------------------------------------------
-#pragma region toml_array.h
+//-------------------------------------------------------------------  ↓ toml_array.h  ---------------------------------
+#pragma region
 
 namespace toml
 {
@@ -894,7 +1049,6 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
-			friend class default_formatter;
 			std::vector<std::unique_ptr<node>> values;
 
 		public:
@@ -929,8 +1083,7 @@ namespace toml
 				return true;
 			}
 
-			[[nodiscard]]
-			bool is_homogeneous() const noexcept
+			[[nodiscard]] bool is_homogeneous() const noexcept
 			{
 				if (values.size() <= 1_sz)
 					return true;
@@ -947,32 +1100,32 @@ namespace toml
 
 			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
 
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
 
 			[[nodiscard]] node* get(size_t index) noexcept { return values[index].get(); }
 			[[nodiscard]] const node* get(size_t index) const noexcept { return values[index].get(); }
 
 			template <typename T>
-			[[nodiscard]]
-			node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
 			{
 				return get(index)->as<T>();
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			const node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
 			{
 				return get(index)->as<T>();
 			}
 	};
 }
 
-#pragma endregion toml_array.h
-//---------------------------------  ↑ toml_array.h  -----------------------------------------------
+#pragma endregion
+//-------------------------------------------------------------------  ↑ toml_array.h  ---------------------------------
 
-//-----------------------------------------------------  ↓ toml_value.h  ---------------------------
-#pragma region toml_value.h
+//-------------------------------------------------------------------------------------  ↓ toml_value.h  ---------------
+#pragma region
 
 namespace toml
 {
@@ -1085,11 +1238,11 @@ namespace toml
 	value(uint32_t) -> value<int64_t>;
 }
 
-#pragma endregion toml_value.h
-//-----------------------------------------------------  ↑ toml_value.h  ---------------------------
+#pragma endregion
+//-------------------------------------------------------------------------------------  ↑ toml_value.h  ---------------
 
-//-------------------------------------------------------------------------  ↓ toml_utf8.h  --------
-#pragma region toml_utf8.h
+//-------------  ↓ toml_utf8.h  ----------------------------------------------------------------------------------------
+#pragma region
 
 #if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
 
@@ -2405,7 +2558,7 @@ namespace toml::impl
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
-		#define TOML_ERROR(...)		throw toml::parse_error( __VA_ARGS__ )
+		#define TOML_ERROR(...)		throw toml::parse_error{ __VA_ARGS__ }
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR(...)		err.emplace( __VA_ARGS__ )
@@ -2506,11 +2659,13 @@ namespace toml::impl
 						if (stream.eof())
 						{
 							if (decoder.needs_more_input())
-								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence", prev.position, source_path_);
+								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
+									prev.position, source_path_);
 							return nullptr;
 						}
 						else
-							TOML_ERROR("An error occurred while reading from the underlying stream", prev.position, source_path_);
+							TOML_ERROR("An error occurred while reading from the underlying stream",
+								prev.position, source_path_);
 					}
 
 					TOML_ERROR_CHECK;
@@ -2577,7 +2732,7 @@ namespace toml::impl
 			static constexpr auto max_history_length = 64_sz;
 
 		private:
-			static constexpr auto history_buffer_size = max_history_length - 1_sz; //the 'head' is stored in the underlying reader
+			static constexpr auto history_buffer_size = max_history_length - 1_sz; //'head' is stored in the reader
 			utf8_reader_interface& reader;
 			struct
 			{
@@ -2668,11 +2823,11 @@ namespace toml::impl
 	#undef TOML_ERROR
 }
 
-#pragma endregion toml_utf8.h
-//-------------------------------------------------------------------------  ↑ toml_utf8.h  --------
+#pragma endregion
+//-------------  ↑ toml_utf8.h  ----------------------------------------------------------------------------------------
 
-//---------------------------------  ↓ toml_node_view.h  -------------------------------------------
-#pragma region toml_node_view.h
+//-------------------------------  ↓ toml_node_view.h  -----------------------------------------------------------------
+#pragma region
 
 namespace toml::impl
 {
@@ -2685,15 +2840,13 @@ namespace toml::impl
 		using member_type = const table*;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static const node* get(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node* get(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node_of<U>* as(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<U>(key);
 		}
@@ -2705,28 +2858,24 @@ namespace toml::impl
 		using member_type = table*;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static node* get(table* tbl, key_type key) noexcept
+		[[nodiscard]] static node* get(table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
-		[[nodiscard]]
-		static const node* get(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node* get(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
 		template <typename T>
-		[[nodiscard]]
-		static node_of<T>* as(table* tbl, key_type key) noexcept
+		[[nodiscard]] static node_of<T>* as(table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<T>(key);
 		}
 
 		template <typename T>
-		[[nodiscard]]
-		static const node_of<T>* as(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node_of<T>* as(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<T>(key);
 		}
@@ -2741,31 +2890,27 @@ namespace toml::impl
 		using member_type = T;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static auto get(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto get(member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
-		[[nodiscard]]
-		static const node* get(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node* get(const member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static auto as(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto as(member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node_of<U>* as(const member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
@@ -2778,31 +2923,27 @@ namespace toml::impl
 		using member_type = T;
 		using key_type = size_t;
 
-		[[nodiscard]]
-		static auto get(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto get(member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
-		[[nodiscard]]
-		static const node* get(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node* get(const member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static auto as(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto as(member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node_of<U>* as(const member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
@@ -2838,8 +2979,7 @@ namespace toml
 			[[nodiscard]] explicit operator bool() const noexcept { return !!get(); }
 
 			template <typename U>
-			[[nodiscard]]
-			auto as() noexcept
+			[[nodiscard]] auto as() noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<U>,
@@ -2850,8 +2990,7 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			const node_of<U>* as() const noexcept
+			[[nodiscard]] const node_of<U>* as() const noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<U>,
@@ -2884,16 +3023,14 @@ namespace toml
 		private:
 
 			template <typename U>
-			[[nodiscard]]
-			static bool value_equality(const node_view& lhs, const U& rhs) noexcept
+			[[nodiscard]] static bool value_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				const auto val = lhs.as<value_of<U>>();
 				return val && val->get() == rhs;
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			static bool container_equality(const node_view& lhs, const U& rhs) noexcept
+			[[nodiscard]] static bool container_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				using elem_t = std::remove_const_t<typename U::value_type>;
 
@@ -2938,34 +3075,29 @@ namespace toml
 			[[nodiscard]] bool operator == (const date_time& rhs) const noexcept { return value_equality(*this, rhs); }
 
 			template <typename U>
-			[[nodiscard]]
-			bool operator == (const std::initializer_list<U>& rhs) const noexcept
+			[[nodiscard]] bool operator == (const std::initializer_list<U>& rhs) const noexcept
 			{
 				return container_equality(*this, rhs);
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			bool operator == (const std::vector<U>& rhs) const noexcept
+			[[nodiscard]] bool operator == (const std::vector<U>& rhs) const noexcept
 			{
 				return container_equality(*this, rhs);
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			friend bool operator == (const U& lhs, const node_view& rhs) noexcept
+			[[nodiscard]] friend bool operator == (const U& lhs, const node_view& rhs) noexcept
 			{
 				return rhs == lhs;
 			}
 
-			[[nodiscard]]
-			node_view<impl::sub_view<node_view<T>, string_view>> operator[] (string_view key) noexcept
+			[[nodiscard]] node_view<impl::sub_view<node_view<T>, string_view>> operator[] (string_view key) noexcept
 			{
 				return { *this, key };
 			}
 
-			[[nodiscard]]
-			node_view<impl::sub_view<node_view<T>, size_t>> operator[] (size_t index) noexcept
+			[[nodiscard]] node_view<impl::sub_view<node_view<T>, size_t>> operator[] (size_t index) noexcept
 			{
 				return { *this, index };
 			}
@@ -2982,11 +3114,11 @@ namespace toml
 	}
 }
 
-#pragma endregion toml_node_view.h
-//---------------------------------  ↑ toml_node_view.h  -------------------------------------------
+#pragma endregion
+//-------------------------------  ↑ toml_node_view.h  -----------------------------------------------------------------
 
-//-----------------------------------------------------  ↓ toml_parser.h  --------------------------
-#pragma region toml_parser.h
+//-------------------------------------------------  ↓ toml_parser.h  --------------------------------------------------
+#pragma region
 
 namespace toml
 {
@@ -2996,16 +3128,125 @@ namespace toml
 
 	#else
 
-	struct parse_result final
+	class parse_result final
 	{
-		std::optional<table> root;
-		parse_error error;
+		private:
+			bool is_err;
+			std::aligned_storage_t<
+				(sizeof(table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(table)),
+				(alignof(table) < alignof(parse_error) ? alignof(parse_error) : alignof(table))
+			> storage;
 
-		[[nodiscard]] explicit operator bool() const noexcept { return root.has_value(); }
+			void destroy() noexcept
+			{
+				if (is_err)
+					std::launder(reinterpret_cast<parse_error*>(&storage))->~parse_error();
+				else
+					std::launder(reinterpret_cast<table*>(&storage))->~table();
+			}
 
-		[[nodiscard]] table& operator* () & noexcept { return *root; }
-		[[nodiscard]] table&& operator* () && noexcept { return *std::move(root); }
-		[[nodiscard]] const table& operator* () const & noexcept { return *root; }
+		public:
+
+			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
+			[[nodiscard]] bool failed() const noexcept { return is_err; }
+			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
+
+			[[nodiscard]] table& get() & noexcept
+			{
+				TOML_ASSERT(!is_err);
+				return *std::launder(reinterpret_cast<table*>(&storage));
+			}
+			[[nodiscard]] table&& get() && noexcept
+			{
+				TOML_ASSERT(!is_err);
+				return std::move(*std::launder(reinterpret_cast<table*>(&storage)));
+			}
+			[[nodiscard]] const table& get() const& noexcept
+			{
+				TOML_ASSERT(!is_err);
+				return *std::launder(reinterpret_cast<const table*>(&storage));
+			}
+
+			[[nodiscard]] parse_error& error() & noexcept
+			{
+				TOML_ASSERT(is_err);
+				return *std::launder(reinterpret_cast<parse_error*>(&storage));
+			}
+			[[nodiscard]] parse_error&& error() && noexcept
+			{
+				TOML_ASSERT(is_err);
+				return std::move(*std::launder(reinterpret_cast<parse_error*>(&storage)));
+			}
+			[[nodiscard]] const parse_error& error() const& noexcept
+			{
+				TOML_ASSERT(is_err);
+				return *std::launder(reinterpret_cast<const parse_error*>(&storage));
+			}
+
+			[[nodiscard]] table& operator* () & noexcept { return get(); }
+			[[nodiscard]] table&& operator* () && noexcept { return std::move(get()); }
+			[[nodiscard]] const table& operator* () const & noexcept { return get(); }
+
+			[[nodiscard]] table* operator-> () noexcept { return &get(); }
+			[[nodiscard]] const table* operator-> () const noexcept { return &get(); }
+
+			[[nodiscard]] operator table& () noexcept { return get(); }
+			[[nodiscard]] operator table&& () noexcept { return std::move(get()); }
+			[[nodiscard]] operator const table& () const noexcept { return get(); }
+
+			[[nodiscard]] explicit operator parse_error& () noexcept { return error(); }
+			[[nodiscard]] explicit operator parse_error && () noexcept { return std::move(error()); }
+			[[nodiscard]] explicit operator const parse_error& () const noexcept { return error(); }
+
+			TOML_NODISCARD_CTOR
+			explicit parse_result(table&& tbl) noexcept
+				: is_err{ false }
+			{
+				::new (&storage) table{ std::move(tbl) };
+			}
+
+			TOML_NODISCARD_CTOR
+			explicit parse_result(parse_error&& err) noexcept
+				: is_err{ true }
+			{
+				::new (&storage) parse_error{ std::move(err) };
+			}
+
+			TOML_NODISCARD_CTOR
+			parse_result(parse_result&& res) noexcept
+				: is_err{ res.is_err }
+			{
+				if (is_err)
+					::new (&storage) parse_error{ std::move(res).error() };
+				else
+					::new (&storage) table{ std::move(res).get() };
+			}
+
+			parse_result& operator=(parse_result&& rhs) noexcept
+			{
+				if (is_err != rhs.is_err)
+				{
+					destroy();
+					is_err = rhs.is_err;
+					if (is_err)
+						::new (&storage) parse_error{ std::move(rhs).error() };
+					else
+						::new (&storage) table{ std::move(rhs).get() };
+				}
+				else
+				{
+					if (is_err)
+						error() = std::move(rhs).error();
+					else
+						get() = std::move(rhs).get();
+				}
+				return *this;
+			}
+
+			~parse_result() noexcept
+			{
+				destroy();
+			}
 	};
 
 	#endif
@@ -3015,7 +3256,7 @@ namespace toml::impl
 {
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK(...)	(void)0
-		#define TOML_ERROR(...)			throw toml::parse_error( __VA_ARGS__ )
+		#define TOML_ERROR(...)			throw toml::parse_error{ __VA_ARGS__ }
 	#else
 		#define TOML_ERROR_CHECK(...)	if (err) return __VA_ARGS__
 		#define TOML_ERROR(...)			err.emplace( __VA_ARGS__ )
@@ -3220,7 +3461,10 @@ namespace toml::impl
 					if (pop_bytes >= recording_buffer.length())
 						recording_buffer.clear();
 					else
-						recording_buffer.erase(recording_buffer.cbegin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes), recording_buffer.cend());
+						recording_buffer.erase(
+							recording_buffer.cbegin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes),
+							recording_buffer.cend()
+						);
 				}
 			}
 
@@ -3301,7 +3545,11 @@ namespace toml::impl
 						if (*cp <= U'\u0008'
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 							|| *cp == U'\u007F')
-							abort_with_error("Encountered unexpected character while parsing comment; control characters U+0000-U+0008, U+000A-U+001F and U+007F are explicitly prohibited from appearing in comments."sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing comment; control characters "
+								"U+0000-U+0008, U+000A-U+001F and U+007F are explicitly prohibited from appearing "
+								"in comments."sv
+							);
 					}
 
 					advance();
@@ -3373,7 +3621,9 @@ namespace toml::impl
 				{
 					TOML_ERROR_CHECK();
 					if (!cp)
-						abort_with_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string"sv);
+						abort_with_error(
+							"Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " string"sv
+						);
 				};
 
 				// skip the '"'
@@ -3418,7 +3668,9 @@ namespace toml::impl
 							{
 								if constexpr (!TOML_LANG_HIGHER_THAN(0, 5, 0)) // toml/issues/622
 								{
-									abort_with_error("Escape sequence '\\s' (Space, U+0020) is not supported in TOML 0.5.0 and earlier."sv);
+									abort_with_error("Escape sequence '\\s' (Space, U+0020) is not supported "
+										"in TOML 0.5.0 and earlier."sv
+									);
 									break;
 								}
 								else
@@ -3444,7 +3696,8 @@ namespace toml::impl
 
 									if (!is_hex_digit(*cp))
 										abort_with_error(
-											"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+											"Encountered unexpected character while parsing"sv,
+											(MULTI_LINE ? " multi-line"sv : ""sv),
 											" string; expected hex digit, saw '\\"sv, *cp, "'"sv
 										);
 									sequence_value += place_value * (
@@ -3487,7 +3740,8 @@ namespace toml::impl
 							// ???
 							default:
 								abort_with_error(
-									"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+									"Encountered unexpected character while parsing"sv,
+									(MULTI_LINE ? " multi-line"sv : ""sv),
 									" string; unknown escape sequence '\\"sv, *cp, "'"sv
 								);
 						}
@@ -3569,7 +3823,8 @@ namespace toml::impl
 							|| (*cp >= U'\u000A' && *cp <= U'\u001F')
 							|| *cp == U'\u007F')
 							abort_with_error(
-								"Encountered unexpected character while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv),
+								"Encountered unexpected character while parsing"sv,
+								(MULTI_LINE ? " multi-line"sv : ""sv),
 								" string; control characters must be escaped with back-slashes."sv
 							);
 
@@ -3605,7 +3860,11 @@ namespace toml::impl
 				{
 					TOML_ERROR_CHECK();
 					if (!cp)
-						abort_with_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string"sv);
+						abort_with_error(
+							"Encountered EOF while parsing"sv,
+							(MULTI_LINE ? " multi-line"sv : ""sv),
+							" literal string"sv
+						);
 				};
 
 				// skip the delimiter
@@ -3679,7 +3938,10 @@ namespace toml::impl
 					TOML_ERROR_CHECK({});
 				}
 
-				abort_with_error("Encountered EOF while parsing"sv, (MULTI_LINE ? " multi-line"sv : ""sv), " literal string"sv);
+				abort_with_error("Encountered EOF while parsing"sv,
+					(MULTI_LINE ? " multi-line"sv : ""sv),
+					" literal string"sv
+				);
 				TOML_ERROR_CHECK({});
 				TOML_UNREACHABLE;
 			}
@@ -3765,12 +4027,18 @@ namespace toml::impl
 					if (!cp)
 						abort_with_error("Encountered EOF while parsing boolean"sv);
 					else
-						abort_with_error("Encountered unexpected character while parsing boolean; expected 'true' or 'false', saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing boolean; "
+							"expected 'true' or 'false', saw '"sv, *cp, '\''
+						);
 				}
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing boolean; expected value-terminator, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing boolean; expected value-terminator, saw '"sv,
+						*cp, '\''
+					);
 
 				TOML_ERROR_CHECK({});
 				return result;
@@ -3801,12 +4069,18 @@ namespace toml::impl
 				if (!consume_expected_sequence(inf ? U"inf"sv : U"nan"sv))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing floating-point; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing floating-point; expected '"sv,
+						inf ? "inf"sv : "nan"sv, "', saw '"sv, *cp, '\''
+					);
 				}
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing floating-point; expected value-terminator, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing floating-point; "
+						"expected value-terminator, saw '"sv, *cp, '\''
+					);
 				TOML_ERROR_CHECK({});
 
 				return inf
@@ -3854,7 +4128,10 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_decimal_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing floating-point; underscores may only follow digits"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"underscores may only follow digits"sv
+							);
 						prev = cp;
 						advance();
 						TOML_ERROR_CHECK({});
@@ -3864,30 +4141,50 @@ namespace toml::impl
 					if (*cp == U'.')
 					{
 						if (seen_decimal)
-							abort_with_error("Encountered unexpected character while parsing floating-point; decimal points may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"decimal points may appear only once"sv
+							);
 						if (seen_exponent)
-							abort_with_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"decimal points may not appear after exponents"sv
+							);
 						seen_decimal = true;
 					}
 					else if (*cp == U'e' || *cp == U'E')
 					{
 						if (seen_exponent)
-							abort_with_error("Encountered unexpected character while parsing floating-point; exponents may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"exponents may appear only once"sv
+							);
 						seen_exponent = true;
 					}
 					else if (*cp == U'+' || *cp == U'-')
 					{
 						if (!seen_exponent || !(*prev == U'e' || *prev == U'E'))
-							abort_with_error("Encountered unexpected character while parsing floating-point; exponent signs must immediately follow 'e'"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"exponent signs must immediately follow 'e'"sv
+							);
 						if (seen_exponent_sign)
-							abort_with_error("Encountered unexpected character while parsing floating-point; exponents signs may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"exponents signs may appear only once"sv
+							);
 						seen_exponent_sign = true;
 					}
 					else if (!is_decimal_digit(*cp))
-						abort_with_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
+						abort_with_error("Encountered unexpected character while parsing floating-point; "
+							"expected decimal digit, saw '"sv, *cp, '\''
+						);
 
 					if (length == sizeof(chars))
-						abort_with_error("Floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						abort_with_error(
+							"Floating-point value out-of-range; exceeds maximum length of "sv,
+							sizeof(chars), " characters"sv
+						);
 
 					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
@@ -3898,7 +4195,10 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing floating-point; expected decimal digit, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing floating-point; "
+						"expected decimal digit, saw '"sv, *cp, '\''
+					);
 				}
 
 				TOML_ERROR_CHECK({});
@@ -3912,7 +4212,10 @@ namespace toml::impl
 					if ((ss >> result))
 						return result * sign;
 					else
-						abort_with_error("Error parsing floating-point; the character sequence could not be interpreted as a floating-point value"sv);
+						abort_with_error(
+							"Error parsing floating-point; "
+							"the character sequence could not be interpreted as a floating-point value"sv
+						);
 				}
 				#else
 				{
@@ -3928,15 +4231,22 @@ namespace toml::impl
 							return result * sign;
 
 						case std::errc::invalid_argument:
-							abort_with_error("Error parsing floating-point; the character sequence could not be interpreted as a floating-point value"sv);
+							abort_with_error(
+								"Error parsing floating-point; "
+								"the character sequence could not be interpreted as a floating-point value"sv
+							);
 
 						case std::errc::result_out_of_range:
 							abort_with_error(
-								"Error parsing floating-point; the character sequence contained a value not representable by a 64-bit floating-point"sv);
+								"Error parsing floating-point; the character sequence contained a value "
+								"not representable by a 64-bit floating-point"sv
+							);
 
 						default: //??
 							abort_with_error(
-								"Error parsing floating-point; an unspecified error occurred while trying to interpret the character sequence as a floating-point value"sv);
+								"Error parsing floating-point; an unspecified error occurred while trying to "
+								"interpret the character sequence as a floating-point value"sv
+							);
 					}
 				}
 				#endif
@@ -3961,13 +4271,19 @@ namespace toml::impl
 
 				// '0'
 				if (*cp != U'0')
-					abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; expected '0', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing hexadecimal floating-point; "
+						"expected '0', saw '"sv, *cp, '\''
+					);
 				advance();
 				eof_check();
 
 				// 'x' or 'X'
 				if (*cp != U'x' && *cp != U'X')
-					abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; expected 'x' or 'X', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing hexadecimal floating-point; "
+						"expected 'x' or 'X', saw '"sv, *cp, '\''
+					);
 				advance();
 				eof_check();
 
@@ -3986,7 +4302,10 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_hex_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; underscores may only follow digits"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"underscores may only follow digits"sv
+							);
 						prev = cp;
 						advance();
 						TOML_ERROR_CHECK({});
@@ -3996,37 +4315,62 @@ namespace toml::impl
 					if (*cp == U'.')
 					{
 						if (seen_decimal)
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; decimal points may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"decimal points may appear only once"sv
+							);
 						if (seen_exponent)
-							abort_with_error("Encountered unexpected character while parsing floating-point; decimal points may not appear after exponents"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing floating-point; "
+								"decimal points may not appear after exponents"sv
+							);
 						seen_decimal = true;
 					}
 					else if (*cp == U'p' || *cp == U'P')
 					{
 						if (seen_exponent)
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"exponents may appear only once"sv
+							);
 						if (!seen_decimal)
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents may not appear before decimal points"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"exponents may not appear before decimal points"sv
+							);
 						seen_exponent = true;
 					}
 					else if (*cp == U'+' || *cp == U'-')
 					{
 						if (!seen_exponent || !(*prev == U'p' || *prev == U'P'))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; exponent signs must immediately follow 'p'"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"exponent signs must immediately follow 'p'"sv
+							);
 						if (seen_exponent_sign)
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; exponents signs may appear only once"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal floating-point; "
+								"exponents signs may appear only once"sv
+							);
 						seen_exponent_sign = true;
 					}
 					else
 					{
 						if (!seen_exponent && !is_hex_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; expected hexadecimal digit, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing hexadecimal "
+							"floating-point; expected hexadecimal digit, saw '"sv, *cp, '\''
+							);
 						else if (seen_exponent && !is_decimal_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point exponent; expected decimal digit, saw '"sv, *cp, '\'');
+							abort_with_error("Encountered unexpected character while parsing hexadecimal "
+							"floating-point exponent; expected decimal digit, saw '"sv, *cp, '\''
+							);
 					}
 
 					if (length == sizeof(chars))
-						abort_with_error("Hexadecimal floating-point value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						abort_with_error(
+							"Hexadecimal floating-point value out-of-range; "
+							"exceeds maximum length of "sv, sizeof(chars), " characters"sv
+						);
 					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
 					advance();
@@ -4037,9 +4381,15 @@ namespace toml::impl
 				{
 					eof_check();
 					if (seen_exponent)
-						abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point exponent; expected decimal digit, saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing hexadecimal floating-point exponent; "
+							"expected decimal digit, saw '"sv, *cp, '\''
+						);
 					else
-						abort_with_error("Encountered unexpected character while parsing hexadecimal floating-point; expected hexadecimal digit, saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing hexadecimal floating-point; "
+							"expected hexadecimal digit, saw '"sv, *cp, '\''
+						);
 				}
 
 				TOML_ERROR_CHECK({});
@@ -4058,15 +4408,22 @@ namespace toml::impl
 						return result;
 
 					case std::errc::invalid_argument:
-						abort_with_error("Error parsing hexadecimal floating-point; the character sequence could not be interpreted as a hexadecimal floating-point value"sv);
+						abort_with_error(
+							"Error parsing hexadecimal floating-point; the character sequence could not "
+							"be interpreted as a hexadecimal floating-point value"sv
+						);
 
 					case std::errc::result_out_of_range:
 						abort_with_error(
-							"Error parsing hexadecimal floating-point; the character sequence contained a value not representable by a 64-bit floating-point"sv);
+							"Error parsing hexadecimal floating-point; the character sequence contained a "
+							"value not representable by a 64-bit floating-point"sv
+						);
 
 					default: //??
 						abort_with_error(
-							"Error parsing hexadecimal floating-point; an unspecified error occurred while trying to interpret the character sequence as a hexadecimal floating-point value"sv);
+							"Error parsing hexadecimal floating-point; an unspecified error occurred while trying "
+							"to interpret the character sequence as a hexadecimal floating-point value"sv
+						);
 				}
 				TOML_ERROR_CHECK({});
 				TOML_UNREACHABLE;
@@ -4089,13 +4446,19 @@ namespace toml::impl
 
 				// '0'
 				if (*cp != U'0')
-					abort_with_error("Encountered unexpected character while parsing binary integer; expected '0', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing binary integer; expected '0', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 				eof_check();
 
 				// 'b' or 'B'
 				if (*cp != U'b' && *cp != U'B')
-					abort_with_error("Encountered unexpected character while parsing binary integer; expected 'b' or 'B', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing binary integer; expected 'b' or 'B', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 				eof_check();
 
@@ -4113,14 +4476,23 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_binary_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing binary integer; underscores may only follow digits"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing binary integer; "
+								"underscores may only follow digits"sv
+							);
 					}
 					else
 					{
 						if (!is_binary_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing binary integer; "
+								"expected binary digit, saw '"sv, *cp, '\''
+							);
 						if (length == sizeof(chars))
-							abort_with_error("Binary integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+							abort_with_error(
+								"Binary integer value out-of-range; exceeds maximum length of "sv,
+								sizeof(chars), " characters"sv
+							);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
 
@@ -4131,7 +4503,10 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing binary integer; expected binary digit, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing binary integer; "
+						"expected binary digit, saw '"sv, *cp, '\''
+					);
 				}
 
 				// single digits can be converted directly
@@ -4154,15 +4529,24 @@ namespace toml::impl
 						return result;
 
 					case std::errc::invalid_argument:
-						abort_with_error("Error parsing binary integer; the character sequence could not be interpreted as a binary integer value"sv);
+						abort_with_error(
+							"Error parsing binary integer; the character sequence could not be "
+							"interpreted as a binary integer value"sv
+						);
 						break;
 
 					case std::errc::result_out_of_range:
-						abort_with_error("Error parsing binary integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+						abort_with_error(
+							"Error parsing binary integer; the character sequence contained a value not representable "
+							"by a signed 64-bit integer"sv
+						);
 						break;
 
 					default: //??
-						abort_with_error("Error parsing binary integer; an unspecified error occurred while trying to interpret the character sequence as a binary integer value"sv);
+						abort_with_error(
+							"Error parsing binary integer; an unspecified error occurred while trying to interpret "
+							"the character sequence as a binary integer value"sv
+						);
 						break;
 				}
 
@@ -4185,13 +4569,17 @@ namespace toml::impl
 
 				// '0'
 				if (*cp != U'0')
-					abort_with_error("Encountered unexpected character while parsing octal integer; expected '0', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing octal integer; expected '0', saw '"sv, *cp, '\''
+					);
 				advance();
 				eof_check();
 
 				// 'o'
 				if (*cp != U'o')
-					abort_with_error("Encountered unexpected character while parsing octal integer; expected 'o', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing octal integer; expected 'o', saw '"sv, *cp, '\''
+					);
 				advance();
 				eof_check();
 
@@ -4209,14 +4597,23 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_octal_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing octal integer; underscores may only follow digits"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing octal integer; "
+								"underscores may only follow digits"sv
+							);
 					}
 					else
 					{
 						if (!is_octal_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing octal integer; "
+								"expected octal digit, saw '"sv, *cp, '\''
+							);
 						if (length == sizeof(chars))
-							abort_with_error("Octal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+							abort_with_error(
+								"Octal integer value out-of-range; exceeds maximum length of "sv,
+								sizeof(chars), " characters"sv
+							);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
 
@@ -4228,7 +4625,10 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing octal integer; expected octal digit, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing octal integer; "
+						"expected octal digit, saw '"sv, *cp, '\''
+					);
 				}
 
 				// single digits can be converted directly
@@ -4251,15 +4651,24 @@ namespace toml::impl
 						return result;
 
 					case std::errc::invalid_argument:
-						abort_with_error("Error parsing octal integer; the character sequence could not be interpreted as a octal integer value"sv);
+						abort_with_error(
+							"Error parsing octal integer; the character sequence could not be interpreted "
+							"as a octal integer value"sv
+						);
 						break;
 
 					case std::errc::result_out_of_range:
-						abort_with_error("Error parsing octal integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+						abort_with_error(
+							"Error parsing octal integer; the character sequence contained a value not representable "
+							"by a signed 64-bit integer"sv
+						);
 						break;
 
 					default: //??
-						abort_with_error("Error parsing octal integer; an unspecified error occurred while trying to interpret the character sequence as a octal integer value"sv);
+						abort_with_error(
+							"Error parsing octal integer; an unspecified error occurred while trying to interpret the "
+							"character sequence as a octal integer value"sv
+						);
 						break;
 				}
 				TOML_ERROR_CHECK({});
@@ -4301,14 +4710,23 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_decimal_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing integer; underscores may only follow digits"sv);
+							abort_with_error(
+								"Encountered unexpected character while parsing integer; "
+								"underscores may only follow digits"sv
+							);
 					}
 					else
 					{
 						if (!is_decimal_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing integer; "
+								"expected decimal digit, saw '"sv, *cp, '\''
+							);
 						if (length == sizeof(chars))
-							abort_with_error("Integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+							abort_with_error(
+								"Integer value out-of-range; exceeds maximum length of "sv,
+								sizeof(chars), " characters"sv
+							);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
 
@@ -4319,12 +4737,18 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing integer; expected decimal digit, saw '"sv,
+						*cp, '\''
+					);
 				}
 
 				// check for leading zeroes etc
 				if (chars[0] == '0')
-					abort_with_error("Encountered unexpected character while parsing integer; leading zeroes are not allowed"sv);
+					abort_with_error(
+						"Encountered unexpected character while parsing integer; "
+						"leading zeroes are not allowed"sv
+					);
 
 				TOML_ERROR_CHECK({});
 
@@ -4348,15 +4772,24 @@ namespace toml::impl
 						return static_cast<int64_t>(result) * sign;
 
 					case std::errc::invalid_argument:
-						abort_with_error("Error parsing integer; the character sequence could not be interpreted as an integer value"sv);
+						abort_with_error(
+							"Error parsing integer; "
+							"the character sequence could not be interpreted as an integer value"sv
+						);
 						break;
 
 					case std::errc::result_out_of_range:
-						abort_with_error("Error parsing integer; the character sequence contained a value not representable by a signed 64-bit integer"sv);
+						abort_with_error(
+							"Error parsing integer; the character sequence contained a value not representable "
+							"by a signed 64-bit integer"sv
+						);
 						break;
 
 					default: //??
-						abort_with_error("Error parsing integer; an unspecified error occurred while trying to interpret the character sequence as an integer value"sv);
+						abort_with_error(
+							"Error parsing integer; an unspecified error occurred while trying to interpret the "
+							"character sequence as an integer value"sv
+						);
 						break;
 				}
 				TOML_ERROR_CHECK({});
@@ -4378,13 +4811,19 @@ namespace toml::impl
 
 				// '0'
 				if (*cp != U'0')
-					abort_with_error("Encountered unexpected character while parsing hexadecimal integer; expected '0', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing hexadecimal integer; expected '0', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 				eof_check();
 
 				// 'x' or 'X'
 				if (*cp != U'x' && *cp != U'X')
-					abort_with_error("Encountered unexpected character while parsing hexadecimal integer; expected 'x' or 'X', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing hexadecimal integer; "
+						"expected 'x' or 'X', saw '"sv, *cp, '\''
+					);
 				advance();
 				eof_check();
 
@@ -4402,14 +4841,23 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_hex_digit(*prev))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal integer; underscores may only follow digits");
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal integer; "
+								"underscores may only follow digits"
+							);
 					}
 					else
 					{
 						if (!is_hex_digit(*cp))
-							abort_with_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing hexadecimal integer; "
+								"expected hexadecimal digit, saw '"sv, *cp, '\''
+							);
 						if (length == sizeof(chars))
-							abort_with_error("Hexadecimal integer value out-of-range; exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+							abort_with_error(
+								"Hexadecimal integer value out-of-range; exceeds maximum length of "sv,
+								sizeof(chars), " characters"sv
+							);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 					}
 
@@ -4420,7 +4868,10 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing hexadecimal integer; expected hexadecimal digit, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing hexadecimal integer; "
+						"expected hexadecimal digit, saw '"sv, *cp, '\''
+					);
 				}
 
 				// single digits can be converted directly
@@ -4462,7 +4913,8 @@ namespace toml::impl
 
 					default: //??
 						abort_with_error(
-							"Error parsing hexadecimal integer; an unspecified error occurred while trying to interpret the character sequence '"sv,
+							"Error parsing hexadecimal integer; "
+							"an unspecified error occurred while trying to interpret the character sequence '"sv,
 							std::string_view{ chars, length },
 							"' as a hexadecimal integer value"sv
 						);
@@ -4490,7 +4942,10 @@ namespace toml::impl
 				if (!consume_digit_sequence(year_digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing date; expected 4-digit year, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date; "
+						"expected 4-digit year, saw '"sv, *cp, '\''
+					);
 				}
 				const auto year = year_digits[3]
 					+ year_digits[2] * 10u
@@ -4501,7 +4956,10 @@ namespace toml::impl
 				// '-'
 				eof_check();
 				if (*cp != U'-')
-					abort_with_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date; expected '-', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 				TOML_ERROR_CHECK({});
 
@@ -4510,7 +4968,10 @@ namespace toml::impl
 				if (!consume_digit_sequence(month_digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing date; expected 2-digit month, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date; expected 2-digit month, saw '"sv,
+						*cp, '\''
+					);
 				}
 				const auto month = month_digits[1] + month_digits[0] * 10u;
 				if (month == 0u || month > 12u)
@@ -4524,7 +4985,10 @@ namespace toml::impl
 				// '-'
 				eof_check();
 				if (*cp != U'-')
-					abort_with_error("Encountered unexpected character while parsing date; expected '-', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date; expected '-', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 				TOML_ERROR_CHECK({});
 
@@ -4533,16 +4997,25 @@ namespace toml::impl
 				if (!consume_digit_sequence(day_digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing date; expected 2-digit day, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date; expected 2-digit day, saw '"sv,
+						*cp, '\''
+					);
 				}
 				const auto day = day_digits[1] + day_digits[0] * 10u;
 				if (day == 0u || day > max_days_in_month)
-					abort_with_error("Day value out-of-range; expected 1-"sv, max_days_in_month, " (inclusive), saw "sv, day);
+					abort_with_error(
+						"Day value out-of-range; expected 1-"sv, max_days_in_month,
+						" (inclusive), saw "sv, day
+					);
 
 				if (!time_may_follow)
 				{
 					if (cp && !is_value_terminator(*cp))
-						abort_with_error("Encountered unexpected character while parsing date; expected value-terminator, saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing date; "
+							"expected value-terminator, saw '"sv, *cp, '\''
+						);
 				}
 
 				TOML_ERROR_CHECK({});
@@ -4573,16 +5046,23 @@ namespace toml::impl
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing time; expected 2-digit hour, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing time; expected 2-digit hour, saw '"sv,
+						*cp, '\''
+					);
 				}
 				const auto hour = digits[1] + digits[0] * 10u;
 				if (hour > 23u)
-					abort_with_error("Hour value out-of-range; expected 0-23 (inclusive), saw "sv, hour);
+					abort_with_error(
+						"Hour value out-of-range; expected 0-23 (inclusive), saw "sv, hour
+					);
 
 				// ':'
 				eof_check();
 				if (*cp != U':')
-					abort_with_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\''
+					);
 				advance();
 				TOML_ERROR_CHECK({});
 
@@ -4590,11 +5070,17 @@ namespace toml::impl
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing time; expected 2-digit minute, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing time; expected 2-digit minute, saw '"sv,
+						*cp, '\''
+					);
 				}
 				const auto minute = digits[1] + digits[0] * 10u;
 				if (minute > 59u)
-					abort_with_error("Minute value out-of-range; expected 0-59 (inclusive), saw "sv, minute);
+					abort_with_error(
+						"Minute value out-of-range; expected 0-59 (inclusive), saw "sv,
+						minute
+					);
 
 				auto time = ::toml::time{
 					static_cast<uint8_t>(hour),
@@ -4606,16 +5092,20 @@ namespace toml::impl
 					// ':'
 					eof_check();
 					if (*cp != U':')
-						abort_with_error("Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing time; expected ':', saw '"sv, *cp, '\''
+						);
 					advance();
 				}
 				else
 				{
-					//early exit here if seconds are omitted
-					//(extension as per https://github.com/toml-lang/toml/issues/671)
-					if (cp && !is_value_terminator(*cp) && *cp != U':' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
+					if (cp
+						&& !is_value_terminator(*cp)
+						&& *cp != U':'
+						&& (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
 						abort_with_error(
-							"Encountered unexpected character while parsing time; expected ':'"sv, (offset_may_follow ? ", offset"sv : ""sv),
+							"Encountered unexpected character while parsing time; expected ':'"sv,
+							(offset_may_follow ? ", offset"sv : ""sv),
 							" or value-terminator, saw '"sv, *cp, '\''
 						);
 					TOML_ERROR_CHECK({});
@@ -4632,7 +5122,10 @@ namespace toml::impl
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
-					abort_with_error("Encountered unexpected character while parsing time; expected 2-digit second, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing time; expected 2-digit second, saw '"sv,
+						*cp, '\''
+					);
 				}
 				const auto second = digits[1] + digits[0] * 10u;
 				if (second > 59u)
@@ -4640,9 +5133,13 @@ namespace toml::impl
 				time.second = static_cast<uint8_t>(second);
 
 				//early exit here if the fractional is omitted
-				if (cp && !is_value_terminator(*cp) && *cp != U'.' && (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
+				if (cp
+					&& !is_value_terminator(*cp)
+					&& *cp != U'.'
+					&& (!offset_may_follow || (*cp != U'+' && *cp != U'-' && *cp != U'Z' && *cp != U'z')))
 					abort_with_error(
-						"Encountered unexpected character while parsing time; expected fractional"sv, (offset_may_follow ? ", offset"sv : ""sv),
+						"Encountered unexpected character while parsing time; expected fractional"sv,
+						(offset_may_follow ? ", offset"sv : ""sv),
 						" or value-terminator, saw '"sv, *cp, '\''
 					);
 				TOML_ERROR_CHECK({});
@@ -4659,9 +5156,14 @@ namespace toml::impl
 				uint32_t fractional_digits[max_fractional_digits];
 				auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 				if (!digit_count)
-					abort_with_error("Encountered unexpected character while parsing time; expected fractional digits, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing time; expected fractional digits, saw '"sv,
+						*cp, '\''
+					);
 				if (digit_count == max_fractional_digits && cp && is_decimal_digit(*cp))
-					abort_with_error("Fractional value out-of-range; exceeds maximum precision of "sv, max_fractional_digits);
+					abort_with_error(
+						"Fractional value out-of-range; exceeds maximum precision of "sv, max_fractional_digits
+					);
 
 				uint32_t value = 0u;
 				uint32_t place = 1u;
@@ -4697,7 +5199,10 @@ namespace toml::impl
 				// ' ' or 'T'
 				eof_check();
 				if (*cp != U' ' && *cp != U'T' && *cp != U't')
-					abort_with_error("Encountered unexpected character while parsing date-time; expected space or 'T', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date-time; expected space or 'T', saw '"sv,
+						*cp, '\''
+					);
 				advance();
 
 				// "HH:MM:SS.fractional"
@@ -4729,7 +5234,10 @@ namespace toml::impl
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit hour, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing date-time offset; "
+								"expected 2-digit hour, saw '"sv, *cp, '\''
+							);
 						}
 						const auto hour = digits[1] + digits[0] * 10u;
 						if (hour > 23u)
@@ -4738,14 +5246,20 @@ namespace toml::impl
 						// ':'
 						eof_check();
 						if (*cp != U':')
-							abort_with_error("Encountered unexpected character while parsing date-time offset; expected ':', saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing date-time offset; "
+								"expected ':', saw '"sv, *cp, '\''
+							);
 						advance();
 
 						// "MM"
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
-							abort_with_error("Encountered unexpected character while parsing date-time offset; expected 2-digit minute, saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing date-time offset; "
+								"expected 2-digit minute, saw '"sv, *cp, '\''
+							);
 						}
 						const auto minute = digits[1] + digits[0] * 10u;
 						if (minute > 59u)
@@ -4759,7 +5273,10 @@ namespace toml::impl
 				}
 
 				if (cp && !is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing date-time; expected value-terminator, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing date-time; expected value-terminator, saw '"sv,
+						*cp, '\''
+					);
 
 				TOML_ERROR_CHECK({});
 				return {
@@ -4810,8 +5327,11 @@ namespace toml::impl
 						if constexpr (!TOML_LANG_HIGHER_THAN(0, 5, 0)) // toml/issues/665
 						{
 							// arrays must be homogeneous in toml 0.5.0 and earlier
-							if (!reinterpret_cast<array*>(val.get())->is_homogeneous())
-								TOML_ERROR( "Arrays cannot contain values of different types in TOML 0.5.0 and earlier.", begin_pos );
+							if (!val->reinterpret_as<array>()->is_homogeneous())
+								TOML_ERROR(
+									"Arrays cannot contain values of different types in TOML 0.5.0 and earlier.",
+									begin_pos
+								);
 						}
 					}
 
@@ -4931,7 +5451,11 @@ namespace toml::impl
 						}
 
 						//anything else would be ambiguous.
-						abort_with_error(eof_while_scanning ? "Encountered EOF while parsing value"sv : "Could not determine value type"sv);
+						abort_with_error(
+							eof_while_scanning
+								? "Encountered EOF while parsing value"sv
+								: "Could not determine value type"sv
+						);
 					}
 
 					// now things that can be identified from two characters
@@ -4945,7 +5469,10 @@ namespace toml::impl
 					{
 						if (char_count == 2_sz && is_decimal_digit(chars[1]))
 						{
-							val = std::make_unique<value<int64_t>>(static_cast<int64_t>(chars[1] - U'0')* (chars[1] == U'-' ? -1LL : 1LL));
+							val = std::make_unique<value<int64_t>>(
+								static_cast<int64_t>(chars[1] - U'0')
+								* (chars[1] == U'-' ? -1LL : 1LL)
+							);
 							advance(); //skip the sign
 							advance(); //skip the digit
 						}
@@ -4974,9 +5501,17 @@ namespace toml::impl
 									if (chars[i] == U'p' || chars[i] == U'P')
 									{
 										#if !TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/562
-											TOML_ERROR( "Hexadecimal floating-point values are not supported in TOML 0.5.0 and earlier.", begin_pos );
+											TOML_ERROR(
+												"Hexadecimal floating-point values are not supported "
+												"in TOML 0.5.0 and earlier.",
+												begin_pos
+											);
 										#elif TOML_USE_STREAMS_FOR_FLOATS
-											TOML_ERROR("Hexadecimal floating-point values are not supported when streams are used to interpret floats (TOML_USE_STREAMS_FOR_FLOATS = 1).", begin_pos);
+											TOML_ERROR(
+												"Hexadecimal floating-point values are not supported when streams "
+												"are used to interpret floats (TOML_USE_STREAMS_FOR_FLOATS = 1).",
+												begin_pos
+											);
 										#else
 											val = std::make_unique<value<double>>(parse_hex_float());
 											break;
@@ -5074,7 +5609,8 @@ namespace toml::impl
 					#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
 					if (is_unicode_combining_mark(*cp))
 						abort_with_error(
-							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
+							"Encountered unexpected character while parsing key; expected bare key starting character "
+							"or string delimiter, saw combining mark '"sv, *cp, '\''
 						);
 					#endif
 					if (is_bare_key_start_character(*cp))
@@ -5086,7 +5622,10 @@ namespace toml::impl
 
 					// ???
 					else
-						abort_with_error("Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing key; expected bare key "
+							"starting character or string delimiter, saw '"sv, *cp, '\''
+						);
 
 					consume_leading_whitespace();
 
@@ -5138,7 +5677,10 @@ namespace toml::impl
 
 				// consume the '='
 				if (*cp != U'=')
-					abort_with_error("Encountered unexpected character while parsing key-value pair; expected '=', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing key-value pair; "
+						"expected '=', saw '"sv, *cp, '\''
+					);
 				advance();
 
 				// skip past any whitespace that followed the '='
@@ -5147,7 +5689,10 @@ namespace toml::impl
 
 				// get the value
 				if (is_value_terminator(*cp))
-					abort_with_error("Encountered unexpected character while parsing key-value pair; expected value, saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing key-value pair; "
+						"expected value, saw '"sv, *cp, '\''
+					);
 				TOML_ERROR_CHECK({});
 				return { std::move(key), parse_value() };
 			}
@@ -5198,7 +5743,10 @@ namespace toml::impl
 
 					// consume the first closing ']'
 					if (*cp != U']')
-						abort_with_error("Encountered unexpected character while parsing table"sv, (is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing table"sv,
+							(is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\''
+						);
 					advance();
 
 					// consume the second closing ']'
@@ -5207,7 +5755,10 @@ namespace toml::impl
 						eof_check();
 
 						if (*cp != U']')
-							abort_with_error("Encountered unexpected character while parsing table array header; expected ']', saw '"sv, *cp, '\'');
+							abort_with_error(
+								"Encountered unexpected character while parsing table array header; "
+								"expected ']', saw '"sv, *cp, '\''
+							);
 						advance();
 					}
 					header_end_pos = current_position_or_assumed_next();
@@ -5237,21 +5788,21 @@ namespace toml::impl
 							key.segments[i],
 							std::make_unique<table>()
 						).first->second.get();
-						implicit_tables.push_back(reinterpret_cast<table*>(child));
+						implicit_tables.push_back(child->reinterpret_as<table>());
 						child->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						parent = reinterpret_cast<table*>(child);
+						parent = child->reinterpret_as<table>();
 					}
 					else if (child->is_table())
 					{
-						parent = reinterpret_cast<table*>(child);
+						parent = child->reinterpret_as<table>();
 					}
-					else if (child->is_array() && find(table_arrays, reinterpret_cast<array*>(child)))
+					else if (child->is_array() && find(table_arrays, child->reinterpret_as<array>()))
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!reinterpret_cast<array*>(child)->values.empty());
-						TOML_ASSERT(reinterpret_cast<array*>(child)->values.back()->is_table());
-						parent = reinterpret_cast<table*>(reinterpret_cast<array*>(child)->values.back().get());
+						TOML_ASSERT(!child->reinterpret_as<array>()->values.empty());
+						TOML_ASSERT(child->reinterpret_as<array>()->values.back()->is_table());
+						parent = child->reinterpret_as<array>()->values.back()->reinterpret_as<table>();
 					}
 					else
 					{
@@ -5273,32 +5824,25 @@ namespace toml::impl
 				auto matching_node = parent->get(key.segments.back());
 				if (!matching_node)
 				{
-					// if it's an array we need to make the array and it's first table element, set the starting regions, and return the table element
+					// if it's an array we need to make the array and it's first table element,
+					// set the starting regions, and return the table element
 					if (is_array)
 					{
-						auto tab_arr = reinterpret_cast<array*>(
-							parent->values.emplace(
-								key.segments.back(),
-								std::make_unique<array>()
-							).first->second.get()
-						);
+						auto tab_arr = parent->values.emplace(key.segments.back(),std::make_unique<array>())
+							.first->second->reinterpret_as<array>();
 						table_arrays.push_back(tab_arr);
 						tab_arr->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						return reinterpret_cast<table*>(tab_arr->values.back().get());
+						return tab_arr->values.back()->reinterpret_as<table>();
 					}
 
 					//otherwise we're just making a table
 					else
 					{
-						auto tab = reinterpret_cast<table*>(
-							parent->values.emplace(
-								key.segments.back(),
-								std::make_unique<table>()
-							).first->second.get()
-						);
+						auto tab = parent->values.emplace(key.segments.back(),std::make_unique<table>())
+							.first->second->reinterpret_as<table>();
 						tab->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
 						return tab;
 					}
@@ -5310,19 +5854,19 @@ namespace toml::impl
 				// otherwise this is a redefinition error.
 				else
 				{
-					if (is_array && matching_node->is_array() && find(table_arrays, reinterpret_cast<array*>(matching_node)))
+					if (is_array && matching_node->is_array() && find(table_arrays, matching_node->reinterpret_as<array>()))
 					{
-						auto tab_arr = reinterpret_cast<array*>(matching_node);
+						auto tab_arr = matching_node->reinterpret_as<array>();
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->rgn = { header_begin_pos, header_end_pos, reader.source_path() };
-						return reinterpret_cast<table*>(tab_arr->values.back().get());
+						return tab_arr->values.back()->reinterpret_as<table>();
 					}
 
 					else if (!is_array
 						&& matching_node->is_table()
 						&& !implicit_tables.empty())
 					{
-						auto tbl = reinterpret_cast<table*>(matching_node);
+						auto tbl = matching_node->reinterpret_as<table>();
 						const auto idx = find(implicit_tables, tbl);
 						if (idx)
 						{
@@ -5366,18 +5910,18 @@ namespace toml::impl
 								std::move(kvp.key.segments[i]),
 								std::make_unique<table>()
 							).first->second.get();
-							dotted_key_tables.push_back(reinterpret_cast<table*>(child));
+							dotted_key_tables.push_back(child->reinterpret_as<table>());
 							dotted_key_tables.back()->inline_ = true;
 							child->rgn = kvp.value->rgn;
 						}
-						else if (!child->is_table() || !find(dotted_key_tables, reinterpret_cast<table*>(child)))
+						else if (!child->is_table() || !find(dotted_key_tables, child->reinterpret_as<table>()))
 						{
 							abort_with_error("Attempt to redefine "sv, child->type(), " as dotted key-value pair"sv);
 						}
 						else
 							child->rgn.end = kvp.value->rgn.end;
 						TOML_ERROR_CHECK();
-						tab = reinterpret_cast<table*>(child);
+						tab = child->reinterpret_as<table>();
 					}
 				}
 
@@ -5429,7 +5973,8 @@ namespace toml::impl
 					#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
 					else if (is_unicode_combining_mark(*cp))
 						abort_with_error(
-							"Encountered unexpected character while parsing key; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
+							"Encountered unexpected character while parsing key; "
+							"expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
 						);
 					#endif
 					else if (is_bare_key_start_character(cp->value) || is_string_delimiter(cp->value))
@@ -5442,12 +5987,18 @@ namespace toml::impl
 						if (cp)
 						{
 							if (!consume_comment() && !consume_line_break())
-								abort_with_error("Encountered unexpected character after key-value pair; expected a comment or whitespace, saw '"sv, *cp, '\'');
+								abort_with_error(
+									"Encountered unexpected character after key-value pair; "
+									"expected a comment or whitespace, saw '"sv, *cp, '\''
+								);
 						}
 					}
 
 					else // ??
-						abort_with_error("Encountered unexpected character while parsing top level of document; expected keys, tables, whitespace or comments, saw '"sv, *cp, '\'');
+						abort_with_error(
+							"Encountered unexpected character while parsing top level of document; "
+							"expected keys, tables, whitespace or comments, saw '"sv, *cp, '\''
+						);
 
 				}
 				while (cp);
@@ -5469,7 +6020,7 @@ namespace toml::impl
 
 				if (type == node_type::table)
 				{
-					auto& tbl = *reinterpret_cast<table*>(&nde);
+					auto& tbl = *nde.reinterpret_as<table>();
 					if (tbl.inline_) //inline tables (and all their inline descendants) are already correctly terminated
 						return;
 
@@ -5483,7 +6034,7 @@ namespace toml::impl
 				}
 				else //arrays
 				{
-					auto& arr = *reinterpret_cast<array*>(&nde);
+					auto& arr = *nde.reinterpret_as<array>();
 					auto end = nde.rgn.end;
 					for (auto& v : arr.values)
 					{
@@ -5531,9 +6082,9 @@ namespace toml::impl
 				#else
 
 				if (err)
-					return { {}, *std::move(err) };
+					return parse_result{ *std::move(err) };
 				else
-					return { { std::move(root) } };
+					return parse_result{ std::move(root) };
 
 				#endif
 
@@ -5589,7 +6140,10 @@ namespace toml::impl
 					advance();
 					continue;
 				}
-				abort_with_error("Encountered unexpected character while parsing array; expected value or closing ']', saw comma"sv);
+				abort_with_error(
+					"Encountered unexpected character while parsing array; "
+					"expected value or closing ']', saw comma"sv
+				);
 			}
 
 			// closing ']'
@@ -5605,7 +6159,10 @@ namespace toml::impl
 			{
 				if (prev == val)
 				{
-					abort_with_error("Encountered unexpected character while parsing array; expected comma or closing ']', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing array; "
+						"expected comma or closing ']', saw '"sv, *cp, '\''
+					);
 					continue;
 				}
 				prev = val;
@@ -5674,7 +6231,10 @@ namespace toml::impl
 					advance();
 				}
 				else
-					abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair or closing '}', saw comma"sv);
+					abort_with_error(
+						"Encountered unexpected character while parsing inline table; "
+						"expected key-value pair or closing '}', saw comma"sv
+					);
 			}
 
 			// closing '}'
@@ -5684,7 +6244,10 @@ namespace toml::impl
 				{
 					if (prev == comma)
 					{
-						abort_with_error("Encountered unexpected character while parsing inline table; expected key-value pair, saw closing '}' (dangling comma)"sv);
+						abort_with_error(
+							"Encountered unexpected character while parsing inline table; "
+							"expected key-value pair, saw closing '}' (dangling comma)"sv
+						);
 						continue;
 					}
 				}
@@ -5699,14 +6262,18 @@ namespace toml::impl
 			else if (is_unicode_combining_mark(*cp))
 			{
 				abort_with_error(
-					"Encountered unexpected character while parsing inline table; expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
+					"Encountered unexpected character while parsing inline table; "
+					"expected bare key starting character or string delimiter, saw combining mark '"sv, *cp, '\''
 				);
 			}
 			#endif
 			else if (is_string_delimiter(*cp) || is_bare_key_start_character(*cp))
 			{
 				if (prev == kvp)
-					abort_with_error("Encountered unexpected character while parsing inline table; expected comma or closing '}', saw '"sv, *cp, '\'');
+					abort_with_error(
+						"Encountered unexpected character while parsing inline table; "
+						"expected comma or closing '}', saw '"sv, *cp, '\''
+					);
 				else
 				{
 					prev = kvp;
@@ -5715,7 +6282,10 @@ namespace toml::impl
 			}
 
 			else
-				abort_with_error("Encountered unexpected character while parsing inline table; expected key or closing '}', saw '"sv, *cp, '\'');
+				abort_with_error(
+					"Encountered unexpected character while parsing inline table; "
+					"expected key or closing '}', saw '"sv, *cp, '\''
+				);
 		}
 
 		TOML_ERROR_CHECK({});
@@ -5782,18 +6352,18 @@ namespace toml
 
 }
 
-#pragma endregion toml_parser.h
-//-----------------------------------------------------  ↑ toml_parser.h  --------------------------
+#pragma endregion
+//-------------------------------------------------  ↑ toml_parser.h  --------------------------------------------------
 
-//-------------------------------------------------------------------------  ↓ toml_formatter.h  ---
-#pragma region toml_formatter.h
+//-------------------------------------------------------------------  ↓ toml_formatter.h  -----------------------------
+#pragma region
 
 namespace toml::impl
 {
 	struct TOML_INTERFACE formatter_writer_interface
 	{
-		virtual void operator() (const void*, size_t) const TOML_MAY_THROW = 0;
-		virtual void operator() (char) const TOML_MAY_THROW = 0;
+		virtual void operator() (const char*, size_t) TOML_MAY_THROW = 0;
+		virtual void operator() (char) TOML_MAY_THROW = 0;
 
 		virtual ~formatter_writer_interface() noexcept = default;
 	};
@@ -5804,85 +6374,71 @@ namespace toml::impl
 	template <typename CHAR>
 	class TOML_EMPTY_BASES formatter_writer<std::basic_ostream<CHAR>> : public formatter_writer_interface
 	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The stream's underlying character type must be 1 byte in size."
+		);
+
 		private:
-			std::basic_ostream<CHAR>& target;
+			std::basic_ostream<CHAR>& target_;
 
 		public:
 
-			void operator() (const void* data, size_t size) const TOML_MAY_THROW override
+			void operator() (const char* characters, size_t num) TOML_MAY_THROW override
 			{
 				TOML_ASSERT(data && size);
-				target.write(reinterpret_cast<const CHAR*>(data), static_cast<std::streamsize>(size));
+				target_.write(reinterpret_cast<const CHAR*>(characters), static_cast<std::streamsize>(num));
 			}
 
-			void operator() (char character) const TOML_MAY_THROW override
+			void operator() (char character) TOML_MAY_THROW override
 			{
-				target.put(static_cast<CHAR>(character));
+				target_.put(static_cast<CHAR>(character));
 			}
 
-			formatter_writer(std::basic_ostream<CHAR>& target_) noexcept
-				: target{ target_ }
+			TOML_NODISCARD_CTOR
+			formatter_writer(std::basic_ostream<CHAR>& target) noexcept
+				: target_{ target }
 			{}
 	};
 
 	template <typename CHAR>
 	formatter_writer(std::basic_ostream<CHAR>&) -> formatter_writer<std::basic_ostream<CHAR>>;
-}
 
-namespace toml
-{
-	class default_formatter final
+	struct formatter_options final
+	{
+		toml::string_view indent_string;
+		bool quote_dates_and_times;
+	};
+
+	class formatter
 	{
 		private:
+			formatter_writer_interface* writer_ = nullptr;
+			formatter_options opts;
+
+		protected:
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const formatter_options& options() const noexcept
+			{
+				return opts;
+			}
+
 			const toml::table& source;
-			std::string_view indent_string;
 			size_t indent_string_columns = {};
+			int indent_level;
+			bool naked_newline;
 
-			mutable int indent_level;
-			mutable bool naked_newline;
-			mutable std::vector<toml::string> key_path;
-			mutable const impl::formatter_writer_interface* writer = nullptr;
-
-			TOML_ALWAYS_INLINE
-			void write(char character) const TOML_MAY_THROW
+			void attach(formatter_writer_interface& writer) noexcept
 			{
-				(*writer)(character);
+				indent_level = 0;
+				naked_newline = true;
+				writer_ = &writer;
 			}
 
-			template <typename CHAR>
-			TOML_ALWAYS_INLINE
-			void write(std::basic_string_view<CHAR> strv) const TOML_MAY_THROW
+			void detach() noexcept
 			{
-				static_assert(sizeof(CHAR) == 1_sz);
-
-				(*writer)(reinterpret_cast<const uint8_t*>(strv.data()), strv.length());
-			}
-
-			template <typename CHAR>
-			TOML_ALWAYS_INLINE
-			void write(const std::basic_string<CHAR>& str) const TOML_MAY_THROW
-			{
-				static_assert(sizeof(CHAR) == 1_sz);
-
-				(*writer)(reinterpret_cast<const uint8_t*>(str.data()), str.length());
-			}
-
-			void write_newline(bool force = false) const TOML_MAY_THROW
-			{
-				if (!naked_newline || force)
-				{
-					write('\n');
-					naked_newline = true;
-				}
-			}
-
-			void write_indent() const TOML_MAY_THROW
-			{
-				for (int i = 0; i < indent_level; i++)
-				{
-					write(indent_string);
-					naked_newline = false;
-				}
+				writer_ = nullptr;
 			}
 
 			TOML_PUSH_WARNINGS
@@ -5892,45 +6448,44 @@ namespace toml
 
 			static toml::string_view escape_string_character(const toml::string_char& c) noexcept
 			{
-				if (c >= toml::string_char{} && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+				static constexpr toml::string_view low_character_escape_table[]
 				{
-					switch (c)
-					{
-						case TOML_STRING_PREFIX('\x00'): return TOML_STRING_PREFIX("\\u0000"sv);
-						case TOML_STRING_PREFIX('\x01'): return TOML_STRING_PREFIX("\\u0001"sv);
-						case TOML_STRING_PREFIX('\x02'): return TOML_STRING_PREFIX("\\u0002"sv);
-						case TOML_STRING_PREFIX('\x03'): return TOML_STRING_PREFIX("\\u0003"sv);
-						case TOML_STRING_PREFIX('\x04'): return TOML_STRING_PREFIX("\\u0004"sv);
-						case TOML_STRING_PREFIX('\x05'): return TOML_STRING_PREFIX("\\u0005"sv);
-						case TOML_STRING_PREFIX('\x06'): return TOML_STRING_PREFIX("\\u0006"sv);
-						case TOML_STRING_PREFIX('\x07'): return TOML_STRING_PREFIX("\\u0007"sv);
-						case TOML_STRING_PREFIX('\x08'): return TOML_STRING_PREFIX("\\b"sv);
-						case TOML_STRING_PREFIX('\x09'): return TOML_STRING_PREFIX("\\t"sv);
-						case TOML_STRING_PREFIX('\x0A'): return TOML_STRING_PREFIX("\\n"sv);
-						case TOML_STRING_PREFIX('\x0B'): return TOML_STRING_PREFIX("\\u000B"sv);
-						case TOML_STRING_PREFIX('\x0C'): return TOML_STRING_PREFIX("\\f"sv);
-						case TOML_STRING_PREFIX('\x0D'): return TOML_STRING_PREFIX("\\r"sv);
-						case TOML_STRING_PREFIX('\x0E'): return TOML_STRING_PREFIX("\\u000E"sv);
-						case TOML_STRING_PREFIX('\x0F'): return TOML_STRING_PREFIX("\\u000F"sv);
-						case TOML_STRING_PREFIX('\x10'): return TOML_STRING_PREFIX("\\u0010"sv);
-						case TOML_STRING_PREFIX('\x11'): return TOML_STRING_PREFIX("\\u0011"sv);
-						case TOML_STRING_PREFIX('\x12'): return TOML_STRING_PREFIX("\\u0012"sv);
-						case TOML_STRING_PREFIX('\x13'): return TOML_STRING_PREFIX("\\u0013"sv);
-						case TOML_STRING_PREFIX('\x14'): return TOML_STRING_PREFIX("\\u0014"sv);
-						case TOML_STRING_PREFIX('\x15'): return TOML_STRING_PREFIX("\\u0015"sv);
-						case TOML_STRING_PREFIX('\x16'): return TOML_STRING_PREFIX("\\u0016"sv);
-						case TOML_STRING_PREFIX('\x17'): return TOML_STRING_PREFIX("\\u0017"sv);
-						case TOML_STRING_PREFIX('\x18'): return TOML_STRING_PREFIX("\\u0018"sv);
-						case TOML_STRING_PREFIX('\x19'): return TOML_STRING_PREFIX("\\u0019"sv);
-						case TOML_STRING_PREFIX('\x1A'): return TOML_STRING_PREFIX("\\u001A"sv);
-						case TOML_STRING_PREFIX('\x1B'): return TOML_STRING_PREFIX("\\u001B"sv);
-						case TOML_STRING_PREFIX('\x1C'): return TOML_STRING_PREFIX("\\u001C"sv);
-						case TOML_STRING_PREFIX('\x1D'): return TOML_STRING_PREFIX("\\u001D"sv);
-						case TOML_STRING_PREFIX('\x1E'): return TOML_STRING_PREFIX("\\u001E"sv);
-						case TOML_STRING_PREFIX('\x1F'): return TOML_STRING_PREFIX("\\u001F"sv);
-						TOML_NO_DEFAULT_CASE;
-					}
-				}
+					TOML_STRING_PREFIX("\\u0000"sv),
+					TOML_STRING_PREFIX("\\u0001"sv),
+					TOML_STRING_PREFIX("\\u0002"sv),
+					TOML_STRING_PREFIX("\\u0003"sv),
+					TOML_STRING_PREFIX("\\u0004"sv),
+					TOML_STRING_PREFIX("\\u0005"sv),
+					TOML_STRING_PREFIX("\\u0006"sv),
+					TOML_STRING_PREFIX("\\u0007"sv),
+					TOML_STRING_PREFIX("\\b"sv),
+					TOML_STRING_PREFIX("\\t"sv),
+					TOML_STRING_PREFIX("\\n"sv),
+					TOML_STRING_PREFIX("\\u000B"sv),
+					TOML_STRING_PREFIX("\\f"sv),
+					TOML_STRING_PREFIX("\\r"sv),
+					TOML_STRING_PREFIX("\\u000E"sv),
+					TOML_STRING_PREFIX("\\u000F"sv),
+					TOML_STRING_PREFIX("\\u0010"sv),
+					TOML_STRING_PREFIX("\\u0011"sv),
+					TOML_STRING_PREFIX("\\u0012"sv),
+					TOML_STRING_PREFIX("\\u0013"sv),
+					TOML_STRING_PREFIX("\\u0014"sv),
+					TOML_STRING_PREFIX("\\u0015"sv),
+					TOML_STRING_PREFIX("\\u0016"sv),
+					TOML_STRING_PREFIX("\\u0017"sv),
+					TOML_STRING_PREFIX("\\u0018"sv),
+					TOML_STRING_PREFIX("\\u0019"sv),
+					TOML_STRING_PREFIX("\\u001A"sv),
+					TOML_STRING_PREFIX("\\u001B"sv),
+					TOML_STRING_PREFIX("\\u001C"sv),
+					TOML_STRING_PREFIX("\\u001D"sv),
+					TOML_STRING_PREFIX("\\u001E"sv),
+					TOML_STRING_PREFIX("\\u001F"sv),
+				};
+
+				if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+					return low_character_escape_table[c];
 				else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
 					return TOML_STRING_PREFIX("\\u007F"sv);
 				else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
@@ -5940,6 +6495,268 @@ namespace toml
 			}
 
 			TOML_POP_WARNINGS
+
+			TOML_ALWAYS_INLINE
+			void write(char character) TOML_MAY_THROW
+			{
+				(*writer_)(character);
+			}
+
+			template <typename CHAR>
+			TOML_ALWAYS_INLINE
+			void write(const CHAR* characters, size_t num) TOML_MAY_THROW
+			{
+				static_assert(sizeof(CHAR) == 1_sz);
+
+				(*writer_)(reinterpret_cast<const char*>(characters), num);
+			}
+
+			template <typename CHAR>
+			TOML_ALWAYS_INLINE
+			void write(std::basic_string_view<CHAR> strv) TOML_MAY_THROW
+			{
+				static_assert(sizeof(CHAR) == 1_sz);
+
+				(*writer_)(reinterpret_cast<const char*>(strv.data()), strv.length());
+			}
+
+			template <typename CHAR>
+			TOML_ALWAYS_INLINE
+			void write(const std::basic_string<CHAR>& str) TOML_MAY_THROW
+			{
+				static_assert(sizeof(CHAR) == 1_sz);
+
+				(*writer_)(reinterpret_cast<const char*>(str.data()), str.length());
+			}
+
+			void write_newline(bool force = false) TOML_MAY_THROW
+			{
+				if (!naked_newline || force)
+				{
+					write('\n');
+					naked_newline = true;
+				}
+			}
+
+			void write_indent() TOML_MAY_THROW
+			{
+				for (int i = 0; i < indent_level; i++)
+				{
+					write(opts.indent_string);
+					naked_newline = false;
+				}
+			}
+
+			template <typename T>
+			void write_integer(T val) TOML_MAY_THROW
+			{
+				char buf[20_sz]; //strlen("-9223372036854775808")
+				const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+				write(buf, static_cast<size_t>(res.ptr - buf));
+				naked_newline = false;
+			}
+
+			void write(const value<int64_t>& val) TOML_MAY_THROW
+			{
+				write_integer(val.get());
+			}
+
+			void write(const value<double>& val) TOML_MAY_THROW
+			{
+				#if TOML_USE_STREAMS_FOR_FLOATS
+				{
+					std::ostringstream oss;
+					oss << val.get();
+					write(oss.str());
+					if (val.get() == 0.0)
+						write(".0"sv);
+				}
+				#else
+				{
+					char buf[32_sz];
+					const auto res = std::to_chars(buf, buf + sizeof(buf), val.get());
+					const auto sv = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
+					write(sv);
+					bool needs_decimal_point = true;
+					for (auto ch : sv)
+					{
+						if (ch == 'e' || ch == 'E' || ch == '.')
+						{
+							needs_decimal_point = false;
+							break;
+						}
+					}
+					if (needs_decimal_point)
+						write(".0"sv);
+				}
+				#endif
+				naked_newline = false;
+			}
+
+			void write(const value<bool>& val) TOML_MAY_THROW
+			{
+				write(val.get() ? "true"sv : "false"sv);
+				naked_newline = false;
+			}
+
+			void write_quoted_string(toml::string_view str) TOML_MAY_THROW
+			{
+				if (str.empty())
+					write("\"\""sv);
+				else
+				{
+					write('"');
+					for (auto c : str)
+						write(escape_string_character(c));
+					write('"');
+				}
+				naked_newline = false;
+			}
+
+			void write(const value<toml::string>& val) TOML_MAY_THROW
+			{
+				write_quoted_string(string_view{ val.get() });
+			}
+
+			template <typename T>
+			void write_zero_padded_integer(T intval, size_t digits) TOML_MAY_THROW
+			{
+				static_assert(std::is_unsigned_v<T>);
+
+				char buf[19_sz]; //strlen("9223372036854775807")
+				const auto res = std::to_chars(buf, buf + sizeof(buf), intval);
+				const auto len = static_cast<size_t>(res.ptr - buf);
+				for (size_t i = len; i < digits; i++)
+					write('0');
+				write(buf, len);
+				naked_newline = false;
+			}
+
+			void write(const time& tm) TOML_MAY_THROW
+			{
+				write_zero_padded_integer(tm.hour, 2_sz);
+				write(':');
+				write_zero_padded_integer(tm.minute, 2_sz);
+				write(':');
+				write_zero_padded_integer(tm.second, 2_sz);
+
+				if (tm.nanosecond && tm.nanosecond <= 999999999u)
+				{
+					write('.');
+					auto ns = tm.nanosecond;
+					size_t digits = 9_sz;
+					while (ns % 10u == 0u)
+					{
+						ns /= 10u;
+						digits--;
+					}
+					write_integer(ns);
+				}
+			}
+
+			void write(const date& dt) TOML_MAY_THROW
+			{
+				write_zero_padded_integer(dt.year, 4_sz);
+				write('-');
+				write_zero_padded_integer(dt.month, 2_sz);
+				write('-');
+				write_zero_padded_integer(dt.day, 2_sz);
+			}
+
+			void write(const date_time& dt) TOML_MAY_THROW
+			{
+				write(dt.date);
+				write('T');
+				write(dt.time);
+				if (dt.time_offset)
+				{
+					const auto& to = *dt.time_offset;
+					if (!to.hours && !to.minutes)
+						write('Z');
+					else
+					{
+						write(to.hours < 0 || to.minutes < 0 ? '-' : '+');
+						write_zero_padded_integer(static_cast<uint8_t>(to.hours < 0 ? -to.hours : to.hours), 2_sz);
+						write(':');
+						write_zero_padded_integer(static_cast<uint8_t>(to.minutes < 0 ? -to.minutes : to.minutes), 2_sz);
+					}
+				}
+			}
+
+			void write(const value<time>& val) TOML_MAY_THROW
+			{
+				if (opts.quote_dates_and_times)
+					write('"');
+				write(val.get());
+				if (opts.quote_dates_and_times)
+					write('"');
+			}
+
+			void write(const value<date>& val) TOML_MAY_THROW
+			{
+				if (opts.quote_dates_and_times)
+					write('"');
+				write(val.get());
+				if (opts.quote_dates_and_times)
+					write('"');
+			}
+
+			void write(const value<date_time>& val) TOML_MAY_THROW
+			{
+				if (opts.quote_dates_and_times)
+					write('"');
+				write(val.get());
+				if (opts.quote_dates_and_times)
+					write('"');
+			}
+
+			void write_value(const node* val_node, node_type type) TOML_MAY_THROW
+			{
+				switch (type)
+				{
+
+					case node_type::string: write(*val_node->reinterpret_as<string>()); break;
+					case node_type::integer: write(*val_node->reinterpret_as<int64_t>()); break;
+					case node_type::floating_point: write(*val_node->reinterpret_as<double>()); break;
+					case node_type::boolean: write(*val_node->reinterpret_as<bool>()); break;
+					case node_type::date: write(*val_node->reinterpret_as<date>()); break;
+					case node_type::time: write(*val_node->reinterpret_as<time>()); break;
+					case node_type::date_time: write(*val_node->reinterpret_as<date_time>()); break;
+					TOML_NO_DEFAULT_CASE;
+				}
+			}
+
+			formatter(const toml::table& source_, formatter_options&& options_) noexcept
+				: opts{ std::move(options_) },
+				source{ source_ }
+			{
+				if (opts.indent_string.empty())
+				{
+					opts.indent_string = TOML_STRING_PREFIX("    "sv);
+					indent_string_columns = 4;
+				}
+				else
+				{
+					for (auto c : opts.indent_string)
+						indent_string_columns += c == '\t' ? 4_sz : 1_sz;
+				}
+			}
+	};
+}
+
+#pragma endregion
+//-------------------------------------------------------------------  ↑ toml_formatter.h  -----------------------------
+
+//-------------------------------------------------------------------------------------  ↓ toml_default_formatter.h  ---
+#pragma region
+
+namespace toml
+{
+	class default_formatter final : impl::formatter
+	{
+		private:
+			using base = impl::formatter;
+			std::vector<toml::string> key_path;
 
 			static toml::string make_key_segment(const toml::string& str) noexcept
 			{
@@ -5975,10 +6792,10 @@ namespace toml
 				}
 			}
 
-			void write_key_segment(const toml::string& str) const TOML_MAY_THROW
+			void write_key_segment(const toml::string& str) TOML_MAY_THROW
 			{
 				if (str.empty())
-					write("''"sv);
+					base::write("''"sv);
 				else
 				{
 					bool requiresQuotes = false;
@@ -5995,207 +6812,57 @@ namespace toml
 					}
 
 					if (requiresQuotes)
-					{
-						write('"');
-						for (auto c : str)
-							write(escape_string_character(c));
-						write('"');
-					}
+						write_quoted_string(str);
 					else
-						write(str);
+						base::write(str);
 				}
 			}
 
-			void write_key_path() const TOML_MAY_THROW
+			void write_key_path() TOML_MAY_THROW
 			{
 				for (const auto& segment : key_path)
 				{
 					if (std::addressof(segment) > key_path.data())
-						write('.');
-					write(segment);
+						base::write('.');
+					base::write(segment);
 				}
 				naked_newline = false;
 			}
 
-			void write(const value<toml::string>& val) const TOML_MAY_THROW
-			{
-				const auto& str = val.get();
-				if (str.empty())
-					write("''"sv);
-				else
-				{
-					write('"');
-					for (auto c : str)
-						write(escape_string_character(c));
-					write('"');
-				}
-				naked_newline = false;
-			}
-
-			template <typename T>
-			void write_integer(T val) const TOML_MAY_THROW
-			{
-				char buf[20_sz]; //strlen("-9223372036854775808")
-				const auto res = std::to_chars(buf, buf + sizeof(buf), val);
-				(*writer)(buf, static_cast<size_t>(res.ptr - buf));
-				naked_newline = false;
-			}
-
-			void write(const value<int64_t>& val) const TOML_MAY_THROW
-			{
-				write_integer(val.get());
-			}
-
-			void write(const value<double>& val) const TOML_MAY_THROW
-			{
-				#if TOML_USE_STREAMS_FOR_FLOATS
-				{
-					std::ostringstream oss;
-					oss << val.get();
-					write(oss.str());
-					if (val.get() == 0.0)
-						write(".0"sv);
-				}
-				#else
-				{
-					char buf[32_sz];
-					const auto res = std::to_chars(buf, buf + sizeof(buf), val.get());
-					const auto sv = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
-					write(sv);
-					bool needs_decimal_point = true;
-					for (auto ch : sv)
-					{
-						if (ch == 'e' || ch == 'E' || ch == '.')
-						{
-							needs_decimal_point = false;
-							break;
-						}
-					}
-					if (needs_decimal_point)
-						write(".0"sv);
-				}
-				#endif
-				naked_newline = false;
-			}
-
-			void write(const value<bool>& val) const TOML_MAY_THROW
-			{
-				write(val.get() ? "true"sv : "false"sv);
-				naked_newline = false;
-			}
-
-			template <typename T>
-			void write_zero_padded_integer(T intval, size_t digits) const TOML_MAY_THROW
-			{
-				static_assert(std::is_unsigned_v<T>);
-
-				char buf[17_sz]; //strlen("9223372036854775807")
-				const auto res = std::to_chars(buf, buf + sizeof(buf), intval);
-				const auto len = static_cast<size_t>(res.ptr - buf);
-				for (size_t i = len; i < digits; i++)
-					write('0');
-				(*writer)(buf, len);
-				naked_newline = false;
-			}
-
-			void write(const time& tm) const TOML_MAY_THROW
-			{
-				write_zero_padded_integer(tm.hour, 2_sz);
-				write(':');
-				write_zero_padded_integer(tm.minute, 2_sz);
-				write(':');
-				write_zero_padded_integer(tm.second, 2_sz);
-
-				if (tm.nanosecond && tm.nanosecond <= 999999999u)
-				{
-					write('.');
-					auto ns = tm.nanosecond;
-					size_t digits = 9_sz;
-					while (ns % 10u == 0u)
-					{
-						ns /= 10u;
-						digits--;
-					}
-					write_integer(ns);
-				}
-			}
-
-			void write(const date& dt) const TOML_MAY_THROW
-			{
-				write_zero_padded_integer(dt.year, 4_sz);
-				write('-');
-				write_zero_padded_integer(dt.month, 2_sz);
-				write('-');
-				write_zero_padded_integer(dt.day, 2_sz);
-			}
-
-			void write(const date_time& dt) const TOML_MAY_THROW
-			{
-				write(dt.date);
-				write('T');
-				write(dt.time);
-				if (dt.time_offset)
-				{
-					const auto& to = *dt.time_offset;
-					if (!to.hours && !to.minutes)
-						write('Z');
-					else
-					{
-						write(to.hours < 0 || to.minutes < 0 ? '-' : '+');
-						write_zero_padded_integer(static_cast<uint8_t>(to.hours < 0 ? -to.hours : to.hours), 2_sz);
-						write(':');
-						write_zero_padded_integer(static_cast<uint8_t>(to.minutes < 0 ? -to.minutes : to.minutes), 2_sz);
-					}
-				}
-			}
-
-			void write(const value<time>& val) const TOML_MAY_THROW
-			{
-				write(val.get());
-			}
-
-			void write(const value<date>& val) const TOML_MAY_THROW
-			{
-				write(val.get());
-			}
-
-			void write(const value<date_time>& val) const TOML_MAY_THROW
-			{
-				write(val.get());
-			}
-
-			inline void write_inline(const table& /*tab*/) const TOML_MAY_THROW;
+			inline void write_inline(const table& /*tbl*/) TOML_MAY_THROW;
 
 			static size_t inline_columns(const node& node) noexcept
 			{
-				switch (node.type())
+				return node.visit([](const auto& n) noexcept
+					-> size_t
 				{
-					case node_type::table:  //assumed to be inline
+					using node_t = impl::remove_cvref_t<decltype(n)>;
+					if constexpr (std::is_same_v<node_t, table>)
 					{
-						auto& values = reinterpret_cast<const table*>(&node)->values;
+						const auto& values = n.values;
 						if (values.empty())
 							return 2_sz; // "{}"
 						size_t weight = 3_sz; // "{ }"
-						for (auto& [k, v] : values)
+						for (const auto& [k, v] : values)
 							weight += k.length() + inline_columns(*v) + 2_sz; // +  ", "
 						return weight;
 					}
-					case node_type::array:
+					else if constexpr (std::is_same_v<node_t, array>)
 					{
-						auto& values = reinterpret_cast<const array*>(&node)->values;
-						if (values.empty())
+						if (n.empty())
 							return 2_sz; // "[]"
 						size_t weight = 3_sz; // "[ ]"
-						for (auto& v : values)
-							weight += inline_columns(*v) + 2_sz; // +  ", "
+						for (size_t i = 0; i < n.size(); i++)
+							weight += inline_columns(*n.get(i)) + 2_sz; // +  ", "
 						return weight;
 					}
-					case node_type::string:
-						return reinterpret_cast<const value<string>*>(&node)->get().length() + 2_sz; // + ""
-
-					case node_type::integer:
+					else if constexpr (std::is_same_v<node_t, value<string>>)
 					{
-						auto v = reinterpret_cast<const value<int64_t>*>(&node)->get();
+						return n.get().length() + 2_sz; // + ""
+					}
+					else if constexpr (std::is_same_v<node_t, value<int64_t>>)
+					{
+						auto v = n.get();
 						if (!v)
 							return 1_sz;
 						size_t weight = {};
@@ -6206,10 +6873,9 @@ namespace toml
 						}
 						return weight + static_cast<size_t>(std::log10(static_cast<double>(v)));
 					}
-
-					case node_type::floating_point:
+					else if constexpr (std::is_same_v<node_t, value<double>>)
 					{
-						auto v = reinterpret_cast<const value<double>*>(&node)->get();
+						auto v = n.get();
 						if (v == 0.0)
 							return 3_sz;
 						size_t weight = 2_sz; // ".0"
@@ -6220,32 +6886,39 @@ namespace toml
 						}
 						return weight + static_cast<size_t>(std::log10(v));
 					}
-
-					case node_type::boolean: return 5_sz;
-					case node_type::date: [[fallthrough]];
-					case node_type::time: return 10_sz;
-					case node_type::date_time: return 30_sz;
-					TOML_NO_DEFAULT_CASE;
-				}
+					else if constexpr (std::is_same_v<node_t, value<bool>>)
+					{
+						return 5_sz;
+					}
+					else if constexpr (std::is_same_v<node_t, value<date>> || std::is_same_v<node_t, value<time>>)
+					{
+						return 10_sz;
+					}
+					else if constexpr (std::is_same_v<node_t, value<date_time>>)
+					{
+						return 30_sz;
+					}
+					TOML_UNREACHABLE;
+				});
 			}
 
 			static bool forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
 			{
-				return (inline_columns(node) + starting_column_bias) > 100_sz;
+				return (inline_columns(node) + starting_column_bias) > 120_sz;
 			}
 
-			void write(const array& arr) const TOML_MAY_THROW
+			void write(const array& arr) TOML_MAY_THROW
 			{
-				if (arr.values.empty())
-					write("[]"sv);
+				if (arr.empty())
+					base::write("[]"sv);
 				else
 				{
 					const auto multiline = forces_multiline(
 						arr,
-						indent_string_columns * static_cast<size_t>(indent_level < 0 ? 0 : indent_level)
+						base::indent_string_columns * static_cast<size_t>(indent_level < 0 ? 0 : indent_level)
 					);
 					const auto original_indent = indent_level;
-					write("["sv);
+					base::write("["sv);
 					if (multiline)
 					{
 						if (indent_level < 0)
@@ -6253,15 +6926,15 @@ namespace toml
 						indent_level++;
 					}
 					else
-						write(' ');
+						base::write(' ');
 
-					for (auto& v : arr.values)
+					for (size_t i = 0; i < arr.size(); i++)
 					{
-						if (std::addressof(v) > arr.values.data())
+						if (i > 0_sz)
 						{
-							write(',');
+							base::write(',');
 							if (!multiline)
-								write(' ');
+								base::write(' ');
 						}
 
 						if (multiline)
@@ -6270,19 +6943,14 @@ namespace toml
 							write_indent();
 						}
 
+						auto v = arr.get(i);
 						const auto type = v->type();
 						switch (type)
 						{
-							case node_type::table: write_inline(*reinterpret_cast<const table*>(v.get())); break;
-							case node_type::array: write(*reinterpret_cast<const array*>(v.get())); break;
-							case node_type::string: write(*reinterpret_cast<const value<string>*>(v.get())); break;
-							case node_type::integer: write(*reinterpret_cast<const value<int64_t>*>(v.get())); break;
-							case node_type::floating_point: write(*reinterpret_cast<const value<double>*>(v.get())); break;
-							case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
-							case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
-							case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-							case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
-							TOML_NO_DEFAULT_CASE;
+							case node_type::table: write_inline(*reinterpret_cast<const table*>(v)); break;
+							case node_type::array: write(*reinterpret_cast<const array*>(v)); break;
+							default:
+								write_value(v, type);
 						}
 
 					}
@@ -6293,16 +6961,16 @@ namespace toml
 						write_indent();
 					}
 					else
-						write(' ');
-					write("]"sv);
+						base::write(' ');
+					base::write("]"sv);
 				}
 				naked_newline = false;
 			}
 
-			void write(const table& tab) const TOML_MAY_THROW
+			void write(const table& tbl) TOML_MAY_THROW
 			{
 				//values, arrays, and inline tables
-				for (auto& [k, v] : tab.values)
+				for (const auto& [k, v] : tbl.values)
 				{
 					const auto type = v->type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(v.get())->is_inline())
@@ -6312,36 +6980,30 @@ namespace toml
 					write_newline();
 					write_indent();
 					write_key_segment(k);
-					write(" = "sv);
+					base::write(" = "sv);
 					switch (type)
 					{
 						case node_type::table: write_inline(*reinterpret_cast<const table*>(v.get())); break;
 						case node_type::array: write(*reinterpret_cast<const array*>(v.get())); break;
-						case node_type::string: write(*reinterpret_cast<const value<string>*>(v.get())); break;
-						case node_type::integer: write(*reinterpret_cast<const value<int64_t>*>(v.get())); break;
-						case node_type::floating_point: write(*reinterpret_cast<const value<double>*>(v.get())); break;
-						case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
-						case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
-						case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-						case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
-						TOML_NO_DEFAULT_CASE;
+						default:
+							write_value(v.get(), type);
 					}
 				}
 
 				//non-inline tables
-				for (auto& [k, v] : tab.values)
+				for (const auto& [k, v] : tbl.values)
 				{
 					const auto type = v->type();
 					if (type != node_type::table || reinterpret_cast<const table*>(v.get())->is_inline())
 						continue;
-					auto& child_tab = *reinterpret_cast<const table*>(v.get());
+					auto& child_tbl = *reinterpret_cast<const table*>(v.get());
 
 					//we can skip indenting and emitting the headers for tables that only contain other tables
 					//(so we don't over-nest)
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
-					for (auto& [child_k, child_v] : child_tab.values)
+					for (auto& [child_k, child_v] : child_tbl.values)
 					{
 						const auto child_type = child_v->type();
 						switch (child_type)
@@ -6377,13 +7039,13 @@ namespace toml
 						write_newline();
 						write_newline(true);
 						write_indent();
-						write("["sv);
+						base::write("["sv);
 						write_key_path();
-						write("]"sv);
+						base::write("]"sv);
 						write_newline(true);
 					}
 
-					write(child_tab);
+					write(child_tbl);
 
 					key_path.pop_back();
 					if (!skip_self)
@@ -6391,26 +7053,26 @@ namespace toml
 				}
 
 				//table arrays
-				for (auto& [k, v] : tab.values)
+				for (const auto& [k, v] : tbl.values)
 				{
 					const auto type = v->type();
 					if (type != node_type::array || !reinterpret_cast<const array*>(v.get())->is_array_of_tables())
 						continue;
-					auto& node = *reinterpret_cast<const array*>(v.get());
+					auto& arr = *reinterpret_cast<const array*>(v.get());
 
 					indent_level++;
 					key_path.push_back(make_key_segment(k));
 
-					for (auto& t : node.values)
+					for (size_t i = 0; i < arr.size(); i++)
 					{
 						write_newline();
 						write_newline(true);
 						write_indent();
-						write("[["sv);
+						base::write("[["sv);
 						write_key_path();
-						write("]]"sv);
+						base::write("]]"sv);
 						write_newline(true);
-						write(*reinterpret_cast<const table*>(t.get()));
+						write(*reinterpret_cast<const table*>(arr.get(i)));
 					}
 
 					key_path.pop_back();
@@ -6418,73 +7080,74 @@ namespace toml
 				}
 			}
 
+			void write() TOML_MAY_THROW
+			{
+				write(source);
+			}
+
 		public:
 
-			explicit default_formatter(const toml::table& source_, std::string_view indent_string_ = "    "sv) noexcept
-				: source{ source_ },
-				indent_string{ indent_string_ }
+			TOML_NODISCARD_CTOR
+			default_formatter(const toml::table& source_, toml::string_view indent_string = {}) noexcept
+				: formatter{
+					source_,
+					impl::formatter_options{
+						indent_string,
+						false //quote_dates_and_times
+					}
+				}
+			{}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, default_formatter& rhs)
+				TOML_MAY_THROW
 			{
-				for (auto c : indent_string)
-					indent_string_columns += c == '\t' ? 4_sz : 1_sz;
+				auto fw = impl::formatter_writer{ lhs };
+				rhs.attach(fw);
+				rhs.indent_level--; //starts at -1 so root kvps and first-level child tables have the same indent
+				rhs.key_path.clear();
+				rhs.write();
+				rhs.detach();
+				return lhs;
 			}
 
 			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const default_formatter& rhs) TOML_MAY_THROW
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, default_formatter&& rhs)
+				TOML_MAY_THROW
 			{
-				static_assert(
-					sizeof(CHAR) == 1,
-					"The stream's underlying character type must be 1 byte in size."
-				);
-
-				rhs.indent_level = -1;
-				rhs.naked_newline = true;
-				rhs.key_path.clear();
-				auto fw = impl::formatter_writer{ lhs };
-				rhs.writer = &fw;
-				rhs.write(rhs.source);
-
-				return lhs;
+				return lhs << rhs; //as lvalue
 			}
 	};
 
-	inline void default_formatter::write_inline(const toml::table& tab) const TOML_MAY_THROW
+	inline void default_formatter::write_inline(const toml::table& tbl) TOML_MAY_THROW
 	{
-		if (tab.values.empty())
-			write("{}"sv);
+		if (tbl.values.empty())
+			base::write("{}"sv);
 		else
 		{
-			write("{ "sv);
+			base::write("{ "sv);
 
 			bool first = false;
-			for (auto& [k, v] : tab.values)
+			for (auto& [k, v] : tbl.values)
 			{
 				if (first)
-				{
-					write(", "sv);
-				}
+					base::write(", "sv);
 				first = true;
 
 				write_key_segment(k);
-				write(" = "sv);
+				base::write(" = "sv);
 
 				const auto type = v->type();
 				switch (type)
 				{
 					case node_type::table: write_inline(*reinterpret_cast<const table*>(v.get())); break;
 					case node_type::array: write(*reinterpret_cast<const array*>(v.get())); break;
-					case node_type::string: write(*reinterpret_cast<const value<string>*>(v.get())); break;
-					case node_type::integer: write(*reinterpret_cast<const value<int64_t>*>(v.get())); break;
-					case node_type::floating_point: write(*reinterpret_cast<const value<double>*>(v.get())); break;
-					case node_type::boolean: write(*reinterpret_cast<const value<bool>*>(v.get())); break;
-					case node_type::date: write(*reinterpret_cast<const value<date>*>(v.get())); break;
-					case node_type::time: write(*reinterpret_cast<const value<time>*>(v.get())); break;
-					case node_type::date_time: write(*reinterpret_cast<const value<date_time>*>(v.get())); break;
-					TOML_NO_DEFAULT_CASE;
+					default:
+						write_value(v.get(), type);
 				}
-
 			}
 
-			write(" }"sv);
+			base::write(" }"sv);
 		}
 		naked_newline = false;
 	}
@@ -6492,17 +7155,137 @@ namespace toml
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs) TOML_MAY_THROW
 	{
-		static_assert(
-			sizeof(CHAR) == 1,
-			"The stream's underlying character type must be 1 byte in size."
-		);
-
 		return lhs << default_formatter{ rhs };
 	}
 }
 
-#pragma endregion toml_formatter.h
-//-------------------------------------------------------------------------  ↑ toml_formatter.h  ---
+#pragma endregion
+//-------------------------------------------------------------------------------------  ↑ toml_default_formatter.h  ---
+
+//-------------  ↓ toml_json_formatter.h  ------------------------------------------------------------------------------
+#pragma region
+
+namespace toml
+{
+	class json_formatter final : impl::formatter
+	{
+		private:
+			using base = impl::formatter;
+
+			inline void write(const toml::table& tbl) TOML_MAY_THROW;
+
+			void write(const array& arr) TOML_MAY_THROW
+			{
+				if (arr.empty())
+					base::write("[]"sv);
+				else
+				{
+					base::write('[');
+					indent_level++;
+					for (size_t i = 0; i < arr.size(); i++)
+					{
+						if (i > 0_sz)
+							base::write(',');
+						write_newline(true);
+						write_indent();
+
+						auto v = arr.get(i);
+						const auto type = v->type();
+						switch (type)
+						{
+							case node_type::table: write(*reinterpret_cast<const table*>(v)); break;
+							case node_type::array: write(*reinterpret_cast<const array*>(v)); break;
+							default:
+								write_value(v, type);
+						}
+
+					}
+					indent_level--;
+					write_newline(true);
+					write_indent();
+					base::write(']');
+				}
+				naked_newline = false;
+			}
+
+			void write() TOML_MAY_THROW
+			{
+				write(source);
+			}
+
+		public:
+
+			TOML_NODISCARD_CTOR
+				json_formatter(const toml::table& source_, toml::string_view indent_string = {}) noexcept
+				: formatter{
+					source_,
+					impl::formatter_options{
+						indent_string,
+						true //quote_dates_and_times
+					}
+				}
+			{}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, json_formatter& rhs)
+				TOML_MAY_THROW
+			{
+				auto fw = impl::formatter_writer{ lhs };
+				rhs.attach(fw);
+				rhs.write();
+				rhs.detach();
+				return lhs;
+			}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, json_formatter&& rhs)
+				TOML_MAY_THROW
+			{
+				return lhs << rhs; //as lvalue
+			}
+	};
+
+	inline void json_formatter::write(const toml::table& tbl) TOML_MAY_THROW
+	{
+		if (tbl.empty())
+			base::write("{}"sv);
+		else
+		{
+			base::write('{');
+			indent_level++;
+			bool first = false;
+			for (auto& [k, v] : tbl.values)
+			{
+				if (first)
+					base::write(", "sv);
+				first = true;
+				write_newline(true);
+				write_indent();
+
+				base::write_quoted_string(k);
+				base::write(" : "sv);
+
+				const auto type = v->type();
+				switch (type)
+				{
+					case node_type::table: write(*reinterpret_cast<const table*>(v.get())); break;
+					case node_type::array: write(*reinterpret_cast<const array*>(v.get())); break;
+					default:
+						write_value(v.get(), type);
+				}
+
+			}
+			indent_level--;
+			write_newline(true);
+			write_indent();
+			base::write('}');
+		}
+		naked_newline = false;
+	}
+}
+
+#pragma endregion
+//-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
 
 //macro hygiene
 #if TOML_UNDEF_MACROS
@@ -6528,7 +7311,7 @@ namespace toml
 	#undef TOML_UNLIKELY
 	#undef TOML_NO_UNIQUE_ADDRESS
 	#undef TOML_NODISCARD_CTOR
-	#undef TOML_LANG_MAKE_VERSION
+	#undef TOML_MAKE_VERSION
 	#undef TOML_LANG_EFFECTIVE_VERSION
 	#undef TOML_LANG_HIGHER_THAN
 	#undef TOML_LANG_AT_LEAST
@@ -6537,3 +7320,8 @@ namespace toml
 	#undef TOML_STRING_PREFIX
 	#undef TOML_UNDEF_MACROS
 #endif
+
+#ifdef __GNUC__
+	#pragma GCC diagnostic pop
+#endif
+// clang-format on

@@ -8,7 +8,6 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
-			friend class default_formatter;
 			std::vector<std::unique_ptr<node>> values;
 
 		public:
@@ -43,8 +42,7 @@ namespace toml
 				return true;
 			}
 
-			[[nodiscard]]
-			bool is_homogeneous() const noexcept
+			[[nodiscard]] bool is_homogeneous() const noexcept
 			{
 				if (values.size() <= 1_sz)
 					return true;
@@ -61,21 +59,21 @@ namespace toml
 
 			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
 
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
 
 			[[nodiscard]] node* get(size_t index) noexcept { return values[index].get(); }
 			[[nodiscard]] const node* get(size_t index) const noexcept { return values[index].get(); }
 
 			template <typename T>
-			[[nodiscard]]
-			node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
 			{
 				return get(index)->as<T>();
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			const node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
 			{
 				return get(index)->as<T>();
 			}

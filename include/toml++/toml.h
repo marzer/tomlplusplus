@@ -13,6 +13,8 @@
 #include "toml_node_view.h"
 #include "toml_parser.h"
 #include "toml_formatter.h"
+#include "toml_default_formatter.h"
+#include "toml_json_formatter.h"
 
 //macro hygiene
 #if TOML_UNDEF_MACROS
@@ -38,7 +40,7 @@
 	#undef TOML_UNLIKELY
 	#undef TOML_NO_UNIQUE_ADDRESS
 	#undef TOML_NODISCARD_CTOR
-	#undef TOML_LANG_MAKE_VERSION
+	#undef TOML_MAKE_VERSION
 	#undef TOML_LANG_EFFECTIVE_VERSION
 	#undef TOML_LANG_HIGHER_THAN
 	#undef TOML_LANG_AT_LEAST

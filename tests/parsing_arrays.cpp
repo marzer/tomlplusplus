@@ -91,7 +91,7 @@ string_array = [ "all", 'strings', """are the same""", '''type''' ]
 		}
 	);
 
-	// heterogeneous arrays are allowed after 0.5.0
+	// toml/issues/665 - heterogeneous arrays
 	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
 
 	parsing_should_succeed(S(R"(

@@ -10,11 +10,10 @@ using namespace std::string_view_literals;
 int main(int argc, char** argv)
 {
 	#ifdef _WIN32
-	SetConsoleOutputCP(65001);
+	SetConsoleOutputCP(65001); //UTF-8 console output
 	#endif
 
 	auto path = std::string{ argc > 1 ? argv[1] : "example.toml" };
-
 	auto file = std::ifstream{ path };
 	if (!file)
 	{
@@ -33,9 +32,8 @@ int main(int argc, char** argv)
 	{
 		std::cerr
 			<< "Error parsing file '"sv << *err.where().path
-			<< "' at line "sv << err.where().begin.line
-			<< ", column "sv << err.where().begin.column
-			<< ":\n"sv << err.what()
+			<< "':\n"sv << err.what()
+			<< "\n  ("sv << err.where().begin << ")"sv
 			<< std::endl;
 
 		return 1;

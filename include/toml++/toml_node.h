@@ -7,6 +7,7 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
+			friend class impl::formatter;
 			source_region rgn{};
 
 		protected:
@@ -19,6 +20,20 @@ namespace toml
 			{
 				rgn = std::move(rhs.rgn);
 				return *this;
+			}
+
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			node_of<T>* reinterpret_as() noexcept
+			{
+				return reinterpret_cast<node_of<T>*>(this);
+			}
+
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const node_of<T>* reinterpret_as() const noexcept
+			{
+				return reinterpret_cast<const node_of<T>*>(this);
 			}
 
 		public:
@@ -82,7 +97,8 @@ namespace toml
 			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
 
 			template <typename T>
-			[[nodiscard]] node_of<T>* as() noexcept
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			node_of<T>* as() noexcept
 			{
 				using type = T;
 				static_assert(
@@ -102,7 +118,8 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]] const node_of<T>* as() const noexcept
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const node_of<T>* as() const noexcept
 			{
 				using type = T;
 				static_assert(
@@ -123,10 +140,111 @@ namespace toml
 
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
-			[[nodiscard]]
-			const source_region& region() const noexcept
+			[[nodiscard]] const source_region& region() const noexcept
 			{
 				return rgn;
+			}
+
+		private:
+
+			// this is done using a static helper to preserve const categories
+			// (otherwise I'd have to implement this function twice)
+			// (const propagation in C++: a modern horror story)
+			template <typename N, typename FUNC>
+			static decltype(auto) do_visit(N* node, FUNC&& visitor) TOML_MAY_THROW
+			{
+				static_assert(
+					impl::is_generic_invocable_v<FUNC&&>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
+					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>,
+					"Visitors must be invocable for at least one of the toml::node specializations"
+				);
+
+				static constexpr auto is_exhaustive = impl::is_generic_invocable_v<FUNC&&> || (
+					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>
+				);
+
+				switch (node->type())
+				{
+					case node_type::table:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<table>());
+						break;
+					case node_type::array:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<array>());
+						break;
+					case node_type::string:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<string>());
+						break;
+					case node_type::integer:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<int64_t>());
+						break;
+					case node_type::floating_point:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<double>());
+						break;
+					case node_type::boolean:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<bool>());
+						break;
+					case node_type::date:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date>());
+						break;
+					case node_type::time:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<time>());
+						break;
+					case node_type::date_time:
+						if constexpr (impl::is_generic_invocable_v<FUNC&&>
+							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>)
+							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date_time>());
+						break;
+					TOML_NO_DEFAULT_CASE;
+				}
+
+				if constexpr (is_exhaustive)
+					TOML_UNREACHABLE;
+			}
+
+		public:
+
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) TOML_MAY_THROW
+			{
+				return do_visit(this, std::forward<FUNC>(visitor));
+			}
+
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) const TOML_MAY_THROW
+			{
+				return do_visit(this, std::forward<FUNC>(visitor));
 			}
 	};
 }

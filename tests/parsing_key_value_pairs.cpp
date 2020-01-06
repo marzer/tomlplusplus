@@ -129,4 +129,23 @@ orange.color = "orange"
 			CHECK(tbl[S("orange")][S("color")] == S("orange"sv));
 		}
 	);
+
+	// allow + in bare keys - toml/issues/644
+	// allow unicode in bare keys - toml/issues/687
+	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	parsing_should_succeed(S(R"(
+key+1 = 0
+ʎǝʞ2 = 0
+)"sv),
+		[](table&& tbl) noexcept
+		{
+			CHECK(tbl.size() == 2);
+			CHECK(tbl[S("key+1")] == 0);
+			CHECK(tbl[S("ʎǝʞ2")] == 0);
+		}
+	);
+	#else
+	parsing_should_fail(R"(key+1 = 0)"sv);
+	parsing_should_fail(R"(ʎǝʞ2 = 0)"sv);
+	#endif
 }

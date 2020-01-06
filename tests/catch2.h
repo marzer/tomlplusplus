@@ -5,7 +5,7 @@
 #define CATCH_CONFIG_CPP17_OPTIONAL
 #define CATCH_CONFIG_CPP17_STRING_VIEW
 #define CATCH_CONFIG_FAST_COMPILE
-#define CATCH_CONFIG_CONSOLE_WIDTH 100
+#define CATCH_CONFIG_CONSOLE_WIDTH 120
 
 //windows.h config
 #ifdef _WIN32
@@ -52,4 +52,8 @@
 	#define NOWINSTYLES //       - WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
 #endif
 
-#include <catch2/single_include/catch2/catch.hpp>
+#if __has_include(<Catch2/single_include/catch2/catch.hpp>)
+	#include <Catch2/single_include/catch2/catch.hpp>
+#else
+	#error Catch2 is missing! You probably need to fetch submodules ("git submodule update --init --recursive")
+#endif

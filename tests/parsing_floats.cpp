@@ -84,6 +84,17 @@ flt8 = 224_617.445_991_228
     parse_expected_value(           "6.02e23"sv,         6.02e23 );
     parse_expected_value(          "6.02e+23"sv,         6.02e23 );
     parse_expected_value(  "1.112_650_06e-17"sv,  1.11265006e-17 );
+
+	//toml/issues/562 - hexfloat literals
+	#if TOML_LANG_HIGHER_THAN(0, 5, 0) && !TOML_USE_STREAMS_FOR_FLOATS
+	parse_expected_value("          0x10.1p0"sv,        0x10.1p0 );
+	parse_expected_value("          0x0.3p10"sv,        0x0.3p10 );
+	parse_expected_value("          0x12.2P2"sv,        0x12.2P2 );
+	#else
+	parsing_should_fail(S("flt = 0x10.1p0"sv));
+	parsing_should_fail(S("flt = 0x0.3p10"sv));
+	parsing_should_fail(S("flt =  0x12.2P2"sv));
+	#endif
 }
 
 TEST_CASE("parsing floats - inf and nan")

@@ -1,0 +1,9 @@
+#pragma once
+
+#define TOML_LIB_MAJOR		0
+#define TOML_LIB_MINOR		1
+#define TOML_LIB_REVISION	0
+
+#define TOML_LANG_MAJOR		0
+#define TOML_LANG_MINOR		5
+#define TOML_LANG_REVISION	0

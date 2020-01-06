@@ -54,13 +54,13 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 	{
 		toml::parse_result result = toml::parse(toml_str, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(*std::move(result.root), source_path));
+			std::forward<FUNC>(func)(validate_table(*std::move(result), source_path));
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error.where.begin.line
-				<< ", column "sv << result.error.where.begin.column
-				<< ":\n"sv << result.error.what
+				"Parse error on line "sv << result.error().where.begin.line
+				<< ", column "sv << result.error().where.begin.column
+				<< ":\n"sv << result.error().what
 			);
 			return;
 		}
@@ -71,13 +71,13 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		ss.write(toml_str.data(), toml_str.length());
 		toml::parse_result result = toml::parse(ss, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(*std::move(result.root), source_path));
+			std::forward<FUNC>(func)(validate_table(*std::move(result), source_path));
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error.where.begin.line
-				<< ", column "sv << result.error.where.begin.column
-				<< ":\n"sv << result.error.what
+				"Parse error on line "sv << result.error().where.begin.line
+				<< ", column "sv << result.error().where.begin.column
+				<< ":\n"sv << result.error().what
 			);
 			return;
 		}
@@ -153,35 +153,57 @@ template <typename T>
 void parse_expected_value(std::string_view value_str, const T& expected) noexcept
 {
 	std::string value;
-	value.reserve(value_str.length() + 6_sz);
-	value.append("val = "sv);
+	static constexpr auto value_key = "val = "sv;
+	value.reserve(value_key.length() + value_str.length());
+	value.append(value_key);
 	value.append(value_str);
 
-	static constexpr auto is_val = [](char c) noexcept
+	static constexpr auto is_val = [](char32_t codepoint) noexcept
 	{
 		if constexpr (std::is_same_v<string, value_of<T>>)
-			return c == '"' || c == '\'';
+			return codepoint == U'"' || codepoint == U'\'';
 		else
-			return c != ' ' && c != '\t';
+			return !impl::is_whitespace(codepoint);
 	};
 
-	size_t begin = 5_sz;
-	for (; begin < value.length(); begin++)
-		if (is_val(value[begin]))
-			break;
-	begin++;
-	size_t end = value.length();
-	for (; end --> 0_sz; )
-		if (is_val(value[end]))
-			break;
-	end += 2_sz;
+	source_position pos{ 1,  static_cast<uint32_t>(value_key.length()) };
+	source_position begin{}, end{};
+	impl::utf8_decoder decoder;
+	for (auto c : value_str)
+	{
+		decoder(static_cast<uint8_t>(c));
+		if (!decoder.has_code_point())
+			continue;
+
+		if (impl::is_line_break(decoder.codepoint))
+		{
+			if (decoder.codepoint != U'\r')
+			{
+				pos.line++;
+				pos.column = 1u;
+			}
+			continue;
+		}
+
+		pos.column++;
+		if (is_val(decoder.codepoint))
+		{
+			if (!begin)
+				begin = pos;
+			else
+				end = pos;
+		}
+	}
+	if (!end)
+		end = begin;
+	end.column++;
 
 	parsing_should_succeed(std::string_view{ value }, [&](table&& tbl) noexcept
 	{
 		CHECK(tbl.size() == 1);
 		REQUIRE(tbl[S("val"sv)].as<value_of<T>>());
 		CHECK(tbl[S("val"sv)].as<value_of<T>>()->get() == expected);
-		CHECK(tbl[S("val"sv)].get()->region().begin == source_position{ 1, static_cast<uint32_t>(begin) });
-		CHECK(tbl[S("val"sv)].get()->region().end == source_position{ 1, static_cast<uint32_t>(end) });
+		CHECK(tbl[S("val"sv)].get()->region().begin == begin);
+		CHECK(tbl[S("val"sv)].get()->region().end == end);
 	});
 }

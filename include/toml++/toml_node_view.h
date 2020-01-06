@@ -14,15 +14,13 @@ namespace toml::impl
 		using member_type = const table*;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static const node* get(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node* get(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node_of<U>* as(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<U>(key);
 		}
@@ -34,28 +32,24 @@ namespace toml::impl
 		using member_type = table*;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static node* get(table* tbl, key_type key) noexcept
+		[[nodiscard]] static node* get(table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
-		[[nodiscard]]
-		static const node* get(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node* get(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get(key);
 		}
 
 		template <typename T>
-		[[nodiscard]]
-		static node_of<T>* as(table* tbl, key_type key) noexcept
+		[[nodiscard]] static node_of<T>* as(table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<T>(key);
 		}
 
 		template <typename T>
-		[[nodiscard]]
-		static const node_of<T>* as(const table* tbl, key_type key) noexcept
+		[[nodiscard]] static const node_of<T>* as(const table* tbl, key_type key) noexcept
 		{
 			return tbl->get_as<T>(key);
 		}
@@ -70,31 +64,27 @@ namespace toml::impl
 		using member_type = T;
 		using key_type = string_view;
 
-		[[nodiscard]]
-		static auto get(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto get(member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
-		[[nodiscard]]
-		static const node* get(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node* get(const member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static auto as(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto as(member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node_of<U>* as(const member_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
@@ -107,31 +97,27 @@ namespace toml::impl
 		using member_type = T;
 		using key_type = size_t;
 
-		[[nodiscard]]
-		static auto get(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto get(member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
-		[[nodiscard]]
-		static const node* get(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node* get(const member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static auto as(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto as(member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]]
-		static const node_of<U>* as(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node_of<U>* as(const member_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
@@ -167,8 +153,7 @@ namespace toml
 			[[nodiscard]] explicit operator bool() const noexcept { return !!get(); }
 
 			template <typename U>
-			[[nodiscard]]
-			auto as() noexcept
+			[[nodiscard]] auto as() noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<U>,
@@ -179,8 +164,7 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			const node_of<U>* as() const noexcept
+			[[nodiscard]] const node_of<U>* as() const noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<U>,
@@ -213,16 +197,14 @@ namespace toml
 		private:
 
 			template <typename U>
-			[[nodiscard]]
-			static bool value_equality(const node_view& lhs, const U& rhs) noexcept
+			[[nodiscard]] static bool value_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				const auto val = lhs.as<value_of<U>>();
 				return val && val->get() == rhs;
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			static bool container_equality(const node_view& lhs, const U& rhs) noexcept
+			[[nodiscard]] static bool container_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				using elem_t = std::remove_const_t<typename U::value_type>;
 
@@ -267,34 +249,29 @@ namespace toml
 			[[nodiscard]] bool operator == (const date_time& rhs) const noexcept { return value_equality(*this, rhs); }
 
 			template <typename U>
-			[[nodiscard]]
-			bool operator == (const std::initializer_list<U>& rhs) const noexcept
+			[[nodiscard]] bool operator == (const std::initializer_list<U>& rhs) const noexcept
 			{
 				return container_equality(*this, rhs);
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			bool operator == (const std::vector<U>& rhs) const noexcept
+			[[nodiscard]] bool operator == (const std::vector<U>& rhs) const noexcept
 			{
 				return container_equality(*this, rhs);
 			}
 
 			template <typename U>
-			[[nodiscard]]
-			friend bool operator == (const U& lhs, const node_view& rhs) noexcept
+			[[nodiscard]] friend bool operator == (const U& lhs, const node_view& rhs) noexcept
 			{
 				return rhs == lhs;
 			}
 
-			[[nodiscard]]
-			node_view<impl::sub_view<node_view<T>, string_view>> operator[] (string_view key) noexcept
+			[[nodiscard]] node_view<impl::sub_view<node_view<T>, string_view>> operator[] (string_view key) noexcept
 			{
 				return { *this, key };
 			}
 
-			[[nodiscard]]
-			node_view<impl::sub_view<node_view<T>, size_t>> operator[] (size_t index) noexcept
+			[[nodiscard]] node_view<impl::sub_view<node_view<T>, size_t>> operator[] (size_t index) noexcept
 			{
 				return { *this, index };
 			}

@@ -90,7 +90,11 @@
 	#define TOML_DISABLE_SWITCH_WARNING		_Pragma("GCC diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_FIELD_INIT_WARNING	_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")
 	#define TOML_DISABLE_VAR_INIT_WARNING	_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")
+	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")				\
+											_Pragma("GCC diagnostic ignored \"-Wextra\"")			\
+											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")	\
+											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
@@ -114,9 +118,9 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #elif TOML_CPP_VERSION >= 201100L
-	#error toml++ requires C++17 or higher. For a TOML parser that supports C++11 see https://github.com/skystrife/cpptoml
+	#error toml++ requires C++17 or higher. For a TOML parser supporting C++11 see https://github.com/skystrife/cpptoml
 #else
-	#error toml++ requires C++17 or higher. For a TOML parser that supports pre-C++11 see https://github.com/ToruNiina/Boost.toml
+	#error toml++ requires C++17 or higher. For a TOML parser supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #endif
 #undef TOML_CPP_VERSION
 
@@ -162,7 +166,7 @@
 	#define TOML_ASSUME(cond)	(void)0
 #endif
 #ifndef TOML_UNREACHABLE
-	#define TOML_UNREACHABLE	(void)0
+	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 #ifdef __cpp_consteval
@@ -197,35 +201,32 @@
 	#define TOML_NODISCARD_CTOR
 #endif
 
-#define TOML_LANG_MAJOR		0
-#define TOML_LANG_MINOR		5
-#define TOML_LANG_REVISION	0
+#include "toml_version.h"
 
-#define TOML_LANG_MAKE_VERSION(maj, min, rev)												\
+#define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))
 
 #if TOML_UNRELEASED_FEATURES
-	#define TOML_LANG_EFFECTIVE_VERSION														\
-		TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION+1)
+	#define TOML_LANG_EFFECTIVE_VERSION												\
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION+1)
 #else
-	#define TOML_LANG_EFFECTIVE_VERSION														\
-		TOML_LANG_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION)
+	#define TOML_LANG_EFFECTIVE_VERSION												\
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION)
 #endif
 
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)												\
-		(TOML_LANG_EFFECTIVE_VERSION > TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
+		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
 
-#define TOML_LANG_AT_LEAST(maj, min, rev)													\
-		(TOML_LANG_EFFECTIVE_VERSION >= TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_AT_LEAST(maj, min, rev)											\
+		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(maj, min, rev))
 
-#define TOML_LANG_EXACTLY(maj, min, rev)													\
-		(TOML_LANG_EFFECTIVE_VERSION == TOML_LANG_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_EXACTLY(maj, min, rev)											\
+		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
 ////////// INCLUDES
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-
 
 #include <cstdint>
 #include <cstring>		//memcpy, memset
@@ -288,7 +289,7 @@ namespace toml
 		uint8_t day;
 
 		[[nodiscard]]
-		friend bool operator == (date lhs, date rhs) noexcept
+		friend constexpr bool operator == (date lhs, date rhs) noexcept
 		{
 			return lhs.year == rhs.year
 				&& lhs.month == rhs.month
@@ -296,7 +297,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (date lhs, date rhs) noexcept
+		friend constexpr bool operator != (date lhs, date rhs) noexcept
 		{
 			return lhs.year != rhs.year
 				|| lhs.month != rhs.month
@@ -312,7 +313,7 @@ namespace toml
 		uint32_t nanosecond;
 
 		[[nodiscard]]
-		friend bool operator == (time lhs, time rhs) noexcept
+		friend constexpr bool operator == (time lhs, time rhs) noexcept
 		{
 			return lhs.hour == rhs.hour
 				&& lhs.minute == rhs.minute
@@ -321,7 +322,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (time lhs, time rhs) noexcept
+		friend constexpr bool operator != (time lhs, time rhs) noexcept
 		{
 			return lhs.hour != rhs.hour
 				|| lhs.minute != rhs.minute
@@ -336,14 +337,14 @@ namespace toml
 		int8_t minutes;
 
 		[[nodiscard]]
-		friend bool operator == (time_offset lhs, time_offset rhs) noexcept
+		friend constexpr bool operator == (time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.hours == rhs.hours
 				&& lhs.minutes == rhs.minutes;
 		}
 
 		[[nodiscard]]
-		friend bool operator != (time_offset lhs, time_offset rhs) noexcept
+		friend constexpr bool operator != (time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.hours != rhs.hours
 				|| lhs.minutes != rhs.minutes;
@@ -357,7 +358,7 @@ namespace toml
 		std::optional<toml::time_offset> time_offset;
 
 		[[nodiscard]]
-		friend bool operator == (const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator == (const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return lhs.date == rhs.date
 				&& lhs.time == rhs.time
@@ -365,7 +366,7 @@ namespace toml
 		}
 
 		[[nodiscard]]
-		friend bool operator != (const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator != (const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return lhs.date != rhs.date
 				|| lhs.time != rhs.time
@@ -399,6 +400,7 @@ namespace toml
 	class table;
 
 	class default_formatter;
+	class json_formatter;
 	
 	namespace impl
 	{
@@ -414,7 +416,23 @@ namespace toml
 
 		#endif
 
+		template <typename T>
+		struct is_generic_invocable
+		{
+			template <typename U>
+			static constexpr auto test(U&&) -> decltype(std::declval<T>()(std::declval<U&&>()), std::true_type{});
+			static constexpr std::false_type test(...);
+
+			struct tester {};
+			static constexpr auto value = decltype(test(tester{}))::value;
+		};
+
+
+		template <typename T>
+		inline constexpr bool is_generic_invocable_v = is_generic_invocable<T>::value;
+
 		class parser;
+		class formatter;
 
 		template <typename T>
 		inline constexpr bool is_value =
@@ -490,39 +508,54 @@ namespace toml
 		uint32_t column;	//begins at 1
 
 		[[nodiscard]]
-		friend bool operator == (const source_position& lhs, const source_position& rhs) noexcept
+		explicit constexpr operator bool () const noexcept
+		{
+			return line > 0u && column > 0u;
+		}
+
+		[[nodiscard]]
+		friend constexpr bool operator == (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line == rhs.line
 				&& lhs.column == rhs.column;
 		}
 
 		[[nodiscard]]
-		friend bool operator != (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator != (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line != rhs.line
 				|| lhs.column != rhs.column;
 		}
 
 		[[nodiscard]]
-		friend bool operator < (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator < (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line
 				|| (lhs.line == rhs.line && lhs.column < rhs.column);
 		}
 
 		[[nodiscard]]
-		friend bool operator <= (const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool operator <= (const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line
 				|| (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
+
+		template <typename CHAR>
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
+			TOML_MAY_THROW
+		{
+			return lhs << "line " << rhs.line << ", column " << rhs.column;
+		}
 	};
+
+	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	struct source_region
 	{
 		source_position begin;
 		source_position end;
-		std::shared_ptr<const std::string> path;
+		source_path_ptr path;
 	};
 
 	enum class node_type : uint8_t
@@ -564,7 +597,7 @@ namespace toml
 			{}
 
 			TOML_NODISCARD_CTOR
-			parse_error(const char* description, const source_position& position, const std::shared_ptr<const std::string>& source_path) noexcept
+			parse_error(const char* description, const source_position& position, const source_path_ptr& source_path) noexcept
 				: std::runtime_error{ description },
 				rgn{ position, position, source_path }
 			{}
@@ -605,7 +638,7 @@ namespace toml
 		{}
 
 		TOML_NODISCARD_CTOR
-		parse_error(const char* description, const source_position& position, const std::shared_ptr<const std::string>& source_path) noexcept
+		parse_error(const char* description, const source_position& position, const source_path_ptr& source_path) noexcept
 			: what{ description },
 			where{ position, position, source_path }
 		{}

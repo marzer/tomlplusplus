@@ -11,7 +11,10 @@
     <ClInclude Include="..\include\toml++\toml_node.h" />
     <ClInclude Include="..\include\toml++\toml_node_view.h" />
     <ClInclude Include="..\include\toml++\toml_utf8_generated.h" />
+    <ClInclude Include="..\include\toml++\toml_default_formatter.h" />
+    <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
+    <ClInclude Include="..\include\toml++\toml_version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

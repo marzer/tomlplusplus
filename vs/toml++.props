@@ -9,7 +9,7 @@
 	<PropertyGroup>
 		<OutDir>$(SolutionDir)..\bin\$(PlatformTarget)-$(Configuration)\</OutDir>
 		<IntDir>$(SolutionDir)..\build\$(TargetName)$(TargetExt)-$(PlatformTarget)-$(Configuration)-$(PlatformToolsetVersion)\</IntDir>
-		<IncludePath>$(SolutionDir)..\include;$(IncludePath)</IncludePath>
+		<IncludePath>$(SolutionDir)..\include;$(SolutionDir)..\extern;$(IncludePath)</IncludePath>
 		<DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>	
 		<LinkIncremental>false</LinkIncremental>	
 	</PropertyGroup>

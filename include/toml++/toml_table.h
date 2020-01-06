@@ -9,6 +9,7 @@ namespace toml
 		private:
 			friend class impl::parser;
 			friend class default_formatter;
+			friend class json_formatter;
 			friend class node_view<table>;
 
 			string_map<std::unique_ptr<node>> values;
@@ -42,18 +43,18 @@ namespace toml
 
 			[[nodiscard]] node_type type() const noexcept override { return node_type::table; }
 
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
 
-			[[nodiscard]]
-			node* get(string_view key) noexcept
+			[[nodiscard]] node* get(string_view key) noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
 					return it->second.get();
 				return nullptr;
 			}
 
-			[[nodiscard]]
-			const node* get(string_view key) const noexcept
+			[[nodiscard]] const node* get(string_view key) const noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
 					return it->second.get();
@@ -61,16 +62,14 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			node_of<T>* get_as(string_view key) noexcept
+			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept
 			{
 				const auto node = get(key);
 				return node ? node->as<T>() : nullptr;
 			}
 
 			template <typename T>
-			[[nodiscard]]
-			const node_of<T>* get_as(string_view key) const noexcept
+			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept
 			{
 				const auto node = get(key);
 				return node ? node->as<T>() : nullptr;
