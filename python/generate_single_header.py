@@ -58,11 +58,7 @@ class Preprocessor:
 
 		if (self.current_level == 1):
 			header_text = '↓ ' + raw_incl
-			calc_pad = lambda i : 15 + i * 18
-			lpad = calc_pad(self.header_indent)
-			if (self.header_indent > 0 and (lpad + len(header_text) + 4) > 120):
-				self.header_indent = 0
-				lpad = calc_pad(self.header_indent)
+			lpad = 23 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.header_indent += 1
 			return '\n{}\n#pragma region {}\n\n{}\n\n#pragma endregion {}\n{}'.format(
 				make_divider(header_text, lpad), '', text, '', make_divider('↑ ' + raw_incl, lpad))

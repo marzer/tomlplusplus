@@ -42,8 +42,7 @@ namespace toml::impl
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
-		return codepoint == U'"'
-			|| codepoint == U'\'';
+		return codepoint == U'"' || codepoint == U'\'';
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -71,7 +70,7 @@ namespace toml::impl
 		return (codepoint >= U'0' && codepoint <= U'9');
 	}
 
-	[[nodiscard]] TOML_ALWAYS_INLINE
+	[[nodiscard]]
 	constexpr bool is_hex_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'a' && codepoint <= U'f')
@@ -87,7 +86,7 @@ namespace toml::impl
 			|| codepoint == U'-'
 			|| codepoint == U'_'
 			#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/644 & toml/issues/687
-            || codepoint == U'+'
+			|| codepoint == U'+'
 			|| is_unicode_letter(codepoint)
 			|| is_unicode_number(codepoint)
 			#endif
@@ -334,16 +333,16 @@ namespace toml::impl
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
-		#define TOML_ERROR(...)		throw toml::parse_error{ __VA_ARGS__ }
+		#define TOML_ERROR			throw toml::parse_error
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
-		#define TOML_ERROR(...)		err.emplace( __VA_ARGS__ )
+		#define TOML_ERROR			err.emplace
 	#endif
 
 	struct TOML_INTERFACE utf8_reader_interface
 	{
 		[[nodiscard]]
-		virtual const std::shared_ptr<const std::string>& source_path() const noexcept = 0;
+		virtual const toml::source_path_ptr& source_path() const noexcept = 0;
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() TOML_MAY_THROW = 0;
@@ -367,7 +366,7 @@ namespace toml::impl
 			utf8_decoder decoder;
 			utf8_codepoint prev{}, current{};
 			uint8_t current_byte_count{};
-			std::shared_ptr<const std::string> source_path_;
+			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
 			std::optional<toml::parse_error> err;
 			#endif
@@ -379,14 +378,14 @@ namespace toml::impl
 				TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
-				current.position = { 1u, 1u };
+				current.position = { 1, 1 };
 
 				if (!source_path.empty())
 					source_path_ = std::make_shared<const std::string>(std::forward<STR>(source_path));
 			}
 
 			[[nodiscard]]
-			const std::shared_ptr<const std::string>& source_path() const noexcept override
+			const source_path_ptr& source_path() const noexcept override
 			{
 				return source_path_;
 			}
@@ -463,7 +462,7 @@ namespace toml::impl
 						if (is_line_break<false>(prev.value))
 						{
 							current.position.line++;
-							current.position.column = 1u;
+							current.position.column = 1;
 						}
 						else
 							current.position.column++;
@@ -506,10 +505,10 @@ namespace toml::impl
 		: public utf8_reader_interface
 	{
 		public:
-			static constexpr auto max_history_length = 64_sz;
+			static constexpr size_t max_history_length = 64;
 
 		private:
-			static constexpr auto history_buffer_size = max_history_length - 1_sz; //'head' is stored in the reader
+			static constexpr size_t history_buffer_size = max_history_length - 1; //'head' is stored in the reader
 			utf8_reader_interface& reader;
 			struct
 			{
@@ -528,7 +527,7 @@ namespace toml::impl
 			{}
 
 			[[nodiscard]]
-			const std::shared_ptr<const std::string>& source_path() const noexcept override
+			const toml::source_path_ptr& source_path() const noexcept override
 			{
 				return reader.source_path();
 			}

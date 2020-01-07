@@ -5,6 +5,7 @@
 //# is used as the source for generate_single_header.py.
 
 #include "toml_common.h"
+#include "toml_print_to_stream.h"
 #include "toml_node.h"
 #include "toml_table.h"
 #include "toml_array.h"
@@ -20,10 +21,10 @@
 #if TOML_UNDEF_MACROS
 	#undef TOML_EXCEPTIONS
 	#undef TOML_USE_STREAMS_FOR_FLOATS
+	#undef TOML_GCC_ATTR
 	#undef TOML_PUSH_WARNINGS
-	#undef TOML_DISABLE_SWITCH_WARNING
-	#undef TOML_DISABLE_FIELD_INIT_WARNING
-	#undef TOML_DISABLE_VAR_INIT_WARNING
+	#undef TOML_DISABLE_SWITCH_WARNINGS
+	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_POP_WARNINGS
 	#undef TOML_ALWAYS_INLINE
@@ -31,6 +32,7 @@
 	#undef TOML_UNREACHABLE
 	#undef TOML_INTERFACE
 	#undef TOML_EMPTY_BASES
+	#undef TOML_CPP_VERSION
 	#undef TOML_CPP
 	#undef TOML_CONDITIONAL_NOEXCEPT
 	#undef TOML_MAY_THROW

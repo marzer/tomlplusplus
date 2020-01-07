@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 		try
 		{
 			const auto table = toml::parse(file, std::move(path));
-			std::cout << table << std::endl;
+			std::cout << toml::json_formatter{ table } << std::endl;
 		}
 		catch (const toml::parse_error & err)
 		{
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 			const auto table = toml::parse(std::cin);
 			std::cout << toml::json_formatter{ table } << std::endl;
 		}
-		catch (const toml::parse_error & err)
+		catch (const toml::parse_error& err)
 		{
 			std::cerr
 				<< "Error parsing stdin:\n"sv << err.what()

@@ -16,14 +16,14 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 {
 	constexpr auto validate_table = [](table&& tabl, std::string_view path) noexcept -> table&&
 	{
-		CHECK(tabl.region().begin != source_position{});
-		CHECK(tabl.region().end != source_position{});
+		CHECK(tabl.source().begin != source_position{});
+		CHECK(tabl.source().end != source_position{});
 		if (path.empty())
-			CHECK(tabl.region().path == nullptr);
+			CHECK(tabl.source().path == nullptr);
 		else
 		{
-			REQUIRE(tabl.region().path != nullptr);
-			CHECK(*tabl.region().path == path);
+			REQUIRE(tabl.source().path != nullptr);
+			CHECK(*tabl.source().path == path);
 		}
 
 		return std::move(tabl);
@@ -58,9 +58,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error().where.begin.line
-				<< ", column "sv << result.error().where.begin.column
-				<< ":\n"sv << result.error().what
+				"Parse error on line "sv << result.error().where().begin.line
+				<< ", column "sv << result.error().where().begin.column
+				<< ":\n"sv << result.error().what()
 			);
 			return;
 		}
@@ -75,9 +75,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error().where.begin.line
-				<< ", column "sv << result.error().where.begin.column
-				<< ":\n"sv << result.error().what
+				"Parse error on line "sv << result.error().where().begin.line
+				<< ", column "sv << result.error().where().begin.column
+				<< ":\n"sv << result.error().what()
 			);
 			return;
 		}
@@ -160,13 +160,13 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 
 	static constexpr auto is_val = [](char32_t codepoint) noexcept
 	{
-		if constexpr (std::is_same_v<string, value_of<T>>)
+		if constexpr (std::is_same_v<string, promoted<T>>)
 			return codepoint == U'"' || codepoint == U'\'';
 		else
 			return !impl::is_whitespace(codepoint);
 	};
 
-	source_position pos{ 1,  static_cast<uint32_t>(value_key.length()) };
+	source_position pos{ 1,  static_cast<source_index>(value_key.length()) };
 	source_position begin{}, end{};
 	impl::utf8_decoder decoder;
 	for (auto c : value_str)
@@ -180,7 +180,7 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 			if (decoder.codepoint != U'\r')
 			{
 				pos.line++;
-				pos.column = 1u;
+				pos.column = source_index{ 1 };
 			}
 			continue;
 		}
@@ -201,9 +201,9 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 	parsing_should_succeed(std::string_view{ value }, [&](table&& tbl) noexcept
 	{
 		CHECK(tbl.size() == 1);
-		REQUIRE(tbl[S("val"sv)].as<value_of<T>>());
-		CHECK(tbl[S("val"sv)].as<value_of<T>>()->get() == expected);
-		CHECK(tbl[S("val"sv)].get()->region().begin == begin);
-		CHECK(tbl[S("val"sv)].get()->region().end == end);
+		REQUIRE(tbl[S("val"sv)].as<promoted<T>>());
+		CHECK(tbl[S("val"sv)].as<promoted<T>>()->get() == expected);
+		CHECK(tbl[S("val"sv)].get()->source().begin == begin);
+		CHECK(tbl[S("val"sv)].get()->source().end == end);
 	});
 }

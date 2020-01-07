@@ -1,5 +1,6 @@
 #pragma once
 #include "toml_node.h"
+#include "toml_print_to_stream.h"
 
 namespace toml
 {
@@ -58,6 +59,21 @@ namespace toml
 				return *this;
 			}
 
+			[[nodiscard]] node_type type() const noexcept override
+			{
+				if constexpr (std::is_same_v<T, string>) return node_type::string;
+				else if constexpr (std::is_same_v<T, int64_t>) return node_type::integer;
+				else if constexpr (std::is_same_v<T, double>) return node_type::floating_point;
+				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
+				else if constexpr (std::is_same_v<T, date>) return node_type::date;
+				else if constexpr (std::is_same_v<T, time>) return node_type::time;
+				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
+			}
+
+			[[nodiscard]] bool is_table() const noexcept override { return false; }
+			[[nodiscard]] bool is_array() const noexcept override { return false; }
+			[[nodiscard]] bool is_value() const noexcept override { return true; }
+
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
 			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
 			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
@@ -82,19 +98,24 @@ namespace toml
 			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(); }
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(); }
 
-			[[nodiscard]] node_type type() const noexcept override
-			{
-					 if constexpr (std::is_same_v<T, string>) return node_type::string;
-				else if constexpr (std::is_same_v<T, int64_t>) return node_type::integer;
-				else if constexpr (std::is_same_v<T, double>) return node_type::floating_point;
-				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
-				else if constexpr (std::is_same_v<T, date>) return node_type::date;
-				else if constexpr (std::is_same_v<T, time>) return node_type::time;
-				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
-			}
+			[[nodiscard]] T& get() & noexcept { return val_; }
+			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }
+			[[nodiscard]] const T& get() const & noexcept { return val_; }
 
-			[[nodiscard]] T& get() noexcept { return val_; }
-			[[nodiscard]] const T& get() const noexcept { return val_; }
+			[[nodiscard]] T& operator* () & noexcept { return val_; }
+			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
+			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
+
+			[[nodiscard]] operator T& () & noexcept { return val_; }
+			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
+			[[nodiscard]] operator const T& () const& noexcept { return val_; }
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
+			{
+				impl::print_to_stream(rhs.val_, lhs);
+				return lhs;
+			}
 	};
 
 	value(const string_char*) -> value<string>;

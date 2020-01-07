@@ -11,7 +11,7 @@ namespace toml::impl
 	template <>
 	struct node_view_traits<const table>
 	{
-		using member_type = const table*;
+		using haystack_type = const table*;
 		using key_type = string_view;
 
 		[[nodiscard]] static const node* get(const table* tbl, key_type key) noexcept
@@ -29,7 +29,7 @@ namespace toml::impl
 	template <>
 	struct node_view_traits<table>
 	{
-		using member_type = table*;
+		using haystack_type = table*;
 		using key_type = string_view;
 
 		[[nodiscard]] static node* get(table* tbl, key_type key) noexcept
@@ -61,30 +61,30 @@ namespace toml::impl
 	template <typename T>
 	struct node_view_traits<sub_view<T, string_view>>
 	{
-		using member_type = T;
+		using haystack_type = T;
 		using key_type = string_view;
 
-		[[nodiscard]] static auto get(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto get(haystack_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
-		[[nodiscard]] static const node* get(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node* get(const haystack_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->get(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]] static auto as(member_type& view, string_view key) noexcept
+		[[nodiscard]] static auto as(haystack_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]] static const node_of<U>* as(const member_type& view, string_view key) noexcept
+		[[nodiscard]] static const node_of<U>* as(const haystack_type& view, string_view key) noexcept
 		{
 			auto parent = view.as_table();
 			return parent ? parent->template get_as<U>(key) : nullptr;
@@ -94,30 +94,30 @@ namespace toml::impl
 	template <typename T>
 	struct node_view_traits<sub_view<T, size_t>>
 	{
-		using member_type = T;
+		using haystack_type = T;
 		using key_type = size_t;
 
-		[[nodiscard]] static auto get(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto get(haystack_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
-		[[nodiscard]] static const node* get(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node* get(const haystack_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->get(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]] static auto as(member_type& view, size_t index) noexcept
+		[[nodiscard]] static auto as(haystack_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
 		}
 
 		template <typename U>
-		[[nodiscard]] static const node_of<U>* as(const member_type& view, size_t index) noexcept
+		[[nodiscard]] static const node_of<U>* as(const haystack_type& view, size_t index) noexcept
 		{
 			auto parent = view.as_array();
 			return parent ? parent->template get_as<U>(index) : nullptr;
@@ -135,20 +135,20 @@ namespace toml
 			using key_type = typename traits::key_type;
 
 		private:
-			using member_type = typename traits::member_type;
-			member_type obj_;
+			using haystack_type = typename traits::haystack_type;
+			haystack_type haystack_;
 			key_type key_;
 
 		public:
 
 			TOML_NODISCARD_CTOR
-			node_view(member_type obj, key_type key) noexcept
-				: obj_{ obj },
+			node_view(haystack_type obj, key_type key) noexcept
+				: haystack_{ obj },
 				key_{ key }
 			{}
 
-			[[nodiscard]] auto get() noexcept { return traits::get(obj_, key_); }
-			[[nodiscard]] const node* get() const noexcept { return traits::get(obj_, key_); }
+			[[nodiscard]] auto get() noexcept { return traits::get(haystack_, key_); }
+			[[nodiscard]] const node* get() const noexcept { return traits::get(haystack_, key_); }
 
 			[[nodiscard]] explicit operator bool() const noexcept { return !!get(); }
 
@@ -160,7 +160,7 @@ namespace toml
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				return traits::template as<U>(obj_, key_);
+				return traits::template as<U>(haystack_, key_);
 			}
 
 			template <typename U>
@@ -171,7 +171,7 @@ namespace toml
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				return traits::template as<U>(obj_, key_);
+				return traits::template as<U>(haystack_, key_);
 			}
 
 			[[nodiscard]] auto as_string() noexcept { return as<string>(); }
@@ -199,7 +199,7 @@ namespace toml
 			template <typename U>
 			[[nodiscard]] static bool value_equality(const node_view& lhs, const U& rhs) noexcept
 			{
-				const auto val = lhs.as<value_of<U>>();
+				const auto val = lhs.as<promoted<U>>();
 				return val && val->get() == rhs;
 			}
 
@@ -210,7 +210,7 @@ namespace toml
 
 				static_assert(
 					impl::is_value_or_promotable<elem_t>,
-					"Container element type must be (or be convertible to) one of the basic value types"
+					"Container element type must be (or be promotable to) one of the basic value types"
 				);
 
 				const array* arr = lhs.as<array>();
@@ -222,7 +222,7 @@ namespace toml
 				size_t i{};
 				for (auto& list_elem : rhs)
 				{
-					const auto elem = arr->get_as<value_of<elem_t>>(i++);
+					const auto elem = arr->get_as<promoted<elem_t>>(i++);
 					if (!elem || elem->get() != list_elem)
 						return false;
 				}
@@ -281,6 +281,10 @@ namespace toml
 	{
 		return { this, key };
 	}
+
+	// inline constexpr auto kek1 = sizeof(node_view<table>);
+	// inline constexpr auto kek2 = sizeof(decltype(std::declval<node_view<table>>()[0]));
+	// inline constexpr auto kek3 = sizeof(decltype(std::declval<node_view<table>>()["kek"sv]));
 
 	inline node_view<const table> table::operator[] (string_view key) const noexcept
 	{

@@ -3,57 +3,53 @@
 
 namespace toml
 {
-	class json_formatter final : impl::formatter
+	template <typename CHAR = char>
+	class json_formatter final : impl::formatter<CHAR>
 	{
 		private:
-			using base = impl::formatter;
+			using base = impl::formatter<CHAR>;
 
-			inline void write(const toml::table& tbl) TOML_MAY_THROW;
+			inline void print(const toml::table& tbl) TOML_MAY_THROW;
 
-			void write(const array& arr) TOML_MAY_THROW
+			void print(const array& arr) TOML_MAY_THROW
 			{
 				if (arr.empty())
-					base::write("[]"sv);
+					impl::print_to_stream("[]"sv, base::stream());
 				else
 				{
-					base::write('[');
-					indent_level++;
+					impl::print_to_stream('[', base::stream());
+					base::increase_indent();
 					for (size_t i = 0; i < arr.size(); i++)
 					{
 						if (i > 0_sz)
-							base::write(',');
-						write_newline(true);
-						write_indent();
+							impl::print_to_stream(',', base::stream());
+						base::print_newline(true);
+						base::print_indent();
 
-						auto v = arr.get(i);
-						const auto type = v->type();
+						auto& v = arr[i];
+						const auto type = v.type();
 						switch (type)
 						{
-							case node_type::table: write(*reinterpret_cast<const table*>(v)); break;
-							case node_type::array: write(*reinterpret_cast<const array*>(v)); break;
+							case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
+							case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 							default:
-								write_value(v, type);
+								base::print(v, type);
 						}
 
 					}
-					indent_level--;
-					write_newline(true);
-					write_indent();
-					base::write(']');
+					base::decrease_indent();
+					base::print_newline(true);
+					base::print_indent();
+					impl::print_to_stream(']', base::stream());
 				}
-				naked_newline = false;
-			}
-
-			void write() TOML_MAY_THROW
-			{
-				write(source);
+				base::clear_naked_newline();
 			}
 
 		public:
 
 			TOML_NODISCARD_CTOR
 				json_formatter(const toml::table& source_, toml::string_view indent_string = {}) noexcept
-				: formatter{
+				: base{
 					source_,
 					impl::formatter_options{
 						indent_string,
@@ -62,61 +58,61 @@ namespace toml
 				}
 			{}
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, json_formatter& rhs)
+			template <typename T>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter& rhs)
 				TOML_MAY_THROW
 			{
-				auto fw = impl::formatter_writer{ lhs };
-				rhs.attach(fw);
-				rhs.write();
+				rhs.attach(lhs);
+				rhs.print(rhs.source());
 				rhs.detach();
 				return lhs;
 			}
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, json_formatter&& rhs)
+			template <typename T>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, json_formatter&& rhs)
 				TOML_MAY_THROW
 			{
 				return lhs << rhs; //as lvalue
 			}
 	};
 
-	inline void json_formatter::write(const toml::table& tbl) TOML_MAY_THROW
+	template <typename CHAR>
+	inline void json_formatter<CHAR>::print(const toml::table& tbl) TOML_MAY_THROW
 	{
 		if (tbl.empty())
-			base::write("{}"sv);
+			impl::print_to_stream("{}"sv, base::stream());
 		else
 		{
-			base::write('{');
-			indent_level++;
+			impl::print_to_stream('{', base::stream());
+			base::increase_indent();
 			bool first = false;
-			for (auto& [k, v] : tbl.values)
+			for (auto [k, v] : tbl)
 			{
 				if (first)
-					base::write(", "sv);
+					impl::print_to_stream(", "sv, base::stream());
 				first = true;
-				write_newline(true);
-				write_indent();
+				base::print_newline(true);
+				base::print_indent();
 
-				base::write_quoted_string(k);
-				base::write(" : "sv);
+				base::print_quoted_string(k);
+				impl::print_to_stream(" : "sv, base::stream());
 
-				const auto type = v->type();
+				const auto type = v.type();
 				switch (type)
 				{
-					case node_type::table: write(*reinterpret_cast<const table*>(v.get())); break;
-					case node_type::array: write(*reinterpret_cast<const array*>(v.get())); break;
+					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
+					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 					default:
-						write_value(v.get(), type);
+						base::print(v, type);
 				}
 
 			}
-			indent_level--;
-			write_newline(true);
-			write_indent();
-			base::write('}');
+			base::decrease_indent();
+			base::print_newline(true);
+			base::print_indent();
+			impl::print_to_stream('}', base::stream());
 		}
-		naked_newline = false;
+		base::clear_naked_newline();
 	}
 }
 

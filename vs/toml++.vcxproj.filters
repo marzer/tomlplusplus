@@ -15,6 +15,7 @@
     <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_version.h" />
+    <ClInclude Include="..\include\toml++\toml_print_to_stream.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

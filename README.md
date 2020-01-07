@@ -30,6 +30,7 @@ toml++.
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                 |
 | `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type.                              |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                |
+| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                         |
 | `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                             |
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version]. |
 

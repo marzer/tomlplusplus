@@ -1,7 +1,7 @@
 #include "tests.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_FIELD_INIT_WARNING
+TOML_DISABLE_INIT_WARNINGS
 
 TEST_CASE("parsing TOML spec example")
 {
@@ -49,7 +49,7 @@ hosts = [
 		CHECK(tbl[S("owner")]);
 		CHECK(tbl[S("owner")].as<table>());
 		CHECK(tbl[S("owner")][S("name")] == S("Tom Preston-Werner"sv));
-		const auto dob = date_time{ { 1979, 5, 27 }, { 7, 32 }, time_offset{ -8 } };
+		const auto dob = date_time{ { 1979, 5, 27 }, { 7, 32 }, time_offset::from_hh_mm(-8, 0) };
 		CHECK(tbl[S("owner")][S("dob")] == dob);
 
 		CHECK(tbl[S("database")].as<table>());

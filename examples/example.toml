@@ -10,6 +10,7 @@ int2 =  9223372036854775807
 flt1 = 0.00000000001
 flt2 = 1e-11
 flt3 = 11.0
+flt4 = +1.0
 
 # hexadecimal with prefix `0x`
 hex1 = 0xDEADBEEF
