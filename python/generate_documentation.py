@@ -709,7 +709,7 @@ def main():
 	docs_dir = path.join(root_dir, 'docs')
 	xml_dir = path.join(docs_dir, 'xml')
 	html_dir = path.join(docs_dir, 'html')
-	mcss_dir = path.join(root_dir, 'extern', 'm.css')
+	mcss_dir = path.join(root_dir, 'extern', 'mcss')
 	doxygen = path.join(mcss_dir, 'documentation', 'doxygen.py')
 
 	print_value('doc', docs_dir)

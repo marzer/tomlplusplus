@@ -45,7 +45,7 @@ jobs:
                 command: |
                     apt-get -qq update && apt-get install -y python3 doxygen python3-pip cmake clang-9 flex bison git
                     pip3 install beautifulsoup4 jinja2 pygments html5lib
-                    git submodule update --init extern/m.css
+                    git submodule update --init extern/mcss
             - run:
                 name: Building and installing Doxygen 1.8.17
                 command: |
