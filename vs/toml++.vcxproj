@@ -59,6 +59,7 @@
     <ClInclude Include="..\include\toml++\toml.h" />
     <ClInclude Include="..\include\toml++\toml_array.h" />
     <ClInclude Include="..\include\toml++\toml_common.h" />
+    <ClInclude Include="..\include\toml++\toml_date_time.h" />
     <ClInclude Include="..\include\toml++\toml_default_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
@@ -74,6 +75,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
+    <None Include="..\python\ci_single_header_check.py" />
+    <None Include="..\python\generate_documentation.py" />
     <None Include="..\python\generate_single_header.py" />
     <None Include="..\python\generate_unicode_functions.py" />
     <None Include="..\README.md" />

@@ -1,5 +1,5 @@
 #pragma once
-#include "toml_common.h"
+#include "toml_date_time.h"
 
 namespace toml::impl
 {
@@ -213,7 +213,7 @@ namespace toml::impl
 	}
 
 	template <typename CHAR>
-	inline void print_to_stream(const toml::time_offset& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_to_stream(toml::time_offset val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
 		if (!val.minutes)
@@ -251,36 +251,5 @@ namespace toml::impl
 		print_to_stream(val.time, stream);
 		if (val.time_offset)
 			print_to_stream(*val.time_offset, stream);
-	}
-}
-
-namespace toml
-{
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs) TOML_MAY_THROW
-	{
-		impl::print_to_stream(rhs, lhs);
-		return lhs;
-	}
-
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs) TOML_MAY_THROW
-	{
-		impl::print_to_stream(rhs, lhs);
-		return lhs;
-	}
-
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs) TOML_MAY_THROW
-	{
-		impl::print_to_stream(rhs, lhs);
-		return lhs;
-	}
-
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs) TOML_MAY_THROW
-	{
-		impl::print_to_stream(rhs, lhs);
-		return lhs;
 	}
 }

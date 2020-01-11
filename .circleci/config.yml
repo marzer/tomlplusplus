@@ -3,9 +3,13 @@ version: 2.1
 jobs:
     linux_build:
         docker:
-            - image: "debian:bullseye"
+            - image: debian:bullseye
         steps:
             - checkout
+            - run:
+                name: Pulling Catch2
+                command: |
+                    git submodule update --init --recursive extern/Catch2
             - run:
                 name: Installing python
                 command: |
@@ -19,10 +23,6 @@ jobs:
                 command: |
                     apt-get -qq update && apt-get install -y git clang-9 g++-9 python3-pip ninja-build
                     pip3 install meson
-            - run:
-                name: Pulling submodules
-                command: |
-                    git submodule update --init --recursive
             - run:
                 name: Building with clang
                 command: |
@@ -38,8 +38,70 @@ jobs:
                 command: |
                     cd build-clang && ninja test && cd ../build-gcc && ninja test
 
+    generate_dox:
+        docker:
+            - image: debian:bullseye
+        steps:
+            - checkout
+            - run:
+                name: Installing dependencies
+                command: |
+                    git submodule update --init extern/m.css
+                    apt-get -qq update && apt-get install -y python3 doxygen python3-pip cmake clang-9 flex bison
+                    pip3 install beautifulsoup4 jinja2 pygments html5lib
+            - run:
+                name: Building and installing Doxygen 1.8.17
+                command: |
+                    wget http://doxygen.nl/files/doxygen-1.8.17.src.tar.gz
+                    tar xvzf doxygen-1.8.17.src.tar.gz
+                    rm doxygen-1.8.17.src.tar.gz
+                    cd doxygen-1.8.17
+                    CC=clang-9 CXX=clang++-9 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -Wno-dev -Wno-deprecated
+                    make install
+            - run:
+                name: Generating documentation
+                command: |
+                    cd python && python3 generate_documentation.py
+            - persist_to_workspace:
+                root: docs
+                paths: html
+
+    deploy_dox:
+        docker:
+            - image: node:8.10.0
+        steps:
+            - checkout
+            - attach_workspace:
+                at: docs
+            - run:
+                name: Disable jekyll builds
+                command: |
+                    touch docs/html/.nojekyll
+            - run:
+                name: Installing dependencies
+                command: |
+                    npm install -g --silent gh-pages
+                    git config user.email "ci-build@tomlplusplus.com"
+                    git config user.name "ci-build"
+            - add_ssh_keys:
+                fingerprints:
+                    - "a6:63:c0:a5:89:cf:2d:03:e7:c9:88:5d:c0:8c:39:e0"
+            - run:
+                name: Deploy docs to gh-pages branch
+                command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/html
+
 workflows:
     version: 2
     build:
         jobs:
             - linux_build
+            - generate_dox:
+                requires:
+                    - linux_build
+                filters:
+                    branches:
+                        only: master
+            - deploy_dox:
+                requires:
+                    - generate_dox
+

@@ -31,13 +31,12 @@ int main(int argc, char** argv)
 	catch (const toml::parse_error& err)
 	{
 		std::cerr
-			<< "Error parsing file '"sv << *err.where().path
-			<< "':\n"sv << err.what()
-			<< "\n  ("sv << err.where().begin << ")"sv
+			<< "Error parsing file '"sv << *err.source().path
+			<< "':\n"sv << err.description()
+			<< "\n  ("sv << err.source().begin << ")"sv
 			<< std::endl;
 
 		return 1;
 	}
-
 	return 0;
 }

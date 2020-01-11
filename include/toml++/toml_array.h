@@ -27,9 +27,9 @@ namespace toml::impl
 
 		public:
 
-			array_iterator() noexcept = default;
-
 			using reference = std::conditional_t<is_const, const node&, node&>;
+
+			array_iterator() noexcept = default;
 
 			array_iterator& operator++() noexcept // ++pre
 			{

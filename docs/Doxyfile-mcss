@@ -1,0 +1,21 @@
+@INCLUDE                = ./Doxyfile
+GENERATE_HTML           = NO
+GENERATE_XML            = YES
+XML_PROGRAMLISTING      = NO
+HTML_EXTRA_STYLESHEET   = https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600 \
+                          ../css/m-dark+documentation.compiled.css \
+                          tomlplusplus.css
+WARN_AS_ERROR          	= NO
+TAB_SIZE				= 4
+HTML_EXTRA_FILES		= tomlplusplus.js
+##! M_THEME_COLOR       = #2d2d30
+##! M_LINKS_NAVBAR1 	= namespaces
+##! M_LINKS_NAVBAR2 	= annotated
+##! M_SEARCH_DOWNLOAD_BINARY = NO
+##! M_CLASS_TREE_EXPAND_LEVELS = 1
+##! M_FILE_TREE_EXPAND_LEVELS = 3
+##! M_PAGE_FINE_PRINT 		= \
+##! <a target="_blank" href="https://github.com/marzer/tomlplusplus/">Github</a> &bull; \
+##! <a target="_blank" href="https://github.com/marzer/tomlplusplus/issues">Report an issue</a> \
+##! <br><br><div id="tpp-custom-footer"></div>
+##! M_HTML_HEADER 		= <script src="tomlplusplus.js"></script>

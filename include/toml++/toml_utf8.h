@@ -71,7 +71,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	constexpr bool is_hex_digit(char32_t codepoint) noexcept
+	constexpr bool is_hexadecimal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'a' && codepoint <= U'f')
 			|| (codepoint >= U'A' && codepoint <= U'F')

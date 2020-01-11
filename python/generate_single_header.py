@@ -3,22 +3,21 @@
 import sys
 import re
 import os
-import os.path
+import os.path as path
 import traceback
 
 
 
 
 def get_script_folder():
-	return os.path.dirname(os.path.realpath(sys.argv[0]))
+	return path.dirname(path.realpath(sys.argv[0]))
 
 
 
 def read_all_text_from_file(path):
 	print("Reading {}".format(path))
-	file = open(path, 'r')
-	text = file.read()
-	file.close()
+	with open(path, 'r') as file:
+		text = file.read()
 	return text
 
 
@@ -48,7 +47,7 @@ class Preprocessor:
 			return ''
 
 		self.processed_includes.append(incl)
-		text = read_all_text_from_file(os.path.join(get_script_folder(), '..', 'include', 'toml++', incl))
+		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
 		text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', text, 0, re.I | re.M)
 		text = re.sub(r'^\s*//\s*clang-format\s+(?:off|on)\s*$', '', text, 0, re.I | re.M)
 		
@@ -58,7 +57,7 @@ class Preprocessor:
 
 		if (self.current_level == 1):
 			header_text = '↓ ' + raw_incl
-			lpad = 23 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
+			lpad = 28 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.header_indent += 1
 			return '\n{}\n#pragma region {}\n\n{}\n\n#pragma endregion {}\n{}'.format(
 				make_divider(header_text, lpad), '', text, '', make_divider('↑ ' + raw_incl, lpad))
@@ -78,7 +77,8 @@ def main():
 	# preprocess header(s)
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
-	source_text = re.sub('^[ \t]*//[/#!].+?$', '', source_text, 0, re.I | re.M) # remove 'magic' comments
+	source_text = re.sub('(?:\n[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
+	source_text = re.sub('^[ \t]*//[/#!<]+.+?$', '', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('\n([ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
 	source_text = source_text.strip()
@@ -111,39 +111,38 @@ that contributed to this header can be found at the beginnings and ends of the c
 TOML language specification:
 Latest: https://github.com/toml-lang/toml/blob/master/README.md
 v0.5.0: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md''')
-	preamble.append(read_all_text_from_file(os.path.join(get_script_folder(), '..', 'LICENSE')))
+	preamble.append(read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE')))
 
 	# write the output file
-	output_file_path = os.path.join(get_script_folder(), '..', 'toml.hpp')
+	output_file_path = path.join(get_script_folder(), '..', 'toml.hpp')
 	print("Writing to {}".format(output_file_path))
-	output_file = open(output_file_path,'w', encoding='utf-8', newline='\n')
-	if (len(preamble) > 0):
-		print(make_divider(), file=output_file)
-	for pre in preamble:
-		print('//', file=output_file)
-		for line in pre.strip().splitlines():
-			print('//', file=output_file, end = '')
-			if (len(line) > 0):
-				print(' ', file=output_file, end = '')
-				print(line, file=output_file)
-			else:
-				print('\n', file=output_file, end = '')
-		print('//', file=output_file)
-		print(make_divider(), file=output_file)
-	print('''// clang-format off
+	with open(output_file_path,'w', encoding='utf-8', newline='\n') as output_file:
+		if (len(preamble) > 0):
+			print(make_divider(), file=output_file)
+		for pre in preamble:
+			print('//', file=output_file)
+			for line in pre.strip().splitlines():
+				print('//', file=output_file, end = '')
+				if (len(line) > 0):
+					print(' ', file=output_file, end = '')
+					print(line, file=output_file)
+				else:
+					print('\n', file=output_file, end = '')
+			print('//', file=output_file)
+			print(make_divider(), file=output_file)
+		print('''// clang-format off
 #pragma once
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
 ''', file=output_file)
-	print(source_text, file=output_file)
-	print('''
+		print(source_text, file=output_file)
+		print('''
 #ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
 // clang-format on''', file=output_file)
-	output_file.close()
 
 
 

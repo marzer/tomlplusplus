@@ -6,6 +6,7 @@
 
 namespace toml::impl
 {
+	[[nodiscard]]
 	inline toml::string default_formatter_make_key_segment(const toml::string& str) noexcept
 	{
 		if (str.empty())
@@ -40,6 +41,7 @@ namespace toml::impl
 		}
 	}
 
+	[[nodiscard]]
 	inline size_t default_formatter_inline_columns(const node& node) noexcept
 	{
 		return node.visit([](const auto& n) noexcept
@@ -110,6 +112,7 @@ namespace toml::impl
 			});
 	}
 
+	[[nodiscard]]
 	inline bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
 	{
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;

@@ -1,6 +1,5 @@
 #pragma once
 #include "toml_node.h"
-#include "toml_print_to_stream.h"
 
 namespace toml
 {
@@ -16,22 +15,12 @@ namespace toml
 		private:
 			friend class impl::parser;
 
-			template <typename U>
+			template <typename U, typename V>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			toml::value<U>* as_value() noexcept
+			static auto as_value([[maybe_unused]] V* ptr) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
-					return this;
-				else
-					return nullptr;
-			}
-
-			template <typename U>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const toml::value<U>* as_value() const noexcept
-			{
-				if constexpr (std::is_same_v<T, U>)
-					return this;
+					return ptr;
 				else
 					return nullptr;
 			}
@@ -82,21 +71,21 @@ namespace toml
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
 			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
 
-			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(); }
-			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(); }
-			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(); }
-			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(); }
-			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(); }
-			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(); }
-			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(); }
+			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(this); }
+			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
+			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
+			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
+			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
 
-			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(); }
-			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(); }
-			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(); }
-			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(); }
-			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(); }
-			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(); }
-			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(); }
+			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(this); }
+			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
+			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
+			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
+			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
 			[[nodiscard]] T& get() & noexcept { return val_; }
 			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }

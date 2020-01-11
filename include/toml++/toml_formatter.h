@@ -1,5 +1,5 @@
 #pragma once
-#include "toml_value.h"
+#include "toml_print_to_stream.h"
 
 namespace toml::impl
 {
@@ -8,6 +8,7 @@ namespace toml::impl
 								// TINAE - char can have signed _or_ unsigned semantics and I can't
 								// be arsed handling this differently
 
+	[[nodiscard]]
 	inline toml::string_view escape_string_character(const toml::string_char& c) noexcept
 	{
 		if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
@@ -40,17 +41,16 @@ namespace toml::impl
 			size_t indent_columns_;
 
 		protected:
-
 			
 			[[nodiscard]] const toml::table& source() const noexcept { return source_; }
 			[[nodiscard]] const formatter_options& options() const noexcept { return options_; }
 			[[nodiscard]] std::basic_ostream<CHAR>& stream() const noexcept { return *stream_; }
 
 			[[nodiscard]] int indent() const noexcept { return indent_; }
+			[[nodiscard]] size_t indent_columns() const noexcept { return indent_columns_; }
 			void indent(int level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
-			size_t indent_columns() const noexcept { return indent_columns_; }
 
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
 

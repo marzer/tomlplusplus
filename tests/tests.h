@@ -43,9 +43,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 	catch (const toml::parse_error& err)
 	{
 		FAIL(
-			"Parse error on line "sv << err.where().begin.line
-			<< ", column "sv << err.where().begin.column
-			<< ":\n"sv << err.what()
+			"Parse error on line "sv << err.source().begin.line
+			<< ", column "sv << err.source().begin.column
+			<< ":\n"sv << err.description()
 		);
 	}
 
@@ -58,9 +58,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error().where().begin.line
-				<< ", column "sv << result.error().where().begin.column
-				<< ":\n"sv << result.error().what()
+				"Parse error on line "sv << result.error().source().begin.line
+				<< ", column "sv << result.error().source().begin.column
+				<< ":\n"sv << result.error().description()
 			);
 			return;
 		}
@@ -75,9 +75,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		else
 		{
 			FAIL(
-				"Parse error on line "sv << result.error().where().begin.line
-				<< ", column "sv << result.error().where().begin.column
-				<< ":\n"sv << result.error().what()
+				"Parse error on line "sv << result.error().source().begin.line
+				<< ", column "sv << result.error().source().begin.column
+				<< ":\n"sv << result.error().description()
 			);
 			return;
 		}
@@ -160,7 +160,7 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 
 	static constexpr auto is_val = [](char32_t codepoint) noexcept
 	{
-		if constexpr (std::is_same_v<string, promoted<T>>)
+		if constexpr (std::is_same_v<string, impl::promoted<T>>)
 			return codepoint == U'"' || codepoint == U'\'';
 		else
 			return !impl::is_whitespace(codepoint);
@@ -201,8 +201,8 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 	parsing_should_succeed(std::string_view{ value }, [&](table&& tbl) noexcept
 	{
 		CHECK(tbl.size() == 1);
-		REQUIRE(tbl[S("val"sv)].as<promoted<T>>());
-		CHECK(tbl[S("val"sv)].as<promoted<T>>()->get() == expected);
+		REQUIRE(tbl[S("val"sv)].as<impl::promoted<T>>());
+		CHECK(tbl[S("val"sv)].as<impl::promoted<T>>()->get() == expected);
 		CHECK(tbl[S("val"sv)].get()->source().begin == begin);
 		CHECK(tbl[S("val"sv)].get()->source().end == end);
 	});

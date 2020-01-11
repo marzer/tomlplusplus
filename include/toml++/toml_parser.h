@@ -1,8 +1,8 @@
 #pragma once
 #include "toml_utf8.h"
-#include "toml_value.h"
-#include "toml_array.h"
 #include "toml_table.h"
+#include "toml_array.h"
+#include "toml_value.h"
 
 namespace toml
 {
@@ -146,6 +146,48 @@ namespace toml::impl
 		#define TOML_ERROR				err.emplace
 	#endif
 
+	#if !TOML_EXCEPTIONS || defined(__INTELLISENSE__)
+		#define TOML_NORETURN
+	#else
+		#define TOML_NORETURN			[[noreturn]]
+	#endif
+
+	template <int> struct parse_integer_traits;
+	template <> struct parse_integer_traits<2> final
+	{
+		static constexpr auto qualifier = "binary"sv;
+		static constexpr auto is_digit = is_binary_digit;
+		static constexpr auto is_signed = false;
+		static constexpr auto buffer_length = 63;
+		static constexpr char32_t prefix_codepoint = U'b';
+		static constexpr char prefix = 'b';
+	};
+	template <> struct parse_integer_traits<8> final
+	{
+		static constexpr auto qualifier = "octal"sv;
+		static constexpr auto is_digit = is_octal_digit;
+		static constexpr auto is_signed = false;
+		static constexpr auto buffer_length = 21; // strlen("777777777777777777777")
+		static constexpr char32_t prefix_codepoint = U'o';
+		static constexpr char prefix = 'o';
+	};
+	template <> struct parse_integer_traits<10> final
+	{
+		static constexpr auto qualifier = "decimal"sv;
+		static constexpr auto is_digit = is_decimal_digit;
+		static constexpr auto is_signed = true;
+		static constexpr auto buffer_length = 19; //strlen("9223372036854775807")
+	};
+	template <> struct parse_integer_traits<16> final
+	{
+		static constexpr auto qualifier = "hexadecimal"sv;
+		static constexpr auto is_digit = is_hexadecimal_digit;
+		static constexpr auto is_signed = false;
+		static constexpr auto buffer_length = 16; //strlen("7FFFFFFFFFFFFFFF")
+		static constexpr char32_t prefix_codepoint = U'x';
+		static constexpr char prefix = 'x';
+	};
+
 	class parser final
 	{
 		private:
@@ -171,9 +213,7 @@ namespace toml::impl
 			}
 
 			template <typename... T>
-			#if TOML_EXCEPTIONS
-			[[noreturn]]
-			#endif
+			TOML_NORETURN
 			void abort_with_error(T &&... args) const TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK();
@@ -541,7 +581,7 @@ namespace toml::impl
 								{
 									eof_check();
 
-									if (!is_hex_digit(*cp))
+									if (!is_hexadecimal_digit(*cp))
 										abort_with_error(
 											"Encountered unexpected character while parsing "sv,
 											(MULTI_LINE ? "multi-line "sv : ""sv),
@@ -1159,7 +1199,7 @@ namespace toml::impl
 
 					if (*cp == U'_')
 					{
-						if (!prev || !is_hex_digit(*prev))
+						if (!prev || !is_hexadecimal_digit(*prev))
 							abort_with_error(
 								"Encountered unexpected character while parsing hexadecimal "sv,
 								node_type::floating_point, "; underscores may only follow digits"sv
@@ -1214,7 +1254,7 @@ namespace toml::impl
 					}
 					else
 					{
-						if (!seen_exponent && !is_hex_digit(*cp))
+						if (!seen_exponent && !is_hexadecimal_digit(*cp))
 							abort_with_error("Encountered unexpected character while parsing hexadecimal "sv,
 								node_type::floating_point, "; expected hexadecimal digit, saw '"sv, *cp, '\''
 							);
@@ -1287,41 +1327,73 @@ namespace toml::impl
 
 			#endif //!TOML_USE_STREAMS_FOR_FLOATS && TOML_LANG_HIGHER_THAN(0, 5, 0)
 
+			template <int base>
 			[[nodiscard]]
-			int64_t parse_binary_integer() TOML_MAY_THROW
+			int64_t parse_integer() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
-				TOML_ASSERT(cp && *cp == U'0');
+				TOML_ASSERT(cp);
+				using traits = parse_integer_traits<base>;
 
 				const auto eof_check = [this]() TOML_MAY_THROW
 				{
 					TOML_ERROR_CHECK();
 					if (!cp)
-						abort_with_error("Encountered EOF while parsing binary "sv, node_type::integer);
+						abort_with_error(
+							"Encountered EOF while parsing "sv, traits::qualifier, ' ', node_type::integer
+						);
 				};
 
-				// '0'
-				if (*cp != U'0')
-					abort_with_error(
-						"Encountered unexpected character while parsing binary "sv,
-						node_type::integer, "; expected '0', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
+				[[maybe_unused]] int64_t sign = 1;
+				if constexpr (traits::is_signed)
+				{
+					if (*cp == U'-')
+					{
+						sign = -1;
+						advance();
+					}
+					else if(*cp == U'+')
+						advance();
+					eof_check();
 
-				// 'b' or 'B'
-				if (*cp != U'b' && *cp != U'B')
-					abort_with_error(
-						"Encountered unexpected character while parsing binary "sv,
-						node_type::integer, "; expected 'b' or 'B', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
+					TOML_ERROR_CHECK({});
+				}
+
+				if constexpr (base == 10)
+				{
+					if (!traits::is_digit(*cp))
+						abort_with_error(
+							"Encountered unexpected character while parsing "sv, traits::qualifier, ' ',
+							node_type::integer, "; expected expected "sv, traits::qualifier,
+							" digit or sign, saw '"sv, *cp, '\''
+						);
+				}
+				else
+				{
+					// '0'
+					if (*cp != U'0')
+						abort_with_error(
+							"Encountered unexpected character while parsing "sv, traits::qualifier,
+							' ', node_type::integer, "; expected '0', saw '"sv, *cp, '\''
+						);
+					advance();
+					eof_check();
+
+					// 'b', 'o', 'x'
+					if (*cp != traits::prefix_codepoint)
+						abort_with_error(
+							"Encountered unexpected character while parsing "sv, traits::qualifier,
+							' ', node_type::integer, "; expected '"sv, traits::prefix,
+							"', saw '"sv, *cp, '\''
+						);
+					advance();
+					eof_check();
+				}
 
 				TOML_ERROR_CHECK({});
 
 				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[64];
+				TOML_GCC_ATTR(uninitialized) char chars[traits::buffer_length];
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -1331,22 +1403,23 @@ namespace toml::impl
 
 					if (*cp == U'_')
 					{
-						if (!prev || !is_binary_digit(*prev))
+						if (!prev || !traits::is_digit(*prev))
 							abort_with_error(
-								"Encountered unexpected character while parsing binary "sv,
-								node_type::integer, "; underscores may only follow digits"sv
+								"Encountered unexpected character while parsing "sv, traits::qualifier,
+								' ', node_type::integer, "; expected "sv, traits::qualifier, " digit, saw '_'"sv
 							);
 					}
 					else
 					{
-						if (!is_binary_digit(*cp))
+						if (!traits::is_digit(*cp))
 							abort_with_error(
-								"Encountered unexpected character while parsing binary "sv,
-								node_type::integer, "; expected binary digit, saw '"sv, *cp, '\''
+								"Encountered unexpected character while parsing "sv, traits::qualifier,
+								' ', node_type::integer, "; expected "sv, traits::qualifier,
+								" digit, saw '"sv, *cp, '\''
 							);
 						if (length == sizeof(chars))
 							abort_with_error(
-								"Error parsing binary "sv, node_type::integer,
+								"Error parsing "sv, traits::qualifier, ' ', node_type::integer,
 								"; exceeds maximum length of "sv, sizeof(chars), " characters"sv
 							);
 						chars[length++] = static_cast<char>(cp->bytes[0]);
@@ -1360,399 +1433,84 @@ namespace toml::impl
 				{
 					eof_check();
 					abort_with_error(
-						"Encountered unexpected character while parsing binary "sv,
-						node_type::integer, "; expected binary digit, saw '"sv, *cp, '\''
+						"Encountered unexpected character while parsing "sv, traits::qualifier,
+						' ', node_type::integer, "; expected "sv, traits::qualifier, " digit, saw '_'"sv
 					);
 				}
+
+				// check for leading zeroes
+				if constexpr (base == 10)
+				{
+					if (chars[0] == '0')
+						abort_with_error(
+							"Error parsing "sv, traits::qualifier,
+							' ', node_type::integer, "; leading zeroes are not allowed"sv
+						);
+				}
+				
+				TOML_ERROR_CHECK({});
 
 				// single digits can be converted directly
 				if (length == 1_sz)
-					return chars[0] == '1' ? 1ull : 0ull;
-
-				TOML_ERROR_CHECK({});
-
-				// otherwise invoke charconv
-				TOML_GCC_ATTR(uninitialized) int64_t result;
-				auto parse_result = std::from_chars(chars, chars + length, result, 2);
-				switch (parse_result.ec)
 				{
-					case std::errc{}: //ok
-						return result;
-
-					case std::errc::invalid_argument:
-						abort_with_error(
-							"Error parsing binary "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
-						);
-						break;
-
-					case std::errc::result_out_of_range:
-						abort_with_error(
-							"Error parsing binary "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
-						);
-						break;
-
-					default: //??
-						abort_with_error(
-							"Error parsing binary "sv, node_type::integer,
-							"; an unspecified error occurred while trying to interpret '",
-							std::string_view{ chars, length }, "' as a value"sv
-						);
-				}
-
-				TOML_ERROR_CHECK({});
-				TOML_UNREACHABLE;
-			}
-
-			[[nodiscard]]
-			int64_t parse_octal_integer() TOML_MAY_THROW
-			{
-				TOML_ERROR_CHECK({});
-				TOML_ASSERT(cp && *cp == U'0');
-
-				const auto eof_check = [this]() TOML_MAY_THROW
-				{
-					TOML_ERROR_CHECK();
-					if (!cp)
-						abort_with_error("Encountered EOF while parsing octal "sv, node_type::integer);
-				};
-
-				// '0'
-				if (*cp != U'0')
-					abort_with_error(
-						"Encountered unexpected character while parsing octal "sv, node_type::integer,
-						"; expected '0', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
-
-				// 'o'
-				if (*cp != U'o')
-					abort_with_error(
-						"Encountered unexpected character while parsing octal "sv, node_type::integer,
-						"; expected 'o', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
-
-				TOML_ERROR_CHECK({});
-
-				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[21]; //21 == strlen("777777777777777777777") (max 64-bit uint)
-				size_t length = {};
-				const utf8_codepoint* prev = {};
-				while (true)
-				{
-					if (!cp || is_value_terminator(*cp))
-						break;
-
-					if (*cp == U'_')
+					if constexpr (base > 10)
 					{
-						if (!prev || !is_octal_digit(*prev))
-							abort_with_error(
-								"Encountered unexpected character while parsing octal "sv, node_type::integer,
-								"; underscores may only follow digits"sv
-							);
+						return chars[0] >= 'A'
+							? 10LL + static_cast<int64_t>(*cp - (*cp >= 'a' ? 'a' : 'A'))
+							: static_cast<int64_t>(*cp - '0');
 					}
 					else
-					{
-						if (!is_octal_digit(*cp))
-							abort_with_error(
-								"Encountered unexpected character while parsing octal "sv, node_type::integer,
-								"; expected octal digit, saw '"sv, *cp, '\''
-							);
-						if (length == sizeof(chars))
-							abort_with_error(
-								"Error parsing octal "sv, node_type::integer,
-								"; exceeds maximum length of "sv, sizeof(chars), " characters"sv
-							);
-						chars[length++] = static_cast<char>(cp->bytes[0]);
-					}
-
-					prev = cp;
-					advance();
-
-					TOML_ERROR_CHECK({});
+						return static_cast<int64_t>(chars[0] - '0');
 				}
-				if (prev && *prev == U'_')
-				{
-					eof_check();
-					abort_with_error(
-						"Encountered unexpected character while parsing octal "sv, node_type::integer,
-						"; expected octal digit, saw '"sv, *cp, '\''
-					);
-				}
-
-				// single digits can be converted directly
-				if (length == 1_sz)
-					return static_cast<int64_t>(chars[0] - '0');
-
-				TOML_ERROR_CHECK({});
 
 				// otherwise invoke charconv
-				TOML_GCC_ATTR(uninitialized) int64_t result;
-				auto parse_result = std::from_chars(chars, chars + length, result, 8);
-				switch (parse_result.ec)
-				{
-					case std::errc{}: //ok
-						return result;
-
-					case std::errc::invalid_argument:
-						abort_with_error(
-							"Error parsing octal "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
-						);
-						break;
-
-					case std::errc::result_out_of_range:
-						abort_with_error(
-							"Error parsing octal "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
-						);
-						break;
-
-					default: //??
-						abort_with_error(
-							"Error parsing octal "sv, node_type::integer,
-							"; an unspecified error occurred while trying to interpret '",
-							std::string_view{ chars, length }, "' as a value"sv
-						);
-				}
-				TOML_ERROR_CHECK({});
-				TOML_UNREACHABLE;
-			}
-
-			[[nodiscard]]
-			int64_t parse_decimal_integer() TOML_MAY_THROW
-			{
-				TOML_ERROR_CHECK({});
-				TOML_ASSERT(cp && (*cp == U'+' || *cp == U'-' || is_decimal_digit(*cp)));
-
-				const auto eof_check = [this]() TOML_MAY_THROW
-				{
-					TOML_ERROR_CHECK();
-					if (!cp)
-						abort_with_error("Encountered EOF while parsing "sv, node_type::integer);
-				};
-
-				// sign
-				const int64_t sign = *cp == U'-' ? -1ll : 1ll;
-				if (*cp == U'+' || *cp == U'-')
-				{
-					advance();
-					eof_check();
-				}
-
-				TOML_ERROR_CHECK({});
-
-				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[19]; //19 == strlen("9223372036854775807") (max 64-bit uint)
-				size_t length = {};
-				const utf8_codepoint* prev = {};
-				while (true)
-				{
-					if (!cp || is_value_terminator(*cp))
-						break;
-
-					if (*cp == U'_')
-					{
-						if (!prev || !is_decimal_digit(*prev))
-							abort_with_error(
-								"Encountered unexpected character while parsing "sv, node_type::integer,
-								"; underscores may only follow digits"sv
-							);
-					}
-					else
-					{
-						if (!is_decimal_digit(*cp))
-							abort_with_error(
-								"Encountered unexpected character while parsing "sv, node_type::integer,
-								"; expected decimal digit, saw '"sv, *cp, '\''
-							);
-						if (length == sizeof(chars))
-							abort_with_error(
-								"Error parsing "sv, node_type::integer,
-								"; exceeds maximum length of "sv, sizeof(chars), " characters"sv
-							);
-						chars[length++] = static_cast<char>(cp->bytes[0]);
-					}
-
-					prev = cp;
-					advance();
-					TOML_ERROR_CHECK({});
-				}
-				if (prev && *prev == U'_')
-				{
-					eof_check();
-					abort_with_error(
-						"Encountered unexpected character while parsing "sv, node_type::integer,
-						"; expected decimal digit, saw '"sv, *cp, '\''
-					);
-				}
-
-				// check for leading zeroes etc
-				if (chars[0] == '0')
-					abort_with_error(
-						"Encountered unexpected character while parsing "sv, node_type::integer,
-						"; leading zeroes are not allowed"sv
-					);
-
-				TOML_ERROR_CHECK({});
-
-				// convert to int
 				TOML_GCC_ATTR(uninitialized) uint64_t result;
-				auto parse_result = std::from_chars(chars, chars + length, result);
-				if (parse_result.ec == std::errc{} && (
-						(sign < 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1ull)
-						|| (sign > 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
-					))
-					parse_result.ec = std::errc::result_out_of_range;
+				auto parse_result = std::from_chars(chars, chars + length, result, base);
+				if constexpr (traits::is_signed)
+				{
+					if (parse_result.ec == std::errc{} && (
+							(sign < 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1ull)
+							|| (sign > 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
+						))
+						parse_result.ec = std::errc::result_out_of_range;
+				}
+				else
+				{
+					if (parse_result.ec == std::errc{} &&
+							result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
+						)
+						parse_result.ec = std::errc::result_out_of_range;
+				}
 				switch (parse_result.ec)
 				{
 					case std::errc{}: //ok
-						return static_cast<int64_t>(result) * sign;
+						if constexpr (traits::is_signed)
+							return static_cast<int64_t>(result) * sign;
+						else
+							return static_cast<int64_t>(result);
 
 					case std::errc::invalid_argument:
 						abort_with_error(
-							"Error parsing "sv, node_type::integer,
+							"Error parsing "sv, traits::qualifier, ' ', node_type::integer,
 							"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
 						);
 						break;
 
 					case std::errc::result_out_of_range:
 						abort_with_error(
-							"Error parsing "sv, node_type::integer,
+							"Error parsing "sv, traits::qualifier, ' ', node_type::integer,
 							"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
 						);
 						break;
 
 					default: //??
 						abort_with_error(
-							"Error parsing "sv, node_type::integer,
+							"Error parsing "sv, traits::qualifier, ' ', node_type::integer,
 							"; an unspecified error occurred while trying to interpret '",
 							std::string_view{ chars, length }, "' as a value"sv
 						);
 				}
-				TOML_ERROR_CHECK({});
-				TOML_UNREACHABLE;
-			}
 
-			[[nodiscard]]
-			int64_t parse_hex_integer() TOML_MAY_THROW
-			{
-				TOML_ERROR_CHECK({});
-				TOML_ASSERT(cp && *cp == U'0');
-
-				const auto eof_check = [this]() TOML_MAY_THROW
-				{
-					TOML_ERROR_CHECK();
-					if (!cp)
-						abort_with_error("Encountered EOF while parsing hexadecimal "sv, node_type::integer);
-				};
-
-				// '0'
-				if (*cp != U'0')
-					abort_with_error(
-						"Encountered unexpected character while parsing hexadecimal "sv, node_type::integer,
-						"; expected '0', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
-
-				// 'x' or 'X'
-				if (*cp != U'x' && *cp != U'X')
-					abort_with_error(
-						"Encountered unexpected character while parsing hexadecimal "sv, node_type::integer,
-						"; expected 'x' or 'X', saw '"sv, *cp, '\''
-					);
-				advance();
-				eof_check();
-
-				TOML_ERROR_CHECK({});
-
-				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[16]; //16 == strlen("FFFFFFFFFFFFFFFF") (max 64-bit uint)
-				size_t length = {};
-				const utf8_codepoint* prev = {};
-				while (true)
-				{
-					if (!cp || is_value_terminator(*cp))
-						break;
-
-					if (*cp == U'_')
-					{
-						if (!prev || !is_hex_digit(*prev))
-							abort_with_error(
-								"Encountered unexpected character while parsing hexadecimal "sv, node_type::integer,
-								"; underscores may only follow digits"
-							);
-					}
-					else
-					{
-						if (!is_hex_digit(*cp))
-							abort_with_error(
-								"Encountered unexpected character while parsing hexadecimal "sv, node_type::integer,
-								"; expected hexadecimal digit, saw '"sv, *cp, '\''
-							);
-						if (length == sizeof(chars))
-							abort_with_error(
-								"Error parsing hexadecimal "sv, node_type::integer,
-								"; exceeds maximum length of "sv, sizeof(chars), " characters"sv
-							);
-						chars[length++] = static_cast<char>(cp->bytes[0]);
-					}
-
-					prev = cp;
-					advance();
-					TOML_ERROR_CHECK({});
-				}
-				if (prev && *prev == U'_')
-				{
-					eof_check();
-					abort_with_error(
-						"Encountered unexpected character while parsing hexadecimal "sv, node_type::integer,
-						"; expected hexadecimal digit, saw '"sv, *cp, '\''
-					);
-				}
-
-				// single digits can be converted directly
-				if (length == 1_sz)
-					return chars[0] >= 'A'
-						? static_cast<int64_t>(10 + (chars[0] - (chars[0] >= 'a' ? 'a' : 'A')))
-						: static_cast<int64_t>(chars[0] - '0');
-
-				TOML_ERROR_CHECK({});
-
-				// otherwise invoke charconv
-				TOML_GCC_ATTR(uninitialized) int64_t result;
-				auto parse_result = std::from_chars(chars, chars + length, result, 16);
-				switch (parse_result.ec)
-				{
-					case std::errc{}: //ok
-						return result;
-
-					case std::errc::invalid_argument:
-						abort_with_error(
-							"Error parsing hexadecimal "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
-						);
-						break;
-
-					case std::errc::result_out_of_range:
-						abort_with_error(
-							"Error parsing hexadecimal "sv, node_type::integer,
-							"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
-						);
-						break;
-
-					default: //??
-						abort_with_error(
-							"Error parsing hexadecimal "sv, node_type::integer,
-							"; an unspecified error occurred while trying to interpret '",
-							std::string_view{ chars, length }, "' as a value"sv
-						);
-				}
 				TOML_ERROR_CHECK({});
 				TOML_UNREACHABLE;
 			}
@@ -2359,8 +2117,8 @@ namespace toml::impl
 							case U'E': [[fallthrough]];
 							case U'e': [[fallthrough]];
 							case U'.': val = std::make_unique<value<double>>(parse_float()); break;
-							case U'b': val = std::make_unique<value<int64_t>>(parse_binary_integer()); break;
-							case U'o': val = std::make_unique<value<int64_t>>(parse_octal_integer()); break;
+							case U'b': val = std::make_unique<value<int64_t>>(parse_integer<2>()); break;
+							case U'o': val = std::make_unique<value<int64_t>>(parse_integer<8>()); break;
 							case U'X': [[fallthrough]];
 							case U'x':
 							{
@@ -2393,7 +2151,7 @@ namespace toml::impl
 								if (val)
 									break;
 
-								val = std::make_unique<value<int64_t>>(parse_hex_integer());
+								val = std::make_unique<value<int64_t>>(parse_integer<16>());
 								break;
 							}
 						}
@@ -2410,7 +2168,7 @@ namespace toml::impl
 						{
 							// 100
 							case has_digits:
-								val = std::make_unique<value<int64_t>>(parse_decimal_integer());
+								val = std::make_unique<value<int64_t>>(parse_integer<10>());
 								break;
 
 							// 1e1
@@ -2491,7 +2249,7 @@ namespace toml::impl
 							// -100
 							case has_digits | has_minus:	[[fallthrough]];
 							case has_digits | has_plus:
-								val = std::make_unique<value<int64_t>>(parse_decimal_integer());
+								val = std::make_unique<value<int64_t>>(parse_integer<10>());
 								break;
 
 							// +1e1
@@ -3256,6 +3014,7 @@ namespace toml::impl
 
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
+	#undef TOML_NORETURN
 }
 
 namespace toml

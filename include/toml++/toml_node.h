@@ -35,11 +35,12 @@ namespace toml
 				return reinterpret_cast<const node_of<T>*>(this);
 			}
 
-		public:
-
 			node() noexcept = default;
 			node(const node&) = delete;
 			node& operator= (const node&) = delete;
+
+		public:
+
 			virtual ~node() noexcept = default;
 
 			[[nodiscard]] virtual node_type type() const noexcept = 0;

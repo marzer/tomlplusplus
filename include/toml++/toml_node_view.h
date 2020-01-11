@@ -199,7 +199,7 @@ namespace toml
 			template <typename U>
 			[[nodiscard]] static bool value_equality(const node_view& lhs, const U& rhs) noexcept
 			{
-				const auto val = lhs.as<promoted<U>>();
+				const auto val = lhs.as<impl::promoted<U>>();
 				return val && val->get() == rhs;
 			}
 
@@ -222,7 +222,7 @@ namespace toml
 				size_t i{};
 				for (auto& list_elem : rhs)
 				{
-					const auto elem = arr->get_as<promoted<elem_t>>(i++);
+					const auto elem = arr->get_as<impl::promoted<elem_t>>(i++);
 					if (!elem || elem->get() != list_elem)
 						return false;
 				}
@@ -281,10 +281,6 @@ namespace toml
 	{
 		return { this, key };
 	}
-
-	// inline constexpr auto kek1 = sizeof(node_view<table>);
-	// inline constexpr auto kek2 = sizeof(decltype(std::declval<node_view<table>>()[0]));
-	// inline constexpr auto kek3 = sizeof(decltype(std::declval<node_view<table>>()["kek"sv]));
 
 	inline node_view<const table> table::operator[] (string_view key) const noexcept
 	{

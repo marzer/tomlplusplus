@@ -94,7 +94,7 @@ namespace toml
 			friend class impl::parser;
 			friend class node_view<table>;
 
-			string_map<std::unique_ptr<node>> values;
+			impl::string_map<std::unique_ptr<node>> values;
 			bool inline_ = false;
 
 		public:

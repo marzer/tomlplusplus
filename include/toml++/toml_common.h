@@ -114,6 +114,8 @@
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
 
+#elif defined (DOXYGEN)
+	#define TOML_EXCEPTIONS	0
 #endif
 
 #ifndef TOML_CPP_VERSION
@@ -268,19 +270,23 @@ TOML_POP_WARNINGS
 ////////// FORWARD DECLARATIONS & TYPEDEFS
 // clang-format on
 
+/// \brief	The root namespace for all toml++ functions and types.
 namespace toml
 {
+	/// \brief	User-defined literals.
 	inline namespace literals
 	{
 		using namespace std::string_literals;
 		using namespace std::string_view_literals;
 
+		/// \brief	Specifies a uint8_t literal.
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
 		{
 			return static_cast<uint8_t>(n);
 		}
 
+		/// \brief	Specifies a size_t literal.
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 		{
@@ -296,14 +302,24 @@ namespace toml
 
 	#else
 
+	/// \brief	The base character type for toml++ keys and string values.
+	/// \remarks This will be `char8_t` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `char`.
 	using string_char = char;
+
+	/// \brief	The string type for toml++ keys and string values.
+	/// \remarks This will be `std::u8string` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `std::string`.
 	using string = std::string;
+
+	/// \brief	The string type for toml++ keys and string values.
+	/// \remarks This will be `std::u8string_view` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `std::string_view`.
 	using string_view = std::string_view;
 
 	#endif
 
-	template <typename T>
-	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
+	struct date;
+	struct time;
+	struct time_offset;
+	struct date_time;
 
 	class node;
 	template <typename T> class node_view;
@@ -311,6 +327,7 @@ namespace toml
 	class array;
 	class table;
 
+	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t
 	{
 		table,
@@ -330,20 +347,30 @@ namespace toml
 
 	#else
 
+	/// \brief	The integer type used to tally line numbers and columns.
+	/// \remarks This will be `uint32_t` if `TOML_LARGE_FILES = 1`, otherwise it will be `uint16_t`.
 	using source_index = uint16_t;
 
 	#endif
 
+	/// \brief	A source document line-and-column pair.
 	struct source_position final
 	{
-		source_index line;	//begins at 1
-		source_index column;	//begins at 1
+		/// \brief The line number.
+		/// \remarks Valid line numbers start at 1.
+		source_index line;
 
+		/// \brief The column number.
+		/// \remarks Valid column numbers start at 1.
+		source_index column;
+
+		/// \brief	Returns true if both line and column numbers are non-zero.
 		[[nodiscard]]
 		explicit constexpr operator bool () const noexcept
 		{
 			return line > source_index{} && column > source_index{};
 		}
+
 
 		[[nodiscard]]
 		friend constexpr bool operator == (const source_position& lhs, const source_position& rhs) noexcept
@@ -381,12 +408,21 @@ namespace toml
 		}
 	};
 
+	/// \brief	A pointer to a shared string resource containing a source path.
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
+	/// \brief	A source document region.
 	struct source_region final
 	{
+		/// \brief The beginning of the region (inclusive).
 		source_position begin;
+
+		/// \brief The end of the region (exclusive).
 		source_position end;
+
+ 		/// \brief	The path to the corresponding source document.
+ 		/// 
+ 		/// \remarks This will be `nullptr` if no path was provided to toml::parse().
 		source_path_ptr path;
 	};
 
@@ -404,23 +440,29 @@ namespace toml
 		public:
 
 			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* description, source_region&& source) noexcept
-				: std::runtime_error{ description },
-				source_{ std::move(source) }
+			parse_error(const char* desc, source_region&& src) noexcept
+				: std::runtime_error{ desc },
+				source_{ std::move(src) }
 			{}
 
 			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* description, const source_region& source) noexcept
-				: parse_error{ description, source_region{ source } }
+			parse_error(const char* desc, const source_region& src) noexcept
+				: parse_error{ desc, source_region{ src } }
 			{}
 
 			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* description, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ description, source_region{ position, position, path } }
+			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
+				: parse_error{ desc, source_region{ position, position, path } }
 			{}
 
 			[[nodiscard]]
-			const source_region& where() const noexcept
+			std::string_view description() const noexcept
+			{
+				return std::string_view{ what() };
+			}
+
+			[[nodiscard]]
+			const source_region& source() const noexcept
 			{
 				return source_;
 			}
@@ -428,6 +470,10 @@ namespace toml
 
 	#else
 
+	/// \brief	An error thrown/returned when parsing fails.
+	/// 
+	/// \remarks This will inherit from `std::runtime_exception` when `TOML_EXCEPTIONS = 1`.
+	/// 		 The public interface will be exactly the same either way.
 	class parse_error final
 	{
 		private:
@@ -437,29 +483,32 @@ namespace toml
 		public:
 
 			TOML_NODISCARD_CTOR
-			parse_error(std::string&& description, source_region&& source) noexcept
-				: description_{ std::move(description) },
-				source_{ std::move(source) }
+			parse_error(std::string&& desc, source_region&& src) noexcept
+				: description_{ std::move(desc) },
+				source_{ std::move(src) }
 			{}
 
 			TOML_NODISCARD_CTOR
-			parse_error(std::string&& description, const source_region& source) noexcept
-				: parse_error{ std::move(description), source_region{ source } }
+			parse_error(std::string&& desc, const source_region& src) noexcept
+				: parse_error{ std::move(desc), source_region{ src } }
 			{}
 
 			TOML_NODISCARD_CTOR
-				parse_error(std::string&& description, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ std::move(description), source_region{ position, position, path } }
+				parse_error(std::string&& desc, const source_position& position, const source_path_ptr& path = {}) noexcept
+				: parse_error{ std::move(desc), source_region{ position, position, path } }
 			{}
 
+
+			/// \brief	Returns a textual description of the error.
 			[[nodiscard]]
-			std::string_view what() const noexcept
+			std::string_view description() const noexcept
 			{
 				return description_;
 			}
 
+			/// \brief	Returns the region of the source document responsible for the error.
 			[[nodiscard]]
-			const source_region& where() const noexcept
+			const source_region& source() const noexcept
 			{
 				return source_;
 			}
@@ -468,103 +517,14 @@ namespace toml
 	#endif
 
 	TOML_POP_WARNINGS
-
-	struct date final
-	{
-		uint16_t year;
-		uint8_t month;
-		uint8_t day;
-
-		[[nodiscard]]
-		friend constexpr bool operator == (date lhs, date rhs) noexcept
-		{
-			return lhs.year == rhs.year
-				&& lhs.month == rhs.month
-				&& lhs.day == rhs.day;
-		}
-
-		[[nodiscard]]
-		friend constexpr bool operator != (date lhs, date rhs) noexcept
-		{
-			return lhs.year != rhs.year
-				|| lhs.month != rhs.month
-				|| lhs.day != rhs.day;
-		}
-	};
-
-	struct time final
-	{
-		uint8_t hour;
-		uint8_t minute;
-		uint8_t second;
-		uint32_t nanosecond;
-
-		[[nodiscard]]
-		friend constexpr bool operator == (const time& lhs, const time& rhs) noexcept
-		{
-			return lhs.hour == rhs.hour
-				&& lhs.minute == rhs.minute
-				&& lhs.second == rhs.second
-				&& lhs.nanosecond == rhs.nanosecond;
-		}
-
-		[[nodiscard]]
-		friend constexpr bool operator != (const time& lhs, const time& rhs) noexcept
-		{
-			return !(lhs == rhs);
-		}
-	};
-
-	struct time_offset final
-	{
-		int16_t minutes;
-
-		[[nodiscard]]
-		static constexpr time_offset from_hh_mm(int8_t hours, int8_t minutes) noexcept
-		{
-			return time_offset{ static_cast<int16_t>(hours * 60 + minutes) };
-		}
-
-		[[nodiscard]]
-		friend constexpr bool operator == (time_offset lhs, time_offset rhs) noexcept
-		{
-			return lhs.minutes == rhs.minutes;
-		}
-
-		[[nodiscard]]
-		friend constexpr bool operator != (time_offset lhs, time_offset rhs) noexcept
-		{
-			return lhs.minutes != rhs.minutes;
-		}
-	};
-
-	struct date_time final
-	{
-		toml::date date;
-		toml::time time;
-		std::optional<toml::time_offset> time_offset;
-
-		[[nodiscard]]
-		friend constexpr bool operator == (const date_time& lhs, const date_time& rhs) noexcept
-		{
-			return lhs.date == rhs.date
-				&& lhs.time == rhs.time
-				&& lhs.time_offset == rhs.time_offset;
-		}
-
-		[[nodiscard]]
-		friend constexpr bool operator != (const date_time& lhs, const date_time& rhs) noexcept
-		{
-			return lhs.date != rhs.date
-				|| lhs.time != rhs.time
-				|| lhs.time_offset != rhs.time_offset;
-		}
-
-	};
 }
 
+/// \brief	Internal implementation details. No user-serviceable parts within.
 namespace toml::impl
 {
+	template <typename T>
+	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
+
 	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
 
 	template <typename T>
@@ -656,6 +616,7 @@ namespace toml::impl
 	template <> struct value_promoter<uint16_t> { using type = int64_t; };
 	template <> struct value_promoter<uint8_t> { using type = int64_t; };
 	template <> struct value_promoter<float> { using type = double; };
+	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
 	{
@@ -705,6 +666,28 @@ namespace toml::impl
 		"time"sv,
 		"date-time"sv
 	};
+
+
+	#define TOML_P2S_DECL(linkage, type)															\
+		template <typename CHAR>																	\
+		linkage void print_to_stream(type, std::basic_ostream<CHAR>&) TOML_MAY_THROW
+
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int8_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int16_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int32_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int64_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint8_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint16_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint32_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint64_t);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, float);
+	TOML_P2S_DECL(TOML_ALWAYS_INLINE, double);
+	TOML_P2S_DECL(inline, const date&);
+	TOML_P2S_DECL(inline, const time&);
+	TOML_P2S_DECL(inline, time_offset);
+	TOML_P2S_DECL(inline, const date_time&);
+
+	#undef TOML_P2S_DECL
 }
 
 namespace toml
@@ -714,9 +697,6 @@ namespace toml
 
 	template <typename T>
 	using value_of = typename impl::node_unwrapper<T>::type;
-
-	template <typename T>
-	using promoted = typename impl::value_promoter<T>::type;
 
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
