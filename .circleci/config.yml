@@ -9,7 +9,7 @@ jobs:
             - run:
                 name: Installing python
                 command: |
-                    apt-get -qq update && apt-get install -y python3
+                    apt-get -qq update && apt-get install --upgrade -y python3
             - run:
                 name: Checking toml.hpp
                 command: |
@@ -17,7 +17,7 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    apt-get -qq update && apt-get install -y git clang-9 g++-9 python3-pip ninja-build
+                    apt-get -qq update && apt-get install --upgrade -y git clang-9 g++-9 python3-pip ninja-build
                     pip3 install meson
                     git submodule update --init --recursive extern/Catch2
             - run:
@@ -43,7 +43,7 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    apt-get -qq update && apt-get install -y python3 doxygen python3-pip cmake clang-9 flex bison git
+                    apt-get -qq update && apt-get install --upgrade -y python3 python3-pip make cmake clang-9 flex bison git wget tar
                     pip3 install beautifulsoup4 jinja2 pygments html5lib
                     git submodule update --init extern/mcss
             - run:
