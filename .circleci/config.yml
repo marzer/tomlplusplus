@@ -7,10 +7,6 @@ jobs:
         steps:
             - checkout
             - run:
-                name: Pulling Catch2
-                command: |
-                    git submodule update --init --recursive extern/Catch2
-            - run:
                 name: Installing python
                 command: |
                     apt-get -qq update && apt-get install -y python3
@@ -19,10 +15,11 @@ jobs:
                 command: |
                     cd python && python3 ci_single_header_check.py
             - run:
-                name: Installing applications
+                name: Installing dependencies
                 command: |
                     apt-get -qq update && apt-get install -y git clang-9 g++-9 python3-pip ninja-build
                     pip3 install meson
+                    git submodule update --init --recursive extern/Catch2
             - run:
                 name: Building with clang
                 command: |
@@ -32,7 +29,7 @@ jobs:
                 name: Building with gcc
                 command: |
                     CXX=g++-9 meson build-gcc
-                    cd build-gcc && ninja -v -j 4
+                    cd build-gcc && ninja -v -j 4  
             - run:
                 name: Running tests
                 command: |
@@ -46,9 +43,9 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    git submodule update --init extern/m.css
-                    apt-get -qq update && apt-get install -y python3 doxygen python3-pip cmake clang-9 flex bison
+                    apt-get -qq update && apt-get install -y python3 doxygen python3-pip cmake clang-9 flex bison git
                     pip3 install beautifulsoup4 jinja2 pygments html5lib
+                    git submodule update --init extern/m.css
             - run:
                 name: Building and installing Doxygen 1.8.17
                 command: |
