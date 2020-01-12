@@ -224,5 +224,8 @@ namespace toml
 
 			[[nodiscard]] inline node_view<table> operator[] (string_view) noexcept;
 			[[nodiscard]] inline node_view<const table> operator[] (string_view) const noexcept;
+
+			template <typename CHAR>
+			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
 	};
 }

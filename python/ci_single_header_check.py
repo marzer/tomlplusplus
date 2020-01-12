@@ -22,7 +22,7 @@ def get_script_folder():
 
 def read_all_text_from_file(path):
 	print("Reading {}".format(path))
-	with open(path, 'r') as file:
+	with open(path, 'r', encoding='utf-8') as file:
 		text = file.read()
 	return text
 

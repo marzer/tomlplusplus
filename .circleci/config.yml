@@ -1,24 +1,18 @@
 version: 2.1
 
 jobs:
-    linux_build:
+    develop_build:
         docker:
-            - image: debian:bullseye
+            - image: marzer/misc_cpp17_dev:latest
         steps:
             - checkout
-            - run:
-                name: Installing python
-                command: |
-                    apt-get -qq update && apt-get install --upgrade -y python3
             - run:
                 name: Checking toml.hpp
                 command: |
                     cd python && python3 ci_single_header_check.py
             - run:
-                name: Installing dependencies
+                name: Pulling Catch2
                 command: |
-                    apt-get -qq update && apt-get install --upgrade -y git clang-9 g++-9 python3-pip ninja-build
-                    pip3 install meson
                     git submodule update --init --recursive extern/Catch2
             - run:
                 name: Building with clang
@@ -35,29 +29,38 @@ jobs:
                 command: |
                     cd build-clang && ninja test && cd ../build-gcc && ninja test
 
-    generate_dox:
+
+    master_build:
         docker:
-            - image: debian:bullseye
+            - image: marzer/misc_cpp17_dev:latest
         steps:
             - checkout
             - run:
-                name: Installing dependencies
+                name: Checking toml.hpp
                 command: |
-                    apt-get -qq update && apt-get install --upgrade -y python3 python3-pip make cmake clang-9 flex bison git wget tar
-                    pip3 install beautifulsoup4 jinja2 pygments html5lib
-                    git submodule update --init extern/mcss
+                    cd python && python3 ci_single_header_check.py
             - run:
-                name: Building and installing Doxygen 1.8.17
+                name: Pulling Catch2
                 command: |
-                    wget http://doxygen.nl/files/doxygen-1.8.17.src.tar.gz
-                    tar xvzf doxygen-1.8.17.src.tar.gz
-                    rm doxygen-1.8.17.src.tar.gz
-                    cd doxygen-1.8.17
-                    CC=clang-9 CXX=clang++-9 cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -Wno-dev -Wno-deprecated
-                    make install
+                    git submodule update --init --recursive extern/Catch2
+            - run:
+                name: Building with clang
+                command: |
+                    CXX=clang++-9 meson build-clang
+                    cd build-clang && ninja -v -j 4
+            - run:
+                name: Building with gcc
+                command: |
+                    CXX=g++-9 meson build-gcc
+                    cd build-gcc && ninja -v -j 4  
+            - run:
+                name: Running tests
+                command: |
+                    cd build-clang && ninja test && cd ../build-gcc && ninja test
             - run:
                 name: Generating documentation
                 command: |
+                    git submodule update --init extern/mcss
                     cd python && python3 generate_documentation.py
             - persist_to_workspace:
                 root: docs
@@ -91,14 +94,15 @@ workflows:
     version: 2
     build:
         jobs:
-            - linux_build
-            - generate_dox:
-                requires:
-                    - linux_build
+            - master_build:
                 filters:
                     branches:
                         only: master
             - deploy_dox:
                 requires:
-                    - generate_dox
+                    - master_build
 
+            - develop_build:
+                filters:
+                    branches:
+                        ignore: master

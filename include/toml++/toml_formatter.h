@@ -1,53 +1,45 @@
 #pragma once
 #include "toml_print_to_stream.h"
 
+namespace toml
+{
+	enum class format_flags : uint8_t
+	{
+		none,
+		always_print_as_inline = 1,
+		quote_dates_and_times = 2
+	};
+	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
+	{
+		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
+	}
+	[[nodiscard]] constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
+	{
+		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
+	}
+}
+
 namespace toml::impl
 {
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_ALL_WARNINGS	// some compilers will complain about a tautological unsigned >= 0.
-								// TINAE - char can have signed _or_ unsigned semantics and I can't
-								// be arsed handling this differently
-
-	[[nodiscard]]
-	inline toml::string_view escape_string_character(const toml::string_char& c) noexcept
-	{
-		if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
-			return low_character_escape_table[c];
-		else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
-			return TOML_STRING_PREFIX("\\u007F"sv);
-		else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
-			return TOML_STRING_PREFIX("\\\""sv);
-		else
-			return toml::string_view{ &c, 1_sz };
-	}
-
-	TOML_POP_WARNINGS
-
-	struct formatter_options final
-	{
-		toml::string_view indent_string;
-		bool quote_dates_and_times;
-	};
-
 	template <typename CHAR = char>
 	class formatter
 	{
 		private:
-			const toml::table& source_;
-			std::basic_ostream<CHAR>* stream_ = nullptr;
-			formatter_options options_;
+			const toml::node* source_;
+			format_flags flags_;
 			int indent_;
 			bool naked_newline_;
-			size_t indent_columns_;
+			std::basic_ostream<CHAR>* stream_ = nullptr;
 
 		protected:
 			
-			[[nodiscard]] const toml::table& source() const noexcept { return source_; }
-			[[nodiscard]] const formatter_options& options() const noexcept { return options_; }
+			[[nodiscard]] const toml::node& source() const noexcept { return *source_; }
+			[[nodiscard]] format_flags flags() const noexcept { return flags_; }
 			[[nodiscard]] std::basic_ostream<CHAR>& stream() const noexcept { return *stream_; }
 
+			static constexpr size_t indent_columns = 4;
+			static constexpr toml::string_view indent_string = TOML_STRING_PREFIX("    "sv);
 			[[nodiscard]] int indent() const noexcept { return indent_; }
-			[[nodiscard]] size_t indent_columns() const noexcept { return indent_columns_; }
 			void indent(int level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
@@ -79,7 +71,7 @@ namespace toml::impl
 			{
 				for (int i = 0; i < indent_; i++)
 				{
-					print_to_stream(options_.indent_string, *stream_);
+					print_to_stream(indent_string, *stream_);
 					naked_newline_ = false;
 				}
 			}
@@ -91,8 +83,7 @@ namespace toml::impl
 				else
 				{
 					print_to_stream('"', *stream_);
-					for (auto c : str)
-						print_to_stream(escape_string_character(c), *stream_);
+					print_to_stream_with_escapes(str, *stream_);
 					print_to_stream('"', *stream_);
 				}
 				naked_newline_ = false;
@@ -114,7 +105,7 @@ namespace toml::impl
 
 					if constexpr (is_date_time)
 					{
-						if (options_.quote_dates_and_times)
+						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);
 					}
 
@@ -122,7 +113,7 @@ namespace toml::impl
 
 					if constexpr (is_date_time)
 					{
-						if (options_.quote_dates_and_times)
+						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);
 					}
 
@@ -145,22 +136,9 @@ namespace toml::impl
 				}
 			}
 
-			formatter(const toml::table& source, formatter_options&& options) noexcept
-				: source_{ source },
-				options_{ std::move(options) }
-				
-			{
-				if (options_.indent_string.empty())
-				{
-					options_.indent_string = TOML_STRING_PREFIX("    "sv);
-					indent_columns_ = 4_sz;
-				}
-				else
-				{
-					indent_columns_ = {};
-					for (auto c : options_.indent_string)
-						indent_columns_ += c == '\t' ? 4_sz : 1_sz;
-				}
-			}
+			formatter(const toml::node& source, format_flags flags) noexcept
+				: source_{ &source },
+				flags_{ flags }
+			{}
 	};
 }

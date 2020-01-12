@@ -3,6 +3,10 @@
 
 namespace toml
 {
+	/// \brief	A TOML node.
+	///
+	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
+	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
 	class TOML_INTERFACE node
 	{
 		private:
@@ -43,25 +47,46 @@ namespace toml
 
 			virtual ~node() noexcept = default;
 
+
+			/// \brief	Returns the node's type identifier.
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
 
+
+			/// \brief	Returns true if this node is a table.
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
+			/// \brief	Returns true if this node is an array.
 			[[nodiscard]] virtual bool is_array() const noexcept = 0;
+			/// \brief	Returns true if this node is a value.
 			[[nodiscard]] virtual bool is_value() const noexcept = 0;
 
+			/// \brief	Returns true if this node is a string value.
 			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
+			/// \brief	Returns true if this node is an integer value.
 			[[nodiscard]] virtual bool is_integer() const noexcept { return false; }
+			/// \brief	Returns true if this node is an floating-point value.
 			[[nodiscard]] virtual bool is_floating_point() const noexcept { return false; }
+			/// \brief	Returns true if this node is a boolean value.
 			[[nodiscard]] virtual bool is_boolean() const noexcept { return false; }
+			/// \brief	Returns true if this node is a local date value.
 			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
+			/// \brief	Returns true if this node is a local time value.
 			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
+			/// \brief	Returns true if this node is a date-time value.
 			[[nodiscard]] virtual bool is_date_time() const noexcept { return false; }
+			/// \brief	Returns true if this node is an array containing only tables.
 			[[nodiscard]] virtual bool is_array_of_tables() const noexcept { return false; }
 
+
+			/// \brief	Checks if a node is a specific type.
+			///
+			/// \tparam	T	The 
+			///
+			/// \returns	Returns true if this node is an instance
 			template <typename T>
-			[[nodiscard]] bool is() const noexcept
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			bool is() const noexcept
 			{
-				using type = value_of<T>;
+				using type = value_of<impl::remove_cvref_t<T>>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -155,8 +180,7 @@ namespace toml
 			static decltype(auto) do_visit(N* node, FUNC&& visitor) TOML_MAY_THROW
 			{
 				static_assert(
-					impl::is_generic_invocable_v<FUNC&&>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
+					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
 					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
 					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
 					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
@@ -168,7 +192,7 @@ namespace toml
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
-				static constexpr auto is_exhaustive = impl::is_generic_invocable_v<FUNC&&> || (
+				static constexpr auto is_exhaustive =
 					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
 					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
 					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
@@ -177,54 +201,44 @@ namespace toml
 					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
 					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
 					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>
-				);
+					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>;
 
 				switch (node->type())
 				{
 					case node_type::table:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<table>());
 						break;
 					case node_type::array:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<array>());
 						break;
 					case node_type::string:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<string>());
 						break;
 					case node_type::integer:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<int64_t>());
 						break;
 					case node_type::floating_point:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<double>());
 						break;
 					case node_type::boolean:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<bool>());
 						break;
 					case node_type::date:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date>());
 						break;
 					case node_type::time:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<time>());
 						break;
 					case node_type::date_time:
-						if constexpr (impl::is_generic_invocable_v<FUNC&&>
-							|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>)
+						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>)
 							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date_time>());
 						break;
 					TOML_NO_DEFAULT_CASE;

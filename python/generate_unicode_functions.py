@@ -467,7 +467,7 @@ def main():
 			print(codepoint_list, end='', file=codepoint_file)
 	else:
 		print("Reading unicode database file into memory")
-		with open(codepoint_file_path, 'r') as codepoint_file:
+		with open(codepoint_file_path, 'r', encoding='utf-8') as codepoint_file:
 			codepoint_list = codepoint_file.read()
 
 

@@ -6,7 +6,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = toml++
 PROJECT_NUMBER         =
-PROJECT_BRIEF          =
+PROJECT_BRIEF          = TOML Parser for C++17
 PROJECT_LOGO           =
 OUTPUT_DIRECTORY       = ./
 CREATE_SUBDIRS         = NO
@@ -27,7 +27,7 @@ ABBREVIATE_BRIEF       = "The $name class" \
                          an \
                          the
 ALWAYS_DETAILED_SEC    = NO
-INLINE_INHERITED_MEMB  = YES
+INLINE_INHERITED_MEMB  = NO
 FULL_PATH_NAMES        = YES
 STRIP_FROM_PATH        = ../
 STRIP_FROM_INC_PATH    =
@@ -53,7 +53,7 @@ EXTENSION_MAPPING      =
 MARKDOWN_SUPPORT       = YES
 TOC_INCLUDE_HEADINGS   = 0
 AUTOLINK_SUPPORT       = YES
-BUILTIN_STL_SUPPORT    = YES
+BUILTIN_STL_SUPPORT    = NO
 CPP_CLI_SUPPORT        = NO
 SIP_SUPPORT            = NO
 IDL_PROPERTY_SUPPORT   = NO
@@ -330,10 +330,13 @@ PERLMOD_MAKEVAR_PREFIX =
 ENABLE_PREPROCESSING   = YES
 MACRO_EXPANSION        = YES
 EXPAND_ONLY_PREDEF     = NO
-SEARCH_INCLUDES        = YES
+SEARCH_INCLUDES        = NO
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = __cplusplus=201703L
+PREDEFINED             = TOML_DOXYGEN=1 \
+						 __cplusplus=201703L \
+						 TOML_ALWAYS_INLINE=inline \
+						 TOML_MAY_THROW=
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO
 #---------------------------------------------------------------------------

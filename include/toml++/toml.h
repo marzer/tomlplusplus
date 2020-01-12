@@ -6,6 +6,7 @@
 
 #include "toml_common.h"
 #include "toml_date_time.h"
+#include "toml_print_to_stream.h"
 #include "toml_node.h"
 #include "toml_table.h"
 #include "toml_array.h"
@@ -13,7 +14,6 @@
 #include "toml_node_view.h"
 #include "toml_utf8.h"
 #include "toml_parser.h"
-#include "toml_print_to_stream.h"
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
@@ -51,4 +51,5 @@
 	#undef TOML_STRING_PREFIX_1
 	#undef TOML_STRING_PREFIX
 	#undef TOML_UNDEF_MACROS
+	#undef TOML_DOXYGEN
 #endif

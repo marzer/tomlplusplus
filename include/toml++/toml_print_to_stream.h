@@ -252,4 +252,26 @@ namespace toml::impl
 		if (val.time_offset)
 			print_to_stream(*val.time_offset, stream);
 	}
+
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_ALL_WARNINGS
+
+	template <typename T, typename CHAR>
+	void print_to_stream_with_escapes(T && str, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	{
+		static_assert(sizeof(CHAR) == 1);
+		for (auto c : str)
+		{
+			if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+				print_to_stream(low_character_escape_table[c], stream);
+			else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
+				print_to_stream(TOML_STRING_PREFIX("\\u007F"sv), stream);
+			else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
+				print_to_stream(TOML_STRING_PREFIX("\\\""sv), stream);
+			else
+				print_to_stream(c, stream);
+		}
+	}
+
+	TOML_POP_WARNINGS
 }

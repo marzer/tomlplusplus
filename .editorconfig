@@ -13,5 +13,5 @@ indent_style = space
 charset = utf-8
 trim_trailing_whitespace = true
 
-[*.{c, cpp, cxx, h, hpp, hxx, inl, py, md}]
+[*.{c, cpp, cxx, h, hpp, hxx, inl, py, md, css}]
 end_of_line = lf

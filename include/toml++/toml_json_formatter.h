@@ -45,17 +45,23 @@ namespace toml
 				base::clear_naked_newline();
 			}
 
+			void print() TOML_MAY_THROW
+			{
+				switch (auto source_type = base::source().type())
+				{
+					case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
+					case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
+					default: base::print(base::source(), source_type);
+				}
+			}
+
 		public:
 
 			TOML_NODISCARD_CTOR
-				json_formatter(const toml::table& source_, toml::string_view indent_string = {}) noexcept
-				: base{
-					source_,
-					impl::formatter_options{
-						indent_string,
-						true //quote_dates_and_times
-					}
-				}
+			explicit json_formatter(
+				const toml::node& source,
+				format_flags flags = format_flags::quote_dates_and_times) noexcept
+				: base{ source, flags }
 			{}
 
 			template <typename T>
@@ -63,7 +69,7 @@ namespace toml
 				TOML_MAY_THROW
 			{
 				rhs.attach(lhs);
-				rhs.print(rhs.source());
+				rhs.print();
 				rhs.detach();
 				return lhs;
 			}

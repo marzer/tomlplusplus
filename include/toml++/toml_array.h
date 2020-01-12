@@ -79,6 +79,25 @@ namespace toml::impl
 
 namespace toml
 {
+	/// \brief	A TOML array.
+	/// \detail The interface of this type is modeled after std::vector so things
+	/// 		mostly work as you'd expect them to with a vector: \cpp
+	/// 		
+	/// auto table = toml::parse("arr = [1, 2, 3, 4, 'five']"sv);
+	/// 
+	/// auto& arr = *table.get_as<toml::array>("arr");
+	/// 
+	/// for (size_t i = 0; i < arr.size(); i++)
+	/// {
+	///		arr[i].visit([=](auto&& el) noexcept
+	///		{
+	///			std::cout << el << ", ";
+	///		});
+	/// }
+	/// 
+	/// // prints: 1, 2, 3, 4, "five"
+	/// 
+	/// \ecpp
 	class array final
 		: public node
 	{
@@ -88,6 +107,11 @@ namespace toml
 
 		public:
 
+			using value_type = node;
+			using size_type = size_t;
+			using difference_type = ptrdiff_t;
+			using reference = node&;
+			using const_reference = const node&;
 			using iterator = impl::array_iterator<false>;
 			using const_iterator = impl::array_iterator<true>;
 
@@ -108,23 +132,20 @@ namespace toml
 			}
 
 			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
-		
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
 			[[nodiscard]] bool is_array() const noexcept override { return true; }
 			[[nodiscard]] bool is_value() const noexcept override { return false; }
+			[[nodiscard]] array* as_array() noexcept override { return this; }
+			[[nodiscard]] const array* as_array() const noexcept override { return this; }
 
-			[[nodiscard]] bool is_array_of_tables() const noexcept override
-			{
-				if (values.empty())
-					return false;
-
-				for (auto& val : values)
-					if (!val->is_table())
-						return false;
-
-				return true;
-			}
-
+			/// \brief	Checks if the array contains values of only one type.
+			///
+			/// \tparam	T	A TOML node type. Provide an explicit type for "is every element a T?".
+			/// 			Leave it as the default `void` for "is every element the same type?".
+			///
+			/// \returns	True if the array was homogeneous.
+			/// 
+			/// \attention	Empty arrays are _not_ regarded as homogeneous.
 			template <typename T = void>
 			[[nodiscard]] bool is_homogeneous() const noexcept
 			{
@@ -147,34 +168,102 @@ namespace toml
 				return true;
 			}
 
-			[[nodiscard]] array* as_array() noexcept override { return this; }
-			[[nodiscard]] const array* as_array() const noexcept override { return this; }
+			/// \brief	Returns true if this array contains only tables.
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			bool is_array_of_tables() const noexcept override
+			{
+				return is_homogeneous<toml::table>();
+			}
 
+			/// \brief	Gets a reference to the node element at a specific index.
+			[[nodiscard]] node& operator[] (size_t index) noexcept { return *values[index]; }
+			/// \brief	Gets a reference to the node element at a specific index.
+			[[nodiscard]] const node& operator[] (size_t index) const noexcept { return *values[index]; }
+
+			/// \brief	Returns a reference to the first element in the array.
+			[[nodiscard]] node& front() noexcept { return *values.front(); }
+			/// \brief	Returns a reference to the first element in the array.
+			[[nodiscard]] const node& front() const noexcept { return *values.front(); }
+			/// \brief	Returns a reference to the last element in the array.
+			[[nodiscard]] node& back() noexcept { return *values.back(); }
+			/// \brief	Returns a reference to the last element in the array.
+			[[nodiscard]] const node& back() const noexcept { return *values.back(); }
+
+			/// \brief	Returns an iterator to the first element.
+			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
+			/// \brief	Returns an iterator to the first element.
+			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
+			/// \brief	Returns an iterator to the first element.
+			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
+
+			/// \brief	Returns an iterator to one-past-the-last element.
+			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
+			/// \brief	Returns an iterator to one-past-the-last element.
+			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
+			/// \brief	Returns an iterator to one-past-the-last element.
+			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+
+			/// \brief	Returns true if the array is empty.
 			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+			/// \brief	Returns the number of elements in the array.
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			/// \brief	Reserves internal storage capacity up to a pre-determined number of elements.
+			void reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
 
-			[[nodiscard]] node& operator[] (size_t index) & noexcept { return *values[index].get(); }
-			[[nodiscard]] node&& operator[] (size_t index) && noexcept { return std::move(*values[index].get()); }
-			[[nodiscard]] const node& operator[] (size_t index) const& noexcept { return *values[index].get(); }
 
+			/// \brief	Removes all elements from the array.
+			void clear() noexcept { values.clear(); }
+
+			// insert()
+			// emplace()
+
+			/// \brief	Removes the specified element from the array.
+			/// 		
+			/// \returns The position following the Iterator following the removed element.
+			iterator erase(const_iterator pos) noexcept
+			{
+				return iterator{ values.erase(pos.raw_) };
+			}
+
+			/// \brief	Removes the specified range of elements elements from the array.
+			/// 
+			/// \returns The position following the Iterator following the last removed element.
+			iterator erase(const_iterator first, const_iterator last) noexcept
+			{
+				return iterator{ values.erase(first.raw_, last.raw_) };
+			}
+
+			// push_back()
+			// emplace_back()
+
+			/// \brief	Removes the last element from the array.
+			void pop_back() noexcept { values.pop_back(); }
+
+			/// \brief	Gets an element at a specific index if it is a particular type.
+			///
+			/// \tparam	T	The node's type.
+			/// \param 	index	The element index.
+			///
+			/// \returns	A pointer to the selected element if it was of the specified type, or nullptr.
 			template <typename T>
 			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
 			{
 				return values[index]->as<T>();
 			}
 
+			/// \brief	Gets an element at a specific index if it is a particular type.
+			///
+			/// \tparam	T	The node's type.
+			/// \param 	index	The element index.
+			///
+			/// \returns	A pointer to the selected element if it was of the specified type, or nullptr.
 			template <typename T>
 			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
 			{
 				return values[index]->as<T>();
 			}
 
-			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
-			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
-			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
-
-			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
-			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
-			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+			template <typename CHAR>
+			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 	};
 }

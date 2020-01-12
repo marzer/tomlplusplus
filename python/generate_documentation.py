@@ -57,28 +57,6 @@ def get_all_files(dir, all=None, any=None):
 
 
 
-def print_value(name, val):
-	print('{}:\n    {}'.format(name, val))
-
-
-
-def error_message(err, prefix="Error"):
-	if (isinstance(err, Exception) or (is_collection(err) and isinstance(err[0], Exception))):
-		exc = err[0] if is_collection(err) else err
-		trace = err[1] if (is_collection(err) and len(err) > 1) else traceback.format_exc(err)
-		print('{}: [{}] {}\n{}'.format(
-				prefix,
-				type(err).__name__,
-				str(err),
-				traceback.format_exc(err)
-			),
-			file=sys.stderr
-		)
-	else:
-		print("{}: {}".format(prefix, err), file=sys.stderr)
-
-
-
 class HTMLDocument(object):
 
 	def __init__(self, path):
@@ -257,14 +235,14 @@ class NavBarFix(object):
 
 
 
-# changes any links to index.html to link to namespaces.html instead (index.html is blank/unused)
+# changes any links to index.html to link to annotated.html instead (index.html is blank/unused)
 class IndexHrefFix(object): 
 
 	def __call__(self, file, doc):
 		links = doc.body('a', href='index.html')
 		if (len(links) > 0):
 			for link in links:
-				link['href'] = 'namespaces.html'
+				link['href'] = 'annotated.html'
 			return True
 		return False
 
@@ -475,31 +453,11 @@ class InlineNamespaceFix3(InlineNamespaceFixBase):
 
 
 
-# adds a custom footer to the main index pages.
-class FooterFix(object):
-	__replacement = '<div id="tpp-custom-footer tpp-injected">Documentation generated {} using '	\
-		+ '<a href="https://mcss.mosra.cz/">m.css</a></div>'.format(
-			datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-		)
-
-	def __call__(self, file, doc):
-		footer = doc.body.find(id='tpp-custom-footer')
-		if (footer is None):
-			return False
-		html_replace_tag(footer, self.__replacement)
-		return True
-
-
-
-#=======================================================================================================================
-
-
-
 # adds links to external sources where appropriate
 class ExtDocLinksFix(object): 
 	__types = [
 		(r'(?:std::)?size_t', 'https://en.cppreference.com/w/cpp/types/size_t'),
-		(r'(?:std::)?u?int(?:8|16|32|64)_ts?', 'https://en.cppreference.com/w/cpp/types/integer'),
+		(r'(?:std::)?u?int(?:8|16|32|64)(fast|least)?_ts?', 'https://en.cppreference.com/w/cpp/types/integer'),
 		(r'std::pairs?', 'https://en.cppreference.com/w/cpp/utility/pair'),
 		(r'std::bytes?', 'https://en.cppreference.com/w/cpp/types/byte'),
 		(r'std::optionals?', 'https://en.cppreference.com/w/cpp/utility/optional'),
@@ -554,6 +512,8 @@ class ExtDocLinksFix(object):
 		(r'std::add_[lr]value_reference(?:_t)?', 'https://en.cppreference.com/w/cpp/types/add_reference'),
 		(r'std::remove_reference(?:_t)?', 'https://en.cppreference.com/w/cpp/types/remove_reference'),
 		(r'std::remove_cv(?:_t)?', 'https://en.cppreference.com/w/cpp/types/remove_cv'),
+		(r'std::exceptions?', 'https://en.cppreference.com/w/cpp/error/exception'),
+		(r'std::runtime_errors?', 'https://en.cppreference.com/w/cpp/error/runtime_error'),
 		(
 			r'(?:L?P)?(?:'
 				+ r'D?WORD(?:32|64|_PTR)?|HANDLE|HMODULE|BOOL(?:EAN)?'
@@ -661,24 +621,41 @@ class EnableIfFix(object):
 
 
 
-_threadError = None
+_threadError = False
 
 
 
 def postprocess_file(dir, file, fixes):
+
 	global _threadError
-	if (_threadError is not None):
+	if (_threadError):
 		return False
 	print("Post-processing {}".format(file))
-	doc = HTMLDocument(path.join(dir, file))
-	file = file.lower()
 	changed = False
-	for fix in fixes:
-		if (fix(file, doc)):
-			changed = True
-	if (changed):
-		doc.flush()
+
+	try:
+		doc = HTMLDocument(path.join(dir, file))
+		file = file.lower()
+		for fix in fixes:
+			if (fix(file, doc)):
+				changed = True
+		if (changed):
+			doc.flush()
+
+	except Exception as err:
+		print(
+			'Error: [{}] {}'.format(
+				type(err).__name__,
+				str(err)
+			),
+			file=sys.stderr
+		)
+		traceback.print_exc(file=sys.stderr)
+		_threadError = True
+
 	return changed
+
+
 
 
 
@@ -712,12 +689,6 @@ def main():
 	mcss_dir = path.join(root_dir, 'extern', 'mcss')
 	doxygen = path.join(mcss_dir, 'documentation', 'doxygen.py')
 
-	print_value('doc', docs_dir)
-	print_value('xml', xml_dir)
-	print_value('html', html_dir)
-	print_value('m.css', mcss_dir)
-	print_value('doxygen', doxygen)
-
 	# delete any previously generated html and xml
 	delete_directory(xml_dir)
 	delete_directory(html_dir)
@@ -744,26 +715,22 @@ def main():
 		, InlineNamespaceFix1()
 		, InlineNamespaceFix2()
 		, InlineNamespaceFix3()
-		, FooterFix()
 		, ExtDocLinksFix()
 		, EnableIfFix()
 	]
 	files = [path.split(f) for f in get_all_files(html_dir, any=('*.html', '*.htm'))]
-	print_value("Files", files)
 	if files:
 		with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(files), num_threads)) as executor:
 			jobs = { executor.submit(postprocess_file, dir, file, fixes) : file for dir, file in files }
 			for job in concurrent.futures.as_completed(jobs):
-				file = jobs[job]
-				try:
-					print('Finished processing {}.'.format(file))
-				except Exception as e:
-					_threadError = (e, traceback.format_exc(e))
+				if _threadError:
 					executor.shutdown(False)
 					break
-		if (_threadError is not None):
-			error_message(_threadError, prefix="Fatal error")
-			sys.exit(-1)
+				else:
+					file = jobs[job]
+					print('Finished processing {}.'.format(file))
+		if _threadError:
+			sys.exit(1)
 
 
 
@@ -772,7 +739,7 @@ if __name__ == '__main__':
 		main()
 	except Exception as err:
 		print(
-			'Fatal error: [{}] {}'.format(
+			'Error: [{}] {}'.format(
 				type(err).__name__,
 				str(err)
 			),

@@ -75,6 +75,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
+    <None Include="..\docs\Doxyfile" />
+    <None Include="..\docs\Doxyfile-mcss" />
+    <None Include="..\docs\tomlplusplus.css" />
+    <None Include="..\docs\tomlplusplus.js" />
     <None Include="..\python\ci_single_header_check.py" />
     <None Include="..\python\generate_documentation.py" />
     <None Include="..\python\generate_single_header.py" />

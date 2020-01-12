@@ -6,6 +6,9 @@
 
 namespace toml::impl
 {
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_ALL_WARNINGS
+
 	[[nodiscard]]
 	inline toml::string default_formatter_make_key_segment(const toml::string& str) noexcept
 	{
@@ -32,7 +35,16 @@ namespace toml::impl
 				s.reserve(str.length() + 2_sz);
 				s += TOML_STRING_PREFIX('"');
 				for (auto c : str)
-					s.append(escape_string_character(c));
+				{
+					if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+						s.append(low_character_escape_table[c]);
+					else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
+						s.append(TOML_STRING_PREFIX("\\u007F"sv));
+					else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
+						s.append(TOML_STRING_PREFIX("\\\""sv));
+					else
+						s += c;
+				}
 				s += TOML_STRING_PREFIX('"');
 				return s;
 			}
@@ -40,6 +52,8 @@ namespace toml::impl
 				return str;
 		}
 	}
+
+	TOML_POP_WARNINGS
 
 	[[nodiscard]]
 	inline size_t default_formatter_inline_columns(const node& node) noexcept
@@ -177,7 +191,7 @@ namespace toml
 					const auto original_indent = base::indent();
 					const auto multiline = impl::default_formatter_forces_multiline(
 						arr,
-						base::indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent)
+						base::indent_columns * static_cast<size_t>(original_indent < 0 ? 0 : original_indent)
 					);
 					impl::print_to_stream("["sv, base::stream());
 					if (multiline)
@@ -341,17 +355,37 @@ namespace toml
 				}
 			}
 
+			void print() TOML_MAY_THROW
+			{
+				switch (auto source_type = base::source().type())
+				{
+					case node_type::table:
+					{
+						auto& tbl = *reinterpret_cast<const table*>(&base::source());
+						if (tbl.is_inline() || (base::flags() & format_flags::always_print_as_inline) != format_flags::none)
+							print_inline(tbl);
+						else
+						{
+							base::decrease_indent(); // so root kvps and tables have the same indent
+							print(tbl);
+						}
+						break;
+					}
+
+					case node_type::array:
+						print(*reinterpret_cast<const array*>(&base::source()));
+						break;
+
+					default:
+						base::print(base::source(), source_type);
+				}
+			}
+
 		public:
 
 			TOML_NODISCARD_CTOR
-			default_formatter(const toml::table& source_, toml::string_view indent_string = {}) noexcept
-				: base{
-					source_,
-					impl::formatter_options{
-						indent_string,
-						false //quote_dates_and_times
-					}
-				}
+			explicit default_formatter(const toml::node& source, format_flags flags = {}) noexcept
+				: base{ source, flags }
 			{}
 
 			template <typename T>
@@ -359,9 +393,8 @@ namespace toml
 				TOML_MAY_THROW
 			{
 				rhs.attach(lhs);
-				rhs.base::decrease_indent(); //starts at -1 so root kvps and first-level child tables have the same indent
 				rhs.key_path.clear();
-				rhs.print(rhs.source());
+				rhs.print();
 				rhs.detach();
 				return lhs;
 			}
@@ -410,6 +443,12 @@ namespace toml
 
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs) TOML_MAY_THROW
+	{
+		return lhs << default_formatter<CHAR>{ rhs };
+	}
+
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const array& rhs) TOML_MAY_THROW
 	{
 		return lhs << default_formatter<CHAR>{ rhs };
 	}

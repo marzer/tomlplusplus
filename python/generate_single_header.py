@@ -16,7 +16,7 @@ def get_script_folder():
 
 def read_all_text_from_file(path):
 	print("Reading {}".format(path))
-	with open(path, 'r') as file:
+	with open(path, 'r', encoding='utf-8') as file:
 		text = file.read()
 	return text
 
@@ -78,10 +78,18 @@ def main():
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
 	source_text = re.sub('(?:\n[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
-	source_text = re.sub('^[ \t]*//[/#!<]+.+?$', '', source_text, 0, re.I | re.M) # remove 'magic' comments
-	source_text = re.sub('\n([ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
+	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
+	for i in range(0, 5): # remove blank lines between simple one-liner definitions
+		source_text = re.sub('(using .+?;)\n\n([ \t]*using)', '\\1\n\\2', source_text, 0, re.I | re.M)
+		source_text = re.sub(
+				'([a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)'	\
+				+ '\n\n([ \t]*[a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)', '\\1\n\\2',
+				source_text, 0, re.I | re.M)
+		source_text = re.sub('(\[\[nodiscard\]\][^\n]+)\n\n([ \t]*\[\[nodiscard\]\])', '\\1\n\\2', source_text, 0, re.I | re.M)
 	source_text = source_text.strip()
+
+	
 
 	# extract library version
 	library_version = [0,0,0]
@@ -101,7 +109,7 @@ def main():
 toml++ v{}
 https://github.com/marzer/tomlplusplus'''.format('.'.join(str(x) for x in library_version)))
 	preamble.append('''
--          THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY           -
+-         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
 
 If you wish to submit a contribution to toml++, hooray and thanks! Before you crack on, please be aware that this
 file was assembled from a number of smaller files by a python script, and code contributions should not be made

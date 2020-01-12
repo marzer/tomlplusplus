@@ -22,8 +22,6 @@ int main(int argc, char** argv)
 	}
 	try
 	{
-		//const auto table = toml::parse(file); //works but parse_errors would not include the source path
-
 		const auto table = toml::parse(file, std::move(path));
 
 		std::cout << table << std::endl;

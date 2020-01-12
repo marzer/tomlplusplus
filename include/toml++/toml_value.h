@@ -1,5 +1,6 @@
 #pragma once
 #include "toml_node.h"
+#include "toml_print_to_stream.h"
 
 namespace toml
 {
@@ -102,7 +103,18 @@ namespace toml
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
 			{
-				impl::print_to_stream(rhs.val_, lhs);
+				// this is the same behaviour as default_formatter, but it's so simple that there's
+				// no need to spin up a new instance of it just for individual values.
+
+				if constexpr (std::is_same_v<T, string>)
+				{
+					impl::print_to_stream('"', lhs);
+					impl::print_to_stream_with_escapes(rhs.val_, lhs);
+					impl::print_to_stream('"', lhs);
+				}
+				else
+					impl::print_to_stream(rhs.val_, lhs);
+				
 				return lhs;
 			}
 	};

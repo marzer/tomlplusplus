@@ -114,8 +114,6 @@
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
 
-#elif defined (DOXYGEN)
-	#define TOML_EXCEPTIONS	0
 #endif
 
 #ifndef TOML_CPP_VERSION
@@ -137,6 +135,9 @@
 
 #ifndef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS 1
+#endif
+#ifndef TOML_DOXYGEN
+	#define TOML_DOXYGEN 0
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept(__VA_ARGS__)
@@ -273,20 +274,17 @@ TOML_POP_WARNINGS
 /// \brief	The root namespace for all toml++ functions and types.
 namespace toml
 {
-	/// \brief	User-defined literals.
 	inline namespace literals
 	{
 		using namespace std::string_literals;
 		using namespace std::string_view_literals;
 
-		/// \brief	Specifies a uint8_t literal.
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
 		{
 			return static_cast<uint8_t>(n);
 		}
 
-		/// \brief	Specifies a size_t literal.
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 		{
@@ -302,16 +300,16 @@ namespace toml
 
 	#else
 
-	/// \brief	The base character type for toml++ keys and string values.
-	/// \remarks This will be `char8_t` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `char`.
+	/// \brief	The base character type for keys and string values.
+	/// \attention This will be `char8_t` if `TOML_CHAR_8_STRINGS` is `1`.
 	using string_char = char;
 
-	/// \brief	The string type for toml++ keys and string values.
-	/// \remarks This will be `std::u8string` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `std::string`.
+	/// \brief	The string type for keys and string values.
+	/// \attention This will be `std::u8string` if `TOML_CHAR_8_STRINGS` is `1`.
 	using string = std::string;
 
-	/// \brief	The string type for toml++ keys and string values.
-	/// \remarks This will be `std::u8string_view` if `TOML_CHAR_8_STRINGS = 1`, otherwise it will be `std::string_view`.
+	/// \brief	The string type for keys and string values.
+	/// \attention This will be `std::u8string_view` if `TOML_CHAR_8_STRINGS` is `1`.
 	using string_view = std::string_view;
 
 	#endif
@@ -348,13 +346,13 @@ namespace toml
 	#else
 
 	/// \brief	The integer type used to tally line numbers and columns.
-	/// \remarks This will be `uint32_t` if `TOML_LARGE_FILES = 1`, otherwise it will be `uint16_t`.
+	/// \attention This will be `uint32_t` if `TOML_LARGE_FILES` is `1`.
 	using source_index = uint16_t;
 
 	#endif
 
 	/// \brief	A source document line-and-column pair.
-	struct source_position final
+	struct source_position
 	{
 		/// \brief The line number.
 		/// \remarks Valid line numbers start at 1.
@@ -370,7 +368,6 @@ namespace toml
 		{
 			return line > source_index{} && column > source_index{};
 		}
-
 
 		[[nodiscard]]
 		friend constexpr bool operator == (const source_position& lhs, const source_position& rhs) noexcept
@@ -412,7 +409,7 @@ namespace toml
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	/// \brief	A source document region.
-	struct source_region final
+	struct source_region
 	{
 		/// \brief The beginning of the region (inclusive).
 		source_position begin;
@@ -429,7 +426,7 @@ namespace toml
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
-	#if TOML_EXCEPTIONS
+	#if !TOML_DOXYGEN && TOML_EXCEPTIONS
 
 	class parse_error final
 		: public std::runtime_error
@@ -472,8 +469,8 @@ namespace toml
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 
-	/// \remarks This will inherit from `std::runtime_exception` when `TOML_EXCEPTIONS = 1`.
-	/// 		 The public interface will be exactly the same either way.
+	/// \remarks This class inherits from `std::runtime_error` when `TOML_EXCEPTIONS` is `1`.
+	/// 		 The public interface remains the same regardless of exception mode.
 	class parse_error final
 	{
 		private:
@@ -537,6 +534,13 @@ namespace toml::impl
 
 	#endif
 
+	template <typename T>
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
+	{
+		return static_cast<std::underlying_type_t<T>>(val);
+	}
+
 	// Q: "why not use std::find??"
 	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
 	//    I don't want to impose such a heavy burden on users.
@@ -550,20 +554,6 @@ namespace toml::impl
 				return i;
 		return {};
 	}
-
-	template <typename T>
-	struct is_generic_invocable
-	{
-		template <typename U>
-		static constexpr auto test(U&&) -> decltype(std::declval<T>()(std::declval<U&&>()), std::true_type{});
-		static constexpr std::false_type test(...);
-
-		struct tester {};
-		static constexpr auto value = decltype(test(tester{}))::value;
-	};
-
-	template <typename T>
-	inline constexpr bool is_generic_invocable_v = is_generic_invocable<T>::value;
 
 	class parser;
 
@@ -692,12 +682,17 @@ namespace toml::impl
 
 namespace toml
 {
+
+	/// \brief	Helper alias that wraps a type up as it's TOML node equivalent.
 	template <typename T>
 	using node_of = typename impl::node_wrapper<T>::type;
 
+	/// \brief	Helper alias that unwraps TOML node type to it's raw value equivalent.
 	template <typename T>
 	using value_of = typename impl::node_unwrapper<T>::type;
 
+
+	/// \brief	Pretty-prints the value of a node_type to a stream.
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
 	{
