@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml::literals namespace | toml++</title>
+  <title>toml::parse_error class | toml++ TOML
+Parser
+for
+C++17</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
   <link href="tomlplusplus.css" rel="stylesheet"/>
   <link href="favicon-dark.png" rel="icon" type="image/png"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <meta content="#2d2d30" name="theme-color"/>
+  <meta content="#22272e" name="theme-color"/>
   <script src="tomlplusplus.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespaces.html" id="m-navbar-brand">toml++</a>
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="annotated.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+Parser
+for
+C++17</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -25,7 +31,7 @@
       <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
         <div class="m-row">
           <ol class="m-col-t-6 m-col-m-none"><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a></li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="pages.html">Pages</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
@@ -43,31 +49,32 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>literals <span class="m-thin">namespace</span>
-         <span class="m-label m-info tpp-injected tpp-inline-namespace" title="All members of this namespace are automatically members of the parent namespace. It does not require an explicit 'using' statement.">inline</span></h1>
-        <p>User-defined literals.</p>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_error <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>An error thrown/returned when parsing fails.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#func-members">Functions</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
               </ul>
             </li>
           </ul>
         </div>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
+<aside class="m-note m-default"><h4>Remark</h4><p>This class inherits from <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/error/runtime_error" target="_blank">std::runtime_error</a></code> when <code>TOML_EXCEPTIONS</code> is <code>1</code>. The public interface remains the same regardless of exception mode.</p></aside>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a4a1fced946c998e169e75fddecf18363">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a1fced946c998e169e75fddecf18363">operator""_sz</a>(</span><span class="m-doc-wrap">unsigned long long n) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a5582e9d66f8aa3f6ef442c0a04d5282f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Specifies a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> literal.</dd>
-            <dt id="a1c49861136a6240d71d7b0d3b79ec42a">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1c49861136a6240d71d7b0d3b79ec42a">operator""_u8</a>(</span><span class="m-doc-wrap">unsigned long long n) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns a textual description of the error.</dd>
+            <dt id="a8168b4941305654cf4ba8fc96efd0514">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8168b4941305654cf4ba8fc96efd0514">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Specifies a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> literal.</dd>
+            <dd>Returns the region of the source document responsible for the error.</dd>
           </dl>
         </section>
       </div>
@@ -114,15 +121,17 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        
-<a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 •
 
 <a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
-<br/><br/><div id="tpp-custom-footer tpp-injected">Documentation generated {} using <a href="https://mcss.mosra.cz/">m.css</a></div>
+<br/><br/>Documentation
+generated
+using
+<a href="https://mcss.mosra.cz/">m.css</a>
       </div>
     </div>
   </div>

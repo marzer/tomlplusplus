@@ -1,3 +1,4 @@
+/*
 table.m-table th
 {
 	color: #ffe698;
@@ -49,71 +50,16 @@ dl.m-doc dd
 	margin-bottom: 0.8rem;
 }
 
-a.tpp-external
-{
-	font-weight: normal;
-}
-
 .m-doc-template a, dl.m-doc dd a, ul.m-doc li > span.m-doc a
 {
-    color: #858585;
+	color: #858585;
 }
 
 .m-doc-template a.tpp-external:hover,
   dl.m-doc dd a.tpp-external:hover,
   ul.m-doc li > span.m-doc a.tpp-external:hover
 {
-    color: inherit;
-}
-
-
-.tpp-swatch, .tpp-enable-if > *
-{
-	display: inline-block;
-	border-radius: 0.2rem;
-}
-
-.tpp-enable-if
-{
-	margin-bottom: 2px;
-}
-
-.tpp-enable-if > *
-{
-  background-clip: padding-box !important;	
-	padding: 0px 2px;
-	text-decoration: none;
-}
-
-.tpp-enable-if > a
-{
-	white-space: nowrap;
-	font-size: 0.8rem;
-	font-weight: bold;
-	background-color: #858585;
-	color: #050505;
-	padding-bottom: 0px;
-	margin: 0px 1px;
-	margin-bottom: 2px;
-}
-
-.tpp-enable-if > a:hover
-{
-	background-color: #747474;
-	color: initial;
-}
-
-.tpp-enable-if > span
-{
-  display: none;
-	padding-left: 2em;
-	
-}
-
-.tpp-swatch
-{
-	min-width: 3em;
-	min-height: 1em;
+	color: inherit;
 }
 
 body > header > nav
@@ -126,12 +72,12 @@ html
 	background-color: #2d2d30;
 }
 
-pre, code, .m-label/*.m-flat.m-success*/, .tpp-enable-if > a
+pre, code, .m-label, .tpp-enable-if > a
 {
 	font-family: 'Consolas', monospace;
 }
 
-pre, .m-doc-search-content /*, .tpp-enable-if > full*/
+pre, .m-doc-search-content
 {
 	background-color: #1e1e1e;
 }
@@ -139,31 +85,6 @@ pre, .m-doc-search-content /*, .tpp-enable-if > full*/
 pre.m-code, code
 {
 	background-color: #1e1e1e88;
-}
-
-.m-code .c1 /* comments */
-{
-    color: rgb(87,166,74);
-}
-
-.m-code .mi, .m-code .mf /* literals */
-{
-	color: rgb(181,206,168);
-}
-
-.m-code .k /* keywords */
-{
-	color: rgb(86,156,214);
-}
-
-.m-code .n /* names */
-{
-	color: rgb(220,220,220);
-}
-
-.m-code .p /* punctuation */
-{
-	color: rgb(120,120,120);
 }
 
 article section.m-doc-details > div > h3:first-child, article section > h2, body > footer > nav
@@ -178,21 +99,7 @@ article section.m-doc-details > div > h3:first-child, article section > h2, body
 
 .m-label:not(.m-flat)
 {
-    font-weight: bold;
-}
-
-header
-{
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-	z-index: 100;
-}
-
-body
-{
-    margin-top: 3rem;
+	font-weight: bold;
 }
 
 div.m-doc-include
@@ -210,9 +117,91 @@ div.m-doc-include
 	color: #9999AA;
 }
 
-article, article > header, article section
+*/
+
+html, body
 {
+	scroll-padding-top: 3.5rem;
+}
+
+body
+{
+	margin-top: 3rem;
+}
+
+header {
+	position: fixed;
+	left: 0;
+	right: 0;
+	top: 0;
+	z-index: 100;
+}
+
+article, article > header, article section {
 	margin-bottom: 3em;
-	background-color: red;
-	background-color: inherit;
+}
+
+pre, code, .tpp-enable-if > a {
+	font-family: 'Consolas', 'Source Sans Pro', monospace;
+}
+
+a.tpp-external {
+	font-weight: normal;
+}
+
+.tpp-enable-if {
+	margin-bottom: 2px;
+}
+
+.tpp-enable-if > * {
+	display: inline-block;
+	border-radius: 0.2rem;
+	background-clip: padding-box !important;
+	padding: 0px 2px;
+	text-decoration: none;
+}
+
+.tpp-enable-if > a {
+	white-space: nowrap;
+	font-size: 0.8rem;
+	font-weight: bold;
+	background-color: #858585;
+	color: #050505;
+	padding-bottom: 0px;
+	margin: 0px 1px;
+	margin-bottom: 2px;
+}
+
+	.tpp-enable-if > a:hover {
+		background-color: #747474;
+		color: initial;
+	}
+
+.tpp-enable-if > span {
+	display: none;
+	padding-left: 2em;
+}
+
+nav .m-thin {
+	margin-left: 0.5em;
+}
+
+.m-code .c1 {
+	color: rgb(87,166,74);
+}
+
+.m-code .mi, .m-code .mf {
+	color: rgb(181,206,168);
+}
+
+.m-code .k {
+	color: rgb(86,156,214);
+}
+
+.m-code .n {
+	color: rgb(220,220,220);
+}
+
+.m-code .p {
+	color: rgb(120,120,120);
 }

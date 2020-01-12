@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml namespace | toml++</title>
+  <title>toml namespace | toml++ TOML
+Parser
+for
+C++17</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
   <link href="tomlplusplus.css" rel="stylesheet"/>
   <link href="favicon-dark.png" rel="icon" type="image/png"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-  <meta content="#2d2d30" name="theme-color"/>
+  <meta content="#22272e" name="theme-color"/>
   <script src="tomlplusplus.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespaces.html" id="m-navbar-brand">toml++</a>
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="annotated.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+Parser
+for
+C++17</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -25,7 +31,7 @@
       <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
         <div class="m-row">
           <ol class="m-col-t-6 m-col-m-none"><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a></li>
-            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="pages.html">Pages</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
@@ -66,13 +72,23 @@
           <dl class="m-doc">
             <dt>namespace <a class="m-doc" href="namespacetoml_1_1impl.html">impl</a></dt>
             <dd>Internal implementation details. No user-serviceable parts within.</dd>
-            <dt>namespace <a class="m-doc" href="namespacetoml_1_1literals.html">literals</a> <span class="m-label m-info m-flat tpp-injected tpp-inline-namespace" title="All members of this namespace are automatically members of the parent namespace. It does not require an explicit 'using' statement.">inline</span></dt>
-            <dd>User-defined literals.</dd>
           </dl>
         </section>
         <section id="nested-classes">
           <h2><a href="#nested-classes">Classes</a></h2>
           <dl class="m-doc">
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1array.html">array</a>
+            </dt>
+            <dd>A TOML array.</dd>
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1node.html">node</a>
+            </dt>
+            <dd>A TOML node.</dd>
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1parse__error.html">parse_error</a>
+            </dt>
+            <dd>An error thrown/returned when parsing fails.</dd>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1source__position.html">source_position</a>
             </dt>
@@ -103,6 +119,11 @@
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
+            <dt id="a7c937f95568df080c3584862c25f4030">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              using <a class="m-doc-self" href="#a7c937f95568df080c3584862c25f4030">node_of</a> = typename impl::node_wrapper&lt;T&gt;::type
+            </dt>
+            <dd>Helper alias that wraps a type up as it's TOML node equivalent.</dd>
             <dt>
               using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </dt>
@@ -114,28 +135,31 @@
             <dt>
               using <a class="m-doc" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
             </dt>
-            <dd>The string type for toml++ keys and string values.</dd>
+            <dd>The string type for keys and string values.</dd>
             <dt>
               using <a class="m-doc" href="#a29d79a4734dc5c63b2b749b02fc0b823">string_char</a> = char
             </dt>
-            <dd>The base character type for toml++ keys and string values.</dd>
+            <dd>The base character type for keys and string values.</dd>
             <dt>
               using <a class="m-doc" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
             </dt>
-            <dd>The string type for toml++ keys and string values.</dd>
+            <dd>The string type for keys and string values.</dd>
+            <dt id="a7b72195a2db21f3eb407442ce9993d01">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              using <a class="m-doc-self" href="#a7b72195a2db21f3eb407442ce9993d01">value_of</a> = typename impl::node_unwrapper&lt;T&gt;::type
+            </dt>
+            <dd>Helper alias that unwraps TOML node type to it's raw value equivalent.</dd>
           </dl>
         </section>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a4a1fced946c998e169e75fddecf18363">operator""_sz</a>(</span><span class="m-doc-wrap">unsigned long long n) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aaa1ee3cd7e3a50ae76f0da76eb21a0bc">
+              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aaa1ee3cd7e3a50ae76f0da76eb21a0bc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a>rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
-            <dd>Specifies a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> literal.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a1c49861136a6240d71d7b0d3b79ec42a">operator""_u8</a>(</span><span class="m-doc-wrap">unsigned long long n) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Specifies a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> literal.</dd>
+            <dd>Pretty-prints the value of a node_type to a stream.</dd>
           </dl>
         </section>
         <section>
@@ -145,28 +169,28 @@
               using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </h3>
             <p>The integer type used to tally line numbers and columns.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a></code> if <code>TOML_LARGE_FILES = 1</code>, otherwise it will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a></code>.</p></aside>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a></code> if <code>TOML_LARGE_FILES</code> is <code>1</code>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d0523987bb329ff90f8d14550b5f3a6"><div>
             <h3>
               using toml::<wbr/><a class="m-doc-self" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
             </h3>
-            <p>The string type for toml++ keys and string values.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::u8string</a></code> if <code>TOML_CHAR_8_STRINGS = 1</code>, otherwise it will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a></code>.</p></aside>
+            <p>The string type for keys and string values.</p>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::u8string</a></code> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a29d79a4734dc5c63b2b749b02fc0b823"><div>
             <h3>
               using toml::<wbr/><a class="m-doc-self" href="#a29d79a4734dc5c63b2b749b02fc0b823">string_char</a> = char
             </h3>
-            <p>The base character type for toml++ keys and string values.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a></code> if <code>TOML_CHAR_8_STRINGS = 1</code>, otherwise it will be <code>char</code>.</p></aside>
+            <p>The base character type for keys and string values.</p>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a></code> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a496653fce75ee70bbe451bb5f2377265"><div>
             <h3>
               using toml::<wbr/><a class="m-doc-self" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
             </h3>
-            <p>The string type for toml++ keys and string values.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a></code> if <code>TOML_CHAR_8_STRINGS = 1</code>, otherwise it will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a></code>.</p></aside>
+            <p>The string type for keys and string values.</p>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a></code> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
           </div></section>
         </section>
       </div>
@@ -213,15 +237,17 @@
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        
-<a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 •
 
 <a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
-<br/><br/><div id="tpp-custom-footer tpp-injected">Documentation generated {} using <a href="https://mcss.mosra.cz/">m.css</a></div>
+<br/><br/>Documentation
+generated
+using
+<a href="https://mcss.mosra.cz/">m.css</a>
       </div>
     </div>
   </div>
