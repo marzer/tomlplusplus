@@ -160,7 +160,7 @@ namespace toml::impl
 
 	template <typename CHAR>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(bool& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(bool val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);

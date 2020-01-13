@@ -98,12 +98,12 @@ namespace toml::impl
 				}
 				else
 				{
-					static constexpr auto is_date_time =
+					static constexpr auto is_dt =
 						std::is_same_v<T, date>
 						|| std::is_same_v<T, time>
 						|| std::is_same_v<T, date_time>;
 
-					if constexpr (is_date_time)
+					if constexpr (is_dt)
 					{
 						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);
@@ -111,7 +111,7 @@ namespace toml::impl
 
 					*stream_ << val;
 
-					if constexpr (is_date_time)
+					if constexpr (is_dt)
 					{
 						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);

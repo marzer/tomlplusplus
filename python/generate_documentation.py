@@ -708,8 +708,8 @@ def main():
 	# post-process html files
 	fixes = [
 		CustomTagsFix()
-		, NavBarFix()
-		, IndexHrefFix()
+		# , NavBarFix()
+		# , IndexHrefFix()
 		, ModifiersFix1()
 		, ModifiersFix2()
 		, InlineNamespaceFix1()

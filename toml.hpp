@@ -22,7 +22,7 @@
 //
 // MIT License
 //
-// Copyright (c) 2019 Mark Gillard
+// Copyright (c) 2019-2020 Mark Gillard
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -81,7 +81,7 @@
 	#error toml++ is a C++ library.
 #endif
 
-#if defined(__clang__) or defined(__GNUC__)
+#if defined(__clang__) || defined(__GNUC__)
 	#define TOML_GCC_ATTR(attr)		__attribute__((attr))
 #else
 	#define TOML_GCC_ATTR(attr)
@@ -441,46 +441,7 @@ namespace toml
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
-	#if !TOML_DOXYGEN && TOML_EXCEPTIONS
-
-	class parse_error final
-		: public std::runtime_error
-	{
-		private:
-			source_region source_;
-
-		public:
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, source_region&& src) noexcept
-				: std::runtime_error{ desc },
-				source_{ std::move(src) }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, const source_region& src) noexcept
-				: parse_error{ desc, source_region{ src } }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ desc, source_region{ position, position, path } }
-			{}
-
-			[[nodiscard]]
-			std::string_view description() const noexcept
-			{
-				return std::string_view{ what() };
-			}
-
-			[[nodiscard]]
-			const source_region& source() const noexcept
-			{
-				return source_;
-			}
-	};
-
-	#else
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
 	class parse_error final
 	{
@@ -510,6 +471,45 @@ namespace toml
 			std::string_view description() const noexcept
 			{
 				return description_;
+			}
+
+			[[nodiscard]]
+			const source_region& source() const noexcept
+			{
+				return source_;
+			}
+	};
+
+	#else
+
+	class parse_error final
+		: public std::runtime_error
+	{
+		private:
+			source_region source_;
+
+		public:
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, source_region&& src) noexcept
+				: std::runtime_error{ desc },
+				source_{ std::move(src) }
+			{}
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, const source_region& src) noexcept
+				: parse_error{ desc, source_region{ src } }
+			{}
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
+				: parse_error{ desc, source_region{ position, position, path } }
+			{}
+
+			[[nodiscard]]
+			std::string_view description() const noexcept
+			{
+				return std::string_view{ what() };
 			}
 
 			[[nodiscard]]
@@ -584,7 +584,11 @@ namespace toml::impl
 		|| std::is_same_v<T, uint32_t>
 		|| std::is_same_v<T, uint16_t>
 		|| std::is_same_v<T, uint8_t>
-		|| std::is_same_v<T, float>;
+		|| std::is_same_v<T, float>
+		#ifdef TOML_SMALL_FLOAT_TYPE
+		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
+		#endif
+		;
 
 	template <typename T>
 	inline constexpr bool is_value_or_node =
@@ -613,6 +617,9 @@ namespace toml::impl
 	template <> struct value_promoter<uint16_t> { using type = int64_t; };
 	template <> struct value_promoter<uint8_t> { using type = int64_t; };
 	template <> struct value_promoter<float> { using type = double; };
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
+	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
@@ -688,12 +695,30 @@ namespace toml::impl
 
 namespace toml
 {
-
 	template <typename T>
 	using node_of = typename impl::node_wrapper<T>::type;
 
 	template <typename T>
 	using value_of = typename impl::node_unwrapper<T>::type;
+
+	template <typename T>
+	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
+	template <typename T>
+	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
+	template <typename T>
+	inline constexpr bool is_string = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<string>>;
+	template <typename T>
+	inline constexpr bool is_integer = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
+	template <typename T>
+	inline constexpr bool is_floating_point = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<double>>;
+	template <typename T>
+	inline constexpr bool is_boolean = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<bool>>;
+	template <typename T>
+	inline constexpr bool is_date = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date>>;
+	template <typename T>
+	inline constexpr bool is_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<time>>;
+	template <typename T>
+	inline constexpr bool is_date_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
@@ -1015,7 +1040,7 @@ namespace toml::impl
 
 	template <typename CHAR>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(bool& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(bool val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);
@@ -1159,17 +1184,18 @@ namespace toml
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>* reinterpret_as() noexcept
-			{
-				return reinterpret_cast<node_of<T>*>(this);
-			}
+			node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<node_of<T>*>(this); }
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			const node_of<T>* reinterpret_as() const noexcept
-			{
-				return reinterpret_cast<const node_of<T>*>(this);
-			}
+			node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<node_of<T>*>(this)); }
+
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			const node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const node_of<T>*>(this); }
+
+			template <typename N, typename T>
+			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
 
 			node() noexcept = default;
 			node(const node&) = delete;
@@ -1281,94 +1307,136 @@ namespace toml
 
 		private:
 
-			// this is done using a static helper to preserve const categories
-			// (otherwise I'd have to implement this function twice)
-			// (const propagation in C++: a modern horror story)
+			template <typename FUNC, typename N, typename T, bool = std::is_invocable_v<FUNC, ref_cast_type<N, T>>>
+			struct visit_return_type final
+			{
+				using type = decltype(std::declval<FUNC>()(std::declval<ref_cast_type<N, T>>()));
+			};
+			template <typename FUNC, typename N, typename T>
+			struct visit_return_type<FUNC, N, T, false> final
+			{
+				using type = void;
+			};
+
+			template <typename A, typename B>
+			using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
+
+			// this is done using a static helper to preserve const and ref categories
+			// (otherwise I'd have to implement this function thrice)
+			// ((propagation in C++: a modern horror story))
 			template <typename N, typename FUNC>
-			TOML_GCC_ATTR(nonnull)
-			static decltype(auto) do_visit(N* node, FUNC&& visitor) TOML_MAY_THROW
+			static decltype(auto) do_visit(N&& node, FUNC&& visitor) TOML_MAY_THROW
 			{
 				static_assert(
-					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
-					|| std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>,
+					std::is_invocable_v<FUNC&&,    ref_cast_type<N&&, table>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
+					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>,
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
-				static constexpr auto is_exhaustive =
-					std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>
-					&& std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>;
-
-				switch (node->type())
+				switch (node.type())
 				{
 					case node_type::table:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<table>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<table>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
 						break;
 					case node_type::array:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<array>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<array>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
 						break;
 					case node_type::string:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<string>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<string>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
 						break;
 					case node_type::integer:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<int64_t>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<int64_t>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
 						break;
 					case node_type::floating_point:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<double>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<double>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
 						break;
 					case node_type::boolean:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<bool>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<bool>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
 						break;
 					case node_type::date:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
 						break;
 					case node_type::time:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<time>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<time>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
 						break;
 					case node_type::date_time:
-						if constexpr (std::is_invocable_v<FUNC&&, decltype(*node->template reinterpret_as<date_time>())>)
-							return std::forward<FUNC>(visitor)(*node->template reinterpret_as<date_time>());
+						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>)
+							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
 						break;
 					TOML_NO_DEFAULT_CASE;
 				}
 
+				static constexpr auto is_exhaustive =
+					std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
+					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>;
+
 				if constexpr (is_exhaustive)
 					TOML_UNREACHABLE;
+				else
+				{
+					using return_type =
+						nonvoid<typename visit_return_type<FUNC&&, N&&, table>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, array>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, string>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, int64_t>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, double>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, bool>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, date>::type,
+						nonvoid<typename visit_return_type<FUNC&&, N&&, time>::type,
+							typename visit_return_type<FUNC&&, N&&, date_time>::type
+						>>>>>>>>;
+
+					if constexpr (!std::is_void_v<return_type>)
+					{
+						static_assert(
+							std::is_default_constructible_v<return_type>,
+							"Non-exhaustive visitors must return a default-constructible type, or void"
+						);
+						return return_type{};
+					}
+				}
 			}
 
 		public:
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW
 			{
-				return do_visit(this, std::forward<FUNC>(visitor));
+				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW
 			{
-				return do_visit(this, std::forward<FUNC>(visitor));
+				return do_visit(std::move(*this), std::forward<FUNC>(visitor));
+			}
+
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW
+			{
+				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 	};
 }
@@ -1934,6 +2002,9 @@ namespace toml
 	value(uint8_t) -> value<int64_t>;
 	value(uint16_t) -> value<int64_t>;
 	value(uint32_t) -> value<int64_t>;
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+	#endif
 }
 
 #pragma endregion
@@ -3816,11 +3887,7 @@ namespace toml::impl
 
 namespace toml
 {
-	#if TOML_EXCEPTIONS
-
-	using parse_result = table;
-
-	#else
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
 	class parse_result final
 	{
@@ -3878,7 +3945,7 @@ namespace toml
 
 			[[nodiscard]] table& operator* () & noexcept { return get(); }
 			[[nodiscard]] table&& operator* () && noexcept { return std::move(get()); }
-			[[nodiscard]] const table& operator* () const & noexcept { return get(); }
+			[[nodiscard]] const table& operator* () const& noexcept { return get(); }
 			[[nodiscard]] table* operator-> () noexcept { return &get(); }
 			[[nodiscard]] const table* operator-> () const noexcept { return &get(); }
 			[[nodiscard]] operator table& () noexcept { return get(); }
@@ -3938,6 +4005,10 @@ namespace toml
 				destroy();
 			}
 	};
+
+	#else
+
+	using parse_result = table;
 
 	#endif
 }
@@ -5742,7 +5813,7 @@ namespace toml::impl
 						if constexpr (!TOML_LANG_HIGHER_THAN(0, 5, 0)) // toml/issues/665
 						{
 							// arrays must be homogeneous in toml 0.5.0 and earlier
-							if (!val->reinterpret_as<array>()->is_homogeneous())
+							if (!val->ref_cast<array>().is_homogeneous())
 								TOML_ERROR(
 									"Arrays cannot contain values of different types in TOML 0.5.0 and earlier.",
 									begin_pos,
@@ -6210,7 +6281,7 @@ namespace toml::impl
 				const auto header_begin_pos = cp->position;
 				source_position header_end_pos;
 				key key;
-				bool is_array = false;
+				bool is_arr = false;
 
 				//parse header
 				{
@@ -6230,7 +6301,7 @@ namespace toml::impl
 					{
 						advance();
 						eof_check();
-						is_array = true;
+						is_arr = true;
 					}
 
 					// skip past any whitespace that followed the '['
@@ -6268,12 +6339,12 @@ namespace toml::impl
 					if (*cp != U']')
 						abort_with_error(
 							"Encountered unexpected character while parsing table"sv,
-							(is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\''
+							(is_arr ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\''
 						);
 					advance();
 
 					// consume the second closing ']'
-					if (is_array)
+					if (is_arr)
 					{
 						eof_check();
 
@@ -6292,7 +6363,7 @@ namespace toml::impl
 					{
 						if (!consume_comment() && !consume_line_break())
 							abort_with_error(
-								"Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv),
+								"Encountered unexpected character after table"sv, (is_arr ? " array"sv : ""sv),
 								" header; expected a comment or whitespace, saw '"sv, *cp, '\''
 							);
 					}
@@ -6311,31 +6382,31 @@ namespace toml::impl
 							key.segments[i],
 							std::make_unique<table>()
 						).first->second.get();
-						implicit_tables.push_back(child->reinterpret_as<table>());
+						implicit_tables.push_back(&child->ref_cast<table>());
 						child->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						parent = child->reinterpret_as<table>();
+						parent = &child->ref_cast<table>();
 					}
 					else if (child->is_table())
 					{
-						parent = child->reinterpret_as<table>();
+						parent = &child->ref_cast<table>();
 					}
-					else if (child->is_array() && find(table_arrays, child->reinterpret_as<array>()))
+					else if (child->is_array() && find(table_arrays, &child->ref_cast<array>()))
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!child->reinterpret_as<array>()->values.empty());
-						TOML_ASSERT(child->reinterpret_as<array>()->values.back()->is_table());
-						parent = child->reinterpret_as<array>()->values.back()->reinterpret_as<table>();
+						TOML_ASSERT(!child->ref_cast<array>().values.empty());
+						TOML_ASSERT(child->ref_cast<array>().values.back()->is_table());
+						parent = &child->ref_cast<array>().values.back()->ref_cast<table>();
 					}
 					else
 					{
-						if (!is_array && child->type() == node_type::table)
+						if (!is_arr && child->type() == node_type::table)
 							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 						else
 							abort_with_error(
 								"Attempt to redefine existing "sv, child->type(),
 								" '"sv, recording_buffer,
-								"' as "sv, is_array ? "array-of-tables"sv : "table"sv
+								"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 							);
 					}
 				}
@@ -6349,23 +6420,23 @@ namespace toml::impl
 				{
 					// if it's an array we need to make the array and it's first table element,
 					// set the starting regions, and return the table element
-					if (is_array)
+					if (is_arr)
 					{
-						auto tab_arr = parent->values.emplace(key.segments.back(),std::make_unique<array>())
-							.first->second->reinterpret_as<array>();
+						auto tab_arr = &parent->values.emplace(key.segments.back(),std::make_unique<array>())
+							.first->second->ref_cast<array>();
 						table_arrays.push_back(tab_arr);
 						tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->values.back()->reinterpret_as<table>();
+						return &tab_arr->values.back()->ref_cast<table>();
 					}
 
 					//otherwise we're just making a table
 					else
 					{
-						auto tab = parent->values.emplace(key.segments.back(),std::make_unique<table>())
-							.first->second->reinterpret_as<table>();
+						auto tab = &parent->values.emplace(key.segments.back(),std::make_unique<table>())
+							.first->second->ref_cast<table>();
 						tab->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 						return tab;
 					}
@@ -6377,19 +6448,19 @@ namespace toml::impl
 				// otherwise this is a redefinition error.
 				else
 				{
-					if (is_array && matching_node->is_array() && find(table_arrays, matching_node->reinterpret_as<array>()))
+					if (is_arr && matching_node->is_array() && find(table_arrays, &matching_node->ref_cast<array>()))
 					{
-						auto tab_arr = matching_node->reinterpret_as<array>();
+						auto tab_arr = &matching_node->ref_cast<array>();
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->values.back()->reinterpret_as<table>();
+						return &tab_arr->values.back()->ref_cast<table>();
 					}
 
-					else if (!is_array
+					else if (!is_arr
 						&& matching_node->is_table()
 						&& !implicit_tables.empty())
 					{
-						auto tbl = matching_node->reinterpret_as<table>();
+						auto tbl = &matching_node->ref_cast<table>();
 						const auto idx = find(implicit_tables, tbl);
 						if (idx)
 						{
@@ -6401,13 +6472,13 @@ namespace toml::impl
 					}
 
 					//if we get here it's a redefinition error.
-					if (!is_array && matching_node->type() == node_type::table)
+					if (!is_arr && matching_node->type() == node_type::table)
 						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 					else
 						abort_with_error(
 							"Attempt to redefine existing "sv, matching_node->type(),
 							" '"sv, recording_buffer,
-							"' as "sv, is_array ? "array-of-tables"sv : "table"sv
+							"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 						);
 				}
 				TOML_ERROR_CHECK({});
@@ -6433,18 +6504,18 @@ namespace toml::impl
 								std::move(kvp.key.segments[i]),
 								std::make_unique<table>()
 							).first->second.get();
-							dotted_key_tables.push_back(child->reinterpret_as<table>());
+							dotted_key_tables.push_back(&child->ref_cast<table>());
 							dotted_key_tables.back()->inline_ = true;
 							child->source_ = kvp.value->source_;
 						}
-						else if (!child->is_table() || !find(dotted_key_tables, child->reinterpret_as<table>()))
+						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
 						{
 							abort_with_error("Attempt to redefine "sv, child->type(), " as dotted key-value pair"sv);
 						}
 						else
 							child->source_.end = kvp.value->source_.end;
 						TOML_ERROR_CHECK();
-						tab = child->reinterpret_as<table>();
+						tab = &child->ref_cast<table>();
 					}
 				}
 
@@ -6543,7 +6614,7 @@ namespace toml::impl
 
 				if (type == node_type::table)
 				{
-					auto& tbl = *nde.reinterpret_as<table>();
+					auto& tbl = nde.ref_cast<table>();
 					if (tbl.inline_) //inline tables (and all their inline descendants) are already correctly terminated
 						return;
 
@@ -6557,7 +6628,7 @@ namespace toml::impl
 				}
 				else //arrays
 				{
-					auto& arr = *nde.reinterpret_as<array>();
+					auto& arr = nde.ref_cast<array>();
 					auto end = nde.source_.end;
 					for (auto& v : arr.values)
 					{
@@ -6978,12 +7049,12 @@ namespace toml::impl
 				}
 				else
 				{
-					static constexpr auto is_date_time =
+					static constexpr auto is_dt =
 						std::is_same_v<T, date>
 						|| std::is_same_v<T, time>
 						|| std::is_same_v<T, date_time>;
 
-					if constexpr (is_date_time)
+					if constexpr (is_dt)
 					{
 						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);
@@ -6991,7 +7062,7 @@ namespace toml::impl
 
 					*stream_ << val;
 
-					if constexpr (is_date_time)
+					if constexpr (is_dt)
 					{
 						if ((flags_ & format_flags::quote_dates_and_times) != format_flags::none)
 							print_to_stream('"', *stream_);
@@ -7086,8 +7157,7 @@ namespace toml::impl
 		return node.visit([](const auto& n) noexcept
 			-> size_t
 			{
-				using node_t = impl::remove_cvref_t<decltype(n)>;
-				if constexpr (std::is_same_v<node_t, table>)
+				if constexpr (is_table<decltype(n)>)
 				{
 					if (n.empty())
 						return 2_sz; // "{}"
@@ -7096,7 +7166,7 @@ namespace toml::impl
 						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
 					return weight;
 				}
-				else if constexpr (std::is_same_v<node_t, array>)
+				else if constexpr (is_array<decltype(n)>)
 				{
 					if (n.empty())
 						return 2_sz; // "[]"
@@ -7105,11 +7175,11 @@ namespace toml::impl
 						weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
 					return weight;
 				}
-				else if constexpr (std::is_same_v<node_t, value<string>>)
+				else if constexpr (is_string<decltype(n)>)
 				{
 					return n.get().length() + 2_sz; // + ""
 				}
-				else if constexpr (std::is_same_v<node_t, value<int64_t>>)
+				else if constexpr (is_integer<decltype(n)>)
 				{
 					auto v = n.get();
 					if (!v)
@@ -7122,7 +7192,7 @@ namespace toml::impl
 					}
 					return weight + static_cast<size_t>(std::log10(static_cast<double>(v)));
 				}
-				else if constexpr (std::is_same_v<node_t, value<double>>)
+				else if constexpr (is_floating_point<decltype(n)>)
 				{
 					auto v = n.get();
 					if (v == 0.0)
@@ -7135,15 +7205,15 @@ namespace toml::impl
 					}
 					return weight + static_cast<size_t>(std::log10(v));
 				}
-				else if constexpr (std::is_same_v<node_t, value<bool>>)
+				else if constexpr (is_boolean<decltype(n)>)
 				{
 					return 5_sz;
 				}
-				else if constexpr (std::is_same_v<node_t, value<date>> || std::is_same_v<node_t, value<time>>)
+				else if constexpr (is_date<decltype(n)> || is_time<decltype(n)>)
 				{
 					return 10_sz;
 				}
-				else if constexpr (std::is_same_v<node_t, value<date_time>>)
+				else if constexpr (is_date_time<decltype(n)>)
 				{
 					return 30_sz;
 				}

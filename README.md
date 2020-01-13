@@ -1,10 +1,24 @@
 # toml++ (tomlplusplus)
-Header-only [TOML v0.5.0] parsing lib for C++17 and later.  
+![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)
+[![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0]
 [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
+[![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](https://github.com/marzer/tomlplusplus/blob/master/LICENSE)  
+
+`toml++` is a header-only toml parser and serializer for C++17, C++20 and whatever comes after.
 
 <br>
 
-# Usage
+# Example
+
+```cpp
+/// example goes here.
+```
+You'll find some more code examples in
+`examples` directory and plenty more as part of the [API documentation].
+
+<br>
+
+# Adding toml++ to your project
 `toml++` comes in two flavours: Regular and Single-header.
 
 ### Regular mode
@@ -12,27 +26,25 @@ Header-only [TOML v0.5.0] parsing lib for C++17 and later.
 2. `#include <toml++/toml.h>`
 
 ### Single-header mode
-1. Drop `toml.hpp` somewhere in your source tree
+1. Drop `toml.hpp` wherever you like in your source tree
 2. There is no step two
 
-The API is the same regardless of how you consume the library. You'll find code examples in
-the `examples` directory.
+The API is the same regardless of how you consume the library. 
 
-<br>
-
-# Configuration
+### Configuration
 A number of configurable options are exposed in the form of preprocessor macros. Most likely you
 won't need to mess with these at all, but in the event you do, set your overrides prior to including
 toml++.
 
-| Option                     |      Type      | Default                           | Description                                                                                   |
-|----------------------------|:--------------:|-----------------------------------|-----------------------------------------------------------------------------------------------|
-| `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                 |
-| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type.                              |
-| `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                |
-| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                         |
-| `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                             |
-| `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version]. |
+| Option                     |      Type      | Default                           | Description                                                                                              |
+|----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
+| `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                            |
+| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type.                                         |
+| `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                           |
+| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                    |
+| `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it. |
+| `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                        |
+| `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].            |
 
 <br>
 
@@ -44,7 +56,7 @@ addition of unreleased features from the [TOML master] and some sane cherry-pick
 The library advertises the most recent numbered language version it fully supports via the preprocessor
 defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_REVISION`.
 
-### **🔸Unreleased features:**
+### **🔸Unreleased TOML features:**
 - [#356]: Allow leading zeros in the exponent part of a float
 - [#516]: Allow newlines and trailing commas in inline tables
 - [#562]: Allow hex floatingpoint values
@@ -59,7 +71,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_REVISION`.
 _These can be disabled (and thus strict [TOML v0.5.0] compliance enforced) by specifying
 `TOML_UNRELEASED_FEATURES = 0` (see [Configuration](#Configuration))._
 
-### **🔹[v0.5.0](https://github.com/toml-lang/toml/releases/tag/v0.5.0) and earlier:**
+### **🔹TOML v0.5.0 and earlier:**
 - All features as of `<< release date >>`.
 
 <br>
@@ -69,8 +81,8 @@ Contributions are welcome, either by [reporting issues](https://github.com/marze
 or submitting pull requests. If you wish to submit a PR, please be aware that:
 - The single-header file `toml.hpp` is generated by a script; make your changes in the files in
     `include`, **not** in `toml.hpp`.
-- Your changes should compile warning-free on at least gcc 8.3.0, clang 8.0, and MSVC 19.2X
-    (Visual Studio 2019).
+- Your changes should compile warning-free on at least one of gcc 8.3.0, clang 8.0, and MSVC 19.2X
+    (Visual Studio 2019). All three is a bonus.
 - You should regenerate the single-header file as part of your PR (a CI check will fail if you don't).
 
 ### Regenerating toml.hpp
@@ -80,10 +92,10 @@ or submitting pull requests. If you wish to submit a PR, please be aware that:
 3. Run `python/generate_single_header.py`
 
 ### Building and testing
-Testing is done using [catch2], included in the respository as a submodule under `tests/catch2`.
+Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
 The first time you want to begin testing you'll need to ensure submodules have been fetched:  
 ```bash
-git submodule update --init --recursive
+git submodule update --init --recursive extern/Catch2
 ```
 
 #### Windows
@@ -100,10 +112,8 @@ Install [meson] and [ninja] if necessary, then test with both gcc and clang:
 ```bash
 CXX=g++ meson build-gcc
 CXX=clang++ meson build-clang
-cd build-gcc
-ninja && ninja test
-cd ../build-clang
-ninja && ninja test
+cd build-gcc && ninja && ninja test
+cd ../build-clang && ninja && ninja test
 ```
 
 <br>
@@ -113,21 +123,23 @@ ninja && ninja test
 `toml++` is licensed under the terms of the MIT license - See [LICENSE].
 
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]',
-which is itself subject to the terms of the MIT license. The license text is included in the
+which is itself subject to the terms of (what appears to be) the MIT license. The license text is included in the
 [relevant part](https://github.com/marzer/tomlplusplus/blob/master/include/toml%2B%2B/toml_utf8.h)
 of the toml++ source.
 
+[API documentation]: https://marzer.github.io/tomlplusplus/namespacetoml.html
 [unreleased TOML language features]: https://github.com/marzer/tomlplusplus#unreleased-features
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
 [TOML v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+[v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [LICENSE]: https://github.com/marzer/tomlplusplus/blob/master/LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 [meson]: https://mesonbuild.com/Getting-meson.html
 [ninja]: https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages
-[catch2]: https://github.com/catchorg/Catch2
+[Catch2]: https://github.com/catchorg/Catch2
 [Test Adapter for Catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01
 [Visual Studio 2019]: https://visualstudio.microsoft.com/vs/
 [#356]: https://github.com/toml-lang/toml/issues/356

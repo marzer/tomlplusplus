@@ -6,12 +6,12 @@
 
 namespace toml
 {
-	#if TOML_EXCEPTIONS
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
-	using parse_result = table;
-
-	#else
-
+	/// \brief	The result of a parsing operation.
+	/// 
+	/// \remarks This type only exists when exceptions are disabled,
+	/// 		 otherwise `parse_result` is a simple alias for `toml::table`.
 	class parse_result final
 	{
 		private:
@@ -69,7 +69,7 @@ namespace toml
 
 			[[nodiscard]] table& operator* () & noexcept { return get(); }
 			[[nodiscard]] table&& operator* () && noexcept { return std::move(get()); }
-			[[nodiscard]] const table& operator* () const & noexcept { return get(); }
+			[[nodiscard]] const table& operator* () const& noexcept { return get(); }
 
 			[[nodiscard]] table* operator-> () noexcept { return &get(); }
 			[[nodiscard]] const table* operator-> () const noexcept { return &get(); }
@@ -132,6 +132,10 @@ namespace toml
 				destroy();
 			}
 	};
+
+	#else
+
+	using parse_result = table;
 
 	#endif
 }
@@ -1938,7 +1942,7 @@ namespace toml::impl
 						if constexpr (!TOML_LANG_HIGHER_THAN(0, 5, 0)) // toml/issues/665
 						{
 							// arrays must be homogeneous in toml 0.5.0 and earlier
-							if (!val->reinterpret_as<array>()->is_homogeneous())
+							if (!val->ref_cast<array>().is_homogeneous())
 								TOML_ERROR(
 									"Arrays cannot contain values of different types in TOML 0.5.0 and earlier.",
 									begin_pos,
@@ -2406,7 +2410,7 @@ namespace toml::impl
 				const auto header_begin_pos = cp->position;
 				source_position header_end_pos;
 				key key;
-				bool is_array = false;
+				bool is_arr = false;
 
 				//parse header
 				{
@@ -2426,7 +2430,7 @@ namespace toml::impl
 					{
 						advance();
 						eof_check();
-						is_array = true;
+						is_arr = true;
 					}
 
 					// skip past any whitespace that followed the '['
@@ -2464,12 +2468,12 @@ namespace toml::impl
 					if (*cp != U']')
 						abort_with_error(
 							"Encountered unexpected character while parsing table"sv,
-							(is_array ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\''
+							(is_arr ? " array"sv : ""sv), " header; expected ']', saw '"sv, *cp, '\''
 						);
 					advance();
 
 					// consume the second closing ']'
-					if (is_array)
+					if (is_arr)
 					{
 						eof_check();
 
@@ -2488,7 +2492,7 @@ namespace toml::impl
 					{
 						if (!consume_comment() && !consume_line_break())
 							abort_with_error(
-								"Encountered unexpected character after table"sv, (is_array ? " array"sv : ""sv),
+								"Encountered unexpected character after table"sv, (is_arr ? " array"sv : ""sv),
 								" header; expected a comment or whitespace, saw '"sv, *cp, '\''
 							);
 					}
@@ -2507,31 +2511,31 @@ namespace toml::impl
 							key.segments[i],
 							std::make_unique<table>()
 						).first->second.get();
-						implicit_tables.push_back(child->reinterpret_as<table>());
+						implicit_tables.push_back(&child->ref_cast<table>());
 						child->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						parent = child->reinterpret_as<table>();
+						parent = &child->ref_cast<table>();
 					}
 					else if (child->is_table())
 					{
-						parent = child->reinterpret_as<table>();
+						parent = &child->ref_cast<table>();
 					}
-					else if (child->is_array() && find(table_arrays, child->reinterpret_as<array>()))
+					else if (child->is_array() && find(table_arrays, &child->ref_cast<array>()))
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!child->reinterpret_as<array>()->values.empty());
-						TOML_ASSERT(child->reinterpret_as<array>()->values.back()->is_table());
-						parent = child->reinterpret_as<array>()->values.back()->reinterpret_as<table>();
+						TOML_ASSERT(!child->ref_cast<array>().values.empty());
+						TOML_ASSERT(child->ref_cast<array>().values.back()->is_table());
+						parent = &child->ref_cast<array>().values.back()->ref_cast<table>();
 					}
 					else
 					{
-						if (!is_array && child->type() == node_type::table)
+						if (!is_arr && child->type() == node_type::table)
 							abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 						else
 							abort_with_error(
 								"Attempt to redefine existing "sv, child->type(),
 								" '"sv, recording_buffer,
-								"' as "sv, is_array ? "array-of-tables"sv : "table"sv
+								"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 							);
 					}
 				}
@@ -2545,23 +2549,23 @@ namespace toml::impl
 				{
 					// if it's an array we need to make the array and it's first table element,
 					// set the starting regions, and return the table element
-					if (is_array)
+					if (is_arr)
 					{
-						auto tab_arr = parent->values.emplace(key.segments.back(),std::make_unique<array>())
-							.first->second->reinterpret_as<array>();
+						auto tab_arr = &parent->values.emplace(key.segments.back(),std::make_unique<array>())
+							.first->second->ref_cast<array>();
 						table_arrays.push_back(tab_arr);
 						tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 						
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->values.back()->reinterpret_as<table>();
+						return &tab_arr->values.back()->ref_cast<table>();
 					}
 
 					//otherwise we're just making a table
 					else
 					{
-						auto tab = parent->values.emplace(key.segments.back(),std::make_unique<table>())
-							.first->second->reinterpret_as<table>();
+						auto tab = &parent->values.emplace(key.segments.back(),std::make_unique<table>())
+							.first->second->ref_cast<table>();
 						tab->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 						return tab;
 					}
@@ -2573,19 +2577,19 @@ namespace toml::impl
 				// otherwise this is a redefinition error.
 				else
 				{
-					if (is_array && matching_node->is_array() && find(table_arrays, matching_node->reinterpret_as<array>()))
+					if (is_arr && matching_node->is_array() && find(table_arrays, &matching_node->ref_cast<array>()))
 					{
-						auto tab_arr = matching_node->reinterpret_as<array>();
+						auto tab_arr = &matching_node->ref_cast<array>();
 						tab_arr->values.push_back(std::make_unique<table>());
 						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return tab_arr->values.back()->reinterpret_as<table>();
+						return &tab_arr->values.back()->ref_cast<table>();
 					}
 
-					else if (!is_array
+					else if (!is_arr
 						&& matching_node->is_table()
 						&& !implicit_tables.empty())
 					{
-						auto tbl = matching_node->reinterpret_as<table>();
+						auto tbl = &matching_node->ref_cast<table>();
 						const auto idx = find(implicit_tables, tbl);
 						if (idx)
 						{
@@ -2597,13 +2601,13 @@ namespace toml::impl
 					}
 
 					//if we get here it's a redefinition error.
-					if (!is_array && matching_node->type() == node_type::table)
+					if (!is_arr && matching_node->type() == node_type::table)
 						abort_with_error("Attempt to redefine existing table '"sv, recording_buffer, '\'');
 					else
 						abort_with_error(
 							"Attempt to redefine existing "sv, matching_node->type(),
 							" '"sv, recording_buffer,
-							"' as "sv, is_array ? "array-of-tables"sv : "table"sv
+							"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 						);
 				}
 				TOML_ERROR_CHECK({});
@@ -2629,18 +2633,18 @@ namespace toml::impl
 								std::move(kvp.key.segments[i]),
 								std::make_unique<table>()
 							).first->second.get();
-							dotted_key_tables.push_back(child->reinterpret_as<table>());
+							dotted_key_tables.push_back(&child->ref_cast<table>());
 							dotted_key_tables.back()->inline_ = true;
 							child->source_ = kvp.value->source_;
 						}
-						else if (!child->is_table() || !find(dotted_key_tables, child->reinterpret_as<table>()))
+						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
 						{
 							abort_with_error("Attempt to redefine "sv, child->type(), " as dotted key-value pair"sv);
 						}
 						else
 							child->source_.end = kvp.value->source_.end;
 						TOML_ERROR_CHECK();
-						tab = child->reinterpret_as<table>();
+						tab = &child->ref_cast<table>();
 					}
 				}
 
@@ -2739,7 +2743,7 @@ namespace toml::impl
 
 				if (type == node_type::table)
 				{
-					auto& tbl = *nde.reinterpret_as<table>();
+					auto& tbl = nde.ref_cast<table>();
 					if (tbl.inline_) //inline tables (and all their inline descendants) are already correctly terminated
 						return;
 
@@ -2753,7 +2757,7 @@ namespace toml::impl
 				}
 				else //arrays
 				{
-					auto& arr = *nde.reinterpret_as<array>();
+					auto& arr = nde.ref_cast<array>();
 					auto end = nde.source_.end;
 					for (auto& v : arr.values)
 					{

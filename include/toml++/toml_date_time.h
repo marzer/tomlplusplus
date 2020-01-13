@@ -3,10 +3,14 @@
 
 namespace toml
 {
+	/// \brief	A local date.
 	struct date final
 	{
+		/// \brief	The year component.
 		uint16_t year;
+		/// \brief	The month component, from 1 - 12.
 		uint8_t month;
+		/// \brief	The day component, from 1 - 31.
 		uint8_t day;
 
 		[[nodiscard]]
@@ -34,11 +38,16 @@ namespace toml
 		}
 	};
 
+	/// \brief	A local time-of-day.
 	struct time final
 	{
+		/// \brief	The hour component, from 0 - 23.
 		uint8_t hour;
+		/// \brief	The minute component, from 0 - 59.
 		uint8_t minute;
+		/// \brief	The second component, from 0 - 59.
 		uint8_t second;
+		/// \brief	The fractional nanoseconds component, from 0 - 999999999.
 		uint32_t nanosecond;
 
 		[[nodiscard]]
@@ -65,8 +74,10 @@ namespace toml
 		}
 	};
 
+	/// \brief	A timezone offset.
 	struct time_offset final
 	{
+		/// \brief	Offset from UTC+0, in minutes.
 		int16_t minutes;
 
 		[[nodiscard]]
@@ -96,10 +107,14 @@ namespace toml
 		}
 	};
 
+	/// \brief	A date-time.
 	struct date_time final
 	{
+		/// \brief	The date component.
 		toml::date date;
+		/// \brief	The time component.
 		toml::time time;
+		/// \brief	The timezone offset component.
 		std::optional<toml::time_offset> time_offset;
 
 		[[nodiscard]]

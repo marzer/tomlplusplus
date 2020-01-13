@@ -132,4 +132,7 @@ namespace toml
 	value(uint8_t) -> value<int64_t>;
 	value(uint16_t) -> value<int64_t>;
 	value(uint32_t) -> value<int64_t>;
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+	#endif
 }

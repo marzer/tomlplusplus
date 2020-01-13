@@ -38,7 +38,7 @@
 	#error toml++ is a C++ library.
 #endif
 
-#if defined(__clang__) or defined(__GNUC__)
+#if defined(__clang__) || defined(__GNUC__)
 	#define TOML_GCC_ATTR(attr)		__attribute__((attr))
 #else
 	#define TOML_GCC_ATTR(attr)
@@ -426,51 +426,12 @@ namespace toml
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
-	#if !TOML_DOXYGEN && TOML_EXCEPTIONS
-
-	class parse_error final
-		: public std::runtime_error
-	{
-		private:
-			source_region source_;
-
-		public:
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, source_region&& src) noexcept
-				: std::runtime_error{ desc },
-				source_{ std::move(src) }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, const source_region& src) noexcept
-				: parse_error{ desc, source_region{ src } }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
-			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ desc, source_region{ position, position, path } }
-			{}
-
-			[[nodiscard]]
-			std::string_view description() const noexcept
-			{
-				return std::string_view{ what() };
-			}
-
-			[[nodiscard]]
-			const source_region& source() const noexcept
-			{
-				return source_;
-			}
-	};
-
-	#else
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 
-	/// \remarks This class inherits from `std::runtime_error` when `TOML_EXCEPTIONS` is `1`.
-	/// 		 The public interface remains the same regardless of exception mode.
+	/// \remarks This class inherits from `std::runtime_error` when exceptions are enabled.
+	/// 		 The public interface is the same regardless of exception mode.
 	class parse_error final
 	{
 		private:
@@ -504,6 +465,45 @@ namespace toml
 			}
 
 			/// \brief	Returns the region of the source document responsible for the error.
+			[[nodiscard]]
+			const source_region& source() const noexcept
+			{
+				return source_;
+			}
+	};
+
+	#else
+
+	class parse_error final
+		: public std::runtime_error
+	{
+		private:
+			source_region source_;
+
+		public:
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, source_region&& src) noexcept
+				: std::runtime_error{ desc },
+				source_{ std::move(src) }
+			{}
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, const source_region& src) noexcept
+				: parse_error{ desc, source_region{ src } }
+			{}
+
+			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
+				: parse_error{ desc, source_region{ position, position, path } }
+			{}
+
+			[[nodiscard]]
+			std::string_view description() const noexcept
+			{
+				return std::string_view{ what() };
+			}
+
 			[[nodiscard]]
 			const source_region& source() const noexcept
 			{
@@ -577,7 +577,11 @@ namespace toml::impl
 		|| std::is_same_v<T, uint32_t>
 		|| std::is_same_v<T, uint16_t>
 		|| std::is_same_v<T, uint8_t>
-		|| std::is_same_v<T, float>;
+		|| std::is_same_v<T, float>
+		#ifdef TOML_SMALL_FLOAT_TYPE
+		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
+		#endif
+		;
 
 	template <typename T>
 	inline constexpr bool is_value_or_node =
@@ -606,6 +610,9 @@ namespace toml::impl
 	template <> struct value_promoter<uint16_t> { using type = int64_t; };
 	template <> struct value_promoter<uint8_t> { using type = int64_t; };
 	template <> struct value_promoter<float> { using type = double; };
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
+	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
@@ -682,7 +689,6 @@ namespace toml::impl
 
 namespace toml
 {
-
 	/// \brief	Helper alias that wraps a type up as it's TOML node equivalent.
 	template <typename T>
 	using node_of = typename impl::node_wrapper<T>::type;
@@ -691,6 +697,33 @@ namespace toml
 	template <typename T>
 	using value_of = typename impl::node_unwrapper<T>::type;
 
+	/// \brief	Metafunction for determining if a type is a toml::table.
+	template <typename T>
+	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
+	/// \brief	Metafunction for determining if a type is a toml::array.
+	template <typename T>
+	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
+	/// \brief	Metafunction for determining if a type is a toml::value<string>.
+	template <typename T>
+	inline constexpr bool is_string = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<string>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<int64_t>.
+	template <typename T>
+	inline constexpr bool is_integer = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<double>.
+	template <typename T>
+	inline constexpr bool is_floating_point = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<double>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<bool>.
+	template <typename T>
+	inline constexpr bool is_boolean = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<bool>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<toml::date>.
+	template <typename T>
+	inline constexpr bool is_date = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<toml::time>.
+	template <typename T>
+	inline constexpr bool is_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<time>>;
+	/// \brief	Metafunction for determining if a type is a toml::value<toml::date_time>.
+	template <typename T>
+	inline constexpr bool is_date_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	/// \brief	Pretty-prints the value of a node_type to a stream.
 	template <typename CHAR>

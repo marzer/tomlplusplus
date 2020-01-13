@@ -61,8 +61,7 @@ namespace toml::impl
 		return node.visit([](const auto& n) noexcept
 			-> size_t
 			{
-				using node_t = impl::remove_cvref_t<decltype(n)>;
-				if constexpr (std::is_same_v<node_t, table>)
+				if constexpr (is_table<decltype(n)>)
 				{
 					if (n.empty())
 						return 2_sz; // "{}"
@@ -71,7 +70,7 @@ namespace toml::impl
 						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
 					return weight;
 				}
-				else if constexpr (std::is_same_v<node_t, array>)
+				else if constexpr (is_array<decltype(n)>)
 				{
 					if (n.empty())
 						return 2_sz; // "[]"
@@ -80,11 +79,11 @@ namespace toml::impl
 						weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
 					return weight;
 				}
-				else if constexpr (std::is_same_v<node_t, value<string>>)
+				else if constexpr (is_string<decltype(n)>)
 				{
 					return n.get().length() + 2_sz; // + ""
 				}
-				else if constexpr (std::is_same_v<node_t, value<int64_t>>)
+				else if constexpr (is_integer<decltype(n)>)
 				{
 					auto v = n.get();
 					if (!v)
@@ -97,7 +96,7 @@ namespace toml::impl
 					}
 					return weight + static_cast<size_t>(std::log10(static_cast<double>(v)));
 				}
-				else if constexpr (std::is_same_v<node_t, value<double>>)
+				else if constexpr (is_floating_point<decltype(n)>)
 				{
 					auto v = n.get();
 					if (v == 0.0)
@@ -110,15 +109,15 @@ namespace toml::impl
 					}
 					return weight + static_cast<size_t>(std::log10(v));
 				}
-				else if constexpr (std::is_same_v<node_t, value<bool>>)
+				else if constexpr (is_boolean<decltype(n)>)
 				{
 					return 5_sz;
 				}
-				else if constexpr (std::is_same_v<node_t, value<date>> || std::is_same_v<node_t, value<time>>)
+				else if constexpr (is_date<decltype(n)> || is_time<decltype(n)>)
 				{
 					return 10_sz;
 				}
-				else if constexpr (std::is_same_v<node_t, value<date_time>>)
+				else if constexpr (is_date_time<decltype(n)>)
 				{
 					return 30_sz;
 				}
