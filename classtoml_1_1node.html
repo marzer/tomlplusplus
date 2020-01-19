@@ -17,10 +17,12 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="annotated.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
+        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="index.html">TOML
 Parser
 for
-C++17</span></a>
+C++17</a>
+      </span>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -30,11 +32,13 @@ C++17</span></a>
       </div>
       <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
         <div class="m-row">
-          <ol class="m-col-t-6 m-col-m-none"><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li><li class="tpp-injected tpp-external-navbar"><a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a></li>
+          <ol class="m-col-t-6 m-col-m-none">
             <li><a href="pages.html">Pages</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
+            <li><a href="namespaces.html">Namespaces</a></li>
             <li><a href="annotated.html">Classes</a></li>
+            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -77,6 +81,52 @@ C++17</span></a>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
+            <dt id="a3331483996cdca451a567fc6fb8eb33e">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3331483996cdca451a567fc6fb8eb33e">as</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="namespacetoml.html#a7c937f95568df080c3584862c25f4030">node_<wbr/>of</a>&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the node as a more specific node type (const overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afb5abee45cc3dd16e7a804bf5642e57c">as</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="namespacetoml.html#a7c937f95568df080c3584862c25f4030">node_<wbr/>of</a>&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the node as a more specific node type.</dd>
+            <dt id="adac204f1c1e3ae99beaa79bb1624cc95">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#adac204f1c1e3ae99beaa79bb1624cc95">as_array</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one.</dd>
+            <dt id="ad9ccea91cc6e2fd0716773d0fc32cfda">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad9ccea91cc6e2fd0716773d0fc32cfda">as_boolean</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;bool&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;bool&gt;, if it is one.</dd>
+            <dt id="a6a61fae21afee050259f3c260a9d3bc1">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6a61fae21afee050259f3c260a9d3bc1">as_date</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;date&gt;, if it is one.</dd>
+            <dt id="a2b0d605574baa29089ade9023381385e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2b0d605574baa29089ade9023381385e">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;date_time&gt;, if it is one.</dd>
+            <dt id="a54c69509719f69dd62a9ad204e349172">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a54c69509719f69dd62a9ad204e349172">as_floating_point</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;double&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;double&gt;, if it is one.</dd>
+            <dt id="aa3200be7b08d6a1b058ac3a6712a87eb">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa3200be7b08d6a1b058ac3a6712a87eb">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
+            <dt id="aa539a0c58aaf58c803ca933a1f8e8447">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa539a0c58aaf58c803ca933a1f8e8447">as_string</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;string&gt;, if it is one.</dd>
+            <dt id="aa696716239e7434145103173e880fb80">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa696716239e7434145103173e880fb80">as_table</a>(</span><span class="m-doc-wrap">) -&gt; table* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::table, if it is one.</dd>
+            <dt id="a4a7808f4d9765d42893a1012f9a97fbb">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a7808f4d9765d42893a1012f9a97fbb">as_time</a>(</span><span class="m-doc-wrap">) -&gt; value&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a toml::value&lt;time&gt;, if it is one.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a03e1bbe1a0640953b7105fe40c733118">is</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
@@ -126,14 +176,70 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeddf9eebbd4ece799e5675e2d9d59e4a">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if this node is a value.</dd>
+            <dt id="aa378fa343dab7d7bdb4073570dba5fdc">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa378fa343dab7d7bdb4073570dba5fdc">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the source region responsible for generating this node during parsing.</dd>
             <dt id="a10f389035ce13abb00a1191358af6334">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10f389035ce13abb00a1191358af6334">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the node's type identifier.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a55b7df0b7f29ca2dcd0e28db221e857a">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp; -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Invokes a visitor on the node based on the node's concrete type.</dd>
+            <dt id="afcc82a71a06ea6b35d52ac76f4a18a2e">
+              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afcc82a71a06ea6b35d52ac76f4a18a2e">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp;&amp; -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Invokes a visitor on the node based on the node's concrete type (rvalue overload).</dd>
+            <dt id="aa00ce625be1701277c92f479e892950d">
+              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa00ce625be1701277c92f479e892950d">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const &amp; -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Invokes a visitor on the node based on the node's concrete type (const overload).</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="afb5abee45cc3dd16e7a804bf5642e57c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a7c937f95568df080c3584862c25f4030">node_<wbr/>of</a>&lt;T&gt;* toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afb5abee45cc3dd16e7a804bf5642e57c">as</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a pointer to the node as a more specific node type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>The node type or TOML value type to cast to.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A pointer to the node as the given type, or nullptr if it was a different type.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">int_value</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="n">toml</span><span class="o">::</span><span class="n">table</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">int_value</span><span class="p">)</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;int64_t&gt;"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">tbl</span><span class="p">)</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a table"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// fully-qualified value node types also work:</span>
+<span class="k">auto</span> <span class="n">int_value2</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="n">toml</span><span class="o">::</span><span class="n">value</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">int_value2</span><span class="p">)</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;int64_t&gt;"</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
+          </div></section>
           <section class="m-doc-details" id="a03e1bbe1a0640953b7105fe40c733118"><div>
             <h3>
               <div class="m-doc-template">
@@ -159,6 +265,50 @@ C++17</span></a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a55b7df0b7f29ca2dcd0e28db221e857a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename FUNC&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a55b7df0b7f29ca2dcd0e28db221e857a">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp;</span></span>
+            </h3>
+            <p>Invokes a visitor on the node based on the node's concrete type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">FUNC</td>
+                  <td>A callable type invocable with one or more of the toml++ node types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>visitor</td>
+                  <td>The visitor object.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The return value of the visitor. Must be default-constructible if non-void and your visitor is not exhaustive.</td>
+                </tr>
+              </tfoot>
+            </table>
+<p>Visitation is useful when you expect a node to be one of a set number of types and need to handle these types differently. Using <code><a class="m-doc" href="classtoml_1_1node.html#a55b7df0b7f29ca2dcd0e28db221e857a">visit()</a></code> allows you to eliminate some of the casting/conversion boilerplate:</p><pre class="m-code"><span class="n">node</span><span class="p">.</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">n</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="n">toml</span><span class="o">::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+        <span class="n">do_something_with_a_string</span><span class="p">(</span><span class="n">n</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="nf">constexpr</span> <span class="p">(</span><span class="n">toml</span><span class="o">::</span><span class="n">is_floating_point</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+        <span class="n">do_something_with_a_float</span><span class="p">(</span><span class="n">n</span><span class="p">.</span><span class="n">get</span><span class="p">());</span>
+    <span class="k">else</span>
+        <span class="k">throw</span> <span class="n">std</span><span class="o">::</span><span class="n">exception</span><span class="p">(</span><span class="s">"Expected string or integer"</span><span class="p">)</span>
+<span class="p">});</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="https://en.wikipedia.org/wiki/Visitor_pattern">https://en.wikipedia.org/wiki/Visitor_<wbr/>pattern</a></p></aside>
           </div></section>
         </section>
       </div>

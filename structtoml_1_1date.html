@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml::parse_error class | toml++ TOML
+  <title>toml::date struct | toml++ TOML
 Parser
 for
 C++17</title>
@@ -53,32 +53,32 @@ C++17</a>
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_error <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>date <span class="m-thin">struct</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>An error thrown/returned when parsing fails.</p>
+        <p>A local date.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
             <li>
               Reference
               <ul>
-                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#pub-attribs">Public variables</a></li>
               </ul>
             </li>
           </ul>
         </div>
-<aside class="m-note m-default"><h4>Remark</h4><p>This class inherits from <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/error/runtime_error" target="_blank">std::runtime_error</a></code> when exceptions are enabled. The public interface is the same regardless of exception mode.</p></aside>
-        <section id="pub-methods">
-          <h2><a href="#pub-methods">Public functions</a></h2>
+        <section id="pub-attribs">
+          <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a5582e9d66f8aa3f6ef442c0a04d5282f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a8ec7a7238b8edd3341b450a7b43ec011"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a8ec7a7238b8edd3341b450a7b43ec011">day</a>
             </dt>
-            <dd>Returns a textual description of the error.</dd>
-            <dt id="a8168b4941305654cf4ba8fc96efd0514">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8168b4941305654cf4ba8fc96efd0514">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>The day component, from 1 - 31.</dd>
+            <dt id="a0528c722d0a81741a95f6e3a1116614e"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a0528c722d0a81741a95f6e3a1116614e">month</a>
             </dt>
-            <dd>Returns the region of the source document responsible for the error.</dd>
+            <dd>The month component, from 1 - 12.</dd>
+            <dt id="ad1dc522b115c69dc908540b1c6ff792b"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a> <a class="m-doc-self" href="#ad1dc522b115c69dc908540b1c6ff792b">year</a>
+            </dt>
+            <dd>The year component.</dd>
           </dl>
         </section>
       </div>
