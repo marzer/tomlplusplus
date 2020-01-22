@@ -232,7 +232,6 @@ namespace toml
 
 		public:
 
-			[[nodiscard]] bool operator == (const string& rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (string_view rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (int64_t rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (int32_t rhs) const noexcept { return value_equality(*this, rhs); }

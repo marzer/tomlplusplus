@@ -8,9 +8,9 @@
 #include "toml_date_time.h"
 #include "toml_print_to_stream.h"
 #include "toml_node.h"
-#include "toml_table.h"
-#include "toml_array.h"
 #include "toml_value.h"
+#include "toml_array.h"
+#include "toml_table.h"
 #include "toml_node_view.h"
 #include "toml_utf8.h"
 #include "toml_parser.h"
@@ -35,7 +35,7 @@
 	#undef TOML_EMPTY_BASES
 	#undef TOML_CPP_VERSION
 	#undef TOML_CPP
-	#undef TOML_CONDITIONAL_NOEXCEPT
+	#undef TOML_MAY_THROW_UNLESS
 	#undef TOML_MAY_THROW
 	#undef TOML_NO_DEFAULT_CASE
 	#undef TOML_CONSTEVAL

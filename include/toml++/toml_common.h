@@ -140,11 +140,11 @@
 	#define TOML_DOXYGEN 0
 #endif
 #if TOML_EXCEPTIONS
-	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept(__VA_ARGS__)
 	#define TOML_MAY_THROW
+	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
 #else
-	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept
-	#define TOML_MAY_THROW					noexcept
+	#define TOML_MAY_THROW				noexcept
+	#define TOML_MAY_THROW_UNLESS(...)	noexcept
 #endif
 
 #ifndef TOML_DISABLE_INIT_WARNINGS
@@ -328,15 +328,15 @@ namespace toml
 	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t
 	{
-		table,
-		array,
-		string,
-		integer,
-		floating_point,
-		boolean,
-		date,
-		time,
-		date_time
+		table, ///< The node is a toml::table.
+		array,  ///< The node is a toml::array.
+		string,  ///< The node is a toml::value<toml::string>.
+		integer,  ///< The node is a toml::value<int64_t>.
+		floating_point,  ///< The node is a toml::value<double>.
+		boolean,  ///< The node is a toml::value<bool>.
+		date,  ///< The node is a toml::value<toml::date>.
+		time,  ///< The node is a toml::value<toml::time>.
+		date_time  ///< The node is a toml::value<toml::date_time>.
 	};
 
 	#if TOML_LARGE_FILES
@@ -534,6 +534,20 @@ namespace toml::impl
 
 	#endif
 
+	template <typename T, typename... U>
+	struct is_one_of_ : std::integral_constant<bool,
+		(false || ... || std::is_same_v<T, U>)
+	> {};
+
+	template <typename T, typename... U>
+	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
+
+	template <typename T, typename... U>
+	using enable_if_one_of = std::enable_if_t<is_one_of<T, U...>>;
+
+	template <typename T, typename... U>
+	using enable_if_not_one_of = std::enable_if_t<!is_one_of<T, U...>>;
+
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
@@ -614,6 +628,20 @@ namespace toml::impl
 	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
 	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
+
+	template <typename T> struct node_type_of_;
+	template <> struct node_type_of_<table> { static constexpr auto value = node_type::table; };
+	template <> struct node_type_of_<array> { static constexpr auto value = node_type::array; };
+	template <> struct node_type_of_<string> { static constexpr auto value = node_type::string; };
+	template <> struct node_type_of_<int64_t> { static constexpr auto value = node_type::integer; };
+	template <> struct node_type_of_<double> { static constexpr auto value = node_type::floating_point; };
+	template <> struct node_type_of_<bool> { static constexpr auto value = node_type::boolean; };
+	template <> struct node_type_of_<date> { static constexpr auto value = node_type::date; };
+	template <> struct node_type_of_<time> { static constexpr auto value = node_type::time; };
+	template <> struct node_type_of_<date_time> { static constexpr auto value = node_type::date_time; };
+
+	template <typename T>
+	inline constexpr auto node_type_of = node_type_of_<promoted<typename node_unwrapper<T>::type>>::value;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
 	{
@@ -730,14 +758,15 @@ namespace toml
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
 	{
 		using underlying_t = std::underlying_type_t<node_type>;
+		const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
 		if constexpr (std::is_same_v<CHAR, char>)
-			return lhs << impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-		else if constexpr (sizeof(CHAR) == 1)
-		{
-			const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-			return lhs << std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(str.data()), str.length() };
-		}
+			return lhs << str;
 		else
-			return lhs << lhs.data();
+		{
+			if constexpr (sizeof(CHAR) == 1)
+				return lhs << std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(str.data()), str.length() };
+			else
+				return lhs << str.data();
+		}
 	}
 }

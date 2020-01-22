@@ -4,9 +4,20 @@
 
 namespace toml
 {
+	/// \brief	A TOML value.
+	/// 		
+	/// \extends ::toml::node
+	/// 		
+	/// \tparam	T	The value's data type. Can be one of:
+	/// 			- toml::string
+	/// 			- int64_t
+	/// 			- double
+	/// 			- bool
+	/// 			- toml::date
+	/// 			- toml::time
+	/// 			- toml::date_time
 	template <typename T>
-	class value final
-		: public node
+	class value final : public node
 	{
 		static_assert(
 			impl::is_value<T>,
@@ -30,18 +41,24 @@ namespace toml
 
 		public:
 
+			/// \brief	Constructs a toml value.
+			///
+			/// \tparam	U	Constructor argument types.
+			/// \param 	args	Variadic list of arguments that are forwarded to the internal value's constructor.
 			template <typename... U>
 			TOML_NODISCARD_CTOR
-			explicit value(U&&... args) TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<T, U &&...>)
+			explicit value(U&&... args) TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<T, U &&...>)
 				: val_{ std::forward<U>(args)... }
 			{}
 
+			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
 				: node{ std::move(other) },
 				val_{ std::move(other.val_) }
 			{}
 
+			/// \brief	Move-assignment operator.
 			value& operator= (value&& rhs) noexcept
 			{
 				node::operator=(std::move(rhs));
@@ -49,19 +66,23 @@ namespace toml
 				return *this;
 			}
 
-			[[nodiscard]] node_type type() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, string>) return node_type::string;
-				else if constexpr (std::is_same_v<T, int64_t>) return node_type::integer;
-				else if constexpr (std::is_same_v<T, double>) return node_type::floating_point;
-				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
-				else if constexpr (std::is_same_v<T, date>) return node_type::date;
-				else if constexpr (std::is_same_v<T, time>) return node_type::time;
-				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
-			}
+			/// \brief	Returns the value's node type identifier.
+			///
+			/// \returns	One of:
+			/// 			- node_type::string
+			/// 			- node_type::integer
+			/// 			- node_type::floating_point
+			/// 			- node_type::boolean
+			/// 			- node_type::date
+			/// 			- node_type::time
+			/// 			- node_type::date_time
+			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<T>; }
 
+			/// \brief	Always returns `false` for value nodes.
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
+			/// \brief	Always returns `false` for value nodes.
 			[[nodiscard]] bool is_array() const noexcept override { return false; }
+			/// \brief	Always returns `true` for value nodes.
 			[[nodiscard]] bool is_value() const noexcept override { return true; }
 
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
@@ -88,16 +109,25 @@ namespace toml
 			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
+			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] T& get() & noexcept { return val_; }
+			/// \brief	Returns a reference to the underlying value (rvalue overload).
 			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }
+			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] const T& get() const & noexcept { return val_; }
 
+			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] T& operator* () & noexcept { return val_; }
+			/// \brief	Returns a reference to the underlying value (rvalue overload).
 			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
+			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
 
+			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] operator T& () & noexcept { return val_; }
+			/// \brief	Returns a reference to the underlying value (rvalue overload).
 			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
+			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] operator const T& () const& noexcept { return val_; }
 
 			template <typename CHAR>
@@ -116,6 +146,134 @@ namespace toml
 					impl::print_to_stream(rhs.val_, lhs);
 				
 				return lhs;
+			}
+
+
+			using value_arg_t = std::conditional_t<
+				std::is_same_v<T, string>,
+				string_view,
+				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
+			>;
+
+			/// \brief	Value equality operator.
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
+			/// \brief	Value equality operator.
+			[[nodiscard]] friend bool operator == (value_arg_t lhs, const value& rhs) noexcept { return lhs == rhs.val_; }
+			/// \brief	Value inequality operator.
+			[[nodiscard]] friend bool operator != (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ != rhs; }
+			/// \brief	Value inequality operator.
+			[[nodiscard]] friend bool operator != (value_arg_t lhs, const value& rhs) noexcept { return lhs != rhs.val_; }
+
+			/// \brief	Value less-than operator.
+			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ < rhs; }
+			/// \brief	Value less-than operator.
+			[[nodiscard]] friend bool operator <  (value_arg_t lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
+			/// \brief	Value less-than-or-equal-to operator.
+			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ <= rhs; }
+			/// \brief	Value less-than-or-equal-to operator.
+			[[nodiscard]] friend bool operator <= (value_arg_t lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
+
+			/// \brief	Value greater-than operator.
+			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ > rhs; }
+			/// \brief	Value greater-than operator.
+			[[nodiscard]] friend bool operator >  (value_arg_t lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
+			/// \brief	Value greater-than-or-equal-to operator.
+			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ >= rhs; }
+			/// \brief	Value greater-than-or-equal-to operator.
+			[[nodiscard]] friend bool operator >= (value_arg_t lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
+
+			/// \brief	Equality operator.
+			///
+			/// \param 	lhs	The LHS value.
+			/// \param 	rhs	The RHS value.
+			///
+			/// \returns	True if the values were of the same type and contained the same value.
+			template <typename U>
+			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ == rhs.val_;
+				else
+					return false;
+			}
+
+			/// \brief	Inequality operator.
+			///
+			/// \param 	lhs	The LHS value.
+			/// \param 	rhs	The RHS value.
+			///
+			/// \returns	True if the values were not of the same type, or did not contain the same value.
+			template <typename U>
+			[[nodiscard]] friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ != rhs.val_;
+				else
+					return true;
+			}
+
+			/// \brief	Less-than operator.
+			///
+			/// \param 	lhs	The LHS toml::value.
+			/// \param 	rhs	The RHS toml::value.
+			///
+			/// \returns	Values of the same data type: `lhs.get() < rhs.get()` <br>
+			/// 			Values of different types: `lhs.type() < rhs.type()`
+			template <typename U>
+			[[nodiscard]] friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ < rhs.val_;
+				else
+					return impl::node_type_of<T> < impl::node_type_of<U>;
+			}
+
+			/// \brief	Less-than-or-equal-to operator.
+			///
+			/// \param 	lhs	The LHS toml::value.
+			/// \param 	rhs	The RHS toml::value.
+			///
+			/// \returns	Values of the same data type: `lhs.get() <= rhs.get()` <br>
+			/// 			Values of different types: `lhs.type() <= rhs.type()`
+			template <typename U>
+			[[nodiscard]] friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ <= rhs.val_;
+				else
+					return impl::node_type_of<T> <= impl::node_type_of<U>;
+			}
+
+			/// \brief	Greater-than operator.
+			///
+			/// \param 	lhs	The LHS toml::value.
+			/// \param 	rhs	The RHS toml::value.
+			///
+			/// \returns	Values of the same data type: `lhs.get() > rhs.get()` <br>
+			/// 			Values of different types: `lhs.type() > rhs.type()`
+			template <typename U>
+			[[nodiscard]] friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ > rhs.val_;
+				else
+					return impl::node_type_of<T> > impl::node_type_of<U>;
+			}
+
+			/// \brief	Greater-than-or-equal-to operator.
+			///
+			/// \param 	lhs	The LHS toml::value.
+			/// \param 	rhs	The RHS toml::value.
+			///
+			/// \returns	Values of the same data type: `lhs.get() >= rhs.get()` <br>
+			/// 			Values of different types: `lhs.type() >= rhs.type()`
+			template <typename U>
+			[[nodiscard]] friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ >= rhs.val_;
+				else
+					return impl::node_type_of<T> >= impl::node_type_of<U>;
 			}
 	};
 

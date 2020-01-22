@@ -78,6 +78,7 @@ def main():
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
 	source_text = re.sub('(?:\n[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
+	source_text = re.sub('(?:///[<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove inline doxy briefs
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
 	for i in range(0, 5): # remove blank lines between simple one-liner definitions

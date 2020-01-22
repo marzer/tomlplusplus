@@ -202,7 +202,55 @@ namespace toml
 
 		private:
 
-			template <typename FUNC, typename N, typename T, bool = std::is_invocable_v<FUNC, ref_cast_type<N, T>>>
+			template <typename FUNC, typename N, typename T>
+			static constexpr bool can_visit = std::is_invocable_v<FUNC, ref_cast_type<N, T>>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool can_visit_any =
+				can_visit<FUNC, N, table>
+				|| can_visit<FUNC, N, array>
+				|| can_visit<FUNC, N, string>
+				|| can_visit<FUNC, N, int64_t>
+				|| can_visit<FUNC, N, double>
+				|| can_visit<FUNC, N, bool>
+				|| can_visit<FUNC, N, date>
+				|| can_visit<FUNC, N, time>
+				|| can_visit<FUNC, N, date_time>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool can_visit_all =
+				can_visit<FUNC, N, table>
+				&& can_visit<FUNC, N, array>
+				&& can_visit<FUNC, N, string>
+				&& can_visit<FUNC, N, int64_t>
+				&& can_visit<FUNC, N, double>
+				&& can_visit<FUNC, N, bool>
+				&& can_visit<FUNC, N, date>
+				&& can_visit<FUNC, N, time>
+				&& can_visit<FUNC, N, date_time>;
+
+			#if TOML_EXCEPTIONS
+
+			template <typename FUNC, typename N, typename T>
+			static constexpr bool visit_is_nothrow_one =
+				!can_visit<FUNC, N, T>
+				|| std::is_nothrow_invocable_v<FUNC, ref_cast_type<N, T>>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool visit_is_nothrow =
+				visit_is_nothrow_one<FUNC, N, table>
+				&& visit_is_nothrow_one<FUNC, N, array>
+				&& visit_is_nothrow_one<FUNC, N, string>
+				&& visit_is_nothrow_one<FUNC, N, int64_t>
+				&& visit_is_nothrow_one<FUNC, N, double>
+				&& visit_is_nothrow_one<FUNC, N, bool>
+				&& visit_is_nothrow_one<FUNC, N, date>
+				&& visit_is_nothrow_one<FUNC, N, time>
+				&& visit_is_nothrow_one<FUNC, N, date_time>;
+
+			#endif
+
+			template <typename FUNC, typename N, typename T, bool = can_visit<FUNC, N, T>>
 			struct visit_return_type final
 			{
 				using type = decltype(std::declval<FUNC>()(std::declval<ref_cast_type<N, T>>()));
@@ -216,78 +264,60 @@ namespace toml
 			template <typename A, typename B>
 			using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
-			// this is done using a static helper to preserve const and ref categories
-			// (otherwise I'd have to implement this function thrice)
-			// ((propagation in C++: a modern horror story))
+			//# this is done using a static helper to preserve const and ref categories
+			//# (otherwise I'd have to implement this function thrice)
+			//# ((propagation in C++: a modern horror story))
 			template <typename N, typename FUNC>
-			static decltype(auto) do_visit(N&& node, FUNC&& visitor) TOML_MAY_THROW
+			static decltype(auto) do_visit(N&& node, FUNC&& visitor)
+				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, N&&>)
 			{
 				static_assert(
-					std::is_invocable_v<FUNC&&,    ref_cast_type<N&&, table>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>,
+					can_visit_any<FUNC&&, N&&>,
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
 				switch (node.type())
 				{
 					case node_type::table:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>)
+						if constexpr (can_visit<FUNC&&, N&&, table>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
 						break;
 					case node_type::array:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>)
+						if constexpr (can_visit<FUNC&&, N&&, array>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
 						break;
 					case node_type::string:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>)
+						if constexpr (can_visit<FUNC&&, N&&, string>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
 						break;
 					case node_type::integer:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>)
+						if constexpr (can_visit<FUNC&&, N&&, int64_t>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
 						break;
 					case node_type::floating_point:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>)
+						if constexpr (can_visit<FUNC&&, N&&, double>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
 						break;
 					case node_type::boolean:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>)
+						if constexpr (can_visit<FUNC&&, N&&, bool>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
 						break;
 					case node_type::date:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>)
+						if constexpr (can_visit<FUNC&&, N&&, date>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
 						break;
 					case node_type::time:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>)
+						if constexpr (can_visit<FUNC&&, N&&, time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
 						break;
 					case node_type::date_time:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>)
+						if constexpr (can_visit<FUNC&&, N&&, date_time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
 						break;
 					TOML_NO_DEFAULT_CASE;
 				}
 
-				static constexpr auto is_exhaustive =
-					std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>;
-
-				if constexpr (is_exhaustive)
+				if constexpr (can_visit_all<FUNC&&, N&&>)
 					TOML_UNREACHABLE;
 				else
 				{
@@ -300,8 +330,8 @@ namespace toml
 						nonvoid<typename visit_return_type<FUNC&&, N&&, bool>::type,
 						nonvoid<typename visit_return_type<FUNC&&, N&&, date>::type,
 						nonvoid<typename visit_return_type<FUNC&&, N&&, time>::type,
-							typename visit_return_type<FUNC&&, N&&, date_time>::type
-						>>>>>>>>;
+								typename visit_return_type<FUNC&&, N&&, date_time>::type
+					>>>>>>>>;
 
 					if constexpr (!std::is_void_v<return_type>)
 					{
@@ -326,9 +356,9 @@ namespace toml
 			/// node.visit([](auto&& n)
 			/// {
 			///		if constexpr (toml::is_string<decltype(n)>)
-			///			do_something_with_a_string(n.get());
-			///		else if constexpr (toml::is_floating_point<decltype(n)>)
-			///			do_something_with_a_float(n.get());
+			///			do_something_with_a_string(*n)); //n is a toml::value<toml::string>
+			///		else if constexpr (toml::is_integer<decltype(n)>)
+			///			do_something_with_an_int(*n); //n is a toml::value<int64_t>
 			///		else
 			///			throw std::exception("Expected string or integer")
 			/// });
@@ -341,25 +371,25 @@ namespace toml
 			/// \param 	visitor	The visitor object.
 			/// 
 			/// \returns The return value of the visitor.
-			/// 		 Must be default-constructible if non-void and your visitor is not exhaustive.
+			/// 		 Can be void. Non-exhaustive visitors must return a default-constructible type.
 			/// 
 			/// \see https://en.wikipedia.org/wiki/Visitor_pattern
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<FUNC>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (const overload).
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}

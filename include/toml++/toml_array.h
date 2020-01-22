@@ -1,5 +1,5 @@
 #pragma once
-#include "toml_node.h"
+#include "toml_value.h"
 
 namespace toml::impl
 {
@@ -79,9 +79,12 @@ namespace toml::impl
 
 namespace toml
 {
+	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] bool operator != (const table& lhs, const table& rhs) noexcept;
+
 	/// \brief	A TOML array.
 	/// \detail The interface of this type is modeled after std::vector so things
-	/// 		mostly work as you'd expect them to with a vector: \cpp
+	/// 		mostly work as you'd expect them to: \cpp
 	/// 		
 	/// auto table = toml::parse("arr = [1, 2, 3, 4, 'five']"sv);
 	/// 
@@ -261,6 +264,47 @@ namespace toml
 			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
 			{
 				return values[index]->as<T>();
+			}
+
+			/// \brief	Equality operator.
+			///
+			/// \param 	lhs	The LHS array.
+			/// \param 	rhs	The RHS array.
+			///
+			/// \returns	True if the arrays contained the same values.
+			[[nodiscard]] friend bool operator == (const array& lhs, const array& rhs) noexcept
+			{
+				if (&lhs == &rhs)
+					return true;
+				if (lhs.values.size() != rhs.values.size())
+					return false;
+				for (size_t i = 0, e = lhs.values.size(); i < e; i++)
+				{
+					const auto lhs_type = lhs.values[i]->type();
+					const node& rhs_ = *rhs.values[i];
+					const auto rhs_type = rhs_.type();
+					if (lhs_type != rhs_type)
+						return false;
+
+					const bool equal = lhs.values[i]->visit([&](const auto& lhs_) noexcept
+					{
+						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
+					});
+					if (!equal)
+						return false;
+				}
+				return true;
+			}
+
+			/// \brief	Inequality operator.
+			///
+			/// \param 	lhs	The LHS array.
+			/// \param 	rhs	The RHS array.
+			///
+			/// \returns	True if the arrays did not contain the same values.
+			[[nodiscard]] friend bool operator != (const array& lhs, const array& rhs) noexcept
+			{
+				return !(lhs == rhs);
 			}
 
 			template <typename CHAR>

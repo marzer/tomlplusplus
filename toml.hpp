@@ -183,11 +183,11 @@
 	#define TOML_DOXYGEN 0
 #endif
 #if TOML_EXCEPTIONS
-	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept(__VA_ARGS__)
 	#define TOML_MAY_THROW
+	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
 #else
-	#define TOML_CONDITIONAL_NOEXCEPT(...)	noexcept
-	#define TOML_MAY_THROW					noexcept
+	#define TOML_MAY_THROW				noexcept
+	#define TOML_MAY_THROW_UNLESS(...)	noexcept
 #endif
 
 #ifndef TOML_DISABLE_INIT_WARNINGS
@@ -541,6 +541,20 @@ namespace toml::impl
 
 	#endif
 
+	template <typename T, typename... U>
+	struct is_one_of_ : std::integral_constant<bool,
+		(false || ... || std::is_same_v<T, U>)
+	> {};
+
+	template <typename T, typename... U>
+	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
+
+	template <typename T, typename... U>
+	using enable_if_one_of = std::enable_if_t<is_one_of<T, U...>>;
+
+	template <typename T, typename... U>
+	using enable_if_not_one_of = std::enable_if_t<!is_one_of<T, U...>>;
+
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
@@ -621,6 +635,20 @@ namespace toml::impl
 	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
 	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
+
+	template <typename T> struct node_type_of_;
+	template <> struct node_type_of_<table> { static constexpr auto value = node_type::table; };
+	template <> struct node_type_of_<array> { static constexpr auto value = node_type::array; };
+	template <> struct node_type_of_<string> { static constexpr auto value = node_type::string; };
+	template <> struct node_type_of_<int64_t> { static constexpr auto value = node_type::integer; };
+	template <> struct node_type_of_<double> { static constexpr auto value = node_type::floating_point; };
+	template <> struct node_type_of_<bool> { static constexpr auto value = node_type::boolean; };
+	template <> struct node_type_of_<date> { static constexpr auto value = node_type::date; };
+	template <> struct node_type_of_<time> { static constexpr auto value = node_type::time; };
+	template <> struct node_type_of_<date_time> { static constexpr auto value = node_type::date_time; };
+
+	template <typename T>
+	inline constexpr auto node_type_of = node_type_of_<promoted<typename node_unwrapper<T>::type>>::value;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
 	{
@@ -724,15 +752,16 @@ namespace toml
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
 	{
 		using underlying_t = std::underlying_type_t<node_type>;
+		const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
 		if constexpr (std::is_same_v<CHAR, char>)
-			return lhs << impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-		else if constexpr (sizeof(CHAR) == 1)
-		{
-			const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-			return lhs << std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(str.data()), str.length() };
-		}
+			return lhs << str;
 		else
-			return lhs << lhs.data();
+		{
+			if constexpr (sizeof(CHAR) == 1)
+				return lhs << std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(str.data()), str.length() };
+			else
+				return lhs << str.data();
+		}
 	}
 }
 
@@ -1307,7 +1336,55 @@ namespace toml
 
 		private:
 
-			template <typename FUNC, typename N, typename T, bool = std::is_invocable_v<FUNC, ref_cast_type<N, T>>>
+			template <typename FUNC, typename N, typename T>
+			static constexpr bool can_visit = std::is_invocable_v<FUNC, ref_cast_type<N, T>>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool can_visit_any =
+				can_visit<FUNC, N, table>
+				|| can_visit<FUNC, N, array>
+				|| can_visit<FUNC, N, string>
+				|| can_visit<FUNC, N, int64_t>
+				|| can_visit<FUNC, N, double>
+				|| can_visit<FUNC, N, bool>
+				|| can_visit<FUNC, N, date>
+				|| can_visit<FUNC, N, time>
+				|| can_visit<FUNC, N, date_time>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool can_visit_all =
+				can_visit<FUNC, N, table>
+				&& can_visit<FUNC, N, array>
+				&& can_visit<FUNC, N, string>
+				&& can_visit<FUNC, N, int64_t>
+				&& can_visit<FUNC, N, double>
+				&& can_visit<FUNC, N, bool>
+				&& can_visit<FUNC, N, date>
+				&& can_visit<FUNC, N, time>
+				&& can_visit<FUNC, N, date_time>;
+
+			#if TOML_EXCEPTIONS
+
+			template <typename FUNC, typename N, typename T>
+			static constexpr bool visit_is_nothrow_one =
+				!can_visit<FUNC, N, T>
+				|| std::is_nothrow_invocable_v<FUNC, ref_cast_type<N, T>>;
+
+			template <typename FUNC, typename N>
+			static constexpr bool visit_is_nothrow =
+				visit_is_nothrow_one<FUNC, N, table>
+				&& visit_is_nothrow_one<FUNC, N, array>
+				&& visit_is_nothrow_one<FUNC, N, string>
+				&& visit_is_nothrow_one<FUNC, N, int64_t>
+				&& visit_is_nothrow_one<FUNC, N, double>
+				&& visit_is_nothrow_one<FUNC, N, bool>
+				&& visit_is_nothrow_one<FUNC, N, date>
+				&& visit_is_nothrow_one<FUNC, N, time>
+				&& visit_is_nothrow_one<FUNC, N, date_time>;
+
+			#endif
+
+			template <typename FUNC, typename N, typename T, bool = can_visit<FUNC, N, T>>
 			struct visit_return_type final
 			{
 				using type = decltype(std::declval<FUNC>()(std::declval<ref_cast_type<N, T>>()));
@@ -1321,78 +1398,57 @@ namespace toml
 			template <typename A, typename B>
 			using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
-			// this is done using a static helper to preserve const and ref categories
-			// (otherwise I'd have to implement this function thrice)
-			// ((propagation in C++: a modern horror story))
 			template <typename N, typename FUNC>
-			static decltype(auto) do_visit(N&& node, FUNC&& visitor) TOML_MAY_THROW
+			static decltype(auto) do_visit(N&& node, FUNC&& visitor)
+				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, N&&>)
 			{
 				static_assert(
-					std::is_invocable_v<FUNC&&,    ref_cast_type<N&&, table>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
-					|| std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>,
+					can_visit_any<FUNC&&, N&&>,
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
 				switch (node.type())
 				{
 					case node_type::table:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>)
+						if constexpr (can_visit<FUNC&&, N&&, table>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
 						break;
 					case node_type::array:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>)
+						if constexpr (can_visit<FUNC&&, N&&, array>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
 						break;
 					case node_type::string:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>)
+						if constexpr (can_visit<FUNC&&, N&&, string>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
 						break;
 					case node_type::integer:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>)
+						if constexpr (can_visit<FUNC&&, N&&, int64_t>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
 						break;
 					case node_type::floating_point:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>)
+						if constexpr (can_visit<FUNC&&, N&&, double>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
 						break;
 					case node_type::boolean:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>)
+						if constexpr (can_visit<FUNC&&, N&&, bool>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
 						break;
 					case node_type::date:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>)
+						if constexpr (can_visit<FUNC&&, N&&, date>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
 						break;
 					case node_type::time:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>)
+						if constexpr (can_visit<FUNC&&, N&&, time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
 						break;
 					case node_type::date_time:
-						if constexpr (std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>)
+						if constexpr (can_visit<FUNC&&, N&&, date_time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
 						break;
 					TOML_NO_DEFAULT_CASE;
 				}
 
-				static constexpr auto is_exhaustive =
-					std::is_invocable_v<FUNC&&, ref_cast_type<N&&, table>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, array>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, string>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, int64_t>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, double>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, bool>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, time>>
-					&& std::is_invocable_v<FUNC&&, ref_cast_type<N&&, date_time>>;
-
-				if constexpr (is_exhaustive)
+				if constexpr (can_visit_all<FUNC&&, N&&>)
 					TOML_UNREACHABLE;
 				else
 				{
@@ -1405,8 +1461,8 @@ namespace toml
 						nonvoid<typename visit_return_type<FUNC&&, N&&, bool>::type,
 						nonvoid<typename visit_return_type<FUNC&&, N&&, date>::type,
 						nonvoid<typename visit_return_type<FUNC&&, N&&, time>::type,
-							typename visit_return_type<FUNC&&, N&&, date_time>::type
-						>>>>>>>>;
+								typename visit_return_type<FUNC&&, N&&, date_time>::type
+					>>>>>>>>;
 
 					if constexpr (!std::is_void_v<return_type>)
 					{
@@ -1422,19 +1478,19 @@ namespace toml
 		public:
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<FUNC>(visitor));
 			}
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW
+			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
@@ -1444,7 +1500,441 @@ namespace toml
 #pragma endregion
 //---------------------------------------------------------------------------------------------  ↑ toml_node.h  --------
 
-//-----------------  ↓ toml_table.h  -----------------------------------------------------------------------------------
+//-----------------  ↓ toml_value.h  -----------------------------------------------------------------------------------
+#pragma region
+
+namespace toml
+{
+	template <typename T>
+	class value final : public node
+	{
+		static_assert(
+			impl::is_value<T>,
+			"Template type parameter must be one of the basic value types"
+		);
+
+		private:
+			friend class impl::parser;
+
+			template <typename U, typename V>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			static auto as_value([[maybe_unused]] V* ptr) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return ptr;
+				else
+					return nullptr;
+			}
+
+			T val_;
+
+		public:
+
+			template <typename... U>
+			TOML_NODISCARD_CTOR
+			explicit value(U&&... args) TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<T, U &&...>)
+				: val_{ std::forward<U>(args)... }
+			{}
+
+			TOML_NODISCARD_CTOR
+			value(value&& other) noexcept
+				: node{ std::move(other) },
+				val_{ std::move(other.val_) }
+			{}
+
+			value& operator= (value&& rhs) noexcept
+			{
+				node::operator=(std::move(rhs));
+				val_ = std::move(rhs.val_);
+				return *this;
+			}
+
+			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<T>; }
+			[[nodiscard]] bool is_table() const noexcept override { return false; }
+			[[nodiscard]] bool is_array() const noexcept override { return false; }
+			[[nodiscard]] bool is_value() const noexcept override { return true; }
+			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
+			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
+			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
+			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<T, bool>; }
+			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
+			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
+			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
+			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(this); }
+			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
+			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
+			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
+			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
+			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(this); }
+			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
+			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
+			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
+			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
+			[[nodiscard]] T& get() & noexcept { return val_; }
+			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }
+			[[nodiscard]] const T& get() const & noexcept { return val_; }
+			[[nodiscard]] T& operator* () & noexcept { return val_; }
+			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
+			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
+			[[nodiscard]] operator T& () & noexcept { return val_; }
+			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
+			[[nodiscard]] operator const T& () const& noexcept { return val_; }
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
+			{
+				// this is the same behaviour as default_formatter, but it's so simple that there's
+				// no need to spin up a new instance of it just for individual values.
+
+				if constexpr (std::is_same_v<T, string>)
+				{
+					impl::print_to_stream('"', lhs);
+					impl::print_to_stream_with_escapes(rhs.val_, lhs);
+					impl::print_to_stream('"', lhs);
+				}
+				else
+					impl::print_to_stream(rhs.val_, lhs);
+
+				return lhs;
+			}
+
+			using value_arg_t = std::conditional_t<
+				std::is_same_v<T, string>,
+				string_view,
+				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
+			>;
+
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
+			[[nodiscard]] friend bool operator == (value_arg_t lhs, const value& rhs) noexcept { return lhs == rhs.val_; }
+			[[nodiscard]] friend bool operator != (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ != rhs; }
+			[[nodiscard]] friend bool operator != (value_arg_t lhs, const value& rhs) noexcept { return lhs != rhs.val_; }
+			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ < rhs; }
+			[[nodiscard]] friend bool operator <  (value_arg_t lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
+			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ <= rhs; }
+			[[nodiscard]] friend bool operator <= (value_arg_t lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
+			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ > rhs; }
+			[[nodiscard]] friend bool operator >  (value_arg_t lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
+			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ >= rhs; }
+			[[nodiscard]] friend bool operator >= (value_arg_t lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
+
+			template <typename U>
+			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ == rhs.val_;
+				else
+					return false;
+			}
+
+			template <typename U>
+			[[nodiscard]] friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ != rhs.val_;
+				else
+					return true;
+			}
+
+			template <typename U>
+			[[nodiscard]] friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ < rhs.val_;
+				else
+					return impl::node_type_of<T> < impl::node_type_of<U>;
+			}
+
+			template <typename U>
+			[[nodiscard]] friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ <= rhs.val_;
+				else
+					return impl::node_type_of<T> <= impl::node_type_of<U>;
+			}
+
+			template <typename U>
+			[[nodiscard]] friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ > rhs.val_;
+				else
+					return impl::node_type_of<T> > impl::node_type_of<U>;
+			}
+
+			template <typename U>
+			[[nodiscard]] friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, U>)
+					return lhs.val_ >= rhs.val_;
+				else
+					return impl::node_type_of<T> >= impl::node_type_of<U>;
+			}
+	};
+
+	value(const string_char*) -> value<string>;
+	value(string_view) -> value<string>;
+	value(string) -> value<string>;
+	value(bool) -> value<bool>;
+	value(float) -> value<double>;
+	value(double) -> value<double>;
+	value(int8_t) -> value<int64_t>;
+	value(int16_t) -> value<int64_t>;
+	value(int32_t) -> value<int64_t>;
+	value(int64_t) -> value<int64_t>;
+	value(uint8_t) -> value<int64_t>;
+	value(uint16_t) -> value<int64_t>;
+	value(uint32_t) -> value<int64_t>;
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+	#endif
+}
+
+#pragma endregion
+//-----------------  ↑ toml_value.h  -----------------------------------------------------------------------------------
+
+//------------------------------------------  ↓ toml_array.h  ----------------------------------------------------------
+#pragma region
+
+namespace toml::impl
+{
+	template <bool is_const>
+	class array_iterator final
+	{
+		private:
+			friend class toml::array;
+
+			using raw_iterator = std::conditional_t<
+				is_const,
+				std::vector<std::unique_ptr<node>>::const_iterator,
+				std::vector<std::unique_ptr<node>>::iterator
+			>;
+
+			mutable raw_iterator raw_;
+
+			array_iterator(const raw_iterator& raw) noexcept
+				: raw_{ raw }
+			{}
+
+			array_iterator(raw_iterator&& raw) noexcept
+				: raw_{ std::move(raw) }
+			{}
+
+		public:
+
+			using reference = std::conditional_t<is_const, const node&, node&>;
+
+			array_iterator() noexcept = default;
+
+			array_iterator& operator++() noexcept // ++pre
+			{
+				++raw_;
+				return *this;
+			}
+
+			array_iterator operator++(int) noexcept // post++
+			{
+				array_iterator out{ raw_ };
+				++raw_;
+				return out;
+			}
+
+			array_iterator& operator--() noexcept // --pre
+			{
+				--raw_;
+				return *this;
+			}
+
+			array_iterator operator--(int) noexcept // post--
+			{
+				array_iterator out{ raw_ };
+				--raw_;
+				return out;
+			}
+
+			[[nodiscard]]
+			reference operator* () const noexcept
+			{
+				return *raw_->get();
+			}
+
+			[[nodiscard]]
+			friend constexpr bool operator == (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ == rhs.raw_;
+			}
+
+			[[nodiscard]]
+			friend constexpr bool operator != (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ != rhs.raw_;
+			}
+	};
+}
+
+namespace toml
+{
+	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] bool operator != (const table& lhs, const table& rhs) noexcept;
+
+	class array final
+		: public node
+	{
+		private:
+			friend class impl::parser;
+			std::vector<std::unique_ptr<node>> values;
+
+		public:
+
+			using value_type = node;
+			using size_type = size_t;
+			using difference_type = ptrdiff_t;
+			using reference = node&;
+			using const_reference = const node&;
+			using iterator = impl::array_iterator<false>;
+			using const_iterator = impl::array_iterator<true>;
+
+			TOML_NODISCARD_CTOR
+			array() noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			array(array&& other) noexcept
+				: node{ std::move(other) },
+				values{ std::move(other.values) }
+			{}
+
+			array& operator= (array&& rhs) noexcept
+			{
+				node::operator=(std::move(rhs));
+				values = std::move(rhs.values);
+				return *this;
+			}
+
+			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
+			[[nodiscard]] bool is_table() const noexcept override { return false; }
+			[[nodiscard]] bool is_array() const noexcept override { return true; }
+			[[nodiscard]] bool is_value() const noexcept override { return false; }
+			[[nodiscard]] array* as_array() noexcept override { return this; }
+			[[nodiscard]] const array* as_array() const noexcept override { return this; }
+
+			template <typename T = void>
+			[[nodiscard]] bool is_homogeneous() const noexcept
+			{
+				if (values.empty())
+					return false;
+
+				if constexpr (std::is_same_v<T, void>)
+				{
+					const auto type = values[0]->type();
+					for (size_t i = 1; i < values.size(); i++)
+						if (values[i]->type() != type)
+							return false;
+				}
+				else
+				{
+					for (auto& v : values)
+						if (!v->is<T>())
+							return false;
+				}
+				return true;
+			}
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			bool is_array_of_tables() const noexcept override
+			{
+				return is_homogeneous<toml::table>();
+			}
+
+			[[nodiscard]] node& operator[] (size_t index) noexcept { return *values[index]; }
+			[[nodiscard]] const node& operator[] (size_t index) const noexcept { return *values[index]; }
+			[[nodiscard]] node& front() noexcept { return *values.front(); }
+			[[nodiscard]] const node& front() const noexcept { return *values.front(); }
+			[[nodiscard]] node& back() noexcept { return *values.back(); }
+			[[nodiscard]] const node& back() const noexcept { return *values.back(); }
+			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
+			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
+			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
+			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
+			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
+			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			void reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
+
+			void clear() noexcept { values.clear(); }
+
+			// insert()
+			// emplace()
+
+			iterator erase(const_iterator pos) noexcept
+			{
+				return iterator{ values.erase(pos.raw_) };
+			}
+
+			iterator erase(const_iterator first, const_iterator last) noexcept
+			{
+				return iterator{ values.erase(first.raw_, last.raw_) };
+			}
+
+			// push_back()
+			// emplace_back()
+
+			void pop_back() noexcept { values.pop_back(); }
+
+			template <typename T>
+			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
+			{
+				return values[index]->as<T>();
+			}
+
+			template <typename T>
+			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
+			{
+				return values[index]->as<T>();
+			}
+
+			[[nodiscard]] friend bool operator == (const array& lhs, const array& rhs) noexcept
+			{
+				if (&lhs == &rhs)
+					return true;
+				if (lhs.values.size() != rhs.values.size())
+					return false;
+				for (size_t i = 0, e = lhs.values.size(); i < e; i++)
+				{
+					const auto lhs_type = lhs.values[i]->type();
+					const node& rhs_ = *rhs.values[i];
+					const auto rhs_type = rhs_.type();
+					if (lhs_type != rhs_type)
+						return false;
+
+					const bool equal = lhs.values[i]->visit([&](const auto& lhs_) noexcept
+					{
+						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
+					});
+					if (!equal)
+						return false;
+				}
+				return true;
+			}
+
+			[[nodiscard]] friend bool operator != (const array& lhs, const array& rhs) noexcept
+			{
+				return !(lhs == rhs);
+			}
+
+			template <typename CHAR>
+			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
+	};
+}
+
+#pragma endregion
+//------------------------------------------  ↑ toml_array.h  ----------------------------------------------------------
+
+//-------------------------------------------------------------------  ↓ toml_table.h  ---------------------------------
 #pragma region
 
 namespace toml::impl
@@ -1594,10 +2084,6 @@ namespace toml
 			{
 				return { values.erase(first.raw_, last.raw_) };
 			}
-			bool erase(const string& key) noexcept
-			{
-				return values.erase(key) > 0_sz;
-			}
 			bool erase(string_view key) noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
@@ -1645,22 +2131,47 @@ namespace toml
 		public:
 
 			[[nodiscard]] node* get(string_view key) noexcept { return do_get(values, key); }
-			[[nodiscard]] node* get(const string& key) noexcept { return do_get(values, key); }
 			[[nodiscard]] const node* get(string_view key) const noexcept { return do_get(values, key); }
-			[[nodiscard]] const node* get(const string& key) const noexcept { return do_get(values, key); }
 
 			template <typename T>
 			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
 			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(const string& key) noexcept { return do_get_as<T>(values, key); }
-			template <typename T>
 			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
-			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(const string& key) const noexcept { return do_get_as<T>(values, key); }
-			[[nodiscard]] bool contains(const string& key) const noexcept { return do_contains(values, key); }
 			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }
 			[[nodiscard]] inline node_view<table> operator[] (string_view) noexcept;
 			[[nodiscard]] inline node_view<const table> operator[] (string_view) const noexcept;
+			[[nodiscard]] friend bool operator == (const table& lhs, const table& rhs) noexcept
+			{
+				if (&lhs == &rhs)
+					return true;
+				if (lhs.values.size() != rhs.values.size())
+					return false;
+
+				for (auto l = lhs.values.begin(), r = rhs.values.begin(), e = lhs.values.end(); l != e; l++, r++)
+				{
+					if (l->first != r->first)
+						return false;
+
+					const auto lhs_type = l->second->type();
+					const node& rhs_ = *r->second;
+					const auto rhs_type = rhs_.type();
+					if (lhs_type != rhs_type)
+						return false;
+
+					const bool equal = l->second->visit([&](const auto& lhs_) noexcept
+					{
+						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
+					});
+					if (!equal)
+						return false;
+				}
+				return true;
+			}
+
+			[[nodiscard]] friend bool operator != (const table& lhs, const table& rhs) noexcept
+			{
+				return !(lhs == rhs);
+			}
 
 			template <typename CHAR>
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
@@ -1668,347 +2179,7 @@ namespace toml
 }
 
 #pragma endregion
-//-----------------  ↑ toml_table.h  -----------------------------------------------------------------------------------
-
-//------------------------------------------  ↓ toml_array.h  ----------------------------------------------------------
-#pragma region
-
-namespace toml::impl
-{
-	template <bool is_const>
-	class array_iterator final
-	{
-		private:
-			friend class toml::array;
-
-			using raw_iterator = std::conditional_t<
-				is_const,
-				std::vector<std::unique_ptr<node>>::const_iterator,
-				std::vector<std::unique_ptr<node>>::iterator
-			>;
-
-			mutable raw_iterator raw_;
-
-			array_iterator(const raw_iterator& raw) noexcept
-				: raw_{ raw }
-			{}
-
-			array_iterator(raw_iterator&& raw) noexcept
-				: raw_{ std::move(raw) }
-			{}
-
-		public:
-
-			using reference = std::conditional_t<is_const, const node&, node&>;
-
-			array_iterator() noexcept = default;
-
-			array_iterator& operator++() noexcept // ++pre
-			{
-				++raw_;
-				return *this;
-			}
-
-			array_iterator operator++(int) noexcept // post++
-			{
-				array_iterator out{ raw_ };
-				++raw_;
-				return out;
-			}
-
-			array_iterator& operator--() noexcept // --pre
-			{
-				--raw_;
-				return *this;
-			}
-
-			array_iterator operator--(int) noexcept // post--
-			{
-				array_iterator out{ raw_ };
-				--raw_;
-				return out;
-			}
-
-			[[nodiscard]]
-			reference operator* () const noexcept
-			{
-				return *raw_->get();
-			}
-
-			[[nodiscard]]
-			friend constexpr bool operator == (const array_iterator& lhs, const array_iterator& rhs) noexcept
-			{
-				return lhs.raw_ == rhs.raw_;
-			}
-
-			[[nodiscard]]
-			friend constexpr bool operator != (const array_iterator& lhs, const array_iterator& rhs) noexcept
-			{
-				return lhs.raw_ != rhs.raw_;
-			}
-	};
-}
-
-namespace toml
-{
-	class array final
-		: public node
-	{
-		private:
-			friend class impl::parser;
-			std::vector<std::unique_ptr<node>> values;
-
-		public:
-
-			using value_type = node;
-			using size_type = size_t;
-			using difference_type = ptrdiff_t;
-			using reference = node&;
-			using const_reference = const node&;
-			using iterator = impl::array_iterator<false>;
-			using const_iterator = impl::array_iterator<true>;
-
-			TOML_NODISCARD_CTOR
-			array() noexcept = default;
-
-			TOML_NODISCARD_CTOR
-			array(array&& other) noexcept
-				: node{ std::move(other) },
-				values{ std::move(other.values) }
-			{}
-
-			array& operator= (array&& rhs) noexcept
-			{
-				node::operator=(std::move(rhs));
-				values = std::move(rhs.values);
-				return *this;
-			}
-
-			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
-			[[nodiscard]] bool is_table() const noexcept override { return false; }
-			[[nodiscard]] bool is_array() const noexcept override { return true; }
-			[[nodiscard]] bool is_value() const noexcept override { return false; }
-			[[nodiscard]] array* as_array() noexcept override { return this; }
-			[[nodiscard]] const array* as_array() const noexcept override { return this; }
-
-			template <typename T = void>
-			[[nodiscard]] bool is_homogeneous() const noexcept
-			{
-				if (values.empty())
-					return false;
-
-				if constexpr (std::is_same_v<T, void>)
-				{
-					const auto type = values[0]->type();
-					for (size_t i = 1; i < values.size(); i++)
-						if (values[i]->type() != type)
-							return false;
-				}
-				else
-				{
-					for (auto& v : values)
-						if (!v->is<T>())
-							return false;
-				}
-				return true;
-			}
-
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			bool is_array_of_tables() const noexcept override
-			{
-				return is_homogeneous<toml::table>();
-			}
-
-			[[nodiscard]] node& operator[] (size_t index) noexcept { return *values[index]; }
-			[[nodiscard]] const node& operator[] (size_t index) const noexcept { return *values[index]; }
-			[[nodiscard]] node& front() noexcept { return *values.front(); }
-			[[nodiscard]] const node& front() const noexcept { return *values.front(); }
-			[[nodiscard]] node& back() noexcept { return *values.back(); }
-			[[nodiscard]] const node& back() const noexcept { return *values.back(); }
-			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
-			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
-			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
-			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
-			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
-			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
-			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
-			[[nodiscard]] size_t size() const noexcept { return values.size(); }
-			void reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
-
-			void clear() noexcept { values.clear(); }
-
-			// insert()
-			// emplace()
-
-			iterator erase(const_iterator pos) noexcept
-			{
-				return iterator{ values.erase(pos.raw_) };
-			}
-
-			iterator erase(const_iterator first, const_iterator last) noexcept
-			{
-				return iterator{ values.erase(first.raw_, last.raw_) };
-			}
-
-			// push_back()
-			// emplace_back()
-
-			void pop_back() noexcept { values.pop_back(); }
-
-			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
-			{
-				return values[index]->as<T>();
-			}
-
-			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
-			{
-				return values[index]->as<T>();
-			}
-
-			template <typename CHAR>
-			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
-	};
-}
-
-#pragma endregion
-//------------------------------------------  ↑ toml_array.h  ----------------------------------------------------------
-
-//-------------------------------------------------------------------  ↓ toml_value.h  ---------------------------------
-#pragma region
-
-namespace toml
-{
-	template <typename T>
-	class value final
-		: public node
-	{
-		static_assert(
-			impl::is_value<T>,
-			"Template type parameter must be one of the basic value types"
-		);
-
-		private:
-			friend class impl::parser;
-
-			template <typename U, typename V>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			static auto as_value([[maybe_unused]] V* ptr) noexcept
-			{
-				if constexpr (std::is_same_v<T, U>)
-					return ptr;
-				else
-					return nullptr;
-			}
-
-			T val_;
-
-		public:
-
-			template <typename... U>
-			TOML_NODISCARD_CTOR
-			explicit value(U&&... args) TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<T, U &&...>)
-				: val_{ std::forward<U>(args)... }
-			{}
-
-			TOML_NODISCARD_CTOR
-			value(value&& other) noexcept
-				: node{ std::move(other) },
-				val_{ std::move(other.val_) }
-			{}
-
-			value& operator= (value&& rhs) noexcept
-			{
-				node::operator=(std::move(rhs));
-				val_ = std::move(rhs.val_);
-				return *this;
-			}
-
-			[[nodiscard]] node_type type() const noexcept override
-			{
-				if constexpr (std::is_same_v<T, string>) return node_type::string;
-				else if constexpr (std::is_same_v<T, int64_t>) return node_type::integer;
-				else if constexpr (std::is_same_v<T, double>) return node_type::floating_point;
-				else if constexpr (std::is_same_v<T, bool>) return node_type::boolean;
-				else if constexpr (std::is_same_v<T, date>) return node_type::date;
-				else if constexpr (std::is_same_v<T, time>) return node_type::time;
-				else if constexpr (std::is_same_v<T, date_time>) return node_type::date_time;
-			}
-
-			[[nodiscard]] bool is_table() const noexcept override { return false; }
-			[[nodiscard]] bool is_array() const noexcept override { return false; }
-			[[nodiscard]] bool is_value() const noexcept override { return true; }
-			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
-			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
-			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
-			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<T, bool>; }
-			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
-			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
-			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
-			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(this); }
-			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
-			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
-			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
-			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
-			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
-			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
-			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(this); }
-			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
-			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
-			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
-			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
-			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
-			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
-			[[nodiscard]] T& get() & noexcept { return val_; }
-			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }
-			[[nodiscard]] const T& get() const & noexcept { return val_; }
-			[[nodiscard]] T& operator* () & noexcept { return val_; }
-			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
-			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
-			[[nodiscard]] operator T& () & noexcept { return val_; }
-			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
-			[[nodiscard]] operator const T& () const& noexcept { return val_; }
-
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
-			{
-				// this is the same behaviour as default_formatter, but it's so simple that there's
-				// no need to spin up a new instance of it just for individual values.
-
-				if constexpr (std::is_same_v<T, string>)
-				{
-					impl::print_to_stream('"', lhs);
-					impl::print_to_stream_with_escapes(rhs.val_, lhs);
-					impl::print_to_stream('"', lhs);
-				}
-				else
-					impl::print_to_stream(rhs.val_, lhs);
-
-				return lhs;
-			}
-	};
-
-	value(const string_char*) -> value<string>;
-	value(string_view) -> value<string>;
-	value(string) -> value<string>;
-	value(bool) -> value<bool>;
-	value(float) -> value<double>;
-	value(double) -> value<double>;
-	value(int8_t) -> value<int64_t>;
-	value(int16_t) -> value<int64_t>;
-	value(int32_t) -> value<int64_t>;
-	value(int64_t) -> value<int64_t>;
-	value(uint8_t) -> value<int64_t>;
-	value(uint16_t) -> value<int64_t>;
-	value(uint32_t) -> value<int64_t>;
-	#ifdef TOML_SMALL_FLOAT_TYPE
-	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
-	#endif
-}
-
-#pragma endregion
-//-------------------------------------------------------------------  ↑ toml_value.h  ---------------------------------
+//-------------------------------------------------------------------  ↑ toml_table.h  ---------------------------------
 
 //------------------------------------------------------------------------------------------  ↓ toml_node_view.h  ------
 #pragma region
@@ -2240,7 +2411,6 @@ namespace toml
 
 		public:
 
-			[[nodiscard]] bool operator == (const string& rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (string_view rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (int64_t rhs) const noexcept { return value_equality(*this, rhs); }
 			[[nodiscard]] bool operator == (int32_t rhs) const noexcept { return value_equality(*this, rhs); }
@@ -3656,7 +3826,7 @@ namespace toml::impl
 
 			template <typename U, typename STR = std::string_view>
 			explicit utf8_reader(U && source, STR&& source_path = {})
-				TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+				TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				current.position = { 1, 1 };
@@ -7696,7 +7866,7 @@ namespace toml
 	#undef TOML_EMPTY_BASES
 	#undef TOML_CPP_VERSION
 	#undef TOML_CPP
-	#undef TOML_CONDITIONAL_NOEXCEPT
+	#undef TOML_MAY_THROW_UNLESS
 	#undef TOML_MAY_THROW
 	#undef TOML_NO_DEFAULT_CASE
 	#undef TOML_CONSTEVAL

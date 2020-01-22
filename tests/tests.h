@@ -202,6 +202,7 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 	{
 		CHECK(tbl.size() == 1);
 		REQUIRE(tbl[S("val"sv)].as<impl::promoted<T>>());
+		REQUIRE(tbl[S("val"sv)].get()->type() == impl::node_type_of<T>);
 		CHECK(tbl[S("val"sv)].as<impl::promoted<T>>()->get() == expected);
 		CHECK(tbl[S("val"sv)].get()->source().begin == begin);
 		CHECK(tbl[S("val"sv)].get()->source().end == end);

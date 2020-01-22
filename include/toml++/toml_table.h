@@ -1,5 +1,5 @@
 #pragma once
-#include "toml_node.h"
+#include "toml_array.h"
 
 namespace toml::impl
 {
@@ -155,10 +155,6 @@ namespace toml
 			{
 				return { values.erase(first.raw_, last.raw_) };
 			}
-			bool erase(const string& key) noexcept
-			{
-				return values.erase(key) > 0_sz;
-			}
 			bool erase(string_view key) noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
@@ -206,24 +202,62 @@ namespace toml
 		public:
 
 			[[nodiscard]] node* get(string_view key) noexcept { return do_get(values, key); }
-			[[nodiscard]] node* get(const string& key) noexcept { return do_get(values, key); }
 			[[nodiscard]] const node* get(string_view key) const noexcept { return do_get(values, key); }
-			[[nodiscard]] const node* get(const string& key) const noexcept { return do_get(values, key); }
 
 			template <typename T>
 			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
 			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(const string& key) noexcept { return do_get_as<T>(values, key); }
-			template <typename T>
 			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
-			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(const string& key) const noexcept { return do_get_as<T>(values, key); }
 
-			[[nodiscard]] bool contains(const string& key) const noexcept { return do_contains(values, key); }
 			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }
 
 			[[nodiscard]] inline node_view<table> operator[] (string_view) noexcept;
 			[[nodiscard]] inline node_view<const table> operator[] (string_view) const noexcept;
+
+			/// \brief	Equality operator.
+			///
+			/// \param 	lhs	The LHS table.
+			/// \param 	rhs	The RHS table.
+			///
+			/// \returns	True if the tables contained the same keys and values.
+			[[nodiscard]] friend bool operator == (const table& lhs, const table& rhs) noexcept
+			{
+				if (&lhs == &rhs)
+					return true;
+				if (lhs.values.size() != rhs.values.size())
+					return false;
+
+				for (auto l = lhs.values.begin(), r = rhs.values.begin(), e = lhs.values.end(); l != e; l++, r++)
+				{
+					if (l->first != r->first)
+						return false;
+
+					const auto lhs_type = l->second->type();
+					const node& rhs_ = *r->second;
+					const auto rhs_type = rhs_.type();
+					if (lhs_type != rhs_type)
+						return false;
+
+					const bool equal = l->second->visit([&](const auto& lhs_) noexcept
+					{
+						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
+					});
+					if (!equal)
+						return false;
+				}
+				return true;
+			}
+
+			/// \brief	Inequality operator.
+			///
+			/// \param 	lhs	The LHS table.
+			/// \param 	rhs	The RHS table.
+			///
+			/// \returns	True if the tables did not contain the same keys and values.
+			[[nodiscard]] friend bool operator != (const table& lhs, const table& rhs) noexcept
+			{
+				return !(lhs == rhs);
+			}
 
 			template <typename CHAR>
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;

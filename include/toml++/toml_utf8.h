@@ -375,7 +375,7 @@ namespace toml::impl
 
 			template <typename U, typename STR = std::string_view>
 			explicit utf8_reader(U && source, STR&& source_path = {})
-				TOML_CONDITIONAL_NOEXCEPT(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+				TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				current.position = { 1, 1 };
