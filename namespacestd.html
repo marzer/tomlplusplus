@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>toml++ TOML
+  <title>std namespace | toml++ TOML
 Parser
 for
 C++17</title>
@@ -39,7 +39,7 @@ C++17</a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="namespaces.html">Namespaces</a></li>
-            <li><a href="annotated.html" id="m-navbar-current">Classes</a></li>
+            <li><a href="annotated.html">Classes</a></li>
             <li><a target="_blank" href="https://github.com/marzer/tomlplusplus/">Github</a></li>
             <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path" />
@@ -54,43 +54,10 @@ C++17</a>
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <h1>Classes</h2>
-        <ul class="m-doc">
-          <li>namespace <a href="namespacestd.html" class="m-doc">std</a> <span class="m-doc">STL namespace.</span></li>
-          <li class="m-doc-collapsible">
-            <a href="#" onclick="return toggle(this)">namespace</a> <a href="namespacetoml.html" class="m-doc">toml</a> <span class="m-doc">The root namespace for all toml++ functions and types.</span>
-            <ul class="m-doc">
-              <li>namespace <a href="namespacetoml_1_1impl.html" class="m-doc">impl</a> <span class="m-doc">Internal implementation details. No user-serviceable parts within.</span></li>
-              <li>class <a href="classtoml_1_1array.html" class="m-doc">array</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A TOML array.</span></li>
-              <li>struct <a href="structtoml_1_1date.html" class="m-doc">date</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A local date.</span></li>
-              <li>struct <a href="structtoml_1_1date__time.html" class="m-doc">date_time</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A date-time.</span></li>
-              <li>class <a href="classtoml_1_1node.html" class="m-doc">node</a> <span class="m-doc">A TOML node.</span></li>
-              <li>class <a href="classtoml_1_1parse__error.html" class="m-doc">parse_error</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">An error thrown/returned when parsing fails.</span></li>
-              <li>class <a href="classtoml_1_1parse__result.html" class="m-doc">parse_result</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">The result of a parsing operation.</span></li>
-              <li>struct <a href="structtoml_1_1source__position.html" class="m-doc">source_position</a> <span class="m-doc">A source document line-and-column pair.</span></li>
-              <li>struct <a href="structtoml_1_1source__region.html" class="m-doc">source_region</a> <span class="m-doc">A source document region.</span></li>
-              <li>struct <a href="structtoml_1_1time.html" class="m-doc">time</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A local time-of-day.</span></li>
-              <li>struct <a href="structtoml_1_1time__offset.html" class="m-doc">time_offset</a> <span class="m-label m-flat m-warning">final</span> <span class="m-doc">A timezone offset.</span></li>
-              <li>class <a href="classtoml_1_1value.html" class="m-doc">value</a> <span class="m-doc">A TOML value.</span></li>
-            </ul>
-          </li>
-        </ul>
-        <script>
-        function toggle(e) {
-            e.parentElement.className = e.parentElement.className == 'm-doc-collapsible' ?
-                'm-doc-expansible' : 'm-doc-collapsible';
-            return false;
-        }
-        /* Collapse all nodes marked as such. Doing it via JS instead of
-           directly in markup so disabling it doesn't harm usability. The list
-           is somehow regenerated on every iteration and shrinks as I change
-           the classes. It's not documented anywhere and I'm not sure if this
-           is the same across browsers, so I am going backwards in that list to
-           be sure. */
-        var collapsed = document.getElementsByClassName("collapsed");
-        for(var i = collapsed.length - 1; i >= 0; --i)
-            collapsed[i].className = 'm-doc-expansible';
-        </script>
+        <h1>
+          std <span class="m-thin">namespace</span>
+        </h1>
+        <p>STL namespace.</p>
       </div>
     </div>
   </div>

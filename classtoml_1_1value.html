@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>toml::value class | toml++ TOML
+Parser
+for
+C++17</title>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="tomlplusplus.css" rel="stylesheet"/>
+  <link href="favicon-dark.png" rel="icon" type="image/png"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <script src="tomlplusplus.js"></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
+        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="index.html">TOML
+Parser
+for
+C++17</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="pages.html">Pages</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="2">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;typename T&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>value <span class="m-thin">class</span>
+        </h1>
+        <p>A TOML value.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">T</td>
+              <td><p>The value's data type. Can be one of:</p><ul><li><a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">toml::<wbr/>string</a></li><li><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></li><li>double</li><li>bool</li><li><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a></li><li><a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a></li><li><a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a></li></ul></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt>
+              using <a class="m-doc" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+            </dt>
+            <dd></dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename... U&gt;</div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a26095dcdb1b42565a62be36f0599afdc">value</a>(</span><span class="m-doc-wrap">U &amp;&amp; ... args) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Constructs a toml value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a234de94185943fea728d269b6387f517">value</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a73c455e4c1d44f73c4b013c4560a204f">operator const T&amp;</a>(</span><span class="m-doc-wrap">) const &amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a69e11567f0ceea943f29b90c542f8d18">operator T&amp;</a>(</span><span class="m-doc-wrap">) &amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#aace025c28dd06f6b57276c89c3bbcc12">operator T&amp;&amp;</a>(</span><span class="m-doc-wrap">) &amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (rvalue overload).</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a31b9cd169a1e8dd37ca7b0fbaf9f88d7">as_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;bool&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aee6157b8c209ed9101c76bb41b580ee4">as_boolean</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;bool&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a35dc5990df24f3c747ee69712323c9dc">as_date</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac494a82b665b29a149cc8a193818e66b">as_date</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6bb2eff4b852795d69ffb93c638806a4">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab45f4fefe1072257d316c296c15e1a08">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a958a3a579a41e8e70ea8f9ee9622f270">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a030b70d68f9f4bb0d6ccb9c12d0259bd">as_floating_point</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a294b8d71c3981adca1ef08cbd7f357eb">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1857070b291d172ce4653ccd1e5227a9">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a77abed8d00a48b1508185eaf1bbd8317">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a40985b4c95eb8255a1a17fa54dd945d2">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af0e62a905073c4e043718286f0e858a9">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac08e949e9793dc1436bf093d7ea61eaf">as_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a090cac07b747abcc492df33def27b273">get</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; T&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (rvalue overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac9d6581566cbaa9d509d660078333a6e">get</a>(</span><span class="m-doc-wrap">) &amp; -&gt; T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac35bee1ae4c4d841b5707e50d16fa682">get</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a59f21081564dc93aabfdb3c7d1e72ee8">is_array</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Always returns <code>false</code> for value nodes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a773843d297d6308e5834f888ad20644a">is_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac518e4cb3ff7ce437c4d90fb3fd0827f">is_date</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a02898ae6aa56fded57a8f63cc39fac24">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a080d4279e89b706ef162fe4e7c6e6074">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af1b8eb84fac8221f20d86d9effb28929">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aaf41ffaf73ec380047eec193e42d059f">is_string</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a62f838ce2586ddb1205cddd63181f138">is_table</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Always returns <code>false</code> for value nodes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a816e94cc79efc3940906a182f472f54d">is_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4ddd71c9ec6c3c2c5fa4e06cb4e4626d">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Always returns <code>true</code> for value nodes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a88cb3a93a37fecbd9ed13219976b7de4">operator*</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; T&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (rvalue overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a78e70e0fcec5fe755d328cbf13d25492">operator*</a>(</span><span class="m-doc-wrap">) &amp; -&gt; T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5d97763beb1145e928065ebd49e43f75">operator*</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const T&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the underlying value (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a133983188b1c222dffdf848a1a6d66be">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move-assignment operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac575b16e5db7118b3d2b311921c6d91d">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the value's node type identifier.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a829d9b96e541d4ec19507ff154372c2b">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Inequality operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae20a0a0639280b93aedb3f7bd4e2f815">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value inequality operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afb3d69a6ac8eee7ac3d4d71cc01b2a46">operator!=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value inequality operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7a08e69ebf5f736083a1766a3be83dec">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Less-than operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8cc3932d68b2574e737f73b43978da33">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value less-than operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a41e670743308108729a03b18494f63e2">operator&lt;</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value less-than operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adf518c9626842f6ef5a834d45ca01cb5">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
+            </dt>
+            <dd></dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a886395440d190477f0d3d16c9e6b594a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Less-than-or-equal-to operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a59ae52e0c193eca6fd2ccbc851fbf21a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value less-than-or-equal-to operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3c962955eeddb47c0eab792df4cb43c9">operator&lt;=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value less-than-or-equal-to operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0084ad9d2ee5f851b3e81226a7da6218">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Equality operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a22554807577ed9953fb852dfadf18d9c">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value equality operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a455937fd79298be4f4a25c49a88796a5">operator==</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value equality operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae923a293a4bb75e31f66ebeb7221a491">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Greater-than operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6382f2cdd26a56a2b572afa21c7680ca">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value greater-than operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa6feddf139f04166ce9859ecd92f4cdd">operator&gt;</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value greater-than operator.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a41b31f2291572c36228a6daa5aff0f1e">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Greater-than-or-equal-to operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a827cc3b49243a0e657f8303d49808cfc">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value greater-than-or-equal-to operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af3e7f08d3cd2288eb97d80c52dc2b01d">operator&gt;=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Value greater-than-or-equal-to operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="a02eaccfe5b461e8b36d9913fbe789239"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              using toml::<wbr/>value&lt;T&gt;::<wbr/><a class="m-doc-self" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+            </h3>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a26095dcdb1b42565a62be36f0599afdc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename... U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a26095dcdb1b42565a62be36f0599afdc">value</a>(</span><span class="m-doc-wrap">U &amp;&amp; ... args) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept(…)</span></span></span>
+            </h3>
+            <p>Constructs a toml value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">U</td>
+                  <td>Constructor argument types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>args</td>
+                  <td>Variadic list of arguments that are forwarded to the internal value's constructor.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a234de94185943fea728d269b6387f517"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a234de94185943fea728d269b6387f517">value</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;&amp; other) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move constructor.</p>
+          </div></section>
+          <section class="m-doc-details" id="a73c455e4c1d44f73c4b013c4560a204f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a73c455e4c1d44f73c4b013c4560a204f">operator const T&amp;</a>(</span><span class="m-doc-wrap">) const &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (const overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="a69e11567f0ceea943f29b90c542f8d18"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a69e11567f0ceea943f29b90c542f8d18">operator T&amp;</a>(</span><span class="m-doc-wrap">) &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value.</p>
+          </div></section>
+          <section class="m-doc-details" id="aace025c28dd06f6b57276c89c3bbcc12"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aace025c28dd06f6b57276c89c3bbcc12">operator T&amp;&amp;</a>(</span><span class="m-doc-wrap">) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (rvalue overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="a31b9cd169a1e8dd37ca7b0fbaf9f88d7"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;bool&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a31b9cd169a1e8dd37ca7b0fbaf9f88d7">as_boolean</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="aee6157b8c209ed9101c76bb41b580ee4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;bool&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aee6157b8c209ed9101c76bb41b580ee4">as_boolean</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a35dc5990df24f3c747ee69712323c9dc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a35dc5990df24f3c747ee69712323c9dc">as_date</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="ac494a82b665b29a149cc8a193818e66b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac494a82b665b29a149cc8a193818e66b">as_date</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a6bb2eff4b852795d69ffb93c638806a4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6bb2eff4b852795d69ffb93c638806a4">as_date_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="ab45f4fefe1072257d316c296c15e1a08"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab45f4fefe1072257d316c296c15e1a08">as_date_time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a958a3a579a41e8e70ea8f9ee9622f270"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a958a3a579a41e8e70ea8f9ee9622f270">as_floating_point</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a030b70d68f9f4bb0d6ccb9c12d0259bd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a030b70d68f9f4bb0d6ccb9c12d0259bd">as_floating_point</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a294b8d71c3981adca1ef08cbd7f357eb"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a294b8d71c3981adca1ef08cbd7f357eb">as_integer</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a1857070b291d172ce4653ccd1e5227a9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1857070b291d172ce4653ccd1e5227a9">as_integer</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a77abed8d00a48b1508185eaf1bbd8317"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a77abed8d00a48b1508185eaf1bbd8317">as_string</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a40985b4c95eb8255a1a17fa54dd945d2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a40985b4c95eb8255a1a17fa54dd945d2">as_string</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="af0e62a905073c4e043718286f0e858a9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af0e62a905073c4e043718286f0e858a9">as_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="ac08e949e9793dc1436bf093d7ea61eaf"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac08e949e9793dc1436bf093d7ea61eaf">as_time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a090cac07b747abcc492df33def27b273"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T&amp;&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a090cac07b747abcc492df33def27b273">get</a>(</span><span class="m-doc-wrap">) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (rvalue overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="ac9d6581566cbaa9d509d660078333a6e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac9d6581566cbaa9d509d660078333a6e">get</a>(</span><span class="m-doc-wrap">) &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac35bee1ae4c4d841b5707e50d16fa682"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const T&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac35bee1ae4c4d841b5707e50d16fa682">get</a>(</span><span class="m-doc-wrap">) const &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (const overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="a59f21081564dc93aabfdb3c7d1e72ee8"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a59f21081564dc93aabfdb3c7d1e72ee8">is_array</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Always returns <code>false</code> for value nodes.</p>
+          </div></section>
+          <section class="m-doc-details" id="a773843d297d6308e5834f888ad20644a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a773843d297d6308e5834f888ad20644a">is_boolean</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="ac518e4cb3ff7ce437c4d90fb3fd0827f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac518e4cb3ff7ce437c4d90fb3fd0827f">is_date</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a02898ae6aa56fded57a8f63cc39fac24"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a02898ae6aa56fded57a8f63cc39fac24">is_date_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a080d4279e89b706ef162fe4e7c6e6074"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a080d4279e89b706ef162fe4e7c6e6074">is_floating_point</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="af1b8eb84fac8221f20d86d9effb28929"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af1b8eb84fac8221f20d86d9effb28929">is_integer</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="aaf41ffaf73ec380047eec193e42d059f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aaf41ffaf73ec380047eec193e42d059f">is_string</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a62f838ce2586ddb1205cddd63181f138"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a62f838ce2586ddb1205cddd63181f138">is_table</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Always returns <code>false</code> for value nodes.</p>
+          </div></section>
+          <section class="m-doc-details" id="a816e94cc79efc3940906a182f472f54d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a816e94cc79efc3940906a182f472f54d">is_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a4ddd71c9ec6c3c2c5fa4e06cb4e4626d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4ddd71c9ec6c3c2c5fa4e06cb4e4626d">is_value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Always returns <code>true</code> for value nodes.</p>
+          </div></section>
+          <section class="m-doc-details" id="a88cb3a93a37fecbd9ed13219976b7de4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T&amp;&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a88cb3a93a37fecbd9ed13219976b7de4">operator*</a>(</span><span class="m-doc-wrap">) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (rvalue overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="a78e70e0fcec5fe755d328cbf13d25492"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">T&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a78e70e0fcec5fe755d328cbf13d25492">operator*</a>(</span><span class="m-doc-wrap">) &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value.</p>
+          </div></section>
+          <section class="m-doc-details" id="a5d97763beb1145e928065ebd49e43f75"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const T&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5d97763beb1145e928065ebd49e43f75">operator*</a>(</span><span class="m-doc-wrap">) const &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a reference to the underlying value (const overload).</p>
+          </div></section>
+          <section class="m-doc-details" id="a133983188b1c222dffdf848a1a6d66be"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a133983188b1c222dffdf848a1a6d66be">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Move-assignment operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="ac575b16e5db7118b3d2b311921c6d91d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac575b16e5db7118b3d2b311921c6d91d">type</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the value's node type identifier.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <tfoot>
+                <tr>
+                  <th style="width: 1%">Returns</th>
+                  <td><p>One of:</p><ul><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">node_type::<wbr/>string</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">node_type::<wbr/>integer</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">node_type::<wbr/>floating_point</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">node_type::<wbr/>boolean</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">node_type::<wbr/>date</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">node_type::<wbr/>time</a></li><li><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">node_type::<wbr/>date_time</a></li></ul></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a829d9b96e541d4ec19507ff154372c2b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a829d9b96e541d4ec19507ff154372c2b">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Inequality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS value.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS value.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the values were not of the same type, or did not contain the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ae20a0a0639280b93aedb3f7bd4e2f815"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae20a0a0639280b93aedb3f7bd4e2f815">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value inequality operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="afb3d69a6ac8eee7ac3d4d71cc01b2a46"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afb3d69a6ac8eee7ac3d4d71cc01b2a46">operator!=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value inequality operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a7a08e69ebf5f736083a1766a3be83dec"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7a08e69ebf5f736083a1766a3be83dec">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Less-than operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Values of the same data type: <code>lhs.get() &lt; rhs.get()</code><br/>Values of different types: <code>lhs.type() &lt; rhs.type()</code></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a8cc3932d68b2574e737f73b43978da33"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8cc3932d68b2574e737f73b43978da33">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value less-than operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a41e670743308108729a03b18494f63e2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a41e670743308108729a03b18494f63e2">operator&lt;</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value less-than operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="adf518c9626842f6ef5a834d45ca01cb5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename CHAR&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adf518c9626842f6ef5a834d45ca01cb5">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs)</span></span>
+            </h3>
+          </div></section>
+          <section class="m-doc-details" id="a886395440d190477f0d3d16c9e6b594a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a886395440d190477f0d3d16c9e6b594a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Less-than-or-equal-to operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Values of the same data type: <code>lhs.get() &lt;= rhs.get()</code><br/>Values of different types: <code>lhs.type() &lt;= rhs.type()</code></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a59ae52e0c193eca6fd2ccbc851fbf21a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a59ae52e0c193eca6fd2ccbc851fbf21a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value less-than-or-equal-to operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a3c962955eeddb47c0eab792df4cb43c9"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3c962955eeddb47c0eab792df4cb43c9">operator&lt;=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value less-than-or-equal-to operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a0084ad9d2ee5f851b3e81226a7da6218"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0084ad9d2ee5f851b3e81226a7da6218">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Equality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS value.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS value.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the values were of the same type and contained the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a22554807577ed9953fb852dfadf18d9c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a22554807577ed9953fb852dfadf18d9c">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value equality operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a455937fd79298be4f4a25c49a88796a5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a455937fd79298be4f4a25c49a88796a5">operator==</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value equality operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="ae923a293a4bb75e31f66ebeb7221a491"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae923a293a4bb75e31f66ebeb7221a491">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Greater-than operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Values of the same data type: <code>lhs.get() &gt; rhs.get()</code><br/>Values of different types: <code>lhs.type() &gt; rhs.type()</code></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a6382f2cdd26a56a2b572afa21c7680ca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6382f2cdd26a56a2b572afa21c7680ca">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value greater-than operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="aa6feddf139f04166ce9859ecd92f4cdd"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa6feddf139f04166ce9859ecd92f4cdd">operator&gt;</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value greater-than operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="a41b31f2291572c36228a6daa5aff0f1e"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a41b31f2291572c36228a6daa5aff0f1e">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;U&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Greater-than-or-equal-to operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>Values of the same data type: <code>lhs.get() &gt;= rhs.get()</code><br/>Values of different types: <code>lhs.type() &gt;= rhs.type()</code></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a827cc3b49243a0e657f8303d49808cfc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a827cc3b49243a0e657f8303d49808cfc">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              value_arg_t rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value greater-than-or-equal-to operator.</p>
+          </div></section>
+          <section class="m-doc-details" id="af3e7f08d3cd2288eb97d80c52dc2b01d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af3e7f08d3cd2288eb97d80c52dc2b01d">operator&gt;=</a>(</span><span class="m-doc-wrap">value_arg_t lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Value greater-than-or-equal-to operator.</p>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script async="async" src="searchdata-v1.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+•
+
+<a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+an
+issue</a>
+
+<br/><br/>Documentation
+generated
+using
+<a href="https://mcss.mosra.cz/">m.css</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>

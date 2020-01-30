@@ -122,13 +122,18 @@ C++17</a>
               struct <a class="m-doc" href="structtoml_1_1time__offset.html">time_offset</a>
             </dt>
             <dd>A timezone offset.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              class <a class="m-doc" href="classtoml_1_1value.html">value</a>
+            </dt>
+            <dd>A TOML value.</dd>
           </dl>
         </section>
         <section id="enum-members">
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
-            <dt id="abac3e84bbf1f2c90717fca107055f48d">
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a>,
@@ -179,12 +184,22 @@ C++17</a>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac64c8d77a6dcf888d15921f73f1d7675">operator!=</a>(</span><span class="m-doc-wrap">const table&amp; lhs,
+              const table&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
             <dt id="aaa1ee3cd7e3a50ae76f0da76eb21a0bc">
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aaa1ee3cd7e3a50ae76f0da76eb21a0bc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a>rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
             <dd>Pretty-prints the value of a node_type to a stream.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1663dfec155837cf2aac97bf610d937c">operator==</a>(</span><span class="m-doc-wrap">const table&amp; lhs,
+              const table&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd></dd>
           </dl>
         </section>
         <section id="var-members">
@@ -238,6 +253,74 @@ C++17</a>
           </dl>
         </section>
         <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="abac3e84bbf1f2c90717fca107055f48d"><div>
+            <h3>
+              enum class toml::<wbr/><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
+            </h3>
+            <p>TOML node type identifiers.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d" id="abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a></td>
+                  <td>
+                  <p>The node is a toml::table.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5" id="abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21" id="abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;toml::string&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8" id="abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a" id="abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">floating_point</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;double&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27" id="abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">boolean</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;bool&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f" id="abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">date</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;toml::date&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b" id="abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">time</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;toml::time&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264" id="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a></td>
+                  <td>
+                  <p>The node is a toml::value&lt;toml::date_time&gt;.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+        </section>
+        <section>
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="ae845239fd7271e3d8e529302d300ad5b"><div>
             <h3>
@@ -266,6 +349,63 @@ C++17</a>
             </h3>
             <p>The string type for keys and string values.</p>
 <aside class="m-note m-warning"><h4>Attention</h4><p>This will be <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a></code> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
+          </div></section>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ac64c8d77a6dcf888d15921f73f1d7675"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac64c8d77a6dcf888d15921f73f1d7675">operator!=</a>(</span><span class="m-doc-wrap">const table&amp; lhs,
+              const table&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS table.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS table.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the tables did not contain the same keys and values.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1663dfec155837cf2aac97bf610d937c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1663dfec155837cf2aac97bf610d937c">operator==</a>(</span><span class="m-doc-wrap">const table&amp; lhs,
+              const table&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS table.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS table.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the tables contained the same keys and values.</td>
+                </tr>
+              </tfoot>
+            </table>
           </div></section>
         </section>
       </div>
