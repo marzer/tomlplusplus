@@ -37,6 +37,28 @@
 // COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
+// SPDX-License-Identifier: MIT
+//
+//----------------------------------------------------------------------------------------------------------------------
+//
+// UTF-8 decoding is performed using a derivative of Bjoern Hoehrmann's 'Flexible and Economical UTF-8 Decoder'
+// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
+//
+// Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
+// Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
 //----------------------------------------------------------------------------------------------------------------------
 // clang-format off
 #pragma once
@@ -323,12 +345,6 @@ namespace toml
 		using namespace std::string_view_literals;
 
 		[[nodiscard]] TOML_ALWAYS_INLINE
-		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
-		{
-			return static_cast<uint8_t>(n);
-		}
-
-		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 		{
 			return static_cast<size_t>(n);
@@ -423,10 +439,7 @@ namespace toml
 
 		template <typename CHAR>
 		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
-			TOML_MAY_THROW
-		{
-			return lhs << "line " << rhs.line << ", column " << rhs.column;
-		}
+			TOML_MAY_THROW;
 	};
 
 	using source_path_ptr = std::shared_ptr<const std::string>;
@@ -436,6 +449,10 @@ namespace toml
 		source_position begin;
 		source_position end;
 		source_path_ptr path;
+
+		template <typename CHAR>
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
+			TOML_MAY_THROW;
 	};
 
 	TOML_PUSH_WARNINGS
@@ -529,7 +546,7 @@ namespace toml::impl
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
 
-	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
+	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20) && _HAS_CXX20)
 
 	template <typename T>
 	using remove_cvref_t = std::remove_cvref_t<T>;
@@ -557,7 +574,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
-	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
+	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
@@ -591,6 +608,7 @@ namespace toml::impl
 	template <typename T>
 	inline constexpr bool is_value_or_promotable =
 		is_value<T>
+		|| std::is_same_v<std::decay_t<T>, string_char*>
 		|| std::is_same_v<T, string_view>
 		|| std::is_same_v<T, int32_t>
 		|| std::is_same_v<T, int16_t>
@@ -602,7 +620,10 @@ namespace toml::impl
 		#ifdef TOML_SMALL_FLOAT_TYPE
 		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
 		#endif
-		;
+		#ifdef TOML_SMALL_INT_TYPE
+		|| std::is_same_v<T, TOML_SMALL_INT_TYPE>
+		#endif
+	;
 
 	template <typename T>
 	inline constexpr bool is_value_or_node =
@@ -622,7 +643,17 @@ namespace toml::impl
 	template <typename T> struct node_unwrapper { using type = T; };
 	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
 
+	template <typename T> using unwrapped = typename impl::node_unwrapper<T>::type;
+
 	template <typename T> struct value_promoter { using type = T; };
+	template <size_t N> struct value_promoter<const string_char[N]> { using type = string; };
+	template <size_t N> struct value_promoter<const string_char(&)[N]> { using type = string; };
+	template <size_t N> struct value_promoter<const string_char(&&)[N]> { using type = string; };
+	template <> struct value_promoter<const string_char*> { using type = string; };
+	template <size_t N> struct value_promoter<string_char[N]> { using type = string; };
+	template <size_t N> struct value_promoter<string_char(&)[N]> { using type = string; };
+	template <size_t N> struct value_promoter<string_char(&&)[N]> { using type = string; };
+	template <> struct value_promoter<string_char*> { using type = string; };
 	template <> struct value_promoter<string_view> { using type = string; };
 	template <> struct value_promoter<int32_t> { using type = int64_t; };
 	template <> struct value_promoter<int16_t> { using type = int64_t; };
@@ -633,6 +664,9 @@ namespace toml::impl
 	template <> struct value_promoter<float> { using type = double; };
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	template <> struct value_promoter<TOML_SMALL_INT_TYPE> { using type = int64_t; };
 	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
@@ -725,9 +759,6 @@ namespace toml
 {
 	template <typename T>
 	using node_of = typename impl::node_wrapper<T>::type;
-
-	template <typename T>
-	using value_of = typename impl::node_unwrapper<T>::type;
 
 	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
@@ -914,8 +945,15 @@ namespace toml::impl
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
-	//    - <charconv> is locale-independent.
+	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
 	//    - I can avoid forcing users to drag in <sstream> and <iomanip>.
+
+	// Q: "there's a lot of reinterpret_casting here, is any of it UB?"
+	// A: - If the source string data is char and the output string is char8_t, then technically yes,
+	//      but not in the other direction. I test in both modes on Clang, GCC and MSVC and have yet to
+	//      see it actually causing an issue, but in the event it does present a problem it's not going to
+	//      be a show-stopper since all it means is I need to do duplicate some code.
+	//    - Strings in C++. Honestly.
 
 	template <typename CHAR1, typename CHAR2>
 	TOML_ALWAYS_INLINE
@@ -923,7 +961,7 @@ namespace toml::impl
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(str.data(), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
 	}
 
 	template <typename CHAR1, typename CHAR2>
@@ -932,7 +970,7 @@ namespace toml::impl
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(str.data(), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
 	}
 
 	template <typename CHAR>
@@ -974,14 +1012,14 @@ namespace toml::impl
 	template <typename T> inline constexpr size_t charconv_buffer_length = 0;
 	template <> inline constexpr size_t charconv_buffer_length<double> = 60;
 	template <> inline constexpr size_t charconv_buffer_length<float> = 40;
-	template <> inline constexpr size_t charconv_buffer_length<uint64_t> = 20; //strlen("18446744073709551615")
-	template <> inline constexpr size_t charconv_buffer_length<int64_t> = 20; //strlen("-9223372036854775808")
-	template <> inline constexpr size_t charconv_buffer_length<int32_t> = 11; //strlen("-2147483648")
-	template <> inline constexpr size_t charconv_buffer_length<int16_t> = 6; //strlen("-32768")
-	template <> inline constexpr size_t charconv_buffer_length<int8_t> = 4; //strlen("-128")
-	template <> inline constexpr size_t charconv_buffer_length<uint32_t> = 10; //strlen("4294967295")
-	template <> inline constexpr size_t charconv_buffer_length<uint16_t> = 5; //strlen("65535")
-	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3; //strlen("255")
+	template <> inline constexpr size_t charconv_buffer_length<uint64_t> = 20; // strlen("18446744073709551615")
+	template <> inline constexpr size_t charconv_buffer_length<int64_t> = 20;  // strlen("-9223372036854775808")
+	template <> inline constexpr size_t charconv_buffer_length<int32_t> = 11;  // strlen("-2147483648")
+	template <> inline constexpr size_t charconv_buffer_length<int16_t> = 6;   // strlen("-32768")
+	template <> inline constexpr size_t charconv_buffer_length<int8_t> = 4;    // strlen("-128")
+	template <> inline constexpr size_t charconv_buffer_length<uint32_t> = 10; // strlen("4294967295")
+	template <> inline constexpr size_t charconv_buffer_length<uint16_t> = 5;  // strlen("65535")
+	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
 	template <typename T, typename CHAR>
 	inline void print_integer_to_stream(T val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
@@ -1154,7 +1192,6 @@ namespace toml::impl
 	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
-
 		print_to_stream(val.date, stream);
 		print_to_stream('T', stream);
 		print_to_stream(val.time, stream);
@@ -1177,12 +1214,56 @@ namespace toml::impl
 				print_to_stream(TOML_STRING_PREFIX("\\u007F"sv), stream);
 			else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
 				print_to_stream(TOML_STRING_PREFIX("\\\""sv), stream);
+			else if (c == TOML_STRING_PREFIX('\\')) TOML_UNLIKELY
+				print_to_stream(TOML_STRING_PREFIX("\\\\"sv), stream);
 			else
 				print_to_stream(c, stream);
 		}
 	}
 
 	TOML_POP_WARNINGS
+}
+
+namespace toml
+{
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
+		TOML_MAY_THROW
+	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The stream's underlying character type must be 1 byte in size."
+		);
+		impl::print_to_stream("line "sv, lhs);
+		impl::print_to_stream(rhs.line, lhs);
+		impl::print_to_stream(", column ", lhs);
+		impl::print_to_stream(rhs.column, lhs);
+		return lhs;
+	}
+
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
+		TOML_MAY_THROW
+	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The stream's underlying character type must be 1 byte in size."
+		);
+		lhs << rhs.begin;
+		if (rhs.begin < rhs.end
+			&& (rhs.end.line != rhs.begin.line || rhs.end.column > rhs.begin.column + source_index{1}))
+		{
+			impl::print_to_stream(" - "sv, lhs);
+			lhs << rhs.end;
+		}
+		if (rhs.path)
+		{
+			impl::print_to_stream(" of '"sv, lhs);
+			impl::print_to_stream(*rhs.path, lhs);
+			impl::print_to_stream('\'', lhs);
+		}
+		return lhs;
+	}
 }
 
 #pragma endregion
@@ -1203,11 +1284,16 @@ namespace toml
 
 			node(node&& other) noexcept
 				: source_{ std::move(other.source_) }
-			{}
+			{
+				other.source_.begin = {};
+				other.source_.end = {};
+			}
 
 			node& operator= (node&& rhs) noexcept
 			{
 				source_ = std::move(rhs.source_);
+				rhs.source_.begin = {};
+				rhs.source_.end = {};
 				return *this;
 			}
 
@@ -1251,7 +1337,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			bool is() const noexcept
 			{
-				using type = value_of<impl::remove_cvref_t<T>>;
+				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -1291,7 +1377,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			node_of<T>* as() noexcept
 			{
-				using type = value_of<T>;
+				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -1312,7 +1398,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			const node_of<T>* as() const noexcept
 			{
-				using type = value_of<T>;
+				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -1580,9 +1666,9 @@ namespace toml
 			[[nodiscard]] T& operator* () & noexcept { return val_; }
 			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
 			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
-			[[nodiscard]] operator T& () & noexcept { return val_; }
-			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
-			[[nodiscard]] operator const T& () const& noexcept { return val_; }
+			[[nodiscard]] explicit operator T& () & noexcept { return val_; }
+			[[nodiscard]] explicit operator T&& () && noexcept { return std::move(val_); }
+			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
@@ -1676,7 +1762,12 @@ namespace toml
 			}
 	};
 
+	template <size_t N> value(const string_char(&)[N]) -> value<string>;
+	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
+	template <size_t N> value(string_char(&)[N]) -> value<string>;
+	template <size_t N> value(string_char(&&)[N]) -> value<string>;
+	value(string_char*) -> value<string>;
 	value(string_view) -> value<string>;
 	value(string) -> value<string>;
 	value(bool) -> value<bool>;
@@ -1691,6 +1782,9 @@ namespace toml
 	value(uint32_t) -> value<int64_t>;
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 }
 
@@ -1726,7 +1820,10 @@ namespace toml::impl
 
 		public:
 
-			using reference = std::conditional_t<is_const, const node&, node&>;
+			using value_type = std::conditional_t<is_const, const node, node>;
+			using reference = value_type&;
+			using pointer = value_type*;
+			using difference_type = ptrdiff_t;
 
 			array_iterator() noexcept = default;
 
@@ -1757,9 +1854,51 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			reference operator* () const noexcept
+			reference operator * () const noexcept
 			{
 				return *raw_->get();
+			}
+
+			[[nodiscard]]
+			pointer operator -> () const noexcept
+			{
+				return raw_->get();
+			}
+
+			array_iterator& operator += (ptrdiff_t rhs) noexcept
+			{
+				raw_ += rhs;
+				return *this;
+			}
+
+			array_iterator& operator -= (ptrdiff_t rhs) noexcept
+			{
+				raw_ -= rhs;
+				return *this;
+			}
+
+			[[nodiscard]]
+			friend constexpr array_iterator operator + (const array_iterator& lhs, ptrdiff_t rhs) noexcept
+			{
+				return { lhs.raw_ + rhs };
+			}
+
+			[[nodiscard]]
+			friend constexpr array_iterator operator + (ptrdiff_t lhs, const array_iterator& rhs) noexcept
+			{
+				return { rhs.raw_ + lhs };
+			}
+
+			[[nodiscard]]
+			friend constexpr array_iterator operator - (const array_iterator& lhs, ptrdiff_t rhs) noexcept
+			{
+				return { lhs.raw_ - rhs };
+			}
+
+			[[nodiscard]]
+			friend constexpr ptrdiff_t operator - (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ - rhs.raw_;
 			}
 
 			[[nodiscard]]
@@ -1773,7 +1912,60 @@ namespace toml::impl
 			{
 				return lhs.raw_ != rhs.raw_;
 			}
+
+			[[nodiscard]]
+			friend constexpr bool operator < (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ < rhs.raw_;
+			}
+
+			[[nodiscard]]
+			friend constexpr bool operator <= (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ <= rhs.raw_;
+			}
+
+			[[nodiscard]]
+			friend constexpr bool operator > (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ > rhs.raw_;
+			}
+
+			[[nodiscard]]
+			friend constexpr bool operator >= (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			{
+				return lhs.raw_ >= rhs.raw_;
+			}
+
+			[[nodiscard]]
+			reference operator[] (ptrdiff_t idx) const noexcept
+			{
+				return *(raw_ + idx)->get();
+			}
 	};
+
+	template <typename T>
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	auto make_node(T&& val) noexcept
+	{
+		using type = impl::unwrapped<remove_cvref_t<T>>;
+		if constexpr (is_one_of<type, array, table>)
+		{
+			static_assert(
+				std::is_rvalue_reference_v<decltype(val)>,
+				"Tables and arrays may only be moved (not copied)."
+			);
+			return new type{ std::forward<T>(val) };
+		}
+		else
+		{
+			static_assert(
+				is_value_or_promotable<type>,
+				"Value initializers must be (or be promotable to) one of the TOML value types"
+			);
+			return new value{ std::forward<T>(val) };
+		}
+	}
 }
 
 namespace toml
@@ -1787,6 +1979,18 @@ namespace toml
 		private:
 			friend class impl::parser;
 			std::vector<std::unique_ptr<node>> values;
+
+			void preinsertion_resize(size_t idx, size_t count) noexcept
+			{
+				const auto new_size = values.size() + count;
+				const auto inserting_at_end = idx == values.size();
+				values.resize(new_size);
+				if (!inserting_at_end)
+				{
+					for (size_t r = new_size, e = idx + count, l = e; r --> e; l--)
+						values[r] = std::move(values[l]);
+				}
+			}
 
 		public:
 
@@ -1806,6 +2010,21 @@ namespace toml
 				: node{ std::move(other) },
 				values{ std::move(other.values) }
 			{}
+
+			template <typename U, typename... V>
+			TOML_NODISCARD_CTOR
+			explicit array(U&& val, V&&... vals) TOML_MAY_THROW
+			{
+				values.reserve(sizeof...(V) + 1_sz);
+				values.emplace_back(impl::make_node(std::forward<U>(val)));
+				if constexpr (sizeof...(V) > 0)
+				{
+					(
+						values.emplace_back(impl::make_node(std::forward<V>(vals))),
+						...
+					);
+				}
+			}
 
 			array& operator= (array&& rhs) noexcept
 			{
@@ -1864,26 +2083,122 @@ namespace toml
 			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
 			[[nodiscard]] size_t size() const noexcept { return values.size(); }
 			void reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
-
 			void clear() noexcept { values.clear(); }
 
-			// insert()
-			// emplace()
+			template <typename U>
+			iterator insert(const_iterator pos, U&& val) noexcept
+			{
+				return { values.emplace(pos.raw_, impl::make_node(std::forward<U>(val))) };
+			}
+
+			template <typename U>
+			iterator insert(const_iterator pos, size_t count, U&& val) noexcept
+			{
+				switch (count)
+				{
+					case 0: return { values.begin() + (pos.raw_ - values.cbegin()) };
+					case 1: return insert(pos, std::forward<U>(val));
+					default:
+					{
+						const auto start_idx = static_cast<size_t>(pos.raw_ - values.cbegin());
+						preinsertion_resize(start_idx, count);
+						size_t i = start_idx;
+						for (size_t e = start_idx + count - 1_sz; i < e; i++)
+							values[i].reset(impl::make_node(val));
+
+						values[i].reset(impl::make_node(std::forward<U>(val)));
+						return { values.begin() + start_idx };
+					}
+				}
+			}
+
+			template <typename ITER>
+			iterator insert(const_iterator pos, ITER first, ITER last) noexcept
+			{
+				const auto count = std::distance(first, last);
+				switch (count)
+				{
+					case 0: return { values.begin() + (pos.raw_ - values.cbegin()) };
+					case 1: return insert(pos, *first);
+					default:
+					{
+						const auto start_idx = static_cast<size_t>(pos.raw_ - values.cbegin());
+						preinsertion_resize(start_idx, count);
+						size_t i = start_idx;
+						for (auto it = first; it != last; it++)
+							values[i].reset(impl::make_node(*it));
+						return { values.begin() + start_idx };
+					}
+				}
+			}
+
+			template <typename U>
+			iterator insert(const_iterator pos, std::initializer_list<U> ilist) noexcept
+			{
+				switch (ilist.size())
+				{
+					case 0: return { values.begin() + (pos.raw_ - values.cbegin()) };
+					case 1: return insert(pos, *ilist.begin());
+					default:
+					{
+						const auto start_idx = static_cast<size_t>(pos.raw_ - values.cbegin());
+						preinsertion_resize(start_idx, ilist.size());
+						size_t i = start_idx;
+						for (auto& val : ilist)
+							values[i].reset(impl::make_node(val));
+						return { values.begin() + start_idx };
+					}
+				}
+			}
+
+			template <typename U, typename... V>
+			iterator emplace(const_iterator pos, V&&... args) noexcept
+			{
+				using type = impl::unwrapped<U>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+				);
+
+				return { values.emplace(pos.raw_, new node_of<type>{ std::forward<V>(args)...} ) };
+			}
 
 			iterator erase(const_iterator pos) noexcept
 			{
-				return iterator{ values.erase(pos.raw_) };
+				return { values.erase(pos.raw_) };
 			}
 
 			iterator erase(const_iterator first, const_iterator last) noexcept
 			{
-				return iterator{ values.erase(first.raw_, last.raw_) };
+				return { values.erase(first.raw_, last.raw_) };
 			}
 
-			// push_back()
-			// emplace_back()
+			template <typename U>
+			decltype(auto) push_back(U&& val) noexcept
+			{
+				auto nde = impl::make_node(std::forward<U>(val));
+				values.emplace_back(nde);
+				return *nde;
+			}
 
-			void pop_back() noexcept { values.pop_back(); }
+			template <typename U, typename... V>
+			decltype(auto) emplace_back(V&&... args) noexcept
+			{
+				using type = impl::unwrapped<U>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+				);
+
+				auto nde = new node_of<type>{ std::forward<V>(args)... };
+				values.emplace_back(nde);
+				return *nde;
+			}
+
+			void pop_back() noexcept
+			{
+				values.pop_back();
+			}
 
 			template <typename T>
 			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
@@ -1926,6 +2241,83 @@ namespace toml
 				return !(lhs == rhs);
 			}
 
+		private:
+
+			[[nodiscard]] size_t total_leaf_count() const noexcept
+			{
+				size_t leaves{};
+				for (size_t i = 0, e = values.size(); i < e; i++)
+				{
+					auto arr = values[i]->as_array();
+					leaves += arr ? arr->total_leaf_count() : 1_sz;
+				}
+				return leaves;
+			}
+
+			void flatten_child(array&& child, size_t& dest_index) noexcept
+			{
+				for (size_t i = 0, e = child.size(); i < e; i++)
+				{
+					auto type = child.values[i]->type();
+					if (type == node_type::array)
+					{
+						array& arr = *reinterpret_cast<array*>(child.values[i].get());
+						if (!arr.empty())
+							flatten_child(std::move(arr), dest_index);
+					}
+					else
+						values[dest_index++] = std::move(child.values[i]);
+				}
+			}
+
+		public:
+
+			void flatten() TOML_MAY_THROW
+			{
+				if (values.empty())
+					return;
+
+				bool requires_flattening = false;
+				size_t size_after_flattening = values.size();
+				for (size_t i = values.size(); i --> 0_sz;)
+				{
+					auto arr = values[i]->as_array();
+					if (!arr)
+						continue;
+					size_after_flattening--; //discount the array itself
+					const auto leaf_count = arr->total_leaf_count();
+					if (leaf_count > 0_sz)
+					{
+						requires_flattening = true;
+						size_after_flattening += leaf_count;
+					}
+					else
+						values.erase(values.cbegin() + i);
+				}
+
+				if (!requires_flattening)
+					return;
+
+				values.reserve(size_after_flattening);
+
+				size_t i = 0;
+				while (i < values.size())
+				{
+					auto arr = values[i]->as_array();
+					if (!arr)
+					{
+						i++;
+						continue;
+					}
+
+					std::unique_ptr<node> arr_storage = std::move(values[i]);
+					const auto leaf_count = arr->total_leaf_count();
+					if (leaf_count > 1_sz)
+						preinsertion_resize(i + 1_sz, leaf_count - 1_sz);
+					flatten_child(std::move(*arr), i); //increments i
+				}
+			}
+
 			template <typename CHAR>
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 	};
@@ -1940,7 +2332,7 @@ namespace toml
 namespace toml::impl
 {
 	template <bool is_const>
-	struct table_iterator_ref_proxy final
+	struct table_proxy_pair final
 	{
 		using value_type = std::conditional_t<is_const, const node, node>;
 
@@ -1974,7 +2366,8 @@ namespace toml::impl
 
 			table_iterator() noexcept = default;
 
-			using reference = table_iterator_ref_proxy<is_const>;
+			using reference = table_proxy_pair<is_const>;
+			using difference_type = ptrdiff_t;
 
 			table_iterator& operator++() noexcept // ++pre
 			{
@@ -2019,6 +2412,30 @@ namespace toml::impl
 				return lhs.raw_ != rhs.raw_;
 			}
 	};
+
+	struct table_init_pair final
+	{
+		string key;
+		std::unique_ptr<node> value;
+
+		template <typename T>
+		table_init_pair(string&& k, T && v) noexcept
+			: key{ std::move(k) },
+			value{ make_node(std::forward<T>(v)) }
+		{}
+
+		template <typename T>
+		table_init_pair(string_view k, T&& v) noexcept
+			: key{ k },
+			value{ make_node(std::forward<T>(v)) }
+		{}
+
+		template <typename T>
+		table_init_pair(const string_char* k, T&& v) noexcept
+			: key{ k },
+			value{ make_node(std::forward<T>(v)) }
+		{}
+	};
 }
 
 namespace toml
@@ -2041,6 +2458,19 @@ namespace toml
 			TOML_NODISCARD_CTOR
 			table() noexcept {}
 
+			template <size_t N>
+			TOML_NODISCARD_CTOR
+			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
+			{
+				for (auto&& kvp : arr)
+				{
+					values.insert_or_assign(
+						std::move(kvp.key),
+						std::move(kvp.value)
+					);
+				}
+			}
+
 			TOML_NODISCARD_CTOR
 			table(table&& other) noexcept
 				: node{ std::move(other) },
@@ -2060,30 +2490,105 @@ namespace toml
 			[[nodiscard]] bool is_table() const noexcept override { return true; }
 			[[nodiscard]] bool is_array() const noexcept override { return false; }
 			[[nodiscard]] bool is_value() const noexcept override { return false; }
-			[[nodiscard]] bool is_inline() const noexcept { return inline_; }
 			[[nodiscard]] table* as_table() noexcept override { return this; }
 			[[nodiscard]] const table* as_table() const noexcept override { return this; }
-			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
-			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			[[nodiscard]] bool is_inline() const noexcept { return inline_; }
+			void is_inline(bool val) noexcept { inline_ = val; }
+			[[nodiscard]] inline node_view<table> operator[] (string_view key) noexcept;
+			[[nodiscard]] inline node_view<const table> operator[] (string_view key) const noexcept;
 			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
 			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
 			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
 			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
-			[[nodiscard]] const_iterator end() const noexcept { return { values.end() };}
+			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
 			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			void clear() noexcept { values.clear(); }
+
+			template <typename K, typename V, typename = std::enable_if_t<
+				std::is_convertible_v<K&&, string_view>
+			>>
+			std::pair<iterator, bool> insert(K&& key, V&& val) noexcept
+			{
+				auto ipos = values.lower_bound(key);
+				if (ipos == values.end() || ipos->first != key)
+				{
+					ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+					return { ipos, true };
+				}
+				return { ipos, false };
+			}
+
+			template <typename ITER, typename = std::enable_if_t<
+				!std::is_convertible_v<ITER&&, string_view>
+			>>
+			void insert(ITER first, ITER last) noexcept
+			{
+				if (first == last)
+					return;
+				for (auto it = first; it != last; it++)
+				{
+					if constexpr (std::is_rvalue_reference_v<decltype(*it)>)
+						insert(std::move((*it).first), std::move((*it).second));
+					else
+						insert((*it).first, (*it).second);
+				}
+			}
+
+			template <typename K, typename V>
+			std::pair<iterator, bool> insert_or_assign(K&& key, V&& val) noexcept
+			{
+				auto ipos = values.lower_bound(key);
+				if (ipos == values.end() || ipos->first != key)
+				{
+					ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+					return { ipos, true };
+				}
+				else
+				{
+					(*ipos).second.reset(impl::make_node(std::forward<V>(val)));
+					return { ipos, false };
+				}
+			}
+
+			template <typename U, typename K, typename... V>
+			std::pair<iterator, bool> emplace(K&& key, V&&... args) noexcept
+			{
+				using type = impl::unwrapped<U>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+				);
+
+				auto ipos = values.lower_bound(key);
+				if (ipos == values.end() || ipos->first != key)
+				{
+					ipos = values.emplace_hint(
+						ipos,
+						std::forward<K>(key),
+						new node_of<type>{ std::forward<V>(args)... }
+					);
+					return { ipos, true };
+				}
+				return { ipos, false };
+			}
 
 			iterator erase(iterator pos) noexcept
 			{
 				return { values.erase(pos.raw_) };
 			}
+
 			iterator erase(const_iterator pos) noexcept
 			{
 				return { values.erase(pos.raw_) };
 			}
+
 			iterator erase(const_iterator first, const_iterator last) noexcept
 			{
 				return { values.erase(first.raw_, last.raw_) };
 			}
+
 			bool erase(string_view key) noexcept
 			{
 				if (auto it = values.find(key); it != values.end())
@@ -2132,14 +2637,15 @@ namespace toml
 
 			[[nodiscard]] node* get(string_view key) noexcept { return do_get(values, key); }
 			[[nodiscard]] const node* get(string_view key) const noexcept { return do_get(values, key); }
+			[[nodiscard]] iterator find(string_view key) noexcept { return { values.find(key) }; }
+			[[nodiscard]] const_iterator find(string_view key) const noexcept { return { values.find(key) }; }
 
 			template <typename T>
 			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
+
 			template <typename T>
 			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
 			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }
-			[[nodiscard]] inline node_view<table> operator[] (string_view) noexcept;
-			[[nodiscard]] inline node_view<const table> operator[] (string_view) const noexcept;
 			[[nodiscard]] friend bool operator == (const table& lhs, const table& rhs) noexcept
 			{
 				if (&lhs == &rhs)
@@ -2336,7 +2842,7 @@ namespace toml
 			[[nodiscard]] auto as() noexcept
 			{
 				static_assert(
-					impl::is_value_or_node<U>,
+					impl::is_value_or_node<impl::unwrapped<U>>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
@@ -2347,7 +2853,7 @@ namespace toml
 			[[nodiscard]] const node_of<U>* as() const noexcept
 			{
 				static_assert(
-					impl::is_value_or_node<U>,
+					impl::is_value_or_node<impl::unwrapped<U>>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
@@ -2386,10 +2892,9 @@ namespace toml
 			[[nodiscard]] static bool container_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				using elem_t = std::remove_const_t<typename U::value_type>;
-
 				static_assert(
 					impl::is_value_or_promotable<elem_t>,
-					"Container element type must be (or be promotable to) one of the basic value types"
+					"Container element type must be (or be promotable to) one of the TOML value types"
 				);
 
 				const array* arr = lhs.as<array>();
@@ -3457,15 +3962,19 @@ namespace toml::impl
 
 namespace toml::impl
 {
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
+	{
+		return codepoint == U'\t' || codepoint == U' ';
+	}
+
 	[[nodiscard]]
-	constexpr bool is_whitespace(char32_t codepoint) noexcept
+	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that don't say "is a line-break")
 
-		return codepoint == U'\t'
-			|| codepoint == U' '
-			|| codepoint == U'\u00A0' // no-break space
+		return codepoint == U'\u00A0' // no-break space
 			|| codepoint == U'\u1680' // ogham space mark
 			|| (codepoint >= U'\u2000' && codepoint <= U'\u200A') // em quad -> hair space
 			|| codepoint == U'\u202F' // narrow no-break space
@@ -3474,20 +3983,37 @@ namespace toml::impl
 		;
 	}
 
-	template <bool CR = true>
 	[[nodiscard]]
-	constexpr bool is_line_break(char32_t codepoint) noexcept
+	constexpr bool is_whitespace(char32_t codepoint) noexcept
+	{
+		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
+	}
+
+	template <bool CR = true>
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
+	{
+		constexpr auto low_range_end = CR ? U'\r' : U'\f';
+		return (codepoint >= U'\n' && codepoint <= low_range_end);
+	}
+
+	[[nodiscard]]
+	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that say "is a line-break")
 
-		constexpr auto low_range_end = CR ? U'\r' : U'\f';
-
-		return (codepoint >= U'\n' && codepoint <= low_range_end)
-			|| codepoint == U'\u0085' // next line
+		return codepoint == U'\u0085' // next line
 			|| codepoint == U'\u2028' // line separator
 			|| codepoint == U'\u2029' // paragraph separator
 		;
+	}
+
+	template <bool CR = true>
+	[[nodiscard]]
+	constexpr bool is_line_break(char32_t codepoint) noexcept
+	{
+		return is_ascii_line_break<CR>(codepoint) || is_unicode_line_break(codepoint);
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -3526,7 +4052,8 @@ namespace toml::impl
 	{
 		return (codepoint >= U'a' && codepoint <= U'f')
 			|| (codepoint >= U'A' && codepoint <= U'F')
-			|| is_decimal_digit(codepoint);
+			|| is_decimal_digit(codepoint)
+		;
 	}
 
 	[[nodiscard]]
@@ -3557,38 +4084,19 @@ namespace toml::impl
 	[[nodiscard]]
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
-		return is_line_break(codepoint)
-			|| is_whitespace(codepoint)
+		return is_ascii_line_break(codepoint)
+			|| is_ascii_whitespace(codepoint)
 			|| codepoint == U']'
 			|| codepoint == U'}'
 			|| codepoint == U','
 			|| codepoint == U'#'
+			|| is_unicode_line_break(codepoint)
+			|| is_unicode_whitespace(codepoint)
 		;
 	}
 
 	struct utf8_decoder final
 	{
-		// This decoder is based on code from here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-		//
-		// License:
-		//
-		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
-		//
-		// Permission is hereby granted, free of charge, to any person obtaining a copy of this
-		// software and associated documentation files (the "Software"), to deal in the Software
-		// without restriction, including without limitation the rights to use, copy, modify, merge,
-		// publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-		// persons to whom the Software is furnished to do so, subject to the following conditions:
-		//
-		// The above copyright notice and this permission notice shall be included in all copies
-		// or substantial portions of the Software.
-		//
-		// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-		// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-		// PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-		// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-		// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-		// DEALINGS IN THE SOFTWARE.
 
 		uint_least32_t state{};
 		char32_t codepoint{};
@@ -3662,9 +4170,9 @@ namespace toml::impl
 				: source{ sv }
 			{
 				if (source.length() >= 3_sz
-					&& static_cast<uint8_t>(source[0]) == 0xEF_u8
-					&& static_cast<uint8_t>(source[1]) == 0xBB_u8
-					&& static_cast<uint8_t>(source[2]) == 0xBF_u8)
+					&& static_cast<uint8_t>(source[0]) == static_cast<uint8_t>(0xEFu)
+					&& static_cast<uint8_t>(source[1]) == static_cast<uint8_t>(0xBBu)
+					&& static_cast<uint8_t>(source[2]) == static_cast<uint8_t>(0xBFu))
 				{
 					position += 3_sz;
 				}
@@ -3706,9 +4214,9 @@ namespace toml::impl
 				if (*source)
 				{
 					static constexpr uint8_t bom[] {
-						0xEF_u8,
-						0xBB_u8,
-						0xBF_u8
+						0xEF,
+						0xBB,
+						0xBF
 					};
 
 					using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
@@ -4113,11 +4621,6 @@ namespace toml
 				return *std::launder(reinterpret_cast<const parse_error*>(&storage));
 			}
 
-			[[nodiscard]] table& operator* () & noexcept { return get(); }
-			[[nodiscard]] table&& operator* () && noexcept { return std::move(get()); }
-			[[nodiscard]] const table& operator* () const& noexcept { return get(); }
-			[[nodiscard]] table* operator-> () noexcept { return &get(); }
-			[[nodiscard]] const table* operator-> () const noexcept { return &get(); }
 			[[nodiscard]] operator table& () noexcept { return get(); }
 			[[nodiscard]] operator table&& () noexcept { return std::move(get()); }
 			[[nodiscard]] operator const table& () const noexcept { return get(); }
@@ -4252,11 +4755,11 @@ namespace toml::impl
 			#endif
 
 			[[nodiscard]]
-			source_position current_position_or_assumed_next() const noexcept
+			source_position current_position(source_index fallback_offset = 0) const noexcept
 			{
 				if (cp)
 					return cp->position;
-				return { prev_pos.line, static_cast<source_index>(prev_pos.column + 1u) };
+				return { prev_pos.line, static_cast<source_index>(prev_pos.column + fallback_offset) };
 			}
 
 			template <typename... T>
@@ -4266,7 +4769,7 @@ namespace toml::impl
 				TOML_ERROR_CHECK();
 
 				if constexpr (sizeof...(T) == 0_sz)
-					TOML_ERROR( "An unspecified error occurred", current_position_or_assumed_next(), reader.source_path() );
+					TOML_ERROR( "An unspecified error occurred", current_position(1), reader.source_path() );
 				else
 				{
 					static constexpr auto buf_size = 512_sz;
@@ -4337,9 +4840,9 @@ namespace toml::impl
 					(concatenator(std::forward<T>(args)), ...);
 					*ptr = '\0';
 					#if TOML_EXCEPTIONS
-						TOML_ERROR( buf, current_position_or_assumed_next(), reader.source_path() );
+						TOML_ERROR( buf, current_position(1), reader.source_path() );
 					#else
-						TOML_ERROR( std::string(buf, ptr - buf), current_position_or_assumed_next(), reader.source_path());
+						TOML_ERROR( std::string(buf, ptr - buf), current_position(1), reader.source_path());
 					#endif
 				}
 			}
@@ -5166,8 +5669,8 @@ namespace toml::impl
 				}
 				#else
 				{
-					auto parse_result = std::from_chars(chars, chars + length, result);
-					switch (parse_result.ec)
+					auto fc_result = std::from_chars(chars, chars + length, result);
+					switch (fc_result.ec)
 					{
 						case std::errc{}: //ok
 							return result * sign;
@@ -5341,8 +5844,8 @@ namespace toml::impl
 
 				// convert to double
 				TOML_GCC_ATTR(uninitialized) double result;
-				auto parse_result = std::from_chars(chars, chars + length, result, std::chars_format::hex);
-				switch (parse_result.ec)
+				auto fc_result = std::from_chars(chars, chars + length, result, std::chars_format::hex);
+				switch (fc_result.ec)
 				{
 					case std::errc{}: //ok
 						return result;
@@ -5512,23 +6015,23 @@ namespace toml::impl
 
 				// otherwise invoke charconv
 				TOML_GCC_ATTR(uninitialized) uint64_t result;
-				auto parse_result = std::from_chars(chars, chars + length, result, base);
+				auto fc_result = std::from_chars(chars, chars + length, result, base);
 				if constexpr (traits::is_signed)
 				{
-					if (parse_result.ec == std::errc{} && (
+					if (fc_result.ec == std::errc{} && (
 							(sign < 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + 1ull)
 							|| (sign > 0 && result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()))
 						))
-						parse_result.ec = std::errc::result_out_of_range;
+						fc_result.ec = std::errc::result_out_of_range;
 				}
 				else
 				{
-					if (parse_result.ec == std::errc{} &&
+					if (fc_result.ec == std::errc{} &&
 							result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max())
 						)
-						parse_result.ec = std::errc::result_out_of_range;
+						fc_result.ec = std::errc::result_out_of_range;
 				}
-				switch (parse_result.ec)
+				switch (fc_result.ec)
 				{
 					case std::errc{}: //ok
 						if constexpr (traits::is_signed)
@@ -6327,7 +6830,7 @@ namespace toml::impl
 					TOML_ERROR_CHECK({});
 				}
 
-				val->source_ = { begin_pos, current_position_or_assumed_next(), reader.source_path() };
+				val->source_ = { begin_pos, current_position(1), reader.source_path() };
 				return val;
 			}
 
@@ -6525,7 +7028,7 @@ namespace toml::impl
 							);
 						advance();
 					}
-					header_end_pos = current_position_or_assumed_next();
+					header_end_pos = current_position(1);
 
 					// handle the rest of the line after the header
 					consume_leading_whitespace();
@@ -6767,8 +7270,7 @@ namespace toml::impl
 				}
 				while (cp);
 
-				auto eof_pos = current_position_or_assumed_next();
-				eof_pos.column++;
+				auto eof_pos = current_position(1);
 				root.source_.end = eof_pos;
 				if (current_table
 					&& current_table != &root
@@ -6914,7 +7416,6 @@ namespace toml::impl
 			else if (*cp == U']')
 			{
 				advance();
-				arr->source_.end = current_position_or_assumed_next();
 				break;
 			}
 
@@ -7017,7 +7518,6 @@ namespace toml::impl
 				}
 
 				advance();
-				tab->source_.end = current_position_or_assumed_next();
 				break;
 			}
 
@@ -7114,6 +7614,25 @@ namespace toml
 
 		return impl::parser{ impl::utf8_reader{ doc, std::move(source_path) } };
 	}
+
+	template <typename CHAR>
+	inline parse_result parse_file(std::basic_string_view<CHAR> file_path) TOML_MAY_THROW
+	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The path's character type must be 1 byte in size."
+		);
+
+		// Q: "why is this function templated??"
+		// A: I don't want to force users to drag in <fstream> if they're not going to do
+		//    any parsing directly from files.
+
+		auto ifs = std::basic_ifstream<CHAR>{ file_path };
+		return parse(
+			ifs,
+			std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() }
+		);
+	}
 }
 
 #pragma endregion
@@ -7132,11 +7651,11 @@ namespace toml
 	};
 	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
+		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
 	[[nodiscard]] constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
+		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
 
@@ -7164,9 +7683,7 @@ namespace toml::impl
 			void indent(int level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
-
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
-
 			void attach(std::basic_ostream<CHAR>& stream) noexcept
 			{
 				indent_ = 0;
@@ -7446,7 +7963,6 @@ namespace toml
 			}
 
 			inline void print_inline(const table& /*tbl*/) TOML_MAY_THROW;
-
 			void print(const array& arr) TOML_MAY_THROW
 			{
 				if (arr.empty())
@@ -7509,12 +8025,20 @@ namespace toml
 
 			void print(const table& tbl) TOML_MAY_THROW
 			{
-				//values, arrays, and inline tables
+				static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
+				{
+					auto arr = nde.as_array();
+					return arr
+						&& arr->is_array_of_tables()
+						&& !arr->template get_as<table>(0_sz)->is_inline();
+				};
+
+				//values, arrays, and inline tables/table arrays
 				for (auto [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
-						|| (type == node_type::array && reinterpret_cast<const array*>(&v)->is_array_of_tables()))
+						|| (type == node_type::array && is_non_inline_array_of_tables(v)))
 						continue;
 
 					base::print_newline();
@@ -7556,7 +8080,7 @@ namespace toml
 								break;
 
 							case node_type::array:
-								if (reinterpret_cast<const array*>(&child_v)->is_array_of_tables())
+								if (is_non_inline_array_of_tables(child_v))
 									child_table_array_count++;
 								else
 									child_value_count++;
@@ -7595,8 +8119,7 @@ namespace toml
 				//table arrays
 				for (auto [k, v] : tbl)
 				{
-					const auto type = v.type();
-					if (type != node_type::array || !reinterpret_cast<const array*>(&v)->is_array_of_tables())
+					if (!is_non_inline_array_of_tables(v))
 						continue;
 					auto& arr = *reinterpret_cast<const array*>(&v);
 
@@ -7734,7 +8257,6 @@ namespace toml
 			using base = impl::formatter<CHAR>;
 
 			inline void print(const toml::table& tbl) TOML_MAY_THROW;
-
 			void print(const array& arr) TOML_MAY_THROW
 			{
 				if (arr.empty())

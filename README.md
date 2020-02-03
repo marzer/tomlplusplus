@@ -1,5 +1,5 @@
 # toml++ (tomlplusplus)
-![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)
+[![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers]
 [![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0]
 [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
 [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](https://github.com/marzer/tomlplusplus/blob/master/LICENSE)  
@@ -10,11 +10,32 @@
 
 # Example
 
-```cpp
-/// example goes here.
+Given a TOML file `configuration.toml` containing the following:
+```toml
+[library]
+name = "toml++"
+version = "0.1.0"
+authors = ["Mark Gillard <mark@notarealwebsite.com>"]
+
+[dependencies]
+cpp = 17
 ```
-You'll find some more code examples in
-`examples` directory and plenty more as part of the [API documentation].
+Reading it in C++ is easy with `toml++`:
+```cpp
+auto config = toml::parse_file( "configuration.toml" );
+
+// get key-value pairs
+std::string_view library_name = config["library"]["name"].as_string()->get();
+std::string_view library_version = config["library"]["version"].as_string()->get();
+std::string_view library_author = config["library"]["authors"][0].as_string()->get();
+int64_t depends_on_cpp_version = config["dependencies"]["cpp"].as_integer()->get();
+
+// re-serialize as JSON
+std::cout << toml::json_formatter{ config } << std::endl;
+
+
+```
+You'll find some more code examples in the `examples` directory, and plenty more as part of the [API documentation].
 
 <br>
 
@@ -32,9 +53,8 @@ You'll find some more code examples in
 The API is the same regardless of how you consume the library. 
 
 ### Configuration
-A number of configurable options are exposed in the form of preprocessor macros. Most likely you
-won't need to mess with these at all, but in the event you do, set your overrides prior to including
-toml++.
+A number of configurable options are exposed in the form of preprocessor `#defines`. Most likely you
+won't need to mess with these at all, butif you do, set them before including toml++.
 
 | Option                     |      Type      | Default                           | Description                                                                                              |
 |----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
@@ -43,6 +63,7 @@ toml++.
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                           |
 | `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                    |
 | `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it. |
+| `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.      |
 | `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                        |
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].            |
 
@@ -72,7 +93,7 @@ _These can be disabled (and thus strict [TOML v0.5.0] compliance enforced) by sp
 `TOML_UNRELEASED_FEATURES = 0` (see [Configuration](#Configuration))._
 
 ### **🔹TOML v0.5.0 and earlier:**
-- All features as of `<< release date >>`.
+- All features supported.
 
 <br>
 
@@ -104,7 +125,7 @@ Install [Visual Studio 2019] and [Test Adapter for Catch2], then open `vs/toml++
 projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
 allow you to run the tests directly.
 
-If test discovery fails, you can usually fix it by clicking enabling
+If test discovery fails you can usually fix it by clicking enabling
 `Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
 
 #### Linux
@@ -120,12 +141,10 @@ cd ../build-clang && ninja && ninja test
 
 # License and Attribution
 
-`toml++` is licensed under the terms of the MIT license - See [LICENSE].
+`toml++` is licensed under the terms of the MIT license - see [LICENSE].
 
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]',
-which is itself subject to the terms of (what appears to be) the MIT license. The license text is included in the
-[relevant part](https://github.com/marzer/tomlplusplus/blob/master/include/toml%2B%2B/toml_utf8.h)
-of the toml++ source.
+which is also subject to the terms of the MIT license - see [LICENSE-utf8-decoder].
 
 [API documentation]: https://marzer.github.io/tomlplusplus/namespacetoml.html
 [unreleased TOML language features]: https://github.com/marzer/tomlplusplus#unreleased-features
@@ -142,6 +161,7 @@ of the toml++ source.
 [Catch2]: https://github.com/catchorg/Catch2
 [Test Adapter for Catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01
 [Visual Studio 2019]: https://visualstudio.microsoft.com/vs/
+[cpp_compilers]: https://en.cppreference.com/w/cpp/compiler_support
 [#356]: https://github.com/toml-lang/toml/issues/356
 [#516]: https://github.com/toml-lang/toml/issues/516
 [#562]: https://github.com/toml-lang/toml/issues/562
@@ -152,3 +172,4 @@ of the toml++ source.
 [#665]: https://github.com/toml-lang/toml/issues/665
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
+[LICENSE-utf8-decoder]: https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder

@@ -54,7 +54,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 	{
 		toml::parse_result result = toml::parse(toml_str, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(*std::move(result), source_path));
+			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
 		else
 		{
 			FAIL(
@@ -71,7 +71,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		ss.write(toml_str.data(), toml_str.length());
 		toml::parse_result result = toml::parse(ss, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(*std::move(result), source_path));
+			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
 		else
 		{
 			FAIL(

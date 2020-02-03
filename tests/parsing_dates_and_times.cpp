@@ -3,7 +3,7 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
 
-TEST_CASE("parsing dates and times")
+TEST_CASE("parsing - dates and times")
 {
 	parsing_should_succeed(S(R"(
 odt1 = 1979-05-27T07:32:00Z

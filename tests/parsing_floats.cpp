@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing floats - normal")
+TEST_CASE("parsing - floats")
 {
 	parsing_should_succeed(S(R"(
 # fractional
@@ -114,7 +114,7 @@ flt8 = 224_617.445_991_228
 	#endif
 }
 
-TEST_CASE("parsing floats - inf and nan")
+TEST_CASE("parsing - inf and nan")
 {
 	parsing_should_succeed(S(R"(
 # infinity

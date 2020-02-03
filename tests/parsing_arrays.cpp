@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing arrays")
+TEST_CASE("parsing - arrays")
 {
 	parsing_should_succeed(S(R"(
 integers = [ 1, 2, 3 ]

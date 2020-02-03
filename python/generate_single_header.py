@@ -81,13 +81,27 @@ def main():
 	source_text = re.sub('(?:///[<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove inline doxy briefs
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
+	return_type_pattern														\
+		= r'(?:'															\
+		+ r'(?:\[\[nodiscard\]\]\s*)?'										\
+		+ r'(?:(?:friend|explicit|virtual|inline|const|operator)\s+)*'		\
+		+ r'(?:'															\
+			+ r'bool|int64_t|(?:const_)?iterator|double|void'				\
+			+ r'|node(?:_(?:view|of)<.+?>|)?|table|array|value(?:<.+?>)?'	\
+			+ r'|T|U|parse_(?:error|result)'								\
+		+ r')'																\
+		+ r'(?:\s*[&*]+)?'													\
+		+ r'(?:\s*[(]\s*[)])?'												\
+		+ r'\s+'															\
+		+ r')'
+	blank_lines_between_returns_pattern = '({}[^\n]+)\n\n([ \t]*{})'.format(return_type_pattern, return_type_pattern)
 	for i in range(0, 5): # remove blank lines between simple one-liner definitions
 		source_text = re.sub('(using .+?;)\n\n([ \t]*using)', '\\1\n\\2', source_text, 0, re.I | re.M)
 		source_text = re.sub(
 				'([a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)'	\
 				+ '\n\n([ \t]*[a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)', '\\1\n\\2',
 				source_text, 0, re.I | re.M)
-		source_text = re.sub('(\[\[nodiscard\]\][^\n]+)\n\n([ \t]*\[\[nodiscard\]\])', '\\1\n\\2', source_text, 0, re.I | re.M)
+		source_text = re.sub(blank_lines_between_returns_pattern, '\\1\n\\2', source_text, 0, re.I | re.M)
 	source_text = source_text.strip()
 
 	
@@ -121,6 +135,15 @@ TOML language specification:
 Latest: https://github.com/toml-lang/toml/blob/master/README.md
 v0.5.0: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md''')
 	preamble.append(read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE')))
+	preamble.append('''
+UTF-8 decoding is performed using a derivative of Bjoern Hoehrmann's 'Flexible and Economical UTF-8 Decoder'
+See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
+
+{}
+'''.format(
+		read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE-utf8-decoder'))
+	))
+
 
 	# write the output file
 	output_file_path = path.join(get_script_folder(), '..', 'toml.hpp')

@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing integers - decimal")
+TEST_CASE("parsing - integers (decimal)")
 {
 	parsing_should_succeed(S(R"(
 int1 = +99
@@ -67,7 +67,7 @@ int7 = 1_2_3_4_5     # VALID but discouraged
 	parse_expected_value( "123_456_789"sv,  123456789 );
 }
 
-TEST_CASE("parsing integers - hex, bin, oct")
+TEST_CASE("parsing - integers (hex, bin, oct)")
 {
 	parsing_should_succeed(S(R"(
 # hexadecimal with prefix `0x`

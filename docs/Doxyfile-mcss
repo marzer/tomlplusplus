@@ -11,9 +11,8 @@ HTML_EXTRA_FILES				= tomlplusplus.js
 SHOW_INCLUDE_FILES				= NO
 ##! M_THEME_COLOR				= #22272e
 ##! M_LINKS_NAVBAR1 = \
-##! 	pages
+##! 	namespaces
 ##! M_LINKS_NAVBAR2 = \
-##!  	namespaces \
 ##!  	annotated \
 ##!		"<a target="_blank" href="https://github.com/marzer/tomlplusplus/">Github</a>"
 ##! M_SEARCH_DOWNLOAD_BINARY	= NO

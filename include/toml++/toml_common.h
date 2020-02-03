@@ -280,12 +280,6 @@ namespace toml
 		using namespace std::string_view_literals;
 
 		[[nodiscard]] TOML_ALWAYS_INLINE
-		TOML_CONSTEVAL uint8_t operator"" _u8(unsigned long long n) noexcept
-		{
-			return static_cast<uint8_t>(n);
-		}
-
-		[[nodiscard]] TOML_ALWAYS_INLINE
 		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 		{
 			return static_cast<size_t>(n);
@@ -301,15 +295,15 @@ namespace toml
 	#else
 
 	/// \brief	The base character type for keys and string values.
-	/// \attention This will be `char8_t` if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for char8_t if `TOML_CHAR_8_STRINGS` is `1`.
 	using string_char = char;
 
 	/// \brief	The string type for keys and string values.
-	/// \attention This will be `std::u8string` if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for std::u8string if `TOML_CHAR_8_STRINGS` is `1`.
 	using string = std::string;
 
 	/// \brief	The string type for keys and string values.
-	/// \attention This will be `std::u8string_view` if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for std::u8string_view if `TOML_CHAR_8_STRINGS` is `1`.
 	using string_view = std::string_view;
 
 	#endif
@@ -346,12 +340,32 @@ namespace toml
 	#else
 
 	/// \brief	The integer type used to tally line numbers and columns.
-	/// \attention This will be `uint32_t` if `TOML_LARGE_FILES` is `1`.
+	/// \remarks This will be an alias for uint32_t if `TOML_LARGE_FILES` is `1`.
 	using source_index = uint16_t;
 
 	#endif
 
 	/// \brief	A source document line-and-column pair.
+	/// 
+	/// \detail \cpp
+	/// auto table = toml::parse_file("config.toml"sv);
+	/// std::cout << "The node 'description' was defined at "sv
+	///		<< table.get("description")->source().begin()
+	///		<< std::endl;
+	///	
+	///	// possible output:
+	///	// The value 'description' was defined at line 7, column 15
+	/// \ecpp
+	/// 
+	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
+	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
+	/// 		 much thought to combining marks, grapheme clusters vs. characters, et cetera.
+	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
+	/// 		 you may find that your source_positions don't match those given by a text editor
+	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
+	/// 		 <br><br>
+	/// 		 This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off
+	/// 		 between parser complexity and correctness.
 	struct source_position
 	{
 		/// \brief The line number.
@@ -369,6 +383,7 @@ namespace toml
 			return line > source_index{} && column > source_index{};
 		}
 
+		/// \brief	Returns true if two source_positions represent the same line and column.
 		[[nodiscard]]
 		friend constexpr bool operator == (const source_position& lhs, const source_position& rhs) noexcept
 		{
@@ -376,6 +391,7 @@ namespace toml
 				&& lhs.column == rhs.column;
 		}
 
+		/// \brief	Returns true if two source_positions do not represent the same line and column.
 		[[nodiscard]]
 		friend constexpr bool operator != (const source_position& lhs, const source_position& rhs) noexcept
 		{
@@ -383,6 +399,7 @@ namespace toml
 				|| lhs.column != rhs.column;
 		}
 
+		/// \brief	Returns true if the LHS position is before the RHS position.
 		[[nodiscard]]
 		friend constexpr bool operator < (const source_position& lhs, const source_position& rhs) noexcept
 		{
@@ -390,6 +407,7 @@ namespace toml
 				|| (lhs.line == rhs.line && lhs.column < rhs.column);
 		}
 
+		/// \brief	Returns true if the LHS position is before the RHS position or equal to it.
 		[[nodiscard]]
 		friend constexpr bool operator <= (const source_position& lhs, const source_position& rhs) noexcept
 		{
@@ -397,18 +415,37 @@ namespace toml
 				|| (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
 
+
+		/// \brief	Prints a source_position to a stream.
 		template <typename CHAR>
 		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
-			TOML_MAY_THROW
-		{
-			return lhs << "line " << rhs.line << ", column " << rhs.column;
-		}
+			TOML_MAY_THROW;
 	};
 
 	/// \brief	A pointer to a shared string resource containing a source path.
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	/// \brief	A source document region.
+	/// 
+	/// \detail \cpp
+	/// auto table = toml::parse_file("config.toml"sv);
+	/// std::cout << "The node 'server' was defined at "sv
+	///		<< table.get("server")->source()
+	///		<< std::endl;
+	///	
+	///	// possible output:
+	///	// The node 'server' was defined at line 3, column 1 - line 10, column 25 of 'config.toml'
+	/// \ecpp
+	/// 
+	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
+	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
+	/// 		 much thought to combining marks, grapheme clusters vs. characters, et cetera.
+	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
+	/// 		 you may find that your source_positions don't match those given by a text editor
+	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
+	/// 		 <br><br>
+	/// 		 This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off
+	/// 		 between parser complexity and correctness.
 	struct source_region
 	{
 		/// \brief The beginning of the region (inclusive).
@@ -421,6 +458,11 @@ namespace toml
  		/// 
  		/// \remarks This will be `nullptr` if no path was provided to toml::parse().
 		source_path_ptr path;
+
+		/// \brief	Prints a source_region to a stream.
+		template <typename CHAR>
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
+			TOML_MAY_THROW;
 	};
 
 	TOML_PUSH_WARNINGS
@@ -522,7 +564,7 @@ namespace toml::impl
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
 
-	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20))
+	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20) && _HAS_CXX20)
 
 	template <typename T>
 	using remove_cvref_t = std::remove_cvref_t<T>;
@@ -550,7 +592,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
-	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
+	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
@@ -584,6 +626,7 @@ namespace toml::impl
 	template <typename T>
 	inline constexpr bool is_value_or_promotable =
 		is_value<T>
+		|| std::is_same_v<std::decay_t<T>, string_char*>
 		|| std::is_same_v<T, string_view>
 		|| std::is_same_v<T, int32_t>
 		|| std::is_same_v<T, int16_t>
@@ -595,7 +638,10 @@ namespace toml::impl
 		#ifdef TOML_SMALL_FLOAT_TYPE
 		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
 		#endif
-		;
+		#ifdef TOML_SMALL_INT_TYPE
+		|| std::is_same_v<T, TOML_SMALL_INT_TYPE>
+		#endif
+	;
 
 	template <typename T>
 	inline constexpr bool is_value_or_node =
@@ -615,7 +661,17 @@ namespace toml::impl
 	template <typename T> struct node_unwrapper { using type = T; };
 	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
 
+	template <typename T> using unwrapped = typename impl::node_unwrapper<T>::type;
+
 	template <typename T> struct value_promoter { using type = T; };
+	template <size_t N> struct value_promoter<const string_char[N]> { using type = string; };
+	template <size_t N> struct value_promoter<const string_char(&)[N]> { using type = string; };
+	template <size_t N> struct value_promoter<const string_char(&&)[N]> { using type = string; };
+	template <> struct value_promoter<const string_char*> { using type = string; };
+	template <size_t N> struct value_promoter<string_char[N]> { using type = string; };
+	template <size_t N> struct value_promoter<string_char(&)[N]> { using type = string; };
+	template <size_t N> struct value_promoter<string_char(&&)[N]> { using type = string; };
+	template <> struct value_promoter<string_char*> { using type = string; };
 	template <> struct value_promoter<string_view> { using type = string; };
 	template <> struct value_promoter<int32_t> { using type = int64_t; };
 	template <> struct value_promoter<int16_t> { using type = int64_t; };
@@ -626,6 +682,9 @@ namespace toml::impl
 	template <> struct value_promoter<float> { using type = double; };
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	template <> struct value_promoter<TOML_SMALL_INT_TYPE> { using type = int64_t; };
 	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
@@ -720,10 +779,6 @@ namespace toml
 	/// \brief	Helper alias that wraps a type up as it's TOML node equivalent.
 	template <typename T>
 	using node_of = typename impl::node_wrapper<T>::type;
-
-	/// \brief	Helper alias that unwraps TOML node type to it's raw value equivalent.
-	template <typename T>
-	using value_of = typename impl::node_unwrapper<T>::type;
 
 	/// \brief	Metafunction for determining if a type is a toml::table.
 	template <typename T>

@@ -41,7 +41,6 @@ SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                = "cpp=@code{.cpp}" \
                          "ecpp=@endcode" \
-                         "epp=@endcode" \
                          "detail=@details"
 TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
@@ -336,7 +335,8 @@ INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = TOML_DOXYGEN=1 \
 						 __cplusplus=201703L \
 						 TOML_ALWAYS_INLINE=inline \
-						 TOML_MAY_THROW=
+						 TOML_MAY_THROW= \
+						 TOML_NODISCARD_CTOR=
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO
 #---------------------------------------------------------------------------

@@ -11,11 +11,11 @@ namespace toml
 	};
 	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
+		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
 	[[nodiscard]] constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
+		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
 

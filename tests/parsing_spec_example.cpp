@@ -3,7 +3,7 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
 
-TEST_CASE("parsing TOML spec example")
+TEST_CASE("parsing - TOML spec example")
 {
 	static constexpr auto toml_text =
 S(R"(# This is a TOML document.

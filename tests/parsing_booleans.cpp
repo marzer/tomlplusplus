@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing booleans")
+TEST_CASE("parsing - booleans")
 {
 	parsing_should_succeed(S(R"(
 bool1 = true

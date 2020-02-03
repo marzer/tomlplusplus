@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing comments")
+TEST_CASE("parsing - comments")
 {
 	parsing_should_succeed(S(R"(
 # This is a full-line comment

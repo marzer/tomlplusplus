@@ -134,6 +134,33 @@ namespace toml::impl
 
 namespace toml
 {
+	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
+	/// 
+	/// \remarks You generally don't need to create an instance of this class explicitly; the stream
+	/// 		 operators of the TOML node types already print themselves out using this formatter.
+	///
+	/// \detail \cpp
+	/// auto tbl = toml::table{{
+	///		{ "description", "This is some TOML, yo." },
+	///		{ "fruit", toml::array{ "apple", "orange", "pear" } },
+	///		{ "numbers", toml::array{ 1, 2, 3, 4, 5 } },
+	///		{ "table", toml::table{{ { "foo", "bar" } }} }
+	/// }};
+	///
+	/// // these two lines are equivalent:
+	///	std::cout << toml::default_formatter{ tbl } << std::endl;
+	///	std::cout << tbl << std::endl;
+	/// 
+	/// // output (twice):
+	/// // description = "This is some TOML, yo."
+	/// // fruit = ["apple", "orange", "pear"]
+	/// // numbers = [1, 2, 3, 4, 5]
+	/// // 
+	/// // [table]
+	/// // foo = "bar"
+	/// \ecpp
+	/// 
+	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
 	template <typename CHAR = char>
 	class default_formatter final : impl::formatter<CHAR>
 	{
@@ -243,12 +270,20 @@ namespace toml
 
 			void print(const table& tbl) TOML_MAY_THROW
 			{
-				//values, arrays, and inline tables
+				static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
+				{
+					auto arr = nde.as_array();
+					return arr
+						&& arr->is_array_of_tables()
+						&& !arr->template get_as<table>(0_sz)->is_inline();
+				};
+
+				//values, arrays, and inline tables/table arrays
 				for (auto [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
-						|| (type == node_type::array && reinterpret_cast<const array*>(&v)->is_array_of_tables()))
+						|| (type == node_type::array && is_non_inline_array_of_tables(v)))
 						continue;
 
 					base::print_newline();
@@ -290,7 +325,7 @@ namespace toml
 								break;
 
 							case node_type::array:
-								if (reinterpret_cast<const array*>(&child_v)->is_array_of_tables())
+								if (is_non_inline_array_of_tables(child_v))
 									child_table_array_count++;
 								else
 									child_value_count++;
@@ -329,8 +364,7 @@ namespace toml
 				//table arrays
 				for (auto [k, v] : tbl)
 				{
-					const auto type = v.type();
-					if (type != node_type::array || !reinterpret_cast<const array*>(&v)->is_array_of_tables())
+					if (!is_non_inline_array_of_tables(v))
 						continue;
 					auto& arr = *reinterpret_cast<const array*>(&v);
 
@@ -382,11 +416,16 @@ namespace toml
 
 		public:
 
+			/// \brief	Constructs a default formatter and binds it to a TOML object.
+			///
+			/// \param 	source	The source TOML object.
+			/// \param 	flags 	Format option flags.
 			TOML_NODISCARD_CTOR
 			explicit default_formatter(const toml::node& source, format_flags flags = {}) noexcept
 				: base{ source, flags }
 			{}
 
+			/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 			template <typename T>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter& rhs)
 				TOML_MAY_THROW
@@ -398,6 +437,7 @@ namespace toml
 				return lhs;
 			}
 
+			/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
 			template <typename T>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter&& rhs)
 				TOML_MAY_THROW

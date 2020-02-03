@@ -3,6 +3,36 @@
 
 namespace toml
 {
+	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
+	///
+	/// \detail \cpp
+	/// auto some_toml = toml::parse(R"(
+	///		[fruit]
+	///		apple.color = "red"
+	///		apple.taste.sweet = true
+	///
+	///		[fruit.apple.texture]
+	///		smooth = true
+	/// )"sv);
+	///	std::cout << toml::json_formatter{ some_toml } << std::endl;
+	/// 
+	/// // output: 
+	/// // {
+	/// //     "fruit" : {
+	/// //         "apple" : {
+	/// //             "color" : "red",
+	/// //             "taste" : {
+	/// //                 "sweet" : true
+	/// //             },
+	/// //             "texture" : {
+	/// //                 "smooth" : true
+	/// //             }
+	/// //         }
+	/// //     }
+	/// // }
+	/// \ecpp
+	/// 
+	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
 	template <typename CHAR = char>
 	class json_formatter final : impl::formatter<CHAR>
 	{
@@ -57,6 +87,10 @@ namespace toml
 
 		public:
 
+			/// \brief	Constructs a JSON formatter and binds it to a TOML object.
+			///
+			/// \param 	source	The source TOML object.
+			/// \param 	flags 	Format option flags.
 			TOML_NODISCARD_CTOR
 			explicit json_formatter(
 				const toml::node& source,
@@ -64,6 +98,8 @@ namespace toml
 				: base{ source, flags }
 			{}
 
+
+			/// \brief	Prints the bound TOML object out to the stream as JSON.
 			template <typename T>
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter& rhs)
 				TOML_MAY_THROW
@@ -74,6 +110,7 @@ namespace toml
 				return lhs;
 			}
 
+			/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
 			template <typename T>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, json_formatter&& rhs)
 				TOML_MAY_THROW

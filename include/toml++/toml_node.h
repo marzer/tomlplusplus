@@ -17,11 +17,16 @@ namespace toml
 			
 			node(node&& other) noexcept
 				: source_{ std::move(other.source_) }
-			{}
+			{
+				other.source_.begin = {};
+				other.source_.end = {};
+			}
 
 			node& operator= (node&& rhs) noexcept
 			{
 				source_ = std::move(rhs.source_);
+				rhs.source_.begin = {};
+				rhs.source_.end = {};
 				return *this;
 			}
 
@@ -84,7 +89,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			bool is() const noexcept
 			{
-				using type = value_of<impl::remove_cvref_t<T>>;
+				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -155,7 +160,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			node_of<T>* as() noexcept
 			{
-				using type = value_of<T>;
+				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
@@ -177,7 +182,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			const node_of<T>* as() const noexcept
 			{
-				using type = value_of<T>;
+				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"

@@ -235,14 +235,14 @@ class NavBarFix(object):
 
 
 
-# changes any links to index.html to link to annotated.html instead (index.html is blank/unused)
+# changes any links to index.html to link to namespacetoml.html instead (index.html is blank/unused)
 class IndexHrefFix(object): 
 
 	def __call__(self, file, doc):
 		links = doc.body('a', href='index.html')
 		if (len(links) > 0):
 			for link in links:
-				link['href'] = 'annotated.html'
+				link['href'] = 'namespacetoml.html'
 			return True
 		return False
 
@@ -496,6 +496,15 @@ class ExtDocLinksFix(object):
 		(r'std::(?:basic_|w)?stringstreams?', 'https://en.cppreference.com/w/cpp/io/basic_stringstream'),
 		(r'std::(?:basic_|w|u8)?string_views?', 'https://en.cppreference.com/w/cpp/string/basic_string_view'),	
 		(r'std::(?:basic_|w|u8)?strings?', 'https://en.cppreference.com/w/cpp/string/basic_string'),
+		
+		(r'(?:<|&lt;)fstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/fstream'),
+		(r'(?:<|&lt;)sstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/sstream'),
+		(r'(?:<|&lt;)iostream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iostream'),
+		(r'(?:<|&lt;)iosfwd(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iosfwd'),
+		(r'(?:<|&lt;)string(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string'),
+		(r'(?:<|&lt;)string_view(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string_view'),
+		
+		
 		(r'char(?:8|16|32)_ts?', 'https://en.cppreference.com/w/cpp/language/types'),
 		(r'std::is_(?:nothrow_)?convertible(?:_v)?', 'https://en.cppreference.com/w/cpp/types/is_convertible'),
 		(r'std::is_same(?:_v)?', 'https://en.cppreference.com/w/cpp/types/is_same'),
@@ -514,6 +523,7 @@ class ExtDocLinksFix(object):
 		(r'std::remove_cv(?:_t)?', 'https://en.cppreference.com/w/cpp/types/remove_cv'),
 		(r'std::exceptions?', 'https://en.cppreference.com/w/cpp/error/exception'),
 		(r'std::runtime_errors?', 'https://en.cppreference.com/w/cpp/error/runtime_error'),
+		(r'std::initializer_lists?', 'https://en.cppreference.com/w/cpp/utility/initializer_list'),
 		(
 			r'(?:L?P)?(?:'
 				+ r'D?WORD(?:32|64|_PTR)?|HANDLE|HMODULE|BOOL(?:EAN)?'
@@ -525,7 +535,14 @@ class ExtDocLinksFix(object):
 		(
 			r'(?:__INTELLISENSE__|_MSC_FULL_VER|_MSC_VER|_MSVC_LANG|_WIN32|_WIN64)',
 			'https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019'
-		)
+		),
+		(r'(?:Legacy)?InputIterators?', 'https://en.cppreference.com/w/cpp/named_req/InputIterator'),
+		(r'(?:Legacy)?OutputIterators?', 'https://en.cppreference.com/w/cpp/named_req/OutputIterator'),
+		(r'(?:Legacy)?ForwardIterators?', 'https://en.cppreference.com/w/cpp/named_req/ForwardIterator'),
+		(r'(?:Legacy)?BidirectionalIterators?', 'https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator'),
+		(r'(?:Legacy)?RandomAccessIterators?', 'https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator'),
+		(r'(?:Legacy)?ContiguousIterators?', 'https://en.cppreference.com/w/cpp/named_req/ContiguousIterator'),
+		(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator')
 	]
 	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td']
 	
@@ -709,7 +726,7 @@ def main():
 	fixes = [
 		CustomTagsFix()
 		# , NavBarFix()
-		# , IndexHrefFix()
+		, IndexHrefFix()
 		, ModifiersFix1()
 		, ModifiersFix2()
 		, InlineNamespaceFix1()
@@ -731,6 +748,23 @@ def main():
 					print('Finished processing {}.'.format(file))
 		if _threadError:
 			sys.exit(1)
+
+	# replace index.html with a redirect
+	index_html_path = path.join(html_dir, 'index.html')
+	with open(index_html_path,'w', encoding='utf-8', newline='\n') as output_file:
+		print('''<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Refresh" content="0; url=./namespacetoml.html" />
+  </head>
+  <body>
+    <p>Please follow <a href="namespacetoml.html">this link</a>.</p>
+  </body>
+</html>
+''',
+			file=output_file
+		)
+
 
 
 

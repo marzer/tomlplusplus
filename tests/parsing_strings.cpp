@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing strings")
+TEST_CASE("parsing - strings")
 {
 	parsing_should_succeed(S(R"(
 str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."

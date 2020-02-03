@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing key-value pairs")
+TEST_CASE("parsing - key-value pairs")
 {
 	parsing_should_succeed(S(R"(
 key = "value"
@@ -48,7 +48,7 @@ name = "Pradyun"
 
 }
 
-TEST_CASE("parsing key-value pairs - dotted")
+TEST_CASE("parsing - key-value pairs (dotted)")
 {
 	parsing_should_succeed(S(R"(
 name = "Orange"

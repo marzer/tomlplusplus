@@ -1,5 +1,4 @@
 test_sources = [
-	'lifetimes.cpp',
 	'main.cpp',
 	'parsing_arrays.cpp',
 	'parsing_booleans.cpp',
@@ -10,7 +9,9 @@ test_sources = [
 	'parsing_key_value_pairs.cpp',
 	'parsing_spec_example.cpp',
 	'parsing_strings.cpp',
-	'parsing_tables.cpp'
+	'parsing_tables.cpp',
+	'manipulating_arrays.cpp',
+	'manipulating_tables.cpp'
 ]
 
 disable_exceptions = 'cpp_eh=none'

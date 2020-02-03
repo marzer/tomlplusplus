@@ -156,7 +156,7 @@ namespace toml
 			[[nodiscard]] auto as() noexcept
 			{
 				static_assert(
-					impl::is_value_or_node<U>,
+					impl::is_value_or_node<impl::unwrapped<U>>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
@@ -167,7 +167,7 @@ namespace toml
 			[[nodiscard]] const node_of<U>* as() const noexcept
 			{
 				static_assert(
-					impl::is_value_or_node<U>,
+					impl::is_value_or_node<impl::unwrapped<U>>,
 					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
@@ -207,10 +207,9 @@ namespace toml
 			[[nodiscard]] static bool container_equality(const node_view& lhs, const U& rhs) noexcept
 			{
 				using elem_t = std::remove_const_t<typename U::value_type>;
-
 				static_assert(
 					impl::is_value_or_promotable<elem_t>,
-					"Container element type must be (or be promotable to) one of the basic value types"
+					"Container element type must be (or be promotable to) one of the TOML value types"
 				);
 
 				const array* arr = lhs.as<array>();

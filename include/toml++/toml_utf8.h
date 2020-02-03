@@ -6,15 +6,19 @@
 
 namespace toml::impl
 {
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
+	{
+		return codepoint == U'\t' || codepoint == U' ';
+	}
+
 	[[nodiscard]]
-	constexpr bool is_whitespace(char32_t codepoint) noexcept
+	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that don't say "is a line-break")
 
-		return codepoint == U'\t'
-			|| codepoint == U' '
-			|| codepoint == U'\u00A0' // no-break space
+		return codepoint == U'\u00A0' // no-break space
 			|| codepoint == U'\u1680' // ogham space mark
 			|| (codepoint >= U'\u2000' && codepoint <= U'\u200A') // em quad -> hair space
 			|| codepoint == U'\u202F' // narrow no-break space
@@ -23,20 +27,37 @@ namespace toml::impl
 		;
 	}
 
-	template <bool CR = true>
 	[[nodiscard]]
-	constexpr bool is_line_break(char32_t codepoint) noexcept
+	constexpr bool is_whitespace(char32_t codepoint) noexcept
+	{
+		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
+	}
+
+	template <bool CR = true>
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
+	{
+		constexpr auto low_range_end = CR ? U'\r' : U'\f';
+		return (codepoint >= U'\n' && codepoint <= low_range_end);
+	}
+
+	[[nodiscard]]
+	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that say "is a line-break")
 
-		constexpr auto low_range_end = CR ? U'\r' : U'\f';
-
-		return (codepoint >= U'\n' && codepoint <= low_range_end)
-			|| codepoint == U'\u0085' // next line
+		return codepoint == U'\u0085' // next line
 			|| codepoint == U'\u2028' // line separator
 			|| codepoint == U'\u2029' // paragraph separator
 		;
+	}
+
+	template <bool CR = true>
+	[[nodiscard]]
+	constexpr bool is_line_break(char32_t codepoint) noexcept
+	{
+		return is_ascii_line_break<CR>(codepoint) || is_unicode_line_break(codepoint);
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -75,7 +96,8 @@ namespace toml::impl
 	{
 		return (codepoint >= U'a' && codepoint <= U'f')
 			|| (codepoint >= U'A' && codepoint <= U'F')
-			|| is_decimal_digit(codepoint);
+			|| is_decimal_digit(codepoint)
+		;
 	}
 
 	[[nodiscard]]
@@ -106,38 +128,22 @@ namespace toml::impl
 	[[nodiscard]]
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
-		return is_line_break(codepoint)
-			|| is_whitespace(codepoint)
+		return is_ascii_line_break(codepoint)
+			|| is_ascii_whitespace(codepoint)
 			|| codepoint == U']'
 			|| codepoint == U'}'
 			|| codepoint == U','
 			|| codepoint == U'#'
+			|| is_unicode_line_break(codepoint)
+			|| is_unicode_whitespace(codepoint)
 		;
 	}
 
 	struct utf8_decoder final
 	{
-		// This decoder is based on code from here: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-		// 
-		// License:
-		// 
-		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
-		// 
-		// Permission is hereby granted, free of charge, to any person obtaining a copy of this
-		// software and associated documentation files (the "Software"), to deal in the Software
-		// without restriction, including without limitation the rights to use, copy, modify, merge,
-		// publish, distribute, sublicense, and/or sell copies of the Software, and to permit
-		// persons to whom the Software is furnished to do so, subject to the following conditions:
-		// 
-		// The above copyright notice and this permission notice shall be included in all copies
-		// or substantial portions of the Software.
-		// 
-		// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
-		// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-		// PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE
-		// FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-		// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
-		// DEALINGS IN THE SOFTWARE.
+		//# This decoder is based on the 'Flexible and Economical UTF-8 Decoder'
+		//# Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+		//# See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
 
 		uint_least32_t state{};
 		char32_t codepoint{};
@@ -211,9 +217,9 @@ namespace toml::impl
 				: source{ sv }
 			{
 				if (source.length() >= 3_sz
-					&& static_cast<uint8_t>(source[0]) == 0xEF_u8
-					&& static_cast<uint8_t>(source[1]) == 0xBB_u8
-					&& static_cast<uint8_t>(source[2]) == 0xBF_u8)
+					&& static_cast<uint8_t>(source[0]) == static_cast<uint8_t>(0xEFu)
+					&& static_cast<uint8_t>(source[1]) == static_cast<uint8_t>(0xBBu)
+					&& static_cast<uint8_t>(source[2]) == static_cast<uint8_t>(0xBFu))
 				{
 					position += 3_sz;
 				}
@@ -255,9 +261,9 @@ namespace toml::impl
 				if (*source)
 				{
 					static constexpr uint8_t bom[] {
-						0xEF_u8,
-						0xBB_u8,
-						0xBF_u8
+						0xEF,
+						0xBB,
+						0xBF
 					};
 
 					using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
@@ -471,7 +477,6 @@ namespace toml::impl
 					}
 				}
 			}
-
 
 			#if !TOML_EXCEPTIONS
 

@@ -205,3 +205,9 @@ nav .m-thin {
 .m-code .p {
 	color: rgb(120,120,120);
 }
+
+.m-doc-details div table.m-table.m-fullwidth.m-flat thead tr th,
+.m-doc-details div table.m-table.m-fullwidth.m-flat tfoot tr th
+{
+	color: #a5c9ea;
+}

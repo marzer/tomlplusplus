@@ -1,6 +1,6 @@
 #include "tests.h"
 
-TEST_CASE("parsing tables")
+TEST_CASE("parsing - tables")
 {
 	parsing_should_succeed(S(R"(
 [table]
@@ -158,7 +158,7 @@ apple.taste.sweet = true
 	);
 }
 
-TEST_CASE("parsing inline tables")
+TEST_CASE("parsing - inline tables")
 {
 	parsing_should_succeed(S(R"(
 name = { first = "Tom", last = "Preston-Werner" }
@@ -264,7 +264,7 @@ name = {
 
 }
 
-TEST_CASE("parsing arrays-of-tables")
+TEST_CASE("parsing - arrays-of-tables")
 {
 	parsing_should_succeed(S(R"(
 points = [ { x = 1, y = 2, z = 3 },

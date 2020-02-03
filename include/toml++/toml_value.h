@@ -124,11 +124,11 @@ namespace toml
 			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
 
 			/// \brief	Returns a reference to the underlying value.
-			[[nodiscard]] operator T& () & noexcept { return val_; }
+			[[nodiscard]] explicit operator T& () & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] operator T&& () && noexcept { return std::move(val_); }
+			[[nodiscard]] explicit operator T&& () && noexcept { return std::move(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
-			[[nodiscard]] operator const T& () const& noexcept { return val_; }
+			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
@@ -277,7 +277,12 @@ namespace toml
 			}
 	};
 
+	template <size_t N> value(const string_char(&)[N]) -> value<string>;
+	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
+	template <size_t N> value(string_char(&)[N]) -> value<string>;
+	template <size_t N> value(string_char(&&)[N]) -> value<string>;
+	value(string_char*) -> value<string>;
 	value(string_view) -> value<string>;
 	value(string) -> value<string>;
 	value(bool) -> value<bool>;
@@ -292,5 +297,8 @@ namespace toml
 	value(uint32_t) -> value<int64_t>;
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 }

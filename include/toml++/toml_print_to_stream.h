@@ -5,8 +5,15 @@ namespace toml::impl
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
-	//    - <charconv> is locale-independent.
+	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
 	//    - I can avoid forcing users to drag in <sstream> and <iomanip>.
+
+	// Q: "there's a lot of reinterpret_casting here, is any of it UB?"
+	// A: - If the source string data is char and the output string is char8_t, then technically yes,
+	//      but not in the other direction. I test in both modes on Clang, GCC and MSVC and have yet to
+	//      see it actually causing an issue, but in the event it does present a problem it's not going to
+	//      be a show-stopper since all it means is I need to do duplicate some code.
+	//    - Strings in C++. Honestly.
 
 	template <typename CHAR1, typename CHAR2>
 	TOML_ALWAYS_INLINE
@@ -14,7 +21,7 @@ namespace toml::impl
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(str.data(), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
 	}
 
 	template <typename CHAR1, typename CHAR2>
@@ -23,7 +30,7 @@ namespace toml::impl
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(str.data(), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
 	}
 
 	template <typename CHAR>
@@ -65,14 +72,14 @@ namespace toml::impl
 	template <typename T> inline constexpr size_t charconv_buffer_length = 0;
 	template <> inline constexpr size_t charconv_buffer_length<double> = 60;
 	template <> inline constexpr size_t charconv_buffer_length<float> = 40;
-	template <> inline constexpr size_t charconv_buffer_length<uint64_t> = 20; //strlen("18446744073709551615")
-	template <> inline constexpr size_t charconv_buffer_length<int64_t> = 20; //strlen("-9223372036854775808")
-	template <> inline constexpr size_t charconv_buffer_length<int32_t> = 11; //strlen("-2147483648")
-	template <> inline constexpr size_t charconv_buffer_length<int16_t> = 6; //strlen("-32768")
-	template <> inline constexpr size_t charconv_buffer_length<int8_t> = 4; //strlen("-128")
-	template <> inline constexpr size_t charconv_buffer_length<uint32_t> = 10; //strlen("4294967295")
-	template <> inline constexpr size_t charconv_buffer_length<uint16_t> = 5; //strlen("65535")
-	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3; //strlen("255")
+	template <> inline constexpr size_t charconv_buffer_length<uint64_t> = 20; // strlen("18446744073709551615")
+	template <> inline constexpr size_t charconv_buffer_length<int64_t> = 20;  // strlen("-9223372036854775808")
+	template <> inline constexpr size_t charconv_buffer_length<int32_t> = 11;  // strlen("-2147483648")
+	template <> inline constexpr size_t charconv_buffer_length<int16_t> = 6;   // strlen("-32768")
+	template <> inline constexpr size_t charconv_buffer_length<int8_t> = 4;    // strlen("-128")
+	template <> inline constexpr size_t charconv_buffer_length<uint32_t> = 10; // strlen("4294967295")
+	template <> inline constexpr size_t charconv_buffer_length<uint16_t> = 5;  // strlen("65535")
+	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
 	template <typename T, typename CHAR>
 	inline void print_integer_to_stream(T val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
@@ -245,7 +252,6 @@ namespace toml::impl
 	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
-
 		print_to_stream(val.date, stream);
 		print_to_stream('T', stream);
 		print_to_stream(val.time, stream);
@@ -268,10 +274,54 @@ namespace toml::impl
 				print_to_stream(TOML_STRING_PREFIX("\\u007F"sv), stream);
 			else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
 				print_to_stream(TOML_STRING_PREFIX("\\\""sv), stream);
+			else if (c == TOML_STRING_PREFIX('\\')) TOML_UNLIKELY
+				print_to_stream(TOML_STRING_PREFIX("\\\\"sv), stream);
 			else
 				print_to_stream(c, stream);
 		}
 	}
 
 	TOML_POP_WARNINGS
+}
+
+namespace toml
+{
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
+		TOML_MAY_THROW
+	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The stream's underlying character type must be 1 byte in size."
+		);
+		impl::print_to_stream("line "sv, lhs);
+		impl::print_to_stream(rhs.line, lhs);
+		impl::print_to_stream(", column ", lhs);
+		impl::print_to_stream(rhs.column, lhs);
+		return lhs;
+	}
+
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
+		TOML_MAY_THROW
+	{
+		static_assert(
+			sizeof(CHAR) == 1,
+			"The stream's underlying character type must be 1 byte in size."
+		);
+		lhs << rhs.begin;
+		if (rhs.begin < rhs.end
+			&& (rhs.end.line != rhs.begin.line || rhs.end.column > rhs.begin.column + source_index{1}))
+		{
+			impl::print_to_stream(" - "sv, lhs);
+			lhs << rhs.end;
+		}
+		if (rhs.path)
+		{
+			impl::print_to_stream(" of '"sv, lhs);
+			impl::print_to_stream(*rhs.path, lhs);
+			impl::print_to_stream('\'', lhs);
+		}
+		return lhs;
+	}
 }
