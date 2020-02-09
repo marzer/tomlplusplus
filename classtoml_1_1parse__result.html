@@ -1,48 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
+<html lang="en"><head>
+  <meta charset="utf-8"/>
   <title>toml::parse_result class | toml++ TOML
 Parser
 for
 C++17</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" />
-  <link rel="stylesheet" href="m-dark+documentation.compiled.css" />
-  <link rel="stylesheet" href="tomlplusplus.css" />
-  <link rel="icon" href="favicon-dark.png" type="image/png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#22272e" />
-  <script
-  src="tomlplusplus.js"></script>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="tomlplusplus.css" rel="stylesheet"/>
+  <link href="favicon-dark.png" rel="icon" type="image/png"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <script src="tomlplusplus.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <span id="m-navbar-brand" class="m-col-t-8 m-col-m-none m-left-m">
-        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a href="index.html" class="m-thin">TOML
+      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
+        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="namespacetoml.html">TOML
 Parser
 for
 C++17</a>
       </span>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
-        <a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-          <path id="m-doc-search-icon-path" d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z"/>
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
         </svg></a>
-        <a id="m-navbar-show" href="#navigation" title="Show navigation"></a>
-        <a id="m-navbar-hide" href="#" title="Hide navigation"></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
       </div>
-      <div id="m-navbar-collapse" class="m-col-t-12 m-show-m m-col-m-none m-right-m">
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
         <div class="m-row">
           <ol class="m-col-t-6 m-col-m-none">
-            <li><a href="pages.html">Pages</a></li>
+            <li><a href="namespaces.html">Namespaces</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
-            <li><a href="namespaces.html">Namespaces</a></li>
             <li><a href="annotated.html">Classes</a></li>
-            <li><a target="_blank" href="https://github.com/marzer/tomlplusplus/">Github</a></li>
-            <li class="m-show-m"><a href="#search" class="m-doc-search-icon" title="Search" onclick="return showSearch()"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
-              <use href="#m-doc-search-icon-path" />
+            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
           </ol>
         </div>
@@ -58,7 +55,97 @@ C++17</a>
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_result <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>The result of a parsing operation.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This type only exists when exceptions are disabled, otherwise <code><a href="classtoml_1_1parse__result.html" class="m-doc">parse_<wbr />result</a></code> is a simple alias for <code>toml::table</code>.</p></aside>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This type only exists when exceptions are disabled. When exceptions are enabled <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> and parsing failures are indicated by raising a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> as an exception.</p></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="n">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="n">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span> <span class="c1">//implicitly converts to table&amp;</span>
+<span class="k">else</span>
+    <span class="n">std</span><span class="o">::</span><span class="n">cerr</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">description</span><span class="p">()</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="n">sv</span>
+        <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span></pre>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="af66ea78a6dd881521ce865a372298e12">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af66ea78a6dd881521ce865a372298e12">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if parsing succeeeded.</dd>
+            <dt id="a43df64e02443b2abfd9d2c86c5e4c30a">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a43df64e02443b2abfd9d2c86c5e4c30a">operator const parse_error&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (const lvalue overload).</dd>
+            <dt id="a93ef6267aa6b9a13e2f1d1be848c3ca1">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a93ef6267aa6b9a13e2f1d1be848c3ca1">operator const table&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
+            <dt id="abc8a693cb538441b5974eff38c716669">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abc8a693cb538441b5974eff38c716669">operator parse_error&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>.</dd>
+            <dt id="a9f70aa665d84aaf5f936dd27f6c95c4a">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f70aa665d84aaf5f936dd27f6c95c4a">operator parse_error&amp;&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (rvalue overload).</dd>
+            <dt id="a578430a196122c65d91d2b7ac5f3cbe0">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a578430a196122c65d91d2b7ac5f3cbe0">operator table&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dt id="a9f6b1433ba5ac328570a4cf714011fa6">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f6b1433ba5ac328570a4cf714011fa6">operator table&amp;&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (rvalue overload).</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ab07914228f9f7436628c99df454f177d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab07914228f9f7436628c99df454f177d">error</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (rvalue overload).</dd>
+            <dt id="aefbb9aafdf00fa1ac979962d22e12e68">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aefbb9aafdf00fa1ac979962d22e12e68">error</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>.</dd>
+            <dt id="a9a5929b01df9a7f7f986b8431cefd2b8">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9a5929b01df9a7f7f986b8431cefd2b8">error</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (const lvalue overload).</dd>
+            <dt id="a9097bc552007537f840602ceca00e99b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9097bc552007537f840602ceca00e99b">failed</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if parsing failed.</dd>
+            <dt id="ac22384b78ac889904cb1be27dd248e87">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac22384b78ac889904cb1be27dd248e87">get</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (rvalue overload).</dd>
+            <dt id="a37c056ff3d68bf10caf1188ca49123fd">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a37c056ff3d68bf10caf1188ca49123fd">get</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dt id="a279d481270fd22b8ea1520c04f9307ae">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a279d481270fd22b8ea1520c04f9307ae">get</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
+            <dt id="ab5bfcd6ed385016395029bd69ad78a3c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab5bfcd6ed385016395029bd69ad78a3c">succeeded</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if parsing succeeeded.</dd>
+          </dl>
+        </section>
       </div>
     </div>
   </div>
@@ -70,27 +157,27 @@ C++17</a>
       <div class="m-col-m-8 m-push-m-2">
         <div class="m-doc-search-header m-text m-small">
           <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
-          <div id="search-symbolcount">&hellip;</div>
+          <div id="search-symbolcount">…</div>
         </div>
         <div class="m-doc-search-content">
           <form>
-            <input type="search" name="q" id="search-input" placeholder="Loading &hellip;" disabled="disabled" autofocus="autofocus" autocomplete="off" spellcheck="false" />
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
           </form>
           <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
-          <div id="search-help" class="m-text m-dim m-text-center">
+          <div class="m-text m-dim m-text-center" id="search-help">
             <p class="m-noindent">Search for symbols, directories, files, pages or
             modules. You can omit any prefix from the symbol or file path; adding a
             <code>:</code> or <code>/</code> suffix lists all members of given symbol or
             directory.</p>
-            <p class="m-noindent">Use <span class="m-label m-dim">&darr;</span>
-            / <span class="m-label m-dim">&uarr;</span> to navigate through the list,
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
             <span class="m-label m-dim">Enter</span> to go.
             <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
             copy a link to the result using <span class="m-label m-dim">⌘</span>
             <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
             <span class="m-label m-dim">M</span> produces a Markdown link.</p>
           </div>
-          <div id="search-notfound" class="m-text m-warning m-text-center">Sorry, nothing was found.</div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
           <ul id="search-results"></ul>
         </div>
       </div>
@@ -98,30 +185,26 @@ C++17</a>
   </div>
 </div>
 <script src="search-v1.js"></script>
-<script src="searchdata-v1.js" async="async"></script>
+<script async="async" src="searchdata-v1.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <a
-target="_blank"
-href="https://github.com/marzer/tomlplusplus/">Github</a>
-&bull;
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+•
 
-<a
-target="_blank"
-href="https://github.com/marzer/tomlplusplus/issues">Report
+<a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
-<br><br>Documentation
+<br/><br/>Documentation
 generated
 using
-<a
-href="https://mcss.mosra.cz/">m.css</a>
+<a href="https://mcss.mosra.cz/">m.css</a>
       </div>
     </div>
   </div>
 </nav></footer>
-</body>
-</html>
+
+
+</body></html>

@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>toml::table class | toml++ TOML
+Parser
+for
+C++17</title>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="tomlplusplus.css" rel="stylesheet"/>
+  <link href="favicon-dark.png" rel="icon" type="image/png"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <script src="tomlplusplus.js"></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
+        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="namespacetoml.html">TOML
+Parser
+for
+C++17</a>
+      </span>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="2">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>table <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>A TOML table.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#base-classes">Base classes</a></li>
+                <li><a href="#pub-types">Public types</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<aside class="m-note m-default"><h4>Remark</h4><p>The interface of this type is modeled after <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>, with some additional considerations made for the heterogeneous nature of a TOML table.</p></aside><pre class="m-code"><span class="c1">// example</span>
+<span class="c1">// code</span>
+<span class="c1">// here</span></pre>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1node.html">node</a>
+            </dt>
+            <dd>A TOML node.</dd>
+          </dl>
+        </section>
+        <section id="pub-types">
+          <h2><a href="#pub-types">Public types</a></h2>
+          <dl class="m-doc">
+            <dt id="a5f20440eb54f783f1704574b1e612a39">
+              using <a class="m-doc-self" href="#a5f20440eb54f783f1704574b1e612a39">const_iterator</a> = impl::table_iterator&lt;true&gt;
+            </dt>
+            <dd>A const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">LegacyBidirectionalIterator</a> for iterating over the key-value pairs in a table.</dd>
+            <dt id="aef09012c31a3d28ba1960da887872dbf">
+              using <a class="m-doc-self" href="#aef09012c31a3d28ba1960da887872dbf">iterator</a> = impl::table_iterator&lt;false&gt;
+            </dt>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">LegacyBidirectionalIterator</a> for iterating over the key-value pairs in a table.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a823f0d3385d2d8d8320a72f78c677a35">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> N&gt;</div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a58a5d740a7b210b1942915f98fe9d8fe">table</a>(</span><span class="m-doc-wrap">impl::table_init_pair( &amp;&amp; arr)[N]) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs a table with one or more initial key-value pairs.</dd>
+            <dt id="ab47a76ab242afa13f1a74e5e2bcded44">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab47a76ab242afa13f1a74e5e2bcded44">table</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="aafd874c7b06b7f0f535e713b2640fe96">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aafd874c7b06b7f0f535e713b2640fe96">as_table</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a pointer to the node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one.</dd>
+            <dt id="a3352f9954e03087b6f596ae23283bd3c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3352f9954e03087b6f596ae23283bd3c">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first key-value pair.</dd>
+            <dt id="a334f050427eb20c8530254f4cd6dddf3">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a334f050427eb20c8530254f4cd6dddf3">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first key-value pair.</dd>
+            <dt id="a15a5f8bd6d194fcbe925a24e5b73b1fb">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a15a5f8bd6d194fcbe925a24e5b73b1fb">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first key-value pair.</dd>
+            <dt id="a311451209f990931ea25828c6091714f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a311451209f990931ea25828c6091714f">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
+            <dt id="aa710f85c588a1b00c3192d1553de4eef">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#aa710f85c588a1b00c3192d1553de4eef">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes all key-value pairs from the table.</dd>
+            <dt id="a554f495f6f2ebc993be1bd0379447051">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a554f495f6f2ebc993be1bd0379447051">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the table is empty.</dd>
+            <dt id="a40c72e81de1da66b7083cad11442cb05">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a40c72e81de1da66b7083cad11442cb05">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
+            <dt id="a96da67654c5ca131cfec2e3c07aa2730">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a96da67654c5ca131cfec2e3c07aa2730">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
+            <dt id="a8d24e995e5cfab4933c82ccd95dd6fa3">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8d24e995e5cfab4933c82ccd95dd6fa3">is_array</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is an array.</dd>
+            <dt id="ad2f9333f6aeb634f4ddbec38493da7c2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad2f9333f6aeb634f4ddbec38493da7c2">is_table</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a table.</dd>
+            <dt id="af137c1e4cf632015709d6a566cc74edc">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af137c1e4cf632015709d6a566cc74edc">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a value.</dd>
+            <dt id="a5c5fd0e11db828ab264eccc96dfdd619">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5c5fd0e11db828ab264eccc96dfdd619">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move-assignment operator.</dd>
+            <dt id="ad7c4105854cc817bf6e781fa7fb1b6d6">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad7c4105854cc817bf6e781fa7fb1b6d6">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the number of key-value pairs in the table.</dd>
+            <dt id="afe589750b98c702710d643a81ed6b9af">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afe589750b98c702710d643a81ed6b9af">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the node's type identifier.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Inequality operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Equality operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a58a5d740a7b210b1942915f98fe9d8fe"><div>
+            <h3>
+              <div class="m-doc-template">template&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> N&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a58a5d740a7b210b1942915f98fe9d8fe">table</a>(</span><span class="m-doc-wrap">impl::table_init_pair( &amp;&amp; arr)[N]) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Constructs a table with one or more initial key-value pairs.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">N</td>
+                  <td>Number of key-value pairs used to initialize the table.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>arr</td>
+                  <td>An array of key-value pairs used to initialize the table.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="n">toml</span><span class="o">::</span><span class="n">table</span><span class="p">{{</span> <span class="c1">//double braces required :( - see Remarks</span>
+    <span class="p">{</span> <span class="s">"foo"</span><span class="p">,</span> <span class="mi">1</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s">"bar"</span><span class="p">,</span> <span class="mf">2.0</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
+<span class="p">}};</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output: </span>
+<span class="c1">// {{ "foo", 1 }, { "bar", 2.0 }, { "kek", "three" }}</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic. This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a href="https://en.cppreference.com/w/cpp/utility/initializer_list">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to be more annoyed about this.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="abdeb5d9d9fc23c031c78e544c6196ea6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Inequality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS table.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS table.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the tables did not contain the same keys and values.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="af8ebaed8105e5de2098992764f2d534a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Equality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS table.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS table.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the tables contained the same keys and values.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script async="async" src="searchdata-v1.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+•
+
+<a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+an
+issue</a>
+
+<br/><br/>Documentation
+generated
+using
+<a href="https://mcss.mosra.cz/">m.css</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>
