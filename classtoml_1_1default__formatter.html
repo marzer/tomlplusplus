@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml::literals namespace | toml++ TOML
+  <title>toml::default_formatter class | toml++ TOML
 Parser
 for
 C++17</title>
@@ -52,29 +52,39 @@ C++17</a>
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>literals <span class="m-thin">namespace</span>
-         <span class="m-label m-info tpp-injected tpp-inline-namespace" title="All members of this namespace are automatically members of the parent namespace. It does not require an explicit 'using' statement.">inline</span></h1>
-        <p>Literal operators used throughout toml++.</p>
-        <div class="m-block m-default">
-          <h3>Contents</h3>
-          <ul>
-            <li>
-              Reference
-              <ul>
-                <li><a href="#func-members">Functions</a></li>
-              </ul>
-            </li>
-          </ul>
-        </div>
-        <section id="func-members">
-          <h2><a href="#func-members">Functions</a></h2>
-          <dl class="m-doc">
-            <dt id="a4a1fced946c998e169e75fddecf18363">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a1fced946c998e169e75fddecf18363">operator""_sz</a>(</span><span class="m-doc-wrap">unsigned long long n) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Creates a <code><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></code> literal.</dd>
-          </dl>
-        </section>
+          <div class="m-doc-template">template&lt;typename CHAR = char&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>default_formatter <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>A wrapper for printing TOML objects out to a stream as formatted TOML.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">CHAR</td>
+              <td>The underlying character type of the output stream. Must be 1 byte in size.</td>
+            </tr>
+          </tbody>
+        </table>
+<aside class="m-note m-default"><h4>Remark</h4><p>You generally don't need to create an instance of this class explicitly; the stream operators of the TOML node types already print themselves out using this formatter.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="n">toml</span><span class="o">::</span><span class="n">table</span><span class="p">{{</span>
+    <span class="p">{</span> <span class="s">"description"</span><span class="p">,</span> <span class="s">"This is some TOML, yo."</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s">"fruit"</span><span class="p">,</span> <span class="n">toml</span><span class="o">::</span><span class="n">array</span><span class="p">{</span> <span class="s">"apple"</span><span class="p">,</span> <span class="s">"orange"</span><span class="p">,</span> <span class="s">"pear"</span> <span class="p">}</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s">"numbers"</span><span class="p">,</span> <span class="n">toml</span><span class="o">::</span><span class="n">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">}</span> <span class="p">},</span>
+    <span class="p">{</span> <span class="s">"table"</span><span class="p">,</span> <span class="n">toml</span><span class="o">::</span><span class="n">table</span><span class="p">{{</span> <span class="p">{</span> <span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span> <span class="p">}</span> <span class="p">}}</span> <span class="p">}</span>
+<span class="p">}};</span>
+
+<span class="c1">// these two lines are equivalent:</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">toml</span><span class="o">::</span><span class="n">default_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output (twice):</span>
+<span class="c1">// description = "This is some TOML, yo."</span>
+<span class="c1">// fruit = ["apple", "orange", "pear"]</span>
+<span class="c1">// numbers = [1, 2, 3, 4, 5]</span>
+<span class="c1">// </span>
+<span class="c1">// [table]</span>
+<span class="c1">// foo = "bar"</span></pre>
       </div>
     </div>
   </div>

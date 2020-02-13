@@ -62,6 +62,7 @@ C++17</a>
               Reference
               <ul>
                 <li><a href="#pub-attribs">Public variables</a></li>
+                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -79,6 +80,86 @@ C++17</a>
             </dt>
             <dd>The year component.</dd>
           </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af2ad5cc7af0b184e6fab182f32df8a1c">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">date</a> lhs,
+              <a class="m-doc" href="structtoml_1_1date.html">date</a> rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Inequality operator.</dd>
+            <dt id="a10635f4b1bdc3b2e8b811e518fa0b80a">
+              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10635f4b1bdc3b2e8b811e518fa0b80a">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
+            </dt>
+            <dd>Prints a date out to a stream as <code>YYYY-MM-DD</code> (per RFC 3339).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a07ff3f69b41d69e780aac60d11e8a2a8">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">date</a> lhs,
+              <a class="m-doc" href="structtoml_1_1date.html">date</a> rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Equality operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="af2ad5cc7af0b184e6fab182f32df8a1c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">friend bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af2ad5cc7af0b184e6fab182f32df8a1c">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">date</a> lhs,
+              <a class="m-doc" href="structtoml_1_1date.html">date</a> rhs) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Inequality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS date.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS date.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the dates did not represent the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a07ff3f69b41d69e780aac60d11e8a2a8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">friend bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a07ff3f69b41d69e780aac60d11e8a2a8">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">date</a> lhs,
+              <a class="m-doc" href="structtoml_1_1date.html">date</a> rhs) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Equality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS date.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS date.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the dates represented the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
         </section>
       </div>
     </div>

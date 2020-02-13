@@ -63,10 +63,18 @@ C++17</a>
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
+                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
         </div>
+<pre class="m-code"><span class="k">auto</span> <span class="n">table</span> <span class="o">=</span> <span class="n">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="n">sv</span><span class="p">);</span>
+<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'description' was defined at "</span><span class="n">sv</span>
+    <span class="o">&lt;&lt;</span> <span class="n">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"description"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
+    <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// possible output:</span>
+<span class="c1">// The value 'description' was defined at line 7, column 15</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high).<br/><br/>This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -87,6 +95,37 @@ C++17</a>
               <a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">source_<wbr/>index</a> <a class="m-doc" href="#ab21cac59798d70e25fe97ac7433763cc">line</a>
             </dt>
             <dd>The line number.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt id="a90fec8fa1014a1358a362f9171cdb073">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a90fec8fa1014a1358a362f9171cdb073">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if two source_positions do not represent the same line and column.</dd>
+            <dt id="a771714902fb113445597a1fd2a24e8cd">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a771714902fb113445597a1fd2a24e8cd">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the LHS position is before the RHS position.</dd>
+            <dt id="aa87323f3ce926e11feb7e30fde4b6ec5">
+              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa87323f3ce926e11feb7e30fde4b6ec5">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</dd>
+            <dt id="abb7d47c85374301ec48e7c5f3ee1c71a">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abb7d47c85374301ec48e7c5f3ee1c71a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the LHS position is before the RHS position or equal to it.</dd>
+            <dt id="a2661adb822c0291c5328d9d00e4b9a8f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2661adb822c0291c5328d9d00e4b9a8f">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if two source_positions represent the same line and column.</dd>
           </dl>
         </section>
         <section>

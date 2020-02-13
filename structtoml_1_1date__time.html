@@ -61,11 +61,22 @@ C++17</a>
             <li>
               Reference
               <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
+                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
         </div>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="af0d6119984645eb015f2fad0ef487bbc">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af0d6119984645eb015f2fad0ef487bbc">is_local</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> does not contain timezone offset information.</dd>
+          </dl>
+        </section>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
@@ -77,10 +88,99 @@ C++17</a>
               <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> <a class="m-doc-self" href="#a18d5e772db4f61635643cda390c2b720">time</a>
             </dt>
             <dd>The time component.</dd>
-            <dt id="abf91ad8c70f0c3fd54690923c348b972"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;<a class="m-doc" href="structtoml_1_1time__offset.html">toml::<wbr/>time_offset</a>&gt; <a class="m-doc-self" href="#abf91ad8c70f0c3fd54690923c348b972">time_offset</a>
+            <dt><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;<a class="m-doc" href="structtoml_1_1time__offset.html">toml::<wbr/>time_offset</a>&gt; <a class="m-doc" href="#abf91ad8c70f0c3fd54690923c348b972">time_offset</a>
             </dt>
             <dd>The timezone offset component.</dd>
           </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9ae0e032ffe90928c47b40bd8155dea3">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Inequality operator.</dd>
+            <dt id="a83781edbe072ba7916c2793c0a15d4c2">
+              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a83781edbe072ba7916c2793c0a15d4c2">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> out to a stream in RFC 3339 format.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a885cbe902aeadacb0953230ade9d8b9a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Equality operator.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a9ae0e032ffe90928c47b40bd8155dea3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">friend bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9ae0e032ffe90928c47b40bd8155dea3">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Inequality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the date_times did not represent the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a885cbe902aeadacb0953230ade9d8b9a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">friend bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a885cbe902aeadacb0953230ade9d8b9a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Equality operator.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the date_times represented the same value.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+        </section>
+        <section>
+          <h2>Variable documentation</h2>
+          <section class="m-doc-details" id="abf91ad8c70f0c3fd54690923c348b972"><div>
+            <h3><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;<a class="m-doc" href="structtoml_1_1time__offset.html">toml::<wbr/>time_offset</a>&gt; toml::<wbr/>date_time::<wbr/><a class="m-doc-self" href="#abf91ad8c70f0c3fd54690923c348b972">time_offset</a>
+            </h3>
+            <p>The timezone offset component.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> is said to be 'local' if the <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> is empty.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>
