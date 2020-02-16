@@ -2,6 +2,7 @@
 //
 // toml++ v0.1.0
 // https://github.com/marzer/tomlplusplus
+// SPDX-License-Identifier: MIT
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -36,8 +37,6 @@
 // WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
 // COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-// SPDX-License-Identifier: MIT
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -339,16 +338,13 @@ TOML_POP_WARNINGS
 
 namespace toml
 {
-	inline namespace literals
-	{
-		using namespace std::string_literals;
-		using namespace std::string_view_literals;
+	using namespace std::string_literals;
+	using namespace std::string_view_literals;
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
-		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
-		{
-			return static_cast<size_t>(n);
-		}
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
+	{
+		return static_cast<size_t>(n);
 	}
 
 	#if TOML_CHAR_8_STRINGS
@@ -581,13 +577,12 @@ namespace toml::impl
 
 	// Q: "why not use std::find??"
 	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
-	//    I don't want to impose such a heavy burden on users.
+	//    I don't want to impose such a heavy compile-time burden on users.
 
 	template <typename T>
 	inline std::optional<size_t> find(const std::vector<T>& haystack, const T& needle) noexcept
 	{
-		const auto end = haystack.size();
-		for (size_t i = 0; i < end; i++)
+		for (size_t i = 0, e = haystack.size(); i < e; i++)
 			if (haystack[i] == needle)
 				return i;
 		return {};
@@ -639,6 +634,9 @@ namespace toml::impl
 	template <> struct node_wrapper<date> { using type = value<date>; };
 	template <> struct node_wrapper<time> { using type = value<time>; };
 	template <> struct node_wrapper<date_time> { using type = value<date_time>; };
+
+	template <typename T>
+	using node_of = typename impl::node_wrapper<T>::type;
 
 	template <typename T> struct node_unwrapper { using type = T; };
 	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
@@ -758,26 +756,23 @@ namespace toml::impl
 namespace toml
 {
 	template <typename T>
-	using node_of = typename impl::node_wrapper<T>::type;
-
-	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
 	template <typename T>
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<string>>;
+	inline constexpr bool is_string = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<string>>;
 	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
+	inline constexpr bool is_integer = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
 	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<double>>;
+	inline constexpr bool is_floating_point = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<double>>;
 	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<bool>>;
+	inline constexpr bool is_boolean = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<bool>>;
 	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date>>;
+	inline constexpr bool is_date = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date>>;
 	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<time>>;
+	inline constexpr bool is_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<time>>;
 	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date_time>>;
+	inline constexpr bool is_date_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
@@ -1299,15 +1294,15 @@ namespace toml
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<node_of<T>*>(this); }
+			impl::node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<impl::node_of<T>*>(this); }
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<node_of<T>*>(this)); }
+			impl::node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<impl::node_of<T>*>(this)); }
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			const node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const node_of<T>*>(this); }
+			const impl::node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const impl::node_of<T>*>(this); }
 
 			template <typename N, typename T>
 			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
@@ -1375,7 +1370,7 @@ namespace toml
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>* as() noexcept
+			impl::node_of<T>* as() noexcept
 			{
 				using type = impl::unwrapped<T>;
 				static_assert(
@@ -1396,7 +1391,7 @@ namespace toml
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			const node_of<T>* as() const noexcept
+			const impl::node_of<T>* as() const noexcept
 			{
 				using type = impl::unwrapped<T>;
 				static_assert(
@@ -2160,7 +2155,7 @@ namespace toml
 					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				return { values.emplace(pos.raw_, new node_of<type>{ std::forward<V>(args)...} ) };
+				return { values.emplace(pos.raw_, new impl::node_of<type>{ std::forward<V>(args)...} ) };
 			}
 
 			iterator erase(const_iterator pos) noexcept
@@ -2190,7 +2185,7 @@ namespace toml
 					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				auto nde = new node_of<type>{ std::forward<V>(args)... };
+				auto nde = new impl::node_of<type>{ std::forward<V>(args)... };
 				values.emplace_back(nde);
 				return *nde;
 			}
@@ -2200,16 +2195,30 @@ namespace toml
 				values.pop_back();
 			}
 
-			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] node* get(size_t index) noexcept
 			{
-				return values[index]->as<T>();
+				return index < values.size() ? values[index].get() : nullptr;
+			}
+
+			[[nodiscard]] const node* get(size_t index) const noexcept
+			{
+				return index < values.size() ? values[index].get() : nullptr;
 			}
 
 			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] impl::node_of<T>* get_as(size_t index) noexcept
 			{
-				return values[index]->as<T>();
+				if (auto val = get(index))
+					return val->as<T>();
+				return nullptr;
+			}
+
+			template <typename T>
+			[[nodiscard]] const impl::node_of<T>* get_as(size_t index) const noexcept
+			{
+				if (auto val = get(index))
+					return val->as<T>();
+				return nullptr;
 			}
 
 			[[nodiscard]] friend bool operator == (const array& lhs, const array& rhs) noexcept
@@ -2567,7 +2576,7 @@ namespace toml
 					ipos = values.emplace_hint(
 						ipos,
 						std::forward<K>(key),
-						new node_of<type>{ std::forward<V>(args)... }
+						new impl::node_of<type>{ std::forward<V>(args)... }
 					);
 					return { ipos, true };
 				}
@@ -2641,10 +2650,10 @@ namespace toml
 			[[nodiscard]] const_iterator find(string_view key) const noexcept { return { values.find(key) }; }
 
 			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
 
 			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
 			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }
 			[[nodiscard]] friend bool operator == (const table& lhs, const table& rhs) noexcept
 			{
@@ -2850,7 +2859,7 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] const node_of<U>* as() const noexcept
+			[[nodiscard]] const impl::node_of<U>* as() const noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<impl::unwrapped<U>>,
@@ -7575,7 +7584,7 @@ namespace toml
 		return impl::parser{ impl::utf8_reader{ doc, std::move(source_path) } };
 	}
 
-#if defined(__cpp_lib_char8_t)
+	#if defined(__cpp_lib_char8_t)
 
 	[[nodiscard]]
 	inline parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW
@@ -7589,7 +7598,7 @@ namespace toml
 		return impl::parser{ impl::utf8_reader{ doc, std::move(source_path) } };
 	}
 
-#endif
+	#endif // defined(__cpp_lib_char8_t)
 
 	template <typename CHAR>
 	[[nodiscard]]
@@ -7632,6 +7641,26 @@ namespace toml
 			ifs,
 			std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() }
 		);
+	}
+
+	inline namespace literals
+	{
+		[[nodiscard]]
+		inline parse_result operator"" _toml(const char* str, size_t len) noexcept
+		{
+			return parse(std::string_view{ str, len });
+		}
+
+		#if defined(__cpp_lib_char8_t)
+
+		[[nodiscard]]
+		inline parse_result operator"" _toml(const char8_t* str, size_t len) noexcept
+		{
+			return parse(std::u8string_view{ str, len });
+		}
+
+		#endif
+
 	}
 }
 

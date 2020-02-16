@@ -44,7 +44,7 @@ namespace toml
 			/// \brief	Constructs a toml value.
 			///
 			/// \tparam	U	Constructor argument types.
-			/// \param 	args	Variadic list of arguments that are forwarded to the internal value's constructor.
+			/// \param 	args	Arguments to forward to the internal value's constructor.
 			template <typename... U>
 			TOML_NODISCARD_CTOR
 			explicit value(U&&... args) TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<T, U &&...>)

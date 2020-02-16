@@ -82,7 +82,7 @@ INTERNAL_DOCS          = NO
 CASE_SENSE_NAMES       = NO
 HIDE_SCOPE_NAMES       = NO
 HIDE_COMPOUND_REFERENCE= NO
-SHOW_INCLUDE_FILES     = YES
+SHOW_INCLUDE_FILES     = NO
 SHOW_GROUPED_MEMB_INC  = NO
 FORCE_LOCAL_INCLUDES   = NO
 INLINE_INFO            = YES
@@ -112,7 +112,7 @@ WARNINGS               = YES
 WARN_IF_UNDOCUMENTED   = YES
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
-WARN_AS_ERROR          = YES
+WARN_AS_ERROR          = NO
 WARN_FORMAT            = "$file:$line: $text"
 WARN_LOGFILE           = ./doc/doxygen_warnings.log
 #---------------------------------------------------------------------------
@@ -202,7 +202,7 @@ IGNORE_PREFIX          =
 #---------------------------------------------------------------------------
 # Configuration options related to the HTML output
 #---------------------------------------------------------------------------
-GENERATE_HTML          = YES
+GENERATE_HTML          = NO
 HTML_OUTPUT            = html
 HTML_FILE_EXTENSION    = .html
 HTML_HEADER            =
@@ -302,9 +302,9 @@ MAN_LINKS              = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the XML output
 #---------------------------------------------------------------------------
-GENERATE_XML           = NO
+GENERATE_XML           = YES
 XML_OUTPUT             = xml
-XML_PROGRAMLISTING     = YES
+XML_PROGRAMLISTING     = NO
 XML_NS_MEMB_FILE_SCOPE = NO
 #---------------------------------------------------------------------------
 # Configuration options related to the DOCBOOK output
@@ -336,7 +336,8 @@ PREDEFINED             = TOML_DOXYGEN=1 \
 						 __cplusplus=201703L \
 						 TOML_ALWAYS_INLINE=inline \
 						 TOML_MAY_THROW= \
-						 TOML_NODISCARD_CTOR=
+						 TOML_NODISCARD_CTOR= \
+						 __cpp_lib_char8_t=201811L
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO
 #---------------------------------------------------------------------------

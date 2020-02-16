@@ -148,7 +148,7 @@ namespace toml
 			/// \brief	Constructs a table with one or more initial key-value pairs.
 			///
 			/// \detail \cpp
-			/// auto tbl = toml::table{{ //double braces required :( - see Remarks
+			/// auto tbl = toml::table{{ // double braces required :( - see remark
 			///		{ "foo", 1 },
 			///		{ "bar", 2.0 },
 			///		{ "kek", "three" }
@@ -165,13 +165,13 @@ namespace toml
 			/// \remarks C++ std::initializer_lists represent their member elements as
 			/// 		 const even if the list's value type is non-const. This is great for
 			/// 		 compiler writers, I guess, but pretty annoying for me since
-			/// 		 TOML key-value pairs are polymorphic. This means that for the
-			/// 		 human-friendly braced init list syntax to work I can't use
+			/// 		 TOML key-value pairs are polymorphic (and thus move-only). This means
+			/// 		 that for the human-friendly braced init list syntax to work I can't use
 			/// 		 std::initializer_list and must instead invent an annoying proxy type,
 			/// 		 which means an extra level of nesting.
 			/// 		 <br><br>
 			/// 		 See https://en.cppreference.com/w/cpp/utility/initializer_list
-			/// 		 if you'd like to be more annoyed about this.
+			/// 		 if you'd like to learn more about this.
 			template <size_t N>
 			TOML_NODISCARD_CTOR
 			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
@@ -212,7 +212,6 @@ namespace toml
 			[[nodiscard]] bool is_value() const noexcept override { return false; }
 			[[nodiscard]] table* as_table() noexcept override { return this; }
 			[[nodiscard]] const table* as_table() const noexcept override { return this; }
-
 
 			/// \brief	Returns true if this table is an inline table.
 			/// 
@@ -261,9 +260,9 @@ namespace toml
 			///
 			/// \returns	A node_view.
 			///
-			/// \remarks std::map::operator[]'s behaviour of constructing an element at a key if it
-			/// 		 didn't exist is terribad, so I've deliberately chosen not to emulate that
-			/// 		 insane bug-factory. This Is Not An Error (tm).
+			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+			/// 		 This Is Not An Error (tm).
 			/// 
 			/// \see toml::node_view
 			[[nodiscard]] inline node_view<table> operator[] (string_view key) noexcept;
@@ -292,6 +291,38 @@ namespace toml
 			/// \brief	Removes all key-value pairs from the table.
 			void clear() noexcept { values.clear(); }
 
+			/// \brief	Inserts a new value at a specific key if one did not already exist.
+			///
+			/// \detail \cpp
+			/// auto tbl = toml::table{{
+			///		{ "a", 1 },
+			///		{ "b", 2 },
+			///		{ "c", 3 }
+			///	}};
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// for (auto k : { "a", "d" })
+			/// {
+			///		auto result = tbl.insert(k, 42);
+			///		std::cout << "inserted a value with key '"sv << k << "': "sv << result.second << std::endl;
+			/// }
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// // output: 
+			/// // { a = 1, b = 2, c = 3 }
+			/// // inserted a value with key 'a': false
+			/// // inserted a value with key 'd': true
+			/// // { a = 1, b = 2, c = 3, d = 42 }
+			/// \ecpp
+			/// 
+			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam V		One of the TOML value types (or a type promotable to one).
+			/// \param 	key		The key at which to insert the new value.
+			/// \param 	val		The new value to insert.
+			/// 
+			/// \returns A std::pair containing:
+			/// 		- An iterator to the insertion position (or the position of the value that prevented insertion)  
+			/// 		- A boolean indicating if the insertion was successful.
 			template <typename K, typename V, typename = std::enable_if_t<
 				std::is_convertible_v<K&&, string_view>
 			>>
@@ -306,6 +337,35 @@ namespace toml
 				return { ipos, false };
 			}
 
+			/// \brief	Inserts a series of key-value pairs into the table.
+			///
+			/// \detail \cpp
+			/// auto tbl = toml::table{{
+			///		{ "a", 1 },
+			///		{ "b", 2 },
+			///		{ "c", 3 }
+			///	}};
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// auto kvps = std::array<std::pair<toml::string, int>>{{
+			///		{ "d", 42 },
+			///		{ "a", 43 }
+			///	}};
+			///	tbl.insert(kvps.begin(), kvps.end());
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// // output: 
+			/// // { a = 1, b = 2, c = 3 }
+			/// // { a = 1, b = 2, c = 3, d = 42 }	//"a" already existed
+			/// \ecpp
+			/// 
+			/// \tparam ITER	An InputIterator to a collection of key-value pairs.
+			/// \param 	first	An iterator to the first value in the input collection.
+			/// \param 	last	An iterator to one-past-the-last value in the input collection.
+			/// 
+			/// \remarks This function is morally equivalent to calling insert(key, value) for each
+			/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
+			/// 		 table will not be replaced.
 			template <typename ITER, typename = std::enable_if_t<
 				!std::is_convertible_v<ITER&&, string_view>
 			>>
@@ -322,6 +382,39 @@ namespace toml
 				}
 			}
 
+			/// \brief	Inserts or assigns a value at a specific key.
+			///
+			/// \detail \cpp
+			/// auto tbl = toml::table{{
+			///		{ "a", 1 },
+			///		{ "b", 2 },
+			///		{ "c", 3 }
+			///	}};
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// for (auto k : { "a", "d" })
+			/// {
+			///		auto result = tbl.insert_or_assign(k, 42);
+			///		std::cout << "value at key '"sv << k
+			///			<< "' was "sv << (result.second ? "inserted"sv : "assigned"sv) << std::endl;
+			/// }
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// // output: 
+			/// // { a = 1, b = 2, c = 3 }
+			/// // value at key 'a' was assigned
+			/// // value at key 'd' was inserted
+			/// // { a = 42, b = 2, c = 3, d = 42 }
+			/// \ecpp
+			/// 
+			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam V		One of the TOML value types (or a type promotable to one).
+			/// \param 	key		The key at which to insert or assign the value.
+			/// \param 	val		The value to insert/assign.
+			/// 
+			/// \returns A std::pair containing:
+			/// 		- An iterator to the value's position
+			/// 		- A boolean containing `true` if the value was inserted, `false` if it was assigned.
 			template <typename K, typename V>
 			std::pair<iterator, bool> insert_or_assign(K&& key, V&& val) noexcept
 			{
@@ -338,6 +431,42 @@ namespace toml
 				}
 			}
 
+			/// \brief	Emplaces a new value at a specific key if one did not already exist.
+			///
+			/// \detail \cpp
+			/// auto tbl = toml::table{{
+			///		{ "a", 1 },
+			///		{ "b", 2 },
+			///		{ "c", 3 }
+			///	}};
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// for (auto k : { "a", "d" })
+			/// {
+			///		// add a string using std::string's substring constructor
+			///		auto result = tbl.emplace<std::string>(k, "this is not a drill"sv, 14, 5);
+			///		std::cout << "emplaced a value with key '"sv << k << "': "sv << result.second << std::endl;
+			/// }
+			/// std::cout << tbl << std::endl;
+			/// 
+			/// // output: 
+			/// // { a = 1, b = 2, c = 3 }
+			/// // emplaced a value with key 'a': false
+			/// // emplaced a value with key 'd': true
+			/// // { a = 1, b = 2, c = 3, d = "drill" }
+			/// \ecpp
+			/// 
+			/// \tparam	U		One of the TOML node or value types.
+			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam V		Value constructor argument types.
+			/// \param 	key		The key at which to emplace the new value.
+			/// \param 	args	Arguments to forward to the value's constructor.
+			/// 
+			/// \returns A std::pair containing:
+			/// 		- An iterator to the emplacement position (or the position of the value that prevented emplacement)
+			/// 		- A boolean indicating if the emplacement was successful.  
+			/// 
+			/// \remark There is no difference between insert and emplace for trivial value types (floats, ints, bools).
 			template <typename U, typename K, typename... V>
 			std::pair<iterator, bool> emplace(K&& key, V&&... args) noexcept
 			{
@@ -353,7 +482,7 @@ namespace toml
 					ipos = values.emplace_hint(
 						ipos,
 						std::forward<K>(key),
-						new node_of<type>{ std::forward<V>(args)... }
+						new impl::node_of<type>{ std::forward<V>(args)... }
 					);
 					return { ipos, true };
 				}
@@ -510,7 +639,38 @@ namespace toml
 
 		public:
 
+			/// \brief	Gets the node at a specific key.
+			///
+			/// \detail \cpp
+			/// auto tbl = toml::table{{
+			///		{ "a", 42, },
+			///		{ "b", "is the meaning of life, apparently." }
+			///	}};
+			///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << std::endl;
+			///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << std::endl;
+			///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << std::endl;
+			/// if (auto val = arr.get("a"))
+			///		std::cout << R"(node ["a"] was an )"sv << val->type() << std::endl;
+			/// 
+			/// // output: 
+			/// // node ["a"] exists: true
+			/// // node ["b"] exists: true
+			/// // node ["c"] exists: false
+			/// // node ["a"] was an integer
+			/// \ecpp
+			/// 
+			/// \tparam	T	The node's type.
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key, or nullptr.
 			[[nodiscard]] node* get(string_view key) noexcept { return do_get(values, key); }
+
+			/// \brief	Gets the node at a specific key (const overload).
+			///
+			/// \tparam	T	The node's type.
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key, or nullptr.
 			[[nodiscard]] const node* get(string_view key) const noexcept { return do_get(values, key); }
 
 			[[nodiscard]] iterator find(string_view key) noexcept { return { values.find(key) }; }
@@ -524,7 +684,7 @@ namespace toml
 			///		{ "b", "is the meaning of life, apparently." }
 			///	}};
 			/// if (auto val = arr.get_as<int64_t>("a"))
-			///		std::cout << node [\"a\"] was an integer with value "sv << **val << std::endl;
+			///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << std::endl;
 			/// 
 			/// // output: 
 			/// // node ["a"] was an integer with value 42
@@ -533,18 +693,18 @@ namespace toml
 			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.
 			///
-			/// \returns	A pointer to the selected node if it was of the specified type, or nullptr.
+			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
 
 			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 			///
 			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.
 			///
-			/// \returns	A pointer to the selected node if it was of the specified type, or nullptr.
+			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
 
 			/// \brief	Returns true if the table contains a node at the given key.
 			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }

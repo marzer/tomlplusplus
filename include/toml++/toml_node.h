@@ -32,15 +32,15 @@ namespace toml
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<node_of<T>*>(this); }
+			impl::node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<impl::node_of<T>*>(this); }
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<node_of<T>*>(this)); }
+			impl::node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<impl::node_of<T>*>(this)); }
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			const node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const node_of<T>*>(this); }
+			const impl::node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const impl::node_of<T>*>(this); }
 
 			template <typename N, typename T>
 			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
@@ -158,7 +158,7 @@ namespace toml
 			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			node_of<T>* as() noexcept
+			impl::node_of<T>* as() noexcept
 			{
 				using type = impl::unwrapped<T>;
 				static_assert(
@@ -180,7 +180,7 @@ namespace toml
 			/// \brief	Gets a pointer to the node as a more specific node type (const overload).
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			const node_of<T>* as() const noexcept
+			const impl::node_of<T>* as() const noexcept
 			{
 				using type = impl::unwrapped<T>;
 				static_assert(

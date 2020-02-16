@@ -122,7 +122,8 @@ def main():
 	preamble = []
 	preamble.append('''
 toml++ v{}
-https://github.com/marzer/tomlplusplus'''.format('.'.join(str(x) for x in library_version)))
+https://github.com/marzer/tomlplusplus
+SPDX-License-Identifier: MIT'''.format('.'.join(str(x) for x in library_version)))
 	preamble.append('''
 -         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
 

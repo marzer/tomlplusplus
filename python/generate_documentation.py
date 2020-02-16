@@ -16,11 +16,54 @@ import bs4 as soup
 
 
 
-_inlineNamespaces = [
+inline_namespaces = [
 	"toml::literals",
 ]
-_inlineNamespaceExplainer = 'All members of this namespace are automatically members of the parent namespace. '	\
+inline_namespace_explainer = 'All members of this namespace are automatically members of the parent namespace. '	\
 	+ 'It does not require an explicit \'using\' statement.'
+type_names = [
+	'table',
+	'array',
+	'value',
+	'date',
+	'time',
+	'date_time',
+	'string',
+	'string_view',
+	'parse_result',
+	'parse_error',
+	'size_t',
+	'uint8_t',
+	'uint16_t',
+	'uint32_t',
+	'uint64_t',
+	'int8_t',
+	'int16_t',
+	'int32_t',
+	'int64_t',
+	'ptrdiff_t',
+	'intptr_t',
+	'uintptr_t',
+	'exception',
+	'iterator',
+	'const_iterator',
+	'int',
+	'long',
+	'short',
+	'signed',
+	'unsigned',
+	'float',
+	'double',
+	'bool',
+	'pair',
+	'tuple',
+]
+all_namespaces = [
+	'std',
+	'toml',
+	'literals',
+	'impl'
+]
 
 
 
@@ -28,10 +71,19 @@ def is_tool(name):
 	return shutil.which(name) is not None
 
 
+
 def is_collection(val):
 	if isinstance(val, (list, tuple, dict, set)):
 		return True
 	return False
+
+
+
+def read_all_text_from_file(path):
+	print("Reading {}".format(path))
+	with open(path, 'r', encoding='utf-8') as file:
+		text = file.read()
+	return text
 
 
 
@@ -91,6 +143,7 @@ class HTMLDocument(object):
 				
 		return tag
 		
+
 	def find_all_from_sections(self, name=None, select=None, section=None, **kwargs):
 		tags = []
 		sectionArgs = { }
@@ -124,7 +177,7 @@ def html_find_parent(tag,name,cutoff=None):
 def html_replace_tag(tag,str):
 	doc = soup.BeautifulSoup(str, 'html5lib')
 	newTags = None
-	if (len(doc.body.contents) > 0):	
+	if (len(doc.body.contents) > 0):
 		newTags = [f for f in doc.body.contents]
 		newTags = [f.extract() for f in newTags]
 		prev = tag
@@ -355,7 +408,7 @@ class ModifiersFix2(ModifiersFixBase):
 
 # base type for applying inline namespace annotations.
 class InlineNamespaceFixBase(object):
-	_namespaceFiles = ['namespace{}.html'.format(ns.lower().replace('::','_1_1')) for ns in _inlineNamespaces]
+	_namespaceFiles = ['namespace{}.html'.format(ns.lower().replace('::','_1_1')) for ns in inline_namespaces]
 
 
 
@@ -368,7 +421,7 @@ class InlineNamespaceFix1(InlineNamespaceFixBase):
 	__allowedFiles = ['annotated.html', 'namespaces.html']
 
 	def __call__(self, file, doc):
-		global _inlineNamespaceExplainer
+		global inline_namespace_explainer
 		changed = False
 		if (file in self.__allowedFiles):
 			anchors = []
@@ -383,7 +436,7 @@ class InlineNamespaceFix1(InlineNamespaceFixBase):
 				doc.new_tag('span',
 					after=anchor,
 					string='inline',
-					title=_inlineNamespaceExplainer,
+					title=inline_namespace_explainer,
 					class_='m-label m-info m-flat tpp-injected tpp-inline-namespace'
 				)
 				anchor.insert_after(' ')
@@ -400,7 +453,7 @@ class InlineNamespaceFix1(InlineNamespaceFixBase):
 class InlineNamespaceFix2(InlineNamespaceFixBase):
 
 	def __call__(self, file, doc):
-		global _inlineNamespaceExplainer
+		global inline_namespace_explainer
 		changed = False
 		if (file in self._namespaceFiles):
 			h1 = doc.body.find('h1')
@@ -409,7 +462,7 @@ class InlineNamespaceFix2(InlineNamespaceFixBase):
 				tag = doc.new_tag('span',
 					parent=h1,
 					string='inline',
-					title=_inlineNamespaceExplainer,
+					title=inline_namespace_explainer,
 					class_='m-label m-info tpp-injected tpp-inline-namespace'
 				)
 				tag.insert_before(' ')
@@ -426,7 +479,7 @@ class InlineNamespaceFix2(InlineNamespaceFixBase):
 class InlineNamespaceFix3(InlineNamespaceFixBase):
 
 	def __call__(self, file, doc):
-		global _inlineNamespaceExplainer
+		global inline_namespace_explainer
 		anchors = doc.find_all_from_sections('a', section='namespaces')
 		changed = False
 		for anchor in anchors:
@@ -440,11 +493,49 @@ class InlineNamespaceFix3(InlineNamespaceFixBase):
 			doc.new_tag('span',
 				after=anchor,
 				string='inline',
-				title=_inlineNamespaceExplainer,
+				title=inline_namespace_explainer,
 				class_='m-label m-info m-flat tpp-injected tpp-inline-namespace'
 			)
 			anchor.insert_after(' ')
 			changed = True
+		return changed
+
+
+
+#=======================================================================================================================
+
+
+
+# adds some additional colouring to the syntax highlighting in code blocks.
+class SyntaxHighlightingFix(object):
+
+	def __call__(self, file, doc):
+		global type_names
+		global all_namespaces
+		code_blocks = doc.body('pre', class_='m-code')
+		changed = False
+		for code_block in code_blocks:
+			names = code_block('span', class_='n')
+			
+			# namespaces
+			for name in names:
+				if (name.string is None or name.string not in all_namespaces):
+					continue
+				next = name.next_sibling
+				if (next is None or next.string is None or next.string != '::'):
+					continue
+				next.extract()
+				name.string.replace_with(name.string + '::')
+				name['class'] = 'ns'
+				changed = True
+
+			# user types and typedefs
+			names += code_block('span', class_='kt')
+			for name in names:
+				if (name.string is not None and name.string in type_names):
+					name['class'] = 'ut'
+					changed = True
+
 		return changed
 
 
@@ -497,12 +588,12 @@ class ExtDocLinksFix(object):
 		(r'std::(?:basic_|w|u8)?string_views?', 'https://en.cppreference.com/w/cpp/string/basic_string_view'),	
 		(r'std::(?:basic_|w|u8)?strings?', 'https://en.cppreference.com/w/cpp/string/basic_string'),
 		
-		(r'(?:<|&lt;)fstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/fstream'),
-		(r'(?:<|&lt;)sstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/sstream'),
-		(r'(?:<|&lt;)iostream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iostream'),
-		(r'(?:<|&lt;)iosfwd(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iosfwd'),
-		(r'(?:<|&lt;)string(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string'),
-		(r'(?:<|&lt;)string_view(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string_view'),
+		(r'\s(?:<|&lt;)fstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/fstream'),
+		(r'\s(?:<|&lt;)sstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/sstream'),
+		(r'\s(?:<|&lt;)iostream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iostream'),
+		(r'\s(?:<|&lt;)iosfwd(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iosfwd'),
+		(r'\s(?:<|&lt;)string(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string'),
+		(r'\s(?:<|&lt;)string_view(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string_view'),
 		
 		
 		(r'char(?:8|16|32)_ts?', 'https://en.cppreference.com/w/cpp/language/types'),
@@ -542,30 +633,42 @@ class ExtDocLinksFix(object):
 		(r'(?:Legacy)?BidirectionalIterators?', 'https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator'),
 		(r'(?:Legacy)?RandomAccessIterators?', 'https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator'),
 		(r'(?:Legacy)?ContiguousIterators?', 'https://en.cppreference.com/w/cpp/named_req/ContiguousIterator'),
-		(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator')
+		(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator'),
+		# toml-specific
+		(r'toml::values?', 'classtoml_1_1value.html'),
+		(r'(toml::)?date_times?', 'structtoml_1_1date__time.html'),
+		(r'(toml::)?time', 'structtoml_1_1time.html'),
+		(r'(toml::)?date', 'structtoml_1_1date.html')
 	]
 	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td']
 	
 	def __init__(self):
 		self.__expressions = []
 		for type, uri in self.__types:
-			self.__expressions.append((re.compile(type+'(?!</a>)'), uri))
+			self.__expressions.append((re.compile(type), uri))
 	
 	@classmethod
 	def __substitute(cls, m, uri):
-		return r'<a href="{}" class="m-doc tpp-injected tpp-external" target="_blank">{}</a>'.format(
+		external = uri.startswith('http')
+		return r'<a href="{}" class="m-doc tpp-injected{}"{}>{}</a>'.format(
 			uri,
-			m.group(0)
+			' tpp-external' if external else '',
+			' target="_blank"' if external else '',
+			m.group(0),
 		)
 			
 	def __process_tag(self, tag):
-		for expr, uri in self.__expressions:
-			for descendant in tag.descendants:
-				if (not isinstance(descendant, soup.NavigableString) or html_find_parent(descendant, 'a', tag) is not None):
-					continue
+		for descendant in tag.descendants:
+			if (not isinstance(descendant, soup.NavigableString) or html_find_parent(descendant, 'a', tag) is not None):
+				continue
+			for expr, uri in self.__expressions:
 				replacer = RegexReplacer(expr, lambda m: self.__substitute(m, uri), html.escape(str(descendant), quote=False))
 				if (replacer):
-					html_replace_tag(descendant, str(replacer))
+					repl_str = str(replacer)
+					begins_with_ws = len(repl_str) > 0 and repl_str[:1].isspace()
+					new_tag = html_replace_tag(descendant, repl_str)[0]
+					if (begins_with_ws and new_tag.string is not None and not new_tag.string[:1].isspace()):
+						new_tag.insert_before(' ')
 					return True
 		return False
 			
@@ -695,6 +798,35 @@ def run_python_script(script_path, *args):
 
 
 
+def preprocess_xml(xml_dir):
+
+	# fix value not knowing it's a child of node
+	toml_value_path = path.join(xml_dir, 'classtoml_1_1value.xml')
+	toml_value_text = read_all_text_from_file(toml_value_path)
+	toml_value_search_string = '<compoundname>toml::value</compoundname>'
+	toml_value_insert_pos = toml_value_text.find(toml_value_search_string)
+	if (toml_value_insert_pos != -1):
+		toml_value_insert_pos += len(toml_value_search_string)
+		toml_value_text = toml_value_text[:toml_value_insert_pos]	\
+			+ '\n    <basecompoundref refid="classtoml_1_1node" prot="public" virt="non-virtual">toml::node</basecompoundref>'	\
+			+ toml_value_text[toml_value_insert_pos:]
+		with open(toml_value_path,'w', encoding='utf-8', newline='\n') as output_file:
+			print(toml_value_text, file=output_file)
+
+	# fix node not knowing it has value as a child
+	toml_node_path = path.join(xml_dir, 'classtoml_1_1node.xml')
+	toml_node_text = read_all_text_from_file(toml_node_path)
+	toml_node_search_string = '<compoundname>toml::node</compoundname>'
+	toml_node_insert_pos = toml_node_text.find(toml_node_search_string)
+	if (toml_node_insert_pos != -1):
+		toml_node_insert_pos += len(toml_node_search_string)
+		toml_node_text = toml_node_text[:toml_node_insert_pos]	\
+			+ '\n    <derivedcompoundref refid="classtoml_1_1value" prot="public" virt="non-virtual">toml::value</derivedcompoundref>'	\
+			+ toml_node_text[toml_node_insert_pos:]
+		with open(toml_node_path,'w', encoding='utf-8', newline='\n') as output_file:
+			print(toml_node_text, file=output_file)
+
+
 def main():
 	global _threadError
 	
@@ -710,21 +842,22 @@ def main():
 	delete_directory(xml_dir)
 	delete_directory(html_dir)
 
-	# run doxygen (via m.css)
-	run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'))
+	# run doxygen
+	subprocess.check_call( ['doxygen', 'Doxyfile'], shell=True, cwd=docs_dir )
 
-	# clean up xml and tmp files
+	# fix some shit that's broken in the xml
+	preprocess_xml(xml_dir)
+
+	# run doxygen.py (m.css)
+	run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'), '--no-doxygen')
+
+	# delete xml
 	delete_directory(xml_dir)
-	#for file in get_all_files(cwd, '*.tmp'):
-	#	try:
-	#		print('Deleting {}'.format(file))
-	#		os.remove(file)
-	#	except Exception as e:
-	#		fatal_error(e)
 		
 	# post-process html files
 	fixes = [
 		CustomTagsFix()
+		, SyntaxHighlightingFix()
 		# , NavBarFix()
 		, IndexHrefFix()
 		, ModifiersFix1()

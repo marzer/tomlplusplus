@@ -188,8 +188,8 @@ namespace toml
 	/// 
 	/// \detail \cpp
 	/// 
-	/// auto table = toml::parse("arr = [1, 2, 3, 4, 'five']"sv);
-	/// auto& arr = *table.get_as<toml::array>("arr");
+	/// auto tbl = toml::parse("arr = [1, 2, 3, 4, 'five']"sv);
+	/// auto& arr = *tbl.get_as<toml::array>("arr");
 	/// std::cout << arr << std::endl;
 	/// 
 	/// for (size_t i = 0; i < arr.size(); i++)
@@ -265,12 +265,7 @@ namespace toml
 			/// \brief	Constructs an array with one or more initial values.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2.0,  
-			///		"three"sv,
-			///		toml::array{ 4, 5 }
-			///	};
+			/// auto arr = toml::array{ 1, 2.0, "three"sv, toml::array{ 4, 5 } };
 			/// std::cout << arr << std::endl;
 			/// 
 			/// // output: 
@@ -304,7 +299,7 @@ namespace toml
 				return *this;
 			}
 
-			/// \brief	Always returns `node_type::array` for array nodes.
+			/// \brief	Always returns node_type::array for array nodes.
 			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
 			/// \brief	Always returns `false` for array nodes.
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
@@ -318,11 +313,7 @@ namespace toml
 			/// \brief	Checks if the array contains nodes of only one type.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2,  
-			///		3
-			///	};
+			/// auto arr = toml::array{ 1, 2, 3 };
 			/// std::cout << "homogenous: "sv << arr.is_homogeneous() << std::endl;
 			/// std::cout << "all doubles: "sv << arr.is_homogeneous<double>() << std::endl;
 			/// std::cout << "all arrays: "sv << arr.is_homogeneous<toml::array>() << std::endl;
@@ -411,10 +402,7 @@ namespace toml
 			/// \brief	Inserts a new node at a specific position in the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		3
-			///	};
+			/// auto arr = toml::array{ 1, 3 };
 			///	arr.insert(arr.cbegin() + 1, "two");
 			///	arr.insert(arr.cend(), toml::array{ 4, 5 });
 			/// std::cout << arr << std::endl;
@@ -539,10 +527,7 @@ namespace toml
 			/// \brief	Emplaces a new value at a specific position in the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2
-			///	};
+			/// auto arr = toml::array{ 1, 2 };
 			///	
 			///	//add a string using std::string's substring constructor
 			///	arr.emplace<std::string>(arr.cbegin() + 1, "this is not a drill"sv, 14, 5);
@@ -555,12 +540,12 @@ namespace toml
 			/// \tparam	U		One of the TOML node or value types.
 			/// \tparam	V		Value constructor argument types.
 			/// \param 	pos		The insertion position.
-			/// \param 	args	Arguments to pass to the value constructor.
+			/// \param 	args	Arguments to forward to the value's constructor.
 			///
 			/// \returns	An iterator to the inserted value.
 			/// 
 			/// \remarks There is no difference between insert and emplace
-			/// 		 For trivial value types (floats, ints, bools).
+			/// 		 for trivial value types (floats, ints, bools).
 			template <typename U, typename... V>
 			iterator emplace(const_iterator pos, V&&... args) noexcept
 			{
@@ -570,17 +555,13 @@ namespace toml
 					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				return { values.emplace(pos.raw_, new node_of<type>{ std::forward<V>(args)...} ) };
+				return { values.emplace(pos.raw_, new impl::node_of<type>{ std::forward<V>(args)...} ) };
 			}
 
 			/// \brief	Removes the specified node from the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2,
-			///		3
-			///	};
+			/// auto arr = toml::array{ 1, 2, 3 };
 			/// std::cout << arr << std::endl;
 			/// 
 			/// arr.erase(arr.cbegin() + 1);
@@ -602,12 +583,7 @@ namespace toml
 			/// \brief	Removes the nodes in the range [first, last) from the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		"bad",
-			///		"karma"
-			///		2,
-			///	};
+			/// auto arr = toml::array{ 1, "bad", "karma" 2 };
 			/// std::cout << arr << std::endl;
 			/// 
 			/// arr.erase(arr.cbegin() + 1, arr.cbegin() + 3);
@@ -630,10 +606,7 @@ namespace toml
 			/// \brief	Appends a new value to the end of the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2
-			///	};
+			/// auto arr = toml::array{ 1, 2 };
 			///	arr.push_back(3);
 			///	arr.push_back(4.0);
 			///	arr.push_back(array{ 5, "six"sv });
@@ -658,10 +631,7 @@ namespace toml
 			/// \brief	Emplaces a new value at the end of the array.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		1,
-			///		2
-			///	};
+			/// auto arr = toml::array{ 1, 2 };
 			///	arr.emplace_back<array>(3, "four"sv);
 			/// std::cout << arr << std::endl;
 			/// 
@@ -671,7 +641,7 @@ namespace toml
 			/// 
 			/// \tparam	U		One of the TOML value types.
 			/// \tparam	V		Value constructor argument types.
-			/// \param 	args	Arguments to pass to the value constructor.
+			/// \param 	args	Arguments to forward to the value's constructor.
 			/// 
 			/// \returns A reference to the newly-constructed value node.
 			///
@@ -686,7 +656,7 @@ namespace toml
 					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
 				);
 
-				auto nde = new node_of<type>{ std::forward<V>(args)... };
+				auto nde = new impl::node_of<type>{ std::forward<V>(args)... };
 				values.emplace_back(nde);
 				return *nde;
 			}
@@ -697,13 +667,45 @@ namespace toml
 				values.pop_back();
 			}
 
+			/// \brief	Gets the node at a specific index.
+			///
+			/// \detail \cpp
+			/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
+			///	std::cout << R"(node [0] exists: )"sv << !!arr.get(0) << std::endl;
+			///	std::cout << R"(node [1] exists: )"sv << !!arr.get(1) << std::endl;
+			///	std::cout << R"(node [2] exists: )"sv << !!arr.get(2) << std::endl;
+			/// if (auto val = arr.get(0))
+			///		std::cout << R"(node [0] was an )"sv << val->type() << std::endl;
+			/// 
+			/// // output: 
+			/// // node [0] exists: true
+			/// // node [1] exists: true
+			/// // node [2] exists: false
+			/// // node [0] was an integer
+			/// \ecpp
+			/// 
+			/// \param 	index	The node's index.
+			///
+			/// \returns	A pointer to the node at the specified index if one existed, or nullptr.
+			[[nodiscard]] node* get(size_t index) noexcept
+			{
+				return index < values.size() ? values[index].get() : nullptr;
+			}
+
+			/// \brief	Gets the node at a specific index (const overload).
+			///
+			/// \param 	index	The node's index.
+			///
+			/// \returns	A pointer to the node at the specified index if one existed, or nullptr.
+			[[nodiscard]] const node* get(size_t index) const noexcept
+			{
+				return index < values.size() ? values[index].get() : nullptr;
+			}
+
 			/// \brief	Gets the node at a specific index if it is a particular type.
 			///
 			/// \detail \cpp
-			/// auto arr = toml::array{
-			///		42,
-			///		"is the meaning of life, apparently."sv
-			///	};
+			/// auto arr = toml::array{ 42, "is the meaning of life, apparently."sv };
 			/// if (auto val = arr.get_as<int64_t>(0))
 			///		std::cout << "node [0] was an integer with value "sv << **val << std::endl;
 			/// 
@@ -714,11 +716,13 @@ namespace toml
 			/// \tparam	T	The node's type.
 			/// \param 	index	The node's index.
 			///
-			/// \returns	A pointer to the selected node if it was of the specified type, or nullptr.
+			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] impl::node_of<T>* get_as(size_t index) noexcept
 			{
-				return values[index]->as<T>();
+				if (auto val = get(index))
+					return val->as<T>();
+				return nullptr;
 			}
 
 			/// \brief	Gets the node at a specific index if it is a particular type (const overload).
@@ -726,11 +730,13 @@ namespace toml
 			/// \tparam	T	The node's type.
 			/// \param 	index	The node's index.
 			///
-			/// \returns	A pointer to the selected node if it was of the specified type, or nullptr.
+			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] const impl::node_of<T>* get_as(size_t index) const noexcept
 			{
-				return values[index]->as<T>();
+				if (auto val = get(index))
+					return val->as<T>();
+				return nullptr;
 			}
 
 			/// \brief	Equality operator.
@@ -810,17 +816,7 @@ namespace toml
 			/// 
 			/// \detail \cpp
 			/// 
-			/// auto arr = toml::array{
-			///		1,
-			///		2,
-			///		toml::array{
-			///			3,
-			///			4,
-			///			toml::array{ 5 }
-			///		},
-			///		6,
-			///		toml::array{}
-			///	};
+			/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
 			/// std::cout << arr << std::endl;
 			/// 
 			/// arr.flatten();

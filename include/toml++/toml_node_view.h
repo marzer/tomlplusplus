@@ -127,6 +127,10 @@ namespace toml::impl
 
 namespace toml
 {
+	/// \brief	A read-only view into a node.
+	///
+	/// \warning This type is experimental. Functionality may change radically between versions
+	/// 		 until I decide that I'm happy with it. Use it at your own risk.
 	template <typename T>
 	class node_view final
 	{
@@ -164,7 +168,7 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] const node_of<U>* as() const noexcept
+			[[nodiscard]] const impl::node_of<U>* as() const noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<impl::unwrapped<U>>,

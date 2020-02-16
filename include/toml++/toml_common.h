@@ -274,16 +274,13 @@ TOML_POP_WARNINGS
 /// \brief	The root namespace for all toml++ functions and types.
 namespace toml
 {
-	inline namespace literals
-	{
-		using namespace std::string_literals;
-		using namespace std::string_view_literals;
+	using namespace std::string_literals;
+	using namespace std::string_view_literals;
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
-		TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
-		{
-			return static_cast<size_t>(n);
-		}
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
+	{
+		return static_cast<size_t>(n);
 	}
 
 	#if TOML_CHAR_8_STRINGS
@@ -328,9 +325,9 @@ namespace toml
 		integer,  ///< The node is a toml::value<int64_t>.
 		floating_point,  ///< The node is a toml::value<double>.
 		boolean,  ///< The node is a toml::value<bool>.
-		date,  ///< The node is a toml::value<toml::date>.
-		time,  ///< The node is a toml::value<toml::time>.
-		date_time  ///< The node is a toml::value<toml::date_time>.
+		date,  ///< The node is a toml::value<date>.
+		time,  ///< The node is a toml::value<time>.
+		date_time  ///< The node is a toml::value<date_time>.
 	};
 
 	#if TOML_LARGE_FILES
@@ -599,13 +596,12 @@ namespace toml::impl
 
 	// Q: "why not use std::find??"
 	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
-	//    I don't want to impose such a heavy burden on users.
+	//    I don't want to impose such a heavy compile-time burden on users.
 
 	template <typename T>
 	inline std::optional<size_t> find(const std::vector<T>& haystack, const T& needle) noexcept
 	{
-		const auto end = haystack.size();
-		for (size_t i = 0; i < end; i++)
+		for (size_t i = 0, e = haystack.size(); i < e; i++)
 			if (haystack[i] == needle)
 				return i;
 		return {};
@@ -657,6 +653,9 @@ namespace toml::impl
 	template <> struct node_wrapper<date> { using type = value<date>; };
 	template <> struct node_wrapper<time> { using type = value<time>; };
 	template <> struct node_wrapper<date_time> { using type = value<date_time>; };
+
+	template <typename T>
+	using node_of = typename impl::node_wrapper<T>::type;
 
 	template <typename T> struct node_unwrapper { using type = T; };
 	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
@@ -776,39 +775,47 @@ namespace toml::impl
 
 namespace toml
 {
-	/// \brief	Helper alias that wraps a type up as it's TOML node equivalent.
-	template <typename T>
-	using node_of = typename impl::node_wrapper<T>::type;
-
 	/// \brief	Metafunction for determining if a type is a toml::table.
 	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
 	/// \brief	Metafunction for determining if a type is a toml::array.
 	template <typename T>
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
-	/// \brief	Metafunction for determining if a type is a toml::value<string>.
+	/// \brief	Metafunction for determining if a type is a toml::string or toml::value<toml::string>.
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<string>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<int64_t>.
+	inline constexpr bool is_string = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<string>>;
+	/// \brief	Metafunction for determining if a type is an int64_t or toml::value<int64_t>.
 	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<double>.
+	inline constexpr bool is_integer = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
+	/// \brief	Metafunction for determining if a type is a double or toml::value<double>.
 	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<double>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<bool>.
+	inline constexpr bool is_floating_point = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<double>>;
+	/// \brief	Metafunction for determining if a type is a bool toml::value<bool>.
 	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<bool>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<toml::date>.
+	inline constexpr bool is_boolean = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<bool>>;
+	/// \brief	Metafunction for determining if a type is a toml::date or toml::value<date>.
 	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<toml::time>.
+	inline constexpr bool is_date = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date>>;
+	/// \brief	Metafunction for determining if a type is a toml::time or toml::value<time>.
 	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<time>>;
-	/// \brief	Metafunction for determining if a type is a toml::value<toml::date_time>.
+	inline constexpr bool is_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<time>>;
+	/// \brief	Metafunction for determining if a type is a toml::date_time or toml::value<date_time>.
 	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<node_of<impl::remove_cvref_t<T>>, value<date_time>>;
+	inline constexpr bool is_date_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	/// \brief	Pretty-prints the value of a node_type to a stream.
+	/// 
+	/// \detail \cpp
+	/// auto arr = toml::array{ 1, 2.0, "3", false };
+	/// for (size_t i = 0; i < arr.size() i++)
+	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << std::endl;
+	///
+	/// // output:
+	/// // Element [0] is: integer
+	/// // Element [1] is: floating-point
+	/// // Element [2] is: string
+	/// // Element [3] is: boolean
+	/// \ecpp
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
 	{
