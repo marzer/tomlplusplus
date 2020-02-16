@@ -17,12 +17,10 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
-        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="namespacetoml.html">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
-C++17</a>
-      </span>
+C++17</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -67,10 +65,10 @@ C++17</a>
             </li>
           </ul>
         </div>
-<pre class="m-code"><span class="k">auto</span> <span class="n">table</span> <span class="o">=</span> <span class="n">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="n">sv</span><span class="p">);</span>
-<span class="n">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'server' was defined at "</span><span class="n">sv</span>
-    <span class="o">&lt;&lt;</span> <span class="n">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
-    <span class="o">&lt;&lt;</span> <span class="n">std</span><span class="o">::</span><span class="n">endl</span><span class="p">;</span>
+<pre class="m-code"><span class="k">auto</span> <span class="ut">table</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="n">sv</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'server' was defined at "</span><span class="n">sv</span>
+    <span class="o">&lt;&lt;</span> <span class="ut">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
+    <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// possible output:</span>
 <span class="c1">// The node 'server' was defined at line 3, column 1 - line 10, column 25 of 'config.toml'</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high).<br/><br/>This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>

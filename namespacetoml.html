@@ -17,12 +17,10 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
-        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="namespacetoml.html">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
-C++17</a>
-      </span>
+C++17</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -76,6 +74,8 @@ C++17</a>
           <dl class="m-doc">
             <dt>namespace <a class="m-doc" href="namespacetoml_1_1impl.html">impl</a></dt>
             <dd>Internal implementation details. No user-serviceable parts within.</dd>
+            <dt>namespace <a class="m-doc" href="namespacetoml_1_1literals.html">literals</a> <span class="m-label m-info m-flat tpp-injected tpp-inline-namespace" title="All members of this namespace are automatically members of the parent namespace. It does not require an explicit 'using' statement.">inline</span></dt>
+            <dd>Convenience literal operators for working with TOML++.</dd>
           </dl>
         </section>
         <section id="nested-classes">
@@ -88,11 +88,11 @@ C++17</a>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1date.html">date</a>
             </dt>
-            <dd>A local date.</dd>
+            <dd>A local <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>.</dd>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1date__time.html">date_time</a>
             </dt>
-            <dd>A date-time.</dd>
+            <dd>A <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename CHAR = char&gt;</div>
               class <a class="m-doc" href="classtoml_1_1default__formatter.html">default_formatter</a>
@@ -107,6 +107,11 @@ C++17</a>
               class <a class="m-doc" href="classtoml_1_1node.html">node</a>
             </dt>
             <dd>A TOML node.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              class <a class="m-doc" href="classtoml_1_1node__view.html">node_view</a>
+            </dt>
+            <dd>A read-only view into a node.</dd>
             <dt>
               class <a class="m-doc" href="classtoml_1_1parse__error.html">parse_error</a>
             </dt>
@@ -130,11 +135,11 @@ C++17</a>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1time.html">time</a>
             </dt>
-            <dd>A local time-of-day.</dd>
+            <dd>A local <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>-of-day.</dd>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1time__offset.html">time_offset</a>
             </dt>
-            <dd>A timezone offset.</dd>
+            <dd>A <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>zone offset.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               class <a class="m-doc" href="classtoml_1_1value.html">value</a>
@@ -162,21 +167,16 @@ C++17</a>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a7c937f95568df080c3584862c25f4030">
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              using <a class="m-doc-self" href="#a7c937f95568df080c3584862c25f4030">node_of</a> = typename impl::node_wrapper&lt;T&gt;::type
-            </dt>
-            <dd>Helper alias that wraps a type up as it's TOML node equivalent.</dd>
             <dt>
-              using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
+              using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </dt>
             <dd>The integer type used to tally line numbers and columns.</dd>
             <dt id="ac6cf446b480546ae1f71f5b86442368d">
-              using <a class="m-doc-self" href="#ac6cf446b480546ae1f71f5b86442368d">source_path_ptr</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/memory/shared_ptr" target="_blank">std::shared_ptr</a>&lt;const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;
+              using <a class="m-doc-self" href="#ac6cf446b480546ae1f71f5b86442368d">source_path_ptr</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/memory/shared_ptr" target="_blank">std::shared_ptr</a>&lt;const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;
             </dt>
             <dd>A pointer to a shared string resource containing a source path.</dd>
             <dt>
-              using <a class="m-doc" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
+              using <a class="m-doc" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
             </dt>
             <dd>The string type for keys and string values.</dd>
             <dt>
@@ -184,7 +184,7 @@ C++17</a>
             </dt>
             <dd>The base character type for keys and string values.</dd>
             <dt>
-              using <a class="m-doc" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
+              using <a class="m-doc" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
             </dt>
             <dd>The string type for keys and string values.</dd>
           </dl>
@@ -197,10 +197,20 @@ C++17</a>
               const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd></dd>
-            <dt id="aaa1ee3cd7e3a50ae76f0da76eb21a0bc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#aba7a9dce22765e62ff2b34eab509101f">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Parses TOML data from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a00c58d8b9c61f2e30da02e21851b2cf4">operator""_toml</a>(</span><span class="m-doc-wrap">const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>* str,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Parses TOML data from a string.</dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aaa1ee3cd7e3a50ae76f0da76eb21a0bc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a>rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aaa1ee3cd7e3a50ae76f0da76eb21a0bc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
             <dd>Pretty-prints the value of a node_type to a stream.</dd>
             <dt>
@@ -221,7 +231,7 @@ C++17</a>
             </dt>
             <dd>Parses a TOML document from a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>doc,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> doc,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a string view.</dd>
@@ -230,6 +240,16 @@ C++17</a>
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a string view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a> doc,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a> string view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a> doc,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a> string view.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a499d47883d3052327269509da09e6aa3">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;CHAR&gt; file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
@@ -249,32 +269,32 @@ C++17</a>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a8e79820651cc9a835082cf9abd47d885">is_boolean</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;bool&gt;.</dd>
+            <dd>Metafunction for determining if a type is a bool <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;.</dd>
             <dt id="a3c5daa4563e3aff2b5e6460aa97d28df">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a3c5daa4563e3aff2b5e6460aa97d28df">is_date</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;toml::date&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;.</dd>
             <dt id="a3285caf012789a607851026f9827a33d">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a3285caf012789a607851026f9827a33d">is_date_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;toml::date_time&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;.</dd>
             <dt id="a1aaaa0e264cdd4f43518571f2f61ac36">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a1aaaa0e264cdd4f43518571f2f61ac36">is_floating_point</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;double&gt;.</dd>
+            <dd>Metafunction for determining if a type is a double or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</dd>
             <dt id="a513bdc4a19071f0be70e92bb6cb1a1a3">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is an <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
             <dt id="aea14621807afe92a840d82c7139cde07">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/header/string" target="_blank">&lt;string&gt;</a>.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">toml::<wbr/>string</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;toml::string&gt;.</dd>
             <dt id="ad11c8c8a8286d6931e40658679aa7ddb">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -284,7 +304,7 @@ C++17</a>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a87aee32768a32bb838150421e4e3cf97">is_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a toml::value&lt;toml::time&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;.</dd>
           </dl>
         </section>
         <section>
@@ -312,43 +332,43 @@ C++17</a>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21" id="abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;toml::string&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;toml::string&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8" id="abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a" id="abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">floating_point</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;double&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27" id="abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">boolean</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;bool&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f" id="abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">date</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;toml::date&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b" id="abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">time</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;toml::time&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264" id="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;toml::date_time&gt;.</p>
+                  <p>The node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;.</p>
                   </td>
                 </tr>
               </tbody>
@@ -359,14 +379,14 @@ C++17</a>
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="ae845239fd7271e3d8e529302d300ad5b"><div>
             <h3>
-              using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
+              using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </h3>
             <p>The integer type used to tally line numbers and columns.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a> if <code>TOML_LARGE_FILES</code> is <code>1</code>.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d0523987bb329ff90f8d14550b5f3a6"><div>
             <h3>
-              using toml::<wbr/><a class="m-doc-self" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
+              using toml::<wbr/><a class="m-doc-self" href="#a1d0523987bb329ff90f8d14550b5f3a6">string</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>
             </h3>
             <p>The string type for keys and string values.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::u8string</a> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
@@ -380,7 +400,7 @@ C++17</a>
           </div></section>
           <section class="m-doc-details" id="a496653fce75ee70bbe451bb5f2377265"><div>
             <h3>
-              using toml::<wbr/><a class="m-doc-self" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
+              using toml::<wbr/><a class="m-doc-self" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
             </h3>
             <p>The string type for keys and string values.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a> if <code>TOML_CHAR_8_STRINGS</code> is <code>1</code>.</p></aside>
@@ -414,6 +434,25 @@ C++17</a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="aaa1ee3cd7e3a50ae76f0da76eb21a0bc"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename CHAR&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aaa1ee3cd7e3a50ae76f0da76eb21a0bc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs)</span></span>
+            </h3>
+            <p>Pretty-prints the value of a node_type to a stream.</p>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="nb">false</span> <span class="p">};</span>
+<span class="k">for</span> <span class="p">(</span><span class="ut">size_t</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// Element [0] is: integer</span>
+<span class="c1">// Element [1] is: floating-point</span>
+<span class="c1">// Element [2] is: string</span>
+<span class="c1">// Element [3] is: boolean</span></pre>
           </div></section>
           <section class="m-doc-details" id="a1663dfec155837cf2aac97bf610d937c"><div>
             <h3>
@@ -477,10 +516,18 @@ C++17</a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A TOML table if exceptions are in use, or a <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> detailing the parsing outcome if exceptions are disabled.</td>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
                 </tr>
               </tfoot>
             </table>
+<pre class="m-code"><span class="ns">std::</span><span class="n">stringstream</span> <span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="n">sv</span><span class="p">;</span>
+
+<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a4f07fd3c3be68c4d0ee2c1478b827322"><div>
             <h3>
@@ -517,14 +564,22 @@ C++17</a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A TOML table if exceptions are in use, or a <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> detailing the parsing outcome if exceptions are disabled.</td>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
                 </tr>
               </tfoot>
             </table>
+<pre class="m-code"><span class="ns">std::</span><span class="n">stringstream</span> <span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="n">sv</span><span class="p">;</span>
+
+<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a20fa3e08d72759083fb17c772a357043"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> doc,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&amp;&amp; source_path)</span></span>
             </h3>
             <p>Parses a TOML document from a string view.</p>
@@ -545,10 +600,15 @@ C++17</a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A TOML table if exceptions are in use, or a <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> detailing the parsing outcome if exceptions are disabled.</td>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
                 </tr>
               </tfoot>
             </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="n">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre>
           </div></section>
           <section class="m-doc-details" id="ada8654fb4ceef15c20fc1d5e0cc734dd"><div>
             <h3>
@@ -573,10 +633,81 @@ C++17</a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A TOML table if exceptions are in use, or a <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> detailing the parsing outcome if exceptions are disabled.</td>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
                 </tr>
               </tfoot>
             </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="n">sv</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a02a2724564149ad8439c0457357308b8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a> doc,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&amp;&amp; source_path)</span></span>
+            </h3>
+            <p>Parses a TOML document from a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a> string view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+                <tr>
+                  <td>source_path</td>
+                  <td>The path used to initialize each node's <code>source().path</code>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="n">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>This overload is not available if your compiler does not support <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae9ee4300ddfbd72b7237283ab8d97618"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::u8string_view</a> doc,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> source_path = {})</span></span>
+            </h3>
+            <p>Parses a TOML document from a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a> string view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+                <tr>
+                  <td>source_path</td>
+                  <td>The path used to initialize each node's <code>source().path</code>. If you don't have a path (or you have no intention of using paths in diagnostics) then this parameter can safely be left blank.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="n">sv</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="c1">// output:</span>
+<span class="c1">// 3</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>This overload is not available if your compiler does not support <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a499d47883d3052327269509da09e6aa3"><div>
             <h3>
@@ -608,11 +739,16 @@ C++17</a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A TOML table if exceptions are in use, or a <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> detailing the parsing outcome if exceptions are disabled.</td>
+                  <td><em>With exceptions:</em> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.<br/><em>Without exceptions:</em> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> detailing the parsing outcome.</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p>You must <code>#include <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/header/fstream" target="_blank">&lt;fstream&gt;</a></code> to use this function (toml++ does not transitively include it for you).</p></aside>
+<pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span><span class="cp"></span>
+
+<span class="ns">toml::</span><span class="ut">parse_result</span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="p">}</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>You must <code>#include<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/header/fstream" target="_blank"> &lt;fstream&gt;</a></code> to use this function (toml++ does not transitively include it for you).</p></aside>
           </div></section>
         </section>
       </div>

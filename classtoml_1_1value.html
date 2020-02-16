@@ -17,12 +17,10 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <span class="m-col-t-8 m-col-m-none m-left-m" id="m-navbar-brand">
-        <a href="https://github.com/marzer/tomlplusplus/">toml++</a> <span class="m-breadcrumb">|</span> <a class="m-thin" href="namespacetoml.html">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
-C++17</a>
-      </span>
+C++17</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -73,6 +71,7 @@ C++17</a>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -81,11 +80,20 @@ C++17</a>
             </li>
           </ul>
         </div>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1node.html">node</a>
+            </dt>
+            <dd>A TOML node.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a class="m-doc" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+              using <a class="m-doc" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
             </dt>
             <dd></dd>
           </dl>
@@ -363,7 +371,7 @@ C++17</a>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              using toml::<wbr/>value&lt;T&gt;::<wbr/><a class="m-doc-self" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a>= <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+              using toml::<wbr/>value&lt;T&gt;::<wbr/><a class="m-doc-self" href="#a02eaccfe5b461e8b36d9913fbe789239">value_arg_t</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
             </h3>
           </div></section>
         </section>
@@ -394,7 +402,7 @@ C++17</a>
               <tbody>
                 <tr>
                   <td>args</td>
-                  <td>Variadic list of arguments that are forwarded to the internal value's constructor.</td>
+                  <td>Arguments to forward to the internal value's constructor.</td>
                 </tr>
               </tbody>
             </table>

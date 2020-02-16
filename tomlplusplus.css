@@ -62,21 +62,6 @@ dl.m-doc dd
 	color: inherit;
 }
 
-body > header > nav
-{
-	background-color: #1e1e1e;
-}
-
-html
-{
-	background-color: #2d2d30;
-}
-
-pre, code, .m-label, .tpp-enable-if > a
-{
-	font-family: 'Consolas', monospace;
-}
-
 pre, .m-doc-search-content
 {
 	background-color: #1e1e1e;
@@ -186,28 +171,71 @@ nav .m-thin {
 	margin-left: 0.5em;
 }
 
-.m-code .c1 {
-	color: rgb(87,166,74);
-}
-
-.m-code .mi, .m-code .mf {
-	color: rgb(181,206,168);
-}
-
-.m-code .k {
-	color: rgb(86,156,214);
-}
-
-.m-code .n {
-	color: rgb(220,220,220);
-}
-
-.m-code .p {
-	color: rgb(120,120,120);
-}
-
 .m-doc-details div table.m-table.m-fullwidth.m-flat thead tr th,
 .m-doc-details div table.m-table.m-fullwidth.m-flat tfoot tr th
 {
 	color: #a5c9ea;
+}
+
+/* comments */
+.m-code .c1
+{
+	color: rgb(87,166,74);
+}
+
+/* int and float literals */
+.m-code .mi,
+.m-code .mf
+{
+	color: rgb(181,206,168);
+}
+
+/* keywords */
+.m-code .k
+{
+	color: rgb(86,156,214);
+}
+
+/* identifier names */
+.m-code .n
+{
+	color: rgb(220,220,220);
+}
+
+/* punctuators (brackets etc) */
+.m-code .p
+{
+	color: rgb(120,120,120);
+}
+
+/* preprocessor directives */
+.m-code .cp
+{
+	color: rgb(120,120,120);
+}
+
+/* string literals, "includes" */
+.m-code .s,
+.m-code .s + .n,
+.m-code .cpf
+{
+	color: rgb(214,157,133);
+}
+
+.m-code .kt,
+.m-code .k
+{
+	font-weight: normal;
+}
+
+/* user types and typedefs */
+.m-code .ut
+{
+	color: rgb(78,201,176);
+}
+
+/* namespace::scopes:: */
+.m-code .ns
+{
+	color: rgb(140,140,140);
 }
