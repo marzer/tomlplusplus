@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -68,9 +68,7 @@ C++17</span></a>
             </li>
           </ul>
         </div>
-<aside class="m-note m-default"><h4>Remark</h4><p>The interface of this type is modeled after <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>, with some additional considerations made for the heterogeneous nature of a TOML table, and for the removal of some cruft (the public interface of <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a> is, simply, <em>a hot mess</em>).</p></aside><pre class="m-code"><span class="c1">// example</span>
-<span class="c1">// code</span>
-<span class="c1">// here</span></pre>
+<aside class="m-note m-default"><h4>Remark</h4><p>The interface of this type is modeled after <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>, with some additional considerations made for the heterogeneous nature of a TOML table, and for the removal of some cruft (the public interface of <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a> is, simply, <em>a hot mess</em>).</p></aside>
         <section id="base-classes">
           <h2><a href="#base-classes">Base classes</a></h2>
           <dl class="m-doc">
@@ -304,10 +302,7 @@ C++17</span></a>
     <span class="p">{</span> <span class="s">"bar"</span><span class="p">,</span> <span class="mf">2.0</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a href="https://en.cppreference.com/w/cpp/utility/initializer_list">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ foo = 1, bar = 2.0, kek = "three" }</pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a href="https://en.cppreference.com/w/cpp/utility/initializer_list">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d63ea8e51917b4dd9a35ae3e2ebd87e"><div>
             <h3>
@@ -366,16 +361,13 @@ C++17</span></a>
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="c1">// add a string using std::string's substring constructor</span>
-    <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="n">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced a value with key '"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced a value with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// emplaced a value with key 'a': false</span>
-<span class="c1">// emplaced a value with key 'd': true</span>
-<span class="c1">// { a = 1, b = 2, c = 3, d = "drill" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between insert and emplace for trivial value types (floats, ints, bools).</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+emplaced a value with key 'a': false
+emplaced a value with key 'd': true
+{ a = 1, b = 2, c = 3, d = "drill" }</pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#a4c48213240ef24e952033f92e8189578">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a020e8f71bec1fbff52260a5a1e0cb12e"><div>
             <h3>
@@ -390,17 +382,17 @@ C++17</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">first</td>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the first key-value pair being erased.</td>
+                  <td>Iterator to the first key-value pair being erased.</td>
                 </tr>
                 <tr>
                   <td>last</td>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the one-past-the-last key-value pair being erased.</td>
+                  <td>Iterator to the one-past-the-last key-value pair being erased.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the first key-value pair immediately following the last removed key-value pair.</td>
+                  <td>Iterator to the first key-value pair immediately following the last removed key-value pair.</td>
                 </tr>
               </tfoot>
             </table>
@@ -413,11 +405,8 @@ C++17</span></a>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = "bad", c = "karma", d = 2 }</span>
-<span class="c1">// { a = 1, d = 2 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = "bad", c = "karma", d = 2 }
+{ a = 1, d = 2 }</pre>
           </div></section>
           <section class="m-doc-details" id="a4dafb4ae116d92add973e5f27f880a9d"><div>
             <h3>
@@ -431,13 +420,13 @@ C++17</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">pos</td>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the key-value pair being erased.</td>
+                  <td>Iterator to the key-value pair being erased.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the first key-value pair immediately following the removed key-value pair.</td>
+                  <td>Iterator to the first key-value pair immediately following the removed key-value pair.</td>
                 </tr>
               </tfoot>
             </table>
@@ -449,11 +438,8 @@ C++17</span></a>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// { a = 1, c = 3 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+{ a = 1, c = 3 }</pre>
           </div></section>
           <section class="m-doc-details" id="a1a90984876ccdd03aaa9e0f9801a839f"><div>
             <h3>
@@ -467,13 +453,13 @@ C++17</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">pos</td>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the key-value pair being erased.</td>
+                  <td>Iterator to the key-value pair being erased.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/Iterator" target="_blank">Iterator</a> to the first key-value pair immediately following the removed key-value pair.</td>
+                  <td>Iterator to the first key-value pair immediately following the removed key-value pair.</td>
                 </tr>
               </tfoot>
             </table>
@@ -485,11 +471,8 @@ C++17</span></a>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// { a = 1, c = 3 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+{ a = 1, c = 3 }</pre>
           </div></section>
           <section class="m-doc-details" id="ad91ed36ee1b3cec423d49d36f3ed366e"><div>
             <h3>
@@ -522,13 +505,10 @@ C++17</span></a>
 
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"not an existing key"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// true</span>
-<span class="c1">// false</span>
-<span class="c1">// { a = 1, c = 3 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+true
+false
+{ a = 1, c = 3 }</pre>
           </div></section>
           <section class="m-doc-details" id="a0ffe1b19d726d04340eb392724550d0f"><div>
             <h3>
@@ -579,17 +559,14 @@ C++17</span></a>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"is the meaning of life, apparently."</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["b"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["c"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"c"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["b"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["c"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"c"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">))</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an </span><span class="dl">)</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">val</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// node ["a"] exists: true</span>
-<span class="c1">// node ["b"] exists: true</span>
-<span class="c1">// node ["c"] exists: false</span>
-<span class="c1">// node ["a"] was an integer</span></pre>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">val</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">node ["a"] exists: true
+node ["b"] exists: true
+node ["c"] exists: false
+node ["a"] was an integer</pre>
           </div></section>
           <section class="m-doc-details" id="a8db429a783088184c4b75cc50a9b4be1"><div>
             <h3>
@@ -665,10 +642,7 @@ C++17</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"is the meaning of life, apparently."</span> <span class="p">}</span>
 <span class="p">}};</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">get_as</span><span class="o">&lt;</span><span class="ut">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"a"</span><span class="p">))</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an integer with value </span><span class="dl">)</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">**</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// node ["a"] was an integer with value 42</span></pre>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an integer with value </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">**</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">node ["a"] was an integer with value 42</pre>
           </div></section>
           <section class="m-doc-details" id="a3f3f179ba4af6327d2fbe14b4d846b36"><div>
             <h3>
@@ -714,11 +688,8 @@ C++17</span></a>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">43</span> <span class="p">}</span>
 <span class="p">}};</span>
 <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kvps</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">kvps</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// { a = 1, b = 2, c = 3, d = 42 }  //"a" already existed</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling insert(key, value) for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+{ a = 1, b = 2, c = 3, d = 42 } //"a" already existed</pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling insert(key, value) for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a4c48213240ef24e952033f92e8189578"><div>
             <h3>
@@ -772,15 +743,12 @@ C++17</span></a>
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted a value with key '"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted a value with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// inserted a value with key 'a': false</span>
-<span class="c1">// inserted a value with key 'd': true</span>
-<span class="c1">// { a = 1, b = 2, c = 3, d = 42 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+inserted a value with key 'a': false
+inserted a value with key 'd': true
+{ a = 1, b = 2, c = 3, d = 42 }</pre>
           </div></section>
           <section class="m-doc-details" id="a4069bd9b5caf8ba10fffe7dc9bbb3634"><div>
             <h3>
@@ -835,23 +803,20 @@ C++17</span></a>
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">insert_or_assign</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"value at key '"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"' was "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">?</span> <span class="s">"inserted"</span><span class="nl">sv</span> <span class="p">:</span> <span class="s">"assigned"</span><span class="n">sv</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"value at key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"' was "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">?</span> <span class="s">"inserted"</span><span class="nl">sv</span> <span class="p">:</span> <span class="s">"assigned"</span><span class="sa">sv</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// { a = 1, b = 2, c = 3 }</span>
-<span class="c1">// value at key 'a' was assigned</span>
-<span class="c1">// value at key 'd' was inserted</span>
-<span class="c1">// { a = 42, b = 2, c = 3, d = 42 }</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
+value at key 'a' was assigned
+value at key 'd' was inserted
+{ a = 42, b = 2, c = 3, d = 42 }</pre>
           </div></section>
           <section class="m-doc-details" id="a53be1b93aa90608ed378323df835a2f3"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a53be1b93aa90608ed378323df835a2f3">is_inline</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns true if this table is an inline table.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Run<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>-constructed tables (i.e. those not created during parsing) are not inline by default.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Runtime-constructed tables (i.e. those not created during parsing) are not inline by default.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8e797a683ff2bacd14d7e7461ecd2780"><div>
             <h3>
@@ -875,23 +840,20 @@ C++17</span></a>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"d"</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span> <span class="p">{</span> <span class="s">"e"</span><span class="p">,</span> <span class="mi">4</span> <span class="p">}</span> <span class="p">}}</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">(</span><span class="o">!</span><span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">());</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">is inline? false
+a = 1
+b = 2
+c = 3
+[d]
+e = 4
 
-<span class="c1">// example output:</span>
-<span class="c1">// is inline? false</span>
-<span class="c1">// a = 1</span>
-<span class="c1">// b = 2</span>
-<span class="c1">// c = 3</span>
-<span class="c1">// [d]</span>
-<span class="c1">// e = 4</span>
-<span class="c1">//</span>
-<span class="c1">// is inline? true</span>
-<span class="c1">// { a = 1, b = 2, c = 3, d = { e = 4 } }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>A table being 'inline' is only relevent during printing; it has no effect on the general functionality of the table object.</p></aside>
+is inline? true
+{ a = 1, b = 2, c = 3, d = { e = 4 } }</pre><aside class="m-note m-default"><h4>Remark</h4><p>A table being 'inline' is only relevent during printing; it has no effect on the general functionality of the table object.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ac0ee38b7d9cbc7ca736f699c90acd833"><div>
             <h3>
@@ -915,7 +877,7 @@ C++17</span></a>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. This Is Not An Error (tm).</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="abdeb5d9d9fc23c031c78e544c6196ea6"><div>
             <h3>

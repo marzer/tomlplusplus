@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -73,16 +73,13 @@ C++17</span></a>
 <span class="p">}};</span>
 
 <span class="c1">// these two lines are equivalent:</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="n">default_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">description = "This is some TOML, yo."
+fruit = ["apple", "orange", "pear"]
+numbers = [1, 2, 3, 4, 5]
 
-<span class="c1">// output (twice):</span>
-<span class="c1">// description = "This is some TOML, yo."</span>
-<span class="c1">// fruit = ["apple", "orange", "pear"]</span>
-<span class="c1">// numbers = [1, 2, 3, 4, 5]</span>
-<span class="c1">// </span>
-<span class="c1">// [table]</span>
-<span class="c1">// foo = "bar"</span></pre>
+[table]
+foo = "bar"</pre>
       </div>
     </div>
   </div>

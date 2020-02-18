@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -65,18 +65,38 @@ C++17</span></a>
             </li>
           </ul>
         </div>
-<aside class="m-note m-warning"><h4>Attention</h4><p>This type only exists when exceptions are disabled. When exceptions are enabled <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> and parsing failures are indicated by raising a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> as an exception.</p></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ut">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
+<aside class="m-note m-danger"><h4>Warning</h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if ARE_EXCEPTIONS_ENABLED </span><span class="c1">// some compiler-specific test</span>
+
+    <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="ut">table</span><span class="p">;</span>
+    <span class="c1">// parsing failures are indicated by throwing a toml::parse_error as an exception</span>
+
+<span class="cp">#else</span>
+
+    <span class="k">class</span> <span class="nc">parse_result</span> <span class="k">final</span>
+    <span class="p">{</span>
+        <span class="c1">// ...</span>
+    <span class="p">};</span>
+
+<span class="cp">#endif</span></pre></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ut">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span> <span class="c1">//implicitly converts to table&amp;</span>
 <span class="k">else</span>
     <span class="ns">std::</span><span class="n">cerr</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">description</span><span class="p">()</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="n">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="n">sv</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">description</span><span class="p">()</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="sa">sv</span>
         <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt id="a058b76f39fb5a971585538f2d4098ba5">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a058b76f39fb5a971585538f2d4098ba5">parse_result</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a>&amp;&amp; res) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="ad9e22f09854af4c36860d61e0c0f25b1">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad9e22f09854af4c36860d61e0c0f25b1">~parse_result</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Destructor.</dd>
             <dt id="af66ea78a6dd881521ce865a372298e12">
               <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af66ea78a6dd881521ce865a372298e12">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -138,6 +158,10 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a279d481270fd22b8ea1520c04f9307ae">get</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
+            <dt id="aa4c2c770a8d214f9d508582233ff1d84">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa4c2c770a8d214f9d508582233ff1d84">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move-assignment operator.</dd>
             <dt id="ab5bfcd6ed385016395029bd69ad78a3c">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab5bfcd6ed385016395029bd69ad78a3c">succeeded</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>

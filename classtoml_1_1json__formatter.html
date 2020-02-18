@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -84,29 +84,26 @@ C++17</span></a>
 
 <span class="s">    [fruit.apple.texture]</span>
 <span class="s">    smooth = true</span>
-<span class="dl">)</span><span class="s">"</span><span class="n">sv</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="n">json_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// {</span>
-<span class="c1">//     "fruit" : {</span>
-<span class="c1">//         "apple" : {</span>
-<span class="c1">//             "color" : "red",</span>
-<span class="c1">//             "taste" : {</span>
-<span class="c1">//                 "sweet" : true</span>
-<span class="c1">//             },</span>
-<span class="c1">//             "texture" : {</span>
-<span class="c1">//                 "smooth" : true</span>
-<span class="c1">//             }</span>
-<span class="c1">//         }</span>
-<span class="c1">//     }</span>
-<span class="c1">// }</span></pre>
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{
+    "fruit" : {
+        "apple" : {
+            "color" : "red",
+            "taste" : {
+                "sweet" : true
+            },
+            "texture" : {
+                "smooth" : true
+            }
+        }
+    }
+}</pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a372da7254f9c9bd6193cb833240dfa85">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              format_flags flags = format_flags::quote_<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>s_and_<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>s) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = format_flags::quote_dates_and_times) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs a JSON formatter and binds it to a TOML object.</dd>
           </dl>
@@ -136,7 +133,7 @@ C++17</span></a>
                 template&lt;typename CHAR&gt;
               </div>
               <span class="m-doc-wrap-bumper"> toml::<wbr/>json_formatter&lt;CHAR&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a372da7254f9c9bd6193cb833240dfa85">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              format_flags flags = format_flags::quote_<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>s_and_<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>s) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = format_flags::quote_dates_and_times) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Constructs a JSON formatter and binds it to a TOML object.</p>
             <table class="m-table m-fullwidth m-flat">

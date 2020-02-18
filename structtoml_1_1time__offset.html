@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -52,7 +52,7 @@ C++17</span></a>
         <h1>
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>time_offset <span class="m-thin">struct</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>A <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>zone offset.</p>
+        <p>A timezone offset.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -73,7 +73,7 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">static auto <a class="m-doc" href="#ad8cf5c07125c1751680d4263f23f3912">from_hh_mm</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> hours,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> minutes) -&gt; <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Creates a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>zone offset from separate hour and minute totals.</dd>
+            <dd>Creates a timezone offset from separate hour and minute totals.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -109,10 +109,10 @@ C++17</span></a>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ad8cf5c07125c1751680d4263f23f3912"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">static <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> toml::<wbr/><a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad8cf5c07125c1751680d4263f23f3912">from_hh_mm</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> hours,
+              <span class="m-doc-wrap-bumper">static <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> toml::<wbr/>time_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad8cf5c07125c1751680d4263f23f3912">from_hh_mm</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> hours,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> minutes) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Creates a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>zone offset from separate hour and minute totals.</p>
+            <p>Creates a timezone offset from separate hour and minute totals.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -137,13 +137,10 @@ C++17</span></a>
 <pre class="m-code"><span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">time_offset</span><span class="o">::</span><span class="n">from_hh_mm</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">time_offset</span><span class="o">::</span><span class="n">from_hh_mm</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">time_offset</span><span class="o">::</span><span class="n">from_hh_mm</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">time_offset</span><span class="o">::</span><span class="n">from_hh_mm</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="c1">// output: </span>
-<span class="c1">// +02:30</span>
-<span class="c1">// -01:30</span>
-<span class="c1">// -02:30</span>
-<span class="c1">// Z</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">time_offset</span><span class="o">::</span><span class="n">from_hh_mm</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">+02:30
+-01:30
+-02:30
+Z</pre>
           </div></section>
           <section class="m-doc-details" id="a77e5bb056ffcd6a91b1740333f23b806"><div>
             <h3>
@@ -168,7 +165,7 @@ C++17</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>True if the <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>_offsets did not represent the same value.</td>
+                  <td>True if the time_offsets did not represent the same value.</td>
                 </tr>
               </tfoot>
             </table>
@@ -196,7 +193,7 @@ C++17</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>True if the <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>_offsets represented the same value.</td>
+                  <td>True if the time_offsets represented the same value.</td>
                 </tr>
               </tfoot>
             </table>

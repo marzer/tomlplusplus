@@ -17,7 +17,7 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="namespacetoml.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
 Parser
 for
 C++17</span></a>
@@ -35,7 +35,7 @@ C++17</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -238,7 +238,7 @@ C++17</span></a>
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">table</span><span class="o">&gt;</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">int_value</span><span class="p">)</span>
     <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;int64_t&gt;"</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="k">else</span> <span class="nf">if</span> <span class="p">(</span><span class="n">tbl</span><span class="p">)</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tbl</span><span class="p">)</span>
     <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a table"</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
 <span class="c1">// fully-qualified value node types also work:</span>
@@ -310,10 +310,10 @@ C++17</span></a>
 <span class="p">{</span>
     <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
         <span class="n">do_something_with_a_string</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">));</span> <span class="c1">//n is a toml::value&lt;toml::string&gt;</span>
-    <span class="k">else</span> <span class="k">if</span> <span class="nf">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_integer</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_integer</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
         <span class="n">do_something_with_an_int</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">);</span> <span class="c1">//n is a toml::value&lt;int64_t&gt;</span>
     <span class="k">else</span>
-        <span class="k">throw</span> <span class="ns">std::</span><span class="ut">exception</span><span class="p">(</span><span class="s">"Expected string or integer"</span><span class="p">)</span>
+        <span class="k">throw</span> <span class="ns">std::</span><span class="ut">exception</span><span class="p">{</span> <span class="s">"Expected string or integer"</span> <span class="p">};</span>
 <span class="p">});</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a href="https://en.wikipedia.org/wiki/Visitor_pattern">https://en.wikipedia.org/wiki/Visitor_<wbr/>pattern</a></p></aside>
           </div></section>
         </section>
