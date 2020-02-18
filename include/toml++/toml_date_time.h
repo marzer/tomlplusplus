@@ -116,12 +116,14 @@ namespace toml
 		/// std::cout << time_offset::from_hh_mm(-2, -30) << std::endl;
 		/// std::cout << time_offset::from_hh_mm(0,0) << std::endl;
 		/// 
-		/// // output: 
-		/// // +02:30
-		/// // -01:30
-		/// // -02:30
-		/// // Z
 		/// \ecpp
+		/// 
+		/// \out
+		/// +02:30
+		/// -01:30
+		/// -02:30
+		/// Z
+		/// \eout
 		/// 
 		/// \param 	hours  	The total hours.
 		/// \param 	minutes	The total minutes.

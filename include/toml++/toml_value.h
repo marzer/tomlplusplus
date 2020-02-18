@@ -41,6 +41,9 @@ namespace toml
 
 		public:
 
+			/// \brief	The value's underlying data type.
+			using value_type = T;
+
 			/// \brief	Constructs a toml value.
 			///
 			/// \tparam	U	Constructor argument types.
@@ -93,20 +96,34 @@ namespace toml
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
 			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
 
+			/// \brief	Returns a pointer to the value if the data type is a string.
 			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(this); }
+			/// \brief	Returns a pointer to the value if the data type is an integer.
 			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
+			/// \brief	Returns a pointer to the value if the data type is a floating-point.
 			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
+			/// \brief	Returns a pointer to the value if the data type is boolean.
 			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
+			/// \brief	Returns a pointer to the value if the data type is a date.
 			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
+			/// \brief	Returns a pointer to the value if the data type is a time.
 			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
+			/// \brief	Returns a pointer to the value if the data type is date-time.
 			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
 
+			/// \brief	Returns a const pointer to the value if the data type is a string.
 			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is an integer.
 			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is a floating-point.
 			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is a boolean.
 			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is a date.
 			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is a time.
 			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
+			/// \brief	Returns a const pointer to the value if the data type is a date-time.
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
 			/// \brief	Returns a reference to the underlying value.
@@ -148,12 +165,33 @@ namespace toml
 				return lhs;
 			}
 
-
+			/// \brief	A type alias for 'value arguments'.
+			/// \details This differs according to the value's type argument:
+			/// 		 - ints, floats, booleans: `value_type`
+			/// 		 - strings: `string_view`
+			/// 		 - everything else: `const value_type&`
 			using value_arg_t = std::conditional_t<
 				std::is_same_v<T, string>,
 				string_view,
 				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
 			>;
+
+			/// \brief	Value-assignment operator.
+			value& operator= (value_arg_t rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, string>)
+					val_.assign(rhs);
+				else
+					val_ = rhs;
+				return *this;
+			}
+
+			template <typename U = T, typename = std::enable_if_t<std::is_same_v<U, string>>>
+			value& operator= (string&& rhs) noexcept
+			{
+				val_ = std::move(rhs);
+				return *this;
+			}
 
 			/// \brief	Value equality operator.
 			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
@@ -217,8 +255,8 @@ namespace toml
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	Values of the same data type: `lhs.get() < rhs.get()` <br>
-			/// 			Values of different types: `lhs.type() < rhs.type()`
+			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() < rhs.get()` <br>
+			/// 			<strong><em>Different value types:</em></strong> `lhs.type() < rhs.type()`
 			template <typename U>
 			[[nodiscard]] friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
 			{
@@ -233,8 +271,8 @@ namespace toml
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	Values of the same data type: `lhs.get() <= rhs.get()` <br>
-			/// 			Values of different types: `lhs.type() <= rhs.type()`
+			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() <= rhs.get()` <br>
+			/// 			<strong><em>Different value types:</em></strong> `lhs.type() <= rhs.type()`
 			template <typename U>
 			[[nodiscard]] friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
 			{
@@ -249,8 +287,8 @@ namespace toml
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	Values of the same data type: `lhs.get() > rhs.get()` <br>
-			/// 			Values of different types: `lhs.type() > rhs.type()`
+			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() > rhs.get()` <br>
+			/// 			<strong><em>Different value types:</em></strong> `lhs.type() > rhs.type()`
 			template <typename U>
 			[[nodiscard]] friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
 			{
@@ -265,8 +303,8 @@ namespace toml
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	Values of the same data type: `lhs.get() >= rhs.get()` <br>
-			/// 			Values of different types: `lhs.type() >= rhs.type()`
+			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() >= rhs.get()` <br>
+			/// 			<strong><em>Different value types:</em></strong> `lhs.type() >= rhs.type()`
 			template <typename U>
 			[[nodiscard]] friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
 			{

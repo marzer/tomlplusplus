@@ -41,6 +41,8 @@ SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
 ALIASES                = "cpp=@code{.cpp}" \
                          "ecpp=@endcode" \
+                         "out=@code{.unparsed}" \
+                         "eout=@endcode" \
                          "detail=@details"
 TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO

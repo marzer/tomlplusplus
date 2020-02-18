@@ -30,8 +30,12 @@ type_names = [
 	'date_time',
 	'string',
 	'string_view',
+	'string_char',
 	'parse_result',
 	'parse_error',
+	'json_formatter',
+	'default_formatter',
+	'format_flags',
 	'size_t',
 	'uint8_t',
 	'uint16_t',
@@ -64,8 +68,11 @@ all_namespaces = [
 	'literals',
 	'impl'
 ]
-
-
+string_literals = [
+	's',
+	'sv',
+	'_toml'
+]
 
 def is_tool(name):
 	return shutil.which(name) is not None
@@ -509,31 +516,63 @@ class InlineNamespaceFix3(InlineNamespaceFixBase):
 # adds some additional colouring to the syntax highlighting in code blocks.
 class SyntaxHighlightingFix(object):
 
+	__missing_keywords = [
+		'constexpr',
+		'if'
+	]
+
 	def __call__(self, file, doc):
 		global type_names
 		global all_namespaces
+		global string_literals
+
 		code_blocks = doc.body('pre', class_='m-code')
 		changed = False
 		for code_block in code_blocks:
-			names = code_block('span', class_='n')
 			
 			# namespaces
+			names = code_block('span', class_='n')
+			names_ = []
 			for name in names:
 				if (name.string is None or name.string not in all_namespaces):
+					names_.append(name)
 					continue
 				next = name.next_sibling
 				if (next is None or next.string is None or next.string != '::'):
+					names_.append(name)
 					continue
+
 				next.extract()
 				name.string.replace_with(name.string + '::')
 				name['class'] = 'ns'
 				changed = True
 
+			# string literals
+			names = names_
+			names_ = []
+			for name in names:
+				if (name.string is None or name.string not in string_literals):
+					names_.append(name)
+					continue
+				prev = name.previous_sibling
+				if (prev is None or prev['class'] is None or 's' not in prev['class']):
+					names_.append(name)
+					continue
+				name['class'] = 'sa'
+				changed = True
+
 			# user types and typedefs
-			names += code_block('span', class_='kt')
+			names = names_ + code_block('span', class_='kt')
 			for name in names:
 				if (name.string is not None and name.string in type_names):
 					name['class'] = 'ut'
+					changed = True
+
+			# misidentifed keywords
+			nfs = code_block('span', class_='nf')
+			for nf in nfs:
+				if (nf.string is not None and nf.string in self.__missing_keywords):
+					nf['class'] = 'k'
 					changed = True
 
 		return changed
@@ -633,19 +672,19 @@ class ExtDocLinksFix(object):
 		(r'(?:Legacy)?BidirectionalIterators?', 'https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator'),
 		(r'(?:Legacy)?RandomAccessIterators?', 'https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator'),
 		(r'(?:Legacy)?ContiguousIterators?', 'https://en.cppreference.com/w/cpp/named_req/ContiguousIterator'),
-		(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator'),
+		#(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator'),
 		# toml-specific
 		(r'toml::values?', 'classtoml_1_1value.html'),
 		(r'(toml::)?date_times?', 'structtoml_1_1date__time.html'),
-		(r'(toml::)?time', 'structtoml_1_1time.html'),
-		(r'(toml::)?date', 'structtoml_1_1date.html')
+		(r'(toml::)?times?', 'structtoml_1_1time.html'),
+		(r'(toml::)?dates?', 'structtoml_1_1date.html')
 	]
 	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td']
 	
 	def __init__(self):
 		self.__expressions = []
 		for type, uri in self.__types:
-			self.__expressions.append((re.compile(type), uri))
+			self.__expressions.append((re.compile('(?<![a-zA-Z_])'+type+'(?![a-zA-Z_])'), uri))
 	
 	@classmethod
 	def __substitute(cls, m, uri):
@@ -858,8 +897,8 @@ def main():
 	fixes = [
 		CustomTagsFix()
 		, SyntaxHighlightingFix()
-		# , NavBarFix()
-		, IndexHrefFix()
+		#, NavBarFix()
+		#, IndexHrefFix()
 		, ModifiersFix1()
 		, ModifiersFix2()
 		, InlineNamespaceFix1()
@@ -881,24 +920,6 @@ def main():
 					print('Finished processing {}.'.format(file))
 		if _threadError:
 			sys.exit(1)
-
-	# replace index.html with a redirect
-	index_html_path = path.join(html_dir, 'index.html')
-	with open(index_html_path,'w', encoding='utf-8', newline='\n') as output_file:
-		print('''<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Refresh" content="0; url=./namespacetoml.html" />
-  </head>
-  <body>
-    <p>Please follow <a href="namespacetoml.html">this link</a>.</p>
-  </body>
-</html>
-''',
-			file=output_file
-		)
-
-
 
 
 if __name__ == '__main__':

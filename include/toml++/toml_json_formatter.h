@@ -16,21 +16,23 @@ namespace toml
 	/// )"sv);
 	///	std::cout << toml::json_formatter{ some_toml } << std::endl;
 	/// 
-	/// // output: 
-	/// // {
-	/// //     "fruit" : {
-	/// //         "apple" : {
-	/// //             "color" : "red",
-	/// //             "taste" : {
-	/// //                 "sweet" : true
-	/// //             },
-	/// //             "texture" : {
-	/// //                 "smooth" : true
-	/// //             }
-	/// //         }
-	/// //     }
-	/// // }
 	/// \ecpp
+	/// 
+	/// \out
+	/// {
+	///     "fruit" : {
+	///         "apple" : {
+	///             "color" : "red",
+	///             "taste" : {
+	///                 "sweet" : true
+	///             },
+	///             "texture" : {
+	///                 "smooth" : true
+	///             }
+	///         }
+	///     }
+	/// }
+	/// \eout
 	/// 
 	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
 	template <typename CHAR = char>

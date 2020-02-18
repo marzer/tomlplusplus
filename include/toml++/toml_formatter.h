@@ -3,11 +3,11 @@
 
 namespace toml
 {
+	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
 	{
 		none,
-		always_print_as_inline = 1,
-		quote_dates_and_times = 2
+		quote_dates_and_times = 1
 	};
 	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{

@@ -32,20 +32,20 @@ int64_t depends_on_cpp_version = config["dependencies"]["cpp"].as_integer()->get
 
 // modify the data
 config.insert_or_assign("alternatives", toml::array{
-	"cpptoml",
-	"toml11",
-	"Boost.TOML"
+    "cpptoml",
+    "toml11",
+    "Boost.TOML"
 });
 
 // iterate & visit over the data
 for (auto [k, v] : config)
 {
-	v.visit([](auto& node) noexcept
-	{
-		std::cout << node << std:endl;
-		if constexpr (toml::is_string<decltype(node)>)
-			do_something_with_string_values(node)
-	});
+    v.visit([](auto& node) noexcept
+    {
+        std::cout << node << std:endl;
+        if constexpr (toml::is_string<decltype(node)>)
+            do_something_with_string_values(node);
+    });
 }
 
 // re-serialize as TOML

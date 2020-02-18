@@ -365,7 +365,7 @@ namespace toml
 			///		else if constexpr (toml::is_integer<decltype(n)>)
 			///			do_something_with_an_int(*n); //n is a toml::value<int64_t>
 			///		else
-			///			throw std::exception("Expected string or integer")
+			///			throw std::exception{ "Expected string or integer" };
 			/// });
 			///
 			/// \ecpp

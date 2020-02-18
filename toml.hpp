@@ -340,6 +340,8 @@ namespace toml
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
+	using size_t = std::size_t;
+	using ptrdiff_t = std::ptrdiff_t;
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
@@ -1245,12 +1247,6 @@ namespace toml
 			"The stream's underlying character type must be 1 byte in size."
 		);
 		lhs << rhs.begin;
-		if (rhs.begin < rhs.end
-			&& (rhs.end.line != rhs.begin.line || rhs.end.column > rhs.begin.column + source_index{1}))
-		{
-			impl::print_to_stream(" - "sv, lhs);
-			lhs << rhs.end;
-		}
 		if (rhs.path)
 		{
 			impl::print_to_stream(" of '"sv, lhs);
@@ -1611,6 +1607,8 @@ namespace toml
 
 		public:
 
+			using value_type = T;
+
 			template <typename... U>
 			TOML_NODISCARD_CTOR
 			explicit value(U&&... args) TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<T, U &&...>)
@@ -1688,6 +1686,22 @@ namespace toml
 				string_view,
 				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
 			>;
+
+			value& operator= (value_arg_t rhs) noexcept
+			{
+				if constexpr (std::is_same_v<T, string>)
+					val_.assign(rhs);
+				else
+					val_ = rhs;
+				return *this;
+			}
+
+			template <typename U = T, typename = std::enable_if_t<std::is_same_v<U, string>>>
+			value& operator= (string&& rhs) noexcept
+			{
+				val_ = std::move(rhs);
+				return *this;
+			}
 
 			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
 			[[nodiscard]] friend bool operator == (value_arg_t lhs, const value& rhs) noexcept { return lhs == rhs.val_; }
@@ -7675,8 +7689,7 @@ namespace toml
 	enum class format_flags : uint8_t
 	{
 		none,
-		always_print_as_inline = 1,
-		quote_dates_and_times = 2
+		quote_dates_and_times = 1
 	};
 	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
@@ -8179,7 +8192,7 @@ namespace toml
 					case node_type::table:
 					{
 						auto& tbl = *reinterpret_cast<const table*>(&base::source());
-						if (tbl.is_inline() || (base::flags() & format_flags::always_print_as_inline) != format_flags::none)
+						if (tbl.is_inline())
 							print_inline(tbl);
 						else
 						{
@@ -8400,7 +8413,7 @@ namespace toml
 #pragma endregion
 //-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
 
-//macro hygiene
+// macro hygiene
 #if TOML_UNDEF_MACROS
 	#undef TOML_EXCEPTIONS
 	#undef TOML_USE_STREAMS_FOR_FLOATS

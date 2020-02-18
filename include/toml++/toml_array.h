@@ -197,7 +197,7 @@ namespace toml
 	///		arr[i].visit([=](auto&& el) noexcept
 	///		{
 	///			if constexpr (toml::is_integer<decltype(el)>)
-	///				el++;
+	///				(*el)++;
 	///			else
 	///				el = "six"sv;
 	///		});
@@ -213,12 +213,14 @@ namespace toml
 	/// arr.emplace_back<toml::array>(10, 11.0);
 	/// std::cout << arr << std::endl;
 	/// 
-	/// // output:
-	/// // [1, 2, 3, 4, "five"]
-	/// // [2, 3, 4, 5, "six"]
-	/// // [3, 4, 5, "six", 7, 8.0, "nine"]
-	/// // [3, 4, 5, "six", 7, 8.0, "nine", [10, 11.0]]
 	/// \ecpp
+	/// 
+	/// \out
+	/// [1, 2, 3, 4, "five"]
+	/// [2, 3, 4, 5, "six"]
+	/// [3, 4, 5, "six", 7, 8.0, "nine"]
+	/// [3, 4, 5, "six", 7, 8.0, "nine", [10, 11.0]]
+	/// \eout
 	class array final
 		: public node
 	{
@@ -268,9 +270,11 @@ namespace toml
 			/// auto arr = toml::array{ 1, 2.0, "three"sv, toml::array{ 4, 5 } };
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, 2.0, "three", [4, 5]]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2.0, "three", [4, 5]]
+			/// \eout
 			/// 	 
 			/// \tparam	U		One of the TOML node or value types (or a type promotable to one).
 			/// \tparam	V		One of the TOML node or value types (or a type promotable to one).
@@ -319,16 +323,18 @@ namespace toml
 			/// std::cout << "all arrays: "sv << arr.is_homogeneous<toml::array>() << std::endl;
 			/// std::cout << "all integers: "sv << arr.is_homogeneous<int64_t>() << std::endl;
 			/// 
-			/// // output: 
-			/// // homogeneous: true
-			/// // all doubles: false
-			/// // all arrays: false
-			/// // all integers: true
 			/// \ecpp
 			/// 
-			/// \tparam	T	A TOML node type.
-			/// 			- Provide an explicit type for "is every node a T?"
-			/// 			- Leave it as `void` for "is every node the same type?"
+			/// \out
+			/// homogeneous: true
+			/// all doubles: false
+			/// all arrays: false
+			/// all integers: true
+			/// \eout
+			/// 
+			/// \tparam	T	A TOML node type. <br>
+			/// 			<strong><em>Explicitly specified:</em></strong> "is every node a T?" <br>
+			/// 			<strong><em>Left as `void`:</em></strong> "is every node the same type?"
 			///
 			/// \returns	True if the array was homogeneous.
 			/// 
@@ -407,9 +413,11 @@ namespace toml
 			///	arr.insert(arr.cend(), toml::array{ 4, 5 });
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, "two", 3, [4, 5]]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, "two", 3, [4, 5]]
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML node or value types (or a type promotable to one).
 			/// \param 	pos		The insertion position.
@@ -432,15 +440,17 @@ namespace toml
 			///	arr.insert(arr.cbegin() + 1, 3, "honk");
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [
-			/// //		"with an evil twinkle in its eye the goose said",
-			/// //		"honk",
-			/// //		"honk",
-			/// //		"honk",
-			/// //		"and immediately we knew peace was never an option."
-			/// // ]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [
+			/// 	"with an evil twinkle in its eye the goose said",
+			/// 	"honk",
+			/// 	"honk",
+			/// 	"honk",
+			/// 	"and immediately we knew peace was never an option."
+			/// ]
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML value types (or a type promotable to one).
 			/// \param 	pos		The insertion position.
@@ -533,9 +543,11 @@ namespace toml
 			///	arr.emplace<std::string>(arr.cbegin() + 1, "this is not a drill"sv, 14, 5);
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, "drill" 2]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, "drill" 2]
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML node or value types.
 			/// \tparam	V		Value constructor argument types.
@@ -544,7 +556,7 @@ namespace toml
 			///
 			/// \returns	An iterator to the inserted value.
 			/// 
-			/// \remarks There is no difference between insert and emplace
+			/// \remarks There is no difference between insert() and emplace()
 			/// 		 for trivial value types (floats, ints, bools).
 			template <typename U, typename... V>
 			iterator emplace(const_iterator pos, V&&... args) noexcept
@@ -567,10 +579,12 @@ namespace toml
 			/// arr.erase(arr.cbegin() + 1);
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, 2, 3]
-			/// // [1, 3]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, 3]
+			/// [1, 3]
+			/// \eout
 			/// 
 			/// \param 	pos		Iterator to the node being erased.
 			/// 
@@ -589,10 +603,12 @@ namespace toml
 			/// arr.erase(arr.cbegin() + 1, arr.cbegin() + 3);
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, "bad", "karma", 3]
-			/// // [1, 3]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, "bad", "karma", 3]
+			/// [1, 3]
+			/// \eout
 			/// 
 			/// \param 	first	Iterator to the first node being erased.
 			/// \param 	last	Iterator to the one-past-the-last node being erased.
@@ -609,12 +625,14 @@ namespace toml
 			/// auto arr = toml::array{ 1, 2 };
 			///	arr.push_back(3);
 			///	arr.push_back(4.0);
-			///	arr.push_back(array{ 5, "six"sv });
+			///	arr.push_back(toml::array{ 5, "six"sv });
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, 2, 3, 4.0, [5, "six"]]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, 3, 4.0, [5, "six"]]
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML value types (or a type promotable to one).
 			/// \param 	val		The value being added.
@@ -632,12 +650,14 @@ namespace toml
 			///
 			/// \detail \cpp
 			/// auto arr = toml::array{ 1, 2 };
-			///	arr.emplace_back<array>(3, "four"sv);
+			///	arr.emplace_back<toml::array>(3, "four"sv);
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output: 
-			/// // [1, 2, [3, "four"]]
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, [3, "four"]]
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML value types.
 			/// \tparam	V		Value constructor argument types.
@@ -671,18 +691,20 @@ namespace toml
 			///
 			/// \detail \cpp
 			/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
-			///	std::cout << R"(node [0] exists: )"sv << !!arr.get(0) << std::endl;
-			///	std::cout << R"(node [1] exists: )"sv << !!arr.get(1) << std::endl;
-			///	std::cout << R"(node [2] exists: )"sv << !!arr.get(2) << std::endl;
+			///	std::cout << "node [0] exists: "sv << !!arr.get(0) << std::endl;
+			///	std::cout << "node [1] exists: "sv << !!arr.get(1) << std::endl;
+			///	std::cout << "node [2] exists: "sv << !!arr.get(2) << std::endl;
 			/// if (auto val = arr.get(0))
-			///		std::cout << R"(node [0] was an )"sv << val->type() << std::endl;
+			///		std::cout << "node [0] was an "sv << val->type() << std::endl;
 			/// 
-			/// // output: 
-			/// // node [0] exists: true
-			/// // node [1] exists: true
-			/// // node [2] exists: false
-			/// // node [0] was an integer
 			/// \ecpp
+			/// 
+			/// \out
+			/// node [0] exists: true
+			/// node [1] exists: true
+			/// node [2] exists: false
+			/// node [0] was an integer
+			/// \eout
 			/// 
 			/// \param 	index	The node's index.
 			///
@@ -709,9 +731,11 @@ namespace toml
 			/// if (auto val = arr.get_as<int64_t>(0))
 			///		std::cout << "node [0] was an integer with value "sv << **val << std::endl;
 			/// 
-			/// // output: 
-			/// // node [0] was an integer with value 42
 			/// \ecpp
+			/// 
+			/// \out
+			/// node [0] was an integer with value 42
+			/// \eout
 			/// 
 			/// \tparam	T	The node's type.
 			/// \param 	index	The node's index.
@@ -822,11 +846,12 @@ namespace toml
 			/// arr.flatten();
 			/// std::cout << arr << std::endl;
 			/// 
-			/// // output:
-			/// // [1, 2, [3, 4, [5]], 6, []]
-			/// // [1, 2, 3, 4, 5, 6]
-			/// 
 			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, [3, 4, [5]], 6, []]
+			/// [1, 2, 3, 4, 5, 6]
+			/// \eout
 			/// 
 			/// \remarks	Arrays inside child tables are not flattened.
 			void flatten() TOML_MAY_THROW

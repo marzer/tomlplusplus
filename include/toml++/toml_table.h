@@ -118,12 +118,6 @@ namespace toml
 	/// 		additional considerations made for the heterogeneous nature of a
 	/// 		TOML table, and for the removal of some cruft (the public interface of
 	/// 		std::map is, simply, _a hot mess_).
-	/// 		
-	/// \detail \cpp
-	/// // example
-	/// // code
-	/// // here
-	/// \ecpp
 	class table final
 		: public node
 	{
@@ -155,9 +149,11 @@ namespace toml
 			///	}};
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { foo = 1, bar = 2.0, kek = "three" }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { foo = 1, bar = 2.0, kek = "three" }
+			/// \eout
 			/// 
 			/// \tparam	N	Number of key-value pairs used to initialize the table.
 			/// \param 	arr	An array of key-value pairs used to initialize the table.
@@ -235,17 +231,19 @@ namespace toml
 			/// std::cout << "is inline? "sv << tbl.is_inline() << std::endl;
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // example output:
-			/// // is inline? false
-			/// // a = 1
-			/// // b = 2
-			/// // c = 3
-			/// // [d]
-			/// // e = 4
-			/// //
-			/// // is inline? true
-			/// // { a = 1, b = 2, c = 3, d = { e = 4 } }
 			/// \ecpp
+			/// 
+			/// \out
+			/// is inline? false
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// [d]
+			/// e = 4
+			/// 
+			/// is inline? true
+			/// { a = 1, b = 2, c = 3, d = { e = 4 } }
+			/// \eout
 			/// 
 			/// \remarks A table being 'inline' is only relevent during printing;
 			/// 		 it has no effect on the general functionality of the table
@@ -262,7 +260,7 @@ namespace toml
 			///
 			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
 			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-			/// 		 This Is Not An Error (tm).
+			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
 			[[nodiscard]] inline node_view<table> operator[] (string_view key) noexcept;
@@ -308,12 +306,14 @@ namespace toml
 			/// }
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // inserted a value with key 'a': false
-			/// // inserted a value with key 'd': true
-			/// // { a = 1, b = 2, c = 3, d = 42 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// inserted a value with key 'a': false
+			/// inserted a value with key 'd': true
+			/// { a = 1, b = 2, c = 3, d = 42 }
+			/// \eout
 			/// 
 			/// \tparam K		toml::string (or a type convertible to it).
 			/// \tparam V		One of the TOML value types (or a type promotable to one).
@@ -354,10 +354,12 @@ namespace toml
 			///	tbl.insert(kvps.begin(), kvps.end());
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // { a = 1, b = 2, c = 3, d = 42 }	//"a" already existed
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// { a = 1, b = 2, c = 3, d = 42 }	//"a" already existed
+			/// \eout
 			/// 
 			/// \tparam ITER	An InputIterator to a collection of key-value pairs.
 			/// \param 	first	An iterator to the first value in the input collection.
@@ -400,12 +402,14 @@ namespace toml
 			/// }
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // value at key 'a' was assigned
-			/// // value at key 'd' was inserted
-			/// // { a = 42, b = 2, c = 3, d = 42 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// value at key 'a' was assigned
+			/// value at key 'd' was inserted
+			/// { a = 42, b = 2, c = 3, d = 42 }
+			/// \eout
 			/// 
 			/// \tparam K		toml::string (or a type convertible to it).
 			/// \tparam V		One of the TOML value types (or a type promotable to one).
@@ -449,12 +453,14 @@ namespace toml
 			/// }
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // emplaced a value with key 'a': false
-			/// // emplaced a value with key 'd': true
-			/// // { a = 1, b = 2, c = 3, d = "drill" }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// emplaced a value with key 'a': false
+			/// emplaced a value with key 'd': true
+			/// { a = 1, b = 2, c = 3, d = "drill" }
+			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML node or value types.
 			/// \tparam K		toml::string (or a type convertible to it).
@@ -466,7 +472,7 @@ namespace toml
 			/// 		- An iterator to the emplacement position (or the position of the value that prevented emplacement)
 			/// 		- A boolean indicating if the emplacement was successful.  
 			/// 
-			/// \remark There is no difference between insert and emplace for trivial value types (floats, ints, bools).
+			/// \remark There is no difference between insert() and emplace() for trivial value types (floats, ints, bools).
 			template <typename U, typename K, typename... V>
 			std::pair<iterator, bool> emplace(K&& key, V&&... args) noexcept
 			{
@@ -502,10 +508,12 @@ namespace toml
 			/// tbl.erase(tbl.begin() + 1);
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // { a = 1, c = 3 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// { a = 1, c = 3 }
+			/// \eout
 			/// 
 			/// \param 	pos		Iterator to the key-value pair being erased.
 			/// 
@@ -528,10 +536,12 @@ namespace toml
 			/// tbl.erase(tbl.cbegin() + 1);
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // { a = 1, c = 3 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// { a = 1, c = 3 }
+			/// \eout
 			/// 
 			/// \param 	pos		Iterator to the key-value pair being erased.
 			/// 
@@ -555,10 +565,12 @@ namespace toml
 			/// tbl.erase(tbl.cbegin() + 1, tbl.cbegin() + 3);
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = "bad", c = "karma", d = 2 }
-			/// // { a = 1, d = 2 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = "bad", c = "karma", d = 2 }
+			/// { a = 1, d = 2 }
+			/// \eout
 			/// 
 			/// \param 	first	Iterator to the first key-value pair being erased.
 			/// \param 	last	Iterator to the one-past-the-last key-value pair being erased.
@@ -583,12 +595,14 @@ namespace toml
 			/// std::cout << tbl.erase("not an existing key") << std::endl;
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// // output: 
-			/// // { a = 1, b = 2, c = 3 }
-			/// // true
-			/// // false
-			/// // { a = 1, c = 3 }
 			/// \ecpp
+			/// 
+			/// \out
+			/// { a = 1, b = 2, c = 3 }
+			/// true
+			/// false
+			/// { a = 1, c = 3 }
+			/// \eout
 			/// 
 			/// \param 	key		Key to erase.
 			/// 
@@ -652,12 +666,14 @@ namespace toml
 			/// if (auto val = arr.get("a"))
 			///		std::cout << R"(node ["a"] was an )"sv << val->type() << std::endl;
 			/// 
-			/// // output: 
-			/// // node ["a"] exists: true
-			/// // node ["b"] exists: true
-			/// // node ["c"] exists: false
-			/// // node ["a"] was an integer
 			/// \ecpp
+			/// 
+			/// \out
+			/// node ["a"] exists: true
+			/// node ["b"] exists: true
+			/// node ["c"] exists: false
+			/// node ["a"] was an integer
+			/// \eout
 			/// 
 			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.
@@ -686,9 +702,11 @@ namespace toml
 			/// if (auto val = arr.get_as<int64_t>("a"))
 			///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << std::endl;
 			/// 
-			/// // output: 
-			/// // node ["a"] was an integer with value 42
 			/// \ecpp
+			/// 
+			/// \out
+			/// node ["a"] was an integer with value 42
+			/// \eout
 			/// 
 			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.

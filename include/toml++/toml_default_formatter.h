@@ -151,14 +151,16 @@ namespace toml
 	///	std::cout << toml::default_formatter{ tbl } << std::endl;
 	///	std::cout << tbl << std::endl;
 	/// 
-	/// // output (twice):
-	/// // description = "This is some TOML, yo."
-	/// // fruit = ["apple", "orange", "pear"]
-	/// // numbers = [1, 2, 3, 4, 5]
-	/// // 
-	/// // [table]
-	/// // foo = "bar"
 	/// \ecpp
+	/// 
+	/// \out
+	/// description = "This is some TOML, yo."
+	/// fruit = ["apple", "orange", "pear"]
+	/// numbers = [1, 2, 3, 4, 5]
+	/// 
+	/// [table]
+	/// foo = "bar"
+	/// \eout
 	/// 
 	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
 	template <typename CHAR = char>
@@ -395,7 +397,7 @@ namespace toml
 					case node_type::table:
 					{
 						auto& tbl = *reinterpret_cast<const table*>(&base::source());
-						if (tbl.is_inline() || (base::flags() & format_flags::always_print_as_inline) != format_flags::none)
+						if (tbl.is_inline())
 							print_inline(tbl);
 						else
 						{

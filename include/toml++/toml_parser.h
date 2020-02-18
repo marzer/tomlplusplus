@@ -10,9 +10,22 @@ namespace toml
 
 	/// \brief	The result of a parsing operation.
 	/// 
-	/// \attention This type only exists when exceptions are disabled.
-	/// 		 When exceptions are enabled parse_result is just an alias for toml::table
-	/// 		 and parsing failures are indicated by raising a toml::parse_error as an exception.
+	/// \warning <strong>This type only exists when exceptions are disabled.</strong>
+	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
+	/// #if ARE_EXCEPTIONS_ENABLED // some compiler-specific test
+	/// 
+	///		using parse_result = table;
+	///		// parsing failures are indicated by throwing a toml::parse_error as an exception
+	///
+	/// #else
+	///	
+	///		class parse_result final
+	///		{
+	///			// ...
+	///		};
+	///	
+	///	#endif
+	/// \ecpp
 	/// 
 	/// \detail A parse_result is effectively a discriminated union containing either a toml::table
 	/// 		or a toml::parse_error. Most member functions assume a particular one of these two states,
@@ -48,14 +61,12 @@ namespace toml
 
 		public:
 
-
 			/// \brief	Returns true if parsing succeeeded.
 			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
 			/// \brief	Returns true if parsing failed.
 			[[nodiscard]] bool failed() const noexcept { return is_err; }
 			/// \brief	Returns true if parsing succeeeded.
 			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
-
 
 			/// \brief	Returns the internal toml::table.
 			[[nodiscard]] table& get() & noexcept
@@ -123,6 +134,8 @@ namespace toml
 				::new (&storage) parse_error{ std::move(err) };
 			}
 
+
+			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			parse_result(parse_result&& res) noexcept
 				: is_err{ res.is_err }
@@ -133,6 +146,7 @@ namespace toml
 					::new (&storage) table{ std::move(res).get() };
 			}
 
+			/// \brief	Move-assignment operator.
 			parse_result& operator=(parse_result&& rhs) noexcept
 			{
 				if (is_err != rhs.is_err)
@@ -154,6 +168,7 @@ namespace toml
 				return *this;
 			}
 
+			/// \brief	Destructor.
 			~parse_result() noexcept
 			{
 				destroy();
@@ -3053,17 +3068,19 @@ namespace toml
 	/// auto tbl = toml::parse("a = 3"sv);
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	[[nodiscard]]
 	inline parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW
 	{
@@ -3077,15 +3094,17 @@ namespace toml
 	/// auto tbl = toml::parse("a = 3"sv, "foo.toml");
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	[[nodiscard]]
 	inline parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
@@ -3100,17 +3119,19 @@ namespace toml
 	/// auto tbl = toml::parse(u8"a = 3"sv);
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 	[[nodiscard]]
@@ -3125,15 +3146,17 @@ namespace toml
 	/// auto tbl = toml::parse(u8"a = 3"sv, "foo.toml");
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 	[[nodiscard]]
@@ -3153,9 +3176,11 @@ namespace toml
 	/// auto tbl = toml::parse(ss);
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \tparam	CHAR			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
@@ -3163,8 +3188,8 @@ namespace toml
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename CHAR>
 	[[nodiscard]]
 	inline parse_result parse(std::basic_istream<CHAR>& doc, std::string_view source_path = {}) TOML_MAY_THROW
@@ -3186,16 +3211,18 @@ namespace toml
 	/// auto tbl = toml::parse(ss, "foo.toml");
 	/// std::cout << tbl["a"] << std::endl;
 	/// 
-	/// // output:
-	/// // 3
 	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
 	/// 
 	/// \tparam	CHAR			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename CHAR>
 	[[nodiscard]]
 	inline parse_result parse(std::basic_istream<CHAR>& doc, std::string&& source_path) TOML_MAY_THROW
@@ -3222,8 +3249,8 @@ namespace toml
 	/// \tparam	CHAR			The path's character type. Must be 1 byte in size.
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
-	/// \returns <em>With exceptions:</em> A toml::table. <br>
-	/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention You must `#include <fstream>` to use this function (toml++
 	/// 		 does not transitively include it for you).
@@ -3260,15 +3287,17 @@ namespace toml
 		/// auto tbl = "a = 3"_toml;
 		/// std::cout << tbl["a"] << std::endl;
 		/// 
-		/// // output:
-		/// // 3
 		/// \ecpp
+		/// 
+		/// \out
+		/// 3
+		/// \eout
 		/// 
 		/// \param 	str	The string data.
 		/// \param 	len	The string length.
 		///
-		/// \returns <em>With exceptions:</em> A toml::table. <br>
-		/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 		[[nodiscard]]
 		inline parse_result operator"" _toml(const char* str, size_t len) noexcept
 		{
@@ -3285,15 +3314,17 @@ namespace toml
 		/// auto tbl = u8"a = 3"_toml;
 		/// std::cout << tbl["a"] << std::endl;
 		/// 
-		/// // output:
-		/// // 3
 		/// \ecpp
+		/// 
+		/// \out
+		/// 3
+		/// \eout
 		/// 
 		/// \param 	str	The string data.
 		/// \param 	len	The string length.
 		///
-		/// \returns <em>With exceptions:</em> A toml::table. <br>
-		/// 		 <em>Without exceptions:</em> A toml::parse_result detailing the parsing outcome.
+		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 		/// 
 		/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 		[[nodiscard]]

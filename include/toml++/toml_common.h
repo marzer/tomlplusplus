@@ -276,6 +276,8 @@ namespace toml
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
+	using size_t = std::size_t;
+	using ptrdiff_t = std::ptrdiff_t;
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
@@ -350,9 +352,11 @@ namespace toml
 	///		<< table.get("description")->source().begin()
 	///		<< std::endl;
 	///	
-	///	// possible output:
-	///	// The value 'description' was defined at line 7, column 15
 	/// \ecpp
+	/// 
+	/// \out
+	///	The value 'description' was defined at line 7, column 15
+	/// \eout
 	/// 
 	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
 	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
@@ -360,8 +364,7 @@ namespace toml
 	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
 	/// 		 you may find that your source_positions don't match those given by a text editor
 	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
-	/// 		 <br><br>
-	/// 		 This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off
+	/// 		 <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off
 	/// 		 between parser complexity and correctness.
 	struct source_position
 	{
@@ -412,8 +415,25 @@ namespace toml
 				|| (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
 
-
 		/// \brief	Prints a source_position to a stream.
+		///
+		/// \detail \cpp
+		/// auto tbl = toml::parse("bar = 42"sv);
+		/// 
+		/// std::cout << "The value for 'bar' was found on "sv
+		///		<< tbl.get("bar")->source()
+		///		<< std::endl;
+		/// 
+		/// \ecpp
+		/// 
+		/// \out
+		/// The value for 'bar' was found on line 1, column 7
+		/// \eout
+		/// 
+		/// \param 	lhs	The stream.
+		/// \param 	rhs	The source_position.
+		///
+		/// \returns	The input stream.
 		template <typename CHAR>
 		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
 			TOML_MAY_THROW;
@@ -425,14 +445,23 @@ namespace toml
 	/// \brief	A source document region.
 	/// 
 	/// \detail \cpp
-	/// auto table = toml::parse_file("config.toml"sv);
-	/// std::cout << "The node 'server' was defined at "sv
-	///		<< table.get("server")->source()
-	///		<< std::endl;
+	/// #include <fstream>
+	/// 
+	/// auto tbl = toml::parse_file("config.toml"sv);
+	/// if (auto server = tbl.get("server"))
+	/// {
+	///		std::cout << "begin: "sv << server->source().begin << std::endl;
+	///		std::cout << "end: "sv << server->source().end << std::endl;
+	///		std::cout << "path: "sv << *server->source().path << std::endl;
+	///	}
 	///	
-	///	// possible output:
-	///	// The node 'server' was defined at line 3, column 1 - line 10, column 25 of 'config.toml'
 	/// \ecpp
+	/// 
+	/// \out
+	///	begin: line 3, column 1
+	///	end: line 3, column 22
+	///	path: config.toml
+	/// \eout
 	/// 
 	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
 	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
@@ -440,8 +469,7 @@ namespace toml
 	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
 	/// 		 you may find that your source_positions don't match those given by a text editor
 	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
-	/// 		 <br><br>
-	/// 		 This Is Not An Error (tm). I've chosen this behaviour as a deliberate trade-off
+	/// 		 <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off
 	/// 		 between parser complexity and correctness.
 	struct source_region
 	{
@@ -457,6 +485,24 @@ namespace toml
 		source_path_ptr path;
 
 		/// \brief	Prints a source_region to a stream.
+		///
+		/// \detail \cpp
+		/// auto tbl = toml::parse("bar = 42", "config.toml");
+		/// 
+		/// std::cout << "The value for 'bar' was found on "sv
+		///		<< tbl.get("bar")->source()
+		///		<< std::endl;
+		/// 
+		/// \ecpp
+		/// 
+		/// \out
+		/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
+		/// \eout
+		/// 
+		/// \param 	lhs	The stream.
+		/// \param 	rhs	The source_position.
+		///
+		/// \returns	The input stream.
 		template <typename CHAR>
 		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
 			TOML_MAY_THROW;
@@ -469,7 +515,7 @@ namespace toml
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 
-	/// \remarks This class inherits from `std::runtime_error` when exceptions are enabled.
+	/// \remarks This class inherits from std::runtime_error when exceptions are enabled.
 	/// 		 The public interface is the same regardless of exception mode.
 	class parse_error final
 	{
@@ -810,12 +856,14 @@ namespace toml
 	/// for (size_t i = 0; i < arr.size() i++)
 	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << std::endl;
 	///
-	/// // output:
-	/// // Element [0] is: integer
-	/// // Element [1] is: floating-point
-	/// // Element [2] is: string
-	/// // Element [3] is: boolean
 	/// \ecpp
+	/// 
+	/// \out
+	/// Element [0] is: integer
+	/// Element [1] is: floating-point
+	/// Element [2] is: string
+	/// Element [3] is: boolean
+	/// \eout
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
 	{

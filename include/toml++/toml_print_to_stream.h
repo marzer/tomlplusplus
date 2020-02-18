@@ -310,12 +310,6 @@ namespace toml
 			"The stream's underlying character type must be 1 byte in size."
 		);
 		lhs << rhs.begin;
-		if (rhs.begin < rhs.end
-			&& (rhs.end.line != rhs.begin.line || rhs.end.column > rhs.begin.column + source_index{1}))
-		{
-			impl::print_to_stream(" - "sv, lhs);
-			lhs << rhs.end;
-		}
 		if (rhs.path)
 		{
 			impl::print_to_stream(" of '"sv, lhs);

@@ -1,109 +1,3 @@
-/*
-table.m-table th
-{
-	color: #ffe698;
-}
-article section > h2
-{
-	padding-top: 0.5rem;
-	padding-bottom: 0.1rem;
-	background-color: #282e36;
-	padding-left: 1rem;
-	margin-left: -1rem;
-	margin-right: -1rem;
-	margin-top: 2rem;
-	border-color: #282e36;
-	border-style: solid;
-	border-width: 0.0625rem;
-	border-left-width: 0.25rem;
-	border-radius: 0.2rem;
-}
-article section:target
-{
-	border-radius: 0.2rem;
-}
-article section:target > h2
-{
-	border-color: #a5c9ea;
-}
-
-table.m-table thead th
-{
-	border-bottom-width: 0.0rem;
-}
-table.m-table tbody td
-{
-	border: 0px;
-}
-table.m-table thead tr:first-child th
-{
-	border-top-width: 0.1rem;
-}
-code.m-code, aside code
-{
-	margin-left: 0.1em;
-	padding-left: 0.2em;
-	padding-right: 0.1em;
-}
-dl.m-doc dd
-{
-	margin-bottom: 0.8rem;
-}
-
-.m-doc-template a, dl.m-doc dd a, ul.m-doc li > span.m-doc a
-{
-	color: #858585;
-}
-
-.m-doc-template a.tpp-external:hover,
-  dl.m-doc dd a.tpp-external:hover,
-  ul.m-doc li > span.m-doc a.tpp-external:hover
-{
-	color: inherit;
-}
-
-pre, .m-doc-search-content
-{
-	background-color: #1e1e1e;
-}
-
-pre.m-code, code
-{
-	background-color: #1e1e1e88;
-}
-
-article section.m-doc-details > div > h3:first-child, article section > h2, body > footer > nav
-{
-	background-color: #252526;
-}
-
-.tpp-external-navbar
-{
-	background-color: #007acc11;
-}
-
-.m-label:not(.m-flat)
-{
-	font-weight: bold;
-}
-
-div.m-doc-include
-{
-	font-size: 0.9rem;	
-}
-
-.m-doc-include span.cp
-{
-  display: none;
-}
-
-.m-doc-include a.cpf
-{
-	color: #9999AA;
-}
-
-*/
-
 html, body
 {
 	scroll-padding-top: 3.5rem;
@@ -114,7 +8,8 @@ body
 	margin-top: 3rem;
 }
 
-header {
+header
+{
 	position: fixed;
 	left: 0;
 	right: 0;
@@ -122,23 +17,28 @@ header {
 	z-index: 100;
 }
 
-article, article > header, article section {
+article, article > header, article section
+{
 	margin-bottom: 3em;
 }
 
-pre, code, .tpp-enable-if > a {
+pre, code, .tpp-enable-if > a
+{
 	font-family: 'Consolas', 'Source Sans Pro', monospace;
 }
 
-a.tpp-external {
+a.tpp-external
+{
 	font-weight: normal;
 }
 
-.tpp-enable-if {
+.tpp-enable-if
+{
 	margin-bottom: 2px;
 }
 
-.tpp-enable-if > * {
+.tpp-enable-if > *
+{
 	display: inline-block;
 	border-radius: 0.2rem;
 	background-clip: padding-box !important;
@@ -146,7 +46,8 @@ a.tpp-external {
 	text-decoration: none;
 }
 
-.tpp-enable-if > a {
+.tpp-enable-if > a
+{
 	white-space: nowrap;
 	font-size: 0.8rem;
 	font-weight: bold;
@@ -157,22 +58,46 @@ a.tpp-external {
 	margin-bottom: 2px;
 }
 
-	.tpp-enable-if > a:hover {
-		background-color: #747474;
-		color: initial;
-	}
+.tpp-enable-if > a:hover
+{
+	background-color: #747474;
+	color: initial;
+}
 
-.tpp-enable-if > span {
+.tpp-enable-if > span
+{
 	display: none;
 	padding-left: 2em;
 }
 
-nav .m-thin {
+nav .m-thin
+{
 	margin-left: 0.5em;
 }
 
+nav .github
+{
+	padding-left: 44px !important;
+	background-image: url("github-icon.png");
+	background-repeat: no-repeat;
+	background-size: 25px 25px;
+	background-position: -30px center;
+	background-origin: content-box;
+}
+
+pre.m-code + pre
+{
+	margin-top: -1.0rem;
+	color: #bababa; /* is yououou */
+	background-color: #282e36aa;
+	font-size: 0.8rem;
+}
+
+/* "Parameters", "Returns" etc */
 .m-doc-details div table.m-table.m-fullwidth.m-flat thead tr th,
-.m-doc-details div table.m-table.m-fullwidth.m-flat tfoot tr th
+.m-doc-details div table.m-table.m-fullwidth.m-flat tfoot tr th,
+.m-doc-details div table.m-table.m-fullwidth.m-flat tfoot tr td strong em,
+.m-doc-details div table.m-table.m-fullwidth.m-flat tbody tr td strong em
 {
 	color: #a5c9ea;
 }
@@ -216,20 +141,23 @@ nav .m-thin {
 
 /* string literals, "includes" */
 .m-code .s,
-.m-code .s + .n,
+.m-code .sa,
+.m-code .dl,
 .m-code .cpf
 {
 	color: rgb(214,157,133);
 }
 
 .m-code .kt,
-.m-code .k
+.m-code .k,
+.m-code .nc
 {
 	font-weight: normal;
 }
 
 /* user types and typedefs */
-.m-code .ut
+.m-code .ut,
+.m-code .nc
 {
 	color: rgb(78,201,176);
 }
