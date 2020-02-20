@@ -68,7 +68,7 @@ C++17</span></a>
             </li>
           </ul>
         </div>
-<aside class="m-note m-default"><h4>Remark</h4><p>The interface of this type is modeled after <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>, with some additional considerations made for the heterogeneous nature of a TOML array.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [1, 2, 3, 4, 'five']"</span><span class="sa">sv</span><span class="p">);</span>
+<p>The interface of this type is modeled after <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>, with some additional considerations made for the heterogeneous nature of a TOML array.</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [1, 2, 3, 4, 'five']"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="k">auto</span><span class="o">&amp;</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">*</span><span class="n">tbl</span><span class="p">.</span><span class="n">get_as</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"arr"</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 
@@ -76,9 +76,9 @@ C++17</span></a>
 <span class="p">{</span>
     <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">visit</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">el</span><span class="p">)</span> <span class="k">noexcept</span>
     <span class="p">{</span>
-        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_integer</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
             <span class="p">(</span><span class="o">*</span><span class="n">el</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
-        <span class="k">else</span>
+        <span class="k">else</span> <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
             <span class="n">el</span> <span class="o">=</span> <span class="s">"six"</span><span class="sa">sv</span><span class="p">;</span>
     <span class="p">});</span>
 <span class="p">}</span>
@@ -134,6 +134,12 @@ C++17</span></a>
               V &amp;&amp; ... vals) <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Constructs an array with one or more initial values.</dd>
+            <dt id="aed0cc8ef1b14991ca80bb8febb6d2ff1">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aed0cc8ef1b14991ca80bb8febb6d2ff1">TOML_ASYMMETRICAL_EQUALITY_OPS</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;,
+              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;T&gt;&amp;,
+              template&lt;typename T&gt;) template&lt; typename T &gt; friend bool operator</span>
+            </dt>
+            <dd>Vector equality operator.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -203,10 +209,6 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a22389a9ed9444fe52be10c4acbdec908">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the specified node from the array.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a86f7f312f44bcdca6fc35307e2843a4c">flatten</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Flattens this array, recursively hoisting the contents of child arrays up into itself.</dd>
             <dt id="a5ba3af18c63546da6f9d2ac3b5b77f64">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5ba3af18c63546da6f9d2ac3b5b77f64">front</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -328,6 +330,12 @@ C++17</span></a>
               const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Equality operator.</dd>
+            <dt id="ab87e435c5a41140e60cd2e703df96fbd">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab87e435c5a41140e60cd2e703df96fbd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; lhs,
+              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;T&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Initializer list equality operator.</dd>
           </dl>
         </section>
         <section>
@@ -525,18 +533,6 @@ C++17</span></a>
 <span class="n">arr</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">[1, 2, 3]
 [1, 3]</pre>
-          </div></section>
-          <section class="m-doc-details" id="a86f7f312f44bcdca6fc35307e2843a4c"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a86f7f312f44bcdca6fc35307e2843a4c">flatten</a>(</span><span class="m-doc-wrap">)</span></span>
-            </h3>
-            <p>Flattens this array, recursively hoisting the contents of child arrays up into itself.</p>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">5</span> <span class="p">}</span> <span class="p">},</span> <span class="mi">6</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{}</span> <span class="p">};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-
-<span class="n">arr</span><span class="p">.</span><span class="n">flatten</span><span class="p">();</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">[1, 2, [3, 4, [5]], 6, []]
-[1, 2, 3, 4, 5, 6]</pre><aside class="m-note m-default"><h4>Remark</h4><p>Arrays inside child tables are not flattened.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a44db509dce6b7b77e563c822a5936abe"><div>
             <h3>

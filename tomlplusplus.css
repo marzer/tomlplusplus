@@ -89,7 +89,8 @@ pre.m-code + pre
 {
 	margin-top: -1.0rem;
 	color: #bababa; /* is yououou */
-	background-color: #282e36aa;
+	background-color: #383e46;
+	border-top: 2px solid #181e26;
 	font-size: 0.8rem;
 }
 

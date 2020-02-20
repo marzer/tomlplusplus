@@ -111,7 +111,7 @@ C++17</span></a>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               class <a class="m-doc" href="classtoml_1_1node__view.html">node_view</a>
             </dt>
-            <dd>A read-only view into a node.</dd>
+            <dd>A view of a node.</dd>
             <dt>
               class <a class="m-doc" href="classtoml_1_1parse__error.html">parse_error</a>
             </dt>
@@ -156,7 +156,8 @@ C++17</span></a>
             </dt>
             <dd>Format flags for modifying how TOML data is printed to streams.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a>,
@@ -197,11 +198,6 @@ C++17</span></a>
         <section id="func-members">
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac64c8d77a6dcf888d15921f73f1d7675">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd></dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#aba7a9dce22765e62ff2b34eab509101f">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> <span class="m-label m-flat m-success">noexcept</span></span>
@@ -307,6 +303,11 @@ C++17</span></a>
               bool <a class="m-doc-self" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Metafunction for determining if a type is an <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dt id="a64ce7ed6974d2b17823565bc67c40873">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              bool <a class="m-doc-self" href="#a64ce7ed6974d2b17823565bc67c40873">is_number</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type satisfies <code><a class="m-doc" href="namespacetoml.html#a513bdc4a19071f0be70e92bb6cb1a1a3">toml::<wbr/>is_integer</a> || <a class="m-doc" href="namespacetoml.html#a1aaaa0e264cdd4f43518571f2f61ac36">toml::<wbr/>is_floating_point</a></code>.</dd>
             <dt id="aea14621807afe92a840d82c7139cde07">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -334,6 +335,12 @@ C++17</span></a>
             <table class="m-table m-fullwidth m-flat m-doc">
               <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
               <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8" id="abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
+                  <td>
+                  <p>Not-a-node.</p>
+                  </td>
+                </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d" id="abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a></td>
                   <td>
@@ -425,33 +432,6 @@ C++17</span></a>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ac64c8d77a6dcf888d15921f73f1d7675"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac64c8d77a6dcf888d15921f73f1d7675">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The LHS table.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The RHS table.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if the tables did not contain the same keys and values.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="a821ef8d59a28949a22199306b97bd34d"><div>
             <h3>
               <div class="m-doc-template">

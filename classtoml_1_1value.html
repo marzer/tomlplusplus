@@ -106,6 +106,10 @@ C++17</span></a>
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#adb71be6a9750358aa79736310637ed42">value</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;) <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename... U&gt;</div>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a26095dcdb1b42565a62be36f0599afdc">value</a>(</span><span class="m-doc-wrap">U &amp;&amp; ... args) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
@@ -252,6 +256,10 @@ C++17</span></a>
             </dt>
             <dd>Returns a reference to the underlying value (const overload).</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7ed303bb67847e0ddfdf930d1a939af4">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; <span class="m-label m-flat m-danger">deleted</span></span>
+            </dt>
+            <dd></dd>
+            <dt>
               <div class="m-doc-template">template&lt;typename U = T, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_same_v&lt;U, string">...</a><span><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;U, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a></span></span>&gt;&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad88187c5a7a5e3d9903370ece8725467">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -283,12 +291,12 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae20a0a0639280b93aedb3f7bd4e2f815">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               <a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Value inequality operator.</dd>
+            <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afb3d69a6ac8eee7ac3d4d71cc01b2a46">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af69b39b6b7e3f1d7d4bce34198397797">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Value inequality operator.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7a08e69ebf5f736083a1766a3be83dec">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
@@ -339,10 +347,10 @@ C++17</span></a>
             </dt>
             <dd>Value equality operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a455937fd79298be4f4a25c49a88796a5">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1b92eca1d009c4244625941717f680f3">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Value equality operator.</dd>
+            <dd></dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae923a293a4bb75e31f66ebeb7221a491">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
@@ -401,6 +409,14 @@ C++17</span></a>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="adb71be6a9750358aa79736310637ed42"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adb71be6a9750358aa79736310637ed42">value</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+          </div></section>
           <section class="m-doc-details" id="a26095dcdb1b42565a62be36f0599afdc"><div>
             <h3>
               <div class="m-doc-template">
@@ -730,6 +746,14 @@ C++17</span></a>
             </h3>
             <p>Returns a reference to the underlying value (const overload).</p>
           </div></section>
+          <section class="m-doc-details" id="a7ed303bb67847e0ddfdf930d1a939af4"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; toml::<wbr/>value&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7ed303bb67847e0ddfdf930d1a939af4">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp;) <span class="m-label m-danger">deleted</span></span></span>
+            </h3>
+          </div></section>
           <section class="m-doc-details" id="ad88187c5a7a5e3d9903370ece8725467"><div>
             <h3>
               <div class="m-doc-template"> template&lt;typename T&gt;
@@ -813,17 +837,15 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae20a0a0639280b93aedb3f7bd4e2f815">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               <a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Value inequality operator.</p>
           </div></section>
-          <section class="m-doc-details" id="afb3d69a6ac8eee7ac3d4d71cc01b2a46"><div>
+          <section class="m-doc-details" id="af69b39b6b7e3f1d7d4bce34198397797"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afb3d69a6ac8eee7ac3d4d71cc01b2a46">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af69b39b6b7e3f1d7d4bce34198397797">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Value inequality operator.</p>
           </div></section>
           <section class="m-doc-details" id="a7a08e69ebf5f736083a1766a3be83dec"><div>
             <h3>
@@ -981,15 +1003,14 @@ C++17</span></a>
             </h3>
             <p>Value equality operator.</p>
           </div></section>
-          <section class="m-doc-details" id="a455937fd79298be4f4a25c49a88796a5"><div>
+          <section class="m-doc-details" id="a1b92eca1d009c4244625941717f680f3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a455937fd79298be4f4a25c49a88796a5">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1b92eca1d009c4244625941717f680f3">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1value.html#a02eaccfe5b461e8b36d9913fbe789239">value_<wbr/>arg_<wbr/>t</a> rhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Value equality operator.</p>
           </div></section>
           <section class="m-doc-details" id="ae923a293a4bb75e31f66ebeb7221a491"><div>
             <h3>

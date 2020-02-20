@@ -235,12 +235,12 @@ C++17</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5c5fd0e11db828ab264eccc96dfdd619">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
-            <dt id="a7d7aa640d81cc7efd308fbf8c56263ce">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7d7aa640d81cc7efd308fbf8c56263ce">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1table.html">table</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aa759da9b5f47d0c6b2638e3534e89dd1">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa759da9b5f47d0c6b2638e3534e89dd1">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair (const overload).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac0ee38b7d9cbc7ca736f699c90acd833">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1table.html">table</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a25143fec68b6db39da6bec5b5635b932">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair.</dd>
             <dt id="ad7c4105854cc817bf6e781fa7fb1b6d6">
@@ -362,11 +362,11 @@ C++17</span></a>
 <span class="p">{</span>
     <span class="c1">// add a string using std::string's substring constructor</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced a value with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
-emplaced a value with key 'a': false
-emplaced a value with key 'd': true
+emplaced with key 'a': false
+emplaced with key 'd': true
 { a = 1, b = 2, c = 3, d = "drill" }</pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#a4c48213240ef24e952033f92e8189578">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a020e8f71bec1fbff52260a5a1e0cb12e"><div>
@@ -689,7 +689,7 @@ node ["a"] was an integer</pre>
 <span class="p">}};</span>
 <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kvps</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">kvps</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
-{ a = 1, b = 2, c = 3, d = 42 } //"a" already existed</pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling insert(key, value) for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
+{ a = 1, b = 2, c = 3, d = 42 } //"a" already existed</pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling <code>insert(key, value)</code> for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a4c48213240ef24e952033f92e8189578"><div>
             <h3>
@@ -743,11 +743,11 @@ node ["a"] was an integer</pre>
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted a value with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">{ a = 1, b = 2, c = 3 }
-inserted a value with key 'a': false
-inserted a value with key 'd': true
+inserted with key 'a': false
+inserted with key 'd': true
 { a = 1, b = 2, c = 3, d = 42 }</pre>
           </div></section>
           <section class="m-doc-details" id="a4069bd9b5caf8ba10fffe7dc9bbb3634"><div>
@@ -855,9 +855,9 @@ e = 4
 is inline? true
 { a = 1, b = 2, c = 3, d = { e = 4 } }</pre><aside class="m-note m-default"><h4>Remark</h4><p>A table being 'inline' is only relevent during printing; it has no effect on the general functionality of the table object.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ac0ee38b7d9cbc7ca736f699c90acd833"><div>
+          <section class="m-doc-details" id="a25143fec68b6db39da6bec5b5635b932"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1table.html">table</a>&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac0ee38b7d9cbc7ca736f699c90acd833">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a25143fec68b6db39da6bec5b5635b932">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -873,7 +873,7 @@ is inline? true
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>.</td>
+                  <td>A view of the value at the given key if one existed, or an empty node view.</td>
                 </tr>
               </tfoot>
             </table>

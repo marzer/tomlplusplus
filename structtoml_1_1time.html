@@ -90,9 +90,9 @@ C++17</span></a>
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
-            <dt id="a4e1b80dd301e0c285f01fbc14e61b624">
+            <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4e1b80dd301e0c285f01fbc14e61b624">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4e1b80dd301e0c285f01fbc14e61b624">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
             <dd>Prints a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</dd>
@@ -132,6 +132,19 @@ C++17</span></a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a4e1b80dd301e0c285f01fbc14e61b624"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename CHAR&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4e1b80dd301e0c285f01fbc14e61b624">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</p>
+<pre class="m-code"><span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">500000000</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">10:20:34
+10:20:34.5</pre>
           </div></section>
           <section class="m-doc-details" id="aa88d156f8ea405513e00702b3c88de2f"><div>
             <h3>

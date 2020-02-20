@@ -59,6 +59,7 @@ C++17</span></a>
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
                 <li><a href="#friends">Friends</a></li>
@@ -66,6 +67,26 @@ C++17</span></a>
             </li>
           </ul>
         </div>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a58660e699081a0e3b44ea9564dcbec64">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a58660e699081a0e3b44ea9564dcbec64">date_time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default-constructs a zero <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ae96326775192b72b5a20016b800d6d0c">date_time</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> d,
+              <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> t) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs a local <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a613da4fbfb0731e6f926ccafedcc69f1">date_time</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> d,
+              <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> t,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">toml::<wbr/>time_offset</a> offset) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs an offset <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+          </dl>
+        </section>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
@@ -99,9 +120,9 @@ C++17</span></a>
               const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
-            <dt id="a83781edbe072ba7916c2793c0a15d4c2">
+            <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a83781edbe072ba7916c2793c0a15d4c2">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a83781edbe072ba7916c2793c0a15d4c2">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
             <dd>Prints a <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> out to a stream in RFC 3339 format.</dd>
@@ -114,6 +135,55 @@ C++17</span></a>
         </section>
         <section>
           <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae96326775192b72b5a20016b800d6d0c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/><a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae96326775192b72b5a20016b800d6d0c">date_time</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> d,
+              <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> t) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Constructs a local <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>The <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a> component.</td>
+                </tr>
+                <tr>
+                  <td>t</td>
+                  <td>The <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> component.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a613da4fbfb0731e6f926ccafedcc69f1"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/><a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a613da4fbfb0731e6f926ccafedcc69f1">date_time</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> d,
+              <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> t,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">toml::<wbr/>time_offset</a> offset) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Constructs an offset <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">d</td>
+                  <td>The <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a> component.</td>
+                </tr>
+                <tr>
+                  <td>t</td>
+                  <td>The <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> component.</td>
+                </tr>
+                <tr>
+                  <td>offset</td>
+                  <td>The timezone offset.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
           <section class="m-doc-details" id="a9ae0e032ffe90928c47b40bd8155dea3"><div>
             <h3>
               <span class="m-doc-wrap-bumper">friend bool </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9ae0e032ffe90928c47b40bd8155dea3">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; lhs,
@@ -141,6 +211,21 @@ C++17</span></a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a83781edbe072ba7916c2793c0a15d4c2"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename CHAR&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a83781edbe072ba7916c2793c0a15d4c2">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> out to a stream in RFC 3339 format.</p>
+<pre class="m-code"><span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">1987-03-16T10:20:34
+1987-03-16T10:20:34-02:30
+1987-03-16T10:20:34Z</pre>
           </div></section>
           <section class="m-doc-details" id="a885cbe902aeadacb0953230ade9d8b9a"><div>
             <h3>

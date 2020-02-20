@@ -52,7 +52,144 @@ C++17</span></a>
         <h1>
           toml++
         </h1>
-<p>This is the home of the API documentation for toml++, a <a href="https://github.com/toml-lang/toml">TOML</a> parser for C++17 and later. If you're looking for information about how to add toml++ to your project etc, see the see <a href="https://github.com/marzer/tomlplusplus/blob/master/README.md">README</a> on GitHub. Otherwise, browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</p><p><em>Obviously this page is pretty sparse and could do with some more content. If you have concrete suggestions for what should go here, please <a href="https://github.com/marzer/tomlplusplus/issues">let me know</a>!</em></p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#mainpage-features">Features</a></li>
+            <li><a href="#mainpage-adding-lib">Adding toml++ to your project</a></li>
+            <li><a href="#mainpage-api-documentation">API Documentation</a></li>
+            <li>
+              <a href="#mainpage-example">Basic examples</a>
+              <ul>
+                <li><a href="#mainpage-example-parsing-files">Parsing TOML files</a></li>
+                <li><a href="#mainpage-example-parsing-strings">Parsing TOML directly from strings</a></li>
+                <li><a href="#mainpage-example-manipulations">Traversing and manipulating data</a></li>
+                <li><a href="#mainpage-example-serialization">Serializing as TOML and JSON</a></li>
+              </ul>
+            </li>
+            <li><a href="#mainpage-contributing">Contributing</a></li>
+            <li><a href="#mainpage-license">License</a></li>
+          </ul>
+        </div>
+<p>This is the home of toml++, a header-only <a href="https://github.com/toml-lang/toml">TOML</a> parser and serializer for C++17 and later.</p><section id="mainpage-features"><h2><a href="#mainpage-features">Features</a></h2><ul><li>C++17 (plus some C++20 features where supported, e.g. char8_t strings)</li><li>Proper UTF-8 handling (incl. BOM)</li><li>Works with or without exceptions</li><li>Doesn't require RTTI</li><li>First-class support for serializing to JSON</li><li>Fully <a href="https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md">TOML v0.5.0</a>-compliant<br/></li><li>Supports a number of 'unreleased' TOML features (optional; these can be disabled)</li></ul></section><section id="mainpage-adding-lib"><h2><a href="#mainpage-adding-lib">Adding toml++ to your project</a></h2><p>Clone <a href="https://github.com/marzer/tomlplusplus/">the repository</a> from GitHub. It's header-only so there's not much you have to do after that, other than some very minor (optional) configuration. See the <a href="https://github.com/marzer/tomlplusplus/blob/master/README.md">README</a> for more info.</p></section><section id="mainpage-api-documentation"><h2><a href="#mainpage-api-documentation">API Documentation</a></h2><p>You're looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</p><p><em>toml++ is still pretty hot off the presses so there's going to be some omissions, typos and general sparseness throughout the docs. If you spot something or have a suggestion, please <a href="https://github.com/marzer/tomlplusplus/issues">let me know</a>!</em></p></section><section id="mainpage-example"><h2><a href="#mainpage-example">Basic examples</a></h2><section id="mainpage-example-parsing-files"><h3><a href="#mainpage-example-parsing-files">Parsing TOML files</a></h3><p>toml++ works whether you have exceptions enabled or not. For the most part the usage is the same, the main difference being how parsing errors are reported to the caller. When exceptions are enabled a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> is thrown directly from the site of the error:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fstream&gt; //required for parse_file()</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
+
+<span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="ns">toml::</span><span class="ut">table</span> <span class="n">tbl</span><span class="p">;</span>
+    <span class="k">try</span>
+    <span class="p">{</span>
+        <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"configuration.toml"</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml::</span><span class="ut">parse_error</span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="ns">std::</span><span class="n">cerr</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">err</span><span class="p">.</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="n">description</span><span class="p">()</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="sa">sv</span>
+            <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="n">do_stuff_with_your_config</span><span class="p">(</span><span class="n">tbl</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><p>When exceptions are disabled parsing methods return a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> and it is up to the caller to check if parsing has been successful by examining the return value:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;fstream&gt; //required for parse_file()</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
+
+<span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="ns">toml::</span><span class="ut">parse_result</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"configuration.toml"</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">tbl</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="ns">std::</span><span class="n">cerr</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">tbl</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">description</span><span class="p">()</span>
+            <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="sa">sv</span>
+            <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    
+    <span class="n">do_stuff_with_your_config</span><span class="p">(</span><span class="n">tbl</span><span class="p">);</span> <span class="c1">//toml::parse_result is convertible to toml::table</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a499d47883d3052327269509da09e6aa3">toml::<wbr/>parse_file()</a></p></aside></section><section id="mainpage-example-parsing-strings"><h3><a href="#mainpage-example-parsing-strings">Parsing TOML directly from strings</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
+
+<span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="c1">// parse error handling omitted for brevity.</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<span class="s">        [library]</span>
+<span class="s">        name = "toml++"</span>
+<span class="s">        version = "0.1.0"</span>
+<span class="s">        authors = ["Mark Gillard &lt;mark@notarealwebsite.com&gt;"]</span>
+<span class="s">    </span>
+<span class="s">        [dependencies]</span>
+<span class="s">        cpp = 17</span>
+<span class="s">    </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">);</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-code">[dependencies]
+cpp = 17
+
+[library]
+authors = ["Mark Gillard &lt;mark@notarealwebsite.com&gt;"]
+name = "toml++"
+version = "0.1.0"</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a></p></aside></section><section id="mainpage-example-manipulations"><h3><a href="#mainpage-example-manipulations">Traversing and manipulating data</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
+
+<span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<span class="s">        numbers = [ 1, 2, 3, "four", 5.0 ]</span>
+<span class="s">        vegetables = [ "tomato", "onion", "mushroom", "lettuce" ]</span>
+<span class="s">        minerals = [ "quartz", "iron", "copper", "diamond" ]</span>
+
+<span class="s">        [animals]</span>
+<span class="s">        cats = [ "tiger", "lion", "puma" ]</span>
+<span class="s">        birds = [ "macaw", "pigeon", "canary" ]</span>
+<span class="s">        fish = [ "salmon", "trout", "carp" ]</span>
+
+<span class="s">    </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">;</span>
+    <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="p">);</span>
+    
+    <span class="k">auto</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"numbers"</span><span class="p">];</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"table has 'numbers': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">numbers</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'numbers' is a: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'numbers': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">node</span> <span class="p">:</span> <span class="o">*</span><span class="n">numbers</span><span class="p">.</span><span class="n">as_array</span><span class="p">())</span>
+        <span class="p">{</span>
+            <span class="n">node</span><span class="p">.</span><span class="n">visit</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">n</span><span class="p">)</span> <span class="k">noexcept</span>
+            <span class="p">{</span>
+                <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+                    <span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
+                <span class="k">else</span> <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+                    <span class="n">n</span> <span class="o">=</span> <span class="s">"five"</span><span class="sa">sv</span><span class="p">;</span>
+            <span class="p">});</span>
+        <span class="p">}</span>
+        <span class="n">numbers</span><span class="p">.</span><span class="n">as_array</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+        <span class="n">numbers</span><span class="p">.</span><span class="n">as_array</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+        <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'numbers': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'cats': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"cats"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'dinosaurs': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"dinosaurs"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">//no dinosaurs :(</span>
+
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-code">table has 'numbers': true
+'numbers' is an: array
+'numbers': [1, 2, 3, "four", 5.0]
+'numbers': [2, 3, 4, "five", 6.0, 7, [8, 9]]
+'cats': ["tiger", "lion", "puma"]
+'dinosaurs':</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></p></aside></section><section id="mainpage-example-serialization"><h3><a href="#mainpage-example-serialization">Serializing as TOML and JSON</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
 
 <span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
@@ -69,18 +206,43 @@ C++17</span></a>
             <span class="p">}}</span>
         <span class="p">},</span>
     <span class="p">}};</span>
+
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### TOML ######"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
     
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### JSON ######"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre><pre class="m-code">cpp = [ 17, 20, "and beyond" ]
+<span class="p">}</span></pre><pre class="m-code">###### TOML ######
+cpp = [17, 20, "and beyond"]
 lib = "toml++"
 repo = "https://github.com/marzer/tomlplusplus/"
-toml = [ "0.5.0", "and beyond" ]
+toml = ["0.5.0", "and beyond"]
 
 [author]
 github = "https://github.com/marzer"
 name = "Mark Gillard"
-twitter = "https://twitter.com/marzer8789"</pre>
+twitter = "https://twitter.com/marzer8789"
+
+###### JSON ######
+{
+    "author" : {
+        "github" : "https://github.com/marzer",
+        "name" : "Mark Gillard",
+        "twitter" : "https://twitter.com/marzer8789"
+    },
+    "cpp" : [
+        17,
+        20,
+        "and beyond"
+    ],
+    "lib" : "toml++",
+    "repo" : "https://github.com/marzer/tomlplusplus/",
+    "toml" : [
+        "0.5.0",
+        "and beyond"
+    ]
+}</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1default__formatter.html">toml::<wbr/>default_formatter</a>, <a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></p></aside></section></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>See the <a href="https://github.com/marzer/tomlplusplus/blob/master/README.md#contributing">Contributing</a> section of the repository README.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</a>.</p><p>UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder">LICENSE-utf8-decoder</a>.</p></section>
       </div>
     </div>
   </div>
