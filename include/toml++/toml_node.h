@@ -82,9 +82,9 @@ namespace toml
 
 			/// \brief	Checks if a node is a specific type.
 			///
-			/// \tparam	T	The 
+			/// \tparam	T	A TOML node or value type.
 			///
-			/// \returns	Returns true if this node is an instance
+			/// \returns	Returns true if this node is an instance of the specified type.
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			bool is() const noexcept

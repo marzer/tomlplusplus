@@ -28,6 +28,7 @@ type_names = [
 	'date',
 	'time',
 	'date_time',
+	'time_offset',
 	'string',
 	'string_view',
 	'string_char',
@@ -844,11 +845,14 @@ def preprocess_xml(xml_dir):
 	toml_value_text = read_all_text_from_file(toml_value_path)
 	toml_value_search_string = '<compoundname>toml::value</compoundname>'
 	toml_value_insert_pos = toml_value_text.find(toml_value_search_string)
+	changed = False
 	if (toml_value_insert_pos != -1):
 		toml_value_insert_pos += len(toml_value_search_string)
 		toml_value_text = toml_value_text[:toml_value_insert_pos]	\
 			+ '\n    <basecompoundref refid="classtoml_1_1node" prot="public" virt="non-virtual">toml::node</basecompoundref>'	\
 			+ toml_value_text[toml_value_insert_pos:]
+		changed = True
+	if changed:
 		with open(toml_value_path,'w', encoding='utf-8', newline='\n') as output_file:
 			print(toml_value_text, file=output_file)
 

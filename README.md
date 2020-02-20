@@ -96,7 +96,7 @@ addition of unreleased features from the [TOML master] and some sane cherry-pick
 [TOML issues list] where the discussion strongly indicates inclusion in a near-future release.
 
 The library advertises the most recent numbered language version it fully supports via the preprocessor
-defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_REVISION`.
+defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
 ### **🔸Unreleased TOML features:**
 - [#356]: Allow leading zeros in the exponent part of a float
@@ -104,7 +104,6 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_REVISION`.
 - [#562]: Allow hex floatingpoint values
 - [#567]: Clarify that control characters are not permitted in comments
 - [#571]: Allow raw tabs inside strings
-- [#622]: Add short escaping alias `\s` for space (`\u0020`)
 - [#644]: Support `+` in key names
 - [#665]: Make arrays heterogeneous
 - [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
@@ -167,7 +166,7 @@ cd ../build-clang && ninja && ninja test
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]',
 which is also subject to the terms of the MIT license - see [LICENSE-utf8-decoder].
 
-[API documentation]: https://marzer.github.io/tomlplusplus/namespacetoml.html
+[API documentation]: https://marzer.github.io/tomlplusplus/
 [unreleased TOML language features]: https://github.com/marzer/tomlplusplus#unreleased-features
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t

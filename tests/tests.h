@@ -201,10 +201,28 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 	parsing_should_succeed(std::string_view{ value }, [&](table&& tbl) noexcept
 	{
 		CHECK(tbl.size() == 1);
-		REQUIRE(tbl[S("val"sv)].as<impl::promoted<T>>());
-		REQUIRE(tbl[S("val"sv)].get()->type() == impl::node_type_of<T>);
-		CHECK(tbl[S("val"sv)].as<impl::promoted<T>>()->get() == expected);
-		CHECK(tbl[S("val"sv)].get()->source().begin == begin);
-		CHECK(tbl[S("val"sv)].get()->source().end == end);
+		const auto nv = tbl[S("val"sv)];
+		REQUIRE(nv);
+		REQUIRE(nv.as<impl::promoted<T>>());
+		REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+
+		//check the raw value
+		CHECK(nv.as<impl::promoted<T>>()->get() == expected);
+
+		//check the value relops
+		CHECK(*nv.as<impl::promoted<T>>() == expected);
+		CHECK(expected == *nv.as<impl::promoted<T>>());
+		CHECK(!(*nv.as<impl::promoted<T>>() != expected));
+		CHECK(!(expected != *nv.as<impl::promoted<T>>()));
+
+		//check the node_view relops
+		CHECK(nv == expected);
+		CHECK(expected == nv);
+		CHECK(!(nv != expected));
+		CHECK(!(expected != nv));
+
+		//make sure source info is correct
+		CHECK(nv.get()->source().begin == begin);
+		CHECK(nv.get()->source().end == end);
 	});
 }

@@ -13,7 +13,6 @@ namespace toml
 		/// \brief	The day component, from 1 - 31.
 		uint8_t day;
 
-
 		/// \brief	Equality operator.
 		///
 		/// \param 	lhs	The LHS date.
@@ -44,6 +43,13 @@ namespace toml
 
 
 		/// \brief	Prints a date out to a stream as `YYYY-MM-DD` (per RFC 3339).
+		/// \detail \cpp
+		/// std::cout << toml::date{ 1987, 3, 16 } << std::endl;
+		/// \ecpp
+		/// 
+		/// \out
+		/// 1987-03-16
+		/// \eout
 		template <typename CHAR>
 		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
 			TOML_MAY_THROW
@@ -93,6 +99,15 @@ namespace toml
 		}
 
 		/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
+		/// \detail \cpp
+		/// std::cout << toml::time{ 10, 20, 34 } << std::endl;
+		/// std::cout << toml::time{ 10, 20, 34, 500000000 } << std::endl;
+		/// \ecpp
+		/// 
+		/// \out
+		/// 10:20:34
+		/// 10:20:34.5
+		/// \eout
 		template <typename CHAR>
 		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
 			TOML_MAY_THROW
@@ -108,13 +123,19 @@ namespace toml
 		/// \brief	Offset from UTC+0, in minutes.
 		int16_t minutes;
 
-		/// \brief	Creates a timezone offset from separate hour and minute totals.
+		/// \brief	Default-constructs a zero time-offset.
+		TOML_NODISCARD_CTOR
+		constexpr time_offset() noexcept
+			: minutes{}
+		{}
+
+		/// \brief	Constructs a timezone offset from separate hour and minute totals.
 		///
 		/// \detail \cpp
-		/// std::cout << time_offset::from_hh_mm(2, 30) << std::endl;
-		/// std::cout << time_offset::from_hh_mm(-2, 30) << std::endl;
-		/// std::cout << time_offset::from_hh_mm(-2, -30) << std::endl;
-		/// std::cout << time_offset::from_hh_mm(0,0) << std::endl;
+		/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
+		/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
+		/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
+		/// std::cout << toml::time_offset{ 0, 0 } << std::endl;
 		/// 
 		/// \ecpp
 		/// 
@@ -129,11 +150,10 @@ namespace toml
 		/// \param 	minutes	The total minutes.
 		///
 		/// \returns	A time_offset.
-		[[nodiscard]]
-		static constexpr time_offset from_hh_mm(int8_t hours, int8_t minutes) noexcept
-		{
-			return time_offset{ static_cast<int16_t>(hours * 60 + minutes) };
-		}
+		TOML_NODISCARD_CTOR
+		constexpr time_offset(int8_t hours, int8_t minutes) noexcept
+			: minutes{ static_cast<int16_t>(hours * 60 + minutes) }
+		{}
 
 		/// \brief	Equality operator.
 		///
@@ -160,6 +180,21 @@ namespace toml
 		}
 
 		/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
+		/// \detail \cpp
+		/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
+		/// std::cout << toml::time_offset{ 2, -30 } << std::endl;
+		/// std::cout << toml::time_offset{} << std::endl;
+		/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
+		/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
+		/// \ecpp
+		/// 
+		/// \out
+		/// +02:30
+		/// +01:30
+		/// Z
+		/// -01:30
+		/// -02:30
+		/// \eout
 		template <typename CHAR>
 		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
 			TOML_MAY_THROW
@@ -180,6 +215,35 @@ namespace toml
 		///
 		/// \remarks The date_time is said to be 'local' if the time_offset is empty.
 		std::optional<toml::time_offset> time_offset;
+
+		/// \brief	Default-constructs a zero date-time.
+		TOML_NODISCARD_CTOR
+		constexpr date_time() noexcept
+			: date{},
+			time{}
+		{}
+
+		/// \brief	Constructs a local date-time.
+		///
+		/// \param 	d	The date component.
+		/// \param 	t	The time component.
+		TOML_NODISCARD_CTOR
+		constexpr date_time(toml::date d, toml::time t) noexcept
+			: date{ d },
+			time{ t }
+		{}
+
+		/// \brief	Constructs an offset date-time.
+		///
+		/// \param 	d	  	The date component.
+		/// \param 	t	  	The time component.
+		/// \param 	offset	The timezone offset.
+		TOML_NODISCARD_CTOR
+			constexpr date_time(toml::date d, toml::time t, toml::time_offset offset) noexcept
+			: date{ d },
+			time{ t },
+			time_offset{ offset }
+		{}
 
 		/// \brief	Returns true if this date_time does not contain timezone offset information.
 		[[nodiscard]]
@@ -217,6 +281,17 @@ namespace toml
 		}
 
 		/// \brief	Prints a date_time out to a stream in RFC 3339 format.
+		/// \detail \cpp
+		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << std::endl;
+		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, { -2, -30 } } << std::endl;
+		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, {} } << std::endl;
+		/// \ecpp
+		/// 
+		/// \out
+		/// 1987-03-16T10:20:34
+		/// 1987-03-16T10:20:34-02:30
+		/// 1987-03-16T10:20:34Z
+		/// \eout
 		template <typename CHAR>
 		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
 			TOML_MAY_THROW

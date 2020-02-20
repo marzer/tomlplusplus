@@ -114,7 +114,7 @@ def main():
 	match = re.search(r'^\s*#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)\s*$', source_text, re.I | re.M)
 	if match is not None:
 		library_version[1] = match.group(1)
-	match = re.search(r'^\s*#\s*define\s+TOML_LIB_REVISION\s+([0-9]+)\s*$', source_text, re.I | re.M)
+	match = re.search(r'^\s*#\s*define\s+TOML_LIB_(?:REVISION|PATCH)\s+([0-9]+)\s*$', source_text, re.I | re.M)
 	if match is not None:
 		library_version[2] = match.group(1)
 

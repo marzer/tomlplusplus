@@ -123,7 +123,6 @@ namespace toml
 	{
 		private:
 			friend class impl::parser;
-			friend class node_view<table>;
 
 			impl::string_map<std::unique_ptr<node>> values;
 			bool inline_ = false;
@@ -198,6 +197,9 @@ namespace toml
 				return *this;
 			}
 
+			table(const table&) = delete;
+			table& operator= (const table&) = delete;
+
 			/// \brief	Always returns `node_type::table` for table nodes.
 			[[nodiscard]] node_type type() const noexcept override { return node_type::table; }
 			/// \brief	Always returns `true` for table nodes.
@@ -256,17 +258,17 @@ namespace toml
 			///
 			/// \param 	key The key used for the lookup.
 			///
-			/// \returns	A node_view.
+			/// \returns	A view of the value at the given key if one existed, or an empty node view.
 			///
 			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
 			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			[[nodiscard]] inline node_view<table> operator[] (string_view key) noexcept;
+			[[nodiscard]] inline node_view<node> operator[] (string_view key) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair (const overload).
-			[[nodiscard]] inline node_view<const table> operator[] (string_view key) const noexcept;
+			[[nodiscard]] inline node_view<const node> operator[] (string_view key) const noexcept;
 
 			/// \brief	Returns an iterator to the first key-value pair.
 			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
@@ -302,7 +304,7 @@ namespace toml
 			/// for (auto k : { "a", "d" })
 			/// {
 			///		auto result = tbl.insert(k, 42);
-			///		std::cout << "inserted a value with key '"sv << k << "': "sv << result.second << std::endl;
+			///		std::cout << "inserted with key '"sv << k << "': "sv << result.second << std::endl;
 			/// }
 			/// std::cout << tbl << std::endl;
 			/// 
@@ -310,8 +312,8 @@ namespace toml
 			/// 
 			/// \out
 			/// { a = 1, b = 2, c = 3 }
-			/// inserted a value with key 'a': false
-			/// inserted a value with key 'd': true
+			/// inserted with key 'a': false
+			/// inserted with key 'd': true
 			/// { a = 1, b = 2, c = 3, d = 42 }
 			/// \eout
 			/// 
@@ -365,7 +367,7 @@ namespace toml
 			/// \param 	first	An iterator to the first value in the input collection.
 			/// \param 	last	An iterator to one-past-the-last value in the input collection.
 			/// 
-			/// \remarks This function is morally equivalent to calling insert(key, value) for each
+			/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 			/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 			/// 		 table will not be replaced.
 			template <typename ITER, typename = std::enable_if_t<
@@ -449,7 +451,7 @@ namespace toml
 			/// {
 			///		// add a string using std::string's substring constructor
 			///		auto result = tbl.emplace<std::string>(k, "this is not a drill"sv, 14, 5);
-			///		std::cout << "emplaced a value with key '"sv << k << "': "sv << result.second << std::endl;
+			///		std::cout << "emplaced with key '"sv << k << "': "sv << result.second << std::endl;
 			/// }
 			/// std::cout << tbl << std::endl;
 			/// 
@@ -457,8 +459,8 @@ namespace toml
 			/// 
 			/// \out
 			/// { a = 1, b = 2, c = 3 }
-			/// emplaced a value with key 'a': false
-			/// emplaced a value with key 'd': true
+			/// emplaced with key 'a': false
+			/// emplaced with key 'd': true
 			/// { a = 1, b = 2, c = 3, d = "drill" }
 			/// \eout
 			/// 

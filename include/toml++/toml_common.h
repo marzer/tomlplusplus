@@ -90,6 +90,10 @@
 	#define TOML_INTERFACE					__declspec(novtable)
 	#define TOML_EMPTY_BASES				__declspec(empty_bases)
 
+	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
+		#define TOML_RELOPS_REORDERING 1
+	#endif
+
 #elif defined(__GNUC__)
 
 	#ifndef __cpp_exceptions
@@ -112,6 +116,10 @@
 	//floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_USE_STREAMS_FOR_FLOATS
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
+	#endif
+
+	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
+		#define TOML_RELOPS_REORDERING 1
 	#endif
 
 #endif
@@ -209,6 +217,17 @@
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
 #endif
+#ifndef TOML_RELOPS_REORDERING
+	#define TOML_RELOPS_REORDERING 0
+#endif
+#if TOML_RELOPS_REORDERING
+	#define TOML_ASYMMETRICAL_EQUALITY_OPS(...)
+#else
+	#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
+		__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
+		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
+#endif
 
 #include "toml_version.h"
 
@@ -217,10 +236,10 @@
 
 #if TOML_UNRELEASED_FEATURES
 	#define TOML_LANG_EFFECTIVE_VERSION												\
-		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION+1)
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH+1)
 #else
 	#define TOML_LANG_EFFECTIVE_VERSION												\
-		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_REVISION)
+		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 #endif
 
 #define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
@@ -231,6 +250,7 @@
 
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
+
 
 ////////// INCLUDES
 
@@ -321,6 +341,7 @@ namespace toml
 	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t
 	{
+		none, ///< Not-a-node.
 		table, ///< The node is a toml::table.
 		array,  ///< The node is a toml::array.
 		string,  ///< The node is a toml::value<toml::string>.
@@ -745,7 +766,7 @@ namespace toml::impl
 	template <> struct node_type_of_<date_time> { static constexpr auto value = node_type::date_time; };
 
 	template <typename T>
-	inline constexpr auto node_type_of = node_type_of_<promoted<typename node_unwrapper<T>::type>>::value;
+	inline constexpr auto node_type_of = node_type_of_<promoted<typename node_unwrapper<remove_cvref_t<T>>::type>>::value;
 
 	inline constexpr toml::string_view low_character_escape_table[] =
 	{
@@ -785,6 +806,7 @@ namespace toml::impl
 
 	inline constexpr std::string_view node_type_friendly_names[] =
 	{
+		"none"sv,
 		"table"sv,
 		"array"sv,
 		"string"sv,
@@ -836,6 +858,9 @@ namespace toml
 	/// \brief	Metafunction for determining if a type is a double or toml::value<double>.
 	template <typename T>
 	inline constexpr bool is_floating_point = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<double>>;
+	/// \brief	Metafunction for determining if a type satisfies `toml::is_integer || toml::is_floating_point`.
+	template <typename T>
+	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
 	/// \brief	Metafunction for determining if a type is a bool toml::value<bool>.
 	template <typename T>
 	inline constexpr bool is_boolean = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<bool>>;

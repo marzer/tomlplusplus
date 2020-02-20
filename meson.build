@@ -13,7 +13,7 @@ project(
 compiler = meson.get_compiler('cpp')
 
 if compiler.get_id() == 'gcc'
-	add_project_arguments(['-fmax-errors=5', '-Wno-attributes'], language : 'cpp')
+	add_project_arguments(['-fmax-errors=5', '-Wno-attributes', '-Wno-init-list-lifetime' ], language : 'cpp')
 endif
 
 if compiler.get_id() == 'clang'

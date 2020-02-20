@@ -131,7 +131,7 @@ str = ''''That's still pointless', she said.'''
 	     S("\"\u03B1\u03B2\u03B3\""sv));
 
 	// toml/issues/622 - escaping alias for spaces
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	#if 0 && TOML_LANG_HIGHER_THAN(0, 5, 0)
 	parse_expected_value(
 		R"("The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));

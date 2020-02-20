@@ -178,15 +178,12 @@ namespace toml::impl
 namespace toml
 {
 	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
-	[[nodiscard]] bool operator != (const table& lhs, const table& rhs) noexcept;
 
 	/// \brief	A TOML array.
 	///
-	/// \remarks The interface of this type is modeled after std::vector, with some
+	/// \detail The interface of this type is modeled after std::vector, with some
 	/// 		additional considerations made for the heterogeneous nature of a
-	/// 		TOML array.
-	/// 
-	/// \detail \cpp
+	/// 		TOML array. \cpp
 	/// 
 	/// auto tbl = toml::parse("arr = [1, 2, 3, 4, 'five']"sv);
 	/// auto& arr = *tbl.get_as<toml::array>("arr");
@@ -196,9 +193,9 @@ namespace toml
 	/// {
 	///		arr[i].visit([=](auto&& el) noexcept
 	///		{
-	///			if constexpr (toml::is_integer<decltype(el)>)
+	///			if constexpr (toml::is_number<decltype(el)>)
 	///				(*el)++;
-	///			else
+	///			else if constexpr (toml::is_string<decltype(el)>)
 	///				el = "six"sv;
 	///		});
 	/// }
@@ -302,6 +299,9 @@ namespace toml
 				values = std::move(rhs.values);
 				return *this;
 			}
+
+			array(const array&) = delete;
+			array& operator= (const array&) = delete;
 
 			/// \brief	Always returns node_type::array for array nodes.
 			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
@@ -807,6 +807,31 @@ namespace toml
 
 		private:
 
+			template <typename T>
+			[[nodiscard]] static bool container_equality(const array& lhs, const T& rhs) noexcept
+			{
+				using elem_t = std::remove_const_t<typename T::value_type>;
+				static_assert(
+					impl::is_value_or_promotable<elem_t>,
+					"Container element type must be (or be promotable to) one of the TOML value types"
+				);
+
+				if (lhs.size() != rhs.size())
+					return false;
+				if (rhs.size() == 0_sz)
+					return true;
+
+				size_t i{};
+				for (auto& list_elem : rhs)
+				{
+					const auto elem = lhs.get_as<impl::promoted<elem_t>>(i++);
+					if (!elem || *elem != list_elem)
+						return false;
+				}
+
+				return true;
+			}
+
 			[[nodiscard]] size_t total_leaf_count() const noexcept
 			{
 				size_t leaves{};
@@ -835,6 +860,22 @@ namespace toml
 			}
 
 		public:
+
+			/// \brief	Initializer list equality operator.
+			template <typename T>
+			[[nodiscard]] friend bool operator == (const array& lhs, const std::initializer_list<T>& rhs) noexcept
+			{
+				return container_equality(lhs, rhs);
+			}
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
+
+			/// \brief	Vector equality operator.
+			template <typename T>
+			[[nodiscard]] friend bool operator == (const array& lhs, const std::vector<T>& rhs) noexcept
+			{
+				return container_equality(lhs, rhs);
+			}
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
 
 			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
 			/// 

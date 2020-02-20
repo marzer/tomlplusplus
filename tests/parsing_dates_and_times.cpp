@@ -18,13 +18,13 @@ lt2 = 00:32:00.999999
 )"sv),
 		[](table&& tbl) noexcept
 		{
-			static constexpr auto odt1 = date_time{ { 1979, 5, 27 }, { 7, 32 }, time_offset{} };
+			static constexpr auto odt1 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
 			CHECK(tbl[S("odt1")] == odt1);
-			static constexpr auto odt2 = date_time{ { 1979, 5, 27 }, { 0, 32 }, time_offset::from_hh_mm(-7, 0) };
+			static constexpr auto odt2 = date_time{ { 1979, 5, 27 }, { 0, 32 }, { -7, 0 } };
 			CHECK(tbl[S("odt2")] == odt2);
-			static constexpr auto odt3 = date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, time_offset::from_hh_mm(-7, 0) };
+			static constexpr auto odt3 = date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, { -7, 0 } };
 			CHECK(tbl[S("odt3")] == odt3);
-			static constexpr auto odt4 = date_time{ { 1979, 5, 27 }, { 7, 32 }, time_offset{} };
+			static constexpr auto odt4 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
 			CHECK(tbl[S("odt4")] == odt4);
 			static constexpr auto ldt1 = date_time{ { 1979, 5, 27 }, { 7, 32 } };
 			CHECK(tbl[S("ldt1")] == ldt1);
@@ -49,12 +49,12 @@ lt2 = 00:32:00.999999
 		parse_expected_value("1987-03-16 10:20:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, time_offset::from_hh_mm( -9, -30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, { -9, -30 } };
 		parse_expected_value("1987-03-16T10:20:30-09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20:30-09:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, time_offset::from_hh_mm( 9, 30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, { 9, 30 } };
 		parse_expected_value("1987-03-16T10:20:30+09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20:30+09:30"sv, val);
 	}
@@ -64,22 +64,22 @@ lt2 = 00:32:00.999999
 		parse_expected_value("1987-03-16 10:20:30.04"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, time_offset::from_hh_mm( -9, -30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, { -9, -30 } };
 		parse_expected_value("1987-03-16T10:20:30.04-09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20:30.04-09:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, time_offset::from_hh_mm( 9, 30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, { 9, 30 } };
 		parse_expected_value("1987-03-16T10:20:30.04+09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20:30.04+09:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, time_offset{} };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, {} };
 		parse_expected_value("1987-03-16T10:20:30Z"sv, val);
 		parse_expected_value("1987-03-16 10:20:30Z"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, time_offset{} };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, {} };
 		parse_expected_value("1987-03-16T10:20:30.04Z"sv, val);
 		parse_expected_value("1987-03-16 10:20:30.04Z"sv, val);
 	}
@@ -94,17 +94,17 @@ lt2 = 00:32:00.999999
 		parse_expected_value("1987-03-16 10:20"sv, val );
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, time_offset::from_hh_mm( -9, -30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, { -9, -30 } };
 		parse_expected_value("1987-03-16T10:20-09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20-09:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, time_offset::from_hh_mm( 9, 30 ) };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, { 9, 30 } };
 		parse_expected_value("1987-03-16T10:20+09:30"sv, val);
 		parse_expected_value("1987-03-16 10:20+09:30"sv, val);
 	}
 	{
-		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, time_offset{} };
+		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, {} };
 		parse_expected_value("1987-03-16T10:20Z"sv, val);
 		parse_expected_value("1987-03-16 10:20Z"sv, val);
 	}

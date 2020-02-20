@@ -6,8 +6,6 @@ namespace toml
 {
 	/// \brief	A TOML value.
 	/// 		
-	/// \extends ::toml::node
-	/// 		
 	/// \tparam	T	The value's data type. Can be one of:
 	/// 			- toml::string
 	/// 			- int64_t
@@ -68,6 +66,9 @@ namespace toml
 				val_ = std::move(rhs.val_);
 				return *this;
 			}
+
+			value(const value&) = delete;
+			value& operator= (const value&) = delete;
 
 			/// \brief	Returns the value's node type identifier.
 			///
@@ -195,12 +196,7 @@ namespace toml
 
 			/// \brief	Value equality operator.
 			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
-			/// \brief	Value equality operator.
-			[[nodiscard]] friend bool operator == (value_arg_t lhs, const value& rhs) noexcept { return lhs == rhs.val_; }
-			/// \brief	Value inequality operator.
-			[[nodiscard]] friend bool operator != (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ != rhs; }
-			/// \brief	Value inequality operator.
-			[[nodiscard]] friend bool operator != (value_arg_t lhs, const value& rhs) noexcept { return lhs != rhs.val_; }
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg_t, )
 
 			/// \brief	Value less-than operator.
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ < rhs; }
@@ -244,10 +240,7 @@ namespace toml
 			template <typename U>
 			[[nodiscard]] friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
-					return lhs.val_ != rhs.val_;
-				else
-					return true;
+				return !(lhs == rhs);
 			}
 
 			/// \brief	Less-than operator.

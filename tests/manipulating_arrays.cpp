@@ -96,6 +96,23 @@ TEST_CASE("arrays - equality")
 {
 	array arr1{ 1, 2, 3 };
 	CHECK(arr1 == arr1);
+	{
+		auto ilist = { 1, 2, 3 };
+		CHECK(arr1 == ilist);
+		CHECK(ilist == arr1);
+
+		ilist = { 2, 3, 4 };
+		CHECK(arr1 != ilist);
+		CHECK(ilist != arr1);
+
+		auto ivec = std::vector{ 1, 2, 3 };
+		CHECK(arr1 == ivec);
+		CHECK(ivec == arr1);
+
+		ivec = std::vector{ 2, 3, 4 };
+		CHECK(arr1 != ivec);
+		CHECK(ivec != arr1);
+	}
 
 	array arr2{ 1, 2, 3 };
 	CHECK(arr1 == arr2);

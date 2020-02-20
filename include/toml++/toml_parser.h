@@ -597,6 +597,7 @@ namespace toml::impl
 							case U'n': str += TOML_STRING_PREFIX('\n'); break;
 							case U'r': str += TOML_STRING_PREFIX('\r'); break;
 
+							#if 0
 							case U's':
 							{
 								if constexpr (!TOML_LANG_HIGHER_THAN(0, 5, 0)) // toml/issues/622
@@ -612,6 +613,7 @@ namespace toml::impl
 									break;
 								}
 							}
+							#endif
 							 
 							case U't': str += TOML_STRING_PREFIX('\t'); break;
 							case U'"': str += TOML_STRING_PREFIX('"'); break;
@@ -1925,7 +1927,8 @@ namespace toml::impl
 								" offset; expected minute between 0 and 59 (inclusive), saw "sv, hour
 							);
 
-						offset.emplace(time_offset{ static_cast<int16_t>((hour * 60 + minute) * sign) });
+						offset.emplace();
+						offset->minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
 					}
 				}
 
@@ -1937,11 +1940,10 @@ namespace toml::impl
 					);
 
 				TOML_ERROR_CHECK({});
-				return {
-					date,
-					time,
-					offset
-				};
+				if (offset)
+					return { date, time, *offset };
+				else
+					return { date, time };
 			}
 
 			// TOML_DISABLE_SWITCH_WARNINGS
