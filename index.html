@@ -95,7 +95,7 @@ C++17</span></a>
     
     <span class="n">do_stuff_with_your_config</span><span class="p">(</span><span class="n">tbl</span><span class="p">);</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre><p>When exceptions are disabled parsing methods return a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> and it is up to the caller to check if parsing has been successful by examining the return value:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="p">}</span></pre><p>When exceptions are disabled parsing methods return a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> and it is up to the caller to check if parsing has been successful by examining the return value:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;fstream&gt; //required for parse_file()</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
 <span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
@@ -115,7 +115,7 @@ C++17</span></a>
     
     <span class="n">do_stuff_with_your_config</span><span class="p">(</span><span class="n">tbl</span><span class="p">);</span> <span class="c1">//toml::parse_result is convertible to toml::table</span>
     <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
-<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a499d47883d3052327269509da09e6aa3">toml::<wbr/>parse_file()</a></p></aside></section><section id="mainpage-example-parsing-strings"><h3><a href="#mainpage-example-parsing-strings">Parsing TOML directly from strings</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="namespacetoml.html#a499d47883d3052327269509da09e6aa3">toml::<wbr/>parse_file()</a><br/></li><li><a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a><br/></li><li><a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a></li></ul></aside></section><section id="mainpage-example-parsing-strings"><h3><a href="#mainpage-example-parsing-strings">Parsing TOML directly from strings</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
 <span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
 
@@ -140,7 +140,7 @@ cpp = 17
 [library]
 authors = ["Mark Gillard &lt;mark@notarealwebsite.com&gt;"]
 name = "toml++"
-version = "0.1.0"</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a></p></aside></section><section id="mainpage-example-manipulations"><h3><a href="#mainpage-example-manipulations">Traversing and manipulating data</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+version = "0.1.0"</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a><br/></p></aside></section><section id="mainpage-example-manipulations"><h3><a href="#mainpage-example-manipulations">Traversing and manipulating data</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
 <span class="k">using</span> <span class="k">namespace</span> <span class="ns">std::</span><span class="n">string_view_literals</span><span class="p">;</span>
 
@@ -189,7 +189,7 @@ version = "0.1.0"</pre><aside class="m-note m-default"><h4>See also</h4><p><a cl
 'numbers': [1, 2, 3, "four", 5.0]
 'numbers': [2, 3, 4, "five", 6.0, 7, [8, 9]]
 'cats': ["tiger", "lion", "puma"]
-'dinosaurs':</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></p></aside></section><section id="mainpage-example-serialization"><h3><a href="#mainpage-example-serialization">Serializing as TOML and JSON</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
+'dinosaurs':</pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a></li><li><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></li><li><a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a></li><li><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></li></ul></aside></section><section id="mainpage-example-serialization"><h3><a href="#mainpage-example-serialization">Serializing as TOML and JSON</a></h3><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
 
 <span class="ut">int</span> <span class="nf">main</span><span class="p">()</span>
@@ -242,7 +242,7 @@ twitter = "https://twitter.com/marzer8789"
         "0.5.0",
         "and beyond"
     ]
-}</pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1default__formatter.html">toml::<wbr/>default_formatter</a>, <a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></p></aside></section></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>See the <a href="https://github.com/marzer/tomlplusplus/blob/master/README.md#contributing">Contributing</a> section of the repository README.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</a>.</p><p>UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder">LICENSE-utf8-decoder</a>.</p></section>
+}</pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1default__formatter.html">toml::<wbr/>default_formatter</a></li><li><a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></li></ul></aside></section></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>See the <a href="https://github.com/marzer/tomlplusplus/blob/master/README.md#contributing">Contributing</a> section of the repository README.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</a>.</p><p>UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder">LICENSE-utf8-decoder</a>.</p></section>
       </div>
     </div>
   </div>
