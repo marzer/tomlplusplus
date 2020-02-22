@@ -4,7 +4,7 @@
 #include "toml_array.h"
 #include "toml_utf8.h"
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
@@ -131,8 +131,9 @@ namespace toml::impl
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
 	/// 
@@ -494,3 +495,4 @@ namespace toml
 		return lhs << default_formatter<CHAR>{ rhs };
 	}
 }
+TOML_END

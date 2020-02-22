@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_print_to_stream.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
@@ -18,8 +18,9 @@ namespace toml
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
+TOML_END
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <typename CHAR = char>
 	class formatter
@@ -142,3 +143,4 @@ namespace toml::impl
 			{}
 	};
 }
+TOML_IMPL_END

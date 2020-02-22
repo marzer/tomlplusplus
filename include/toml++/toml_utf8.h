@@ -4,7 +4,7 @@
 #include "toml_utf8_generated.h"
 #endif // TOML_LANG_HIGHER_THAN(0, 5, 0)
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
@@ -603,4 +603,4 @@ namespace toml::impl
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 }
-
+TOML_IMPL_END

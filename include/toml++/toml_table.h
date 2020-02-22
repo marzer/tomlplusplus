@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_array.h"
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <bool is_const>
 	struct table_proxy_pair final
@@ -109,8 +109,9 @@ namespace toml::impl
 		{}
 	};
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	/// \brief	A TOML table.
 	/// 
@@ -778,3 +779,4 @@ namespace toml
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
 	};
 }
+TOML_END

@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_date_time.h"
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
@@ -115,7 +115,7 @@ namespace toml::impl
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename T, typename CHAR>
-	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream, bool hexfloat = false) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -133,6 +133,9 @@ namespace toml::impl
 		#if TOML_USE_STREAMS_FOR_FLOATS
 		{
 			std::ostringstream oss;
+			oss.precision(std::numeric_limits<T>::digits10 + 1);
+			if (hexfloat)
+				oss << std::hexfloat;
 			oss << val;
 			const auto str = oss.str();
 			print_to_stream(str, stream);
@@ -142,7 +145,9 @@ namespace toml::impl
 		#else
 		{
 			TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
-			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+			const auto res = hexfloat
+				? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
+				: std::to_chars(buf, buf + sizeof(buf), val);
 			const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
 			print_to_stream(str, stream);
 			if (needs_decimal_point(str))
@@ -283,8 +288,9 @@ namespace toml::impl
 
 	TOML_POP_WARNINGS
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	template <typename CHAR>
 	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
@@ -319,3 +325,4 @@ namespace toml
 		return lhs;
 	}
 }
+TOML_END

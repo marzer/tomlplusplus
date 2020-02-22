@@ -5,6 +5,13 @@
 [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](https://github.com/marzer/tomlplusplus/blob/master/LICENSE)  
 
 `toml++` is a header-only toml parser and serializer for C++17, C++20 and whatever comes after.
+ - Fully [TOML v0.5.0]-compliant
+ - Modern C++17 (with some C++20 features where supported)
+ - Proper UTF-8 handling (incl. BOM)
+ - Works with or without exceptions
+ - Doesn't require RTTI
+ - First-class support for serializing to JSON
+ - Supports a number of 'unreleased' TOML features (optional)
 
 <br>
 
@@ -25,10 +32,10 @@ Reading it in C++ is easy with `toml++`:
 auto config = toml::parse_file( "configuration.toml" );
 
 // get key-value pairs
-std::string_view library_name = config["library"]["name"].as_string()->get();
-std::string_view library_version = config["library"]["version"].as_string()->get();
-std::string_view library_author = config["library"]["authors"][0].as_string()->get();
-int64_t depends_on_cpp_version = config["dependencies"]["cpp"].as_integer()->get();
+std::string_view library_name = config["library"]["name"].value_or(""sv);
+std::string_view library_version = config["library"]["version"].value_or(""sv);
+std::string_view library_author = config["library"]["authors"][0].value_or(""sv);
+int64_t depends_on_cpp_version = config["dependencies"]["cpp"].value_or(0);
 
 // modify the data
 config.insert_or_assign("alternatives", toml::array{
@@ -80,7 +87,7 @@ won't need to mess with these at all, butif you do, set them before including to
 | Option                     |      Type      | Default                           | Description                                                                                              |
 |----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                            |
-| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type.                                         |
+| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                   |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                           |
 | `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                    |
 | `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it. |

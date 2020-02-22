@@ -3,7 +3,7 @@
 #include "toml_array.h"
 #include "toml_value.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	A view of a node.
 	/// 
@@ -77,31 +77,29 @@ namespace toml
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
 
 			/// \brief	Returns true if the viewed node is a toml::table.
-			[[nodiscard]] bool is_table() const noexcept { return type() == node_type::table; }
+			[[nodiscard]] bool is_table() const noexcept { return node_ && node_->is_table(); }
 			/// \brief	Returns true if the viewed node is a toml::array.
-			[[nodiscard]] bool is_array() const noexcept { return type() == node_type::array; }
+			[[nodiscard]] bool is_array() const noexcept { return node_ && node_->is_array(); }
 			/// \brief	Returns true if the viewed node is a toml::value<>.
-			[[nodiscard]] bool is_value() const noexcept { return type() > node_type::array; }
+			[[nodiscard]] bool is_value() const noexcept { return node_ && node_->is_value(); }
 			/// \brief	Returns true if the viewed node is a toml::value<string>.
-			[[nodiscard]] bool is_string() const noexcept { return type() == node_type::string; }
+			[[nodiscard]] bool is_string() const noexcept { return node_ && node_->is_string(); }
 			/// \brief	Returns true if the viewed node is a toml::value<int64_t>.
-			[[nodiscard]] bool is_integer() const noexcept { return type() == node_type::integer; }
+			[[nodiscard]] bool is_integer() const noexcept { return node_ && node_->is_integer(); }
 			/// \brief	Returns true if the viewed node is a toml::value<double>.
-			[[nodiscard]] bool is_floating_point() const noexcept { return type() == node_type::floating_point; }
+			[[nodiscard]] bool is_floating_point() const noexcept { return node_ && node_->is_floating_point(); }
+			/// \brief	Returns true if the viewed node is a toml::value<int64_t> or toml::value<double>.
+			[[nodiscard]] bool is_number() const noexcept { return node_ && node_->is_number(); }
 			/// \brief	Returns true if the viewed node is a toml::value<bool>.
-			[[nodiscard]] bool is_boolean() const noexcept { return type() == node_type::boolean; }
+			[[nodiscard]] bool is_boolean() const noexcept { return node_ && node_->is_boolean(); }
 			/// \brief	Returns true if the viewed node is a toml::value<date>.
-			[[nodiscard]] bool is_date() const noexcept { return type() == node_type::date; }
+			[[nodiscard]] bool is_date() const noexcept { return node_ && node_->is_date(); }
 			/// \brief	Returns true if the viewed node is a toml::value<time>.
-			[[nodiscard]] bool is_time() const noexcept { return type() == node_type::time; }
+			[[nodiscard]] bool is_time() const noexcept { return node_ && node_->is_time(); }
 			/// \brief	Returns true if the viewed node is a toml::value<date_time>.
-			[[nodiscard]] bool is_date_time() const noexcept { return type() == node_type::date_time; }
-
+			[[nodiscard]] bool is_date_time() const noexcept { return node_ && node_->is_date_time(); }
 			/// \brief	Returns true if the viewed node is a toml::array that contains only tables.
-			[[nodiscard]] bool is_array_of_tables() const noexcept
-			{
-				return node_ ? node_->is_array_of_tables() : false;
-			}
+			[[nodiscard]] bool is_array_of_tables() const noexcept { return node_ && node_->is_array_of_tables(); }
 
 			/// \brief	Checks if this view references a node of a specific type.
 			///
@@ -177,6 +175,51 @@ namespace toml
 			[[nodiscard]] const value<date>* as_date() const noexcept { return as<date>(); }
 			[[nodiscard]] const value<time>* as_time() const noexcept { return as<time>(); }
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
+
+			/// \brief	Gets the raw value represented by the viewed value node, or a default.
+			///
+			/// \detail The underlying node is retrieved as if it were a value of the input default value's
+			/// 		type. For example, if you specify an integral default value, you'll only get
+			/// 		a non-default return value if the underlying node existed _and_ was an integer:\cpp
+			/// auto tbl = toml::parse(R"(
+			///	int = 42
+			/// flt = 420.0
+			/// bln = false
+			/// )"sv);
+			/// 
+			/// std::cout << "accessing 'int' as an integer: "sv << tbl["int"].value_or(-1) << std::endl;
+			/// std::cout << "accessing 'int' as a float: "sv << tbl["int"].value_or(-1.0) << std::endl;
+			/// std::cout << "accessing 'flt' as a float: "sv << tbl["flt"].value_or(-1.0f) << std::endl;
+			/// \ecpp
+			/// 
+			/// \out
+			/// accessing 'int' as an integer: 42
+			/// accessing 'int' as a float: -1.0
+			/// accessing 'flt' as a float: 420.0
+			/// \eout
+			/// 
+			/// \tparam	U	Default value type. Must be (or be promotable to) one of the TOML value types.
+			/// \param 	default_value	The default value to return if no matching node was found.
+			///
+			/// \returns	The selected value, or the default if no match was found.
+			template <typename U>
+			[[nodiscard]] auto value_or(U&& default_value) const noexcept
+			{
+				static_assert(
+					impl::is_value_or_promotable<impl::remove_cvref_t<U>>,
+					"Default value type must be (or be promotable to) one of the TOML value types"
+				);
+
+				using value_type = impl::promoted<impl::remove_cvref_t<U>>;
+				using return_type = std::conditional_t<
+					std::is_same_v<value_type, string>,
+					std::conditional_t<std::is_same_v<impl::remove_cvref_t<U>, string>, string, string_view>,
+					value_type
+				>;
+				if (auto val = node_ ? node_->template as<value_type>() : nullptr)
+					return return_type{ **val };
+				return return_type{ std::forward<U>(default_value) };
+			}
 
 		private:
 
@@ -348,3 +391,4 @@ namespace toml
 		return { this->get(key) };
 	}
 }
+TOML_END

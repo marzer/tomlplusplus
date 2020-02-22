@@ -1,6 +1,6 @@
-#include <toml++/toml.h>
 #include <iostream>
 #include <fstream>
+#include <toml++/toml.h>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>

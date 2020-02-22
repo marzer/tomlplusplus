@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_value.h"
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <bool is_const>
 	class array_iterator final
@@ -174,8 +174,9 @@ namespace toml::impl
 		}
 	}
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
 
@@ -945,3 +946,4 @@ namespace toml
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 	};
 }
+TOML_END

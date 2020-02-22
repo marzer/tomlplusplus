@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_formatter.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
 	///
@@ -160,4 +160,4 @@ namespace toml
 		base::clear_naked_newline();
 	}
 }
-
+TOML_END

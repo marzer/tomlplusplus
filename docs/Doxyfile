@@ -339,6 +339,9 @@ PREDEFINED             = TOML_DOXYGEN=1 \
 						 TOML_ALWAYS_INLINE=inline \
 						 TOML_MAY_THROW= \
 						 TOML_NODISCARD_CTOR= \
+						 TOML_ASYMMETRICAL_EQUALITY_OPS= \
+						 TOML_START="namespace toml" \
+						 TOML_END= \
 						 __cpp_lib_char8_t=201811L
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO

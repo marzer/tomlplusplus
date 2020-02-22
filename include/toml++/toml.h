@@ -20,7 +20,6 @@
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_EXCEPTIONS
 	#undef TOML_USE_STREAMS_FOR_FLOATS
 	#undef TOML_GCC_ATTR
 	#undef TOML_PUSH_WARNINGS
@@ -54,6 +53,10 @@
 	#undef TOML_DOXYGEN
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
+	#undef TOML_START
+	#undef TOML_END
+	#undef TOML_IMPL_START
+	#undef TOML_IMPL_END
 #endif
 
 /// \mainpage toml++
@@ -126,7 +129,7 @@
 /// 
 /// \ecpp
 /// 
-/// When exceptions are disabled parsing methods return a toml::parse_error and it is up to the caller
+/// When exceptions are disabled parsing methods return a toml::parse_result and it is up to the caller
 /// to check if parsing has been successful by examining the return value:
 /// \cpp
 /// #include <iostream>
@@ -151,7 +154,11 @@
 /// 	return 0;
 /// }
 /// \ecpp
-/// \see toml::parse_file()
+/// 
+/// \see
+///		- toml::parse_file()  
+///		- toml::parse_result  
+///		- toml::parse_error
 /// 
 ///////////////////////////////////
 /// 
@@ -189,7 +196,7 @@
 /// name = "toml++"
 /// version = "0.1.0"
 /// \eout
-/// \see toml::parse()
+/// \see toml::parse()  
 /// 
 ///////////////////////////////////
 /// 
@@ -252,7 +259,11 @@
 /// 'dinosaurs':
 /// \eout
 /// 
-/// \see toml::node, toml::node_view, toml::array, toml::table
+/// \see
+/// 	- toml::node
+/// 	- toml::node_view
+/// 	- toml::array
+/// 	- toml::table
 /// 
 ///////////////////////////////////
 /// 
@@ -317,7 +328,9 @@
 ///     ]
 /// }
 /// \eout
-/// \see toml::default_formatter, toml::json_formatter
+/// \see
+///		- toml::default_formatter
+///		- toml::json_formatter
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 

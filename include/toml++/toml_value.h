@@ -2,7 +2,7 @@
 #include "toml_node.h"
 #include "toml_print_to_stream.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	A TOML value.
 	/// 		
@@ -92,6 +92,7 @@ namespace toml
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
 			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
 			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
+			[[nodiscard]] bool is_number() const noexcept override { return impl::is_one_of<T, int64_t, double>; }
 			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<T, bool>; }
 			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
@@ -326,6 +327,9 @@ namespace toml
 	value(uint8_t) -> value<int64_t>;
 	value(uint16_t) -> value<int64_t>;
 	value(uint32_t) -> value<int64_t>;
+	value(date) -> value<date>;
+	value(time) -> value<time>;
+	value(date_time) -> value<date_time>;
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
 	#endif
@@ -333,3 +337,4 @@ namespace toml
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 }
+TOML_END

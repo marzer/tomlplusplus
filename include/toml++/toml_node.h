@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_common.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	A TOML node.
 	///
@@ -69,6 +69,8 @@ namespace toml
 			[[nodiscard]] virtual bool is_integer() const noexcept { return false; }
 			/// \brief	Returns true if this node is an floating-point value.
 			[[nodiscard]] virtual bool is_floating_point() const noexcept { return false; }
+			/// \brief	Returns true if this node is an integer or floating-point value.
+			[[nodiscard]] virtual bool is_number() const noexcept { return false; }
 			/// \brief	Returns true if this node is a boolean value.
 			[[nodiscard]] virtual bool is_boolean() const noexcept { return false; }
 			/// \brief	Returns true if this node is a local date value.
@@ -400,3 +402,4 @@ namespace toml
 			}
 	};
 }
+TOML_END

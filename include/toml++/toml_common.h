@@ -229,6 +229,17 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
+#if !TOML_DOXYGEN
+	#if TOML_EXCEPTIONS
+		#define TOML_START	namespace toml { inline namespace wex
+	#else
+		#define TOML_START	namespace toml { inline namespace woex
+	#endif
+	#define TOML_END			}
+#endif
+#define TOML_IMPL_START			TOML_START { namespace impl
+#define TOML_IMPL_END			} TOML_END
+
 #include "toml_version.h"
 
 #define TOML_MAKE_VERSION(maj, min, rev)											\
@@ -292,7 +303,9 @@ TOML_POP_WARNINGS
 // clang-format on
 
 /// \brief	The root namespace for all toml++ functions and types.
-namespace toml
+namespace toml { }
+
+TOML_START
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
@@ -621,9 +634,9 @@ namespace toml
 
 	TOML_POP_WARNINGS
 }
+TOML_END
 
-/// \brief	Internal implementation details. No user-serviceable parts within.
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
@@ -840,8 +853,9 @@ namespace toml::impl
 
 	#undef TOML_P2S_DECL
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	/// \brief	Metafunction for determining if a type is a toml::table.
 	template <typename T>
@@ -905,3 +919,4 @@ namespace toml
 		}
 	}
 }
+TOML_END

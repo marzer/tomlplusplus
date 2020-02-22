@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.1.0
+// toml++ v0.2.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -293,8 +293,19 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
+#if !TOML_DOXYGEN
+	#if TOML_EXCEPTIONS
+		#define TOML_START	namespace toml { inline namespace wex
+	#else
+		#define TOML_START	namespace toml { inline namespace woex
+	#endif
+	#define TOML_END			}
+#endif
+#define TOML_IMPL_START			TOML_START { namespace impl
+#define TOML_IMPL_END			} TOML_END
+
 #define TOML_LIB_MAJOR		0
-#define TOML_LIB_MINOR		1
+#define TOML_LIB_MINOR		2
 #define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		0
@@ -355,7 +366,9 @@ TOML_POP_WARNINGS
 	#define TOML_STRING_PREFIX(S) S
 #endif
 
-namespace toml
+namespace toml { }
+
+TOML_START
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
@@ -558,8 +571,9 @@ namespace toml
 
 	TOML_POP_WARNINGS
 }
+TOML_END
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
@@ -775,8 +789,9 @@ namespace toml::impl
 
 	#undef TOML_P2S_DECL
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
@@ -815,6 +830,7 @@ namespace toml
 		}
 	}
 }
+TOML_END
 
 #pragma endregion
 //-----------------  ↑ toml_common.h  ----------------------------------------------------------------------------------
@@ -822,7 +838,7 @@ namespace toml
 //----------------------------------------  ↓ toml_date_time.h  --------------------------------------------------------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	struct date final
 	{
@@ -977,6 +993,7 @@ namespace toml
 		}
 	};
 }
+TOML_END
 
 #pragma endregion
 //----------------------------------------  ↑ toml_date_time.h  --------------------------------------------------------
@@ -984,7 +1001,7 @@ namespace toml
 //--------------------------------------------------------------  ↓ toml_print_to_stream.h  ----------------------------
 #pragma region
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
@@ -1098,7 +1115,7 @@ namespace toml::impl
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename T, typename CHAR>
-	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream, bool hexfloat = false) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -1116,6 +1133,9 @@ namespace toml::impl
 		#if TOML_USE_STREAMS_FOR_FLOATS
 		{
 			std::ostringstream oss;
+			oss.precision(std::numeric_limits<T>::digits10 + 1);
+			if (hexfloat)
+				oss << std::hexfloat;
 			oss << val;
 			const auto str = oss.str();
 			print_to_stream(str, stream);
@@ -1125,7 +1145,9 @@ namespace toml::impl
 		#else
 		{
 			TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
-			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+			const auto res = hexfloat
+				? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
+				: std::to_chars(buf, buf + sizeof(buf), val);
 			const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
 			print_to_stream(str, stream);
 			if (needs_decimal_point(str))
@@ -1266,8 +1288,9 @@ namespace toml::impl
 
 	TOML_POP_WARNINGS
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	template <typename CHAR>
 	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
@@ -1302,6 +1325,7 @@ namespace toml
 		return lhs;
 	}
 }
+TOML_END
 
 #pragma endregion
 //--------------------------------------------------------------  ↑ toml_print_to_stream.h  ----------------------------
@@ -1309,7 +1333,7 @@ namespace toml
 //---------------------------------------------------------------------------------------------  ↓ toml_node.h  --------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	class TOML_INTERFACE node
 	{
@@ -1364,6 +1388,7 @@ namespace toml
 			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_integer() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_floating_point() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_number() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_boolean() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
 			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
@@ -1619,6 +1644,7 @@ namespace toml
 			}
 	};
 }
+TOML_END
 
 #pragma endregion
 //---------------------------------------------------------------------------------------------  ↑ toml_node.h  --------
@@ -1626,7 +1652,7 @@ namespace toml
 //-----------------  ↓ toml_value.h  -----------------------------------------------------------------------------------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	template <typename T>
 	class value final : public node
@@ -1684,6 +1710,7 @@ namespace toml
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
 			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
 			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
+			[[nodiscard]] bool is_number() const noexcept override { return impl::is_one_of<T, int64_t, double>; }
 			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<T, bool>; }
 			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
@@ -1833,6 +1860,9 @@ namespace toml
 	value(uint8_t) -> value<int64_t>;
 	value(uint16_t) -> value<int64_t>;
 	value(uint32_t) -> value<int64_t>;
+	value(date) -> value<date>;
+	value(time) -> value<time>;
+	value(date_time) -> value<date_time>;
 	#ifdef TOML_SMALL_FLOAT_TYPE
 	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
 	#endif
@@ -1840,6 +1870,7 @@ namespace toml
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 }
+TOML_END
 
 #pragma endregion
 //-----------------  ↑ toml_value.h  -----------------------------------------------------------------------------------
@@ -1847,7 +1878,7 @@ namespace toml
 //------------------------------------------  ↓ toml_array.h  ----------------------------------------------------------
 #pragma region
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <bool is_const>
 	class array_iterator final
@@ -2020,8 +2051,9 @@ namespace toml::impl
 		}
 	}
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
 
@@ -2429,6 +2461,7 @@ namespace toml
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 	};
 }
+TOML_END
 
 #pragma endregion
 //------------------------------------------  ↑ toml_array.h  ----------------------------------------------------------
@@ -2436,7 +2469,7 @@ namespace toml
 //-------------------------------------------------------------------  ↓ toml_table.h  ---------------------------------
 #pragma region
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <bool is_const>
 	struct table_proxy_pair final
@@ -2544,8 +2577,9 @@ namespace toml::impl
 		{}
 	};
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	class table final
 		: public node
@@ -2792,6 +2826,7 @@ namespace toml
 			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
 	};
 }
+TOML_END
 
 #pragma endregion
 //-------------------------------------------------------------------  ↑ toml_table.h  ---------------------------------
@@ -2799,7 +2834,7 @@ namespace toml
 //------------------------------------------------------------------------------------------  ↓ toml_node_view.h  ------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	template <typename T>
 	class node_view final
@@ -2824,20 +2859,18 @@ namespace toml
 			[[nodiscard]] const viewed_type* get() const noexcept { return node_; }
 
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
-			[[nodiscard]] bool is_table() const noexcept { return type() == node_type::table; }
-			[[nodiscard]] bool is_array() const noexcept { return type() == node_type::array; }
-			[[nodiscard]] bool is_value() const noexcept { return type() > node_type::array; }
-			[[nodiscard]] bool is_string() const noexcept { return type() == node_type::string; }
-			[[nodiscard]] bool is_integer() const noexcept { return type() == node_type::integer; }
-			[[nodiscard]] bool is_floating_point() const noexcept { return type() == node_type::floating_point; }
-			[[nodiscard]] bool is_boolean() const noexcept { return type() == node_type::boolean; }
-			[[nodiscard]] bool is_date() const noexcept { return type() == node_type::date; }
-			[[nodiscard]] bool is_time() const noexcept { return type() == node_type::time; }
-			[[nodiscard]] bool is_date_time() const noexcept { return type() == node_type::date_time; }
-			[[nodiscard]] bool is_array_of_tables() const noexcept
-			{
-				return node_ ? node_->is_array_of_tables() : false;
-			}
+			[[nodiscard]] bool is_table() const noexcept { return node_ && node_->is_table(); }
+			[[nodiscard]] bool is_array() const noexcept { return node_ && node_->is_array(); }
+			[[nodiscard]] bool is_value() const noexcept { return node_ && node_->is_value(); }
+			[[nodiscard]] bool is_string() const noexcept { return node_ && node_->is_string(); }
+			[[nodiscard]] bool is_integer() const noexcept { return node_ && node_->is_integer(); }
+			[[nodiscard]] bool is_floating_point() const noexcept { return node_ && node_->is_floating_point(); }
+			[[nodiscard]] bool is_number() const noexcept { return node_ && node_->is_number(); }
+			[[nodiscard]] bool is_boolean() const noexcept { return node_ && node_->is_boolean(); }
+			[[nodiscard]] bool is_date() const noexcept { return node_ && node_->is_date(); }
+			[[nodiscard]] bool is_time() const noexcept { return node_ && node_->is_time(); }
+			[[nodiscard]] bool is_date_time() const noexcept { return node_ && node_->is_date_time(); }
+			[[nodiscard]] bool is_array_of_tables() const noexcept { return node_ && node_->is_array_of_tables(); }
 
 			template <typename U>
 			[[nodiscard]]
@@ -2888,6 +2921,25 @@ namespace toml
 			[[nodiscard]] const value<date>* as_date() const noexcept { return as<date>(); }
 			[[nodiscard]] const value<time>* as_time() const noexcept { return as<time>(); }
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
+
+			template <typename U>
+			[[nodiscard]] auto value_or(U&& default_value) const noexcept
+			{
+				static_assert(
+					impl::is_value_or_promotable<impl::remove_cvref_t<U>>,
+					"Default value type must be (or be promotable to) one of the TOML value types"
+				);
+
+				using value_type = impl::promoted<impl::remove_cvref_t<U>>;
+				using return_type = std::conditional_t<
+					std::is_same_v<value_type, string>,
+					std::conditional_t<std::is_same_v<impl::remove_cvref_t<U>, string>, string, string_view>,
+					value_type
+				>;
+				if (auto val = node_ ? node_->template as<value_type>() : nullptr)
+					return return_type{ **val };
+				return return_type{ std::forward<U>(default_value) };
+			}
 
 		private:
 
@@ -3025,6 +3077,7 @@ namespace toml
 		return { this->get(key) };
 	}
 }
+TOML_END
 
 #pragma endregion
 //------------------------------------------------------------------------------------------  ↑ toml_node_view.h  ------
@@ -3038,7 +3091,7 @@ namespace toml
 	TOML_ASSUME(codepoint >= first);				\
 	TOML_ASSUME(codepoint <= last)
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	[[nodiscard]]
 	constexpr bool is_unicode_letter(char32_t codepoint) noexcept
@@ -4010,12 +4063,13 @@ namespace toml::impl
 		// chunk summary: 2255 codepoints from 282 ranges (spanning a search area of 917232)
 	}
 }
+TOML_IMPL_END
 
 #undef TOML_ASSUME_CODEPOINT_BETWEEN
 
 #endif // TOML_LANG_HIGHER_THAN(0, 5, 0)
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
@@ -4611,6 +4665,7 @@ namespace toml::impl
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 }
+TOML_IMPL_END
 
 #pragma endregion
 //------------------  ↑ toml_utf8.h  -----------------------------------------------------------------------------------
@@ -4618,7 +4673,7 @@ namespace toml::impl
 //------------------------------------------  ↓ toml_parser.h  ---------------------------------------------------------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
@@ -4740,8 +4795,9 @@ namespace toml
 
 	#endif
 }
+TOML_END
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK(...)	(void)0
@@ -4874,6 +4930,7 @@ namespace toml::impl
 							#if TOML_USE_STREAMS_FOR_FLOATS
 							{
 								std::ostringstream oss;
+								oss.precision(std::numeric_limits<arg_t>::digits10 + 1);
 								oss << arg;
 								const auto str = oss.str();
 								std::memcpy(ptr, str.c_str(), str.length());
@@ -5759,7 +5816,7 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
-			#if !TOML_USE_STREAMS_FOR_FLOATS && TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/562
+			#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/562
 
 			[[nodiscard]]
 			double parse_hex_float() TOML_MAY_THROW
@@ -5901,38 +5958,62 @@ namespace toml::impl
 
 				// convert to double
 				TOML_GCC_ATTR(uninitialized) double result;
-				auto fc_result = std::from_chars(chars, chars + length, result, std::chars_format::hex);
-				switch (fc_result.ec)
+				#if TOML_USE_STREAMS_FOR_FLOATS
 				{
-					case std::errc{}: //ok
-						return result;
+					std::string str;
+					{
+						std::stringstream ss;
+						ss.write("0x", 2_sz);
+						ss.write(chars, static_cast<std::streamsize>(length));
+						str = ss.str();
+					}
 
-					case std::errc::invalid_argument:
+					char* end = {};
+					result = std::strtod(str.c_str(), &end);
+					if (result == 0.0 && end == str.c_str())
 						abort_with_error(
 							"Error parsing hexadecimal "sv, node_type::floating_point,
 							"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
 						);
-						break;
-
-					case std::errc::result_out_of_range:
-						abort_with_error(
-							"Error parsing hexadecimal "sv, node_type::floating_point,
-							"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
-						);
-						break;
-
-					default: //??
-						abort_with_error(
-							"Error parsing hexadecimal "sv, node_type::floating_point,
-							"; an unspecified error occurred while trying to interpret '",
-							std::string_view{ chars, length }, "' as a value"sv
-						);
+					else
+						return result;
 				}
+				#else
+				{
+					auto fc_result = std::from_chars(chars, chars + length, result, std::chars_format::hex);
+					switch (fc_result.ec)
+					{
+						case std::errc{}: //ok
+							return result;
+
+						case std::errc::invalid_argument:
+							abort_with_error(
+								"Error parsing hexadecimal "sv, node_type::floating_point,
+								"; '"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
+							);
+							break;
+
+						case std::errc::result_out_of_range:
+							abort_with_error(
+								"Error parsing hexadecimal "sv, node_type::floating_point,
+								"; '"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
+							);
+							break;
+
+						default: //??
+							abort_with_error(
+								"Error parsing hexadecimal "sv, node_type::floating_point,
+								"; an unspecified error occurred while trying to interpret '",
+								std::string_view{ chars, length }, "' as a value"sv
+							);
+					}
+				}
+				#endif
 				TOML_ERROR_CHECK({});
 				TOML_UNREACHABLE;
 			}
 
-			#endif //!TOML_USE_STREAMS_FOR_FLOATS && TOML_LANG_HIGHER_THAN(0, 5, 0)
+			#endif //TOML_LANG_HIGHER_THAN(0, 5, 0)
 
 			template <int base>
 			[[nodiscard]]
@@ -6735,14 +6816,6 @@ namespace toml::impl
 											TOML_ERROR(
 												"Hexadecimal floating-point values are not supported "
 												"in TOML 0.5.0 and earlier.",
-												begin_pos,
-												reader.source_path()
-											);
-										#elif TOML_USE_STREAMS_FOR_FLOATS
-											TOML_ERROR(
-												"Hexadecimal floating-point values are not "
-												"supported when streams are used to interpret floats "
-												"(TOML_USE_STREAMS_FOR_FLOATS = 1).",
 												begin_pos,
 												reader.source_path()
 											);
@@ -7617,8 +7690,9 @@ namespace toml::impl
 	#undef TOML_ERROR
 	#undef TOML_NORETURN
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	[[nodiscard]]
 	inline parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW
@@ -7711,6 +7785,7 @@ namespace toml
 
 	}
 }
+TOML_END
 
 #pragma endregion
 //------------------------------------------  ↑ toml_parser.h  ---------------------------------------------------------
@@ -7718,7 +7793,7 @@ namespace toml
 //-----------------------------------------------------------------  ↓ toml_formatter.h  -------------------------------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	enum class format_flags : uint8_t
 	{
@@ -7734,8 +7809,9 @@ namespace toml
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
+TOML_END
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	template <typename CHAR = char>
 	class formatter
@@ -7856,6 +7932,7 @@ namespace toml::impl
 			{}
 	};
 }
+TOML_IMPL_END
 
 #pragma endregion
 //-----------------------------------------------------------------  ↑ toml_formatter.h  -------------------------------
@@ -7863,7 +7940,7 @@ namespace toml::impl
 //--------------------------------------------------------------------------------------  ↓ toml_default_formatter.h  --
 #pragma region
 
-namespace toml::impl
+TOML_IMPL_START
 {
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
@@ -7990,8 +8067,9 @@ namespace toml::impl
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
+TOML_IMPL_END
 
-namespace toml
+TOML_START
 {
 	template <typename CHAR = char>
 	class default_formatter final : impl::formatter<CHAR>
@@ -8317,6 +8395,7 @@ namespace toml
 		return lhs << default_formatter<CHAR>{ rhs };
 	}
 }
+TOML_END
 
 #pragma endregion
 //--------------------------------------------------------------------------------------  ↑ toml_default_formatter.h  --
@@ -8324,7 +8403,7 @@ namespace toml
 //-------------  ↓ toml_json_formatter.h  ------------------------------------------------------------------------------
 #pragma region
 
-namespace toml
+TOML_START
 {
 	template <typename CHAR = char>
 	class json_formatter final : impl::formatter<CHAR>
@@ -8443,13 +8522,13 @@ namespace toml
 		base::clear_naked_newline();
 	}
 }
+TOML_END
 
 #pragma endregion
 //-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_EXCEPTIONS
 	#undef TOML_USE_STREAMS_FOR_FLOATS
 	#undef TOML_GCC_ATTR
 	#undef TOML_PUSH_WARNINGS
@@ -8483,6 +8562,10 @@ namespace toml
 	#undef TOML_DOXYGEN
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
+	#undef TOML_START
+	#undef TOML_END
+	#undef TOML_IMPL_START
+	#undef TOML_IMPL_END
 #endif
 
 #ifdef __GNUC__

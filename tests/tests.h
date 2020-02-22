@@ -152,11 +152,11 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 template <typename T>
 void parse_expected_value(std::string_view value_str, const T& expected) noexcept
 {
-	std::string value;
-	static constexpr auto value_key = "val = "sv;
-	value.reserve(value_key.length() + value_str.length());
-	value.append(value_key);
-	value.append(value_str);
+	std::string val;
+	static constexpr auto key = "val = "sv;
+	val.reserve(key.length() + value_str.length());
+	val.append(key);
+	val.append(value_str);
 
 	static constexpr auto is_val = [](char32_t codepoint) noexcept
 	{
@@ -166,7 +166,7 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 			return !impl::is_whitespace(codepoint);
 	};
 
-	source_position pos{ 1,  static_cast<source_index>(value_key.length()) };
+	source_position pos{ 1,  static_cast<source_index>(key.length()) };
 	source_position begin{}, end{};
 	impl::utf8_decoder decoder;
 	for (auto c : value_str)
@@ -198,31 +198,73 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 		end = begin;
 	end.column++;
 
-	parsing_should_succeed(std::string_view{ value }, [&](table&& tbl) noexcept
+	using value_type = impl::promoted<impl::remove_cvref_t<T>>;
+	value<value_type> val_parsed;
+
+	parsing_should_succeed(std::string_view{ val }, [&](table&& tbl) noexcept
 	{
+		INFO("String being parsed: '"sv << val << "'"sv);
+
 		CHECK(tbl.size() == 1);
-		const auto nv = tbl[S("val"sv)];
+		auto nv = tbl[S("val"sv)];
 		REQUIRE(nv);
-		REQUIRE(nv.as<impl::promoted<T>>());
+		REQUIRE(nv.as<value_type>());
 		REQUIRE(nv.get()->type() == impl::node_type_of<T>);
 
-		//check the raw value
-		CHECK(nv.as<impl::promoted<T>>()->get() == expected);
+		// check the raw value
+		CHECK(nv.as<value_type>()->get() == expected);
+		CHECK(nv.value_or(T{}) == expected);
 
-		//check the value relops
-		CHECK(*nv.as<impl::promoted<T>>() == expected);
-		CHECK(expected == *nv.as<impl::promoted<T>>());
-		CHECK(!(*nv.as<impl::promoted<T>>() != expected));
-		CHECK(!(expected != *nv.as<impl::promoted<T>>()));
+		// check the table relops
+		CHECK(tbl == table{ { { S("val"sv), expected } } });
+		CHECK(!(tbl != table{ { { S("val"sv), expected } } }));
 
-		//check the node_view relops
+		// check the value relops
+		CHECK(*nv.as<value_type>() == expected);
+		CHECK(expected == *nv.as<value_type>());
+		CHECK(!(*nv.as<value_type>() != expected));
+		CHECK(!(expected != *nv.as<value_type>()));
+
+		// check the node_view relops
 		CHECK(nv == expected);
 		CHECK(expected == nv);
 		CHECK(!(nv != expected));
 		CHECK(!(expected != nv));
 
-		//make sure source info is correct
+		// make sure source info is correct
 		CHECK(nv.get()->source().begin == begin);
 		CHECK(nv.get()->source().end == end);
+
+		// steal the val for round-trip tests
+		val_parsed = std::move(*nv.as<value_type>());
 	});
+
+	// check round-tripping
+	value<value_type> val_reparsed;
+	{
+		std::string str;
+		{
+			auto tbl = table{ { { S("val"sv), *val_parsed } } };
+			std::stringstream ss;
+			ss << tbl;
+			str = ss.str();
+		}
+
+		parsing_should_succeed(std::string_view{ str }, [&](table&& tbl) noexcept
+		{
+			CHECK(tbl.size() == 1);
+			auto nv = tbl[S("val"sv)];
+			REQUIRE(nv);
+			REQUIRE(nv.as<value_type>());
+			REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+
+			CHECK(nv.as<value_type>()->get() == expected);
+			CHECK(nv.value_or(T{}) == expected);
+
+			val_reparsed = std::move(*nv.as<value_type>());
+		});
+	}
+	CHECK(val_reparsed == val_parsed);
+	CHECK(val_reparsed == expected);
+
 }

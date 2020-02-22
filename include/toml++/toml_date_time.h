@@ -1,7 +1,7 @@
 #pragma once
 #include "toml_common.h"
 
-namespace toml
+TOML_START
 {
 	/// \brief	A local date.
 	struct date final
@@ -301,3 +301,4 @@ namespace toml
 		}
 	};
 }
+TOML_END

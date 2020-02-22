@@ -1,6 +1,6 @@
-#include <toml++/toml.h>
 #include <iostream>
 #include <fstream>
+#include <toml++/toml.h>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -22,9 +22,8 @@ int main(int argc, char** argv)
 	}
 	try
 	{
-		const auto table = toml::parse(file, std::move(path));
-
-		std::cout << table << std::endl;
+		const auto tbl = toml::parse(file, std::move(path));
+		std::cout << tbl << std::endl;
 	}
 	catch (const toml::parse_error& err)
 	{

@@ -504,11 +504,11 @@ def main():
 		print('#pragma once', file=output_file)
 		print('#include "toml_common.h"', file=output_file)
 		print('\n#define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)\t\\\n\tTOML_ASSUME(codepoint >= first);\t\t\t\t\\\n\tTOML_ASSUME(codepoint <= last)', file=output_file)
-		print('\nnamespace toml::impl\n{', file=output_file, end='')
+		print('\nTOML_IMPL_START\n{', file=output_file, end='')
 		emit_function('is_unicode_letter', ('Ll', 'Lm', 'Lo', 'Lt', 'Lu'), output_file, codepoints)
 		emit_function('is_unicode_number', ('Nd', 'Nl'), output_file, codepoints)
 		emit_function('is_unicode_combining_mark', ('Mn', 'Mc'), output_file, codepoints)
-		print('}\n\n#undef TOML_ASSUME_CODEPOINT_BETWEEN', file=output_file)
+		print('}\nTOML_IMPL_END\n\n#undef TOML_ASSUME_CODEPOINT_BETWEEN', file=output_file)
 
 if __name__ == '__main__':
 	try:
