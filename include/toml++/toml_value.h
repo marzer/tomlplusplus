@@ -42,6 +42,17 @@ TOML_START
 			/// \brief	The value's underlying data type.
 			using value_type = T;
 
+			/// \brief	A type alias for 'value arguments'.
+			/// \details This differs according to the value's type argument:
+			/// 		 - ints, floats, booleans: `value_type`
+			/// 		 - strings: `string_view`
+			/// 		 - everything else: `const value_type&`
+			using value_arg = std::conditional_t<
+				std::is_same_v<T, string>,
+				string_view,
+				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
+			>;
+
 			/// \brief	Constructs a toml value.
 			///
 			/// \tparam	U	Constructor argument types.
@@ -167,19 +178,8 @@ TOML_START
 				return lhs;
 			}
 
-			/// \brief	A type alias for 'value arguments'.
-			/// \details This differs according to the value's type argument:
-			/// 		 - ints, floats, booleans: `value_type`
-			/// 		 - strings: `string_view`
-			/// 		 - everything else: `const value_type&`
-			using value_arg_t = std::conditional_t<
-				std::is_same_v<T, string>,
-				string_view,
-				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
-			>;
-
 			/// \brief	Value-assignment operator.
-			value& operator= (value_arg_t rhs) noexcept
+			value& operator= (value_arg rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, string>)
 					val_.assign(rhs);
@@ -196,26 +196,26 @@ TOML_START
 			}
 
 			/// \brief	Value equality operator.
-			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg_t, )
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 
 			/// \brief	Value less-than operator.
-			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ < rhs; }
+			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
 			/// \brief	Value less-than operator.
-			[[nodiscard]] friend bool operator <  (value_arg_t lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
+			[[nodiscard]] friend bool operator <  (value_arg lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
 			/// \brief	Value less-than-or-equal-to operator.
-			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ <= rhs; }
+			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg rhs) noexcept { return lhs.val_ <= rhs; }
 			/// \brief	Value less-than-or-equal-to operator.
-			[[nodiscard]] friend bool operator <= (value_arg_t lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
+			[[nodiscard]] friend bool operator <= (value_arg lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
 
 			/// \brief	Value greater-than operator.
-			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ > rhs; }
+			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ > rhs; }
 			/// \brief	Value greater-than operator.
-			[[nodiscard]] friend bool operator >  (value_arg_t lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
+			[[nodiscard]] friend bool operator >  (value_arg lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
 			/// \brief	Value greater-than-or-equal-to operator.
-			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ >= rhs; }
+			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg rhs) noexcept { return lhs.val_ >= rhs; }
 			/// \brief	Value greater-than-or-equal-to operator.
-			[[nodiscard]] friend bool operator >= (value_arg_t lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
+			[[nodiscard]] friend bool operator >= (value_arg lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
 
 			/// \brief	Equality operator.
 			///

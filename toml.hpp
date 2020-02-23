@@ -293,17 +293,6 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
-#if !TOML_DOXYGEN
-	#if TOML_EXCEPTIONS
-		#define TOML_START	namespace toml { inline namespace wex
-	#else
-		#define TOML_START	namespace toml { inline namespace woex
-	#endif
-	#define TOML_END			}
-#endif
-#define TOML_IMPL_START			TOML_START { namespace impl
-#define TOML_IMPL_END			} TOML_END
-
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		2
 #define TOML_LIB_PATCH		0
@@ -331,6 +320,23 @@
 
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
+
+#if !TOML_DOXYGEN
+
+	#if TOML_EXCEPTIONS
+		#define TOML_INLINE_NS_EX
+	#else
+		#define TOML_INLINE_NS_EX _noex
+	#endif
+
+	#define TOML_START_2(VER, ARG1, ARG2)	namespace toml { inline namespace v##VER##ARG1##ARG2
+	#define TOML_START_1(VER, ARG1, ARG2)	TOML_START_2(VER, ARG1, ARG2)
+	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,)
+	#define TOML_END		}
+
+#endif
+#define TOML_IMPL_START		TOML_START { namespace impl
+#define TOML_IMPL_END		} TOML_END
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -1680,6 +1686,11 @@ TOML_START
 		public:
 
 			using value_type = T;
+			using value_arg = std::conditional_t<
+				std::is_same_v<T, string>,
+				string_view,
+				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
+			>;
 
 			template <typename... U>
 			TOML_NODISCARD_CTOR
@@ -1757,13 +1768,7 @@ TOML_START
 				return lhs;
 			}
 
-			using value_arg_t = std::conditional_t<
-				std::is_same_v<T, string>,
-				string_view,
-				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
-			>;
-
-			value& operator= (value_arg_t rhs) noexcept
+			value& operator= (value_arg rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, string>)
 					val_.assign(rhs);
@@ -1779,16 +1784,16 @@ TOML_START
 				return *this;
 			}
 
-			[[nodiscard]] friend bool operator == (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ == rhs; }
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg_t, )
-			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ < rhs; }
-			[[nodiscard]] friend bool operator <  (value_arg_t lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
-			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ <= rhs; }
-			[[nodiscard]] friend bool operator <= (value_arg_t lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
-			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ > rhs; }
-			[[nodiscard]] friend bool operator >  (value_arg_t lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
-			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg_t rhs) noexcept { return lhs.val_ >= rhs; }
-			[[nodiscard]] friend bool operator >= (value_arg_t lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
+			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
+			[[nodiscard]] friend bool operator <  (value_arg lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
+			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg rhs) noexcept { return lhs.val_ <= rhs; }
+			[[nodiscard]] friend bool operator <= (value_arg lhs, const value& rhs) noexcept { return lhs <= rhs.val_; }
+			[[nodiscard]] friend bool operator >  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ > rhs; }
+			[[nodiscard]] friend bool operator >  (value_arg lhs, const value& rhs) noexcept { return lhs > rhs.val_; }
+			[[nodiscard]] friend bool operator >= (const value& lhs, value_arg rhs) noexcept { return lhs.val_ >= rhs; }
+			[[nodiscard]] friend bool operator >= (value_arg lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
 
 			template <typename U>
 			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
@@ -8562,7 +8567,10 @@ TOML_END
 	#undef TOML_DOXYGEN
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
+	#undef TOML_INLINE_NS_EX
 	#undef TOML_START
+	#undef TOML_START_2
+	#undef TOML_START_1
 	#undef TOML_END
 	#undef TOML_IMPL_START
 	#undef TOML_IMPL_END

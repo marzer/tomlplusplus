@@ -229,17 +229,6 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
-#if !TOML_DOXYGEN
-	#if TOML_EXCEPTIONS
-		#define TOML_START	namespace toml { inline namespace wex
-	#else
-		#define TOML_START	namespace toml { inline namespace woex
-	#endif
-	#define TOML_END			}
-#endif
-#define TOML_IMPL_START			TOML_START { namespace impl
-#define TOML_IMPL_END			} TOML_END
-
 #include "toml_version.h"
 
 #define TOML_MAKE_VERSION(maj, min, rev)											\
@@ -262,6 +251,22 @@
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
+#if !TOML_DOXYGEN
+
+	#if TOML_EXCEPTIONS
+		#define TOML_INLINE_NS_EX
+	#else
+		#define TOML_INLINE_NS_EX _noex
+	#endif
+
+	#define TOML_START_2(VER, ARG1, ARG2)	namespace toml { inline namespace v##VER##ARG1##ARG2
+	#define TOML_START_1(VER, ARG1, ARG2)	TOML_START_2(VER, ARG1, ARG2)
+	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,)
+	#define TOML_END		}
+	
+#endif
+#define TOML_IMPL_START		TOML_START { namespace impl
+#define TOML_IMPL_END		} TOML_END
 
 ////////// INCLUDES
 

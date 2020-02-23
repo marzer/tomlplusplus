@@ -53,7 +53,10 @@
 	#undef TOML_DOXYGEN
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
+	#undef TOML_INLINE_NS_EX
 	#undef TOML_START
+	#undef TOML_START_2
+	#undef TOML_START_1
 	#undef TOML_END
 	#undef TOML_IMPL_START
 	#undef TOML_IMPL_END
@@ -61,33 +64,47 @@
 
 /// \mainpage toml++
 /// 
-/// This is the home of toml++, a header-only [TOML](https://github.com/toml-lang/toml) parser and serializer for C++17 and later.
+/// This is the home of toml++, a header-only [TOML](https://github.com/toml-lang/toml) parser and serializer for C++17
+/// and later.
 ///
 /// \tableofcontents
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - C++17 (plus some C++20 features where supported, e.g. char8_t strings)
+/// - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
+///		unreleased TOML features (these are optional)
+/// - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 /// - Proper UTF-8 handling (incl. BOM)
 /// - Works with or without exceptions
 /// - Doesn't require RTTI
 /// - First-class support for serializing to JSON
-/// - Fully [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md)-compliant  
-/// - Supports a number of 'unreleased' TOML features (optional; these can be disabled)
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-adding-lib Adding toml++ to your project
-/// Clone [the repository](https://github.com/marzer/tomlplusplus/) from GitHub. It's header-only so there's not much you have to do after that,
-/// other than some very minor (optional) configuration. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
+/// It's header-only library so really all you have to do is clone
+/// [the repository](https://github.com/marzer/tomlplusplus/) from GitHub and set your include paths.
+/// There's some minor configuration you can do to customize some basic library functionality, but that's totally
+/// optional. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
+/// 
+/// <blockquote>
+/// <h3>On Linkers and the One-Definition-Rule</h3>
+/// <p>Header-only libraries are great for minimal setup, but can cause ODR violations and complex linker errors
+/// in situations where multiple modules include them separately, each with different versions, configuration options,
+/// exception handling modes, et cetera.</p>
+/// <p>`toml++` attempts to combat this problem by nesting everything inside an additional inline namespace that
+/// changes according to the library's major version and the compiler's exception-handling mode.</p>
+/// </blockquote>
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-api-documentation API Documentation
-/// You're looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.
+/// You're looking at it! Browse the docs using the links at the top of the page.
+/// You can search from anywhere by pressing the TAB key.
 /// 
-/// <em>toml++ is still pretty hot off the presses so there's going to be some omissions, typos and general sparseness throughout the docs.
+/// <em>toml++ is still pretty hot off the presses so there's going to be some omissions,
+/// typos and general sparseness throughout the docs.
 /// If you spot something or have a suggestion, please [let me know](https://github.com/marzer/tomlplusplus/issues)!</em>
 /// 
 ///////////////////////////////////////////////////////////////////////
@@ -99,7 +116,8 @@
 /// \subsection mainpage-example-parsing-files Parsing TOML files
 /// toml++ works whether you have exceptions enabled or not. For the most part the usage is the same,
 /// the main difference being how parsing errors are reported to the caller. When exceptions are enabled
-/// a toml::parse_error is thrown directly from the site of the error:
+/// a successful call to a parsing function simply returns a toml::table, whereas a failed call sees a toml::parse_error
+/// thrown directly from the site of the error:
 /// \cpp
 /// #include <iostream>
 /// #include <fstream> //required for parse_file()
@@ -129,7 +147,7 @@
 /// 
 /// \ecpp
 /// 
-/// When exceptions are disabled parsing methods return a toml::parse_result and it is up to the caller
+/// When exceptions are disabled parsing functions return a toml::parse_result instead and it is up to the caller
 /// to check if parsing has been successful by examining the return value:
 /// \cpp
 /// #include <iostream>
@@ -341,9 +359,13 @@
 /// 
 /// \section mainpage-license License
 ///  
-/// toml++ is licensed under the terms of the MIT license - see [LICENSE](https://github.com/marzer/tomlplusplus/blob/master/LICENSE).
+/// toml++ is licensed under the terms of the MIT license - see
+/// [LICENSE](https://github.com/marzer/tomlplusplus/blob/master/LICENSE).
 ///
-/// UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's 'Flexible and Economical UTF - 8 Decoder', which is also subject
-/// to the terms of the MIT license - see [LICENSE-utf8-decoder](https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder).
+/// UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's
+/// 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see
+/// [LICENSE-utf8-decoder](https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder).
 ///  
+/// \remark Note that if you're using the single-header version of the library you don't need to distribute these files;
+/// 		their contents is included in the preamble at the top of the file.
 /// 

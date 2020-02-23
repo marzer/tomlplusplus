@@ -35,17 +35,18 @@ TOML_START
 	/// 
 	/// tbl["products"][0]["keywords"].as_array()->push_back("heavy");
 	/// std::cout << tbl["products"][0]["keywords"] << std::endl;
-	/// std::cout << "has third product: "sv << !!tbl["products"][2] << std::endl;
-	/// std::cout << tbl["products"][2] << std::endl; // no-op
-	/// 
-	/// \ecpp
+	/// std::cout << "has product[2]: "sv << !!tbl["products"][2] << std::endl;
+	/// std::cout << "product[2]: "sv << tbl["products"][2] << std::endl;
+		/// \ecpp
 	/// 
 	/// \out
 	/// "my hardware store"
 	/// "Hammer"
 	/// [ "hammer", "construction", "build" ]
+	/// "build"
 	/// [ "hammer", "construction", "build", "heavy" ]
-	/// has third product: false
+	/// has product[2]: false
+	/// product[2]:
 	/// \eout
 	template <typename T>
 	class node_view final

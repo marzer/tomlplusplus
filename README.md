@@ -5,13 +5,13 @@
 [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](https://github.com/marzer/tomlplusplus/blob/master/LICENSE)  
 
 `toml++` is a header-only toml parser and serializer for C++17, C++20 and whatever comes after.
- - Fully [TOML v0.5.0]-compliant
- - Modern C++17 (with some C++20 features where supported)
+ - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
+ 	unreleased TOML features (these are optional)
+ - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
  - Doesn't require RTTI
  - First-class support for serializing to JSON
- - Supports a number of 'unreleased' TOML features (optional)
 
 <br>
 
