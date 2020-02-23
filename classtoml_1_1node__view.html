@@ -91,12 +91,14 @@ C++17</span></a>
 
 <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">].</span><span class="n">as_array</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="s">"heavy"</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"has third product: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="c1">// no-op</span></pre><pre class="m-code">"my hardware store"
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"has product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="err">*/</span></pre><pre class="m-code">"my hardware store"
 "Hammer"
 [ "hammer", "construction", "build" ]
+"build"
 [ "hammer", "construction", "build", "heavy" ]
-has third product: false</pre>
+has product[2]: false
+product[2]:</pre>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
