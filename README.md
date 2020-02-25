@@ -1,13 +1,10 @@
-# toml++ (tomlplusplus)
-[![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers]
-[![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0]
-[![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
-[![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](https://github.com/marzer/tomlplusplus/blob/master/LICENSE)  
+# toml++ (tomlplusplus) · [![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers] [![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0] [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus) [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](./LICENSE)  
 
-`toml++` is a header-only toml parser and serializer for C++17, C++20 and whatever comes after.
- - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
- 	unreleased TOML features (these are optional)
+![banner](docs/tomlplusplus-banner-small.png)
+ - Header-only
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
+ - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
+ 	[unreleased TOML language features] (these are optional)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
  - Doesn't require RTTI
@@ -139,15 +136,15 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 which is also subject to the terms of the MIT license - see [LICENSE-utf8-decoder].
 
 [API documentation]: https://marzer.github.io/tomlplusplus/
-[unreleased TOML language features]: https://github.com/marzer/tomlplusplus#unreleased-features
+[unreleased TOML language features]: #unreleased-toml-features
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
 [TOML v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 [v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-[CONTRIBUTING]: https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md
-[LICENSE]: https://github.com/marzer/tomlplusplus/blob/master/LICENSE
+[CONTRIBUTING]: ./CONTRIBUTING.md
+[LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 [cpp_compilers]: https://en.cppreference.com/w/cpp/compiler_support
 [reporting issues]: https://github.com/marzer/tomlplusplus/issues
@@ -161,4 +158,4 @@ which is also subject to the terms of the MIT license - see [LICENSE-utf8-decode
 [#665]: https://github.com/toml-lang/toml/issues/665
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
-[LICENSE-utf8-decoder]: https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder
+[LICENSE-utf8-decoder]: ./LICENSE-utf8-decoder
