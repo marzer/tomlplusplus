@@ -594,6 +594,33 @@ TOML_START
 			{
 				return source_;
 			}
+
+			/// \brief	Prints a parse_error to a stream.
+			///
+			/// \detail \cpp
+			/// try
+			/// {
+			/// 	auto tbl = toml::parse("enabled = trUe"sv);
+			/// }
+			/// catch (const toml::parse_error & err)
+			/// {
+			/// 	std::cerr << "Parsing failed:\n"sv << err << std::endl;
+			/// }
+			/// \ecpp
+			/// 
+			/// \out
+			/// Parsing failed:
+			/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+			///		(error occurred at line 1, column 13)
+			/// \eout
+			/// 
+			/// \param 	lhs	The stream.
+			/// \param 	rhs	The parse_error.
+			///
+			/// \returns	The input stream.
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+				TOML_MAY_THROW;
 	};
 
 	#else
@@ -633,6 +660,10 @@ TOML_START
 			{
 				return source_;
 			}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+				TOML_MAY_THROW;
 	};
 
 	#endif

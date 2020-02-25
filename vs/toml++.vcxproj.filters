@@ -77,6 +77,7 @@
     <None Include="..\docs\tomlplusplus.js">
       <Filter>doc</Filter>
     </None>
+    <None Include="..\CONTRIBUTING.md" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

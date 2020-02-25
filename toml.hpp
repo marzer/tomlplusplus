@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.2.0
+// toml++ v0.2.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -295,7 +295,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		2
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -532,6 +532,10 @@ TOML_START
 			{
 				return source_;
 			}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+				TOML_MAY_THROW;
 	};
 
 	#else
@@ -571,6 +575,10 @@ TOML_START
 			{
 				return source_;
 			}
+
+			template <typename CHAR>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+				TOML_MAY_THROW;
 	};
 
 	#endif
@@ -1308,7 +1316,7 @@ TOML_START
 		);
 		impl::print_to_stream("line "sv, lhs);
 		impl::print_to_stream(rhs.line, lhs);
-		impl::print_to_stream(", column ", lhs);
+		impl::print_to_stream(", column "sv, lhs);
 		impl::print_to_stream(rhs.column, lhs);
 		return lhs;
 	}
@@ -1328,6 +1336,17 @@ TOML_START
 			impl::print_to_stream(*rhs.path, lhs);
 			impl::print_to_stream('\'', lhs);
 		}
+		return lhs;
+	}
+
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+		TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs.description(), lhs);
+		impl::print_to_stream("\n\t(error occurred at "sv, lhs);
+		lhs << rhs.source();
+		impl::print_to_stream(")"sv, lhs);
 		return lhs;
 	}
 }
@@ -5590,6 +5609,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 				TOML_ASSERT(cp && (*cp == U't' || *cp == U'f'));
 
+				start_recording(true);
 				auto result = *cp == U't';
 				if (!consume_expected_sequence(result ? U"true"sv : U"false"sv))
 				{
@@ -5598,9 +5618,10 @@ TOML_IMPL_START
 					else
 						abort_with_error(
 							"Encountered unexpected character while parsing "sv, node_type::boolean,
-							"; expected 'true' or 'false', saw '"sv, *cp, '\''
+							"; expected '"sv, result ? "true"sv : "false"sv, "', saw '"sv, recording_buffer, '\''
 						);
 				}
+				stop_recording();
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))
@@ -5627,6 +5648,7 @@ TOML_IMPL_START
 						abort_with_error("Encountered EOF while parsing "sv, node_type::floating_point);
 				};
 
+				start_recording(true);
 				const int sign = *cp == U'-' ? -1 : 1;
 				if (*cp == U'+' || *cp == U'-')
 				{
@@ -5641,9 +5663,10 @@ TOML_IMPL_START
 					eof_check();
 					abort_with_error(
 						"Encountered unexpected character while parsing "sv, node_type::floating_point,
-						"; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, *cp, '\''
+						"; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, recording_buffer, '\''
 					);
 				}
+				stop_recording();
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))

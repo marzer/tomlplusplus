@@ -302,7 +302,7 @@ TOML_START
 		);
 		impl::print_to_stream("line "sv, lhs);
 		impl::print_to_stream(rhs.line, lhs);
-		impl::print_to_stream(", column ", lhs);
+		impl::print_to_stream(", column "sv, lhs);
 		impl::print_to_stream(rhs.column, lhs);
 		return lhs;
 	}
@@ -322,6 +322,17 @@ TOML_START
 			impl::print_to_stream(*rhs.path, lhs);
 			impl::print_to_stream('\'', lhs);
 		}
+		return lhs;
+	}
+
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+		TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs.description(), lhs);
+		impl::print_to_stream("\n\t(error occurred at "sv, lhs);
+		lhs << rhs.source();
+		impl::print_to_stream(")"sv, lhs);
 		return lhs;
 	}
 }

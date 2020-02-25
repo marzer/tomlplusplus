@@ -78,7 +78,8 @@
 /// - Proper UTF-8 handling (incl. BOM)
 /// - Works with or without exceptions
 /// - Doesn't require RTTI
-/// - First-class support for serializing to JSON
+/// - First-class support for serializing to JSON  
+/// - Tested on Clang and GCC and MSVC (VS2019)
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -88,14 +89,15 @@
 /// There's some minor configuration you can do to customize some basic library functionality, but that's totally
 /// optional. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
 /// 
-/// <blockquote>
-/// <h3>On Linkers and the One-Definition-Rule</h3>
-/// <p>Header-only libraries are great for minimal setup, but can cause ODR violations and complex linker errors
+/// \remark
+/// \parblock
+/// Header-only libraries are great for minimal setup, but can cause ODR violations and complex linker errors
 /// in situations where multiple modules include them separately, each with different versions, configuration options,
-/// exception handling modes, et cetera.</p>
-/// <p>`toml++` attempts to combat this problem by nesting everything inside an additional inline namespace that
-/// changes according to the library's major version and the compiler's exception-handling mode.</p>
-/// </blockquote>
+/// exception handling modes, et cetera.
+/// 
+/// `toml++` attempts to combat this problem by nesting everything inside an additional inline namespace that
+/// changes according to the library's major version and the compiler's exception-handling mode.
+/// \endparblock
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -173,23 +175,47 @@
 /// }
 /// \ecpp
 /// 
+/// Instances of toml::parse_error can be printed directly to streams:
+/// \cpp
+/// try
+///	{
+///		auto tbl = toml::parse("enabled = trUe"sv); //fails; TOML booleans are case-sensitive
+///	}
+///	catch (const toml::parse_error & err)
+///	{
+///		std::cerr << "Parsing failed:\n"sv << err << std::endl;
+///		return 1;
+///	}
+/// \ecpp
+/// 	 
+/// \out
+/// Parsing failed:
+/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+///		(error occurred at line 1, column 13)
+/// \eout
+/// 
+/// If the default error formatting is not be suitable for your use-case you can access the error's
+/// toml::source_region and description directly from the error object (as in the examples above).
+/// 
 /// \see
 ///		- toml::parse_file()  
 ///		- toml::parse_result  
-///		- toml::parse_error
+///		- toml::parse_error  
+///		- toml::source_region  
+///		- toml::source_position
 /// 
 ///////////////////////////////////
 /// 
-/// \subsection mainpage-example-parsing-strings Parsing TOML directly from strings
-/// 
+/// \subsection mainpage-example-parsing-strings Parsing TOML directly from strings and streams
+/// Strings and std::istreams can be read directly using toml::parse():
 /// \cpp
 /// #include <iostream>
+/// #include <sstream>
 /// #include <toml++/toml.h>
 /// using namespace std::string_view_literals;
 /// 
 /// int main()
 /// {
-///		// parse error handling omitted for brevity.
 ///		static constexpr auto source = R"(
 ///			[library]
 ///			name = "toml++"
@@ -199,8 +225,20 @@
 ///			[dependencies]
 ///			cpp = 17
 ///		)"sv;
-///		auto tbl = toml::parse(source);
-///		std::cout << tbl << std::endl;
+///		
+///		// parse directly from a string view:
+///		{
+///			auto tbl = toml::parse(source);
+///			std::cout << tbl << std::endl;
+///		}
+///		
+///		// parse from a string stream:
+///		{
+///			std::stringstream ss{ std::string{ source } };
+///			auto tbl = toml::parse(ss);
+///			std::cout << tbl << std::endl;
+///		}
+///		
 /// 	return 0;
 /// }
 /// \ecpp
@@ -213,7 +251,10 @@
 /// authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 /// name = "toml++"
 /// version = "0.1.0"
+/// 
+/// ... exactly as above, but twice
 /// \eout
+/// 
 /// \see toml::parse()  
 /// 
 ///////////////////////////////////
@@ -353,7 +394,9 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-contributing Contributing
-/// See the [Contributing](https://github.com/marzer/tomlplusplus/blob/master/README.md#contributing) section of the repository README.
+/// Contributions are very welcome! Either by [reporting issues](https://github.com/marzer/tomlplusplus/issues) or submitting pull requests.
+/// If you wish to submit a pull request, please see [CONTRIBUTING](https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md)
+/// for all the details you need to get going.
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -366,6 +409,6 @@
 /// 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see
 /// [LICENSE-utf8-decoder](https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder).
 ///  
-/// \remark Note that if you're using the single-header version of the library you don't need to distribute these files;
+/// \remark If you're using the single-header version of the library you don't need to distribute these files;
 /// 		their contents is included in the preamble at the top of the file.
 /// 

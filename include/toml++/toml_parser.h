@@ -9,6 +9,26 @@ TOML_START
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
 	/// \brief	The result of a parsing operation.
+	///
+	/// \detail A parse_result is effectively a discriminated union containing either a toml::table
+	/// 		or a toml::parse_error. Most member functions assume a particular one of these two states,
+	/// 		and calling them when in the wrong state will cause errors (e.g. attempting to access the
+	/// 		error object when parsing was successful). \cpp
+	/// parse_result result = toml::parse_file("config.toml");
+	/// if (result)
+	///		do_stuff_with_a_table(result); //implicitly converts to table&
+	///	else
+	///		std::cerr << "Parse failed:\n"sv << result.error() << std::endl;
+	/// 
+	/// \ecpp
+	/// 	
+	/// \out
+	/// example output:
+	/// 
+	/// Parse failed:
+	/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+	///		(error occurred at line 1, column 13 of 'config.toml')
+	/// \eout
 	/// 
 	/// \warning <strong>This type only exists when exceptions are disabled.</strong>
 	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
@@ -25,22 +45,6 @@ TOML_START
 	///		};
 	///	
 	///	#endif
-	/// \ecpp
-	/// 
-	/// \detail A parse_result is effectively a discriminated union containing either a toml::table
-	/// 		or a toml::parse_error. Most member functions assume a particular one of these two states,
-	/// 		and calling them when in the wrong state will cause errors (e.g. attempting to access the
-	/// 		error object when parsing was successful). \cpp
-	/// parse_result result = toml::parse_file("config.toml");
-	/// if (result)
-	///		do_stuff_with_a_table(result); //implicitly converts to table&
-	///	else
-	///		std::cerr
-	///			<< "Error parsing file '"sv << *result.error().source().path
-	///			<< "':\n"sv << result.error().description()
-	///			<< "\n  ("sv << result.error().source().begin << ")"sv
-	///			<< std::endl;
-	/// 
 	/// \ecpp
 	class parse_result final
 	{
@@ -971,6 +975,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 				TOML_ASSERT(cp && (*cp == U't' || *cp == U'f'));
 
+				start_recording(true);
 				auto result = *cp == U't';
 				if (!consume_expected_sequence(result ? U"true"sv : U"false"sv))
 				{
@@ -979,9 +984,10 @@ TOML_IMPL_START
 					else
 						abort_with_error(
 							"Encountered unexpected character while parsing "sv, node_type::boolean,
-							"; expected 'true' or 'false', saw '"sv, *cp, '\''
+							"; expected '"sv, result ? "true"sv : "false"sv, "', saw '"sv, recording_buffer, '\''
 						);
 				}
+				stop_recording();
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))
@@ -1008,6 +1014,7 @@ TOML_IMPL_START
 						abort_with_error("Encountered EOF while parsing "sv, node_type::floating_point);
 				};
 
+				start_recording(true);
 				const int sign = *cp == U'-' ? -1 : 1;
 				if (*cp == U'+' || *cp == U'-')
 				{
@@ -1022,9 +1029,10 @@ TOML_IMPL_START
 					eof_check();
 					abort_with_error(
 						"Encountered unexpected character while parsing "sv, node_type::floating_point,
-						"; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, *cp, '\''
+						"; expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, recording_buffer, '\''
 					);
 				}
+				stop_recording();
 				TOML_ERROR_CHECK({});
 
 				if (cp && !is_value_terminator(*cp))

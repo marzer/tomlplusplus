@@ -17,3 +17,4 @@ HTML_EXTRA_FILES				= tomlplusplus.js	\
 ##!								  <a target="_blank" href="https://github.com/marzer/tomlplusplus/issues">Report an issue</a> \
 ##!								  <br><br>Documentation generated using <a href="https://mcss.mosra.cz/">m.css</a>
 ##! M_HTML_HEADER 				= <script src="tomlplusplus.js"></script>
+##! M_FAVICON					= favicon.ico

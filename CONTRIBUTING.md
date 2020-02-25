@@ -13,14 +13,14 @@ If you wish to submit a PR, please be aware that:
     others, add an include directive to `include/toml++/toml.h`
 3. Run `python/generate_single_header.py`
 
-### Building and testing
+### Building and running the tests
 Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
 The first time you want to begin testing you'll need to ensure submodules have been fetched:  
 ```bash
 git submodule update --init --recursive extern/Catch2
 ```
 
-#### Windows
+#### Testing on Windows with Visual Studio
 
 Install [Visual Studio 2019] and [Test Adapter for Catch2], then open `vs/toml++.sln` and build the
 projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
@@ -29,7 +29,7 @@ allow you to run the tests directly.
 If test discovery fails you can usually fix it by clicking enabling
 `Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
 
-#### Linux
+#### Testing on Linux (and WSL)
 Install [meson] and [ninja] if necessary, then test with both gcc and clang:
 ```bash
 CXX=g++ meson build-gcc

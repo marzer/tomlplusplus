@@ -12,6 +12,7 @@
  - Works with or without exceptions
  - Doesn't require RTTI
  - First-class support for serializing to JSON
+ - Tested on Clang and GCC and MSVC (VS2019)
 
 <br>
 

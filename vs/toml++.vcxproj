@@ -75,6 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
+    <None Include="..\CONTRIBUTING.md" />
     <None Include="..\docs\Doxyfile" />
     <None Include="..\docs\Doxyfile-mcss" />
     <None Include="..\docs\tomlplusplus.css" />

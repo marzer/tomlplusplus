@@ -517,9 +517,16 @@ class InlineNamespaceFix3(InlineNamespaceFixBase):
 # adds some additional colouring to the syntax highlighting in code blocks.
 class SyntaxHighlightingFix(object):
 
-	__missing_keywords = [
+	__keywords = [
 		'constexpr',
-		'if'
+		'if',
+		'else',
+		'true',
+		'false',
+		'const',
+		'noexcept',
+		'template',
+		'typename'
 	]
 
 	def __call__(self, file, doc):
@@ -570,11 +577,12 @@ class SyntaxHighlightingFix(object):
 					changed = True
 
 			# misidentifed keywords
-			nfs = code_block('span', class_='nf')
-			for nf in nfs:
-				if (nf.string is not None and nf.string in self.__missing_keywords):
-					nf['class'] = 'k'
-					changed = True
+			for keywordClass in ['nf', 'nb']:
+				kws = code_block('span', class_=keywordClass)
+				for kw in kws:
+					if (kw.string is not None and kw.string in self.__keywords):
+						kw['class'] = 'k'
+						changed = True
 
 		return changed
 
@@ -677,7 +685,7 @@ class ExtDocLinksFix(object):
 		# toml-specific
 		(r'toml::values?', 'classtoml_1_1value.html'),
 		(r'(toml::)?date_times?', 'structtoml_1_1date__time.html'),
-		(r'(toml::)?times?', 'structtoml_1_1time.html'),
+		(r'(toml::)?time', 'structtoml_1_1time.html'),
 		(r'(toml::)?dates?', 'structtoml_1_1date.html')
 	]
 	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td']

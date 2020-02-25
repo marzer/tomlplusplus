@@ -29,13 +29,9 @@ int main(int argc, char** argv)
 			const auto table = toml::parse(file, std::move(path));
 			std::cout << toml::json_formatter{ table } << std::endl;
 		}
-		catch (const toml::parse_error & err)
+		catch (const toml::parse_error& err)
 		{
-			std::cerr
-				<< "Error parsing file '"sv << *err.source().path
-				<< "':\n"sv << err.description()
-				<< "\n  ("sv << err.source().begin << ")"sv
-				<< std::endl;
+			std::cerr << "Error parsing file:\n"sv << err << std::endl;
 
 			return 1;
 		}
@@ -51,10 +47,7 @@ int main(int argc, char** argv)
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cerr
-				<< "Error parsing stdin:\n"sv << err.description()
-				<< "\n  ("sv << err.source().begin << ")"sv
-				<< std::endl;
+			std::cerr << "Error parsing stdin:\n"sv << err << std::endl;
 
 			return 1;
 		}
