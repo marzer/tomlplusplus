@@ -8,7 +8,7 @@ C++17</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
   <link href="tomlplusplus.css" rel="stylesheet"/>
-  <link href="favicon-dark.png" rel="icon" type="image/png"/>
+  <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
   <script src="tomlplusplus.js"></script>
@@ -65,7 +65,15 @@ C++17</span></a>
             </li>
           </ul>
         </div>
-<aside class="m-note m-danger"><h4>Warning</h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if ARE_EXCEPTIONS_ENABLED </span><span class="c1">// some compiler-specific test</span>
+<p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ut">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    <span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span> <span class="c1">//implicitly converts to table&amp;</span>
+<span class="k">else</span>
+    <span class="ns">std::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parse failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">example output:
+
+Parse failed:
+Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+    (error occurred at line 1, column 13 of 'config.toml')</pre><aside class="m-note m-danger"><h4>Warning</h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if ARE_EXCEPTIONS_ENABLED </span><span class="c1">// some compiler-specific test</span>
 
     <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="ut">table</span><span class="p">;</span>
     <span class="c1">// parsing failures are indicated by throwing a toml::parse_error as an exception</span>
@@ -77,15 +85,7 @@ C++17</span></a>
         <span class="c1">// ...</span>
     <span class="p">};</span>
 
-<span class="cp">#endif</span></pre></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ut">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span> <span class="c1">//implicitly converts to table&amp;</span>
-<span class="k">else</span>
-    <span class="ns">std::</span><span class="n">cerr</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">description</span><span class="p">()</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">().</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")"</span><span class="sa">sv</span>
-        <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre>
+<span class="cp">#endif</span></pre></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
