@@ -2,9 +2,9 @@
 <html lang="en"><head>
   <meta charset="utf-8"/>
   <title>toml::node_view class | toml++ TOML
-Parser
 for
-C++17</title>
+modern
+C++</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
   <link href="tomlplusplus.css" rel="stylesheet"/>
@@ -17,10 +17,10 @@ C++17</title>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand">toml++ <span class="m-thin">TOML
-Parser
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="tomlplusplus-logo.png"/>toml++ <span class="m-thin">TOML
 for
-C++17</span></a>
+modern
+C++</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -92,13 +92,13 @@ C++17</span></a>
 <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">].</span><span class="n">as_array</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="s">"heavy"</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"has product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="err">*/</span></pre><pre class="m-code">"my hardware store"
-"Hammer"
-[ "hammer", "construction", "build" ]
-"build"
-[ "hammer", "construction", "build", "heavy" ]
-has product[2]: false
-product[2]:</pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="err">*/</span></pre><pre class="m-console"><span class="go">"my hardware store"</span>
+<span class="go">"Hammer"</span>
+<span class="go">[ "hammer", "construction", "build" ]</span>
+<span class="go">"build"</span>
+<span class="go">[ "hammer", "construction", "build", "heavy" ]</span>
+<span class="go">has product[2]: false</span>
+<span class="go">product[2]:</span></pre>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -836,9 +836,9 @@ product[2]:</pre>
 
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"accessing 'int' as an integer: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"int"</span><span class="p">].</span><span class="n">value_or</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"accessing 'int' as a float: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"int"</span><span class="p">].</span><span class="n">value_or</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"accessing 'flt' as a float: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"flt"</span><span class="p">].</span><span class="n">value_or</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-code">accessing 'int' as an integer: 42
-accessing 'int' as a float: -1.0
-accessing 'flt' as a float: 420.0</pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"accessing 'flt' as a float: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"flt"</span><span class="p">].</span><span class="n">value_or</span><span class="p">(</span><span class="o">-</span><span class="mf">1.0f</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">accessing 'int' as an integer: 42</span>
+<span class="go">accessing 'int' as a float: -1.0</span>
+<span class="go">accessing 'flt' as a float: 420.0</span></pre>
           </div></section>
           <section class="m-doc-details" id="a361a48e1182904d974be0c302cdcc75f"><div>
             <h3>
