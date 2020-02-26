@@ -15,13 +15,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char8", "test_char8.vc
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char8_noexcept", "test_char8_noexcept.vcxproj", "{F094F967-42B5-4AD7-AB44-EA044CD9837E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_strict_char", "test_strict_char.vcxproj", "{89FF67C6-94C0-4C46-8411-7549A36584FB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char_strict", "test_char_strict.vcxproj", "{89FF67C6-94C0-4C46-8411-7549A36584FB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_strict_char_noexcept", "test_strict_char_noexcept.vcxproj", "{F05F8C1B-7E23-4147-901E-AD91092E5752}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char_strict_noexcept", "test_char_strict_noexcept.vcxproj", "{F05F8C1B-7E23-4147-901E-AD91092E5752}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_strict_char8", "test_strict_char8.vcxproj", "{EAC419E9-0C72-4625-B2B9-E879F697021A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char8_strict", "test_char8_strict.vcxproj", "{EAC419E9-0C72-4625-B2B9-E879F697021A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_strict_char8_noexcept", "test_strict_char8_noexcept.vcxproj", "{9ADB61D3-FDFA-4A9C-A34F-663007BB70F6}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_char8_strict_noexcept", "test_char8_strict_noexcept.vcxproj", "{9ADB61D3-FDFA-4A9C-A34F-663007BB70F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{412816A5-9D22-4A30-BCDF-ABFB54BB3735}"
 EndProject
@@ -37,13 +37,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char8", "test_x86_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char8_noexcept", "test_x86_char8_noexcept.vcxproj", "{BE980D05-770C-4420-B59B-EAD7A63468D2}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_strict_char", "test_x86_strict_char.vcxproj", "{3B05742A-6512-4B11-8842-A1B9D1465B1F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char_strict", "test_x86_char_strict.vcxproj", "{3B05742A-6512-4B11-8842-A1B9D1465B1F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_strict_char_noexcept", "test_x86_strict_char_noexcept.vcxproj", "{0BBEE569-536D-452C-808C-61843FECCC7E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char_strict_noexcept", "test_x86_char_strict_noexcept.vcxproj", "{0BBEE569-536D-452C-808C-61843FECCC7E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_strict_char8", "test_x86_strict_char8.vcxproj", "{A4F27C6F-601D-45C0-9F81-7C100BD93B9A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char8_strict", "test_x86_char8_strict.vcxproj", "{A4F27C6F-601D-45C0-9F81-7C100BD93B9A}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_strict_char8_noexcept", "test_x86_strict_char8_noexcept.vcxproj", "{0CAD095A-C9F2-49FC-9C9F-4508498BE488}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "test_x86_char8_strict_noexcept", "test_x86_char8_strict_noexcept.vcxproj", "{0CAD095A-C9F2-49FC-9C9F-4508498BE488}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

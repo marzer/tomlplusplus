@@ -54,6 +54,7 @@
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
 	#undef TOML_INLINE_NS_EX
+	#undef TOML_INLINE_NS_CHAR_8
 	#undef TOML_START
 	#undef TOML_START_2
 	#undef TOML_START_1
@@ -64,9 +65,8 @@
 
 /// \mainpage toml++
 /// 
-/// This is the home of toml++, a header-only [TOML](https://github.com/toml-lang/toml) parser and serializer for C++17
-/// and later.
-///
+/// \image html tomlplusplus-banner-small.png width=1280px
+/// 
 /// \tableofcontents
 /// 
 ///////////////////////////////////////////////////////////////////////
@@ -89,14 +89,16 @@
 /// There's some minor configuration you can do to customize some basic library functionality, but that's totally
 /// optional. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
 /// 
-/// \remark
-/// \parblock
-/// Header-only libraries are great for minimal setup, but can cause ODR violations and complex linker errors
-/// in situations where multiple modules include them separately, each with different versions, configuration options,
-/// exception handling modes, et cetera.
+/// \m_class{m-note m-default}
 /// 
-/// `toml++` attempts to combat this problem by nesting everything inside an additional inline namespace that
-/// changes according to the library's major version and the compiler's exception-handling mode.
+/// \parblock
+/// <h3>A word on Linkers and the One Definition Rule</h3>
+/// Header-only libraries are great for minimal setup but can cause ODR violations and complex linker errors
+/// in situations where multiple modules include them separately, each with different versions, configuration options,
+/// exception handling modes...
+/// 
+/// This library attempts to combat this problem by nesting everything inside an additional inline namespace
+/// that changes according to the library's major version, the compiler's exception-handling mode, et cetera.
 /// \endparblock
 /// 
 ///////////////////////////////////////////////////////////////////////
@@ -105,9 +107,11 @@
 /// You're looking at it! Browse the docs using the links at the top of the page.
 /// You can search from anywhere by pressing the TAB key.
 /// 
-/// <em>toml++ is still pretty hot off the presses so there's going to be some omissions,
+/// \m_class{m-note m-default}
+///
+/// This library is still pretty hot off the presses so there's going to be some omissions,
 /// typos and general sparseness throughout the docs.
-/// If you spot something or have a suggestion, please [let me know](https://github.com/marzer/tomlplusplus/issues)!</em>
+/// If you spot something or have a suggestion, please [let me know](https://github.com/marzer/tomlplusplus/issues)!
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -260,7 +264,9 @@
 ///////////////////////////////////
 /// 
 /// \subsection mainpage-example-manipulations Traversing and manipulating data
-/// 
+/// A TOML document is a tree of values, arrays and tables, represented as the toml::value, toml::array
+/// and toml::table, respectively. All three inherit from toml::node, and can be easily accessed via
+/// the toml::node_view:
 /// \cpp
 /// #include <iostream>
 /// #include <toml++/toml.h>
@@ -281,29 +287,39 @@
 ///		)"sv;
 ///		auto tbl = toml::parse(source);
 ///		
+///		// get a view of the element 'numbers'
 ///		auto numbers = tbl["numbers"];
 ///		std::cout << "table has 'numbers': "sv << !!numbers << std::endl;
-///		if (numbers)
+///		std::cout << "numbers is a: "sv << numbers.type() << std::endl;
+///		std::cout << "numbers: "sv << numbers << std::endl;
+///
+///		// get the underlying array object to do some more advanced stuff
+///		if (auto arr = numbers.as_array())
 ///		{
-///			std::cout << "'numbers' is a: "sv << numbers.type() << std::endl;
-///			std::cout << "'numbers': "sv << numbers << std::endl;
-///			for (auto& node : *numbers.as_array())
+///			for (auto& elem : *arr)
 ///			{
-///				node.visit([=](auto&& n) noexcept
+///				// visitation helps deal with the polymorphic nature of TOML data
+///				elem.visit([=](auto&& el) noexcept
 ///				{
-///					if constexpr (toml::is_number<decltype(n)>)
-///						(*n)++;
-///					else if constexpr (toml::is_string<decltype(n)>)
-///						n = "five"sv;
+///					if constexpr (toml::is_number<decltype(el)>)
+///						(*el)++;
+///					else if constexpr (toml::is_string<decltype(el)>)
+///						el = "five"sv;
 ///				});
 ///			}
-///			numbers.as_array()->push_back(7);
-///			numbers.as_array()->emplace_back<toml::array>(8, 9);
-///			std::cout << "'numbers': "sv << numbers << std::endl;
+///			
+///			// arrays are very similar to std::vector
+///			arr->push_back(7);
+///			arr->emplace_back<toml::array>(8, 9);
+///			std::cout << "numbers: "sv << numbers << std::endl;
 ///		}
 ///
-///		std::cout << "'cats': "sv << tbl["animals"]["cats"] << std::endl;
-///		std::cout << "'dinosaurs': "sv << tbl["animals"]["dinosaurs"] << std::endl; //no dinosaurs :(
+///		// node-views can be chained to quickly query deeper
+///		std::cout << "cats: "sv << tbl["animals"]["cats"] << std::endl;
+///		std::cout << "fish[1]: "sv << tbl["animals"]["fish"][1] << std::endl;
+///		
+///		// ...even if the element doesn't exist
+///		std::cout << "dinosaurs: "sv << tbl["animals"]["dinosaurs"] << std::endl; //no dinosaurs :(
 /// 
 /// 	return 0;
 /// }
@@ -311,16 +327,18 @@
 /// 
 /// \out
 /// table has 'numbers': true
-/// 'numbers' is an: array
-/// 'numbers': [1, 2, 3, "four", 5.0]
-/// 'numbers': [2, 3, 4, "five", 6.0, 7, [8, 9]]
-/// 'cats': ["tiger", "lion", "puma"]
-/// 'dinosaurs':
+/// numbers is an: array
+/// numbers: [1, 2, 3, "four", 5.0]
+/// numbers: [2, 3, 4, "five", 6.0, 7, [8, 9]]
+/// cats: ["tiger", "lion", "puma"]
+/// fish[1]: "trout"
+/// dinosaurs:
 /// \eout
 /// 
 /// \see
 /// 	- toml::node
-/// 	- toml::node_view
+/// 	- toml::node_view  
+/// 	- toml::value
 /// 	- toml::array
 /// 	- toml::table
 /// 
@@ -408,7 +426,9 @@
 /// UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's
 /// 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see
 /// [LICENSE-utf8-decoder](https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder).
-///  
-/// \remark If you're using the single-header version of the library you don't need to distribute these files;
-/// 		their contents is included in the preamble at the top of the file.
+/// 
+/// \m_class{m-note m-default}
+/// 
+/// If you're using the single-header version of the library you don't need to distribute these files;
+/// their contents is included in the preamble at the top of the file.
 /// 

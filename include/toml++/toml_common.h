@@ -140,21 +140,21 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-
 #ifndef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS 1
-#endif
-#ifndef TOML_DOXYGEN
-	#define TOML_DOXYGEN 0
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
+	#define TOML_INLINE_NS_EX
 #else
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
+	#define TOML_INLINE_NS_EX _noex
 #endif
-
+#ifndef TOML_DOXYGEN
+	#define TOML_DOXYGEN 0
+#endif
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
@@ -251,17 +251,17 @@
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
-#if !TOML_DOXYGEN
+#if TOML_CHAR_8_STRINGS
+	#define TOML_INLINE_NS_CHAR_8 _char8
+#else
+	#define TOML_INLINE_NS_CHAR_8
+#endif
 
-	#if TOML_EXCEPTIONS
-		#define TOML_INLINE_NS_EX
-	#else
-		#define TOML_INLINE_NS_EX _noex
-	#endif
+#if !TOML_DOXYGEN
 
 	#define TOML_START_2(VER, ARG1, ARG2)	namespace toml { inline namespace v##VER##ARG1##ARG2
 	#define TOML_START_1(VER, ARG1, ARG2)	TOML_START_2(VER, ARG1, ARG2)
-	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,)
+	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,TOML_INLINE_NS_CHAR_8)
 	#define TOML_END		}
 	
 #endif

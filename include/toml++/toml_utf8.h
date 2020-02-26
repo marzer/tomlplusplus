@@ -305,10 +305,10 @@ TOML_IMPL_START
 	struct utf8_codepoint final
 	{
 		char32_t value;
-		uint8_t bytes[4];
-		toml::source_position position;
+		string_char bytes[4];
+		source_position position;
 
-		template <typename CHAR = toml::string_char>
+		template <typename CHAR = string_char>
 		[[nodiscard]] TOML_ALWAYS_INLINE
 		std::basic_string_view<CHAR> as_view() const noexcept
 		{
@@ -318,8 +318,8 @@ TOML_IMPL_START
 			);
 
 			return bytes[3]
-				? std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes), 4_sz }
-				: std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR* const>(bytes) };
+				? std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(bytes), 4_sz }
+				: std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(bytes) };
 		}
 
 		[[nodiscard]]
@@ -339,7 +339,7 @@ TOML_IMPL_START
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
-		#define TOML_ERROR			throw toml::parse_error
+		#define TOML_ERROR			throw parse_error
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR			err.emplace
@@ -348,7 +348,7 @@ TOML_IMPL_START
 	struct TOML_INTERFACE utf8_reader_interface
 	{
 		[[nodiscard]]
-		virtual const toml::source_path_ptr& source_path() const noexcept = 0;
+		virtual const source_path_ptr& source_path() const noexcept = 0;
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() TOML_MAY_THROW = 0;
@@ -356,7 +356,7 @@ TOML_IMPL_START
 		#if !TOML_EXCEPTIONS
 
 		[[nodiscard]]
-		virtual std::optional<toml::parse_error>&& error() noexcept = 0;
+		virtual std::optional<parse_error>&& error() noexcept = 0;
 
 		#endif
 
@@ -374,7 +374,7 @@ TOML_IMPL_START
 			uint8_t current_byte_count{};
 			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
-			std::optional<toml::parse_error> err;
+			std::optional<parse_error> err;
 			#endif
 
 		public:
@@ -426,11 +426,11 @@ TOML_IMPL_START
 						}
 						catch (const std::exception& exc)
 						{
-							throw toml::parse_error{ exc.what(), prev.position, source_path_ };
+							throw parse_error{ exc.what(), prev.position, source_path_ };
 						}
 						catch (...)
 						{
-							throw toml::parse_error{ "An unspecified error occurred", prev.position, source_path_ };
+							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
 						}
 					}
 					#endif
@@ -457,7 +457,7 @@ TOML_IMPL_START
 
 					TOML_ERROR_CHECK;
 
-					current.bytes[current_byte_count++] = *nextByte;
+					current.bytes[current_byte_count++] = static_cast<string_char>(*nextByte);
 					if (decoder.has_code_point())
 					{
 						current.value = decoder.codepoint;
@@ -481,7 +481,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<toml::parse_error>&& error() noexcept override
+			std::optional<parse_error>&& error() noexcept override
 			{
 				return std::move(err);
 			}
@@ -532,7 +532,7 @@ TOML_IMPL_START
 			{}
 
 			[[nodiscard]]
-			const toml::source_path_ptr& source_path() const noexcept override
+			const source_path_ptr& source_path() const noexcept override
 			{
 				return reader.source_path();
 			}
@@ -592,7 +592,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<toml::parse_error>&& error() noexcept override
+			std::optional<parse_error>&& error() noexcept override
 			{
 				return reader.error();
 			}

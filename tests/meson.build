@@ -37,23 +37,23 @@ char_noexcept = executable(
 test('char_noexcept', char_noexcept)
 
 
-strict_char = executable(
-	'strict_char',
+char_strict = executable(
+	'char_strict',
 	test_sources,
 	include_directories : inc,
 	cpp_args : [ no_unreleased_features ]
 )
-test('strict_char', strict_char)
+test('char_strict', char_strict)
 
 
-strict_char_noexcept = executable(
-	'strict_char_noexcept',
+char_strict_noexcept = executable(
+	'char_strict_noexcept',
 	test_sources,
 	include_directories : inc,
 	override_options : [ disable_exceptions ],
 	cpp_args : [ no_unreleased_features ]
 )
-test('strict_char_noexcept', strict_char_noexcept)
+test('char_strict_noexcept', char_strict_noexcept)
 
 
 if compiler_supports_char8_strings
@@ -76,22 +76,22 @@ if compiler_supports_char8_strings
 	)
 	test('char8_noexcept', char8_noexcept)
 	
-	strict_char8 = executable(
-		'strict_char8',
+	char8_strict = executable(
+		'char8_strict',
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std ],
 		cpp_args : [ cpp20, define_toml_use_char8_strings, no_unreleased_features ]
 	)
-	test('strict_char8', strict_char8)
+	test('char8_strict', char8_strict)
 
-	strict_char8_noexcept = executable(
-		'strict_char8_noexcept',
+	char8_strict_noexcept = executable(
+		'char8_strict_noexcept',
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std, disable_exceptions ],
 		cpp_args : [ cpp20, define_toml_use_char8_strings, no_unreleased_features ]
 	)
-	test('strict_char8_noexcept', strict_char8_noexcept)
+	test('char8_strict_noexcept', char8_strict_noexcept)
 
 endif

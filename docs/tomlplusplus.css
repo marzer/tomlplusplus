@@ -85,13 +85,16 @@ nav .github
 	background-origin: content-box;
 }
 
-pre.m-code + pre
+/* code blocks w/ output examples */
+pre.m-code + pre.m-console
 {
 	margin-top: -1.0rem;
-	color: #bababa; /* is yououou */
-	background-color: #383e46;
-	border-top: 2px solid #181e26;
+	border-top: 1px solid #444444;
 	font-size: 0.8rem;
+}
+pre.m-code + pre.m-console span
+{
+	color: #bababa; /* is yououou */
 }
 
 /* "Parameters", "Returns" etc */

@@ -62,6 +62,13 @@ type_names = [
 	'bool',
 	'pair',
 	'tuple',
+	'istream',
+	'ostream',
+	'ifstream',
+	'ofstream',
+	'stringstream',
+	'istringstream',
+	'ostringstream'
 ]
 all_namespaces = [
 	'std',
@@ -296,23 +303,6 @@ class NavBarFix(object):
 
 
 
-# changes any links to index.html to link to namespacetoml.html instead (index.html is blank/unused)
-class IndexHrefFix(object): 
-
-	def __call__(self, file, doc):
-		links = doc.body('a', href='index.html')
-		if (len(links) > 0):
-			for link in links:
-				link['href'] = 'namespacetoml.html'
-			return True
-		return False
-
-
-
-#=======================================================================================================================
-
-
-
 # base type for modifier parsing fixers.
 class ModifiersFixBase(object):
 	_modifierRegex = "defaulted|noexcept|constexpr|(?:pure )?virtual|protected|__(?:(?:vector|std|fast)call|cdecl)"
@@ -407,6 +397,22 @@ class ModifiersFix2(ModifiersFixBase):
 						)
 						lastInserted.insert_after(' ')
 		return changed
+
+
+
+#=======================================================================================================================
+
+
+
+# applies some basic fixes to index.html
+class IndexPageFix(object): 
+
+	def __call__(self, file, doc):
+		if file != 'index.html':
+			return False
+		parent = doc.body.main.article.div.div.div
+		parent('h1')[0].replace_with(parent('img')[0].extract())
+		return True
 
 
 
@@ -569,7 +575,7 @@ class SyntaxHighlightingFix(object):
 				name['class'] = 'sa'
 				changed = True
 
-			# user types and typedefs
+			# types and typedefs
 			names = names_ + code_block('span', class_='kt')
 			for name in names:
 				if (name.string is not None and name.string in type_names):
@@ -910,7 +916,7 @@ def main():
 		CustomTagsFix()
 		, SyntaxHighlightingFix()
 		#, NavBarFix()
-		#, IndexHrefFix()
+		, IndexPageFix()
 		, ModifiersFix1()
 		, ModifiersFix2()
 		, InlineNamespaceFix1()
