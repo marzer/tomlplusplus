@@ -72,14 +72,14 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
-///		unreleased TOML features (these are optional)
+/// - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus optional support for some
+///		unreleased TOML features
 /// - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 /// - Proper UTF-8 handling (incl. BOM)
 /// - Works with or without exceptions
 /// - Doesn't require RTTI
 /// - First-class support for serializing to JSON  
-/// - Tested on Clang and GCC and MSVC (VS2019)
+/// - Tested on Clang, GCC and MSVC (VS2019)
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -89,29 +89,11 @@
 /// There's some minor configuration you can do to customize some basic library functionality, but that's totally
 /// optional. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
 /// 
-/// \m_class{m-note m-default}
-/// 
-/// \parblock
-/// <h3>A word on Linkers and the One Definition Rule</h3>
-/// Header-only libraries are great for minimal setup but can cause ODR violations and complex linker errors
-/// in situations where multiple modules include them separately, each with different versions, configuration options,
-/// exception handling modes...
-/// 
-/// This library attempts to combat this problem by nesting everything inside an additional inline namespace
-/// that changes according to the library's major version, the compiler's exception-handling mode, et cetera.
-/// \endparblock
-/// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-api-documentation API Documentation
 /// You're looking at it! Browse the docs using the links at the top of the page.
 /// You can search from anywhere by pressing the TAB key.
-/// 
-/// \m_class{m-note m-default}
-///
-/// This library is still pretty hot off the presses so there's going to be some omissions,
-/// typos and general sparseness throughout the docs.
-/// If you spot something or have a suggestion, please [let me know](https://github.com/marzer/tomlplusplus/issues)!
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -431,4 +413,4 @@
 /// 
 /// If you're using the single-header version of the library you don't need to distribute these files;
 /// their contents is included in the preamble at the top of the file.
-/// 
+///

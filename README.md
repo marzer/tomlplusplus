@@ -1,15 +1,14 @@
-# toml++ (tomlplusplus) · [![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers] [![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0] [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus) [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](./LICENSE)  
+# toml++ (tomlplusplus) · [![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers] [![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0] [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus) [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](./LICENSE) [![Mentioned in Awesome C++](https://awesome.re/mentioned-badge.svg)](https://github.com/fffaraz/awesome-cpp)
 
 ![banner](docs/tomlplusplus-banner-small.png)
  - Header-only
+ - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
- - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus support for some
- 	[unreleased TOML language features] (these are optional)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
  - Doesn't require RTTI
  - First-class support for serializing to JSON
- - Tested on Clang and GCC and MSVC (VS2019)
+ - Tested on Clang, GCC and MSVC (VS2019)
 
 <br>
 
@@ -80,7 +79,7 @@ The API is the same regardless of how you consume the library.
 
 ### Configuration
 A number of configurable options are exposed in the form of preprocessor `#defines`. Most likely you
-won't need to mess with these at all, butif you do, set them before including toml++.
+won't need to mess with these at all, but if you do, set them before including toml++.
 
 | Option                     |      Type      | Default                           | Description                                                                                              |
 |----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
