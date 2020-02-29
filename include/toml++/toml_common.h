@@ -46,10 +46,6 @@
 
 #ifdef __clang__
 
-	#ifndef __cpp_exceptions
-		#define TOML_EXCEPTIONS	0
-	#endif
-
 	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("clang diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
@@ -72,11 +68,7 @@
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
 
-#elif defined(_MSC_VER)
-
-	#ifndef _CPPUNWIND
-		#define TOML_EXCEPTIONS	0
-	#endif
+#elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
 	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
@@ -95,10 +87,6 @@
 	#endif
 
 #elif defined(__GNUC__)
-
-	#ifndef __cpp_exceptions
-		#define TOML_EXCEPTIONS	0
-	#endif
 
 	#define TOML_PUSH_WARNINGS				_Pragma("GCC diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")
@@ -140,14 +128,13 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-#ifndef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS 1
-#endif
-#if TOML_EXCEPTIONS
+#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	#define TOML_EXCEPTIONS	1
 	#define TOML_MAY_THROW
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
 	#define TOML_INLINE_NS_EX
 #else
+	#define TOML_EXCEPTIONS	0
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
 	#define TOML_INLINE_NS_EX _noex
@@ -275,7 +262,6 @@ TOML_DISABLE_ALL_WARNINGS
 
 #include <cstdint>
 #include <cstring>		//memcpy, memset
-#include <cmath>		//log10
 #include <optional>
 #include <memory>
 #include <string_view>

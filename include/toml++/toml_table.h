@@ -678,7 +678,6 @@ TOML_START
 			/// node ["a"] was an integer
 			/// \eout
 			/// 
-			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
@@ -686,7 +685,6 @@ TOML_START
 
 			/// \brief	Gets the node at a specific key (const overload).
 			///
-			/// \tparam	T	The node's type.
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.

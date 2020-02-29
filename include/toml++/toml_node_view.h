@@ -374,10 +374,13 @@ TOML_START
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view& nv) TOML_MAY_THROW
 			{
-				nv.visit([&](const auto& node) TOML_MAY_THROW
+				if (nv.node_)
 				{
-					os << node;
-				});
+					nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
+					{
+						os << n;
+					});
+				}
 				return os;
 			}
 	};

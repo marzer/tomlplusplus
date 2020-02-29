@@ -146,13 +146,11 @@ TOML_START
 		/// Z
 		/// \eout
 		/// 
-		/// \param 	hours  	The total hours.
-		/// \param 	minutes	The total minutes.
-		///
-		/// \returns	A time_offset.
+		/// \param 	h  	The total hours.
+		/// \param 	m	The total minutes.
 		TOML_NODISCARD_CTOR
-		constexpr time_offset(int8_t hours, int8_t minutes) noexcept
-			: minutes{ static_cast<int16_t>(hours * 60 + minutes) }
+		constexpr time_offset(int8_t h, int8_t m) noexcept
+			: minutes{ static_cast<int16_t>(h * 60 + m) }
 		{}
 
 		/// \brief	Equality operator.

@@ -192,7 +192,7 @@ TOML_START
 	/// 
 	/// for (size_t i = 0; i < arr.size(); i++)
 	/// {
-	///		arr[i].visit([=](auto&& el) noexcept
+	///		arr[i].visit([](auto&& el) noexcept
 	///		{
 	///			if constexpr (toml::is_number<decltype(el)>)
 	///				(*el)++;
@@ -476,7 +476,7 @@ TOML_START
 
 						//# potentially move the initial value into the last element
 						values[i].reset(impl::make_node(std::forward<U>(val)));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -504,7 +504,7 @@ TOML_START
 						size_t i = start_idx;
 						for (auto it = first; it != last; it++)
 							values[i].reset(impl::make_node(*it));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -530,7 +530,7 @@ TOML_START
 						size_t i = start_idx;
 						for (auto& val : ilist)
 							values[i].reset(impl::make_node(val));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -916,7 +916,7 @@ TOML_START
 						size_after_flattening += leaf_count;
 					}
 					else
-						values.erase(values.cbegin() + i);
+						values.erase(values.cbegin() + static_cast<ptrdiff_t>(i));
 				}
 
 				if (!requires_flattening)

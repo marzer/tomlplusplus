@@ -41,11 +41,11 @@ TOML_START
 	class parse_result final
 	{
 		private:
-			bool is_err;
 			std::aligned_storage_t<
 				(sizeof(table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(table)),
 				(alignof(table) < alignof(parse_error) ? alignof(parse_error) : alignof(table))
 			> storage;
+			bool is_err;
 
 			void destroy() noexcept
 			{
@@ -334,9 +334,9 @@ TOML_IMPL_START
 					(concatenator(std::forward<T>(args)), ...);
 					*ptr = '\0';
 					#if TOML_EXCEPTIONS
-						TOML_ERROR( buf, current_position(1), reader.source_path() );
+						TOML_ERROR(buf, current_position(1), reader.source_path());
 					#else
-						TOML_ERROR( std::string(buf, ptr - buf), current_position(1), reader.source_path());
+						TOML_ERROR(std::string(buf, static_cast<size_t>(ptr - buf)), current_position(1), reader.source_path());
 					#endif
 				}
 			}

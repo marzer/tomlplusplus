@@ -27,10 +27,10 @@ TOML_IMPL_START
 	{
 		private:
 			const toml::node* source_;
-			format_flags flags_;
-			int indent_;
-			bool naked_newline_;
 			std::basic_ostream<CHAR>* stream_ = nullptr;
+			format_flags flags_;
+			int8_t indent_;
+			bool naked_newline_;
 
 		protected:
 			
@@ -40,8 +40,8 @@ TOML_IMPL_START
 
 			static constexpr size_t indent_columns = 4;
 			static constexpr toml::string_view indent_string = TOML_STRING_PREFIX("    "sv);
-			[[nodiscard]] int indent() const noexcept { return indent_; }
-			void indent(int level) noexcept { indent_ = level; }
+			[[nodiscard]] int8_t indent() const noexcept { return indent_; }
+			void indent(int8_t level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
 
@@ -49,7 +49,7 @@ TOML_IMPL_START
 
 			void attach(std::basic_ostream<CHAR>& stream) noexcept
 			{
-				indent_ = 0;
+				indent_ = {};
 				naked_newline_ = true;
 				stream_ = &stream;
 			}
@@ -70,7 +70,7 @@ TOML_IMPL_START
 
 			void print_indent() TOML_MAY_THROW
 			{
-				for (int i = 0; i < indent_; i++)
+				for (int8_t i = 0; i < indent_; i++)
 				{
 					print_to_stream(indent_string, *stream_);
 					naked_newline_ = false;

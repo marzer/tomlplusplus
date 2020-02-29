@@ -1,6 +1,11 @@
-# toml++ (tomlplusplus) · [![c++version](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers] [![tomlversion](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0] [![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus) [![GitHub](https://img.shields.io/github/license/marzer/tomlplusplus)](./LICENSE) [![Mentioned in Awesome C++](https://awesome.re/mentioned-badge.svg)](https://github.com/fffaraz/awesome-cpp)
-
-![banner](docs/tomlplusplus-banner-small.png)
+![banner](docs/tomlplusplus-banner-small.png)  
+[![C++](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers]
+[![TOML](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0]
+[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![Releases](https://img.shields.io/github/release/marzer/tomlplusplus.svg)](https://github.com/marzer/tomlplusplus/releases)
+[![Mentioned in Awesome C++](https://awesome.re/mentioned-badge.svg)](https://github.com/fffaraz/awesome-cpp)
+[![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
+ ====
  - Header-only
  - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)

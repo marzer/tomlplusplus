@@ -83,31 +83,47 @@ TOML_IMPL_START
 				{
 					return n.get().length() + 2_sz; // + ""
 				}
-				else if constexpr (is_integer<decltype(n)>)
+				else if constexpr (is_number<decltype(n)>)
 				{
-					auto v = n.get();
-					if (!v)
-						return 1_sz;
-					size_t weight = {};
-					if (v < 0)
+					static constexpr auto digit_count = [](auto num) noexcept
+						-> size_t
 					{
-						weight += 1;
-						v *= -1;
-					}
-					return weight + static_cast<size_t>(std::log10(static_cast<double>(v)));
-				}
-				else if constexpr (is_floating_point<decltype(n)>)
-				{
-					auto v = n.get();
-					if (v == 0.0)
-						return 3_sz;
-					size_t weight = 2_sz; // ".0"
-					if (v < 0.0)
+						using number_t = decltype(num);
+						size_t digits = 1_sz;
+						while (num >= number_t{ 10 })
+						{
+							num /= number_t{ 10 };
+							digits++;
+						}
+						return digits;
+					};
+
+					if constexpr (is_integer<decltype(n)>)
 					{
-						weight += 1;
-						v *= -1.0;
+						auto v = n.get();
+						if (!v)
+							return 1_sz;
+						size_t weight = {};
+						if (v < 0)
+						{
+							weight += 1;
+							v *= -1;
+						}
+						return weight + digit_count(v);
 					}
-					return weight + static_cast<size_t>(std::log10(v));
+					else if constexpr (is_floating_point<decltype(n)>)
+					{
+						auto v = n.get();
+						if (v == 0.0)
+							return 3_sz;
+						size_t weight = 2_sz; // ".0"
+						if (v < 0.0)
+						{
+							weight += 1;
+							v *= -1.0;
+						}
+						return weight + digit_count(v);
+					}
 				}
 				else if constexpr (is_boolean<decltype(n)>)
 				{

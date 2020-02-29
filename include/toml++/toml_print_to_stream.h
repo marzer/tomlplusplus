@@ -21,7 +21,7 @@ TOML_IMPL_START
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
 	template <typename CHAR1, typename CHAR2>
@@ -30,7 +30,7 @@ TOML_IMPL_START
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
 	template <typename CHAR>

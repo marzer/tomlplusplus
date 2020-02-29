@@ -281,7 +281,7 @@
 ///			for (auto& elem : *arr)
 ///			{
 ///				// visitation helps deal with the polymorphic nature of TOML data
-///				elem.visit([=](auto&& el) noexcept
+///				elem.visit([](auto&& el) noexcept
 ///				{
 ///					if constexpr (toml::is_number<decltype(el)>)
 ///						(*el)++;

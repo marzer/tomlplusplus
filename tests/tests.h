@@ -14,8 +14,11 @@ TOML_POP_WARNINGS
 template <typename CHAR, typename FUNC>
 void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, std::string_view source_path = {}) noexcept
 {
+	INFO("String being parsed: '"sv << std::string_view( reinterpret_cast<const char*>(toml_str.data()), toml_str.length() ) << "'"sv)
+
 	constexpr auto validate_table = [](table&& tabl, std::string_view path) noexcept -> table&&
 	{
+		INFO("Validating table source information"sv)
 		CHECK(tabl.source().begin != source_position{});
 		CHECK(tabl.source().end != source_position{});
 		if (path.empty())
@@ -33,10 +36,14 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 
 	try
 	{
-		std::forward<FUNC>(func)(validate_table(toml::parse(toml_str, source_path), source_path));
 		{
+			INFO("Parsing string directly"sv)
+			std::forward<FUNC>(func)(validate_table(toml::parse(toml_str, source_path), source_path));
+		}
+		{
+			INFO("Parsing from a string stream"sv)
 			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
-			ss.write(toml_str.data(), toml_str.length());
+			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			std::forward<FUNC>(func)(validate_table(toml::parse(ss, source_path), source_path));
 		}
 	}
@@ -52,6 +59,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 	#else
 
 	{
+		INFO("Parsing string directly"sv)
 		toml::parse_result result = toml::parse(toml_str, source_path);
 		if (result)
 			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
@@ -67,8 +75,9 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 	}
 
 	{
+		INFO("Parsing from a string stream"sv)
 		std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
-		ss.write(toml_str.data(), toml_str.length());
+		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 		toml::parse_result result = toml::parse(ss, source_path);
 		if (result)
 			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
@@ -117,7 +126,7 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 		run_tests([=]()
 		{
 			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
-			ss.write(toml_str.data(), toml_str.length());
+			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			(void)toml::parse(ss);
 		});
 
@@ -142,7 +151,7 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 		run_tests([=]() noexcept
 		{
 			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
-			ss.write(toml_str.data(), toml_str.length());
+			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			return toml::parse(ss);
 		});
 
@@ -203,8 +212,6 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 
 	parsing_should_succeed(std::string_view{ val }, [&](table&& tbl) noexcept
 	{
-		INFO("String being parsed: '"sv << val << "'"sv);
-
 		CHECK(tbl.size() == 1);
 		auto nv = tbl[S("val"sv)];
 		REQUIRE(nv);

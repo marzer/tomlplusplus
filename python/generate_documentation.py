@@ -407,11 +407,25 @@ class ModifiersFix2(ModifiersFixBase):
 # applies some basic fixes to index.html
 class IndexPageFix(object): 
 
+	__badges = [
+		('C++', 'https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational', 'https://en.cppreference.com/w/cpp/compiler_support'),
+		('TOML', 'https://img.shields.io/badge/TOML-v0.5.0-informational', 'https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md'),
+		('MIT License', 'https://img.shields.io/badge/license-MIT-blue.svg', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE'),
+		('Releases', 'https://img.shields.io/github/release/marzer/tomlplusplus.svg', 'https://github.com/marzer/tomlplusplus/releases'),
+		('Mentioned in Awesome C++', 'https://awesome.re/mentioned-badge.svg', 'https://github.com/fffaraz/awesome-cpp'),
+		('CircleCI', 'https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield', 'https://circleci.com/gh/marzer/tomlplusplus')
+	]
+
 	def __call__(self, file, doc):
 		if file != 'index.html':
 			return False
 		parent = doc.body.main.article.div.div.div
-		parent('h1')[0].replace_with(parent('img')[0].extract())
+		banner = parent('img')[0].extract()
+		parent('h1')[0].replace_with(banner)
+		parent = doc.new_tag('div', class_='gh-badges', after=banner)
+		for (alt, src, href) in self.__badges:
+			anchor = doc.new_tag('a', parent=parent, href=href, target='_blank')
+			doc.new_tag('img', parent=anchor, src=src, alt='caption')
 		return True
 
 
@@ -828,8 +842,6 @@ def postprocess_file(dir, file, fixes):
 		_threadError = True
 
 	return changed
-
-
 
 
 

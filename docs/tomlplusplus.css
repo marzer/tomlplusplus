@@ -171,3 +171,13 @@ pre.m-code + pre.m-console span
 {
 	color: rgb(140,140,140);
 }
+
+/* github badges (index.html) */
+.gh-badges
+{
+	padding-bottom: 0.75rem;
+}
+.gh-badges a
+{
+	margin-right: 0.5rem;
+}

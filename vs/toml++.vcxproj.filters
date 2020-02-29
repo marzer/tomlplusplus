@@ -78,6 +78,7 @@
       <Filter>doc</Filter>
     </None>
     <None Include="..\CONTRIBUTING.md" />
+    <None Include="..\meson.build" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

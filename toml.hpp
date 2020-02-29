@@ -110,10 +110,6 @@
 
 #ifdef __clang__
 
-	#ifndef __cpp_exceptions
-		#define TOML_EXCEPTIONS	0
-	#endif
-
 	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("clang diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
@@ -136,11 +132,7 @@
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
 
-#elif defined(_MSC_VER)
-
-	#ifndef _CPPUNWIND
-		#define TOML_EXCEPTIONS	0
-	#endif
+#elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
 	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
@@ -159,10 +151,6 @@
 	#endif
 
 #elif defined(__GNUC__)
-
-	#ifndef __cpp_exceptions
-		#define TOML_EXCEPTIONS	0
-	#endif
 
 	#define TOML_PUSH_WARNINGS				_Pragma("GCC diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")
@@ -204,14 +192,13 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-#ifndef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS 1
-#endif
-#if TOML_EXCEPTIONS
+#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	#define TOML_EXCEPTIONS	1
 	#define TOML_MAY_THROW
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
 	#define TOML_INLINE_NS_EX
 #else
+	#define TOML_EXCEPTIONS	0
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
 	#define TOML_INLINE_NS_EX _noex
@@ -343,7 +330,6 @@ TOML_DISABLE_ALL_WARNINGS
 
 #include <cstdint>
 #include <cstring>		//memcpy, memset
-#include <cmath>		//log10
 #include <optional>
 #include <memory>
 #include <string_view>
@@ -926,8 +912,8 @@ TOML_START
 		{}
 
 		TOML_NODISCARD_CTOR
-		constexpr time_offset(int8_t hours, int8_t minutes) noexcept
-			: minutes{ static_cast<int16_t>(hours * 60 + minutes) }
+		constexpr time_offset(int8_t h, int8_t m) noexcept
+			: minutes{ static_cast<int16_t>(h * 60 + m) }
 		{}
 
 		[[nodiscard]]
@@ -1035,7 +1021,7 @@ TOML_IMPL_START
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
 	template <typename CHAR1, typename CHAR2>
@@ -1044,7 +1030,7 @@ TOML_IMPL_START
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), str.length());
+		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
 	template <typename CHAR>
@@ -2218,7 +2204,7 @@ TOML_START
 							values[i].reset(impl::make_node(val));
 
 						values[i].reset(impl::make_node(std::forward<U>(val)));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -2238,7 +2224,7 @@ TOML_START
 						size_t i = start_idx;
 						for (auto it = first; it != last; it++)
 							values[i].reset(impl::make_node(*it));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -2257,7 +2243,7 @@ TOML_START
 						size_t i = start_idx;
 						for (auto& val : ilist)
 							values[i].reset(impl::make_node(val));
-						return { values.begin() + start_idx };
+						return { values.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
 			}
@@ -2455,7 +2441,7 @@ TOML_START
 						size_after_flattening += leaf_count;
 					}
 					else
-						values.erase(values.cbegin() + i);
+						values.erase(values.cbegin() + static_cast<ptrdiff_t>(i));
 				}
 
 				if (!requires_flattening)
@@ -3083,10 +3069,13 @@ TOML_START
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view& nv) TOML_MAY_THROW
 			{
-				nv.visit([&](const auto& node) TOML_MAY_THROW
+				if (nv.node_)
 				{
-					os << node;
-				});
+					nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
+					{
+						os << n;
+					});
+				}
 				return os;
 			}
 	};
@@ -4704,12 +4693,11 @@ TOML_START
 	class parse_result final
 	{
 		private:
-			bool is_err;
 			std::aligned_storage_t<
 				(sizeof(table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(table)),
 				(alignof(table) < alignof(parse_error) ? alignof(parse_error) : alignof(table))
 			> storage;
-
+			bool is_err;
 			void destroy() noexcept
 			{
 				if (is_err)
@@ -4976,9 +4964,9 @@ TOML_IMPL_START
 					(concatenator(std::forward<T>(args)), ...);
 					*ptr = '\0';
 					#if TOML_EXCEPTIONS
-						TOML_ERROR( buf, current_position(1), reader.source_path() );
+						TOML_ERROR(buf, current_position(1), reader.source_path());
 					#else
-						TOML_ERROR( std::string(buf, ptr - buf), current_position(1), reader.source_path());
+						TOML_ERROR(std::string(buf, static_cast<size_t>(ptr - buf)), current_position(1), reader.source_path());
 					#endif
 				}
 			}
@@ -7846,10 +7834,10 @@ TOML_IMPL_START
 	{
 		private:
 			const toml::node* source_;
-			format_flags flags_;
-			int indent_;
-			bool naked_newline_;
 			std::basic_ostream<CHAR>* stream_ = nullptr;
+			format_flags flags_;
+			int8_t indent_;
+			bool naked_newline_;
 
 		protected:
 
@@ -7859,14 +7847,14 @@ TOML_IMPL_START
 
 			static constexpr size_t indent_columns = 4;
 			static constexpr toml::string_view indent_string = TOML_STRING_PREFIX("    "sv);
-			[[nodiscard]] int indent() const noexcept { return indent_; }
-			void indent(int level) noexcept { indent_ = level; }
+			[[nodiscard]] int8_t indent() const noexcept { return indent_; }
+			void indent(int8_t level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
 			void attach(std::basic_ostream<CHAR>& stream) noexcept
 			{
-				indent_ = 0;
+				indent_ = {};
 				naked_newline_ = true;
 				stream_ = &stream;
 			}
@@ -7887,7 +7875,7 @@ TOML_IMPL_START
 
 			void print_indent() TOML_MAY_THROW
 			{
-				for (int i = 0; i < indent_; i++)
+				for (int8_t i = 0; i < indent_; i++)
 				{
 					print_to_stream(indent_string, *stream_);
 					naked_newline_ = false;
@@ -8047,31 +8035,47 @@ TOML_IMPL_START
 				{
 					return n.get().length() + 2_sz; // + ""
 				}
-				else if constexpr (is_integer<decltype(n)>)
+				else if constexpr (is_number<decltype(n)>)
 				{
-					auto v = n.get();
-					if (!v)
-						return 1_sz;
-					size_t weight = {};
-					if (v < 0)
+					static constexpr auto digit_count = [](auto num) noexcept
+						-> size_t
 					{
-						weight += 1;
-						v *= -1;
-					}
-					return weight + static_cast<size_t>(std::log10(static_cast<double>(v)));
-				}
-				else if constexpr (is_floating_point<decltype(n)>)
-				{
-					auto v = n.get();
-					if (v == 0.0)
-						return 3_sz;
-					size_t weight = 2_sz; // ".0"
-					if (v < 0.0)
+						using number_t = decltype(num);
+						size_t digits = 1_sz;
+						while (num >= number_t{ 10 })
+						{
+							num /= number_t{ 10 };
+							digits++;
+						}
+						return digits;
+					};
+
+					if constexpr (is_integer<decltype(n)>)
 					{
-						weight += 1;
-						v *= -1.0;
+						auto v = n.get();
+						if (!v)
+							return 1_sz;
+						size_t weight = {};
+						if (v < 0)
+						{
+							weight += 1;
+							v *= -1;
+						}
+						return weight + digit_count(v);
 					}
-					return weight + static_cast<size_t>(std::log10(v));
+					else if constexpr (is_floating_point<decltype(n)>)
+					{
+						auto v = n.get();
+						if (v == 0.0)
+							return 3_sz;
+						size_t weight = 2_sz; // ".0"
+						if (v < 0.0)
+						{
+							weight += 1;
+							v *= -1.0;
+						}
+						return weight + digit_count(v);
+					}
 				}
 				else if constexpr (is_boolean<decltype(n)>)
 				{
