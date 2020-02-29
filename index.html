@@ -49,7 +49,7 @@ C++</span></a>
   <div class="m-container m-container-inflatable">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <img alt="Image" class="m-image" src="tomlplusplus-banner-small.png" style="width: 1280px;"/>
+        <img alt="Image" class="m-image" src="tomlplusplus-banner-small.png" style="width: 1280px;"/><div class="gh-badges"><a href="https://en.cppreference.com/w/cpp/compiler_support" target="_blank"><img alt="caption" src="https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational"/></a><a href="https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md" target="_blank"><img alt="caption" src="https://img.shields.io/badge/TOML-v0.5.0-informational"/></a><a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank"><img alt="caption" src="https://img.shields.io/badge/license-MIT-blue.svg"/></a><a href="https://github.com/marzer/tomlplusplus/releases" target="_blank"><img alt="caption" src="https://img.shields.io/github/release/marzer/tomlplusplus.svg"/></a><a href="https://github.com/fffaraz/awesome-cpp" target="_blank"><img alt="caption" src="https://awesome.re/mentioned-badge.svg"/></a><a href="https://circleci.com/gh/marzer/tomlplusplus" target="_blank"><img alt="caption" src="https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield"/></a></div>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -193,7 +193,7 @@ C++</span></a>
         <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;</span> <span class="nl">elem</span> <span class="p">:</span> <span class="o">*</span><span class="n">arr</span><span class="p">)</span>
         <span class="p">{</span>
             <span class="c1">// visitation helps deal with the polymorphic nature of TOML data</span>
-            <span class="n">elem</span><span class="p">.</span><span class="n">visit</span><span class="p">([</span><span class="o">=</span><span class="p">](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">el</span><span class="p">)</span> <span class="k">noexcept</span>
+            <span class="n">elem</span><span class="p">.</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">el</span><span class="p">)</span> <span class="k">noexcept</span>
             <span class="p">{</span>
                 <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
                     <span class="p">(</span><span class="o">*</span><span class="n">el</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>

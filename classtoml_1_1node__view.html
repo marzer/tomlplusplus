@@ -291,12 +291,12 @@ C++</span></a>
             <dd>Gets the raw value represented by the viewed value node, or a default.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a361a48e1182904d974be0c302cdcc75f">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a83e12ddc297409435263024a6ce52cfd">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Invokes a visitor on the viewed node based on its concrete type (const overload).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adc6739b1827bbe39bafc271cfe69b6ee">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4cb52fd27a284dbaf651a7d9352a4af3">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Invokes a visitor on the viewed node based on its concrete type.</dd>
           </dl>
@@ -840,27 +840,27 @@ C++</span></a>
 <span class="go">accessing 'int' as a float: -1.0</span>
 <span class="go">accessing 'flt' as a float: 420.0</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a361a48e1182904d974be0c302cdcc75f"><div>
+          <section class="m-doc-details" id="a83e12ddc297409435263024a6ce52cfd"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
                 template&lt;typename FUNC&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a361a48e1182904d974be0c302cdcc75f">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a83e12ddc297409435263024a6ce52cfd">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Invokes a visitor on the viewed node based on its concrete type (const overload).</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#aa1b228f99295358e10e94a9d6e6aee75">node::<wbr/>visit()</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a52651c7c516fbcca09280ea0a0329de4">node::<wbr/>visit()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="adc6739b1827bbe39bafc271cfe69b6ee"><div>
+          <section class="m-doc-details" id="a4cb52fd27a284dbaf651a7d9352a4af3"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
                 template&lt;typename FUNC&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adc6739b1827bbe39bafc271cfe69b6ee">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4cb52fd27a284dbaf651a7d9352a4af3">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Invokes a visitor on the viewed node based on its concrete type.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#aa1b228f99295358e10e94a9d6e6aee75">node::<wbr/>visit()</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a52651c7c516fbcca09280ea0a0329de4">node::<wbr/>visit()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ad8492137ae31941485e738caa0e080fa"><div>
             <h3>
