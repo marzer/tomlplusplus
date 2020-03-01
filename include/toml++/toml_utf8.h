@@ -1,8 +1,6 @@
 #pragma once
 #include "toml_common.h"
-#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
 #include "toml_utf8_generated.h"
-#endif // TOML_LANG_HIGHER_THAN(0, 5, 0)
 
 TOML_IMPL_START
 {

@@ -2,6 +2,8 @@
 #pragma once
 #include "toml_common.h"
 
+#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
+
 #define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)	\
 	TOML_ASSUME(codepoint >= first);				\
 	TOML_ASSUME(codepoint <= last)
@@ -984,3 +986,5 @@ TOML_IMPL_START
 TOML_IMPL_END
 
 #undef TOML_ASSUME_CODEPOINT_BETWEEN
+
+#endif // TOML_LANG_HIGHER_THAN(0, 5, 0)

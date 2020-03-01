@@ -8,6 +8,21 @@
 	#undef TOML_CONFIG_HEADER
 #endif
 
+#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE)
+	#undef TOML_ALL_INLINE
+	#define TOML_ALL_INLINE 1
+	#undef TOML_IMPLEMENTATION
+	#define TOML_IMPLEMENTATION 1
+#endif
+
+#ifndef TOML_IMPLEMENTATION
+	#define TOML_IMPLEMENTATION 0
+#endif
+
+#ifndef TOML_API
+	#define TOML_API
+#endif
+
 #ifndef TOML_CHAR_8_STRINGS
 	#define TOML_CHAR_8_STRINGS 0
 #endif
@@ -214,6 +229,11 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
+#endif
+#if TOML_ALL_INLINE
+	#define TOML_INLINE_FUNC_IMPL	inline
+#else
+	#define TOML_INLINE_FUNC_IMPL
 #endif
 
 #include "toml_version.h"

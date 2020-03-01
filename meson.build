@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '0.2.2',
+	version : '0.3.0',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
@@ -27,6 +27,7 @@ endif
 
 if compiler.get_id() == 'clang'
 	add_project_arguments([
+			'-g0',
 			'-ferror-limit=5',
 			'-fchar8_t',
 			'-Wno-c++98-compat',

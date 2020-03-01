@@ -1,3 +1,7 @@
+#define TOML_ALL_INLINE 0
+#define TOML_IMPLEMENTATION 1
+#include "../include/toml++/toml.h"
+
 #define CATCH_CONFIG_RUNNER
 #include "catch2.h"
 

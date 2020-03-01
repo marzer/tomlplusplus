@@ -14,11 +14,6 @@ TOML_START
 		uint8_t day;
 
 		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS date.
-		/// \param 	rhs	The RHS date.
-		///
-		/// \returns	True if the dates represented the same value.
 		[[nodiscard]]
 		friend constexpr bool operator == (date lhs, date rhs) noexcept
 		{
@@ -28,11 +23,6 @@ TOML_START
 		}
 
 		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS date.
-		/// \param 	rhs	The RHS date.
-		///
-		/// \returns	True if the dates did not represent the same value.
 		[[nodiscard]]
 		friend constexpr bool operator != (date lhs, date rhs) noexcept
 		{
@@ -41,7 +31,46 @@ TOML_START
 				|| lhs.day != rhs.day;
 		}
 
+	private:
 
+		[[nodiscard]] TOML_ALWAYS_INLINE
+		static constexpr uint32_t pack(date d) noexcept
+		{
+			return static_cast<uint32_t>(d.year) << 16
+				| static_cast<uint32_t>(d.month) << 8
+				| static_cast<uint32_t>(d.day);
+		}
+
+	public:
+
+		/// \brief	Less-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator <  (date lhs, date rhs) noexcept
+		{
+			return pack(lhs) < pack(rhs);
+		}
+
+		/// \brief	Less-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator <= (date lhs, date rhs) noexcept
+		{
+			return pack(lhs) <= pack(rhs);
+		}
+
+		/// \brief	Greater-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator >  (date lhs, date rhs) noexcept
+		{
+			return pack(lhs) > pack(rhs);
+		}
+
+		/// \brief	Greater-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator >= (date lhs, date rhs) noexcept
+		{
+			return pack(lhs) >= pack(rhs);
+		}
+		
 		/// \brief	Prints a date out to a stream as `YYYY-MM-DD` (per RFC 3339).
 		/// \detail \cpp
 		/// std::cout << toml::date{ 1987, 3, 16 } << std::endl;
@@ -51,7 +80,7 @@ TOML_START
 		/// 1987-03-16
 		/// \eout
 		template <typename CHAR>
-		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
 			TOML_MAY_THROW
 		{
 			impl::print_to_stream(rhs, lhs);
@@ -72,11 +101,6 @@ TOML_START
 		uint32_t nanosecond;
 
 		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS time.
-		/// \param 	rhs	The RHS time.
-		///
-		/// \returns	True if the times represented the same value.
 		[[nodiscard]]
 		friend constexpr bool operator == (const time& lhs, const time& rhs) noexcept
 		{
@@ -87,15 +111,51 @@ TOML_START
 		}
 
 		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS time.
-		/// \param 	rhs	The RHS time.
-		///
-		/// \returns	True if the times did not represent the same value.
 		[[nodiscard]]
 		friend constexpr bool operator != (const time& lhs, const time& rhs) noexcept
 		{
 			return !(lhs == rhs);
+		}
+
+	private:
+
+		[[nodiscard]] TOML_ALWAYS_INLINE
+		static constexpr uint64_t pack(time t) noexcept
+		{
+			return static_cast<uint64_t>(t.hour) << 48
+				| static_cast<uint64_t>(t.minute) << 40
+				| static_cast<uint64_t>(t.second) << 32
+				| static_cast<uint64_t>(t.nanosecond);
+		}
+
+	public:
+
+		/// \brief	Less-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator <  (time lhs, time rhs) noexcept
+		{
+			return pack(lhs) < pack(rhs);
+		}
+
+		/// \brief	Less-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator <= (time lhs, time rhs) noexcept
+		{
+			return pack(lhs) <= pack(rhs);
+		}
+
+		/// \brief	Greater-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator >  (time lhs, time rhs) noexcept
+		{
+			return pack(lhs) > pack(rhs);
+		}
+
+		/// \brief	Greater-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator >= (time lhs, time rhs) noexcept
+		{
+			return pack(lhs) >= pack(rhs);
 		}
 
 		/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
@@ -109,7 +169,7 @@ TOML_START
 		/// 10:20:34.5
 		/// \eout
 		template <typename CHAR>
-		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
 			TOML_MAY_THROW
 		{
 			impl::print_to_stream(rhs, lhs);
@@ -154,11 +214,6 @@ TOML_START
 		{}
 
 		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS time_offset.
-		/// \param 	rhs	The RHS time_offset.
-		///
-		/// \returns	True if the time_offsets represented the same value.
 		[[nodiscard]]
 		friend constexpr bool operator == (time_offset lhs, time_offset rhs) noexcept
 		{
@@ -166,15 +221,38 @@ TOML_START
 		}
 
 		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS time_offset.
-		/// \param 	rhs	The RHS time_offset.
-		///
-		/// \returns	True if the time_offsets did not represent the same value.
 		[[nodiscard]]
 		friend constexpr bool operator != (time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes != rhs.minutes;
+		}
+
+		/// \brief	Less-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator <  (time_offset lhs, time_offset rhs) noexcept
+		{
+			return lhs.minutes < rhs.minutes;
+		}
+
+		/// \brief	Less-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator <= (time_offset lhs, time_offset rhs) noexcept
+		{
+			return lhs.minutes <= rhs.minutes;
+		}
+
+		/// \brief	Greater-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator >  (time_offset lhs, time_offset rhs) noexcept
+		{
+			return lhs.minutes > rhs.minutes;
+		}
+
+		/// \brief	Greater-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator >= (time_offset lhs, time_offset rhs) noexcept
+		{
+			return lhs.minutes >= rhs.minutes;
 		}
 
 		/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
@@ -194,7 +272,7 @@ TOML_START
 		/// -02:30
 		/// \eout
 		template <typename CHAR>
-		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
 			TOML_MAY_THROW
 		{
 			impl::print_to_stream(rhs, lhs);
@@ -251,11 +329,6 @@ TOML_START
 		}
 
 		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS date_time.
-		/// \param 	rhs	The RHS date_time.
-		///
-		/// \returns	True if the date_times represented the same value.
 		[[nodiscard]]
 		friend constexpr bool operator == (const date_time& lhs, const date_time& rhs) noexcept
 		{
@@ -265,17 +338,46 @@ TOML_START
 		}
 
 		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS date_time.
-		/// \param 	rhs	The RHS date_time.
-		///
-		/// \returns	True if the date_times did not represent the same value.
 		[[nodiscard]]
 		friend constexpr bool operator != (const date_time& lhs, const date_time& rhs) noexcept
 		{
-			return lhs.date != rhs.date
-				|| lhs.time != rhs.time
-				|| lhs.time_offset != rhs.time_offset;
+			return !(lhs == rhs);
+		}
+
+		/// \brief	Less-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator <  (const date_time& lhs, const date_time& rhs) noexcept
+		{
+			if (lhs.date != rhs.date)
+				return lhs.date < rhs.date;
+			if (lhs.time != rhs.time)
+				return lhs.time < rhs.time;
+			return lhs.time_offset < rhs.time_offset;
+		}
+
+		/// \brief	Less-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator <= (const date_time& lhs, const date_time& rhs) noexcept
+		{
+			if (lhs.date != rhs.date)
+				return lhs.date < rhs.date;
+			if (lhs.time != rhs.time)
+				return lhs.time < rhs.time;
+			return lhs.time_offset <= rhs.time_offset;
+		}
+
+		/// \brief	Greater-than operator.
+		[[nodiscard]]
+		friend constexpr bool operator >  (const date_time& lhs, const date_time& rhs) noexcept
+		{
+			return !(lhs <= rhs);
+		}
+
+		/// \brief	Greater-than-or-equal-to operator.
+		[[nodiscard]]
+		friend constexpr bool operator >= (const date_time& lhs, const date_time& rhs) noexcept
+		{
+			return !(lhs < rhs);
 		}
 
 		/// \brief	Prints a date_time out to a stream in RFC 3339 format.
@@ -291,7 +393,7 @@ TOML_START
 		/// 1987-03-16T10:20:34Z
 		/// \eout
 		template <typename CHAR>
-		friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
+		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
 			TOML_MAY_THROW
 		{
 			impl::print_to_stream(rhs, lhs);

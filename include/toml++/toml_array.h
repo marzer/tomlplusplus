@@ -151,6 +151,11 @@ TOML_IMPL_START
 			}
 	};
 
+	#if !TOML_ALL_INLINE
+	extern template class array_iterator<true>;
+	extern template class array_iterator<false>;
+	#endif
+
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	auto make_node(T&& val) noexcept
@@ -219,24 +224,14 @@ TOML_START
 	/// [3, 4, 5, "six", 7, 8.0, "nine"]
 	/// [3, 4, 5, "six", 7, 8.0, "nine", [10, 11.0]]
 	/// \eout
-	class array final
+	class TOML_API array final
 		: public node
 	{
 		private:
 			friend class impl::parser;
 			std::vector<std::unique_ptr<node>> values;
 
-			void preinsertion_resize(size_t idx, size_t count) noexcept
-			{
-				const auto new_size = values.size() + count;
-				const auto inserting_at_end = idx == values.size();
-				values.resize(new_size);
-				if (!inserting_at_end)
-				{
-					for (size_t r = new_size, e = idx + count, l = e; r --> e; l--)
-						values[r] = std::move(values[l]);
-				}
-			}
+			void preinsertion_resize(size_t idx, size_t count) noexcept;
 
 		public:
 
@@ -253,14 +248,11 @@ TOML_START
 
 			/// \brief	Default constructor.
 			TOML_NODISCARD_CTOR
-			array() noexcept = default;
+			array() noexcept;
 
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
-			array(array&& other) noexcept
-				: node{ std::move(other) },
-				values{ std::move(other.values) }
-			{}
+			array(array&& other) noexcept;
 
 			/// \brief	Constructs an array with one or more initial values.
 			///
@@ -294,26 +286,21 @@ TOML_START
 			}
 
 			/// \brief	Move-assignment operator.
-			array& operator= (array&& rhs) noexcept
-			{
-				node::operator=(std::move(rhs));
-				values = std::move(rhs.values);
-				return *this;
-			}
+			array& operator= (array&& rhs) noexcept;
 
 			array(const array&) = delete;
 			array& operator= (const array&) = delete;
 
 			/// \brief	Always returns node_type::array for array nodes.
-			[[nodiscard]] node_type type() const noexcept override { return node_type::array; }
+			[[nodiscard]] node_type type() const noexcept override;
 			/// \brief	Always returns `false` for array nodes.
-			[[nodiscard]] bool is_table() const noexcept override { return false; }
+			[[nodiscard]] bool is_table() const noexcept override;
 			/// \brief	Always returns `true` for array nodes.
-			[[nodiscard]] bool is_array() const noexcept override { return true; }
+			[[nodiscard]] bool is_array() const noexcept override;
 			/// \brief	Always returns `false` for array nodes.
-			[[nodiscard]] bool is_value() const noexcept override { return false; }
-			[[nodiscard]] array* as_array() noexcept override { return this; }
-			[[nodiscard]] const array* as_array() const noexcept override { return this; }
+			[[nodiscard]] bool is_value() const noexcept override;
+			[[nodiscard]] array* as_array() noexcept override;
+			[[nodiscard]] const array* as_array() const noexcept override;
 
 			/// \brief	Checks if the array contains nodes of only one type.
 			///
@@ -370,41 +357,41 @@ TOML_START
 			}
 
 			/// \brief	Gets a reference to the node at a specific index.
-			[[nodiscard]] node& operator[] (size_t index) noexcept { return *values[index]; }
+			[[nodiscard]] node& operator[] (size_t index) noexcept;
 			/// \brief	Gets a reference to the node at a specific index.
-			[[nodiscard]] const node& operator[] (size_t index) const noexcept { return *values[index]; }
+			[[nodiscard]] const node& operator[] (size_t index) const noexcept;
 
 			/// \brief	Returns a reference to the first node in the array.
-			[[nodiscard]] node& front() noexcept { return *values.front(); }
+			[[nodiscard]] node& front() noexcept;
 			/// \brief	Returns a reference to the first node in the array.
-			[[nodiscard]] const node& front() const noexcept { return *values.front(); }
+			[[nodiscard]] const node& front() const noexcept;
 			/// \brief	Returns a reference to the last node in the array.
-			[[nodiscard]] node& back() noexcept { return *values.back(); }
+			[[nodiscard]] node& back() noexcept;
 			/// \brief	Returns a reference to the last node in the array.
-			[[nodiscard]] const node& back() const noexcept { return *values.back(); }
+			[[nodiscard]] const node& back() const noexcept;
 
 			/// \brief	Returns an iterator to the first node.
-			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
+			[[nodiscard]] iterator begin() noexcept;
 			/// \brief	Returns an iterator to the first node.
-			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
+			[[nodiscard]] const_iterator begin() const noexcept;
 			/// \brief	Returns an iterator to the first node.
-			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
+			[[nodiscard]] const_iterator cbegin() const noexcept;
 
 			/// \brief	Returns an iterator to one-past-the-last node.
-			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
+			[[nodiscard]] iterator end() noexcept;
 			/// \brief	Returns an iterator to one-past-the-last node.
-			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
+			[[nodiscard]] const_iterator end() const noexcept;
 			/// \brief	Returns an iterator to one-past-the-last node.
-			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+			[[nodiscard]] const_iterator cend() const noexcept;
 
 			/// \brief	Returns true if the array is empty.
-			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+			[[nodiscard]] bool empty() const noexcept;
 			/// \brief	Returns the number of nodes in the array.
-			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			[[nodiscard]] size_t size() const noexcept;
 			/// \brief	Reserves internal storage capacity up to a pre-determined number of nodes.
-			void reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
+			void reserve(size_t new_capacity) TOML_MAY_THROW;
 			/// \brief	Removes all nodes from the array.
-			void clear() noexcept { values.clear(); }
+			void clear() noexcept;
 
 			/// \brief	Inserts a new node at a specific position in the array.
 			///
@@ -590,10 +577,7 @@ TOML_START
 			/// \param 	pos		Iterator to the node being erased.
 			/// 
 			/// \returns Iterator to the first node immediately following the removed node.
-			iterator erase(const_iterator pos) noexcept
-			{
-				return { values.erase(pos.raw_) };
-			}
+			iterator erase(const_iterator pos) noexcept;
 
 			/// \brief	Removes the nodes in the range [first, last) from the array.
 			///
@@ -615,10 +599,7 @@ TOML_START
 			/// \param 	last	Iterator to the one-past-the-last node being erased.
 			/// 
 			/// \returns Iterator to the first node immediately following the last removed node.
-			iterator erase(const_iterator first, const_iterator last) noexcept
-			{
-				return { values.erase(first.raw_, last.raw_) };
-			}
+			iterator erase(const_iterator first, const_iterator last) noexcept;
 
 			/// \brief	Appends a new value to the end of the array.
 			///
@@ -683,10 +664,7 @@ TOML_START
 			}
 
 			/// \brief	Removes the last node from the array.
-			void pop_back() noexcept
-			{
-				values.pop_back();
-			}
+			void pop_back() noexcept;
 
 			/// \brief	Gets the node at a specific index.
 			///
@@ -710,20 +688,14 @@ TOML_START
 			/// \param 	index	The node's index.
 			///
 			/// \returns	A pointer to the node at the specified index if one existed, or nullptr.
-			[[nodiscard]] node* get(size_t index) noexcept
-			{
-				return index < values.size() ? values[index].get() : nullptr;
-			}
+			[[nodiscard]] node* get(size_t index) noexcept;
 
 			/// \brief	Gets the node at a specific index (const overload).
 			///
 			/// \param 	index	The node's index.
 			///
 			/// \returns	A pointer to the node at the specified index if one existed, or nullptr.
-			[[nodiscard]] const node* get(size_t index) const noexcept
-			{
-				return index < values.size() ? values[index].get() : nullptr;
-			}
+			[[nodiscard]] const node* get(size_t index) const noexcept;
 
 			/// \brief	Gets the node at a specific index if it is a particular type.
 			///
@@ -770,29 +742,7 @@ TOML_START
 			/// \param 	rhs	The RHS array.
 			///
 			/// \returns	True if the arrays contained the same values.
-			[[nodiscard]] friend bool operator == (const array& lhs, const array& rhs) noexcept
-			{
-				if (&lhs == &rhs)
-					return true;
-				if (lhs.values.size() != rhs.values.size())
-					return false;
-				for (size_t i = 0, e = lhs.values.size(); i < e; i++)
-				{
-					const auto lhs_type = lhs.values[i]->type();
-					const node& rhs_ = *rhs.values[i];
-					const auto rhs_type = rhs_.type();
-					if (lhs_type != rhs_type)
-						return false;
-
-					const bool equal = lhs.values[i]->visit([&](const auto& lhs_) noexcept
-					{
-						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
-					});
-					if (!equal)
-						return false;
-				}
-				return true;
-			}
+			friend bool operator == (const array& lhs, const array& rhs) noexcept;
 
 			/// \brief	Inequality operator.
 			///
@@ -800,10 +750,7 @@ TOML_START
 			/// \param 	rhs	The RHS array.
 			///
 			/// \returns	True if the arrays did not contain the same values.
-			[[nodiscard]] friend bool operator != (const array& lhs, const array& rhs) noexcept
-			{
-				return !(lhs == rhs);
-			}
+			friend bool operator != (const array& lhs, const array& rhs) noexcept;
 
 
 		private:
@@ -833,32 +780,9 @@ TOML_START
 				return true;
 			}
 
-			[[nodiscard]] size_t total_leaf_count() const noexcept
-			{
-				size_t leaves{};
-				for (size_t i = 0, e = values.size(); i < e; i++)
-				{
-					auto arr = values[i]->as_array();
-					leaves += arr ? arr->total_leaf_count() : 1_sz;
-				}
-				return leaves;
-			}
+			[[nodiscard]] size_t total_leaf_count() const noexcept;
 
-			void flatten_child(array&& child, size_t& dest_index) noexcept
-			{
-				for (size_t i = 0, e = child.size(); i < e; i++)
-				{
-					auto type = child.values[i]->type();
-					if (type == node_type::array)
-					{
-						array& arr = *reinterpret_cast<array*>(child.values[i].get());
-						if (!arr.empty())
-							flatten_child(std::move(arr), dest_index);
-					}
-					else
-						values[dest_index++] = std::move(child.values[i]);
-				}
-			}
+			void flatten_child(array&& child, size_t& dest_index) noexcept;
 
 		public:
 
@@ -878,72 +802,28 @@ TOML_START
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
 
-			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
-			/// 
-			/// \detail \cpp
-			/// 
-			/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
-			/// std::cout << arr << std::endl;
-			/// 
-			/// arr.flatten();
-			/// std::cout << arr << std::endl;
-			/// 
-			/// \ecpp
-			/// 
-			/// \out
-			/// [1, 2, [3, 4, [5]], 6, []]
-			/// [1, 2, 3, 4, 5, 6]
-			/// \eout
-			/// 
-			/// \remarks	Arrays inside child tables are not flattened.
-			void flatten() TOML_MAY_THROW
-			{
-				if (values.empty())
-					return;
-
-				bool requires_flattening = false;
-				size_t size_after_flattening = values.size();
-				for (size_t i = values.size(); i --> 0_sz;)
-				{
-					auto arr = values[i]->as_array();
-					if (!arr)
-						continue;
-					size_after_flattening--; //discount the array itself
-					const auto leaf_count = arr->total_leaf_count();
-					if (leaf_count > 0_sz)
-					{
-						requires_flattening = true;
-						size_after_flattening += leaf_count;
-					}
-					else
-						values.erase(values.cbegin() + static_cast<ptrdiff_t>(i));
-				}
-
-				if (!requires_flattening)
-					return;
-
-				values.reserve(size_after_flattening);
-
-				size_t i = 0;
-				while (i < values.size())
-				{
-					auto arr = values[i]->as_array();
-					if (!arr)
-					{
-						i++;
-						continue;
-					}
-
-					std::unique_ptr<node> arr_storage = std::move(values[i]);
-					const auto leaf_count = arr->total_leaf_count();
-					if (leaf_count > 1_sz)
-						preinsertion_resize(i + 1_sz, leaf_count - 1_sz);
-					flatten_child(std::move(*arr), i); //increments i
-				}
-			}
+				/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
+				/// 
+				/// \detail \cpp
+				/// 
+				/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
+				/// std::cout << arr << std::endl;
+				/// 
+				/// arr.flatten();
+				/// std::cout << arr << std::endl;
+				/// 
+				/// \ecpp
+				/// 
+				/// \out
+				/// [1, 2, [3, 4, [5]], 6, []]
+				/// [1, 2, 3, 4, 5, 6]
+				/// \eout
+				/// 
+				/// \remarks	Arrays inside child tables are not flattened.
+				void flatten() TOML_MAY_THROW;
 
 			template <typename CHAR>
-			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 	};
 }
 TOML_END

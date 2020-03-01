@@ -1,5 +1,6 @@
 #pragma once
 #define TOML_UNDEF_MACROS 0
+#define TOML_ALL_INLINE 0
 #include "../include/toml++/toml.h"
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -219,7 +220,10 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 		REQUIRE(nv.get()->type() == impl::node_type_of<T>);
 
 		// check the raw value
+		CHECK(nv.get()->value<value_type>() == expected);
+		CHECK(nv.get()->value_or(T{}) == expected);
 		CHECK(nv.as<value_type>()->get() == expected);
+		CHECK(nv.value<value_type>() == expected);
 		CHECK(nv.value_or(T{}) == expected);
 
 		// check the table relops

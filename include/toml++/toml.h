@@ -12,11 +12,17 @@
 #include "toml_array.h"
 #include "toml_table.h"
 #include "toml_node_view.h"
+#include "toml_utf8_generated.h"
 #include "toml_utf8.h"
 #include "toml_parser.h"
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
+#include "toml_node_impl.h"
+#include "toml_value_impl.h"
+#include "toml_array_impl.h"
+#include "toml_table_impl.h"
+#include "toml_parser_impl.h"
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
@@ -61,6 +67,9 @@
 	#undef TOML_END
 	#undef TOML_IMPL_START
 	#undef TOML_IMPL_END
+	#undef TOML_ALL_INLINE
+	#undef TOML_IMPLEMENTATION
+	#undef TOML_INLINE_FUNC_IMPL
 #endif
 
 /// \mainpage toml++

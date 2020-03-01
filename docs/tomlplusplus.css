@@ -70,19 +70,30 @@ a.tpp-external
 	padding-left: 2em;
 }
 
-nav .m-thin
+@media screen and (min-width: 576px)
 {
-	margin-left: 0.5em;
+	nav .m-thin
+	{
+		margin-left: 0.5em;
+	}
+
+	nav .github
+	{
+		padding-left: 44px !important;
+		background-image: url("github-icon.png");
+		background-repeat: no-repeat;
+		background-size: 25px 25px;
+		background-position: -30px center;
+		background-origin: content-box;
+	}
 }
 
-nav .github
+@media screen and (max-width: 576px)
 {
-	padding-left: 44px !important;
-	background-image: url("github-icon.png");
-	background-repeat: no-repeat;
-	background-size: 25px 25px;
-	background-position: -30px center;
-	background-origin: content-box;
+	nav .m-thin, nav .github
+	{
+		display: none;
+	}
 }
 
 /* code blocks w/ output examples */

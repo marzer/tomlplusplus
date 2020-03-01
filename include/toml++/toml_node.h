@@ -7,7 +7,7 @@ TOML_START
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
 	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
-	class TOML_INTERFACE node
+	class TOML_INTERFACE TOML_API node
 	{
 		private:
 			friend class impl::parser;
@@ -15,32 +15,29 @@ TOML_START
 
 		protected:
 			
-			node(node&& other) noexcept
-				: source_{ std::move(other.source_) }
-			{
-				other.source_.begin = {};
-				other.source_.end = {};
-			}
+			node(node&& other) noexcept;
+			node& operator= (node&& rhs) noexcept;
 
-			node& operator= (node&& rhs) noexcept
+			template <typename T>
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			impl::node_of<T>& ref_cast() & noexcept
 			{
-				source_ = std::move(rhs.source_);
-				rhs.source_.begin = {};
-				rhs.source_.end = {};
-				return *this;
+				return *reinterpret_cast<impl::node_of<T>*>(this);
 			}
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>& ref_cast() & noexcept { return *reinterpret_cast<impl::node_of<T>*>(this); }
+			impl::node_of<T>&& ref_cast() && noexcept
+			{
+				return std::move(*reinterpret_cast<impl::node_of<T>*>(this));
+			}
 
 			template <typename T>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>&& ref_cast() && noexcept { return std::move(*reinterpret_cast<impl::node_of<T>*>(this)); }
-
-			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const impl::node_of<T>& ref_cast() const & noexcept { return *reinterpret_cast<const impl::node_of<T>*>(this); }
+			const impl::node_of<T>& ref_cast() const & noexcept
+			{
+				return *reinterpret_cast<const impl::node_of<T>*>(this);
+			}
 
 			template <typename N, typename T>
 			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
@@ -64,23 +61,23 @@ TOML_START
 			[[nodiscard]] virtual bool is_value() const noexcept = 0;
 
 			/// \brief	Returns true if this node is a string value.
-			[[nodiscard]] virtual bool is_string() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_string() const noexcept;
 			/// \brief	Returns true if this node is an integer value.
-			[[nodiscard]] virtual bool is_integer() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_integer() const noexcept;
 			/// \brief	Returns true if this node is an floating-point value.
-			[[nodiscard]] virtual bool is_floating_point() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_floating_point() const noexcept;
 			/// \brief	Returns true if this node is an integer or floating-point value.
-			[[nodiscard]] virtual bool is_number() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_number() const noexcept;
 			/// \brief	Returns true if this node is a boolean value.
-			[[nodiscard]] virtual bool is_boolean() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_boolean() const noexcept;
 			/// \brief	Returns true if this node is a local date value.
-			[[nodiscard]] virtual bool is_date() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_date() const noexcept;
 			/// \brief	Returns true if this node is a local time value.
-			[[nodiscard]] virtual bool is_time() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_time() const noexcept;
 			/// \brief	Returns true if this node is a date-time value.
-			[[nodiscard]] virtual bool is_date_time() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_date_time() const noexcept;
 			/// \brief	Returns true if this node is an array containing only tables.
-			[[nodiscard]] virtual bool is_array_of_tables() const noexcept { return false; }
+			[[nodiscard]] virtual bool is_array_of_tables() const noexcept;
 
 			/// \brief	Checks if a node is a specific type.
 			///
@@ -109,33 +106,89 @@ TOML_START
 			}
 
 			/// \brief	Returns a pointer to the node as a toml::table, if it is one.
-			[[nodiscard]] virtual table* as_table() noexcept { return nullptr; }
+			[[nodiscard]] virtual table* as_table() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::array, if it is one.
-			[[nodiscard]] virtual array* as_array() noexcept { return nullptr; }
+			[[nodiscard]] virtual array* as_array() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<string>, if it is one.
-			[[nodiscard]] virtual value<string>* as_string() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<string>* as_string() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<int64_t>, if it is one.
-			[[nodiscard]] virtual value<int64_t>* as_integer() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<int64_t>* as_integer() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<double>, if it is one.
-			[[nodiscard]] virtual value<double>* as_floating_point() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<double>* as_floating_point() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<bool>, if it is one.
-			[[nodiscard]] virtual value<bool>* as_boolean() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<bool>* as_boolean() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<date>, if it is one.
-			[[nodiscard]] virtual value<date>* as_date() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<date>* as_date() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<time>, if it is one.
-			[[nodiscard]] virtual value<time>* as_time() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<time>* as_time() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<date_time>, if it is one.
-			[[nodiscard]] virtual value<date_time>* as_date_time() noexcept { return nullptr; }
+			[[nodiscard]] virtual toml::value<date_time>* as_date_time() noexcept;
 
-			[[nodiscard]] virtual const table* as_table() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const array* as_array() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<string>* as_string() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<int64_t>* as_integer() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<double>* as_floating_point() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<bool>* as_boolean() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<date>* as_date() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<time>* as_time() const noexcept { return nullptr; }
-			[[nodiscard]] virtual const value<date_time>* as_date_time() const noexcept { return nullptr; }
+			[[nodiscard]] virtual const table* as_table() const noexcept;
+			[[nodiscard]] virtual const array* as_array() const noexcept;
+			[[nodiscard]] virtual const toml::value<string>* as_string() const noexcept;
+			[[nodiscard]] virtual const toml::value<int64_t>* as_integer() const noexcept;
+			[[nodiscard]] virtual const toml::value<double>* as_floating_point() const noexcept;
+			[[nodiscard]] virtual const toml::value<bool>* as_boolean() const noexcept;
+			[[nodiscard]] virtual const toml::value<date>* as_date() const noexcept;
+			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
+			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
+
+			/// \brief	Gets the raw value contained by this node.
+			/// 
+			/// \detail The std::optional returned by this function will only contain a value if the node was an instance of
+			/// 		toml::value with the same value type as the template argument. Additionally, some type are allowed to
+			/// 		convert to each other, for instance asking for an integer when the value exists as a double,
+			/// 		or requesting a string value as a string_view: \cpp
+			/// auto tbl = toml::parse(R"(
+			///		int_val = 10
+			///		float_val = 25.6
+			///		string_val = "kek"
+			/// )"sv);
+			/// 
+			/// if (auto val = tbl.get("int_val"sv)->value<int64_t>())
+			///		std::cout << "'int_val' as int64_t: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("int_val"sv)->value<double>())
+			///		std::cout << "'int_val' as double: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("float_val"sv)->value<int64_t>())
+			///		std::cout << "'float_val' as int64_t: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("float_val"sv)->value<double>())
+			///		std::cout << "'float_val' as double: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("string_val"sv)->value<std::string>())
+			///		std::cout << "'string_val' as std::string: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("string_val"sv)->value<std::string_view>())
+			///		std::cout << "'string_val' as std::string_view: "sv << *val << std::endl;
+			/// if (auto val = tbl.get("string_val"sv)->value<int64_t>())
+			///		std::cout << "this line won't be printed."sv << std::endl;
+			/// \ecpp
+			/// 
+			/// \out
+			/// 'int_val' as int64_t: 10
+			/// 'int_val' as double: 10
+			/// 'float_val' as int64_t: 25
+			/// 'float_val' as double: 25.6
+			/// 'string_val' as std::string: kek
+			/// 'string_val' as std::string_view: kek
+			/// \eout
+			///
+			/// \tparam	T	One of the TOML value types. Can also be a string_view.
+			///
+			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it), or an empty optional.
+			template <typename T>
+			[[nodiscard]] std::optional<T> value() const noexcept;
+
+			/// \brief	Gets the raw value contained by this node, or a default.
+			///
+			/// \tparam	T	Default value type. Must be (or be promotable to) one of the TOML value types.
+			/// \param 	default_value	The default value to return if the node wasn't a value, wasn't the
+			/// 						correct type, or no conversion was possible.
+			///
+			/// \returns	The node's underlying value, or the default if the node wasn't a value, wasn't the
+			/// 						correct type, or no conversion was possible.
+			/// 
+			/// \see node::value()
+			template <typename T>
+			[[nodiscard]] auto value_or(T&& default_value) const noexcept;
 
 			/// \brief	Gets a pointer to the node as a more specific node type.
 			///
@@ -202,10 +255,7 @@ TOML_START
 			}
 
 			/// \brief	Returns the source region responsible for generating this node during parsing.
-			[[nodiscard]] const source_region& source() const noexcept
-			{
-				return source_;
-			}
+			[[nodiscard]] const source_region& source() const noexcept;
 
 		private:
 
@@ -289,38 +339,47 @@ TOML_START
 						if constexpr (can_visit<FUNC&&, N&&, table>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
 						break;
+
 					case node_type::array:
 						if constexpr (can_visit<FUNC&&, N&&, array>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
 						break;
+
 					case node_type::string:
 						if constexpr (can_visit<FUNC&&, N&&, string>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
 						break;
+
 					case node_type::integer:
 						if constexpr (can_visit<FUNC&&, N&&, int64_t>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
 						break;
+
 					case node_type::floating_point:
 						if constexpr (can_visit<FUNC&&, N&&, double>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
 						break;
+
 					case node_type::boolean:
 						if constexpr (can_visit<FUNC&&, N&&, bool>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
 						break;
+
 					case node_type::date:
 						if constexpr (can_visit<FUNC&&, N&&, date>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
 						break;
+
 					case node_type::time:
 						if constexpr (can_visit<FUNC&&, N&&, time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
 						break;
+
 					case node_type::date_time:
 						if constexpr (can_visit<FUNC&&, N&&, date_time>)
 							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
 						break;
+
 					TOML_NO_DEFAULT_CASE;
 				}
 

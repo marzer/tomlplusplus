@@ -167,58 +167,56 @@ TOML_START
 			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
 			[[nodiscard]] auto as_date_time() noexcept { return as<date_time>(); }
 
+			/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one (const overload).
 			[[nodiscard]] const table* as_table() const noexcept { return as<table>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one (const overload).
 			[[nodiscard]] const array* as_array() const noexcept { return as<array>(); }
-			[[nodiscard]] const value<string>* as_string() const noexcept { return as<string>(); }
-			[[nodiscard]] const value<int64_t>* as_integer() const noexcept { return as<int64_t>(); }
-			[[nodiscard]] const value<double>* as_floating_point() const noexcept { return as<double>(); }
-			[[nodiscard]] const value<bool>* as_boolean() const noexcept { return as<bool>(); }
-			[[nodiscard]] const value<date>* as_date() const noexcept { return as<date>(); }
-			[[nodiscard]] const value<time>* as_time() const noexcept { return as<time>(); }
-			[[nodiscard]] const value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one (const overload).
+			[[nodiscard]] const toml::value<string>* as_string() const noexcept { return as<string>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one (const overload).
+			[[nodiscard]] const toml::value<int64_t>* as_integer() const noexcept { return as<int64_t>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one (const overload).
+			[[nodiscard]] const toml::value<double>* as_floating_point() const noexcept { return as<double>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one (const overload).
+			[[nodiscard]] const toml::value<bool>* as_boolean() const noexcept { return as<bool>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one (const overload).
+			[[nodiscard]] const toml::value<date>* as_date() const noexcept { return as<date>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one (const overload).
+			[[nodiscard]] const toml::value<time>* as_time() const noexcept { return as<time>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one (const overload).
+			[[nodiscard]] const toml::value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
 
-			/// \brief	Gets the raw value represented by the viewed value node, or a default.
+			/// \brief	Gets the raw value contained by the referenced node.
+			/// 
+			/// \tparam	U	One of the TOML value types. Can also be a string_view.
 			///
-			/// \detail The underlying node is retrieved as if it were a value of the input default value's
-			/// 		type. For example, if you specify an integral default value, you'll only get
-			/// 		a non-default return value if the underlying node existed _and_ was an integer:\cpp
-			/// auto tbl = toml::parse(R"(
-			///	int = 42
-			/// flt = 420.0
-			/// bln = false
-			/// )"sv);
+			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it), or an empty optional.
 			/// 
-			/// std::cout << "accessing 'int' as an integer: "sv << tbl["int"].value_or(-1) << std::endl;
-			/// std::cout << "accessing 'int' as a float: "sv << tbl["int"].value_or(-1.0) << std::endl;
-			/// std::cout << "accessing 'flt' as a float: "sv << tbl["flt"].value_or(-1.0f) << std::endl;
-			/// \ecpp
-			/// 
-			/// \out
-			/// accessing 'int' as an integer: 42
-			/// accessing 'int' as a float: -1.0
-			/// accessing 'flt' as a float: 420.0
-			/// \eout
-			/// 
+			/// \see node::value()
+			template <typename U>
+			[[nodiscard]] std::optional<U> value() const noexcept
+			{
+				if (node_)
+					return node_->template value<U>();
+				return {};
+			}
+
+			/// \brief	Gets the raw value contained by the referenced node, or a default.
+			///
 			/// \tparam	U	Default value type. Must be (or be promotable to) one of the TOML value types.
-			/// \param 	default_value	The default value to return if no matching node was found.
+			/// \param 	default_value	The default value to return if the view did not reference a node,
+			/// 						or if the node wasn't a value, wasn't the correct type, or no conversion was possible.
 			///
-			/// \returns	The selected value, or the default if no match was found.
+			/// \returns	The node's underlying value, or the default if the node wasn't a value, wasn't the
+			/// 			correct type, or no conversion was possible.
+			/// 
+			/// \see node::value_or()
 			template <typename U>
 			[[nodiscard]] auto value_or(U&& default_value) const noexcept
 			{
-				static_assert(
-					impl::is_value_or_promotable<impl::remove_cvref_t<U>>,
-					"Default value type must be (or be promotable to) one of the TOML value types"
-				);
-
-				using value_type = impl::promoted<impl::remove_cvref_t<U>>;
-				using return_type = std::conditional_t<
-					std::is_same_v<value_type, string>,
-					std::conditional_t<std::is_same_v<impl::remove_cvref_t<U>, string>, string, string_view>,
-					value_type
-				>;
-				if (auto val = node_ ? node_->template as<value_type>() : nullptr)
-					return return_type{ **val };
+				using return_type = decltype(node_->value_or(std::forward<U>(default_value)));
+				if (node_)
+					return node_->value_or(std::forward<U>(default_value));
 				return return_type{ std::forward<U>(default_value) };
 			}
 
@@ -287,14 +285,14 @@ TOML_START
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename U>
-			[[nodiscard]] friend bool operator == (const node_view& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]] friend bool operator == (const node_view& lhs, const toml::value<U>& rhs) noexcept
 			{
 				if (lhs.node_ == &rhs)
 					return true;
 				const auto val = lhs.as<U>();
 				return val && *val == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const value<U>&, template <typename U>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
@@ -369,7 +367,6 @@ TOML_START
 				return { nullptr };
 			}
 
-
 			/// \brief	Prints the viewed node out to a stream.
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view& nv) TOML_MAY_THROW
@@ -384,15 +381,5 @@ TOML_START
 				return os;
 			}
 	};
-
-	inline node_view<node> table::operator[] (string_view key) noexcept
-	{
-		return { this->get(key) };
-	}
-
-	inline node_view<const node> table::operator[] (string_view key) const noexcept
-	{
-		return { this->get(key) };
-	}
 }
 TOML_END

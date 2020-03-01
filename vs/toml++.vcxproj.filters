@@ -49,6 +49,21 @@
     <ClInclude Include="..\include\toml++\toml_version.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_node_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_array_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_table_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_value_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_parser_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

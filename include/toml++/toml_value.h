@@ -19,7 +19,7 @@ TOML_START
 	{
 		static_assert(
 			impl::is_value<T>,
-			"Template type parameter must be one of the basic value types"
+			"Template type parameter must be one of the TOML value types"
 		);
 
 		private:
@@ -335,6 +335,117 @@ TOML_START
 	#endif
 	#ifdef TOML_SMALL_INT_TYPE
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
+	#endif
+
+	template <typename T>
+	inline std::optional<T> node::value() const noexcept
+	{
+		static_assert(
+			impl::is_value<T> || std::is_same_v<T, string_view>,
+			"Value type must be one of the TOML value types (or string_view)"
+		);
+
+		switch (type())
+		{
+			case node_type::none:	[[fallthrough]];
+			case node_type::table:	[[fallthrough]];
+			case node_type::array:
+				return {};
+
+			case node_type::string:
+			{
+				if constexpr (std::is_same_v<T, string> || std::is_same_v<T, string_view>)
+					return { T{ ref_cast<string>().get() } };
+				else
+					return {};
+			}
+
+			case node_type::integer:
+			{
+				if constexpr (std::is_same_v<T, int64_t>)
+					return ref_cast<int64_t>().get();
+				else if constexpr (std::is_same_v<T, double>)
+					return static_cast<double>(ref_cast<int64_t>().get());
+				else
+					return {};
+			}
+
+			case node_type::floating_point:
+			{
+				if constexpr (std::is_same_v<T, double>)
+					return ref_cast<double>().get();
+				else if constexpr (std::is_same_v<T, int64_t>)
+					return static_cast<int64_t>(ref_cast<double>().get());
+				else
+					return {};
+			}
+
+			case node_type::boolean:
+			{
+				if constexpr (std::is_same_v<T, bool>)
+					return ref_cast<bool>().get();
+				else
+					return {};
+			}
+
+			case node_type::date:
+			{
+				if constexpr (std::is_same_v<T, date>)
+					return ref_cast<date>().get();
+				else
+					return {};
+			}
+
+			case node_type::time:
+			{
+				if constexpr (std::is_same_v<T, time>)
+					return ref_cast<time>().get();
+				else
+					return {};
+			}
+
+			case node_type::date_time:
+			{
+				if constexpr (std::is_same_v<T, date_time>)
+					return ref_cast<date_time>().get();
+				else
+					return {};
+			}
+
+			TOML_NO_DEFAULT_CASE;
+		}
+
+		TOML_UNREACHABLE;
+	}
+
+	template <typename T>
+	inline auto node::value_or(T&& default_value) const noexcept
+	{
+		static_assert(
+			impl::is_value_or_promotable<impl::remove_cvref_t<T>>,
+			"Default value type must be (or be promotable to) one of the TOML value types"
+		);
+
+		using value_type = impl::promoted<impl::remove_cvref_t<T>>;
+		using return_type = std::conditional_t<
+			std::is_same_v<value_type, string>,
+			std::conditional_t<std::is_same_v<impl::remove_cvref_t<T>, string>, string, string_view>,
+			value_type
+		>;
+
+		if (auto val = this->value<return_type>())
+			return *val;
+		return return_type{ std::forward<T>(default_value) };
+	}
+
+	#if !TOML_ALL_INLINE
+	extern template class value<string>;
+	extern template class value<int64_t>;
+	extern template class value<double>;
+	extern template class value<bool>;
+	extern template class value<date>;
+	extern template class value<time>;
+	extern template class value<date_time>;
 	#endif
 }
 TOML_END

@@ -85,6 +85,13 @@ TOML_IMPL_START
 			}
 	};
 
+	#if !TOML_ALL_INLINE
+	extern template struct table_proxy_pair<true>;
+	extern template struct table_proxy_pair<false>;
+	extern template class table_iterator<true>;
+	extern template class table_iterator<false>;
+	#endif
+
 	struct table_init_pair final
 	{
 		string key;
@@ -119,7 +126,7 @@ TOML_START
 	/// 		additional considerations made for the heterogeneous nature of a
 	/// 		TOML table, and for the removal of some cruft (the public interface of
 	/// 		std::map is, simply, _a hot mess_).
-	class table final
+	class TOML_API table final
 		: public node
 	{
 		private:
@@ -127,6 +134,8 @@ TOML_START
 
 			impl::string_map<std::unique_ptr<node>> values;
 			bool inline_ = false;
+
+			table(impl::table_init_pair*, size_t) noexcept;
 
 		public:
 
@@ -137,7 +146,7 @@ TOML_START
 			
 			/// \brief	Default constructor.
 			TOML_NODISCARD_CTOR
-			table() noexcept {}
+			table() noexcept;
 
 			/// \brief	Constructs a table with one or more initial key-value pairs.
 			///
@@ -171,52 +180,35 @@ TOML_START
 			template <size_t N>
 			TOML_NODISCARD_CTOR
 			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
-			{
-				for (auto&& kvp : arr)
-				{
-					values.insert_or_assign(
-						std::move(kvp.key),
-						std::move(kvp.value)
-					);
-				}
-			}
+				: table{ arr, N }
+			{}
 
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
-			table(table&& other) noexcept
-				: node{ std::move(other) },
-				values{ std::move(other.values) },
-				inline_ { other.inline_ }
-			{}
+			table(table&& other) noexcept;
 
 			/// \brief	Move-assignment operator.
-			table& operator= (table&& rhs) noexcept
-			{
-				node::operator=(std::move(rhs));
-				values = std::move(rhs.values);
-				inline_ = rhs.inline_;
-				return *this;
-			}
+			table& operator= (table&& rhs) noexcept;
 
 			table(const table&) = delete;
 			table& operator= (const table&) = delete;
 
 			/// \brief	Always returns `node_type::table` for table nodes.
-			[[nodiscard]] node_type type() const noexcept override { return node_type::table; }
+			[[nodiscard]] node_type type() const noexcept override;
 			/// \brief	Always returns `true` for table nodes.
-			[[nodiscard]] bool is_table() const noexcept override { return true; }
+			[[nodiscard]] bool is_table() const noexcept override;
 			/// \brief	Always returns `false` for table nodes.
-			[[nodiscard]] bool is_array() const noexcept override { return false; }
+			[[nodiscard]] bool is_array() const noexcept override;
 			/// \brief	Always returns `false` for table nodes.
-			[[nodiscard]] bool is_value() const noexcept override { return false; }
-			[[nodiscard]] table* as_table() noexcept override { return this; }
-			[[nodiscard]] const table* as_table() const noexcept override { return this; }
+			[[nodiscard]] bool is_value() const noexcept override;
+			[[nodiscard]] table* as_table() noexcept override;
+			[[nodiscard]] const table* as_table() const noexcept override;
 
 			/// \brief	Returns true if this table is an inline table.
 			/// 
 			/// \remarks Runtime-constructed tables (i.e. those not created during
 			/// 		 parsing) are not inline by default.
-			[[nodiscard]] bool is_inline() const noexcept { return inline_; }
+			[[nodiscard]] bool is_inline() const noexcept;
 
 			/// \brief	Sets whether this table is a TOML inline table.
 			///
@@ -253,7 +245,7 @@ TOML_START
 			/// 		 object.
 			/// 
 			/// \param 	val	The new value for 'inline'.
-			void is_inline(bool val) noexcept { inline_ = val; }
+			void is_inline(bool val) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair.
 			///
@@ -266,31 +258,31 @@ TOML_START
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			[[nodiscard]] inline node_view<node> operator[] (string_view key) noexcept;
+			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair (const overload).
-			[[nodiscard]] inline node_view<const node> operator[] (string_view key) const noexcept;
+			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept;
 
 			/// \brief	Returns an iterator to the first key-value pair.
-			[[nodiscard]] iterator begin() noexcept { return { values.begin() }; }
+			[[nodiscard]] iterator begin() noexcept;
 			/// \brief	Returns an iterator to the first key-value pair.
-			[[nodiscard]] const_iterator begin() const noexcept { return { values.begin() }; }
+			[[nodiscard]] const_iterator begin() const noexcept;
 			/// \brief	Returns an iterator to the first key-value pair.
-			[[nodiscard]] const_iterator cbegin() const noexcept { return { values.cbegin() }; }
+			[[nodiscard]] const_iterator cbegin() const noexcept;
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair.
-			[[nodiscard]] iterator end() noexcept { return { values.end() }; }
+			[[nodiscard]] iterator end() noexcept;
 			/// \brief	Returns an iterator to one-past-the-last key-value pair.
-			[[nodiscard]] const_iterator end() const noexcept { return { values.end() }; }
+			[[nodiscard]] const_iterator end() const noexcept;
 			/// \brief	Returns an iterator to one-past-the-last key-value pair.
-			[[nodiscard]] const_iterator cend() const noexcept { return { values.cend() }; }
+			[[nodiscard]] const_iterator cend() const noexcept;
 
 			/// \brief	Returns true if the table is empty.
-			[[nodiscard]] bool empty() const noexcept { return values.empty(); }
+			[[nodiscard]] bool empty() const noexcept;
 			/// \brief	Returns the number of key-value pairs in the table.
-			[[nodiscard]] size_t size() const noexcept { return values.size(); }
+			[[nodiscard]] size_t size() const noexcept;
 			/// \brief	Removes all key-value pairs from the table.
-			void clear() noexcept { values.clear(); }
+			void clear() noexcept;
 
 			/// \brief	Inserts a new value at a specific key if one did not already exist.
 			///
@@ -521,10 +513,7 @@ TOML_START
 			/// \param 	pos		Iterator to the key-value pair being erased.
 			/// 
 			/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
-			iterator erase(iterator pos) noexcept
-			{
-				return { values.erase(pos.raw_) };
-			}
+			iterator erase(iterator pos) noexcept;
 
 			/// \brief	Removes the specified key-value pair from the table (const iterator overload).
 			///
@@ -549,10 +538,7 @@ TOML_START
 			/// \param 	pos		Iterator to the key-value pair being erased.
 			/// 
 			/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
-			iterator erase(const_iterator pos) noexcept
-			{
-				return { values.erase(pos.raw_) };
-			}
+			iterator erase(const_iterator pos) noexcept;
 
 			/// \brief	Removes the key-value pairs in the range [first, last) from the table.
 			///
@@ -579,10 +565,7 @@ TOML_START
 			/// \param 	last	Iterator to the one-past-the-last key-value pair being erased.
 			/// 
 			/// \returns Iterator to the first key-value pair immediately following the last removed key-value pair.
-			iterator erase(const_iterator first, const_iterator last) noexcept
-			{
-				return { values.erase(first.raw_, last.raw_) };
-			}
+			iterator erase(const_iterator first, const_iterator last) noexcept;
 
 			/// \brief	Removes the value with the given key from the table.
 			///
@@ -610,15 +593,7 @@ TOML_START
 			/// \param 	key		Key to erase.
 			/// 
 			/// \returns True if any values with matching keys were found and erased.
-			bool erase(string_view key) noexcept
-			{
-				if (auto it = values.find(key); it != values.end())
-				{
-					values.erase(it);
-					return true;
-				}
-				return false;
-			}
+			bool erase(string_view key) noexcept;
 
 		private:
 
@@ -681,17 +656,17 @@ TOML_START
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			[[nodiscard]] node* get(string_view key) noexcept { return do_get(values, key); }
+			[[nodiscard]] node* get(string_view key) noexcept;
 
 			/// \brief	Gets the node at a specific key (const overload).
 			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			[[nodiscard]] const node* get(string_view key) const noexcept { return do_get(values, key); }
+			[[nodiscard]] const node* get(string_view key) const noexcept;
 
-			[[nodiscard]] iterator find(string_view key) noexcept { return { values.find(key) }; }
-			[[nodiscard]] const_iterator find(string_view key) const noexcept { return { values.find(key) }; }
+			[[nodiscard]] iterator find(string_view key) noexcept;
+			[[nodiscard]] const_iterator find(string_view key) const noexcept;
 
 			/// \brief	Gets the node at a specific key if it is a particular type.
 			///
@@ -714,7 +689,10 @@ TOML_START
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept
+			{
+				return do_get_as<T>(values, key);
+			}
 
 			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 			///
@@ -723,10 +701,13 @@ TOML_START
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept { return do_get_as<T>(values, key); }
+			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept
+			{
+				return do_get_as<T>(values, key);
+			}
 
 			/// \brief	Returns true if the table contains a node at the given key.
-			[[nodiscard]] bool contains(string_view key) const noexcept { return do_contains(values, key); }
+			[[nodiscard]] bool contains(string_view key) const noexcept;
 
 			/// \brief	Equality operator.
 			///
@@ -734,33 +715,7 @@ TOML_START
 			/// \param 	rhs	The RHS table.
 			///
 			/// \returns	True if the tables contained the same keys and values.
-			[[nodiscard]] friend bool operator == (const table& lhs, const table& rhs) noexcept
-			{
-				if (&lhs == &rhs)
-					return true;
-				if (lhs.values.size() != rhs.values.size())
-					return false;
-
-				for (auto l = lhs.values.begin(), r = rhs.values.begin(), e = lhs.values.end(); l != e; l++, r++)
-				{
-					if (l->first != r->first)
-						return false;
-
-					const auto lhs_type = l->second->type();
-					const node& rhs_ = *r->second;
-					const auto rhs_type = rhs_.type();
-					if (lhs_type != rhs_type)
-						return false;
-
-					const bool equal = l->second->visit([&](const auto& lhs_) noexcept
-					{
-						return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
-					});
-					if (!equal)
-						return false;
-				}
-				return true;
-			}
+			friend bool operator == (const table& lhs, const table& rhs) noexcept;
 
 			/// \brief	Inequality operator.
 			///
@@ -768,13 +723,10 @@ TOML_START
 			/// \param 	rhs	The RHS table.
 			///
 			/// \returns	True if the tables did not contain the same keys and values.
-			[[nodiscard]] friend bool operator != (const table& lhs, const table& rhs) noexcept
-			{
-				return !(lhs == rhs);
-			}
+			friend bool operator != (const table& lhs, const table& rhs) noexcept;
 
 			template <typename CHAR>
-			friend inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
 	};
 }
 TOML_END
