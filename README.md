@@ -86,18 +86,19 @@ The API is the same regardless of how you consume the library.
 A number of configurable options are exposed in the form of preprocessor `#defines`. Most likely you
 won't need to mess with these at all, but if you do, set them before including toml++.
 
-| Option                     |      Type      | Default                           | Description                                                                                              |
-|----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
-| `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a static library). |
-| `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                            |
-| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                     |
-| `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                           |
-| `TOML_IMPLEMENTATION`      |     boolean    | `0`                               | Enables the compiling of the library's implemenation. Meaningless if `TOML_ALL_INLINE` is `1`.           |
-| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                    |
-| `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it. |
-| `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.      |
-| `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                        |
-| `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].            |
+| Option                     |      Type      | Default                           | Description                                                                                                |
+|----------------------------|:--------------:|-----------------------------------|------------------------------------------------------------------------------------------------------------|
+| `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).  |
+| `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport) on Windows)`.                         |
+| `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                              |
+| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                       |
+| `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                             |
+| `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_ALL_INLINE` is `1`.|
+| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                      |
+| `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.   |
+| `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.        |
+| `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                          |
+| `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].              |
 
 <br>
 

@@ -15,7 +15,7 @@ TOML_START
 	/// 			- toml::time
 	/// 			- toml::date_time
 	template <typename T>
-	class value final : public node
+	class TOML_API value final : public node
 	{
 		static_assert(
 			impl::is_value<T>,
@@ -337,6 +337,16 @@ TOML_START
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API value<string>;
+	extern template class TOML_API value<int64_t>;
+	extern template class TOML_API value<double>;
+	extern template class TOML_API value<bool>;
+	extern template class TOML_API value<date>;
+	extern template class TOML_API value<time>;
+	extern template class TOML_API value<date_time>;
+	#endif
+
 	template <typename T>
 	inline std::optional<T> node::value() const noexcept
 	{
@@ -437,15 +447,5 @@ TOML_START
 			return *val;
 		return return_type{ std::forward<T>(default_value) };
 	}
-
-	#if !TOML_ALL_INLINE
-	extern template class value<string>;
-	extern template class value<int64_t>;
-	extern template class value<double>;
-	extern template class value<bool>;
-	extern template class value<date>;
-	extern template class value<time>;
-	extern template class value<date_time>;
-	#endif
 }
 TOML_END

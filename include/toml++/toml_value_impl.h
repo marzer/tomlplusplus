@@ -1,18 +1,14 @@
 #pragma once
-#include "toml_array.h"
-
-#if TOML_IMPLEMENTATION
+#include "toml_value.h"
 
 TOML_START
 {
-	template class value<string>;
-	template class value<int64_t>;
-	template class value<double>;
-	template class value<bool>;
-	template class value<date>;
-	template class value<time>;
-	template class value<date_time>;
+	template class TOML_API value<string>;
+	template class TOML_API value<int64_t>;
+	template class TOML_API value<double>;
+	template class TOML_API value<bool>;
+	template class TOML_API value<date>;
+	template class TOML_API value<time>;
+	template class TOML_API value<date_time>;
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION

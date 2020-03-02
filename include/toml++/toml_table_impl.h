@@ -2,17 +2,6 @@
 #include "toml_table.h"
 #include "toml_node_view.h"
 
-#if TOML_IMPLEMENTATION
-
-TOML_IMPL_START
-{
-	template struct table_proxy_pair<true>;
-	template struct table_proxy_pair<false>;
-	template class table_iterator<true>;
-	template class table_iterator<false>;
-}
-TOML_IMPL_END
-
 TOML_START
 {
 	TOML_INLINE_FUNC_IMPL
@@ -137,7 +126,8 @@ TOML_START
 		return do_contains(values, key);
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator == (const table& lhs, const table& rhs) noexcept
 	{
 		if (&lhs == &rhs)
@@ -166,12 +156,11 @@ TOML_START
 		return true;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator != (const table& lhs, const table& rhs) noexcept
 	{
 		return !(lhs == rhs);
 	}
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION

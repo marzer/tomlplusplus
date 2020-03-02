@@ -1,8 +1,6 @@
 #pragma once
 #include "toml_parser.h"
 
-#if TOML_IMPLEMENTATION
-
 TOML_IMPL_START
 {
 	#if TOML_EXCEPTIONS
@@ -2903,7 +2901,8 @@ TOML_IMPL_START
 	#undef TOML_ERROR
 	#undef TOML_NORETURN
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result do_parse(utf8_reader_interface&& reader) TOML_MAY_THROW
 	{
 		return impl::parser{ std::move(reader) };
@@ -2913,13 +2912,15 @@ TOML_IMPL_END
 
 TOML_START
 {
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -2927,13 +2928,15 @@ TOML_START
 
 	#if defined(__cpp_lib_char8_t)
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -2943,7 +2946,8 @@ TOML_START
 
 	inline namespace literals
 	{
-		TOML_INLINE_FUNC_IMPL TOML_API
+		TOML_API
+		TOML_INLINE_FUNC_IMPL
 		parse_result operator"" _toml(const char* str, size_t len) noexcept
 		{
 			return parse(std::string_view{ str, len });
@@ -2951,7 +2955,8 @@ TOML_START
 
 		#if defined(__cpp_lib_char8_t)
 
-		TOML_INLINE_FUNC_IMPL TOML_API
+		TOML_API
+		TOML_INLINE_FUNC_IMPL
 		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept
 		{
 			return parse(std::u8string_view{ str, len });
@@ -2961,5 +2966,3 @@ TOML_START
 	}
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION

@@ -179,7 +179,7 @@ TOML_END
 
 TOML_IMPL_START
 {
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 }
 TOML_IMPL_END
@@ -205,7 +205,7 @@ TOML_START
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
 
 	/// \brief	Parses a TOML document from a string view.
@@ -225,7 +225,7 @@ TOML_START
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#if defined(__cpp_lib_char8_t)
@@ -251,7 +251,7 @@ TOML_START
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
 
 	/// \brief	Parses a TOML document from a char8_t string view.
@@ -273,7 +273,7 @@ TOML_START
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#endif // defined(__cpp_lib_char8_t)
@@ -423,7 +423,7 @@ TOML_START
 		///
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-		[[nodiscard]]
+		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) noexcept;
 
 		#if defined(__cpp_lib_char8_t)
@@ -449,7 +449,7 @@ TOML_START
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 		/// 
 		/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-		[[nodiscard]]
+		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept;
 
 		#endif

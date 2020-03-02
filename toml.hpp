@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.3.0
+// toml++ v0.3.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -77,11 +77,12 @@
 #if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE)
 	#undef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 1
-	#undef TOML_IMPLEMENTATION
-	#define TOML_IMPLEMENTATION 1
 #endif
 
-#ifndef TOML_IMPLEMENTATION
+#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
+	#undef TOML_IMPLEMENTATION
+	#define TOML_IMPLEMENTATION 1
+#else
 	#define TOML_IMPLEMENTATION 0
 #endif
 
@@ -302,7 +303,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -1822,7 +1823,7 @@ TOML_END
 TOML_START
 {
 	template <typename T>
-	class value final : public node
+	class TOML_API value final : public node
 	{
 		static_assert(
 			impl::is_value<T>,
@@ -2036,6 +2037,16 @@ TOML_START
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API value<string>;
+	extern template class TOML_API value<int64_t>;
+	extern template class TOML_API value<double>;
+	extern template class TOML_API value<bool>;
+	extern template class TOML_API value<date>;
+	extern template class TOML_API value<time>;
+	extern template class TOML_API value<date_time>;
+	#endif
+
 	template <typename T>
 	inline std::optional<T> node::value() const noexcept
 	{
@@ -2136,16 +2147,6 @@ TOML_START
 			return *val;
 		return return_type{ std::forward<T>(default_value) };
 	}
-
-	#if !TOML_ALL_INLINE
-	extern template class value<string>;
-	extern template class value<int64_t>;
-	extern template class value<double>;
-	extern template class value<bool>;
-	extern template class value<date>;
-	extern template class value<time>;
-	extern template class value<date_time>;
-	#endif
 }
 TOML_END
 
@@ -2305,10 +2306,8 @@ TOML_IMPL_START
 			}
 	};
 
-	#if !TOML_ALL_INLINE
-	extern template class array_iterator<true>;
-	extern template class array_iterator<false>;
-	#endif
+	template class array_iterator<true>;
+	template class array_iterator<false>;
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -2337,7 +2336,10 @@ TOML_IMPL_END
 
 TOML_START
 {
-	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 
 	class TOML_API array final
 		: public node
@@ -2607,7 +2609,7 @@ TOML_START
 				return container_equality(lhs, rhs);
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
-				void flatten() TOML_MAY_THROW;
+			void flatten() TOML_MAY_THROW;
 
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
@@ -2705,12 +2707,10 @@ TOML_IMPL_START
 			}
 	};
 
-	#if !TOML_ALL_INLINE
-	extern template struct table_proxy_pair<true>;
-	extern template struct table_proxy_pair<false>;
-	extern template class table_iterator<true>;
-	extern template class table_iterator<false>;
-	#endif
+	template struct table_proxy_pair<true>;
+	template struct table_proxy_pair<false>;
+	template class table_iterator<true>;
+	template class table_iterator<false>;
 
 	struct table_init_pair final
 	{
@@ -2740,6 +2740,11 @@ TOML_IMPL_END
 
 TOML_START
 {
+	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
+
 	class TOML_API table final
 		: public node
 	{
@@ -4895,23 +4900,25 @@ TOML_END
 
 TOML_IMPL_START
 {
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 }
 TOML_IMPL_END
 
 TOML_START
 {
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
-	[[nodiscard]]
+
+	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#if defined(__cpp_lib_char8_t)
 
-	[[nodiscard]]
+	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
-	[[nodiscard]]
+
+	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#endif // defined(__cpp_lib_char8_t)
@@ -4961,12 +4968,12 @@ TOML_START
 
 	inline namespace literals
 	{
-		[[nodiscard]]
+		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) noexcept;
 
 		#if defined(__cpp_lib_char8_t)
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept;
 
 		#endif
@@ -5731,10 +5738,10 @@ TOML_END
 #pragma endregion
 //--------------------------------------  ↑ toml_json_formatter.h  -----------------------------------------------------
 
+#if TOML_IMPLEMENTATION
+
 //-----------------------------------------------------------------  ↓ toml_node_impl.h  -------------------------------
 #pragma region
-
-#if TOML_IMPLEMENTATION
 
 TOML_START
 {
@@ -5789,44 +5796,29 @@ TOML_START
 }
 TOML_END
 
-#endif // TOML_IMPLEMENTATION
-
 #pragma endregion
 //-----------------------------------------------------------------  ↑ toml_node_impl.h  -------------------------------
 
 //------------------------------------------------------------------------------------------  ↓ toml_value_impl.h  -----
 #pragma region
 
-#if TOML_IMPLEMENTATION
-
 TOML_START
 {
-	template class value<string>;
-	template class value<int64_t>;
-	template class value<double>;
-	template class value<bool>;
-	template class value<date>;
-	template class value<time>;
-	template class value<date_time>;
+	template class TOML_API value<string>;
+	template class TOML_API value<int64_t>;
+	template class TOML_API value<double>;
+	template class TOML_API value<bool>;
+	template class TOML_API value<date>;
+	template class TOML_API value<time>;
+	template class TOML_API value<date_time>;
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION
 
 #pragma endregion
 //------------------------------------------------------------------------------------------  ↑ toml_value_impl.h  -----
 
 //---------------  ↓ toml_array_impl.h  --------------------------------------------------------------------------------
 #pragma region
-
-#if TOML_IMPLEMENTATION
-
-TOML_IMPL_START
-{
-	template class array_iterator<true>;
-	template class array_iterator<false>;
-}
-TOML_IMPL_END
 
 TOML_START
 {
@@ -5918,7 +5910,8 @@ TOML_START
 		return index < values.size() ? values[index].get() : nullptr;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator == (const array& lhs, const array& rhs) noexcept
 	{
 		if (&lhs == &rhs)
@@ -5943,7 +5936,8 @@ TOML_START
 		return true;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator != (const array& lhs, const array& rhs) noexcept
 	{
 		return !(lhs == rhs);
@@ -6027,24 +6021,11 @@ TOML_START
 }
 TOML_END
 
-#endif // TOML_IMPLEMENTATION
-
 #pragma endregion
 //---------------  ↑ toml_array_impl.h  --------------------------------------------------------------------------------
 
 //----------------------------------------  ↓ toml_table_impl.h  -------------------------------------------------------
 #pragma region
-
-#if TOML_IMPLEMENTATION
-
-TOML_IMPL_START
-{
-	template struct table_proxy_pair<true>;
-	template struct table_proxy_pair<false>;
-	template class table_iterator<true>;
-	template class table_iterator<false>;
-}
-TOML_IMPL_END
 
 TOML_START
 {
@@ -6170,7 +6151,8 @@ TOML_START
 		return do_contains(values, key);
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator == (const table& lhs, const table& rhs) noexcept
 	{
 		if (&lhs == &rhs)
@@ -6199,7 +6181,8 @@ TOML_START
 		return true;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator != (const table& lhs, const table& rhs) noexcept
 	{
 		return !(lhs == rhs);
@@ -6207,15 +6190,11 @@ TOML_START
 }
 TOML_END
 
-#endif // TOML_IMPLEMENTATION
-
 #pragma endregion
 //----------------------------------------  ↑ toml_table_impl.h  -------------------------------------------------------
 
 //----------------------------------------------------------------  ↓ toml_parser_impl.h  ------------------------------
 #pragma region
-
-#if TOML_IMPLEMENTATION
 
 TOML_IMPL_START
 {
@@ -9114,7 +9093,8 @@ TOML_IMPL_START
 	#undef TOML_ERROR
 	#undef TOML_NORETURN
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result do_parse(utf8_reader_interface&& reader) TOML_MAY_THROW
 	{
 		return impl::parser{ std::move(reader) };
@@ -9124,13 +9104,15 @@ TOML_IMPL_END
 
 TOML_START
 {
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -9138,13 +9120,15 @@ TOML_START
 
 	#if defined(__cpp_lib_char8_t)
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_INLINE_FUNC_IMPL TOML_API
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -9154,7 +9138,8 @@ TOML_START
 
 	inline namespace literals
 	{
-		TOML_INLINE_FUNC_IMPL TOML_API
+		TOML_API
+		TOML_INLINE_FUNC_IMPL
 		parse_result operator"" _toml(const char* str, size_t len) noexcept
 		{
 			return parse(std::string_view{ str, len });
@@ -9162,7 +9147,8 @@ TOML_START
 
 		#if defined(__cpp_lib_char8_t)
 
-		TOML_INLINE_FUNC_IMPL TOML_API
+		TOML_API
+		TOML_INLINE_FUNC_IMPL
 		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept
 		{
 			return parse(std::u8string_view{ str, len });
@@ -9173,10 +9159,10 @@ TOML_START
 }
 TOML_END
 
-#endif // TOML_IMPLEMENTATION
-
 #pragma endregion
 //----------------------------------------------------------------  ↑ toml_parser_impl.h  ------------------------------
+
+#endif
 
 // macro hygiene
 #if TOML_UNDEF_MACROS

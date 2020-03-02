@@ -85,12 +85,10 @@ TOML_IMPL_START
 			}
 	};
 
-	#if !TOML_ALL_INLINE
-	extern template struct table_proxy_pair<true>;
-	extern template struct table_proxy_pair<false>;
-	extern template class table_iterator<true>;
-	extern template class table_iterator<false>;
-	#endif
+	template struct table_proxy_pair<true>;
+	template struct table_proxy_pair<false>;
+	template class table_iterator<true>;
+	template class table_iterator<false>;
 
 	struct table_init_pair final
 	{
@@ -120,6 +118,11 @@ TOML_IMPL_END
 
 TOML_START
 {
+	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
+
 	/// \brief	A TOML table.
 	/// 
 	/// \remarks The interface of this type is modeled after std::map, with some

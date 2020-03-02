@@ -1,8 +1,6 @@
 #pragma once
 #include "toml_node.h"
 
-#if TOML_IMPLEMENTATION
-
 TOML_START
 {
 	TOML_INLINE_FUNC_IMPL
@@ -55,5 +53,3 @@ TOML_START
 	TOML_INLINE_FUNC_IMPL const source_region& node::source() const noexcept { return source_; }
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION

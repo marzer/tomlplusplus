@@ -1,15 +1,6 @@
 #pragma once
 #include "toml_array.h"
 
-#if TOML_IMPLEMENTATION
-
-TOML_IMPL_START
-{
-	template class array_iterator<true>;
-	template class array_iterator<false>;
-}
-TOML_IMPL_END
-
 TOML_START
 {
 	TOML_INLINE_FUNC_IMPL
@@ -100,7 +91,8 @@ TOML_START
 		return index < values.size() ? values[index].get() : nullptr;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator == (const array& lhs, const array& rhs) noexcept
 	{
 		if (&lhs == &rhs)
@@ -125,7 +117,8 @@ TOML_START
 		return true;
 	}
 
-	[[nodiscard]] TOML_INLINE_FUNC_IMPL
+	TOML_API
+	TOML_INLINE_FUNC_IMPL
 	bool operator != (const array& lhs, const array& rhs) noexcept
 	{
 		return !(lhs == rhs);
@@ -208,5 +201,3 @@ TOML_START
 	}
 }
 TOML_END
-
-#endif // TOML_IMPLEMENTATION

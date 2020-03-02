@@ -151,10 +151,8 @@ TOML_IMPL_START
 			}
 	};
 
-	#if !TOML_ALL_INLINE
-	extern template class array_iterator<true>;
-	extern template class array_iterator<false>;
-	#endif
+	template class array_iterator<true>;
+	template class array_iterator<false>;
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -183,7 +181,10 @@ TOML_IMPL_END
 
 TOML_START
 {
-	[[nodiscard]] bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
+	template <typename CHAR>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
 
 	/// \brief	A TOML array.
 	///
@@ -752,7 +753,6 @@ TOML_START
 			/// \returns	True if the arrays did not contain the same values.
 			friend bool operator != (const array& lhs, const array& rhs) noexcept;
 
-
 		private:
 
 			template <typename T>
@@ -802,25 +802,25 @@ TOML_START
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
 
-				/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
-				/// 
-				/// \detail \cpp
-				/// 
-				/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
-				/// std::cout << arr << std::endl;
-				/// 
-				/// arr.flatten();
-				/// std::cout << arr << std::endl;
-				/// 
-				/// \ecpp
-				/// 
-				/// \out
-				/// [1, 2, [3, 4, [5]], 6, []]
-				/// [1, 2, 3, 4, 5, 6]
-				/// \eout
-				/// 
-				/// \remarks	Arrays inside child tables are not flattened.
-				void flatten() TOML_MAY_THROW;
+			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
+			/// 
+			/// \detail \cpp
+			/// 
+			/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
+			/// std::cout << arr << std::endl;
+			/// 
+			/// arr.flatten();
+			/// std::cout << arr << std::endl;
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, [3, 4, [5]], 6, []]
+			/// [1, 2, 3, 4, 5, 6]
+			/// \eout
+			/// 
+			/// \remarks	Arrays inside child tables are not flattened.
+			void flatten() TOML_MAY_THROW;
 
 			template <typename CHAR>
 			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;

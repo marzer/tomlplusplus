@@ -18,11 +18,16 @@
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
+
+#if TOML_IMPLEMENTATION
+
 #include "toml_node_impl.h"
 #include "toml_value_impl.h"
 #include "toml_array_impl.h"
 #include "toml_table_impl.h"
 #include "toml_parser_impl.h"
+
+#endif
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
