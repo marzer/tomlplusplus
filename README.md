@@ -88,7 +88,7 @@ won't need to mess with these at all, but if you do, set them before including t
 
 | Option                     |      Type      | Default                           | Description                                                                                              |
 |----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------|
-| `TOML_ALL_INLINE`          |     boolean    | `1`                               | Set this to zero if you wish to compile the bulk of the toml++ implementation into a particular TU (e.g. as part of a static lib). |
+| `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a static library). |
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                            |
 | `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                     |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                           |
