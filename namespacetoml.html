@@ -172,6 +172,11 @@ C++</span></a>
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
             <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              using <a class="m-doc" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;T&gt;
+            </dt>
+            <dd>The 'optional' type used throughout the library.</dd>
+            <dt>
               using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </dt>
             <dd>The integer type used to tally line numbers and columns.</dd>
@@ -480,6 +485,16 @@ C++</span></a>
         </section>
         <section>
           <h2>Typedef documentation</h2>
+          <section class="m-doc-details" id="af34a9fb3305e419784104609e6bbb7ac"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              using toml::<wbr/><a class="m-doc-self" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;T&gt;
+            </h3>
+            <p>The 'optional' type used throughout the library.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>By default this will be a simple alias for <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>, but you can change the optional type used by the library by setting <code>TOML_OPTIONAL_TYPE</code>.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="ae845239fd7271e3d8e529302d300ad5b"><div>
             <h3>
               using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
