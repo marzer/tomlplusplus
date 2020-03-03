@@ -358,10 +358,12 @@ TOML_START
 	struct date_time;
 
 	class node;
-	template <typename T> class node_view;
-	template <typename T> class value;
 	class array;
 	class table;
+	template <typename> class node_view;
+	template <typename> class value;
+	template <typename> class default_formatter;
+	template <typename> class json_formatter;
 
 	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t

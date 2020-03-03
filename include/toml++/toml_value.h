@@ -4,6 +4,9 @@
 
 TOML_START
 {
+	template <typename CHAR, typename T>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const value<T>&) TOML_MAY_THROW;
+
 	/// \brief	A TOML value.
 	/// 		
 	/// \tparam	T	The value's data type. Can be one of:
@@ -160,23 +163,8 @@ TOML_START
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
-			{
-				// this is the same behaviour as default_formatter, but it's so simple that there's
-				// no need to spin up a new instance of it just for individual values.
-
-				if constexpr (std::is_same_v<T, string>)
-				{
-					impl::print_to_stream('"', lhs);
-					impl::print_to_stream_with_escapes(rhs.val_, lhs);
-					impl::print_to_stream('"', lhs);
-				}
-				else
-					impl::print_to_stream(rhs.val_, lhs);
-				
-				return lhs;
-			}
+			template <typename CHAR, typename U>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<U>& rhs) TOML_MAY_THROW;
 
 			/// \brief	Value-assignment operator.
 			value& operator= (value_arg rhs) noexcept
@@ -309,6 +297,16 @@ TOML_START
 			}
 	};
 
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API value<string>;
+	extern template class TOML_API value<int64_t>;
+	extern template class TOML_API value<double>;
+	extern template class TOML_API value<bool>;
+	extern template class TOML_API value<date>;
+	extern template class TOML_API value<time>;
+	extern template class TOML_API value<date_time>;
+	#endif
+
 	template <size_t N> value(const string_char(&)[N]) -> value<string>;
 	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
@@ -337,15 +335,24 @@ TOML_START
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
-	#if !TOML_ALL_INLINE
-	extern template class TOML_API value<string>;
-	extern template class TOML_API value<int64_t>;
-	extern template class TOML_API value<double>;
-	extern template class TOML_API value<bool>;
-	extern template class TOML_API value<date>;
-	extern template class TOML_API value<time>;
-	extern template class TOML_API value<date_time>;
-	#endif
+	/// \brief	Prints the value out to a stream.
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<T>& rhs) TOML_MAY_THROW
+	{
+		// this is the same behaviour as default_formatter, but it's so simple that there's
+		// no need to spin up a new instance of it just for individual values.
+
+		if constexpr (std::is_same_v<T, string>)
+		{
+			impl::print_to_stream('"', lhs);
+			impl::print_to_stream_with_escapes(rhs.val_, lhs);
+			impl::print_to_stream('"', lhs);
+		}
+		else
+			impl::print_to_stream(rhs.val_, lhs);
+				
+		return lhs;
+	}
 
 	template <typename T>
 	inline std::optional<T> node::value() const noexcept

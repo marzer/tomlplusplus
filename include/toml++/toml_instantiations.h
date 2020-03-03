@@ -1,5 +1,6 @@
 #pragma once
 #include "toml_value.h"
+#include "toml_node_view.h"
 
 TOML_START
 {
@@ -10,5 +11,8 @@ TOML_START
 	template class TOML_API value<date>;
 	template class TOML_API value<time>;
 	template class TOML_API value<date_time>;
+
+	template class TOML_API node_view<node>;
+	template class TOML_API node_view<const node>;
 }
 TOML_END

@@ -13,7 +13,7 @@ TOML_POP_WARNINGS
 #define S(str) TOML_STRING_PREFIX(str)
 
 template <typename CHAR, typename FUNC>
-void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, std::string_view source_path = {}) noexcept
+inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, std::string_view source_path = {}) noexcept
 {
 	INFO("String being parsed: '"sv << std::string_view( reinterpret_cast<const char*>(toml_str.data()), toml_str.length() ) << "'"sv)
 
@@ -29,7 +29,6 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 			REQUIRE(tabl.source().path != nullptr);
 			CHECK(*tabl.source().path == path);
 		}
-
 		return std::move(tabl);
 	};
 
@@ -48,7 +47,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 			std::forward<FUNC>(func)(validate_table(toml::parse(ss, source_path), source_path));
 		}
 	}
-	catch (const toml::parse_error& err)
+	catch (const parse_error& err)
 	{
 		FAIL(
 			"Parse error on line "sv << err.source().begin.line
@@ -61,7 +60,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 
 	{
 		INFO("Parsing string directly"sv)
-		toml::parse_result result = toml::parse(toml_str, source_path);
+		parse_result result = toml::parse(toml_str, source_path);
 		if (result)
 			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
 		else
@@ -79,7 +78,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 		INFO("Parsing from a string stream"sv)
 		std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
 		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-		toml::parse_result result = toml::parse(ss, source_path);
+		parse_result result = toml::parse(ss, source_path);
 		if (result)
 			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
 		else
@@ -97,7 +96,7 @@ void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, 
 }
 
 template <typename CHAR>
-void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
+inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 {
 	#if TOML_EXCEPTIONS
 
@@ -107,9 +106,9 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 		{
 			fn();
 		}
-		catch (const toml::parse_error&)
+		catch (const parse_error&)
 		{
-			SUCCEED("toml::parse_error thrown OK"sv);
+			SUCCEED("parse_error thrown OK"sv);
 			return true;
 		}
 		catch (const std::exception& exc)
@@ -135,7 +134,7 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 
 	static constexpr auto run_tests = [](auto&& fn) noexcept
 	{
-		toml::parse_result result = fn();
+		parse_result result = fn();
 		if (result)
 		{
 			FAIL("Expected parsing failure"sv);
@@ -143,7 +142,7 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 		}
 		else
 		{
-			SUCCEED("toml::parse_error returned OK"sv);
+			SUCCEED("parse_error returned OK"sv);
 			return true;
 		}
 	};
@@ -160,7 +159,7 @@ void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 }
 
 template <typename T>
-void parse_expected_value(std::string_view value_str, const T& expected) noexcept
+inline void parse_expected_value(std::string_view value_str, const T& expected) noexcept
 {
 	std::string val;
 	static constexpr auto key = "val = "sv;
@@ -277,5 +276,66 @@ void parse_expected_value(std::string_view value_str, const T& expected) noexcep
 	}
 	CHECK(val_reparsed == val_parsed);
 	CHECK(val_reparsed == expected);
-
 }
+
+// manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
+#define TESTS_MANUAL_INSTANTIATIONS 1
+#if TESTS_MANUAL_INSTANTIATIONS
+
+extern template void parse_expected_value(std::string_view, const int&) noexcept;
+extern template void parse_expected_value(std::string_view, const unsigned int&) noexcept;
+extern template void parse_expected_value(std::string_view, const bool&) noexcept;
+extern template void parse_expected_value(std::string_view, const float&) noexcept;
+extern template void parse_expected_value(std::string_view, const double&) noexcept;
+extern template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
+
+TOML_IMPL_START
+{
+	extern template class formatter<char>;
+}
+TOML_IMPL_END
+
+TOML_START
+{
+	extern template class default_formatter<char>;
+
+	extern template std::ostream& operator<< (std::ostream&, const table&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const array&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<string>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<int64_t>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<double>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<bool>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<date>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<time>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const value<date_time>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const node_view<node>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const node_view<const node>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, node_type) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const source_region&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const source_position&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const parse_error&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const date&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const time&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const time_offset&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const date_time&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&&) TOML_MAY_THROW;
+}
+TOML_END
+
+extern template class std::unique_ptr<const Catch::IExceptionTranslator>;
+namespace Catch
+{
+	extern template struct StringMaker<node_view<node>>;
+	extern template struct StringMaker<node_view<const node>>;
+	extern template ReusableStringStream& ReusableStringStream::operator << (node_view<node> const&);
+	extern template ReusableStringStream& ReusableStringStream::operator << (node_view<const node> const&);
+	namespace Detail
+	{
+		extern template std::string stringify(const node_view<node>&);
+		extern template std::string stringify(const node_view<const node>&);
+	}
+}
+
+#endif // TESTS_MANUAL_INSTANTIATIONS
+

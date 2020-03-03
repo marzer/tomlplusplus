@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.3.1
+// toml++ v0.3.2
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -303,7 +303,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		1
+#define TOML_LIB_PATCH		2
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -413,10 +413,12 @@ TOML_START
 	struct time_offset;
 	struct date_time;
 	class node;
-	template <typename T> class node_view;
-	template <typename T> class value;
 	class array;
 	class table;
+	template <typename> class node_view;
+	template <typename> class value;
+	template <typename> class default_formatter;
+	template <typename> class json_formatter;
 
 	enum class node_type : uint8_t
 	{
@@ -918,15 +920,14 @@ TOML_START
 		{
 			return pack(lhs) >= pack(rhs);
 		}
-
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	struct time final
 	{
@@ -986,15 +987,14 @@ TOML_START
 		{
 			return pack(lhs) >= pack(rhs);
 		}
-
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	struct time_offset final
 	{
@@ -1045,15 +1045,14 @@ TOML_START
 		{
 			return lhs.minutes >= rhs.minutes;
 		}
-
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	struct date_time final
 	{
@@ -1131,15 +1130,14 @@ TOML_START
 		{
 			return !(lhs < rhs);
 		}
-
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 }
 TOML_END
 
@@ -1822,6 +1820,9 @@ TOML_END
 
 TOML_START
 {
+	template <typename CHAR, typename T>
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const value<T>&) TOML_MAY_THROW;
+
 	template <typename T>
 	class TOML_API value final : public node
 	{
@@ -1912,24 +1913,8 @@ TOML_START
 			[[nodiscard]] explicit operator T&& () && noexcept { return std::move(val_); }
 			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value& rhs) TOML_MAY_THROW
-			{
-				// this is the same behaviour as default_formatter, but it's so simple that there's
-				// no need to spin up a new instance of it just for individual values.
-
-				if constexpr (std::is_same_v<T, string>)
-				{
-					impl::print_to_stream('"', lhs);
-					impl::print_to_stream_with_escapes(rhs.val_, lhs);
-					impl::print_to_stream('"', lhs);
-				}
-				else
-					impl::print_to_stream(rhs.val_, lhs);
-
-				return lhs;
-			}
-
+			template <typename CHAR, typename U>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<U>& rhs) TOML_MAY_THROW;
 			value& operator= (value_arg rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, string>)
@@ -2009,6 +1994,16 @@ TOML_START
 			}
 	};
 
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API value<string>;
+	extern template class TOML_API value<int64_t>;
+	extern template class TOML_API value<double>;
+	extern template class TOML_API value<bool>;
+	extern template class TOML_API value<date>;
+	extern template class TOML_API value<time>;
+	extern template class TOML_API value<date_time>;
+	#endif
+
 	template <size_t N> value(const string_char(&)[N]) -> value<string>;
 	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
@@ -2037,15 +2032,23 @@ TOML_START
 	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
-	#if !TOML_ALL_INLINE
-	extern template class TOML_API value<string>;
-	extern template class TOML_API value<int64_t>;
-	extern template class TOML_API value<double>;
-	extern template class TOML_API value<bool>;
-	extern template class TOML_API value<date>;
-	extern template class TOML_API value<time>;
-	extern template class TOML_API value<date_time>;
-	#endif
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<T>& rhs) TOML_MAY_THROW
+	{
+		// this is the same behaviour as default_formatter, but it's so simple that there's
+		// no need to spin up a new instance of it just for individual values.
+
+		if constexpr (std::is_same_v<T, string>)
+		{
+			impl::print_to_stream('"', lhs);
+			impl::print_to_stream_with_escapes(rhs.val_, lhs);
+			impl::print_to_stream('"', lhs);
+		}
+		else
+			impl::print_to_stream(rhs.val_, lhs);
+
+		return lhs;
+	}
 
 	template <typename T>
 	inline std::optional<T> node::value() const noexcept
@@ -2941,14 +2944,18 @@ TOML_END
 
 TOML_START
 {
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<T>&) TOML_MAY_THROW;
+
 	template <typename T>
-	class node_view final
+	class TOML_API node_view final
 	{
 		public:
 			using viewed_type = T;
 
 		private:
 			friend class toml::table;
+			template <typename U> friend class toml::node_view;
 
 			viewed_type* node_;
 
@@ -3131,17 +3138,11 @@ TOML_START
 				return arr && *arr == rhs;
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
-			[[nodiscard]] node_view<viewed_type> operator[] (string_view key) noexcept
+
+			[[nodiscard]] node_view operator[] (string_view key) noexcept
 			{
 				if (auto tbl = this->as_table())
 					return { tbl->get(key) };
-				return { nullptr };
-			}
-
-			[[nodiscard]] node_view<viewed_type> operator[] (size_t index) noexcept
-			{
-				if (auto tbl = this->as_array())
-					return { tbl->get(index) };
 				return { nullptr };
 			}
 
@@ -3152,26 +3153,41 @@ TOML_START
 				return { nullptr };
 			}
 
-			[[nodiscard]] node_view<const viewed_type> operator[] (size_t index) const noexcept
+			[[nodiscard]] node_view operator[] (size_t index) noexcept
 			{
-				if (auto tbl = this->as_array())
-					return { tbl->get(index) };
+				if (auto arr = this->as_array())
+					return { arr->get(index) };
 				return { nullptr };
 			}
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view& nv) TOML_MAY_THROW
+			[[nodiscard]] node_view<const viewed_type> operator[] (size_t index) const noexcept
 			{
-				if (nv.node_)
-				{
-					nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
-					{
-						os << n;
-					});
-				}
-				return os;
+				if (auto arr = this->as_array())
+					return { arr->get(index) };
+				return { nullptr };
 			}
+
+			template <typename CHAR, typename U>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<U>&) TOML_MAY_THROW;
 	};
+
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API node_view<node>;
+	extern template class TOML_API node_view<const node>;
+	#endif
+
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view<T>& nv) TOML_MAY_THROW
+	{
+		if (nv.node_)
+		{
+			nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
+				{
+					os << n;
+				});
+		}
+		return os;
+	}
 }
 TOML_END
 
@@ -5282,6 +5298,11 @@ TOML_IMPL_END
 
 TOML_START
 {
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
+
 	template <typename CHAR = char>
 	class default_formatter final : impl::formatter<CHAR>
 	{
@@ -5541,23 +5562,10 @@ TOML_START
 				: base{ source, flags }
 			{}
 
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter& rhs)
-				TOML_MAY_THROW
-			{
-				rhs.attach(lhs);
-				rhs.key_path.clear();
-				rhs.print();
-				rhs.detach();
-				return lhs;
-			}
-
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter&& rhs)
-				TOML_MAY_THROW
-			{
-				return lhs << rhs; //as lvalue
-			}
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
 	};
 
 	template <typename CHAR>
@@ -5594,6 +5602,22 @@ TOML_START
 		base::clear_naked_newline();
 	}
 
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs) TOML_MAY_THROW
+	{
+		rhs.attach(lhs);
+		rhs.key_path.clear();
+		rhs.print();
+		rhs.detach();
+		return lhs;
+	}
+
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs) TOML_MAY_THROW
+	{
+		return lhs << rhs; //as lvalue
+	}
+
 	template <typename CHAR>
 	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs) TOML_MAY_THROW
 	{
@@ -5616,6 +5640,11 @@ TOML_END
 
 TOML_START
 {
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
+
 	template <typename CHAR = char>
 	class json_formatter final : impl::formatter<CHAR>
 	{
@@ -5676,22 +5705,10 @@ TOML_START
 				: base{ source, flags }
 			{}
 
-			template <typename T>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter& rhs)
-				TOML_MAY_THROW
-			{
-				rhs.attach(lhs);
-				rhs.print();
-				rhs.detach();
-				return lhs;
-			}
-
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, json_formatter&& rhs)
-				TOML_MAY_THROW
-			{
-				return lhs << rhs; //as lvalue
-			}
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
 	};
 
 	template <typename CHAR>
@@ -5732,6 +5749,21 @@ TOML_START
 		}
 		base::clear_naked_newline();
 	}
+
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs) TOML_MAY_THROW
+	{
+		rhs.attach(lhs);
+		rhs.print();
+		rhs.detach();
+		return lhs;
+	}
+
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs) TOML_MAY_THROW
+	{
+		return lhs << rhs; //as lvalue
+	}
 }
 TOML_END
 
@@ -5740,7 +5772,28 @@ TOML_END
 
 #if TOML_IMPLEMENTATION
 
-//-----------------------------------------------------------------  ↓ toml_node_impl.h  -------------------------------
+//---------------------------------------------------------------  ↓ toml_instantiations.h  ----------------------------
+#pragma region
+
+TOML_START
+{
+	template class TOML_API value<string>;
+	template class TOML_API value<int64_t>;
+	template class TOML_API value<double>;
+	template class TOML_API value<bool>;
+	template class TOML_API value<date>;
+	template class TOML_API value<time>;
+	template class TOML_API value<date_time>;
+
+	template class TOML_API node_view<node>;
+	template class TOML_API node_view<const node>;
+}
+TOML_END
+
+#pragma endregion
+//---------------------------------------------------------------  ↑ toml_instantiations.h  ----------------------------
+
+//------------------------------------------------------------------------------------------  ↓ toml_node_impl.h  ------
 #pragma region
 
 TOML_START
@@ -5797,25 +5850,7 @@ TOML_START
 TOML_END
 
 #pragma endregion
-//-----------------------------------------------------------------  ↑ toml_node_impl.h  -------------------------------
-
-//------------------------------------------------------------------------------------------  ↓ toml_value_impl.h  -----
-#pragma region
-
-TOML_START
-{
-	template class TOML_API value<string>;
-	template class TOML_API value<int64_t>;
-	template class TOML_API value<double>;
-	template class TOML_API value<bool>;
-	template class TOML_API value<date>;
-	template class TOML_API value<time>;
-	template class TOML_API value<date_time>;
-}
-TOML_END
-
-#pragma endregion
-//------------------------------------------------------------------------------------------  ↑ toml_value_impl.h  -----
+//------------------------------------------------------------------------------------------  ↑ toml_node_impl.h  ------
 
 //---------------  ↓ toml_array_impl.h  --------------------------------------------------------------------------------
 #pragma region

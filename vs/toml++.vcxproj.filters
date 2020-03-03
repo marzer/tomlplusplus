@@ -58,11 +58,14 @@
     <ClInclude Include="..\include\toml++\toml_table_impl.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_value_impl.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\toml++\toml_parser_impl.h">
       <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_instantiations.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\tests\catch2.h">
+      <Filter>extern</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -104,6 +107,9 @@
     </Filter>
     <Filter Include="doc">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="extern">
+      <UniqueIdentifier>{b838dba3-02f6-446f-840e-6b4c62d2fb0c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

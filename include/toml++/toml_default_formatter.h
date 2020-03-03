@@ -151,6 +151,11 @@ TOML_IMPL_END
 
 TOML_START
 {
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
+
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
 	/// 
 	/// \remarks You generally don't need to create an instance of this class explicitly; the stream
@@ -444,25 +449,10 @@ TOML_START
 				: base{ source, flags }
 			{}
 
-			/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter& rhs)
-				TOML_MAY_THROW
-			{
-				rhs.attach(lhs);
-				rhs.key_path.clear();
-				rhs.print();
-				rhs.detach();
-				return lhs;
-			}
-
-			/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, default_formatter&& rhs)
-				TOML_MAY_THROW
-			{
-				return lhs << rhs; //as lvalue
-			}
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
 	};
 
 	template <typename CHAR>
@@ -497,6 +487,24 @@ TOML_START
 			impl::print_to_stream(" }"sv, base::stream());
 		}
 		base::clear_naked_newline();
+	}
+
+	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs) TOML_MAY_THROW
+	{
+		rhs.attach(lhs);
+		rhs.key_path.clear();
+		rhs.print();
+		rhs.detach();
+		return lhs;
+	}
+
+	/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs) TOML_MAY_THROW
+	{
+		return lhs << rhs; //as lvalue
 	}
 
 	template <typename CHAR>

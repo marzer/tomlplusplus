@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '0.3.0',
+	version : '0.3.2',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
@@ -30,6 +30,7 @@ if compiler.get_id() == 'clang'
 			'-g0',
 			'-ferror-limit=5',
 			'-fchar8_t',
+			# '-Weverything',
 			'-Wno-c++98-compat',
 			'-Wno-c++98-compat-pedantic',
 			'-Wno-float-equal',
@@ -38,7 +39,7 @@ if compiler.get_id() == 'clang'
 			'-Wno-padded',
 			'-Wno-weak-vtables',
 			'-Wno-double-promotion'
-			#, '-Weverything'
+			#, '-ftime-trace'
 		],
 		language : 'cpp'
 	)

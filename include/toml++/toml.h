@@ -21,8 +21,8 @@
 
 #if TOML_IMPLEMENTATION
 
+#include "toml_instantiations.h"
 #include "toml_node_impl.h"
-#include "toml_value_impl.h"
 #include "toml_array_impl.h"
 #include "toml_table_impl.h"
 #include "toml_parser_impl.h"

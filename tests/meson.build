@@ -11,7 +11,8 @@ test_sources = [
 	'parsing_strings.cpp',
 	'parsing_tables.cpp',
 	'manipulating_arrays.cpp',
-	'manipulating_tables.cpp'
+	'manipulating_tables.cpp',
+	'tests.cpp'
 ]
 
 disable_exceptions = 'cpp_eh=none'

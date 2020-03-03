@@ -75,8 +75,9 @@
     <ClInclude Include="..\include\toml++\toml_table.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
     <ClInclude Include="..\include\toml++\toml_value.h" />
-    <ClInclude Include="..\include\toml++\toml_value_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_instantiations.h" />
     <ClInclude Include="..\include\toml++\toml_version.h" />
+    <ClInclude Include="..\tests\catch2.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

@@ -5,6 +5,9 @@
 
 TOML_START
 {
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<T>&) TOML_MAY_THROW;
+
 	/// \brief	A view of a node.
 	/// 
 	/// \detail A node_view is like a std::optional<toml::node> with lots of toml-specific stuff built-in.
@@ -49,13 +52,14 @@ TOML_START
 	/// product[2]:
 	/// \eout
 	template <typename T>
-	class node_view final
+	class TOML_API node_view final
 	{
 		public:
 			using viewed_type = T;
 
 		private:
 			friend class toml::table;
+			template <typename U> friend class toml::node_view;
 
 			viewed_type* node_;
 
@@ -331,7 +335,15 @@ TOML_START
 			///
 			/// \returns	A view of the selected node if this node represented a table and it contained a
 			/// 			value at the given key, or an empty view.
-			[[nodiscard]] node_view<viewed_type> operator[] (string_view key) noexcept
+			[[nodiscard]] node_view operator[] (string_view key) noexcept
+			{
+				if (auto tbl = this->as_table())
+					return { tbl->get(key) };
+				return { nullptr };
+			}
+
+			/// \brief	Returns a view of the selected subnode (const overload).
+			[[nodiscard]] node_view<const viewed_type> operator[] (string_view key) const noexcept
 			{
 				if (auto tbl = this->as_table())
 					return { tbl->get(key) };
@@ -344,42 +356,42 @@ TOML_START
 			///
 			/// \returns	A view of the selected node if this node represented an array and it contained a
 			/// 			value at the given index, or an empty view.
-			[[nodiscard]] node_view<viewed_type> operator[] (size_t index) noexcept
+			[[nodiscard]] node_view operator[] (size_t index) noexcept
 			{
-				if (auto tbl = this->as_array())
-					return { tbl->get(index) };
-				return { nullptr };
-			}
-
-			/// \brief	Returns a view of the selected subnode (const overload).
-			[[nodiscard]] node_view<const viewed_type> operator[] (string_view key) const noexcept
-			{
-				if (auto tbl = this->as_table())
-					return { tbl->get(key) };
+				if (auto arr = this->as_array())
+					return { arr->get(index) };
 				return { nullptr };
 			}
 
 			/// \brief	Returns a view of the selected subnode (const overload).
 			[[nodiscard]] node_view<const viewed_type> operator[] (size_t index) const noexcept
 			{
-				if (auto tbl = this->as_array())
-					return { tbl->get(index) };
+				if (auto arr = this->as_array())
+					return { arr->get(index) };
 				return { nullptr };
 			}
 
-			/// \brief	Prints the viewed node out to a stream.
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view& nv) TOML_MAY_THROW
-			{
-				if (nv.node_)
-				{
-					nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
-					{
-						os << n;
-					});
-				}
-				return os;
-			}
+			template <typename CHAR, typename U>
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<U>&) TOML_MAY_THROW;
 	};
+
+	#if !TOML_ALL_INLINE
+	extern template class TOML_API node_view<node>;
+	extern template class TOML_API node_view<const node>;
+	#endif
+
+	/// \brief	Prints the viewed node out to a stream.
+	template <typename CHAR, typename T>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view<T>& nv) TOML_MAY_THROW
+	{
+		if (nv.node_)
+		{
+			nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
+				{
+					os << n;
+				});
+		}
+		return os;
+	}
 }
 TOML_END

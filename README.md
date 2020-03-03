@@ -23,7 +23,7 @@ Given a TOML file `configuration.toml` containing the following:
 ```toml
 [library]
 name = "toml++"
-version = "0.1.0"
+version = "0.3.2"
 authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 
 [dependencies]
@@ -89,7 +89,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | Option                     |      Type      | Default                           | Description                                                                                                |
 |----------------------------|:--------------:|-----------------------------------|------------------------------------------------------------------------------------------------------------|
 | `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).  |
-| `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport) on Windows)`.                         |
+| `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                         |
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                              |
 | `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                       |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                             |

@@ -3,6 +3,11 @@
 
 TOML_START
 {
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
+
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
 	///
 	/// \detail \cpp
@@ -100,25 +105,10 @@ TOML_START
 				: base{ source, flags }
 			{}
 
-
-			/// \brief	Prints the bound TOML object out to the stream as JSON.
-			template <typename T>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter& rhs)
-				TOML_MAY_THROW
-			{
-				rhs.attach(lhs);
-				rhs.print();
-				rhs.detach();
-				return lhs;
-			}
-
-			/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
-			template <typename T>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<T>& lhs, json_formatter&& rhs)
-				TOML_MAY_THROW
-			{
-				return lhs << rhs; //as lvalue
-			}
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+			template <typename T, typename U>
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
 	};
 
 	template <typename CHAR>
@@ -158,6 +148,23 @@ TOML_START
 			impl::print_to_stream('}', base::stream());
 		}
 		base::clear_naked_newline();
+	}
+
+	/// \brief	Prints the bound TOML object out to the stream as JSON.
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs) TOML_MAY_THROW
+	{
+		rhs.attach(lhs);
+		rhs.print();
+		rhs.detach();
+		return lhs;
+	}
+
+	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
+	template <typename T, typename U>
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs) TOML_MAY_THROW
+	{
+		return lhs << rhs; //as lvalue
 	}
 }
 TOML_END

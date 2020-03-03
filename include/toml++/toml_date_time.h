@@ -70,23 +70,22 @@ TOML_START
 		{
 			return pack(lhs) >= pack(rhs);
 		}
-		
-		/// \brief	Prints a date out to a stream as `YYYY-MM-DD` (per RFC 3339).
-		/// \detail \cpp
-		/// std::cout << toml::date{ 1987, 3, 16 } << std::endl;
-		/// \ecpp
-		/// 
-		/// \out
-		/// 1987-03-16
-		/// \eout
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	/// \brief	Prints a date out to a stream as `YYYY-MM-DD` (per RFC 3339).
+	/// \detail \cpp
+	/// std::cout << toml::date{ 1987, 3, 16 } << std::endl;
+	/// \ecpp
+	/// 
+	/// \out
+	/// 1987-03-16
+	/// \eout
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	/// \brief	A local time-of-day.
 	struct time final
@@ -157,25 +156,24 @@ TOML_START
 		{
 			return pack(lhs) >= pack(rhs);
 		}
-
-		/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
-		/// \detail \cpp
-		/// std::cout << toml::time{ 10, 20, 34 } << std::endl;
-		/// std::cout << toml::time{ 10, 20, 34, 500000000 } << std::endl;
-		/// \ecpp
-		/// 
-		/// \out
-		/// 10:20:34
-		/// 10:20:34.5
-		/// \eout
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
+	/// \detail \cpp
+	/// std::cout << toml::time{ 10, 20, 34 } << std::endl;
+	/// std::cout << toml::time{ 10, 20, 34, 500000000 } << std::endl;
+	/// \ecpp
+	/// 
+	/// \out
+	/// 10:20:34
+	/// 10:20:34.5
+	/// \eout
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	/// \brief	A timezone offset.
 	struct time_offset final
@@ -254,31 +252,30 @@ TOML_START
 		{
 			return lhs.minutes >= rhs.minutes;
 		}
-
-		/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
-		/// \detail \cpp
-		/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
-		/// std::cout << toml::time_offset{ 2, -30 } << std::endl;
-		/// std::cout << toml::time_offset{} << std::endl;
-		/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
-		/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
-		/// \ecpp
-		/// 
-		/// \out
-		/// +02:30
-		/// +01:30
-		/// Z
-		/// -01:30
-		/// -02:30
-		/// \eout
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
+	/// \detail \cpp
+	/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
+	/// std::cout << toml::time_offset{ 2, -30 } << std::endl;
+	/// std::cout << toml::time_offset{} << std::endl;
+	/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
+	/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
+	/// \ecpp
+	/// 
+	/// \out
+	/// +02:30
+	/// +01:30
+	/// Z
+	/// -01:30
+	/// -02:30
+	/// \eout
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 
 	/// \brief	A date-time.
 	struct date_time final
@@ -379,26 +376,25 @@ TOML_START
 		{
 			return !(lhs < rhs);
 		}
-
-		/// \brief	Prints a date_time out to a stream in RFC 3339 format.
-		/// \detail \cpp
-		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << std::endl;
-		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, { -2, -30 } } << std::endl;
-		/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, {} } << std::endl;
-		/// \ecpp
-		/// 
-		/// \out
-		/// 1987-03-16T10:20:34
-		/// 1987-03-16T10:20:34-02:30
-		/// 1987-03-16T10:20:34Z
-		/// \eout
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
-			TOML_MAY_THROW
-		{
-			impl::print_to_stream(rhs, lhs);
-			return lhs;
-		}
 	};
+
+	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
+	/// \detail \cpp
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << std::endl;
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, { -2, -30 } } << std::endl;
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, {} } << std::endl;
+	/// \ecpp
+	/// 
+	/// \out
+	/// 1987-03-16T10:20:34
+	/// 1987-03-16T10:20:34-02:30
+	/// 1987-03-16T10:20:34Z
+	/// \eout
+	template <typename CHAR>
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs) TOML_MAY_THROW
+	{
+		impl::print_to_stream(rhs, lhs);
+		return lhs;
+	}
 }
 TOML_END
