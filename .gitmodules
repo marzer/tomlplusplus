@@ -4,3 +4,6 @@
 [submodule "extern/mcss"]
 	path = extern/mcss
 	url = https://github.com/mosra/m.css.git
+[submodule "extern/tloptional"]
+	path = extern/tloptional
+	url = https://github.com/TartanLlama/optional.git

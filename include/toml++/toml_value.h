@@ -355,7 +355,7 @@ TOML_START
 	}
 
 	template <typename T>
-	inline std::optional<T> node::value() const noexcept
+	inline optional<T> node::value() const noexcept
 	{
 		static_assert(
 			impl::is_value<T> || std::is_same_v<T, string_view>,

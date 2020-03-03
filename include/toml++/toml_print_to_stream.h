@@ -61,7 +61,7 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_GCC_ATTR(nonnull) TOML_ALWAYS_INLINE
-	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW 
+	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
 		stream.write(reinterpret_cast<const CHAR*>(str), static_cast<std::streamsize>(len));

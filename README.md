@@ -23,7 +23,7 @@ Given a TOML file `configuration.toml` containing the following:
 ```toml
 [library]
 name = "toml++"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 
 [dependencies]
@@ -93,8 +93,10 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                              |
 | `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                       |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                             |
+| `TOML_EXCEPTIONS`          |     boolean    | `1`                               | Sets whether the library uses exceptions. Ignored if you've disabled them at the compiler level.           |
 | `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_ALL_INLINE` is `1`.|
 | `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                      |
+| `TOML_OPTIONAL_TYPE`       |    type name   | undefined                         | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].    |
 | `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.   |
 | `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.        |
 | `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                          |
@@ -166,3 +168,4 @@ which is also subject to the terms of the MIT license - see [LICENSE-utf8-decode
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
 [LICENSE-utf8-decoder]: ./LICENSE-utf8-decoder
+[something better than std::optional]: https://github.com/TartanLlama/optional

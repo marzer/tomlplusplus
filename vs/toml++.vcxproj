@@ -92,6 +92,7 @@
     <None Include="..\python\generate_single_header.py" />
     <None Include="..\python\generate_unicode_functions.py" />
     <None Include="..\README.md" />
+    <None Include="..\tests\meson.build" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

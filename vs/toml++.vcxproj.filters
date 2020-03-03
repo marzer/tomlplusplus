@@ -65,7 +65,7 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\tests\catch2.h">
-      <Filter>extern</Filter>
+      <Filter>tests</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -97,6 +97,9 @@
     </None>
     <None Include="..\CONTRIBUTING.md" />
     <None Include="..\meson.build" />
+    <None Include="..\tests\meson.build">
+      <Filter>tests</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -108,7 +111,7 @@
     <Filter Include="doc">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
     </Filter>
-    <Filter Include="extern">
+    <Filter Include="tests">
       <UniqueIdentifier>{b838dba3-02f6-446f-840e-6b4c62d2fb0c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

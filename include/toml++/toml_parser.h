@@ -373,15 +373,27 @@ TOML_START
 			"The path's character type must be 1 byte in size."
 		);
 
-		// Q: "why is this function templated??"
-		// A: I don't want to force users to drag in <fstream> if they're not going to do
-		//    any parsing directly from files.
+		auto str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
+		auto ifs = std::basic_ifstream<CHAR>{ str };
+		return parse( ifs, std::move(str) );
+	}
 
-		auto ifs = std::basic_ifstream<CHAR>{ file_path };
-		return parse(
-			ifs,
-			std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() }
-		);
+	// Q: "why are the parse_file functions templated??"
+	// A: I don't want to force users to drag in <fstream> if they're not going to do
+	//    any parsing directly from files. Keeping them templated delays their instantiation
+	//    until they're actually required, so only those users wanting to use parse_file()
+	//    are burdened by the <fstream> overhead.
+
+	template <typename CHAR>
+	inline parse_result parse_file(const std::basic_string<CHAR>& file_path) TOML_MAY_THROW
+	{
+		return parse_file(std::basic_string_view<CHAR>{ file_path });
+	}
+
+	template <typename CHAR>
+	inline parse_result parse_file(const CHAR* file_path) TOML_MAY_THROW
+	{
+		return parse_file(std::basic_string_view<CHAR>{ file_path });
 	}
 
 	/// \brief	Convenience literal operators for working with TOML++.

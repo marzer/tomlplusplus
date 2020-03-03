@@ -48,6 +48,10 @@
 	#define TOML_UNDEF_MACROS 1
 #endif
 
+#ifndef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS 1
+#endif
+
 ////////// COMPILER & ENVIRONMENT STUFF
 
 #ifndef __cplusplus
@@ -144,16 +148,18 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
-	#define TOML_EXCEPTIONS	1
+#if !defined(__EXCEPTIONS) && !defined(__cpp_exceptions) && !defined(_CPPUNWIND)
+	#undef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS	0
+#endif
+#if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
-	#define TOML_INLINE_NS_EX
+	#define TOML_NS1_EX
 #else
-	#define TOML_EXCEPTIONS	0
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
-	#define TOML_INLINE_NS_EX _noex
+	#define TOML_NS1_EX _noex
 #endif
 #ifndef TOML_DOXYGEN
 	#define TOML_DOXYGEN 0
@@ -259,17 +265,35 @@
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
-#if TOML_CHAR_8_STRINGS
-	#define TOML_INLINE_NS_CHAR_8 _char8
+#ifdef TOML_OPTIONAL_TYPE
+	#define TOML_NS2_OPT _opt
 #else
-	#define TOML_INLINE_NS_CHAR_8
+	#define TOML_NS2_OPT
 #endif
+
+#if TOML_CHAR_8_STRINGS
+	#define TOML_NS3_CHAR8 _char8
+#else
+	#define TOML_NS3_CHAR8
+#endif
+
+#define TOML_NS4
+#define TOML_NS5
 
 #if !TOML_DOXYGEN
 
-	#define TOML_START_2(VER, ARG1, ARG2)	namespace toml { inline namespace v##VER##ARG1##ARG2
-	#define TOML_START_1(VER, ARG1, ARG2)	TOML_START_2(VER, ARG1, ARG2)
-	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,TOML_INLINE_NS_CHAR_8)
+	#define TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
+		namespace toml { inline namespace v##VER##ARG1##ARG2##ARG3##ARG4##ARG5
+
+	#define TOML_START_1(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
+		TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)
+
+	#define TOML_START																\
+		TOML_START_1(																\
+			TOML_LIB_MAJOR, TOML_NS1_EX, TOML_NS2_OPT,								\
+			TOML_NS3_CHAR8, TOML_NS4, TOML_NS5										\
+		)
+
 	#define TOML_END		}
 	
 #endif
@@ -283,7 +307,6 @@ TOML_DISABLE_ALL_WARNINGS
 
 #include <cstdint>
 #include <cstring>		//memcpy, memset
-#include <optional>
 #include <memory>
 #include <string_view>
 #include <string>
@@ -291,6 +314,9 @@ TOML_DISABLE_ALL_WARNINGS
 #include <map>
 #include <iosfwd>
 #include <charconv>
+#ifndef TOML_OPTIONAL_TYPE
+	#include <optional>
+#endif
 #if TOML_USE_STREAMS_FOR_FLOATS
 	#include <sstream>
 #endif
@@ -389,6 +415,22 @@ TOML_START
 	/// \brief	The integer type used to tally line numbers and columns.
 	/// \remarks This will be an alias for uint32_t if `TOML_LARGE_FILES` is `1`.
 	using source_index = uint16_t;
+
+	#endif
+
+	#ifdef TOML_OPTIONAL_TYPE
+
+	template <typename T>
+	using optional = TOML_OPTIONAL_TYPE<T>;
+
+	#else
+
+	/// \brief	The 'optional' type used throughout the library.
+	/// 
+	/// \remarks By default this will be a simple alias for std::optional, but you can change the optional type
+	/// 		 used by the library by setting `TOML_OPTIONAL_TYPE`.
+	template <typename T>
+	using optional = std::optional<T>;
 
 	#endif
 
@@ -724,12 +766,13 @@ TOML_IMPL_START
 	//    I don't want to impose such a heavy compile-time burden on users.
 
 	template <typename T>
-	inline std::optional<size_t> find(const std::vector<T>& haystack, const T& needle) noexcept
+	[[nodiscard]]
+	inline const T* find(const std::vector<T>& haystack, const T& needle) noexcept
 	{
 		for (size_t i = 0, e = haystack.size(); i < e; i++)
 			if (haystack[i] == needle)
-				return i;
-		return {};
+				return haystack.data() + i;
+		return nullptr;
 	}
 
 	class parser;

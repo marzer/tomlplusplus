@@ -17,7 +17,8 @@ If you wish to submit a PR, please be aware that:
 Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
 The first time you want to begin testing you'll need to ensure submodules have been fetched:  
 ```bash
-git submodule update --init --recursive extern/Catch2
+git submodule update --init extern/Catch2
+git submodule update --init extern/tloptional
 ```
 
 #### Testing on Windows with Visual Studio

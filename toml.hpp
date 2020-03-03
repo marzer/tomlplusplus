@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.3.2
+// toml++ v0.3.3
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -114,6 +114,10 @@
 	#define TOML_UNDEF_MACROS 1
 #endif
 
+#ifndef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS 1
+#endif
+
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
@@ -208,16 +212,18 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
-	#define TOML_EXCEPTIONS	1
+#if !defined(__EXCEPTIONS) && !defined(__cpp_exceptions) && !defined(_CPPUNWIND)
+	#undef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS	0
+#endif
+#if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
-	#define TOML_INLINE_NS_EX
+	#define TOML_NS1_EX
 #else
-	#define TOML_EXCEPTIONS	0
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
-	#define TOML_INLINE_NS_EX _noex
+	#define TOML_NS1_EX _noex
 #endif
 #ifndef TOML_DOXYGEN
 	#define TOML_DOXYGEN 0
@@ -303,7 +309,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		2
+#define TOML_LIB_PATCH		3
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -329,17 +335,35 @@
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
-#if TOML_CHAR_8_STRINGS
-	#define TOML_INLINE_NS_CHAR_8 _char8
+#ifdef TOML_OPTIONAL_TYPE
+	#define TOML_NS2_OPT _opt
 #else
-	#define TOML_INLINE_NS_CHAR_8
+	#define TOML_NS2_OPT
 #endif
+
+#if TOML_CHAR_8_STRINGS
+	#define TOML_NS3_CHAR8 _char8
+#else
+	#define TOML_NS3_CHAR8
+#endif
+
+#define TOML_NS4
+#define TOML_NS5
 
 #if !TOML_DOXYGEN
 
-	#define TOML_START_2(VER, ARG1, ARG2)	namespace toml { inline namespace v##VER##ARG1##ARG2
-	#define TOML_START_1(VER, ARG1, ARG2)	TOML_START_2(VER, ARG1, ARG2)
-	#define TOML_START		TOML_START_1(TOML_LIB_MAJOR,TOML_INLINE_NS_EX,TOML_INLINE_NS_CHAR_8)
+	#define TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
+		namespace toml { inline namespace v##VER##ARG1##ARG2##ARG3##ARG4##ARG5
+
+	#define TOML_START_1(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
+		TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)
+
+	#define TOML_START																\
+		TOML_START_1(																\
+			TOML_LIB_MAJOR, TOML_NS1_EX, TOML_NS2_OPT,								\
+			TOML_NS3_CHAR8, TOML_NS4, TOML_NS5										\
+		)
+
 	#define TOML_END		}
 
 #endif
@@ -351,7 +375,6 @@ TOML_DISABLE_ALL_WARNINGS
 
 #include <cstdint>
 #include <cstring>		//memcpy, memset
-#include <optional>
 #include <memory>
 #include <string_view>
 #include <string>
@@ -359,6 +382,9 @@ TOML_DISABLE_ALL_WARNINGS
 #include <map>
 #include <iosfwd>
 #include <charconv>
+#ifndef TOML_OPTIONAL_TYPE
+	#include <optional>
+#endif
 #if TOML_USE_STREAMS_FOR_FLOATS
 	#include <sstream>
 #endif
@@ -441,6 +467,18 @@ TOML_START
 	#else
 
 	using source_index = uint16_t;
+
+	#endif
+
+	#ifdef TOML_OPTIONAL_TYPE
+
+	template <typename T>
+	using optional = TOML_OPTIONAL_TYPE<T>;
+
+	#else
+
+	template <typename T>
+	using optional = std::optional<T>;
 
 	#endif
 
@@ -639,12 +677,13 @@ TOML_IMPL_START
 	//    I don't want to impose such a heavy compile-time burden on users.
 
 	template <typename T>
-	inline std::optional<size_t> find(const std::vector<T>& haystack, const T& needle) noexcept
+	[[nodiscard]]
+	inline const T* find(const std::vector<T>& haystack, const T& needle) noexcept
 	{
 		for (size_t i = 0, e = haystack.size(); i < e; i++)
 			if (haystack[i] == needle)
-				return i;
-		return {};
+				return haystack.data() + i;
+		return nullptr;
 	}
 
 	class parser;
@@ -1058,7 +1097,7 @@ TOML_START
 	{
 		toml::date date;
 		toml::time time;
-		std::optional<toml::time_offset> time_offset;
+		optional<toml::time_offset> time_offset;
 
 		TOML_NODISCARD_CTOR
 		constexpr date_time() noexcept
@@ -1590,7 +1629,7 @@ TOML_START
 			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
 
 			template <typename T>
-			[[nodiscard]] std::optional<T> value() const noexcept;
+			[[nodiscard]] optional<T> value() const noexcept;
 
 			template <typename T>
 			[[nodiscard]] auto value_or(T&& default_value) const noexcept;
@@ -2051,7 +2090,7 @@ TOML_START
 	}
 
 	template <typename T>
-	inline std::optional<T> node::value() const noexcept
+	inline optional<T> node::value() const noexcept
 	{
 		static_assert(
 			impl::is_value<T> || std::is_same_v<T, string_view>,
@@ -3035,7 +3074,7 @@ TOML_START
 			[[nodiscard]] const toml::value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
 
 			template <typename U>
-			[[nodiscard]] std::optional<U> value() const noexcept
+			[[nodiscard]] optional<U> value() const noexcept
 			{
 				if (node_)
 					return node_->template value<U>();
@@ -4418,7 +4457,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			constexpr std::optional<uint8_t> operator() () noexcept
+			constexpr optional<uint8_t> operator() () noexcept
 			{
 				if (position >= source.length())
 					return {};
@@ -4473,7 +4512,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			std::optional<uint8_t> operator() () TOML_MAY_THROW
+			optional<uint8_t> operator() () TOML_MAY_THROW
 			{
 				auto val = source->get();
 				if (val == std::basic_istream<CHAR>::traits_type::eof())
@@ -4536,7 +4575,7 @@ TOML_IMPL_START
 		#if !TOML_EXCEPTIONS
 
 		[[nodiscard]]
-		virtual std::optional<parse_error>&& error() noexcept = 0;
+		virtual optional<parse_error>&& error() noexcept = 0;
 
 		#endif
 
@@ -4554,7 +4593,7 @@ TOML_IMPL_START
 			uint8_t current_byte_count{};
 			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
-			std::optional<parse_error> err;
+			optional<parse_error> err;
 			#endif
 
 		public:
@@ -4592,7 +4631,7 @@ TOML_IMPL_START
 
 				while (true)
 				{
-					std::optional<uint8_t> nextByte;
+					optional<uint8_t> nextByte;
 					if constexpr (!TOML_EXCEPTIONS || noexcept(stream()))
 					{
 						nextByte = stream();
@@ -4661,7 +4700,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<parse_error>&& error() noexcept override
+			optional<parse_error>&& error() noexcept override
 			{
 				return std::move(err);
 			}
@@ -4772,7 +4811,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<parse_error>&& error() noexcept override
+			optional<parse_error>&& error() noexcept override
 			{
 				return reader.error();
 			}
@@ -4971,15 +5010,27 @@ TOML_START
 			"The path's character type must be 1 byte in size."
 		);
 
-		// Q: "why is this function templated??"
-		// A: I don't want to force users to drag in <fstream> if they're not going to do
-		//    any parsing directly from files.
+		auto str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
+		auto ifs = std::basic_ifstream<CHAR>{ str };
+		return parse( ifs, std::move(str) );
+	}
 
-		auto ifs = std::basic_ifstream<CHAR>{ file_path };
-		return parse(
-			ifs,
-			std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() }
-		);
+	// Q: "why are the parse_file functions templated??"
+	// A: I don't want to force users to drag in <fstream> if they're not going to do
+	//    any parsing directly from files. Keeping them templated delays their instantiation
+	//    until they're actually required, so only those users wanting to use parse_file()
+	//    are burdened by the <fstream> overhead.
+
+	template <typename CHAR>
+	inline parse_result parse_file(const std::basic_string<CHAR>& file_path) TOML_MAY_THROW
+	{
+		return parse_file(std::basic_string_view<CHAR>{ file_path });
+	}
+
+	template <typename CHAR>
+	inline parse_result parse_file(const CHAR* file_path) TOML_MAY_THROW
+	{
+		return parse_file(std::basic_string_view<CHAR>{ file_path });
 	}
 
 	inline namespace literals
@@ -6296,7 +6347,7 @@ TOML_IMPL_START
 			std::string recording_buffer; //for diagnostics
 			bool recording = false;
 			#if !TOML_EXCEPTIONS
-			mutable std::optional<toml::parse_error> err;
+			mutable optional<toml::parse_error> err;
 			#endif
 
 			[[nodiscard]]
@@ -7944,13 +7995,14 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// offset
-				std::optional<time_offset> offset;
+				time_offset offset;
+				bool has_offset = false;
 				if (cp)
 				{
 					// zero offset ("Z")
 					if (*cp == U'Z' || *cp == U'z')
 					{
-						offset.emplace(time_offset{});
+						has_offset = true;
 						advance();
 					}
 
@@ -8004,8 +8056,8 @@ TOML_IMPL_START
 								" offset; expected minute between 0 and 59 (inclusive), saw "sv, hour
 							);
 
-						offset.emplace();
-						offset->minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
+						has_offset = true;
+						offset.minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
 					}
 				}
 
@@ -8016,8 +8068,8 @@ TOML_IMPL_START
 					);
 
 				TOML_ERROR_CHECK({});
-				if (offset)
-					return { date, time, *offset };
+				if (has_offset)
+					return { date, time, offset };
 				else
 					return { date, time };
 			}
@@ -8702,10 +8754,9 @@ TOML_IMPL_START
 						&& !implicit_tables.empty())
 					{
 						auto tbl = &matching_node->ref_cast<table>();
-						const auto idx = find(implicit_tables, tbl);
-						if (idx)
+						if (auto found = find(implicit_tables, tbl))
 						{
-							implicit_tables.erase(implicit_tables.cbegin() + static_cast<ptrdiff_t>(*idx));
+							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
 							tbl->source_.begin = header_begin_pos;
 							tbl->source_.end = header_end_pos;
 							return tbl;
@@ -9234,8 +9285,11 @@ TOML_END
 	#undef TOML_DOXYGEN
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
-	#undef TOML_INLINE_NS_EX
-	#undef TOML_INLINE_NS_CHAR_8
+	#undef TOML_NS1_EX
+	#undef TOML_NS2_OPT
+	#undef TOML_NS3_CHAR8
+	#undef TOML_NS4
+	#undef TOML_NS5
 	#undef TOML_START
 	#undef TOML_START_2
 	#undef TOML_START_1

@@ -198,7 +198,7 @@ TOML_START
 			/// 
 			/// \see node::value()
 			template <typename U>
-			[[nodiscard]] std::optional<U> value() const noexcept
+			[[nodiscard]] optional<U> value() const noexcept
 			{
 				if (node_)
 					return node_->template value<U>();

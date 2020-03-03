@@ -66,7 +66,7 @@ TOML_IMPL_START
 			std::string recording_buffer; //for diagnostics 
 			bool recording = false;
 			#if !TOML_EXCEPTIONS
-			mutable std::optional<toml::parse_error> err;
+			mutable optional<toml::parse_error> err;
 			#endif
 
 			[[nodiscard]]
@@ -1714,13 +1714,14 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// offset
-				std::optional<time_offset> offset;
+				time_offset offset;
+				bool has_offset = false;
 				if (cp)
 				{
 					// zero offset ("Z")
 					if (*cp == U'Z' || *cp == U'z')
 					{
-						offset.emplace(time_offset{});
+						has_offset = true;
 						advance();
 					}
 
@@ -1775,8 +1776,8 @@ TOML_IMPL_START
 								" offset; expected minute between 0 and 59 (inclusive), saw "sv, hour
 							);
 
-						offset.emplace();
-						offset->minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
+						has_offset = true;
+						offset.minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
 					}
 				}
 
@@ -1788,8 +1789,8 @@ TOML_IMPL_START
 					);
 
 				TOML_ERROR_CHECK({});
-				if (offset)
-					return { date, time, *offset };
+				if (has_offset)
+					return { date, time, offset };
 				else
 					return { date, time };
 			}
@@ -2474,10 +2475,9 @@ TOML_IMPL_START
 						&& !implicit_tables.empty())
 					{
 						auto tbl = &matching_node->ref_cast<table>();
-						const auto idx = find(implicit_tables, tbl);
-						if (idx)
+						if (auto found = find(implicit_tables, tbl))
 						{
-							implicit_tables.erase(implicit_tables.cbegin() + static_cast<ptrdiff_t>(*idx));
+							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
 							tbl->source_.begin = header_begin_pos;
 							tbl->source_.end = header_end_pos;
 							return tbl;

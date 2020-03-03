@@ -136,7 +136,7 @@ TOML_START
 
 			/// \brief	Gets the raw value contained by this node.
 			/// 
-			/// \detail The std::optional returned by this function will only contain a value if the node was an instance of
+			/// \detail The optional returned by this function will only contain a value if the node was an instance of
 			/// 		toml::value with the same value type as the template argument. Additionally, some type are allowed to
 			/// 		convert to each other, for instance asking for an integer when the value exists as a double,
 			/// 		or requesting a string value as a string_view: \cpp
@@ -175,7 +175,7 @@ TOML_START
 			///
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it), or an empty optional.
 			template <typename T>
-			[[nodiscard]] std::optional<T> value() const noexcept;
+			[[nodiscard]] optional<T> value() const noexcept;
 
 			/// \brief	Gets the raw value contained by this node, or a default.
 			///

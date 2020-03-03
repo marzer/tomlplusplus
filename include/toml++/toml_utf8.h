@@ -236,7 +236,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			constexpr std::optional<uint8_t> operator() () noexcept
+			constexpr optional<uint8_t> operator() () noexcept
 			{
 				if (position >= source.length())
 					return {};
@@ -291,7 +291,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			std::optional<uint8_t> operator() () TOML_MAY_THROW
+			optional<uint8_t> operator() () TOML_MAY_THROW
 			{
 				auto val = source->get();
 				if (val == std::basic_istream<CHAR>::traits_type::eof())
@@ -354,7 +354,7 @@ TOML_IMPL_START
 		#if !TOML_EXCEPTIONS
 
 		[[nodiscard]]
-		virtual std::optional<parse_error>&& error() noexcept = 0;
+		virtual optional<parse_error>&& error() noexcept = 0;
 
 		#endif
 
@@ -372,7 +372,7 @@ TOML_IMPL_START
 			uint8_t current_byte_count{};
 			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
-			std::optional<parse_error> err;
+			optional<parse_error> err;
 			#endif
 
 		public:
@@ -410,7 +410,7 @@ TOML_IMPL_START
 
 				while (true)
 				{
-					std::optional<uint8_t> nextByte;
+					optional<uint8_t> nextByte;
 					if constexpr (!TOML_EXCEPTIONS || noexcept(stream()))
 					{
 						nextByte = stream();
@@ -479,7 +479,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<parse_error>&& error() noexcept override
+			optional<parse_error>&& error() noexcept override
 			{
 				return std::move(err);
 			}
@@ -590,7 +590,7 @@ TOML_IMPL_START
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
-			std::optional<parse_error>&& error() noexcept override
+			optional<parse_error>&& error() noexcept override
 			{
 				return reader.error();
 			}

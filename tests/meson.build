@@ -17,9 +17,16 @@ test_sources = [
 
 disable_exceptions = 'cpp_eh=none'
 no_unreleased_features = '-DTOML_UNRELEASED_FEATURES=0'
-define_toml_use_char8_strings = '-DTOML_CHAR_8_STRINGS=1'
+toml_char8_strings = '-DTOML_CHAR_8_STRINGS=1'
 manually_set_cpp_std = 'cpp_std=none'
 cpp20 = '-std=c++2a'
+use_tloptional = '-DTARTANLLAMA_OPTIONAL'
+
+
+############################################################################
+### char
+############################################################################
+
 
 char = executable(
 	'char',
@@ -57,14 +64,43 @@ char_strict_noexcept = executable(
 test('char_strict_noexcept', char_strict_noexcept)
 
 
+############################################################################
+### char w/ tl::optional
+############################################################################
+
+
+char_tlopt = executable(
+	'char_tlopt',
+	test_sources,
+	include_directories : inc,
+	cpp_args : [ use_tloptional ]
+)
+test('char_tlopt', char_tlopt)
+
+
+char_tlopt_strict = executable(
+	'char_tlopt_strict',
+	test_sources,
+	include_directories : inc,
+	cpp_args : [ no_unreleased_features, use_tloptional ]
+)
+test('char_tlopt_strict', char_tlopt_strict)
+
+
 if compiler_supports_char8_strings
+
+
+	############################################################################
+	### char8
+	############################################################################
+
 
 	char8 = executable(
 		'char8',
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, define_toml_use_char8_strings ]
+		cpp_args : [ cpp20, toml_char8_strings ]
 	)
 	test('char8', char8)
 
@@ -73,7 +109,7 @@ if compiler_supports_char8_strings
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std, disable_exceptions ],
-		cpp_args : [ cpp20, define_toml_use_char8_strings ]
+		cpp_args : [ cpp20, toml_char8_strings ]
 	)
 	test('char8_noexcept', char8_noexcept)
 	
@@ -82,7 +118,7 @@ if compiler_supports_char8_strings
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, define_toml_use_char8_strings, no_unreleased_features ]
+		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features ]
 	)
 	test('char8_strict', char8_strict)
 
@@ -91,8 +127,33 @@ if compiler_supports_char8_strings
 		test_sources,
 		include_directories : inc,
 		override_options : [ manually_set_cpp_std, disable_exceptions ],
-		cpp_args : [ cpp20, define_toml_use_char8_strings, no_unreleased_features ]
+		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features ]
 	)
 	test('char8_strict_noexcept', char8_strict_noexcept)
+
+
+	############################################################################
+	### char8 w/ tl::optional
+	############################################################################
+
+
+	char8_tlopt = executable(
+		'char8_tlopt',
+		test_sources,
+		include_directories : inc,
+		override_options : [ manually_set_cpp_std ],
+		cpp_args : [ cpp20, toml_char8_strings, use_tloptional ]
+	)
+	test('char8_tlopt', char8_tlopt)
+
+	char8_tlopt_strict = executable(
+		'char8_tlopt_strict',
+		test_sources,
+		include_directories : inc,
+		override_options : [ manually_set_cpp_std ],
+		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features, use_tloptional ]
+	)
+	test('char8_tlopt_strict', char8_tlopt_strict)
+
 
 endif

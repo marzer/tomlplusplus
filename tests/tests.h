@@ -1,14 +1,20 @@
 #pragma once
+#ifdef TARTANLLAMA_OPTIONAL
+	#if __has_include(<tloptional/include/tl/optional.hpp>)
+		#include <tloptional/include/tl/optional.hpp>
+	#else
+		#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
+	#endif
+	#define TOML_OPTIONAL_TYPE tl::optional
+#endif
 #define TOML_UNDEF_MACROS 0
 #define TOML_ALL_INLINE 0
 #include "../include/toml++/toml.h"
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
 #include "catch2.h"
 #include <sstream>
+
 using namespace toml;
 using namespace Catch::literals;
-TOML_POP_WARNINGS
 
 #define S(str) TOML_STRING_PREFIX(str)
 
