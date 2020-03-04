@@ -77,7 +77,14 @@ tomlplusplus_dep = declare_dependency(
 	version : meson.project_version(),
 )
 
-if get_option('BUILD_TESTS')
+build_tests = false
+if get_option('BUILD_TESTS').auto()
+	build_tests = (not meson.is_subproject())
+else
+	build_tests = get_option('BUILD_TESTS').enabled()
+endif
+
+if build_tests
 	inc = include_directories('include', 'extern')
 	subdir('tests')
 else

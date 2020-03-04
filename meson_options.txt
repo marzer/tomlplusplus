@@ -1,1 +1,1 @@
-option('BUILD_TESTS', type : 'boolean', value : false, description : 'Whether to build tests')
+option('BUILD_TESTS', type : 'feature', value : 'auto', description : 'Whether to build tests (defaults to auto: only if not a subproject)')
