@@ -11,7 +11,6 @@ project(
 	]
 )
 
-
 compiler = meson.get_compiler('cpp')
 message(['compiler ID: ', compiler.get_id()])
 
@@ -73,7 +72,16 @@ compiler_supports_char8_strings = compiler.compiles('''
 	args : [ '-std=c++2a' ]
 )
 
-inc = include_directories(['include', 'extern'])
+tomlplusplus_dep = declare_dependency(
+	include_directories : include_directories('include'),
+	version : meson.project_version(),
+)
 
-subdir('tests')
+if get_option('BUILD_TESTS')
+	inc = include_directories('include', 'extern')
+	subdir('tests')
+else
+	message('Not building tests')
+endif
+
 # subdir('examples')
