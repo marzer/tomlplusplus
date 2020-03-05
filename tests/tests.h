@@ -7,11 +7,12 @@
 	#endif
 	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
+#include "catch2.h"
+#include <sstream>
+#include <cassert> //so TOML_ASSERT() maps to assert()
 #define TOML_UNDEF_MACROS 0
 #define TOML_ALL_INLINE 0
 #include "../include/toml++/toml.h"
-#include "catch2.h"
-#include <sstream>
 
 using namespace toml;
 using namespace Catch::literals;
@@ -230,6 +231,8 @@ inline void parse_expected_value(std::string_view value_str, const T& expected) 
 		CHECK(nv.as<value_type>()->get() == expected);
 		CHECK(nv.value<value_type>() == expected);
 		CHECK(nv.value_or(T{}) == expected);
+		CHECK(nv.ref<value_type>() == expected);
+		CHECK(nv.get()->ref<value_type>() == expected);
 
 		// check the table relops
 		CHECK(tbl == table{ { { S("val"sv), expected } } });

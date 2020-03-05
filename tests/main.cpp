@@ -7,6 +7,7 @@
 	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
 
+#include <cassert> //so TOML_ASSERT() maps to assert()
 #define TOML_ALL_INLINE 0
 #define TOML_IMPLEMENTATION
 #include "../include/toml++/toml.h"

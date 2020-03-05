@@ -23,7 +23,6 @@ Given a TOML file `configuration.toml` containing the following:
 ```toml
 [library]
 name = "toml++"
-version = "0.3.3"
 authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 
 [dependencies]
@@ -35,7 +34,6 @@ auto config = toml::parse_file( "configuration.toml" );
 
 // get key-value pairs
 std::string_view library_name = config["library"]["name"].value_or(""sv);
-std::string_view library_version = config["library"]["version"].value_or(""sv);
 std::string_view library_author = config["library"]["authors"][0].value_or(""sv);
 int64_t depends_on_cpp_version = config["dependencies"]["cpp"].value_or(0);
 

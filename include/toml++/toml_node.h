@@ -91,7 +91,7 @@ TOML_START
 				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -218,7 +218,7 @@ TOML_START
 				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -240,7 +240,7 @@ TOML_START
 				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -321,11 +321,12 @@ TOML_START
 			template <typename A, typename B>
 			using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
-			//# this is done using a static helper to preserve const and ref categories
-			//# (otherwise I'd have to implement this function thrice)
+			//# these functions are static helpers to preserve const and ref categories
+			//# (otherwise I'd have to implement them thrice)
 			//# ((propagation in C++: a modern horror story))
+
 			template <typename N, typename FUNC>
-			static decltype(auto) do_visit(N&& node, FUNC&& visitor)
+			static decltype(auto) do_visit(N&& n, FUNC&& visitor)
 				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, N&&>)
 			{
 				static_assert(
@@ -333,51 +334,51 @@ TOML_START
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
-				switch (node.type())
+				switch (n.type())
 				{
 					case node_type::table:
 						if constexpr (can_visit<FUNC&&, N&&, table>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<table>());
 						break;
 
 					case node_type::array:
 						if constexpr (can_visit<FUNC&&, N&&, array>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<array>());
 						break;
 
 					case node_type::string:
 						if constexpr (can_visit<FUNC&&, N&&, string>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<string>());
 						break;
 
 					case node_type::integer:
 						if constexpr (can_visit<FUNC&&, N&&, int64_t>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<int64_t>());
 						break;
 
 					case node_type::floating_point:
 						if constexpr (can_visit<FUNC&&, N&&, double>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<double>());
 						break;
 
 					case node_type::boolean:
 						if constexpr (can_visit<FUNC&&, N&&, bool>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<bool>());
 						break;
 
 					case node_type::date:
 						if constexpr (can_visit<FUNC&&, N&&, date>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<date>());
 						break;
 
 					case node_type::time:
 						if constexpr (can_visit<FUNC&&, N&&, time>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<time>());
 						break;
 
 					case node_type::date_time:
 						if constexpr (can_visit<FUNC&&, N&&, date_time>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
 						break;
 
 					TOML_NO_DEFAULT_CASE;
@@ -408,6 +409,25 @@ TOML_START
 						return return_type{};
 					}
 				}
+			}
+
+
+			template <typename T, typename N>
+			[[nodiscard]] static decltype(auto) do_ref(N&& n) noexcept
+			{
+				using type = impl::unwrapped<T>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+				);
+				TOML_ASSERT(
+					n.template is<T>()
+					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
+				);
+				if constexpr (impl::is_value<type>)
+					return std::forward<N>(n).template ref_cast<type>().get();
+				else
+					return std::forward<N>(n).template ref_cast<type>();
 			}
 
 		public:
@@ -446,18 +466,56 @@ TOML_START
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 
-			/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
 			template <typename FUNC>
 			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<FUNC>(visitor));
 			}
 
-			/// \brief	Invokes a visitor on the node based on the node's concrete type (const overload).
 			template <typename FUNC>
 			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
+			}
+
+			/// \brief	Gets a raw reference to a value node's underlying data.
+			///
+			/// \warning This function is dangerous if used carelessly and **WILL** break your code if the chosen value type
+			/// 		 doesn't match the node's actual type. If you provide a definition for `TOML_ASSERT`
+			/// 		 (explicitly or indirectly by including `<cassert>`) an assertion will fire when
+			/// 		 invalid accesses are attempted: \cpp
+			///
+			/// auto tbl = toml::parse(R"(
+			/// 
+			///	min = 32
+			///	max = 45
+			///	
+			/// )"sv);
+			/// 
+			/// auto& min_ref = tbl.get("min")->ref<int64_t>(); // this is OK
+			/// auto& max_ref = tbl.get("max")->ref<double>();  // hits assertion because the type is wrong
+			///
+			/// \ecpp
+			/// 
+			/// \tparam	T	One of the TOML value types.
+			///
+			/// \returns	A reference to the underlying data.
+			template <typename T>
+			[[nodiscard]] impl::unwrapped<T>& ref() & noexcept
+			{
+				return do_ref<T>(*this);
+			}
+
+			template <typename T>
+			[[nodiscard]] impl::unwrapped<T>&& ref() && noexcept
+			{
+				return do_ref<T>(std::move(*this));
+			}
+
+			template <typename T>
+			[[nodiscard]] const impl::unwrapped<T>& ref() const& noexcept
+			{
+				return do_ref<T>(*this);
 			}
 	};
 }

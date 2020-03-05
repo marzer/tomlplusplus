@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.3.3
+// toml++ v0.4.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -308,8 +308,8 @@
 #endif
 
 #define TOML_LIB_MAJOR		0
-#define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		3
+#define TOML_LIB_MINOR		4
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -1595,7 +1595,7 @@ TOML_START
 				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -1641,7 +1641,7 @@ TOML_START
 				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -1662,7 +1662,7 @@ TOML_START
 				using type = impl::unwrapped<T>;
 				static_assert(
 					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -1743,7 +1743,7 @@ TOML_START
 			using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
 			template <typename N, typename FUNC>
-			static decltype(auto) do_visit(N&& node, FUNC&& visitor)
+			static decltype(auto) do_visit(N&& n, FUNC&& visitor)
 				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, N&&>)
 			{
 				static_assert(
@@ -1751,51 +1751,51 @@ TOML_START
 					"Visitors must be invocable for at least one of the toml::node specializations"
 				);
 
-				switch (node.type())
+				switch (n.type())
 				{
 					case node_type::table:
 						if constexpr (can_visit<FUNC&&, N&&, table>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<table>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<table>());
 						break;
 
 					case node_type::array:
 						if constexpr (can_visit<FUNC&&, N&&, array>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<array>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<array>());
 						break;
 
 					case node_type::string:
 						if constexpr (can_visit<FUNC&&, N&&, string>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<string>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<string>());
 						break;
 
 					case node_type::integer:
 						if constexpr (can_visit<FUNC&&, N&&, int64_t>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<int64_t>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<int64_t>());
 						break;
 
 					case node_type::floating_point:
 						if constexpr (can_visit<FUNC&&, N&&, double>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<double>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<double>());
 						break;
 
 					case node_type::boolean:
 						if constexpr (can_visit<FUNC&&, N&&, bool>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<bool>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<bool>());
 						break;
 
 					case node_type::date:
 						if constexpr (can_visit<FUNC&&, N&&, date>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<date>());
 						break;
 
 					case node_type::time:
 						if constexpr (can_visit<FUNC&&, N&&, time>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<time>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<time>());
 						break;
 
 					case node_type::date_time:
 						if constexpr (can_visit<FUNC&&, N&&, date_time>)
-							return std::forward<FUNC>(visitor)(std::forward<N>(node).template ref_cast<date_time>());
+							return std::forward<FUNC>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
 						break;
 
 					TOML_NO_DEFAULT_CASE;
@@ -1828,6 +1828,24 @@ TOML_START
 				}
 			}
 
+			template <typename T, typename N>
+			[[nodiscard]] static decltype(auto) do_ref(N&& n) noexcept
+			{
+				using type = impl::unwrapped<T>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+				);
+				TOML_ASSERT(
+					n.template is<T>()
+					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
+				);
+				if constexpr (impl::is_value<type>)
+					return std::forward<N>(n).template ref_cast<type>().get();
+				else
+					return std::forward<N>(n).template ref_cast<type>();
+			}
+
 		public:
 
 			template <typename FUNC>
@@ -1846,6 +1864,24 @@ TOML_START
 			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
+			}
+
+			template <typename T>
+			[[nodiscard]] impl::unwrapped<T>& ref() & noexcept
+			{
+				return do_ref<T>(*this);
+			}
+
+			template <typename T>
+			[[nodiscard]] impl::unwrapped<T>&& ref() && noexcept
+			{
+				return do_ref<T>(std::move(*this));
+			}
+
+			template <typename T>
+			[[nodiscard]] const impl::unwrapped<T>& ref() const& noexcept
+			{
+				return do_ref<T>(*this);
 			}
 	};
 }
@@ -2996,18 +3032,21 @@ TOML_START
 			friend class toml::table;
 			template <typename U> friend class toml::node_view;
 
-			viewed_type* node_;
+			mutable viewed_type* node_;
 
 			TOML_NODISCARD_CTOR
 			node_view(viewed_type* node) noexcept
 				: node_{ node }
 			{}
 
+			template <typename FUNC>
+			static constexpr bool visit_is_nothrow
+				= noexcept(std::declval<viewed_type*>()->visit(std::declval<FUNC&&>()));
+
 		public:
 
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
-			[[nodiscard]] viewed_type* get() noexcept { return node_; }
-			[[nodiscard]] const viewed_type* get() const noexcept { return node_; }
+			[[nodiscard]] viewed_type* get() const noexcept { return node_; }
 
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
 			[[nodiscard]] bool is_table() const noexcept { return node_ && node_->is_table(); }
@@ -3032,7 +3071,7 @@ TOML_START
 
 			template <typename U>
 			[[nodiscard]]
-			auto as() noexcept
+			auto as() const noexcept
 			{
 				static_assert(
 					impl::is_value_or_node<impl::unwrapped<U>>,
@@ -3042,36 +3081,15 @@ TOML_START
 				return node_ ? node_->template as<U>() : nullptr;
 			}
 
-			template <typename U>
-			[[nodiscard]]
-			const impl::node_of<U>* as() const noexcept
-			{
-				static_assert(
-					impl::is_value_or_node<impl::unwrapped<U>>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
-				);
-
-				return node_ ? node_->template as<U>() : nullptr;
-			}
-
-			[[nodiscard]] auto as_table() noexcept { return as<table>(); }
-			[[nodiscard]] auto as_array() noexcept { return as<array>(); }
-			[[nodiscard]] auto as_string() noexcept { return as<string>(); }
-			[[nodiscard]] auto as_integer() noexcept { return as<int64_t>(); }
-			[[nodiscard]] auto as_floating_point() noexcept { return as<double>(); }
-			[[nodiscard]] auto as_boolean() noexcept { return as<bool>(); }
-			[[nodiscard]] auto as_date() noexcept { return as<date>(); }
-			[[nodiscard]] auto as_time() noexcept { return as<time>(); }
-			[[nodiscard]] auto as_date_time() noexcept { return as<date_time>(); }
-			[[nodiscard]] const table* as_table() const noexcept { return as<table>(); }
-			[[nodiscard]] const array* as_array() const noexcept { return as<array>(); }
-			[[nodiscard]] const toml::value<string>* as_string() const noexcept { return as<string>(); }
-			[[nodiscard]] const toml::value<int64_t>* as_integer() const noexcept { return as<int64_t>(); }
-			[[nodiscard]] const toml::value<double>* as_floating_point() const noexcept { return as<double>(); }
-			[[nodiscard]] const toml::value<bool>* as_boolean() const noexcept { return as<bool>(); }
-			[[nodiscard]] const toml::value<date>* as_date() const noexcept { return as<date>(); }
-			[[nodiscard]] const toml::value<time>* as_time() const noexcept { return as<time>(); }
-			[[nodiscard]] const toml::value<date_time>* as_date_time() const noexcept { return as<date_time>(); }
+			[[nodiscard]] auto as_table() const noexcept { return as<table>(); }
+			[[nodiscard]] auto as_array() const noexcept { return as<array>(); }
+			[[nodiscard]] auto as_string() const noexcept { return as<string>(); }
+			[[nodiscard]] auto as_integer() const noexcept { return as<int64_t>(); }
+			[[nodiscard]] auto as_floating_point() const noexcept { return as<double>(); }
+			[[nodiscard]] auto as_boolean() const noexcept { return as<bool>(); }
+			[[nodiscard]] auto as_date() const noexcept { return as<date>(); }
+			[[nodiscard]] auto as_time() const noexcept { return as<time>(); }
+			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
 			template <typename U>
 			[[nodiscard]] optional<U> value() const noexcept
@@ -3090,37 +3108,30 @@ TOML_START
 				return return_type{ std::forward<U>(default_value) };
 			}
 
-		private:
-
-			template <typename N, typename FUNC>
-			static decltype(auto) do_visit(N* node, FUNC&& visitor)
-				TOML_MAY_THROW_UNLESS(noexcept(std::declval<N*>()->visit(std::declval<FUNC&&>())))
+			template <typename FUNC>
+			decltype(auto) visit(FUNC&& visitor) const
+				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&>)
 			{
-				using return_type = decltype(node->visit(std::forward<FUNC>(visitor)));
-				if (node)
-					return node->visit(std::forward<FUNC>(visitor));
+				using return_type = decltype(node_->visit(std::forward<FUNC>(visitor)));
+				if (node_)
+					return node_->visit(std::forward<FUNC>(visitor));
 				if constexpr (!std::is_void_v<return_type>)
 					return return_type{};
 			}
 
-			template <typename FUNC, typename N>
-			static constexpr bool visit_is_nothrow =
-				noexcept(do_visit(std::declval<N*>(), std::declval<FUNC&&>()));
-
-		public:
-
-			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor)
-				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, viewed_type>)
+			template <typename U>
+			[[nodiscard]] decltype(auto) ref() const noexcept
 			{
-				return do_visit(node_, std::forward<FUNC>(visitor));
-			}
-
-			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const
-				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const viewed_type>)
-			{
-				return do_visit(node_, std::forward<FUNC>(visitor));
+				using type = impl::unwrapped<U>;
+				static_assert(
+					impl::is_value_or_node<type>,
+					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+				);
+				TOML_ASSERT(
+					node_
+					&& "toml::node_view::ref() called on a node_view that did not reference a node"
+				);
+				return node_->template ref<type>();
 			}
 
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const table& rhs) noexcept
@@ -3178,28 +3189,14 @@ TOML_START
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
 
-			[[nodiscard]] node_view operator[] (string_view key) noexcept
+			[[nodiscard]] node_view operator[] (string_view key) const noexcept
 			{
 				if (auto tbl = this->as_table())
 					return { tbl->get(key) };
 				return { nullptr };
 			}
 
-			[[nodiscard]] node_view<const viewed_type> operator[] (string_view key) const noexcept
-			{
-				if (auto tbl = this->as_table())
-					return { tbl->get(key) };
-				return { nullptr };
-			}
-
-			[[nodiscard]] node_view operator[] (size_t index) noexcept
-			{
-				if (auto arr = this->as_array())
-					return { arr->get(index) };
-				return { nullptr };
-			}
-
-			[[nodiscard]] node_view<const viewed_type> operator[] (size_t index) const noexcept
+			[[nodiscard]] node_view operator[] (size_t index) const noexcept
 			{
 				if (auto arr = this->as_array())
 					return { arr->get(index) };

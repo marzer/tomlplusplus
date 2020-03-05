@@ -59,3 +59,32 @@ namespace Catch
 
 #endif // TESTS_MANUAL_INSTANTIATIONS
 
+TOML_START
+{
+	using std::declval;
+	using std::is_same_v;
+
+	static_assert(is_same_v<decltype(declval<node&>().ref<double>()), double&>);
+	static_assert(is_same_v<decltype(declval<node&&>().ref<double>()), double&&>);
+	static_assert(is_same_v<decltype(declval<const node&>().ref<double>()), const double&>);
+	static_assert(is_same_v<decltype(declval<node&>().ref<value<double>>()), double&>);
+	static_assert(is_same_v<decltype(declval<node&&>().ref<value<double>>()), double&&>);
+	static_assert(is_same_v<decltype(declval<const node&>().ref<value<double>>()), const double&>);
+	static_assert(is_same_v<decltype(declval<node&>().ref<table>()), table&>);
+	static_assert(is_same_v<decltype(declval<node&&>().ref<table>()), table&&>);
+	static_assert(is_same_v<decltype(declval<const node&>().ref<table>()), const table&>);
+	static_assert(is_same_v<decltype(declval<node&>().ref<array>()), array&>);
+	static_assert(is_same_v<decltype(declval<node&&>().ref<array>()), array&&>);
+	static_assert(is_same_v<decltype(declval<const node&>().ref<array>()), const array&>);
+
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<double>()), double&>);
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<double>()), const double&>);
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<value<double>>()), double&>);
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<value<double>>()), const double&>);
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<table>()), table&>);
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<table>()), const table&>);
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<array>()), array&>);
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<array>()), const array&>);
+
+}
+TOML_END
