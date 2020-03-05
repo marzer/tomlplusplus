@@ -68,7 +68,7 @@ C++</span></a>
             </li>
           </ul>
         </div>
-<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;toml::node&gt; with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#ae6cb95f4fe9c544d1b3ecc7a13f4db59">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;toml::node&gt; with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#a58bb61e3c953a5a74abf1cce278e3e5a">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
 
 <span class="s">    title = "my hardware store"</span>
 <span class="s">    </span>
@@ -122,92 +122,47 @@ C++</span></a>
           <dl class="m-doc">
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a34b843f5bad449c8382700a5b1237997">as</a>(</span><span class="m-doc-wrap">) const -&gt; const impl::node_of&lt;U&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets a pointer to the viewed node as a more specific node type (const overload).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aff83ab3aec7e119e96bd6081f92075ae">as</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3476f5c32d9b9d565383a3e46b9bccb7">as</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets a pointer to the viewed node as a more specific node type.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8f90485b37364c7b48239a9fbfc70c7">as_array</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a17a4ce3701eeb96ac3983c7d2052b220">as_array</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3b55b8d3689a041829a538018643795d">as_array</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a54b2902bd332f0f5b344f42bc3346524">as_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;bool&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae49d09fb5939bb58e1e7853db6e7e46d">as_boolean</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a94cd2d3913b40c2ea29b6c7f3209f636">as_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0efe210956886838ee9b723a3640ec35">as_date</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa1f910015594bbee5eebf6448ebbffc0">as_date</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4d5a3856016df76cb3f58f4555d0a6bd">as_date</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad18e46c7a64942873a678a339683b865">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a06f37d47de9da08ba547599f5d273ec1">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9dafac60cded81b8073677d13c1698e9">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#acc4644e9c293fb083b6fd356c9942e53">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;double&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac35c7f130e0f45225bb5864c2f0fedb7">as_floating_point</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9426d71e287e1ec287605f3da8fe0adb">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7f764ad63a873f41a644e9c303c5f3e9">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae3f18c5ab86bfac4a4c8771e9e01aea4">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a322bc3f41d73fb8ae1eb4a691f3113db">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adac5b73f9ff69e814b5ad59e705a82e1">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;string&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a16209f4b30ed4cf04c14ccdf7b693c3e">as_string</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a214686ffb3cbff470afe2b34a32b2b44">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;string&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa64c4dcce93d677b7fd6ee3221bb53f4">as_table</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a551ea5519488f9d34d7175654e145273">as_table</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af7695c20270a060711efae40caec9a5b">as_table</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a79a4a7c4123240c17a568f1fd25b2e8b">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;, if it is one (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a98305e96ad322c56ea5ad6764f21d202">as_time</a>(</span><span class="m-doc-wrap">) -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac4a86de4c56860d393978fdc25086f6d">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af0b13ffb44058443447c77d0d0132a9e">get</a>(</span><span class="m-doc-wrap">) const -&gt; const viewed_type* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the node that's being referenced by the view (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#acb69904da63df253c69c902bfc52a49d">get</a>(</span><span class="m-doc-wrap">) -&gt; viewed_type* <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a57f3f0b4d954fe3ece11f1bcd9fb0112">get</a>(</span><span class="m-doc-wrap">) const -&gt; viewed_type* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the node that's being referenced by the view.</dd>
             <dt>
@@ -264,22 +219,19 @@ C++</span></a>
             </dt>
             <dd>Returns true if the viewed node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;&gt;.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a132a3ff5a49b6624d88628b2c547f067">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const viewed_type&gt; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a view of the selected subnode (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1bcf39ba9f6b6ef5b5aeb8eed261bc75">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae16fc4d9cb739f7f3aec1d2c7e50af07">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aab41cdf88148e61d5c6e13833fba836e">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const viewed_type&gt; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a view of the selected subnode (const overload).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae6cb95f4fe9c544d1b3ecc7a13f4db59">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a58bb61e3c953a5a74abf1cce278e3e5a">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a387d1f28a6a1e4b773376e404caec65a">ref</a>(</span><span class="m-doc-wrap">) const -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to the viewed node's underlying data.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa78578f6bcb855942cb756a83c307800">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -297,11 +249,6 @@ C++</span></a>
             <dt>
               <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a83e12ddc297409435263024a6ce52cfd">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Invokes a visitor on the viewed node based on its concrete type (const overload).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4cb52fd27a284dbaf651a7d9352a4af3">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Invokes a visitor on the viewed node based on its concrete type.</dd>
           </dl>
@@ -373,23 +320,13 @@ C++</span></a>
             </h3>
             <p>Returns true if the view references a node.</p>
           </div></section>
-          <section class="m-doc-details" id="a34b843f5bad449c8382700a5b1237997"><div>
+          <section class="m-doc-details" id="a3476f5c32d9b9d565383a3e46b9bccb7"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const impl::node_of&lt;U&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a34b843f5bad449c8382700a5b1237997">as</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Gets a pointer to the viewed node as a more specific node type (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="aff83ab3aec7e119e96bd6081f92075ae"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-                template&lt;typename U&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aff83ab3aec7e119e96bd6081f92075ae">as</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3476f5c32d9b9d565383a3e46b9bccb7">as</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets a pointer to the viewed node as a more specific node type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -411,183 +348,93 @@ C++</span></a>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ac7219dd5732ca845f3121d953e4fdd57">toml::<wbr/>node::<wbr/>as()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="af8f90485b37364c7b48239a9fbfc70c7"><div>
+          <section class="m-doc-details" id="a3b55b8d3689a041829a538018643795d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1array.html">array</a>* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8f90485b37364c7b48239a9fbfc70c7">as_array</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a17a4ce3701eeb96ac3983c7d2052b220"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a17a4ce3701eeb96ac3983c7d2052b220">as_array</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3b55b8d3689a041829a538018643795d">as_array</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="a54b2902bd332f0f5b344f42bc3346524"><div>
+          <section class="m-doc-details" id="a94cd2d3913b40c2ea29b6c7f3209f636"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;bool&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a54b2902bd332f0f5b344f42bc3346524">as_boolean</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="ae49d09fb5939bb58e1e7853db6e7e46d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae49d09fb5939bb58e1e7853db6e7e46d">as_boolean</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a94cd2d3913b40c2ea29b6c7f3209f636">as_boolean</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="a0efe210956886838ee9b723a3640ec35"><div>
+          <section class="m-doc-details" id="a4d5a3856016df76cb3f58f4555d0a6bd"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0efe210956886838ee9b723a3640ec35">as_date</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="aa1f910015594bbee5eebf6448ebbffc0"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa1f910015594bbee5eebf6448ebbffc0">as_date</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4d5a3856016df76cb3f58f4555d0a6bd">as_date</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="ad18e46c7a64942873a678a339683b865"><div>
+          <section class="m-doc-details" id="a9dafac60cded81b8073677d13c1698e9"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad18e46c7a64942873a678a339683b865">as_date_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a06f37d47de9da08ba547599f5d273ec1"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a06f37d47de9da08ba547599f5d273ec1">as_date_time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9dafac60cded81b8073677d13c1698e9">as_date_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="acc4644e9c293fb083b6fd356c9942e53"><div>
+          <section class="m-doc-details" id="a9426d71e287e1ec287605f3da8fe0adb"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;double&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acc4644e9c293fb083b6fd356c9942e53">as_floating_point</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="ac35c7f130e0f45225bb5864c2f0fedb7"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac35c7f130e0f45225bb5864c2f0fedb7">as_floating_point</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9426d71e287e1ec287605f3da8fe0adb">as_floating_point</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="a7f764ad63a873f41a644e9c303c5f3e9"><div>
+          <section class="m-doc-details" id="a322bc3f41d73fb8ae1eb4a691f3113db"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7f764ad63a873f41a644e9c303c5f3e9">as_integer</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="ae3f18c5ab86bfac4a4c8771e9e01aea4"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae3f18c5ab86bfac4a4c8771e9e01aea4">as_integer</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a322bc3f41d73fb8ae1eb4a691f3113db">as_integer</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="adac5b73f9ff69e814b5ad59e705a82e1"><div>
+          <section class="m-doc-details" id="a214686ffb3cbff470afe2b34a32b2b44"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adac5b73f9ff69e814b5ad59e705a82e1">as_string</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;string&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a16209f4b30ed4cf04c14ccdf7b693c3e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a16209f4b30ed4cf04c14ccdf7b693c3e">as_string</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a214686ffb3cbff470afe2b34a32b2b44">as_string</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;string&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="aa64c4dcce93d677b7fd6ee3221bb53f4"><div>
+          <section class="m-doc-details" id="af7695c20270a060711efae40caec9a5b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1table.html">table</a>* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa64c4dcce93d677b7fd6ee3221bb53f4">as_table</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a551ea5519488f9d34d7175654e145273"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a551ea5519488f9d34d7175654e145273">as_table</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af7695c20270a060711efae40caec9a5b">as_table</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="a79a4a7c4123240c17a568f1fd25b2e8b"><div>
+          <section class="m-doc-details" id="ac4a86de4c56860d393978fdc25086f6d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a79a4a7c4123240c17a568f1fd25b2e8b">as_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;, if it is one (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a98305e96ad322c56ea5ad6764f21d202"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a98305e96ad322c56ea5ad6764f21d202">as_time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">auto toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac4a86de4c56860d393978fdc25086f6d">as_time</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>&gt;, if it is one.</p>
           </div></section>
-          <section class="m-doc-details" id="af0b13ffb44058443447c77d0d0132a9e"><div>
+          <section class="m-doc-details" id="a57f3f0b4d954fe3ece11f1bcd9fb0112"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const viewed_type* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af0b13ffb44058443447c77d0d0132a9e">get</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns the node that's being referenced by the view (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="acb69904da63df253c69c902bfc52a49d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">viewed_type* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acb69904da63df253c69c902bfc52a49d">get</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">viewed_type* toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a57f3f0b4d954fe3ece11f1bcd9fb0112">get</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the node that's being referenced by the view.</p>
           </div></section>
@@ -727,21 +574,12 @@ C++</span></a>
             </h3>
             <p>Returns true if the viewed node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;&gt;.</p>
           </div></section>
-          <section class="m-doc-details" id="a132a3ff5a49b6624d88628b2c547f067"><div>
+          <section class="m-doc-details" id="ae16fc4d9cb739f7f3aec1d2c7e50af07"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const viewed_type&gt; toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a132a3ff5a49b6624d88628b2c547f067">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a view of the selected subnode (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="a1bcf39ba9f6b6ef5b5aeb8eed261bc75"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1bcf39ba9f6b6ef5b5aeb8eed261bc75">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae16fc4d9cb739f7f3aec1d2c7e50af07">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the selected subnode.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -762,22 +600,13 @@ C++</span></a>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="aab41cdf88148e61d5c6e13833fba836e"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const viewed_type&gt; toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aab41cdf88148e61d5c6e13833fba836e">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Returns a view of the selected subnode (const overload).</p>
-          </div></section>
-          <section class="m-doc-details" id="ae6cb95f4fe9c544d1b3ecc7a13f4db59"><div>
+          <section class="m-doc-details" id="a58bb61e3c953a5a74abf1cce278e3e5a"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae6cb95f4fe9c544d1b3ecc7a13f4db59">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a58bb61e3c953a5a74abf1cce278e3e5a">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the selected subnode.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -797,6 +626,43 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a387d1f28a6a1e4b773376e404caec65a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a387d1f28a6a1e4b773376e404caec65a">ref</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a raw reference to the viewed node's underlying data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">U</td>
+                  <td>One of the TOML value types.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the underlying data.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-danger"><h4>Warning</h4><p>This function is dangerous if used carelessly and <strong>WILL</strong> break your code if the <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> didn't reference a node, or the chosen value type doesn't match the node's actual type. If you provide a definition for TOML_ASSERT (explicitly or indirectly by including <code>&lt;cassert&gt;</code>) an assertion will fire when invalid accesses are attempted:</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+
+<span class="s">min = 32</span>
+<span class="s">max = 45</span>
+
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
+
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">min_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"min"</span><span class="p">].</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut">int64_t</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// this is OK</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">max_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"max"</span><span class="p">].</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut">double</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// hits assertion because the type is wrong</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">min_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"foo"</span><span class="p">].</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut">int64_t</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// hits assertion because "foo" didn't exist</span></pre></aside>
           </div></section>
           <section class="m-doc-details" id="aa78578f6bcb855942cb756a83c307800"><div>
             <h3>
@@ -879,17 +745,6 @@ C++</span></a>
                 template&lt;typename FUNC&gt;
               </div>
               <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a83e12ddc297409435263024a6ce52cfd">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Invokes a visitor on the viewed node based on its concrete type (const overload).</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a52651c7c516fbcca09280ea0a0329de4">node::<wbr/>visit()</a></p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a4cb52fd27a284dbaf651a7d9352a4af3"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename T&gt;
-                template&lt;typename FUNC&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4cb52fd27a284dbaf651a7d9352a4af3">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Invokes a visitor on the viewed node based on its concrete type.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Has no effect if the view does not reference a node.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a52651c7c516fbcca09280ea0a0329de4">node::<wbr/>visit()</a></p></aside>

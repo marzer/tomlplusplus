@@ -186,6 +186,11 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeddf9eebbd4ece799e5675e2d9d59e4a">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">pure virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if this node is a value.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a669d39909c44e25dccf8816a038ce4ef">ref</a>(</span><span class="m-doc-wrap">) &amp; -&gt; impl::unwrapped&lt;T&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to a value node's underlying data.</dd>
             <dt id="a4a30e611eeddce99e5c48fd80e79b134">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a30e611eeddce99e5c48fd80e79b134">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -204,21 +209,11 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a423ddccc36345545615e20290c9a8a65">value_or</a>(</span><span class="m-doc-wrap">T&amp;&amp; default_value) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the raw value contained by this node, or a default.</dd>
-            <dt id="a9d1495337720eca4b566f59978c30937">
-              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9d1495337720eca4b566f59978c30937">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp;&amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Invokes a visitor on the node based on the node's concrete type (rvalue overload).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a52651c7c516fbcca09280ea0a0329de4">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Invokes a visitor on the node based on the node's concrete type.</dd>
-            <dt id="a23f44ea1c5e1608717a2efda9a9e16fb">
-              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a23f44ea1c5e1608717a2efda9a9e16fb">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) const &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Invokes a visitor on the node based on the node's concrete type (const overload).</dd>
           </dl>
         </section>
         <section>
@@ -285,6 +280,41 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
+          </div></section>
+          <section class="m-doc-details" id="a669d39909c44e25dccf8816a038ce4ef"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">impl::unwrapped&lt;T&gt;&amp; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a669d39909c44e25dccf8816a038ce4ef">ref</a>(</span><span class="m-doc-wrap">) &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a raw reference to a value node's underlying data.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>One of the TOML value types.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the underlying data.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-danger"><h4>Warning</h4><p>This function is dangerous if used carelessly and <strong>WILL</strong> break your code if the chosen value type doesn't match the node's actual type. If you provide a definition for <code>TOML_ASSERT</code> (explicitly or indirectly by including <code>&lt;cassert&gt;</code>) an assertion will fire when invalid accesses are attempted:</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+
+<span class="s">min = 32</span>
+<span class="s">max = 45</span>
+
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
+
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">min_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"min"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut">int64_t</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// this is OK</span>
+<span class="k">auto</span><span class="o">&amp;</span> <span class="n">max_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"max"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut">double</span><span class="o">&gt;</span><span class="p">();</span>  <span class="c1">// hits assertion because the type is wrong</span></pre></aside>
           </div></section>
           <section class="m-doc-details" id="ab144c1ae90338b6b03f6af0574c87993"><div>
             <h3>
