@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.4.0
+// toml++ v0.4.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -309,7 +309,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		4
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -1317,12 +1317,12 @@ TOML_IMPL_START
 
 		#if TOML_USE_STREAMS_FOR_FLOATS
 		{
-			std::ostringstream oss;
-			oss.precision(std::numeric_limits<T>::digits10 + 1);
+			std::ostringstream ss;
+			ss.precision(std::numeric_limits<T>::digits10 + 1);
 			if (hexfloat)
-				oss << std::hexfloat;
-			oss << val;
-			const auto str = oss.str();
+				ss << std::hexfloat;
+			ss << val;
+			const auto str = std::move(ss).str();
 			print_to_stream(str, stream);
 			if (needs_decimal_point(str))
 				print_to_stream(".0"sv, stream);
@@ -3824,221 +3824,137 @@ TOML_IMPL_START
 					return false;
 
 				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\u309A');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 183u)
+				switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 1460u)
 				{
-					case 0: return true;
-					case 2: return true;
-					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x591ull)) & 0x5B5FFFFFFFFFFFull;
-					case 4: return codepoint <= U'\u061A' || (codepoint >= U'\u064B' && codepoint <= U'\u065F')
-							|| codepoint == U'\u0670';
-					case 5:
+					case 0:
 					{
-						if (codepoint < U'\u06D6' || codepoint > U'\u0749')
+						if (codepoint > U'\u085B')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u06D6', U'\u0749');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x6D6u) / 58u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\u085B');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 63u)
 						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x6D6u)) & 0xF67E7Fu;
-							case 1: return codepoint <= U'\u0711' || codepoint >= U'\u0730';
-							TOML_NO_DEFAULT_CASE;
+							case 0: return true;
+							case 1: return true;
+							case 6: return true;
+							case 10: return true;
+							case 11: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x5B5u)) & 0x5B5FFu;
+							case 12: return true;
+							case 13: return codepoint <= U'\u065F' || codepoint >= U'\u0670';
+							case 15: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x6D6u)) & 0xF67E7Fu;
+							case 16: return true;
+							case 17: return true;
+							case 18: return true;
+							case 19: return codepoint <= U'\u07B0' || codepoint >= U'\u07EB';
+							case 20: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x7ECull)) & 0x6EFFBC00000200FFull;
+							case 21: return codepoint <= U'\u082D' || codepoint >= U'\u0859';
+							default: return false;
 						}
-						// chunk summary: 46 codepoints from 6 ranges (spanning a search area of 116)
+						// chunk summary: 293 codepoints from 24 ranges (spanning a search area of 1372)
 					}
-					case 6: return codepoint == U'\u074A' || (codepoint >= U'\u07A6' && codepoint <= U'\u07B0')
-							|| (codepoint >= U'\u07EB' && codepoint <= U'\u07F3') || codepoint == U'\u07FD';
-					case 7:
+					case 1:
 					{
-						if (codepoint < U'\u0816' || codepoint > U'\u085B')
+						if (codepoint < U'\u08D3' || codepoint > U'\u0E4E')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0816', U'\u085B');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x816u) / 35u)
-						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x816u)) & 0xFBBFEFu;
-							default: return true;
-						}
-						// chunk summary: 24 codepoints from 5 ranges (spanning a search area of 70)
-					}
-					case 8:
-					{
-						if (codepoint < U'\u08D3' || codepoint > U'\u0963')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u08D3', U'\u0963');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x8D3u) / 49u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u08D3', U'\u0E4E');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x8D3u) / 64u)
 						{
 							case 0: return codepoint != U'\u08E2';
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x93Aull)) & 0x3003FBFFFF7ull;
+							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x93Au)) & 0x1BFFFF7u;
+							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x953ull)) & 0x1C0000001801Full;
+							case 3: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x9BCu)) & 0x399FDu;
+							case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x9D7ull)) & 0x1C8000001801ull;
+							case 5: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA3Cu)) & 0x23987Du;
+							case 6: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA70u)) & 0xE0023u;
+							case 7: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xABCu)) & 0x3BBFDu;
+							case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAE2ull)) & 0x3BF000003ull;
+							case 9: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xB3Cu)) & 0x399FDu;
+							case 10: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xB56ull)) & 0x100000003003ull;
+							case 11: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xBBEu)) & 0xF71Fu;
+							case 12: return codepoint <= U'\u0BD7' || codepoint >= U'\u0C00';
+							case 13: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xC3Eu)) & 0xF77Fu;
+							case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC55ull)) & 0x700000006003ull;
+							case 15: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xCBCu)) & 0x3DDFDu;
+							case 16: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xCD5ull)) & 0x780000006003ull;
+							case 17: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xD3Bu)) & 0x7BBFBu;
+							case 18: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xD57ull)) & 0x180000001801ull;
+							case 19: return codepoint <= U'\u0DCA' || codepoint >= U'\u0DCF';
+							case 20: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xDD3ull)) & 0x180001FEBull;
+							case 21: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xE31u)) & 0x3FC003F9u;
+							TOML_NO_DEFAULT_CASE;
+						}
+						// chunk summary: 280 codepoints from 70 ranges (spanning a search area of 1404)
+					}
+					case 2:
+					{
+						if (codepoint < U'\u0EB1' || codepoint > U'\u135F')
+							return false;
+
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0EB1', U'\u135F');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0xEB1u) / 64u)
+						{
+							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xEB1u)) & 0x1F800FF9u;
+							case 1: return true;
+							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xF35u)) & 0x615u;
+							case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xF71ull)) & 0xFFFFFF7FF06FFFFFull;
+							case 4: return codepoint <= U'\u0FBC' || codepoint >= U'\u0FC6';
+							case 5: return true;
+							case 6: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1031ull)) & 0x1FCEE1E000003FFFull;
+							case 7: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1071ull)) & 0x1E005FFE000Full;
+							case 18: return true;
 							default: return false;
 						}
-						// chunk summary: 78 codepoints from 6 ranges (spanning a search area of 145)
+						// chunk summary: 154 codepoints from 23 ranges (spanning a search area of 1199)
 					}
-					case 9:
+					case 3:
 					{
-						if (codepoint < U'\u0981' || codepoint > U'\u0A03')
+						if (codepoint < U'\u1712' || codepoint > U'\u193B')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0981', U'\u0A03');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x981u) / 44u)
-						{
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x9BCu)) & 0x80399FDu;
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x9E2ull)) & 0x390000003ull;
-							default: return true;
-						}
-						// chunk summary: 23 codepoints from 9 ranges (spanning a search area of 131)
-					}
-					case 10:
-					{
-						if (codepoint < U'\u0A3C' || codepoint > U'\u0ACD')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0A3C', U'\u0ACD');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xA3Cu) / 49u)
-						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA3Cu)) & 0x23987Du;
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA70u)) & 0xE0023u;
-							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xABCu)) & 0x3BBFDu;
-							TOML_NO_DEFAULT_CASE;
-						}
-						// chunk summary: 33 codepoints from 12 ranges (spanning a search area of 146)
-					}
-					case 11:
-					{
-						if (codepoint < U'\u0AE2' || codepoint > U'\u0B82')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0AE2', U'\u0B82');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xAE2u) / 54u)
-						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAE2ull)) & 0x3BF000003ull;
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xB3Cu)) & 0x399FDu;
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xB56ull)) & 0x100000003003ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-						// chunk summary: 29 codepoints from 10 ranges (spanning a search area of 161)
-					}
-					case 12:
-					{
-						if (codepoint < U'\u0BBE' || codepoint > U'\u0C4A')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0BBE', U'\u0C4A');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xBBEu) / 47u)
-						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xBBEu)) & 0x200F71Fu;
-							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xC3Eu)) & 0x177Fu;
-							default: return true;
-						}
-						// chunk summary: 29 codepoints from 8 ranges (spanning a search area of 141)
-					}
-					case 13:
-					{
-						if (codepoint < U'\u0C4B' || codepoint > U'\u0D01')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0C4B', U'\u0D01');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xC4Bu) / 61u)
-						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC4Bull)) & 0x1C0000001800C07ull;
-							case 1: return codepoint != U'\u0C88';
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xCC6ull)) & 0xC000000300180F7ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-						// chunk summary: 31 codepoints from 11 ranges (spanning a search area of 183)
-					}
-					case 14:
-					{
-						if (codepoint < U'\u0D02' || codepoint > U'\u0D83')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0D02', U'\u0D83');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xD02u) / 44u)
-						{
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xD3Bu)) & 0x1007BBFBu;
-							case 2: return codepoint <= U'\u0D63' || codepoint >= U'\u0D82';
-							default: return true;
-						}
-						// chunk summary: 23 codepoints from 8 ranges (spanning a search area of 130)
-					}
-					case 15:
-					{
-						if (codepoint < U'\u0DCA' || codepoint > U'\u0E4E')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0DCA', U'\u0E4E');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xDCAu) / 45u)
-						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xDCAull)) & 0x300003FD7E1ull;
-							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xE31u)) & 0x3FC003F9u;
-							default: return false;
-						}
-						// chunk summary: 34 codepoints from 8 ranges (spanning a search area of 133)
-					}
-					case 16: return codepoint == U'\u0EB1' || (codepoint >= U'\u0EB4' && codepoint <= U'\u0EBC')
-							|| (codepoint >= U'\u0EC8' && codepoint <= U'\u0ECD') || codepoint >= U'\u0F18';
-					case 17:
-					{
-						if (codepoint < U'\u0F35' || codepoint > U'\u0FC6')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0F35', U'\u0FC6');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xF35u) / 49u)
-						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xF35u)) & 0x615u;
-							case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xF71ull)) & 0x3FF06FFFFFull;
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xF97ull)) & 0x803FFFFFFFFDull;
-							TOML_NO_DEFAULT_CASE;
-						}
-						// chunk summary: 75 codepoints from 9 ranges (spanning a search area of 146)
-					}
-					case 18:
-					{
-						if (codepoint < U'\u102B' || codepoint > U'\u108F')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u102B', U'\u108F');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x102Bu) / 51u)
-						{
-							case 0: return codepoint <= U'\u103E' || codepoint >= U'\u1056';
-							case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x105Eull)) & 0x2FFF00078FE77ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-						// chunk summary: 54 codepoints from 8 ranges (spanning a search area of 101)
-					}
-					case 19: return true;
-					case 22: return true;
-					case 28:
-					{
-						if (codepoint < U'\u1712' || codepoint > U'\u17BA')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1712', U'\u17BA');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1712u) / 57u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1712', U'\u193B');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x1712u) / 62u)
 						{
 							case 0: return codepoint <= U'\u1714' || codepoint >= U'\u1732';
 							case 1: return codepoint <= U'\u1753' || codepoint >= U'\u1772';
+							case 3: return codepoint <= U'\u17D3' || codepoint >= U'\u17DD';
+							case 6: return codepoint <= U'\u1886' || codepoint >= U'\u18A9';
+							case 7: return false;
+							case 8: return codepoint <= U'\u192B' || codepoint >= U'\u1930';
 							default: return true;
 						}
-						// chunk summary: 17 codepoints from 5 ranges (spanning a search area of 169)
+						// chunk summary: 73 codepoints from 11 ranges (spanning a search area of 554)
 					}
-					case 29: return codepoint <= U'\u17D3' || codepoint == U'\u17DD' || codepoint >= U'\u180B';
-					case 30: return codepoint <= U'\u1886' || codepoint == U'\u18A9' || codepoint >= U'\u1920';
-					case 31: return codepoint <= U'\u192B' || codepoint >= U'\u1930';
-					case 32: return codepoint <= U'\u1A1B' || (codepoint >= U'\u1A55' && codepoint <= U'\u1A5E')
-							|| (codepoint >= U'\u1A60' && codepoint <= U'\u1A7C') || codepoint == U'\u1A7F';
-					case 33: return codepoint <= U'\u1ABD' || (codepoint >= U'\u1B00' && codepoint <= U'\u1B04')
-							|| codepoint >= U'\u1B34';
-					case 34: return codepoint <= U'\u1B73' || (codepoint >= U'\u1B80' && codepoint <= U'\u1B82')
-							|| (codepoint >= U'\u1BA1' && codepoint <= U'\u1BAD') || codepoint >= U'\u1BE6';
-					case 35: return true;
-					case 36: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1CD0ull)) & 0x39021FFFFF7ull;
-					case 37: return codepoint != U'\u1D73';
-					case 41: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x20D0ull)) & 0x1FFE21FFFull;
-					case 58: return true;
-					case 59: return codepoint <= U'\u2D7F' || codepoint >= U'\u2DE0';
-					case 60: return true;
-					case 63: return codepoint <= U'\u302F' || codepoint >= U'\u3099';
+					case 4:
+					{
+						if (codepoint < U'\u1A17' || codepoint > U'\u1DFF')
+							return false;
+
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1A17', U'\u1DFF');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x1A17u) / 63u)
+						{
+							case 0: return codepoint <= U'\u1A1B' || codepoint >= U'\u1A55';
+							case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1A56ull)) & 0x27FFFFFFDFFull;
+							case 5: return codepoint <= U'\u1B73' || codepoint >= U'\u1B80';
+							case 9: return false;
+							case 10: return false;
+							case 11: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1CD0ull)) & 0x39021FFFFF7ull;
+							case 12: return false;
+							case 13: return false;
+							case 15: return codepoint != U'\u1DFA';
+							default: return true;
+						}
+						// chunk summary: 232 codepoints from 19 ranges (spanning a search area of 1001)
+					}
+					case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x20D0ull)) & 0x1FFE21FFFull;
+					case 7:
+					{
+						if (codepoint < U'\u2CEF')
+							return false;
+
+						return ((static_cast<uint_least32_t>(codepoint) - 0x2CEFu) / 63u) & 0x601Dull;
+						// chunk summary: 44 codepoints from 5 ranges (spanning a search area of 940)
+					}
 					default: return false;
 				}
 				// chunk summary: 1102 codepoints from 155 ranges (spanning a search area of 11675)
@@ -4075,50 +3991,72 @@ TOML_IMPL_START
 					return false;
 
 				TOML_ASSUME_CODEPOINT_BETWEEN(U'\uFB1E', U'\U00011A99');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xFB1Eu) / 128u)
+				switch ((static_cast<uint_least32_t>(codepoint) - 0xFB1Eu) / 1008u)
 				{
-					case 0: return true;
-					case 5: return true;
-					case 6: return true;
-					case 13: return true;
-					case 15: return true;
-					case 16: return true;
-					case 29: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x10A01u)) & 0x7837u;
-					case 30: return codepoint <= U'\U00010A3A' || codepoint >= U'\U00010A3F';
-					case 31: return true;
-					case 36: return true;
-					case 40: return true;
-					case 41: return true;
-					case 42: return codepoint <= U'\U00011046' || codepoint >= U'\U0001107F';
-					case 43: return codepoint <= U'\U000110BA' || codepoint >= U'\U00011100';
-					case 44: return codepoint <= U'\U00011134' || (codepoint >= U'\U00011145' && codepoint <= U'\U00011146')
-							|| codepoint == U'\U00011173' || codepoint >= U'\U00011180';
-					case 45: return codepoint <= U'\U000111C0' || codepoint >= U'\U000111C9';
-					case 46: return codepoint <= U'\U00011237' || codepoint >= U'\U0001123E';
-					case 47: return codepoint <= U'\U000112EA' || codepoint >= U'\U00011300';
-					case 48: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1133Bull)) & 0x3E3F980100733FBull;
-					case 50: return codepoint <= U'\U00011446' || codepoint >= U'\U0001145E';
-					case 51: return true;
-					case 53: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x115AFull)) & 0x60000003FE7Full;
-					case 54: return true;
-					case 55: return codepoint <= U'\U000116B7' || codepoint >= U'\U0001171D';
-					case 56: return true;
-					case 58: return true;
-					case 61: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x119D1ull)) & 0x3FF00000008FE7Full;
-					case 62:
+					case 0: return codepoint == U'\uFB1E' || (codepoint >= U'\uFE00' && codepoint <= U'\uFE0F')
+							|| codepoint >= U'\uFE20';
+					case 1: return codepoint <= U'\U000101FD' || codepoint >= U'\U000102E0';
+					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10A01ull)) & 0x4380000000007837ull;
+					case 4: return codepoint <= U'\U00010AE6' || codepoint >= U'\U00010D24';
+					case 5:
 					{
-						if (codepoint < U'\U00011A33')
+						if (codepoint < U'\U00010F46' || codepoint > U'\U0001123E')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00011A33', U'\U00011A99');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x11A33u) / 52u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010F46', U'\U0001123E');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x10F46u) / 64u)
 						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11A33ull)) & 0x1FFC0100F7Full;
+							case 1: return false;
+							case 4: return codepoint <= U'\U00011046' || codepoint >= U'\U0001107F';
+							case 7: return codepoint <= U'\U00011134' || codepoint >= U'\U00011145';
+							case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11146ull)) & 0x1C00200000000001ull;
+							case 11: return codepoint <= U'\U00011237' || codepoint >= U'\U0001123E';
 							default: return true;
 						}
-						// chunk summary: 39 codepoints from 5 ranges (spanning a search area of 103)
+						// chunk summary: 98 codepoints from 14 ranges (spanning a search area of 761)
 					}
-					default: return false;
+					case 6:
+					{
+						if (codepoint < U'\U000112DF' || codepoint > U'\U000116AD')
+							return false;
+
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U000112DF', U'\U000116AD');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x112DFu) / 61u)
+						{
+							case 0: return codepoint <= U'\U000112EA' || codepoint >= U'\U00011300';
+							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x1133Bu)) & 0x100733FBu;
+							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11362u)) & 0x7C7F3u;
+							case 3: return false;
+							case 4: return false;
+							case 8: return false;
+							case 9: return false;
+							case 10: return false;
+							case 11: return codepoint <= U'\U000115B5' || codepoint >= U'\U000115B8';
+							case 12: return codepoint <= U'\U000115C0' || codepoint >= U'\U000115DC';
+							default: return true;
+						}
+						// chunk summary: 122 codepoints from 18 ranges (spanning a search area of 975)
+					}
+					case 7:
+					{
+						if (codepoint < U'\U000116AE')
+							return false;
+
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U000116AE', U'\U00011A99');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x116AEu) / 63u)
+						{
+							case 0: return true;
+							case 1: return true;
+							case 6: return true;
+							case 12: return codepoint <= U'\U000119D7' || codepoint >= U'\U000119DA';
+							case 13: return codepoint <= U'\U000119E4' || codepoint >= U'\U00011A01';
+							case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11A33ull)) & 0x1FFC0100F7Full;
+							case 15: return true;
+							default: return false;
+						}
+						// chunk summary: 104 codepoints from 12 ranges (spanning a search area of 1004)
+					}
+					default: return true;
 				}
 				// chunk summary: 383 codepoints from 56 ranges (spanning a search area of 8060)
 			}
@@ -4164,43 +4102,40 @@ TOML_IMPL_START
 					return false;
 
 				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001E94A');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 128u)
+				switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 765u)
 				{
 					case 0:
 					{
-						if (codepoint > U'\U0001D1AD')
+						if (codepoint > U'\U0001D244')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001D1AD');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 37u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001D244');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 56u)
 						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D165ull)) & 0x1F3FC03F1Full;
-							case 1: return codepoint <= U'\U0001D18B' || codepoint >= U'\U0001D1AA';
-							TOML_NO_DEFAULT_CASE;
+							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D165ull)) & 0x7F3FC03F1Full;
+							case 2: return false;
+							default: return true;
 						}
-						// chunk summary: 30 codepoints from 5 ranges (spanning a search area of 73)
+						// chunk summary: 33 codepoints from 6 ranges (spanning a search area of 224)
 					}
-					case 1: return true;
-					case 17: return codepoint <= U'\U0001DA36' || codepoint >= U'\U0001DA3B';
-					case 18:
+					case 2: return codepoint <= U'\U0001DA36' || codepoint >= U'\U0001DA3B';
+					case 3:
 					{
-						if (codepoint < U'\U0001DA65' || codepoint > U'\U0001DAAF')
+						if (codepoint < U'\U0001DA5C' || codepoint > U'\U0001DAAF')
 							return false;
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001DA65', U'\U0001DAAF');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1DA65u) / 38u)
+						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001DA5C', U'\U0001DAAF');
+						switch ((static_cast<uint_least32_t>(codepoint) - 0x1DA5Cu) / 42u)
 						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x1DA65u)) & 0x800100FFu;
-							case 1: return codepoint != U'\U0001DA8B';
+							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1DA5Cull)) & 0x1000201FFFFull;
+							case 1: return codepoint != U'\U0001DA86';
 							TOML_NO_DEFAULT_CASE;
 						}
-						// chunk summary: 30 codepoints from 5 ranges (spanning a search area of 75)
+						// chunk summary: 39 codepoints from 5 ranges (spanning a search area of 84)
 					}
-					case 29: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1E000ull)) & 0x7DBF9FFFF7Full;
-					case 31: return true;
-					case 35: return true;
-					case 46: return true;
-					case 47: return true;
+					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1E000ull)) & 0x7DBF9FFFF7Full;
+					case 5: return codepoint <= U'\U0001E136' || codepoint >= U'\U0001E2EC';
+					case 7: return codepoint <= U'\U0001E8D6' || codepoint >= U'\U0001E944';
 					default: return false;
 				}
 				// chunk summary: 223 codepoints from 21 ranges (spanning a search area of 6118)
@@ -4586,7 +4521,8 @@ TOML_IMPL_START
 		private:
 			utf8_byte_stream<T> stream;
 			utf8_decoder decoder;
-			utf8_codepoint prev{}, current{};
+			utf8_codepoint codepoints[2];
+			size_t cp_idx = 1;
 			uint8_t current_byte_count{};
 			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
@@ -4600,7 +4536,9 @@ TOML_IMPL_START
 				TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
-				current.position = { 1, 1 };
+				std::memset(codepoints, 0, sizeof(codepoints));
+				codepoints[0].position = { 1, 1 };
+				codepoints[1].position = { 1, 1 };
 
 				if (!source_path.empty())
 					source_path_ = std::make_shared<const std::string>(std::forward<STR>(source_path));
@@ -4616,6 +4554,8 @@ TOML_IMPL_START
 			const utf8_codepoint* read_next() TOML_MAY_THROW override
 			{
 				TOML_ERROR_CHECK;
+
+				auto& prev = codepoints[(cp_idx - 1_sz) % 2_sz];
 
 				if (stream.eof())
 					return nullptr;
@@ -4673,25 +4613,26 @@ TOML_IMPL_START
 
 					TOML_ERROR_CHECK;
 
+					auto& current = codepoints[cp_idx % 2_sz];
 					current.bytes[current_byte_count++] = static_cast<string_char>(*nextByte);
 					if (decoder.has_code_point())
 					{
+						//store codepoint
 						current.value = decoder.codepoint;
-						prev = current;
-						std::memset(current.bytes, 0, sizeof(current.bytes));
+
+						//reset prev (will be the next 'current')
+						std::memset(prev.bytes, 0, sizeof(prev.bytes));
 						current_byte_count = {};
-
-						if (is_line_break<false>(prev.value))
-						{
-							current.position.line++;
-							current.position.column = 1;
-						}
+						if (is_line_break<false>(current.value))
+							prev.position = { static_cast<source_index>(current.position.line + 1), 1 };
 						else
-							current.position.column++;
-
-						return &prev;
+							prev.position = { current.position.line, static_cast<source_index>(current.position.column + 1) };
+						cp_idx++;
+						return &current;
 					}
 				}
+
+				TOML_UNREACHABLE;
 			}
 
 			#if !TOML_EXCEPTIONS
@@ -6411,10 +6352,10 @@ TOML_IMPL_START
 						{
 							#if TOML_USE_STREAMS_FOR_FLOATS
 							{
-								std::ostringstream oss;
-								oss.precision(std::numeric_limits<arg_t>::digits10 + 1);
-								oss << arg;
-								const auto str = oss.str();
+								std::ostringstream ss;
+								ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
+								ss << arg;
+								const auto str = std::move(ss).str();
 								std::memcpy(ptr, str.c_str(), str.length());
 								ptr += str.length();
 							}
@@ -7448,10 +7389,10 @@ TOML_IMPL_START
 				{
 					std::string str;
 					{
-						std::stringstream ss;
+						std::ostringstream ss;
 						ss.write("0x", 2_sz);
 						ss.write(chars, static_cast<std::streamsize>(length));
-						str = ss.str();
+						str = std::move(ss).str();
 					}
 
 					char* end = {};

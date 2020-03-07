@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '0.4.0',
+	version : '0.4.1',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
@@ -16,6 +16,7 @@ message(['compiler ID: ', compiler.get_id()])
 
 if compiler.get_id() == 'gcc'
 	add_project_arguments([
+			'-g0',
 			'-fmax-errors=5',
 			'-Wno-attributes',
 			'-Wno-init-list-lifetime'

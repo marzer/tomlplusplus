@@ -133,10 +133,10 @@ TOML_IMPL_START
 						{
 							#if TOML_USE_STREAMS_FOR_FLOATS
 							{
-								std::ostringstream oss;
-								oss.precision(std::numeric_limits<arg_t>::digits10 + 1);
-								oss << arg;
-								const auto str = oss.str();
+								std::ostringstream ss;
+								ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
+								ss << arg;
+								const auto str = std::move(ss).str();
 								std::memcpy(ptr, str.c_str(), str.length());
 								ptr += str.length();
 							}
@@ -1170,10 +1170,10 @@ TOML_IMPL_START
 				{
 					std::string str;
 					{
-						std::stringstream ss;
+						std::ostringstream ss;
 						ss.write("0x", 2_sz);
 						ss.write(chars, static_cast<std::streamsize>(length));
-						str = ss.str();
+						str = std::move(ss).str();
 					}
 
 					char* end = {};

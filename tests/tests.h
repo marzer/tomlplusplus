@@ -264,9 +264,9 @@ inline void parse_expected_value(std::string_view value_str, const T& expected) 
 		std::string str;
 		{
 			auto tbl = table{ { { S("val"sv), *val_parsed } } };
-			std::stringstream ss;
+			std::ostringstream ss;
 			ss << tbl;
-			str = ss.str();
+			str = std::move(ss).str();
 		}
 
 		parsing_should_succeed(std::string_view{ str }, [&](table&& tbl) noexcept

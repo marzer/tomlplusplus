@@ -14,7 +14,7 @@ import traceback
 
 class Settings:
 	binary_bitmasks = False
-	switch_case_limit = 64
+	switch_case_limits = [64, 8]
 
 
 
@@ -26,24 +26,25 @@ def make_literal(codepoint):
 
 
 
-def make_bitmask(codepoint, size=64):
+def make_bitmask(codepoint, bits = 64):
 	if (Settings.binary_bitmasks):
-		if (size==64):
+		if (bits > 32):
 			return "0b{:064b}ull".format(codepoint)
 		else:
 			return "0b{:032b}u".format(codepoint)
 	else:
-		if (size==64):
+		if (bits > 32):
 			return "0x{:X}ull".format(codepoint)
 		else:
 			return "0x{:X}u".format(codepoint)
+
 
 
 def make_mask_from_indices(indices):
 	mask = 0
 	for i in indices:
 		mask = mask | (1 << i)
-	return mask;
+	return mask
 
 
 
@@ -63,33 +64,37 @@ def range_last(r):
 
 
 
-def calculate_subdivisions(span_size):
+def is_pow2(v):
+	return v & (v-1) == 0
+
+
+
+def calculate_subdivisions(span_size, level):
 
 	# if it's a relatively small span, divide it such the effective size of each subchunk
 	# would be less than or equal to 64 so we'll generate bitmask ops
 	if (64 < span_size <= 4096):
-		subdiv_count = int(math.ceil(span_size / 64))
-		return subdiv_count
+		return int(math.ceil(span_size / 64))
+
+	case_limit = Settings.switch_case_limits[min(len(Settings.switch_case_limits)-1, level)]
 
 	# try to find a divisor that will yield a power-of-2 size
-	subdiv_count = 2
-	subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
-	while (subdiv_count <= Settings.switch_case_limit):
-		if (subdiv_size > 0 and subdiv_size < span_size and (subdiv_size & (subdiv_size-1) == 0)):
-			return subdiv_count
-		subdiv_count += 1
-		subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
+	subdivs = case_limit
+	while (subdivs > 1):
+		subdiv_size = int(math.ceil(span_size / float(subdivs)))
+		if (subdiv_size > 1 and subdiv_size < span_size and is_pow2(subdiv_size)):
+			return subdivs
+		subdivs -= 1
 
 	# couldn't find divisor that would yield a power-of-2 size
-	subdiv_count = Settings.switch_case_limit
-	subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
-	while (subdiv_count > 1):
-		if (subdiv_size > 0 and subdiv_size < span_size):
-			return subdiv_count
-		subdiv_count -= 1
-		subdiv_size = int(math.ceil(span_size / float(subdiv_count)))
+	subdivs = case_limit
+	while (subdivs > 1):
+		subdiv_size = int(math.ceil(span_size / float(subdivs)))
+		if (subdiv_size > 1 and subdiv_size < span_size):
+			return subdivs
+		subdivs /= 2
 
-	return subdiv_count
+	return subdivs
 
 
 
@@ -98,9 +103,10 @@ def calculate_subdivisions(span_size):
 
 class Chunk:
 
-	def __init__(self, first, last):
+	def __init__(self, first, last, level=0):
 		self.first = int(first)
 		self.last = int(last)
+		self.level = level
 		self.span_size = (self.last - self.first) + 1
 		self.count = 0
 		self.ranges = []
@@ -109,11 +115,13 @@ class Chunk:
 		self.first_set = self.last + 1
 		self.last_set = -1
 		self.first_unset = self.first
+		self.all_div_by = None
+		self.all_div_by_add = None
 
 
 	def low_range_mask(self):
 		if self.count == 0:
-			return 0;
+			return 0
 		mask = 0
 		bits = 0
 		prev_last_unset = -1
@@ -125,13 +133,13 @@ class Chunk:
 				prev_last_unset += 1
 				bits += 1
 			if (bits >= 64):
-				break;
+				break
 			while (count > 0 and bits < 64):
 				mask |= (1 << bits)
 				bits += 1
 				count -= 1
 			if (bits >= 64):
-				break;
+				break
 
 			prev_last_unset = last + 1
 		return mask
@@ -156,6 +164,44 @@ class Chunk:
 		self.first_set = min(self.first_set, f)
 
 
+	def analyze(self):
+		if (self.count > 0 and (self.first != self.first_set or self.last != self.last_set)):
+			raise Exception('cannot call analyze() on an untrimmed Chunk')
+
+		self.all_div_by = None
+		self.all_div_by_add = None
+		if (self.span_size <= 1):
+			return
+		for div in range(2, 51):
+			for add in range(0, 50):
+				divisible = None
+				for r in self.ranges:
+					first = range_first(r)
+					last = range_last(r)
+					if (last < self.first_set):
+						continue
+					if (first > self.last_set):
+						break
+					first = max(first, self.first_set)
+					last = min(last, self.last_set)
+
+					if (divisible is None):
+						divisible = True
+					for cp in range(first, last+1):
+						divisible = divisible and (((cp + add) % div) == 0)
+						if not divisible:
+							break
+					if not divisible:
+						break
+
+				if divisible is not None and divisible:
+					self.all_div_by = div
+					if add != 0:
+						self.all_div_by_add = add
+					return
+
+
+
 	def trim(self):
 		if (self.subchunks is not None
 			or self.count == 0
@@ -168,6 +214,9 @@ class Chunk:
 
 
 	def subdivide(self):
+		if (self.count > 0 and (self.first != self.first_set or self.last != self.last_set)):
+			raise Exception('cannot call subdivide() on an untrimmed Chunk')
+
 		if (self.subchunks is not None
 			or self.count >= self.span_size - 1
 			or self.count <= 1
@@ -177,9 +226,10 @@ class Chunk:
 			or self.count == (self.last_set - self.first_set) + 1
 			or (len(self.ranges) == 2 and range_first(self.ranges[0]) == self.first and range_last(self.ranges[1]) == self.last)
 			or len(self.ranges) <= 4
+			or self.all_div_by is not None
 			):
 			return
-		subchunk_count = calculate_subdivisions(self.span_size)
+		subchunk_count = calculate_subdivisions(self.span_size, self.level)
 		if (subchunk_count <= 1):
 			return
 		subchunk_size = int(math.ceil(self.span_size / float(subchunk_count)))
@@ -192,7 +242,8 @@ class Chunk:
 			self.subchunks.append(
 				Chunk(
 					self.first + (subchunk * self.subchunk_size),
-					min(self.first + (((subchunk + 1) * self.subchunk_size) - 1), self.last)
+					min(self.first + (((subchunk + 1) * self.subchunk_size) - 1), self.last),
+					self.level + 1
 				)
 			)
 		for r in self.ranges:
@@ -210,15 +261,16 @@ class Chunk:
 		#self.ranges = None
 		for subchunk in self.subchunks:
 			subchunk.trim()
+			subchunk.analyze()
 			subchunk.subdivide()
 
 
 	def always_returns_true(self):
-		return self.count == self.span_size;
+		return self.count == self.span_size
 
 
 	def always_returns_false(self):
-		return self.count == 0;
+		return self.count == 0
 
 
 	def print_subchunk_case(self, subchunk_index, output_file, level, indent):
@@ -237,11 +289,11 @@ class Chunk:
 
 		# return true; (completely full range)
 		if (self.always_returns_true()):
-			return 'true';
+			return 'true'
 
 		# return false; (completely empty range)
 		elif (self.always_returns_false()):
-			return 'false';
+			return 'false'
 
 		# return cp == A
 		elif (self.count == 1):
@@ -267,6 +319,17 @@ class Chunk:
 		elif (len(self.ranges) == 2 and range_first(self.ranges[0]) == self.first and range_last(self.ranges[1]) == self.last):
 			return 'codepoint <= {} || codepoint >= {}'.format(make_literal(range_last(self.ranges[0])), make_literal(range_first(self.ranges[1])))
 
+		# return cp % X == 0
+		elif (self.all_div_by is not None):
+			if (self.all_div_by_add is not None):
+				return '(static_cast<uint_least64_t>(codepoint) {} {}ull) % {}ull == 0ull'.format(
+						'-' if self.all_div_by_add < 0 else '+',
+						abs(self.all_div_by_add),
+						self.all_div_by
+					)
+			else:
+				return 'static_cast<uint_least64_t>(codepoint) % {}ull == 0ull'.format(self.all_div_by)
+	
 		# return cp & A (32-bit)
 		elif ((self.last_set - self.first_set) + 1 <= 32):
 			if (self.first_set == self.first):
@@ -430,6 +493,7 @@ def emit_function(name, categories, file, codepoints):
 	if (first_codepoint != -1):
 		root_chunk.add(first_codepoint, last_codepoint)
 	root_chunk.trim()
+	root_chunk.analyze()
 	root_chunk.subdivide()
 
 	# write the function
@@ -448,6 +512,17 @@ def emit_function(name, categories, file, codepoints):
 
 def get_script_folder():
     return path.dirname(path.realpath(sys.argv[0]))
+
+
+
+def append_codepoint(codepoints, codepoint, category):
+	if (codepoint <= 128 # ASCII range (handled separately in C++)
+		or 0xD800 <= codepoint <= 0xF8FF # surrogates & private use area
+		or 0x30000 <= codepoint <= 0xDFFFF # planes 3-13
+		or 0xF0000 <= codepoint <= 0x10FFFD # planes 15-16
+		or 0xFFFE <= (codepoint & 0xFFFF) <= 0xFFFF # noncharacters
+		): return
+	codepoints.append((codepoint, category))
 
 
 
@@ -475,6 +550,7 @@ def main():
 	re_codepoint = re.compile(r'^([0-9a-fA-F]+);(.+?);([a-zA-Z]+);')
 	current_range_start = -1
 	codepoints = []
+	parsed_codepoints = 0
 	for codepoint_entry in codepoint_list.split('\n'):
 		match = re_codepoint.search(codepoint_entry)
 		if (match is None):
@@ -482,18 +558,18 @@ def main():
 				raise Exception('Previous codepoint indicated the start of a range but the next one was null')
 			continue
 		codepoint = int('0x{}'.format(match.group(1)), 16)
-		if (codepoint <= 128): # ASCII range is handled separately
-			continue
 		if (current_range_start > -1):
 			for cp in range(current_range_start, codepoint):
-				codepoints.append((cp, match.group(3)))
+				parsed_codepoints += 1
+				append_codepoint(codepoints, cp, match.group(3))
 			current_range_start = -1
 		else:
 			if (match.group(2).endswith(', First>')):
 				current_range_start = codepoint
 			else:
-				codepoints.append((codepoint, match.group(3)))
-	print("Parsed {} codepoints from unicode database file.".format(len(codepoints)))
+				parsed_codepoints += 1
+				append_codepoint(codepoints, codepoint, match.group(3))
+	print("Extracted {} of {} codepoints from unicode database file.".format(len(codepoints), parsed_codepoints))
 	codepoints.sort(key=lambda r:r[0])
 
 	# write the output file

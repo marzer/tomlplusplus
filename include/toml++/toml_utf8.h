@@ -368,7 +368,8 @@ TOML_IMPL_START
 		private:
 			utf8_byte_stream<T> stream;
 			utf8_decoder decoder;
-			utf8_codepoint prev{}, current{};
+			utf8_codepoint codepoints[2];
+			size_t cp_idx = 1;
 			uint8_t current_byte_count{};
 			source_path_ptr source_path_;
 			#if !TOML_EXCEPTIONS
@@ -382,7 +383,9 @@ TOML_IMPL_START
 				TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
-				current.position = { 1, 1 };
+				std::memset(codepoints, 0, sizeof(codepoints));
+				codepoints[0].position = { 1, 1 };
+				codepoints[1].position = { 1, 1 };
 
 				if (!source_path.empty())
 					source_path_ = std::make_shared<const std::string>(std::forward<STR>(source_path));
@@ -398,6 +401,8 @@ TOML_IMPL_START
 			const utf8_codepoint* read_next() TOML_MAY_THROW override
 			{
 				TOML_ERROR_CHECK;
+
+				auto& prev = codepoints[(cp_idx - 1_sz) % 2_sz];
 
 				if (stream.eof())
 					return nullptr;
@@ -455,25 +460,26 @@ TOML_IMPL_START
 
 					TOML_ERROR_CHECK;
 
+					auto& current = codepoints[cp_idx % 2_sz];
 					current.bytes[current_byte_count++] = static_cast<string_char>(*nextByte);
 					if (decoder.has_code_point())
 					{
+						//store codepoint
 						current.value = decoder.codepoint;
-						prev = current;
-						std::memset(current.bytes, 0, sizeof(current.bytes));
+
+						//reset prev (will be the next 'current')
+						std::memset(prev.bytes, 0, sizeof(prev.bytes));
 						current_byte_count = {};
-
-						if (is_line_break<false>(prev.value))
-						{
-							current.position.line++;
-							current.position.column = 1;
-						}
+						if (is_line_break<false>(current.value))
+							prev.position = { static_cast<source_index>(current.position.line + 1), 1 };
 						else
-							current.position.column++;
-
-						return &prev;
+							prev.position = { current.position.line, static_cast<source_index>(current.position.column + 1) };
+						cp_idx++;
+						return &current;
 					}
 				}
+
+				TOML_UNREACHABLE;
 			}
 
 			#if !TOML_EXCEPTIONS

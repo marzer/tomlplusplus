@@ -132,12 +132,12 @@ TOML_IMPL_START
 
 		#if TOML_USE_STREAMS_FOR_FLOATS
 		{
-			std::ostringstream oss;
-			oss.precision(std::numeric_limits<T>::digits10 + 1);
+			std::ostringstream ss;
+			ss.precision(std::numeric_limits<T>::digits10 + 1);
 			if (hexfloat)
-				oss << std::hexfloat;
-			oss << val;
-			const auto str = oss.str();
+				ss << std::hexfloat;
+			ss << val;
+			const auto str = std::move(ss).str();
 			print_to_stream(str, stream);
 			if (needs_decimal_point(str))
 				print_to_stream(".0"sv, stream);
