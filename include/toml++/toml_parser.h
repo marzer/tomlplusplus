@@ -28,9 +28,9 @@ TOML_START
 	///		(error occurred at line 1, column 13 of 'config.toml')
 	/// \eout
 	/// 
-	/// \attention <strong>This type only exists when exceptions are disabled.</strong>
+	/// \attention <strong>This type only exists when exceptions are not enabled.</strong>
 	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
-	/// #if ARE_EXCEPTIONS_ENABLED // some compiler-specific test
+	/// #if TOML_EXCEPTIONS
 	///		using parse_result = table;
 	/// #else
 	///		class parse_result final { // ...

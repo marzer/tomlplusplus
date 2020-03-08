@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.4.1
+// toml++ v0.4.2
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -114,10 +114,6 @@
 	#define TOML_UNDEF_MACROS 1
 #endif
 
-#ifndef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS 1
-#endif
-
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
@@ -213,8 +209,15 @@
 	#define TOML_CPP 17
 #endif
 #if !defined(__EXCEPTIONS) && !defined(__cpp_exceptions) && !defined(_CPPUNWIND)
+	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
+		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
+	#endif
 	#undef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS	0
+#else
+	#ifndef TOML_EXCEPTIONS
+		#define TOML_EXCEPTIONS 1
+	#endif
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
@@ -309,7 +312,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		4
-#define TOML_LIB_PATCH		1
+#define TOML_LIB_PATCH		2
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5

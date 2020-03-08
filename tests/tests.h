@@ -14,6 +14,16 @@
 #define TOML_ALL_INLINE 0
 #include "../include/toml++/toml.h"
 
+#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
+	#if !TOML_EXCEPTIONS
+		#error Exceptions were enabled but TOML_EXCEPTIONS was auto-set to disabled
+	#endif
+#else
+	#if TOML_EXCEPTIONS
+		#error Exceptions were disabled but TOML_EXCEPTIONS was auto-set to enabled
+	#endif
+#endif
+
 using namespace toml;
 using namespace Catch::literals;
 

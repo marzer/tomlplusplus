@@ -48,10 +48,6 @@
 	#define TOML_UNDEF_MACROS 1
 #endif
 
-#ifndef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS 1
-#endif
-
 ////////// COMPILER & ENVIRONMENT STUFF
 
 #ifndef __cplusplus
@@ -149,8 +145,15 @@
 	#define TOML_CPP 17
 #endif
 #if !defined(__EXCEPTIONS) && !defined(__cpp_exceptions) && !defined(_CPPUNWIND)
+	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
+		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
+	#endif
 	#undef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS	0
+#else
+	#ifndef TOML_EXCEPTIONS
+		#define TOML_EXCEPTIONS 1
+	#endif
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW

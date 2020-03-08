@@ -24,5 +24,7 @@ HTML_EXTRA_FILES = \
 ##! M_PAGE_FINE_PRINT 			= <a target="_blank" href="https://github.com/marzer/tomlplusplus/">Github</a> &bull; \
 ##!								  <a target="_blank" href="https://github.com/marzer/tomlplusplus/issues">Report an issue</a> \
 ##!								  <br><br>Documentation generated using <a href="https://mcss.mosra.cz/">m.css</a>
-##! M_HTML_HEADER 				= <script src="tomlplusplus.js"></script>
+##! M_HTML_HEADER = <meta name="google-site-verification" content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" />\
+##!		<meta name="description" content="TOML parser and serializer for C++17, C++20, and whatever comes after.">\
+##!		<script src="tomlplusplus.js"></script>
 ##! M_FAVICON					= favicon.ico
