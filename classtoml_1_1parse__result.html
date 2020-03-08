@@ -11,6 +11,18 @@ C++</title>
   <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
+  <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
+  <meta content="TOML
+  parser
+  and
+  serializer
+  for
+  C++17,
+  C++20,
+  and
+  whatever
+  comes
+  after." name="description"/>
   <script src="tomlplusplus.js"></script>
 </head>
 <body>
@@ -73,7 +85,7 @@ C++</span></a>
 
 <span class="go">Parse failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
-<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if ARE_EXCEPTIONS_ENABLED </span><span class="c1">// some compiler-specific test</span>
+<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p><strong>This type only exists when exceptions are not enabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
     <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="ut">table</span><span class="p">;</span>
 <span class="cp">#else</span>
     <span class="k">class</span> <span class="nc">parse_result</span> <span class="k">final</span> <span class="p">{</span> <span class="c1">// ...</span>
