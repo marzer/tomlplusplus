@@ -77,6 +77,73 @@ TOML_IMPL_START
 				return { prev_pos.line, static_cast<source_index>(prev_pos.column + fallback_offset) };
 			}
 
+			template <typename T, size_t N>
+			static void abort_with_error_concatenate(T&& arg, char(& buf)[N], char*& ptr) noexcept
+			{
+				(void)buf;
+
+				using arg_t = remove_cvref_t<T>;
+				if constexpr (std::is_same_v<arg_t, std::string_view> || std::is_same_v<arg_t, std::string>)
+				{
+					std::memcpy(ptr, arg.data(), arg.length());
+					ptr += arg.length();
+				}
+				else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
+				{
+					toml::string_view cp_view;
+					if (arg.value <= U'\x1F') TOML_UNLIKELY
+						cp_view = low_character_escape_table[arg.value];
+					else if (arg.value == U'\x7F')  TOML_UNLIKELY
+						cp_view = TOML_STRING_PREFIX("\\u007F"sv);
+					else
+						cp_view = arg.template as_view<string_char>();
+
+					std::memcpy(ptr, cp_view.data(), cp_view.length());
+					ptr += cp_view.length();
+				}
+				else if constexpr (std::is_same_v<arg_t, char>)
+				{
+					*ptr++ = arg;
+				}
+				else if constexpr (std::is_same_v<arg_t, bool>)
+				{
+					const auto boolval = arg ? "true"sv : "false"sv;
+					std::memcpy(ptr, boolval.data(), boolval.length());
+					ptr += boolval.length();
+				}
+				else if constexpr (std::is_same_v<arg_t, node_type>)
+				{
+					const auto str = impl::node_type_friendly_names[
+						static_cast<std::underlying_type_t<node_type>>(arg)
+					];
+					std::memcpy(ptr, str.data(), str.length());
+					ptr += str.length();
+				}
+				else if constexpr (std::is_floating_point_v<arg_t>)
+				{
+					#if TOML_USE_STREAMS_FOR_FLOATS
+					{
+						std::ostringstream ss;
+						ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
+						ss << arg;
+						const auto str = std::move(ss).str();
+						std::memcpy(ptr, str.c_str(), str.length());
+						ptr += str.length();
+					}
+					#else
+					{
+						const auto result = std::to_chars(ptr, buf + N, arg);
+						ptr = result.ptr;
+					}
+					#endif
+				}
+				else if constexpr (std::is_integral_v<arg_t>)
+				{
+					const auto result = std::to_chars(ptr, buf + N, arg);
+					ptr = result.ptr;
+				}
+			}
+
 			template <typename... T>
 			TOML_NORETURN
 			void abort_with_error(T &&... args) const TOML_MAY_THROW
@@ -90,70 +157,7 @@ TOML_IMPL_START
 					static constexpr auto buf_size = 512_sz;
 					TOML_GCC_ATTR(uninitialized) char buf[buf_size];
 					auto ptr = buf;
-					const auto concatenator = [&](auto&& arg) noexcept //a.k.a. "no stringstreams, thanks"
-					{
-						using arg_t = remove_cvref_t<decltype(arg)>;
-						if constexpr (std::is_same_v<arg_t, std::string_view> || std::is_same_v<arg_t, std::string>)
-						{
-							std::memcpy(ptr, arg.data(), arg.length());
-							ptr += arg.length();
-						}
-						else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
-						{
-							toml::string_view cp_view;
-							if (arg.value <= U'\x1F') TOML_UNLIKELY
-								cp_view = low_character_escape_table[arg.value];
-							else if (arg.value == U'\x7F')  TOML_UNLIKELY
-								cp_view = TOML_STRING_PREFIX("\\u007F"sv);
-							else
-								cp_view = arg.template as_view<string_char>();
-
-							std::memcpy(ptr, cp_view.data(), cp_view.length());
-							ptr += cp_view.length();
-						}
-						else if constexpr (std::is_same_v<arg_t, char>)
-						{
-							*ptr++ = arg;
-						}
-						else if constexpr (std::is_same_v<arg_t, bool>)
-						{
-							const auto boolval = arg ? "true"sv : "false"sv;
-							std::memcpy(ptr, boolval.data(), boolval.length());
-							ptr += boolval.length();
-						}
-						else if constexpr (std::is_same_v<arg_t, node_type>)
-						{
-							const auto str = impl::node_type_friendly_names[
-								static_cast<std::underlying_type_t<node_type>>(arg)
-							];
-							std::memcpy(ptr, str.data(), str.length());
-							ptr += str.length();
-						}
-						else if constexpr (std::is_floating_point_v<arg_t>)
-						{
-							#if TOML_USE_STREAMS_FOR_FLOATS
-							{
-								std::ostringstream ss;
-								ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
-								ss << arg;
-								const auto str = std::move(ss).str();
-								std::memcpy(ptr, str.c_str(), str.length());
-								ptr += str.length();
-							}
-							#else
-							{
-								const auto result = std::to_chars(ptr, buf + buf_size, arg);
-								ptr = result.ptr;
-							}
-							#endif
-						}
-						else if constexpr (std::is_integral_v<arg_t>)
-						{
-							const auto result = std::to_chars(ptr, buf + buf_size, arg);
-							ptr = result.ptr;
-						}
-					};
-					(concatenator(std::forward<T>(args)), ...);
+					(abort_with_error_concatenate(std::forward<T>(args), buf, ptr), ...);
 					*ptr = '\0';
 					#if TOML_EXCEPTIONS
 						TOML_ERROR(buf, current_position(1), reader.source_path());
@@ -1014,7 +1018,7 @@ TOML_IMPL_START
 						default: //??
 							abort_with_error(
 								"Error parsing "sv, node_type::floating_point,
-								"; an unspecified error occurred while trying to interpret '",
+								"; an unspecified error occurred while trying to interpret '"sv,
 								std::string_view{ chars, length }, "' as a value"sv
 							);
 					}
@@ -1211,7 +1215,7 @@ TOML_IMPL_START
 						default: //??
 							abort_with_error(
 								"Error parsing hexadecimal "sv, node_type::floating_point,
-								"; an unspecified error occurred while trying to interpret '",
+								"; an unspecified error occurred while trying to interpret '"sv,
 								std::string_view{ chars, length }, "' as a value"sv
 							);
 					}
@@ -1402,7 +1406,7 @@ TOML_IMPL_START
 					default: //??
 						abort_with_error(
 							"Error parsing "sv, traits::qualifier, ' ', node_type::integer,
-							"; an unspecified error occurred while trying to interpret '",
+							"; an unspecified error occurred while trying to interpret '"sv,
 							std::string_view{ chars, length }, "' as a value"sv
 						);
 				}
