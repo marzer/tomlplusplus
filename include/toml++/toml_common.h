@@ -117,7 +117,11 @@
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 
-	//floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
+	// these pass the __has_attribute() test but cause warnings on if/else branches =/
+	#define TOML_LIKELY
+	#define TOML_UNLIKELY
+
+	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_USE_STREAMS_FOR_FLOATS
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
@@ -204,13 +208,13 @@
 	#define TOML_CONSTEVAL		constexpr
 #endif
 #ifndef __INTELLISENSE__
-	#if __has_cpp_attribute(likely)
+	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY [[likely]]
 	#endif
-	#if __has_cpp_attribute(unlikely)
+	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
 		#define TOML_UNLIKELY [[unlikely]]
 	#endif
-	#if __has_cpp_attribute(no_unique_address)
+	#if !defined(TOML_NO_UNIQUE_ADDRESS) && __has_cpp_attribute(no_unique_address)
 		#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
 	#endif
 	#if __has_cpp_attribute(nodiscard) >= 201907L

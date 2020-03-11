@@ -18,7 +18,6 @@ if compiler.get_id() == 'gcc'
 	add_project_arguments([
 			'-g0',
 			'-fmax-errors=5',
-			'-Wno-attributes',
 			'-Wno-init-list-lifetime'
 		],
 		language : 'cpp'

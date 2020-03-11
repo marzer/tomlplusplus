@@ -181,7 +181,11 @@
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 
-	//floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
+	// these pass the __has_attribute() test but cause warnings on if/else branches =/
+	#define TOML_LIKELY
+	#define TOML_UNLIKELY
+
+	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_USE_STREAMS_FOR_FLOATS
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
 	#endif
@@ -268,13 +272,13 @@
 	#define TOML_CONSTEVAL		constexpr
 #endif
 #ifndef __INTELLISENSE__
-	#if __has_cpp_attribute(likely)
+	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY [[likely]]
 	#endif
-	#if __has_cpp_attribute(unlikely)
+	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
 		#define TOML_UNLIKELY [[unlikely]]
 	#endif
-	#if __has_cpp_attribute(no_unique_address)
+	#if !defined(TOML_NO_UNIQUE_ADDRESS) && __has_cpp_attribute(no_unique_address)
 		#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
 	#endif
 	#if __has_cpp_attribute(nodiscard) >= 201907L
@@ -1277,7 +1281,7 @@ TOML_IMPL_START
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+		char buf[charconv_buffer_length<T>];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
 		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
 	}
@@ -1332,7 +1336,7 @@ TOML_IMPL_START
 		}
 		#else
 		{
-			TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+			char buf[charconv_buffer_length<T>];
 			const auto res = hexfloat
 				? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
 				: std::to_chars(buf, buf + sizeof(buf), val);
@@ -1370,7 +1374,7 @@ TOML_IMPL_START
 	inline void print_to_stream(T val, std::basic_ostream<CHAR>& stream, size_t zero_pad_to_digits) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
-		TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+		char buf[charconv_buffer_length<T>];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
 		const auto len = static_cast<size_t>(res.ptr - buf);
 		for (size_t i = len; i < zero_pad_to_digits; i++)
@@ -6377,7 +6381,7 @@ TOML_IMPL_START
 				else
 				{
 					static constexpr auto buf_size = 512_sz;
-					TOML_GCC_ATTR(uninitialized) char buf[buf_size];
+					char buf[buf_size];
 					auto ptr = buf;
 					(abort_with_error_concatenate(std::forward<T>(args), buf, ptr), ...);
 					*ptr = '\0';
@@ -7114,7 +7118,7 @@ TOML_IMPL_START
 				}
 
 				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[64];
+				char chars[64];
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				bool seen_decimal = false, seen_exponent_sign = false, seen_exponent = false;
@@ -7202,7 +7206,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// convert to double
-				TOML_GCC_ATTR(uninitialized) double result;
+				double result;
 				#if TOML_USE_STREAMS_FOR_FLOATS
 				{
 					std::stringstream ss;
@@ -7286,7 +7290,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[23]; //23 = strlen("1.0123456789ABCDEFp+999")
+				char chars[23]; //23 = strlen("1.0123456789ABCDEFp+999")
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				bool seen_decimal = false, seen_exponent_sign = false, seen_exponent = false;
@@ -7391,7 +7395,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// convert to double
-				TOML_GCC_ATTR(uninitialized) double result;
+				double result;
 				#if TOML_USE_STREAMS_FOR_FLOATS
 				{
 					std::string str;
@@ -7515,7 +7519,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// consume value chars
-				TOML_GCC_ATTR(uninitialized) char chars[traits::buffer_length];
+				char chars[traits::buffer_length];
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				while (true)
@@ -7586,7 +7590,7 @@ TOML_IMPL_START
 				}
 
 				// otherwise invoke charconv
-				TOML_GCC_ATTR(uninitialized) uint64_t result;
+				uint64_t result;
 				auto fc_result = std::from_chars(chars, chars + length, result, base);
 				if constexpr (traits::is_signed)
 				{
@@ -7653,7 +7657,7 @@ TOML_IMPL_START
 				};
 
 				// "YYYY"
-				TOML_GCC_ATTR(uninitialized) uint32_t year_digits[4];
+				uint32_t year_digits[4];
 				if (!consume_digit_sequence(year_digits))
 				{
 					eof_check();
@@ -7679,7 +7683,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// "MM"
-				TOML_GCC_ATTR(uninitialized) uint32_t month_digits[2];
+				uint32_t month_digits[2];
 				if (!consume_digit_sequence(month_digits))
 				{
 					eof_check();
@@ -7711,7 +7715,7 @@ TOML_IMPL_START
 				TOML_ERROR_CHECK({});
 
 				// "DD"
-				TOML_GCC_ATTR(uninitialized) uint32_t day_digits[2];
+				uint32_t day_digits[2];
 				if (!consume_digit_sequence(day_digits))
 				{
 					eof_check();
@@ -7760,7 +7764,7 @@ TOML_IMPL_START
 				};
 
 				// "HH"
-				TOML_GCC_ATTR(uninitialized) uint32_t digits[2];
+				uint32_t digits[2];
 				if (!consume_digit_sequence(digits))
 				{
 					eof_check();
@@ -7880,7 +7884,7 @@ TOML_IMPL_START
 
 				// ".FFFFFFFFF"
 				static constexpr auto max_fractional_digits = 9_sz;
-				TOML_GCC_ATTR(uninitialized) uint32_t fractional_digits[max_fractional_digits];
+				uint32_t fractional_digits[max_fractional_digits];
 				auto digit_count = consume_variable_length_digit_sequence(fractional_digits);
 				if (!digit_count)
 					abort_with_error(
@@ -7960,7 +7964,7 @@ TOML_IMPL_START
 						eof_check();
 
 						// "HH"
-						TOML_GCC_ATTR(uninitialized) int digits[2];
+						int digits[2];
 						if (!consume_digit_sequence(digits))
 						{
 							eof_check();
@@ -8101,7 +8105,7 @@ TOML_IMPL_START
 						has_space = 256
 					};
 					int traits = has_nothing;
-					TOML_GCC_ATTR(uninitialized) char32_t chars[utf8_buffered_reader::max_history_length];
+					char32_t chars[utf8_buffered_reader::max_history_length];
 					size_t char_count = {}, advance_count = {};
 					bool eof_while_scanning = false;
 					const auto scan = [&]() TOML_MAY_THROW

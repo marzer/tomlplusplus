@@ -89,7 +89,7 @@ TOML_IMPL_START
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+		char buf[charconv_buffer_length<T>];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
 		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
 	}
@@ -144,7 +144,7 @@ TOML_IMPL_START
 		}
 		#else
 		{
-			TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+			char buf[charconv_buffer_length<T>];
 			const auto res = hexfloat
 				? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
 				: std::to_chars(buf, buf + sizeof(buf), val);
@@ -182,7 +182,7 @@ TOML_IMPL_START
 	inline void print_to_stream(T val, std::basic_ostream<CHAR>& stream, size_t zero_pad_to_digits) TOML_MAY_THROW
 	{
 		static_assert(sizeof(CHAR) == 1);
-		TOML_GCC_ATTR(uninitialized) char buf[charconv_buffer_length<T>];
+		char buf[charconv_buffer_length<T>];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
 		const auto len = static_cast<size_t>(res.ptr - buf);
 		for (size_t i = len; i < zero_pad_to_digits; i++)
