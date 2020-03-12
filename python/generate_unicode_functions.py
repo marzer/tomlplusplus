@@ -425,7 +425,7 @@ class Chunk:
 							self.print_subchunk_case(subchunk_index, output_file, level, indent)
 					print("{}\tdefault: return false;".format(indent), file=output_file)
 				print("{}}}".format(indent), file=output_file)
-			print("{}// chunk summary: {} codepoints from {} ranges (spanning a search area of {})".format(indent, self.count, len(self.ranges), self.span_size), file=output_file)
+			print("{}//# chunk summary: {} codepoints from {} ranges (spanning a search area of {})".format(indent, self.count, len(self.ranges), self.span_size), file=output_file)
 
 		# return cp == A || cp == B ...
 		else:
@@ -521,7 +521,7 @@ def get_script_folder():
 def append_codepoint(codepoints, codepoint, category):
 	if (codepoint <= 128 # ASCII range (handled separately in C++)
 		or 0xD800 <= codepoint <= 0xF8FF # surrogates & private use area
-		or 0x30000 <= codepoint <= 0xDFFFF # planes 3-13
+		or 0x40000 <= codepoint <= 0xDFFFF # planes 4-13
 		or 0xF0000 <= codepoint <= 0x10FFFD # planes 15-16
 		or 0xFFFE <= (codepoint & 0xFFFF) <= 0xFFFF # noncharacters
 		): return
