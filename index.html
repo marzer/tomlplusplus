@@ -145,7 +145,6 @@ C++</span></a>
     <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
 <span class="s">        [library]</span>
 <span class="s">        name = "toml++"</span>
-<span class="s">        version = "0.1.0"</span>
 <span class="s">        authors = ["Mark Gillard &lt;mark@notarealwebsite.com&gt;"]</span>
 <span class="s">    </span>
 <span class="s">        [dependencies]</span>
@@ -172,7 +171,6 @@ C++</span></a>
 <span class="go">[library]</span>
 <span class="go">authors = ["Mark Gillard &lt;mark@notarealwebsite.com&gt;"]</span>
 <span class="go">name = "toml++"</span>
-<span class="go">version = "0.1.0"</span>
 
 <span class="go">... exactly as above, but twice</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a><br/></p></aside></section><section id="mainpage-example-manipulations"><h3><a href="#mainpage-example-manipulations">Traversing and manipulating data</a></h3><p>A TOML document is a tree of values, arrays and tables, represented as the <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a> and <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, respectively. All three inherit from <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, and can be easily accessed via the <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span><span class="cp"></span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span><span class="cp"></span>
@@ -287,7 +285,7 @@ C++</span></a>
 <span class="go">        "0.5.0",</span>
 <span class="go">        "and beyond"</span>
 <span class="go">    ]</span>
-<span class="go">}</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1default__formatter.html">toml::<wbr/>default_formatter</a></li><li><a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></li></ul></aside></section></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>Contributions are very welcome! Either by <a href="https://github.com/marzer/tomlplusplus/issues">reporting issues</a> or submitting pull requests. If you wish to submit a pull request, please see <a href="https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md">CONTRIBUTING</a> for all the details you need to get going.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</a>.</p><p>UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder">LICENSE-utf8-decoder</a>.</p><p class="m-note m-default">If you're using the single-header version of the library you don't need to distribute these files; their contents is included in the preamble at the top of the file.</p></section>
+<span class="go">}</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1default__formatter.html">toml::<wbr/>default_formatter</a></li><li><a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></li></ul></aside></section></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>Contributions are very welcome! Either by <a href="https://github.com/marzer/tomlplusplus/issues">reporting issues</a> or submitting pull requests. If you wish to submit a pull request, please see <a href="https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md">CONTRIBUTING</a> for all the details you need to get going.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE">LICENSE</a>.</p><p class="m-note m-default">If you're using the single-header version of the library you don't need to explicitly distribute the license file; it is embedded in the preamble at the top of the header.</p></section>
       </div>
     </div>
   </div>
