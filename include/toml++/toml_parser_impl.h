@@ -1,3 +1,7 @@
+//# This file is a part of toml++ and is subject to the the terms of the MIT license.
+//# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+//# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+
 #pragma once
 #include "toml_parser.h"
 
@@ -444,14 +448,24 @@ TOML_IMPL_START
 							case U'\\': str += TOML_STRING_PREFIX('\\'); break;
 
 							// unicode scalar sequences
+							case U'x':
+								#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+									[[fallthrough]];
+								#else
+									abort_with_error("Escape sequence '\\x' is not supported "
+										"in TOML 0.5.0 and earlier."sv
+									);
+									break;
+								#endif
 							case U'u': [[fallthrough]];
 							case U'U':
 							{
-								uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : 0x1000u;
+								uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
 								uint32_t sequence_value{};
 								while (place_value)
 								{
 									eof_check();
+									TOML_ERROR_CHECK({});
 
 									if (!is_hexadecimal_digit(*cp))
 										abort_with_error(
@@ -497,7 +511,6 @@ TOML_IMPL_START
 									str += static_cast<string_char>(0x80u | ((sequence_value >> 6) & 0x3Fu));
 									str += static_cast<string_char>(0x80u | (sequence_value & 0x3Fu));
 								}
-
 								break;
 							}
 

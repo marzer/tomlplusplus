@@ -120,6 +120,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#665]: Make arrays heterogeneous
 - [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
 - [#687]: Relax bare key restrictions to allow additional unicode characters
+- [#709]: Include an \xHH escape code sequence
 
 _These can be disabled (and thus strict [TOML v0.5.0] compliance enforced) by specifying
 `TOML_UNRELEASED_FEATURES = 0` (see [Configuration](#Configuration))._
@@ -139,8 +140,7 @@ If you wish to submit a pull request, please see [CONTRIBUTING] for all the deta
 
 `toml++` is licensed under the terms of the MIT license - see [LICENSE].
 
-UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]',
-which is also subject to the terms of the MIT license - see [LICENSE-utf8-decoder].
+UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]'.
 
 [API documentation]: https://marzer.github.io/tomlplusplus/
 [unreleased TOML language features]: #unreleased-toml-features
@@ -165,5 +165,6 @@ which is also subject to the terms of the MIT license - see [LICENSE-utf8-decode
 [#665]: https://github.com/toml-lang/toml/issues/665
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
+[#709]: https://github.com/toml-lang/toml/pull/709
 [LICENSE-utf8-decoder]: ./LICENSE-utf8-decoder
 [something better than std::optional]: https://github.com/TartanLlama/optional

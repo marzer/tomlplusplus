@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# This file is a part of toml++ and is subject to the the terms of the MIT license.
+# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
 import sys
 import re
@@ -77,7 +80,7 @@ def main():
 	# preprocess header(s)
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
-	source_text = re.sub('(?:\n[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
+	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
 	source_text = re.sub('(?:///[<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove inline doxy briefs
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
@@ -103,8 +106,6 @@ def main():
 				source_text, 0, re.I | re.M)
 		source_text = re.sub(blank_lines_between_returns_pattern, '\\1\n\\2', source_text, 0, re.I | re.M)
 	source_text = source_text.strip()
-
-	
 
 	# extract library version
 	library_version = [0,0,0]
@@ -136,15 +137,6 @@ TOML language specification:
 Latest: https://github.com/toml-lang/toml/blob/master/README.md
 v0.5.0: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md''')
 	preamble.append(read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE')))
-	preamble.append('''
-UTF-8 decoding is performed using a derivative of Bjoern Hoehrmann's 'Flexible and Economical UTF-8 Decoder'
-See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
-
-{}
-'''.format(
-		read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE-utf8-decoder'))
-	))
-
 
 	# write the output file
 	output_file_path = path.join(get_script_folder(), '..', 'toml.hpp')

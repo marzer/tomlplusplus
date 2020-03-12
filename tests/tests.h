@@ -14,7 +14,7 @@
 #define TOML_ALL_INLINE 0
 #include "../include/toml++/toml.h"
 
-#if defined(__EXCEPTIONS) || defined(__cpp_exceptions) || defined(_CPPUNWIND)
+#if TOML_COMPILER_EXCEPTIONS
 	#if !TOML_EXCEPTIONS
 		#error Exceptions were enabled but TOML_EXCEPTIONS was auto-set to disabled
 	#endif
@@ -115,6 +115,8 @@ inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&&
 template <typename CHAR>
 inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 {
+	INFO("String being parsed: '"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "'"sv)
+
 	#if TOML_EXCEPTIONS
 
 	static constexpr auto run_tests = [](auto&& fn) noexcept

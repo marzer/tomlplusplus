@@ -138,4 +138,30 @@ str = ''''That's still pointless', she said.'''
 	#else
 	parsing_should_fail(R"(str = "The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv);
 	#endif
+
+	// toml/pull/709 - \xHH short-form unicode scalars
+	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	parse_expected_value(
+		R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
+		 S("\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv));
+	#else
+	parsing_should_fail(R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
+	#endif
+
+	//check 8-digit \U scalars with insufficient digits
+	parsing_should_fail(R"(str = "\U1234567")"sv);
+	parsing_should_fail(R"(str = "\U123456")"sv);
+	parsing_should_fail(R"(str = "\U12345")"sv);
+	parsing_should_fail(R"(str = "\U1234")"sv);
+	parsing_should_fail(R"(str = "\U123")"sv);
+	parsing_should_fail(R"(str = "\U12")"sv);
+	parsing_should_fail(R"(str = "\U1")"sv);
+
+	//check 4-digit \u scalars with insufficient digits
+	parsing_should_fail(R"(str = "\u123")"sv);
+	parsing_should_fail(R"(str = "\u12")"sv);
+	parsing_should_fail(R"(str = "\u1")"sv);
+
+	//check 2-digit \x scalars with insufficient digits
+	parsing_should_fail(R"(str = "\x1")"sv);
 }

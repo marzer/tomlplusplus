@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.4.3
+// toml++ v0.4.4
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -23,27 +23,8 @@
 //
 // MIT License
 //
-// Copyright (c) 2019-2020 Mark Gillard
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-// documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
-// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
-// permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all copies or substantial portions of the
-// Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
-// WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-// COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
-// OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-//
-//----------------------------------------------------------------------------------------------------------------------
-//
-// UTF-8 decoding is performed using a derivative of Bjoern Hoehrmann's 'Flexible and Economical UTF-8 Decoder'
-// See http://bjoern.hoehrmann.de/utf-8/decoder/dfa/ for details.
-//
-// Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+// Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+// Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de> (utf8_decoder)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -134,13 +115,14 @@
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-
 	#if __has_declspec_attribute(novtable)
 		#define TOML_INTERFACE			__declspec(novtable)
 	#endif
-
 	#if __has_declspec_attribute(empty_bases)
 		#define TOML_EMPTY_BASES		__declspec(empty_bases)
+	#endif
+	#ifdef __EXCEPTIONS
+		#define TOML_COMPILER_EXCEPTIONS 1
 	#endif
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
@@ -161,9 +143,11 @@
 	#define TOML_UNREACHABLE				__assume(0)
 	#define TOML_INTERFACE					__declspec(novtable)
 	#define TOML_EMPTY_BASES				__declspec(empty_bases)
-
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
+	#endif
+	#ifdef _CPPUNWIND
+		#define TOML_COMPILER_EXCEPTIONS 1
 	#endif
 
 #elif defined(__GNUC__)
@@ -180,6 +164,12 @@
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
+	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
+		#define TOML_RELOPS_REORDERING 1
+	#endif
+	#ifdef __cpp_exceptions
+		#define TOML_COMPILER_EXCEPTIONS 1
+	#endif
 
 	// these pass the __has_attribute() test but cause warnings on if/else branches =/
 	#define TOML_LIKELY
@@ -188,10 +178,6 @@
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_USE_STREAMS_FOR_FLOATS
 		#define TOML_USE_STREAMS_FOR_FLOATS 1
-	#endif
-
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
 	#endif
 
 #endif
@@ -212,16 +198,19 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
-#if !defined(__EXCEPTIONS) && !defined(__cpp_exceptions) && !defined(_CPPUNWIND)
+#ifndef TOML_COMPILER_EXCEPTIONS
+	#define TOML_COMPILER_EXCEPTIONS 0
+#endif
+#if TOML_COMPILER_EXCEPTIONS
+	#ifndef TOML_EXCEPTIONS
+		#define TOML_EXCEPTIONS 1
+	#endif
+#else
 	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
 		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
 	#endif
 	#undef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS	0
-#else
-	#ifndef TOML_EXCEPTIONS
-		#define TOML_EXCEPTIONS 1
-	#endif
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
@@ -278,9 +267,6 @@
 	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
 		#define TOML_UNLIKELY [[unlikely]]
 	#endif
-	#if !defined(TOML_NO_UNIQUE_ADDRESS) && __has_cpp_attribute(no_unique_address)
-		#define TOML_NO_UNIQUE_ADDRESS [[no_unique_address]]
-	#endif
 	#if __has_cpp_attribute(nodiscard) >= 201907L
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
@@ -290,9 +276,6 @@
 #endif
 #ifndef TOML_UNLIKELY
 	#define TOML_UNLIKELY
-#endif
-#ifndef TOML_NO_UNIQUE_ADDRESS
-	#define TOML_NO_UNIQUE_ADDRESS
 #endif
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
@@ -316,7 +299,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		4
-#define TOML_LIB_PATCH		3
+#define TOML_LIB_PATCH		4
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -6670,14 +6653,24 @@ TOML_IMPL_START
 							case U'\\': str += TOML_STRING_PREFIX('\\'); break;
 
 							// unicode scalar sequences
+							case U'x':
+								#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+									[[fallthrough]];
+								#else
+									abort_with_error("Escape sequence '\\x' is not supported "
+										"in TOML 0.5.0 and earlier."sv
+									);
+									break;
+								#endif
 							case U'u': [[fallthrough]];
 							case U'U':
 							{
-								uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : 0x1000u;
+								uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
 								uint32_t sequence_value{};
 								while (place_value)
 								{
 									eof_check();
+									TOML_ERROR_CHECK({});
 
 									if (!is_hexadecimal_digit(*cp))
 										abort_with_error(
@@ -6723,7 +6716,6 @@ TOML_IMPL_START
 									str += static_cast<string_char>(0x80u | ((sequence_value >> 6) & 0x3Fu));
 									str += static_cast<string_char>(0x80u | (sequence_value & 0x3Fu));
 								}
-
 								break;
 							}
 
@@ -9221,7 +9213,6 @@ TOML_END
 	#undef TOML_CONSTEVAL
 	#undef TOML_LIKELY
 	#undef TOML_UNLIKELY
-	#undef TOML_NO_UNIQUE_ADDRESS
 	#undef TOML_NODISCARD_CTOR
 	#undef TOML_MAKE_VERSION
 	#undef TOML_LANG_EFFECTIVE_VERSION
@@ -9248,6 +9239,7 @@ TOML_END
 	#undef TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_INLINE_FUNC_IMPL
+	#undef TOML_COMPILER_EXCEPTIONS
 #endif
 
 #ifdef __GNUC__

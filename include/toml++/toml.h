@@ -1,3 +1,7 @@
+//# This file is a part of toml++ and is subject to the the terms of the MIT license.
+//# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+//# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+
 #pragma once
 
 //# Note: most of these would be included transitively but
@@ -51,7 +55,6 @@
 	#undef TOML_CONSTEVAL
 	#undef TOML_LIKELY
 	#undef TOML_UNLIKELY
-	#undef TOML_NO_UNIQUE_ADDRESS
 	#undef TOML_NODISCARD_CTOR
 	#undef TOML_MAKE_VERSION
 	#undef TOML_LANG_EFFECTIVE_VERSION
@@ -78,6 +81,7 @@
 	#undef TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_INLINE_FUNC_IMPL
+	#undef TOML_COMPILER_EXCEPTIONS
 #endif
 
 /// \mainpage toml++
@@ -222,7 +226,6 @@
 ///		static constexpr auto source = R"(
 ///			[library]
 ///			name = "toml++"
-///			version = "0.1.0"
 ///			authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 ///		
 ///			[dependencies]
@@ -253,7 +256,6 @@
 /// [library]
 /// authors = ["Mark Gillard <mark@notarealwebsite.com>"]
 /// name = "toml++"
-/// version = "0.1.0"
 /// 
 /// ... exactly as above, but twice
 /// \eout
@@ -422,12 +424,8 @@
 /// toml++ is licensed under the terms of the MIT license - see
 /// [LICENSE](https://github.com/marzer/tomlplusplus/blob/master/LICENSE).
 ///
-/// UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's
-/// 'Flexible and Economical UTF - 8 Decoder', which is also subject to the terms of the MIT license - see
-/// [LICENSE-utf8-decoder](https://github.com/marzer/tomlplusplus/blob/master/LICENSE-utf8-decoder).
-/// 
 /// \m_class{m-note m-default}
 /// 
-/// If you're using the single-header version of the library you don't need to distribute these files;
-/// their contents is included in the preamble at the top of the file.
+/// If you're using the single-header version of the library you don't need to explicitly distribute the license file;
+/// it is embedded in the preamble at the top of the header.
 ///

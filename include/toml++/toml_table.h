@@ -1,3 +1,7 @@
+//# This file is a part of toml++ and is subject to the the terms of the MIT license.
+//# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+//# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+
 #pragma once
 #include "toml_array.h"
 
