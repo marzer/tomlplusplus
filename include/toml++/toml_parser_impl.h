@@ -221,8 +221,8 @@ TOML_IMPL_START
 						recording_buffer.clear();
 					else
 						recording_buffer.erase(
-							recording_buffer.cbegin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes),
-							recording_buffer.cend()
+							recording_buffer.begin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes),
+							recording_buffer.end()
 						);
 				}
 			}
