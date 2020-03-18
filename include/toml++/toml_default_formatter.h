@@ -459,6 +459,10 @@ TOML_START
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
 	};
 
+	default_formatter(const table&) -> default_formatter<char>;
+	default_formatter(const array&) -> default_formatter<char>;
+	template <typename T> default_formatter(const value<T>&) -> default_formatter<char>;
+
 	template <typename CHAR>
 	inline void default_formatter<CHAR>::print_inline(const toml::table& tbl) TOML_MAY_THROW
 	{

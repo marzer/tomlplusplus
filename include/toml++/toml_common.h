@@ -318,6 +318,9 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 
+#if __has_include(<version>)
+	#include <version>
+#endif
 #include <cstdint>
 #include <cstring>		//memcpy, memset
 #include <memory>
@@ -348,6 +351,12 @@ TOML_POP_WARNINGS
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
 #else
 	#define TOML_STRING_PREFIX(S) S
+#endif
+
+#ifdef __cpp_lib_launder
+	#define TOML_LAUNDER(x)	std::launder(x)
+#else
+	#define TOML_LAUNDER(x)	x
 #endif
 
 ////////// FORWARD DECLARATIONS & TYPEDEFS

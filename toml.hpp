@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.4.4
+// toml++ v0.5.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -298,8 +298,8 @@
 #endif
 
 #define TOML_LIB_MAJOR		0
-#define TOML_LIB_MINOR		4
-#define TOML_LIB_PATCH		4
+#define TOML_LIB_MINOR		5
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
@@ -363,6 +363,9 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 
+#if __has_include(<version>)
+	#include <version>
+#endif
 #include <cstdint>
 #include <cstring>		//memcpy, memset
 #include <memory>
@@ -393,6 +396,12 @@ TOML_POP_WARNINGS
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
 #else
 	#define TOML_STRING_PREFIX(S) S
+#endif
+
+#ifdef __cpp_lib_launder
+	#define TOML_LAUNDER(x)	std::launder(x)
+#else
+	#define TOML_LAUNDER(x)	x
 #endif
 
 namespace toml { }
@@ -4721,9 +4730,9 @@ TOML_START
 			void destroy() noexcept
 			{
 				if (is_err)
-					std::launder(reinterpret_cast<parse_error*>(&storage))->~parse_error();
+					TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage))->~parse_error();
 				else
-					std::launder(reinterpret_cast<table*>(&storage))->~table();
+					TOML_LAUNDER(reinterpret_cast<table*>(&storage))->~table();
 			}
 
 		public:
@@ -4734,33 +4743,33 @@ TOML_START
 			[[nodiscard]] table& get() & noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *std::launder(reinterpret_cast<table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<table*>(&storage));
 			}
 			[[nodiscard]] table&& get() && noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return std::move(*std::launder(reinterpret_cast<table*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<table*>(&storage)));
 			}
 			[[nodiscard]] const table& get() const& noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *std::launder(reinterpret_cast<const table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const table*>(&storage));
 			}
 
 			[[nodiscard]] parse_error& error() & noexcept
 			{
 				TOML_ASSERT(is_err);
-				return *std::launder(reinterpret_cast<parse_error*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage));
 			}
 			[[nodiscard]] parse_error&& error() && noexcept
 			{
 				TOML_ASSERT(is_err);
-				return std::move(*std::launder(reinterpret_cast<parse_error*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage)));
 			}
 			[[nodiscard]] const parse_error& error() const& noexcept
 			{
 				TOML_ASSERT(is_err);
-				return *std::launder(reinterpret_cast<const parse_error*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const parse_error*>(&storage));
 			}
 
 			[[nodiscard]] operator table& () noexcept { return get(); }
@@ -5495,6 +5504,10 @@ TOML_START
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
 	};
 
+	default_formatter(const table&) -> default_formatter<char>;
+	default_formatter(const array&) -> default_formatter<char>;
+	template <typename T> default_formatter(const value<T>&) -> default_formatter<char>;
+
 	template <typename CHAR>
 	inline void default_formatter<CHAR>::print_inline(const toml::table& tbl) TOML_MAY_THROW
 	{
@@ -5626,10 +5639,8 @@ TOML_START
 		public:
 
 			TOML_NODISCARD_CTOR
-			explicit json_formatter(
-				const toml::node& source,
-				format_flags flags = format_flags::quote_dates_and_times) noexcept
-				: base{ source, flags }
+				explicit json_formatter(const toml::node& source, format_flags flags = {}) noexcept
+				: base{ source, flags | format_flags::quote_dates_and_times }
 			{}
 
 			template <typename T, typename U>
@@ -5637,6 +5648,10 @@ TOML_START
 			template <typename T, typename U>
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
 	};
+
+	json_formatter(const table&) -> json_formatter<char>;
+	json_formatter(const array&) -> json_formatter<char>;
+	template <typename T> json_formatter(const value<T>&) -> json_formatter<char>;
 
 	template <typename CHAR>
 	inline void json_formatter<CHAR>::print(const toml::table& tbl) TOML_MAY_THROW
@@ -9188,6 +9203,7 @@ TOML_END
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_INLINE_FUNC_IMPL
 	#undef TOML_COMPILER_EXCEPTIONS
+	#undef TOML_LAUNDER
 #endif
 
 #ifdef __GNUC__

@@ -21,7 +21,18 @@ toml_char8_strings = '-DTOML_CHAR_8_STRINGS=1'
 manually_set_cpp_std = 'cpp_std=none'
 cpp20 = '-std=c++2a'
 use_tloptional = '-DTARTANLLAMA_OPTIONAL'
-
+compiler_supports_char8_strings = compiler.compiles('''
+	#include <string_view>
+	#include <string>
+	using namespace std::string_view_literals;
+	std::u8string func()
+	{
+		return std::u8string{ u8"this is a test."sv };
+	}
+	''',
+	name : 'char8 string check',
+	args : [ '-std=c++2a' ]
+)
 
 ############################################################################
 ### char

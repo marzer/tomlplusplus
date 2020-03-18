@@ -103,10 +103,8 @@ TOML_START
 			/// \param 	source	The source TOML object.
 			/// \param 	flags 	Format option flags.
 			TOML_NODISCARD_CTOR
-			explicit json_formatter(
-				const toml::node& source,
-				format_flags flags = format_flags::quote_dates_and_times) noexcept
-				: base{ source, flags }
+				explicit json_formatter(const toml::node& source, format_flags flags = {}) noexcept
+				: base{ source, flags | format_flags::quote_dates_and_times }
 			{}
 
 			template <typename T, typename U>
@@ -114,6 +112,10 @@ TOML_START
 			template <typename T, typename U>
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
 	};
+
+	json_formatter(const table&) -> json_formatter<char>;
+	json_formatter(const array&) -> json_formatter<char>;
+	template <typename T> json_formatter(const value<T>&) -> json_formatter<char>;
 
 	template <typename CHAR>
 	inline void json_formatter<CHAR>::print(const toml::table& tbl) TOML_MAY_THROW

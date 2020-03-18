@@ -52,9 +52,9 @@ TOML_START
 			void destroy() noexcept
 			{
 				if (is_err)
-					std::launder(reinterpret_cast<parse_error*>(&storage))->~parse_error();
+					TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage))->~parse_error();
 				else
-					std::launder(reinterpret_cast<table*>(&storage))->~table();
+					TOML_LAUNDER(reinterpret_cast<table*>(&storage))->~table();
 			}
 
 		public:
@@ -70,38 +70,38 @@ TOML_START
 			[[nodiscard]] table& get() & noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *std::launder(reinterpret_cast<table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<table*>(&storage));
 			}
 			/// \brief	Returns the internal toml::table (rvalue overload).
 			[[nodiscard]] table&& get() && noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return std::move(*std::launder(reinterpret_cast<table*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<table*>(&storage)));
 			}
 			/// \brief	Returns the internal toml::table (const lvalue overload).
 			[[nodiscard]] const table& get() const& noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *std::launder(reinterpret_cast<const table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const table*>(&storage));
 			}
 
 			/// \brief	Returns the internal toml::parse_error.
 			[[nodiscard]] parse_error& error() & noexcept
 			{
 				TOML_ASSERT(is_err);
-				return *std::launder(reinterpret_cast<parse_error*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage));
 			}
 			/// \brief	Returns the internal toml::parse_error (rvalue overload).
 			[[nodiscard]] parse_error&& error() && noexcept
 			{
 				TOML_ASSERT(is_err);
-				return std::move(*std::launder(reinterpret_cast<parse_error*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage)));
 			}
 			/// \brief	Returns the internal toml::parse_error (const lvalue overload).
 			[[nodiscard]] const parse_error& error() const& noexcept
 			{
 				TOML_ASSERT(is_err);
-				return *std::launder(reinterpret_cast<const parse_error*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const parse_error*>(&storage));
 			}
 
 			/// \brief	Returns the internal toml::table.

@@ -1,1 +1,2 @@
 option('BUILD_TESTS', type : 'feature', value : 'auto', description : 'Whether to build tests (defaults to auto: only if not a subproject)')
+option('BUILD_EXAMPLES', type : 'feature', value : 'auto', description : 'Whether to build examples (defaults to auto: only if not a subproject)')
