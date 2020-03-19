@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v0.5.0
+// toml++ v0.5.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -60,7 +60,7 @@
 	#define TOML_ALL_INLINE 1
 #endif
 
-#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
+#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE || defined(__INTELLISENSE__)
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
 #else
@@ -98,13 +98,6 @@
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
-
-#if defined(__clang__) || defined(__GNUC__)
-	#define TOML_GCC_ATTR(attr)		__attribute__((attr))
-#else
-	#define TOML_GCC_ATTR(attr)
-#endif
-
 #ifdef __clang__
 
 	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
@@ -112,14 +105,17 @@
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
+	#define TOML_GCC_ATTR(attr)				__attribute__((attr))
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#if __has_declspec_attribute(novtable)
-		#define TOML_INTERFACE			__declspec(novtable)
-	#endif
-	#if __has_declspec_attribute(empty_bases)
-		#define TOML_EMPTY_BASES		__declspec(empty_bases)
+	#if defined(_MSC_VER) && defined(__has_declspec_attribute)
+		#if __has_declspec_attribute(novtable)
+			#define TOML_INTERFACE			__declspec(novtable)
+		#endif
+		#if __has_declspec_attribute(empty_bases)
+			#define TOML_EMPTY_BASES		__declspec(empty_bases)
+		#endif
 	#endif
 	#ifdef __EXCEPTIONS
 		#define TOML_COMPILER_EXCEPTIONS 1
@@ -162,6 +158,7 @@
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
 											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
+	#define TOML_GCC_ATTR(attr)				__attribute__((attr))
 	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
@@ -193,7 +190,7 @@
 	#define TOML_CPP 26
 #elif TOML_CPP_VERSION >= 202300L
 	#define TOML_CPP 23
-#elif TOML_CPP_VERSION >= 202000L
+#elif TOML_CPP_VERSION >= 202002L
 	#define TOML_CPP 20
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
@@ -238,6 +235,9 @@
 #endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS
+#endif
+#ifndef TOML_GCC_ATTR
+	#define TOML_GCC_ATTR(attr)
 #endif
 #ifndef TOML_INTERFACE
 	#define TOML_INTERFACE
@@ -299,7 +299,7 @@
 
 #define TOML_LIB_MAJOR		0
 #define TOML_LIB_MINOR		5
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		0
 #define TOML_LANG_MINOR		5
