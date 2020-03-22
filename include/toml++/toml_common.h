@@ -64,16 +64,24 @@
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
-	#define TOML_GCC_ATTR(attr)				__attribute__((attr))
-	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#if defined(_MSC_VER) && defined(__has_declspec_attribute)
-		#if __has_declspec_attribute(novtable)
-			#define TOML_INTERFACE			__declspec(novtable)
+	#if defined(_MSC_VER) // msvc compat mode
+		#if defined(__has_declspec_attribute)
+			#if __has_declspec_attribute(novtable)
+				#define TOML_INTERFACE		__declspec(novtable)
+			#endif
+			#if __has_declspec_attribute(empty_bases)
+				#define TOML_EMPTY_BASES	__declspec(empty_bases)
+			#endif
+			#define TOML_ALWAYS_INLINE		__forceinline
 		#endif
-		#if __has_declspec_attribute(empty_bases)
-			#define TOML_EMPTY_BASES		__declspec(empty_bases)
+	#else // regular ol' clang
+		#define TOML_GNU_ATTR(attr)			__attribute__((attr))
+		#ifdef __has_attribute
+			#if __has_attribute(always_inline)
+				#define TOML_ALWAYS_INLINE	__attribute__((__always_inline__)) inline
+			#endif
 		#endif
 	#endif
 	#ifdef __EXCEPTIONS
@@ -117,8 +125,8 @@
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
 											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
-	#define TOML_GCC_ATTR(attr)				__attribute__((attr))
-	#define TOML_ALWAYS_INLINE				TOML_GCC_ATTR(__always_inline__) inline
+	#define TOML_GNU_ATTR(attr)				__attribute__((attr))
+	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
@@ -195,8 +203,8 @@
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS
 #endif
-#ifndef TOML_GCC_ATTR
-	#define TOML_GCC_ATTR(attr)
+#ifndef TOML_GNU_ATTR
+	#define TOML_GNU_ATTR(attr)
 #endif
 #ifndef TOML_INTERFACE
 	#define TOML_INTERFACE
@@ -706,18 +714,18 @@ TOML_START
 
 		public:
 
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
 			parse_error(const char* desc, source_region&& src) noexcept
 				: std::runtime_error{ desc },
 				source_{ std::move(src) }
 			{}
 
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
 			parse_error(const char* desc, const source_region& src) noexcept
 				: parse_error{ desc, source_region{ src } }
 			{}
 
-			TOML_NODISCARD_CTOR TOML_GCC_ATTR(nonnull)
+			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
 			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
 				: parse_error{ desc, source_region{ position, position, path } }
 			{}
