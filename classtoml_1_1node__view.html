@@ -665,7 +665,7 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-danger"><h4>Warning</h4><p>This function is dangerous if used carelessly and <strong>WILL</strong> break your code if the <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> didn't reference a node, or the chosen value type doesn't match the node's actual type. If you provide a definition for TOML_ASSERT (explicitly or indirectly by including <code>&lt;cassert&gt;</code>) an assertion will fire when invalid accesses are attempted:</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<aside class="m-note m-danger"><h4>Warning</h4><p>This function is dangerous if used carelessly and <strong>WILL</strong> break your code if the <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> didn't reference a node, or the chosen value type doesn't match the node's actual type. In debug builds an assertion will fire when invalid accesses are attempted:</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
 
 <span class="s">min = 32</span>
 <span class="s">max = 45</span>
