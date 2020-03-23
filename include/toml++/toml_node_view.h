@@ -217,8 +217,7 @@ TOML_START
 			///
 			/// \warning This function is dangerous if used carelessly and **WILL** break your code if the 
 			/// 		 node_view didn't reference a node, or the chosen value type doesn't match the node's
-			/// 		 actual type. If you provide a definition for TOML_ASSERT (explicitly or indirectly
-			/// 		 by including `<cassert>`) an assertion will fire when invalid accesses are attempted: \cpp
+			/// 		 actual type. In debug builds an assertion will fire when invalid accesses are attempted: \cpp
 			///
 			/// auto tbl = toml::parse(R"(
 			///	

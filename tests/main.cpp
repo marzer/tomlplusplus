@@ -6,10 +6,10 @@
 	#endif
 	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
-
-#include <cassert> //so TOML_ASSERT() maps to assert()
-#define TOML_ALL_INLINE 0
-#define TOML_IMPLEMENTATION
+#if !defined(_MSC_VER) || !defined(_M_IX86)
+	#define TOML_ALL_INLINE 0
+	#define TOML_IMPLEMENTATION
+#endif
 #include "../include/toml++/toml.h"
 
 #define CATCH_CONFIG_RUNNER

@@ -9,9 +9,10 @@
 #endif
 #include "catch2.h"
 #include <sstream>
-#include <cassert> //so TOML_ASSERT() maps to assert()
 #define TOML_UNDEF_MACROS 0
-#define TOML_ALL_INLINE 0
+#if !defined(_MSC_VER) || !defined(_M_IX86)
+	#define TOML_ALL_INLINE 0
+#endif
 #include "../include/toml++/toml.h"
 
 #if TOML_COMPILER_EXCEPTIONS

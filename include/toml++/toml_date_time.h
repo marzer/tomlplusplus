@@ -8,7 +8,7 @@
 TOML_START
 {
 	/// \brief	A local date.
-	struct date final
+	struct TOML_TRIVIAL_ABI date final
 	{
 		/// \brief	The year component.
 		uint16_t year;
@@ -92,7 +92,7 @@ TOML_START
 	}
 
 	/// \brief	A local time-of-day.
-	struct time final
+	struct TOML_TRIVIAL_ABI time final
 	{
 		/// \brief	The hour component, from 0 - 23.
 		uint8_t hour;
@@ -180,7 +180,7 @@ TOML_START
 	}
 
 	/// \brief	A timezone offset.
-	struct time_offset final
+	struct TOML_TRIVIAL_ABI time_offset final
 	{
 		/// \brief	Offset from UTC+0, in minutes.
 		int16_t minutes;

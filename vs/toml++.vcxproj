@@ -93,6 +93,7 @@
     <None Include="..\python\generate_unicode_functions.py" />
     <None Include="..\README.md" />
     <None Include="..\tests\meson.build" />
+    <None Include="toml++.props" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

@@ -100,6 +100,7 @@
     <None Include="..\tests\meson.build">
       <Filter>tests</Filter>
     </None>
+    <None Include="toml++.props" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

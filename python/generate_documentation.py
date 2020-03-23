@@ -25,21 +25,7 @@ inline_namespaces = [
 inline_namespace_explainer = 'All members of this namespace are automatically members of the parent namespace. '	\
 	+ 'It does not require an explicit \'using\' statement.'
 type_names = [
-	'table',
-	'array',
-	'value',
-	'date',
-	'time',
-	'date_time',
-	'time_offset',
-	'string',
-	'string_view',
-	'string_char',
-	'parse_result',
-	'parse_error',
-	'json_formatter',
-	'default_formatter',
-	'format_flags',
+	#------ standard types
 	'size_t',
 	'uint8_t',
 	'uint16_t',
@@ -71,7 +57,24 @@ type_names = [
 	'ofstream',
 	'stringstream',
 	'istringstream',
-	'ostringstream'
+	'ostringstream',
+	'string_view',
+	'string',
+	'byte',
+	#------ toml++ types
+	'table',
+	'array',
+	'value',
+	'date',
+	'time',
+	'date_time',
+	'time_offset',
+	'string_char',
+	'parse_result',
+	'parse_error',
+	'json_formatter',
+	'default_formatter',
+	'format_flags'
 ]
 all_namespaces = [
 	'std',
@@ -657,16 +660,13 @@ class ExtDocLinksFix(object):
 		(r'std::(?:basic_|w)?ostringstreams?', 'https://en.cppreference.com/w/cpp/io/basic_ostringstream'),
 		(r'std::(?:basic_|w)?stringstreams?', 'https://en.cppreference.com/w/cpp/io/basic_stringstream'),
 		(r'std::(?:basic_|w|u8)?string_views?', 'https://en.cppreference.com/w/cpp/string/basic_string_view'),	
-		(r'std::(?:basic_|w|u8)?strings?', 'https://en.cppreference.com/w/cpp/string/basic_string'),
-		
+		(r'std::(?:basic_|w|u8)?strings?', 'https://en.cppreference.com/w/cpp/string/basic_string'),	
 		(r'\s(?:<|&lt;)fstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/fstream'),
 		(r'\s(?:<|&lt;)sstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/sstream'),
 		(r'\s(?:<|&lt;)iostream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iostream'),
 		(r'\s(?:<|&lt;)iosfwd(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/iosfwd'),
 		(r'\s(?:<|&lt;)string(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string'),
 		(r'\s(?:<|&lt;)string_view(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string_view'),
-		
-		
 		(r'char(?:8|16|32)_ts?', 'https://en.cppreference.com/w/cpp/language/types'),
 		(r'std::is_(?:nothrow_)?convertible(?:_v)?', 'https://en.cppreference.com/w/cpp/types/is_convertible'),
 		(r'std::is_same(?:_v)?', 'https://en.cppreference.com/w/cpp/types/is_same'),
@@ -683,8 +683,15 @@ class ExtDocLinksFix(object):
 		(r'std::add_[lr]value_reference(?:_t)?', 'https://en.cppreference.com/w/cpp/types/add_reference'),
 		(r'std::remove_reference(?:_t)?', 'https://en.cppreference.com/w/cpp/types/remove_reference'),
 		(r'std::remove_cv(?:_t)?', 'https://en.cppreference.com/w/cpp/types/remove_cv'),
+		(r'std::underlying_type(?:_t)?', 'https://en.cppreference.com/w/cpp/types/underlying_type'),
 		(r'std::exceptions?', 'https://en.cppreference.com/w/cpp/error/exception'),
 		(r'std::runtime_errors?', 'https://en.cppreference.com/w/cpp/error/runtime_error'),
+		(r'std::is_constant_evaluated', 'https://en.cppreference.com/w/cpp/types/is_constant_evaluated'),
+		(r'std::launder', 'https://en.cppreference.com/w/cpp/utility/launder'),
+		(r'std::bit_width', 'https://en.cppreference.com/w/cpp/numeric/bit_width'),
+		(r'std::bit_ceil', 'https://en.cppreference.com/w/cpp/numeric/bit_ceil'),
+		(r'std::bit_floor', 'https://en.cppreference.com/w/cpp/numeric/bit_floor'),
+		(r'std::bit_cast', 'https://en.cppreference.com/w/cpp/numeric/bit_cast'),
 		(r'std::initializer_lists?', 'https://en.cppreference.com/w/cpp/utility/initializer_list'),
 		(
 			r'(?:L?P)?(?:'
@@ -704,7 +711,15 @@ class ExtDocLinksFix(object):
 		(r'(?:Legacy)?BidirectionalIterators?', 'https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator'),
 		(r'(?:Legacy)?RandomAccessIterators?', 'https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator'),
 		(r'(?:Legacy)?ContiguousIterators?', 'https://en.cppreference.com/w/cpp/named_req/ContiguousIterator'),
-		#(r'(?:Legacy)?Iterators?', 'https://en.cppreference.com/w/cpp/named_req/Iterator'),
+		(
+			r'(?:'
+				+ r'__cplusplus|__STDC_HOSTED__'
+				+ r'|__FILE__|__LINE__'
+				+ r'|__DATE__|__TIME__'
+				+ r'|__STDCPP_DEFAULT_NEW_ALIGNMENT__'
+				+ r')',
+			'https://en.cppreference.com/w/cpp/preprocessor/replace'
+		),
 		# toml-specific
 		(r'toml::values?', 'classtoml_1_1value.html'),
 		(r'(toml::)?date_times?', 'structtoml_1_1date__time.html'),

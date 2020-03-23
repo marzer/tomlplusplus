@@ -40,17 +40,11 @@
 	#define TOML_LARGE_FILES 0
 #endif
 
-#ifndef TOML_ASSERT
-	#ifdef assert
-		#define TOML_ASSERT(expr)	assert(expr)
-	#else
-		#define TOML_ASSERT(expr)	(void)0
-	#endif
-#endif
-
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
+
+//TOML_ASSERT
 
 ////////// COMPILER & ENVIRONMENT STUFF
 
@@ -66,8 +60,9 @@
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
+	#define TOML_GNU_ATTR(attr)				__attribute__((attr))
 	#if defined(_MSC_VER) // msvc compat mode
-		#if defined(__has_declspec_attribute)
+		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
 				#define TOML_INTERFACE		__declspec(novtable)
 			#endif
@@ -76,12 +71,13 @@
 			#endif
 			#define TOML_ALWAYS_INLINE		__forceinline
 		#endif
-	#else // regular ol' clang
-		#define TOML_GNU_ATTR(attr)			__attribute__((attr))
-		#ifdef __has_attribute
-			#if __has_attribute(always_inline)
-				#define TOML_ALWAYS_INLINE	__attribute__((__always_inline__)) inline
-			#endif
+	#endif
+	#ifdef __has_attribute
+		#if !defined(TOML_ALWAYS_INLINE) && __has_attribute(always_inline)
+			#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
+		#endif
+		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
+			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
 		#endif
 	#endif
 	#ifdef __EXCEPTIONS
@@ -244,6 +240,9 @@
 #ifndef TOML_UNLIKELY
 	#define TOML_UNLIKELY
 #endif
+#ifndef TOML_TRIVIAL_ABI
+	#define TOML_TRIVIAL_ABI
+#endif
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
 #endif
@@ -338,6 +337,14 @@ TOML_DISABLE_ALL_WARNINGS
 #include <map>
 #include <iosfwd>
 #include <charconv>
+#ifndef TOML_ASSERT
+	#if !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
+		#include <cassert>
+		#define TOML_ASSERT(expr)			assert(expr)
+	#else
+		#define TOML_ASSERT(expr)			(void)0
+	#endif
+#endif
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
 #endif

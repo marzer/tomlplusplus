@@ -83,6 +83,7 @@
 	#undef TOML_INLINE_FUNC_IMPL
 	#undef TOML_COMPILER_EXCEPTIONS
 	#undef TOML_LAUNDER
+	#undef TOML_TRIVIAL_ABI
 #endif
 
 /// \mainpage toml++

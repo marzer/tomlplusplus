@@ -17,7 +17,6 @@
 		<ClCompile>
 			<BufferSecurityCheck>false</BufferSecurityCheck>
 			<ControlFlowGuard>false</ControlFlowGuard>
-			<RuntimeTypeInfo>false</RuntimeTypeInfo> <!-- /GR- -->
 			<FloatingPointExceptions>false</FloatingPointExceptions> <!-- /fp:except- -->
 			<ExceptionHandling>Sync</ExceptionHandling> <!-- /EHsc -->
 			<ConformanceMode>true</ConformanceMode>  <!-- /permissive- -->
@@ -32,7 +31,6 @@
 			<DiagnosticsFormat>Caret</DiagnosticsFormat>
 			<AdditionalOptions>%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew</AdditionalOptions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_CONSOLE</PreprocessorDefinitions>
-			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
