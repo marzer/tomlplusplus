@@ -192,3 +192,9 @@ pre.m-code + pre.m-console span
 {
 	margin-right: 0.5rem;
 }
+
+/* page category subheading ("module" etc) */
+h1 span.m-thin
+{
+	color: #747474;
+}
