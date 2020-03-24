@@ -41,6 +41,7 @@ type_names = [
 	'exception',
 	'iterator',
 	'const_iterator',
+	'void',
 	'int',
 	'long',
 	'short',
@@ -883,35 +884,8 @@ def run_python_script(script_path, *args):
 
 
 def preprocess_xml(xml_dir):
+	pass
 
-	# fix value not knowing it's a child of node
-	toml_value_path = path.join(xml_dir, 'classtoml_1_1value.xml')
-	toml_value_text = read_all_text_from_file(toml_value_path)
-	toml_value_search_string = '<compoundname>toml::value</compoundname>'
-	toml_value_insert_pos = toml_value_text.find(toml_value_search_string)
-	changed = False
-	if (toml_value_insert_pos != -1):
-		toml_value_insert_pos += len(toml_value_search_string)
-		toml_value_text = toml_value_text[:toml_value_insert_pos]	\
-			+ '\n    <basecompoundref refid="classtoml_1_1node" prot="public" virt="non-virtual">toml::node</basecompoundref>'	\
-			+ toml_value_text[toml_value_insert_pos:]
-		changed = True
-	if changed:
-		with open(toml_value_path,'w', encoding='utf-8', newline='\n') as output_file:
-			print(toml_value_text, file=output_file)
-
-	# fix node not knowing it has value as a child
-	toml_node_path = path.join(xml_dir, 'classtoml_1_1node.xml')
-	toml_node_text = read_all_text_from_file(toml_node_path)
-	toml_node_search_string = '<compoundname>toml::node</compoundname>'
-	toml_node_insert_pos = toml_node_text.find(toml_node_search_string)
-	if (toml_node_insert_pos != -1):
-		toml_node_insert_pos += len(toml_node_search_string)
-		toml_node_text = toml_node_text[:toml_node_insert_pos]	\
-			+ '\n    <derivedcompoundref refid="classtoml_1_1value" prot="public" virt="non-virtual">toml::value</derivedcompoundref>'	\
-			+ toml_node_text[toml_node_insert_pos:]
-		with open(toml_node_path,'w', encoding='utf-8', newline='\n') as output_file:
-			print(toml_node_text, file=output_file)
 
 
 def main():

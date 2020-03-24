@@ -8,7 +8,7 @@
 
 TOML_START
 {
-	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 
 	/// \brief	The result of a parsing operation.
 	///

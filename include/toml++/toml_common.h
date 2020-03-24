@@ -82,6 +82,8 @@
 	#endif
 	#ifdef __EXCEPTIONS
 		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
@@ -107,6 +109,8 @@
 	#endif
 	#ifdef _CPPUNWIND
 		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 
 #elif defined(__GNUC__)
@@ -129,6 +133,8 @@
 	#endif
 	#ifdef __cpp_exceptions
 		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 
 	// these pass the __has_attribute() test but cause warnings on if/else branches =/
@@ -159,7 +165,7 @@
 	#define TOML_CPP 17
 #endif
 #ifndef TOML_COMPILER_EXCEPTIONS
-	#define TOML_COMPILER_EXCEPTIONS 0
+	#define TOML_COMPILER_EXCEPTIONS 1
 #endif
 #if TOML_COMPILER_EXCEPTIONS
 	#ifndef TOML_EXCEPTIONS
@@ -180,9 +186,6 @@
 	#define TOML_MAY_THROW				noexcept
 	#define TOML_MAY_THROW_UNLESS(...)	noexcept
 	#define TOML_NS1_EX _noex
-#endif
-#ifndef TOML_DOXYGEN
-	#define TOML_DOXYGEN 0
 #endif
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
@@ -300,7 +303,7 @@
 #define TOML_NS4
 #define TOML_NS5
 
-#if !TOML_DOXYGEN
+#ifndef DOXYGEN
 
 	#define TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
 		namespace toml { inline namespace v##VER##ARG1##ARG2##ARG3##ARG4##ARG5
@@ -415,11 +418,14 @@ TOML_START
 
 	#endif
 
+	#ifndef DOXYGEN
+
+	// foward declarations are hidden from doxygen
+	// because they fuck it up =/
 	struct date;
 	struct time;
 	struct time_offset;
 	struct date_time;
-
 	class node;
 	class array;
 	class table;
@@ -427,6 +433,8 @@ TOML_START
 	template <typename> class value;
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
+
+	#endif // !DOXYGEN
 
 	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t
@@ -638,7 +646,7 @@ TOML_START
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
-	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 

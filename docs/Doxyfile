@@ -345,7 +345,7 @@ EXPAND_ONLY_PREDEF     = NO
 SEARCH_INCLUDES        = NO
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
-PREDEFINED             = TOML_DOXYGEN=1 \
+PREDEFINED             = DOXYGEN=1 \
 						 __cplusplus=201703L \
 						 TOML_ALWAYS_INLINE=inline \
 						 TOML_MAY_THROW= \
