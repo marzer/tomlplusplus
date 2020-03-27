@@ -217,6 +217,46 @@ def html_replace_tag(tag,str):
 
 
 
+def html_shallow_search(starting_tag, names, filter = None):
+	if isinstance(starting_tag, soup.NavigableString):
+		return []
+	
+	if not is_collection(names):
+		names = [ names ]
+		
+	if starting_tag.name in names:
+		if filter is None or filter(starting_tag):
+			return [ starting_tag ]
+		
+	results = []
+	for tag in starting_tag.children:
+		if isinstance(tag, soup.NavigableString):
+			continue
+		if tag.name in names:
+			if filter is None or filter(tag):
+				results.append(tag)
+		else:
+			results = results + html_shallow_search(tag, names, filter)
+	return results
+
+
+
+def html_string_descendants(starting_tag, filter = None):
+	if isinstance(starting_tag, soup.NavigableString):
+		if filter is None or filter(starting_tag):
+			return [ starting_tag ]
+	
+	results = []
+	for tag in starting_tag.children:
+		if isinstance(tag, soup.NavigableString):
+			if filter is None or filter(tag):
+				results.append(tag)
+		else:
+			results = results + html_string_descendants(tag, filter)
+	return results
+
+
+
 class RegexReplacer(object):
 
 	def __substitute(self, m):
@@ -693,6 +733,15 @@ class ExtDocLinksFix(object):
 		(r'std::bit_ceil', 'https://en.cppreference.com/w/cpp/numeric/bit_ceil'),
 		(r'std::bit_floor', 'https://en.cppreference.com/w/cpp/numeric/bit_floor'),
 		(r'std::bit_cast', 'https://en.cppreference.com/w/cpp/numeric/bit_cast'),
+		(r'std::countl_zero', 'https://en.cppreference.com/w/cpp/numeric/countl_zero'),
+		(r'std::countr_zero', 'https://en.cppreference.com/w/cpp/numeric/countr_zero'),
+		(r'std::countl_one', 'https://en.cppreference.com/w/cpp/numeric/countl_one'),
+		(r'std::countr_one', 'https://en.cppreference.com/w/cpp/numeric/countr_one'),
+		(r'std::has_single_bit', 'https://en.cppreference.com/w/cpp/numeric/has_single_bit'),
+		(r'std::min', 'https://en.cppreference.com/w/cpp/algorithm/min'),
+		(r'std::max', 'https://en.cppreference.com/w/cpp/algorithm/max'),
+		(r'std::clamp', 'https://en.cppreference.com/w/cpp/algorithm/clamp'),
+		(r'std::numeric_limits', 'https://en.cppreference.com/w/cpp/types/numeric_limits'),
 		(r'std::initializer_lists?', 'https://en.cppreference.com/w/cpp/utility/initializer_list'),
 		(
 			r'(?:L?P)?(?:'
@@ -727,7 +776,7 @@ class ExtDocLinksFix(object):
 		(r'(toml::)?time', 'structtoml_1_1time.html'),
 		(r'(toml::)?dates?', 'structtoml_1_1date.html')
 	]
-	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td']
+	__allowedNames = ['dd', 'p', 'dt', 'h3', 'td', 'div']
 	
 	def __init__(self):
 		self.__expressions = []
@@ -743,34 +792,31 @@ class ExtDocLinksFix(object):
 			' target="_blank"' if external else '',
 			m.group(0),
 		)
-			
-	def __process_tag(self, tag):
-		for descendant in tag.descendants:
-			if (not isinstance(descendant, soup.NavigableString) or html_find_parent(descendant, 'a', tag) is not None):
-				continue
-			for expr, uri in self.__expressions:
-				replacer = RegexReplacer(expr, lambda m: self.__substitute(m, uri), html.escape(str(descendant), quote=False))
-				if (replacer):
-					repl_str = str(replacer)
-					begins_with_ws = len(repl_str) > 0 and repl_str[:1].isspace()
-					new_tag = html_replace_tag(descendant, repl_str)[0]
-					if (begins_with_ws and new_tag.string is not None and not new_tag.string[:1].isspace()):
-						new_tag.insert_before(' ')
-					return True
-		return False
-			
 
 	def __call__(self, file, doc):
 		changed = False
-		for name in self.__allowedNames:
-			for tag in doc.body.main.article.div.div(name):
-				if (len(tag.contents) == 0 or html_find_parent(tag, 'a', doc.body) is not None):
-					continue
-				while (self.__process_tag(tag)):
-					changed = True
-					continue
-		return changed
+		root = doc.body.main.article.div.div
+		
+		tags = tags = html_shallow_search(root, self.__allowedNames, lambda t: html_find_parent(t, 'a', root) is None)
 
+		strings = []
+		for tag in tags:
+			strings = strings + html_string_descendants(tag, lambda t: html_find_parent(t, 'a', tag) is None)
+		
+		for expr, uri in self.__expressions:
+			for string in strings:
+				if string.parent is None:
+					continue
+				replacer = RegexReplacer(expr, lambda m: self.__substitute(m, uri), html.escape(str(string), quote=False))
+				if replacer:
+					repl_str = str(replacer)
+					begins_with_ws = len(repl_str) > 0 and repl_str[:1].isspace()
+					new_tag = html_replace_tag(string, repl_str)[0]
+					if (begins_with_ws and new_tag.string is not None and not new_tag.string[:1].isspace()):
+						new_tag.insert_before(' ')
+					changed = True
+			
+		return changed
 
 
 
