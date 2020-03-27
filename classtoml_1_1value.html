@@ -105,7 +105,7 @@ C++</span></a>
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a class="m-doc" href="#afaa76c1c7d5c72d2e3b888cc47213551">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+              using <a class="m-doc" href="#afaa76c1c7d5c72d2e3b888cc47213551">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, std::conditional_t&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
             </dt>
             <dd>A type alias for 'value arguments'.</dd>
             <dt id="a3a0834bc9911a097f6569ce462e3e5b8">
@@ -162,11 +162,11 @@ C++</span></a>
             <dt id="a6bb2eff4b852795d69ffb93c638806a4">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6bb2eff4b852795d69ffb93c638806a4">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a const pointer to the value if the data type is a <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a const pointer to the value if the data type is a date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="ab45f4fefe1072257d316c296c15e1a08">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab45f4fefe1072257d316c296c15e1a08">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the value if the data type is <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a pointer to the value if the data type is date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="a958a3a579a41e8e70ea8f9ee9622f270">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a958a3a579a41e8e70ea8f9ee9622f270">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -226,7 +226,7 @@ C++</span></a>
             <dt id="a02898ae6aa56fded57a8f63cc39fac24">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a02898ae6aa56fded57a8f63cc39fac24">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
+            <dd>Returns true if this node is a date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
             <dt id="a080d4279e89b706ef162fe4e7c6e6074">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a080d4279e89b706ef162fe4e7c6e6074">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -374,7 +374,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              using toml::<wbr/>value&lt;T&gt;::<wbr/><a class="m-doc-self" href="#afaa76c1c7d5c72d2e3b888cc47213551">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/is_same" target="_blank">std::is_same_v</a>&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
+              using toml::<wbr/>value&lt;T&gt;::<wbr/><a class="m-doc-self" href="#afaa76c1c7d5c72d2e3b888cc47213551">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;T, <a class="m-doc" href="namespacetoml.html#a1d0523987bb329ff90f8d14550b5f3a6">string</a>&gt;, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>, std::conditional_t&lt;impl::is_one_of&lt;T, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, T, const T&amp;&gt;&gt;
             </h3>
             <p>A type alias for 'value arguments'.</p>
 <p>This differs according to the value's type argument:</p><ul><li>ints, floats, booleans: <code>value_type</code></li><li>strings: <code>string_view</code></li><li>everything else: <code>const value_type&amp;</code></li></ul>
