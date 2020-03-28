@@ -311,39 +311,39 @@ extern template void parse_expected_value(std::string_view, const float&) noexce
 extern template void parse_expected_value(std::string_view, const double&) noexcept;
 extern template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	extern template class formatter<char>;
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
 	extern template class default_formatter<char>;
 
-	extern template std::ostream& operator<< (std::ostream&, const table&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const array&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<string>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<int64_t>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<double>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<bool>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<date>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<time>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const value<date_time>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const node_view<node>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const node_view<const node>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, node_type) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const source_region&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const source_position&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const parse_error&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const date&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const time&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const time_offset&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, const date_time&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&) TOML_MAY_THROW;
-	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&&) TOML_MAY_THROW;
+	extern template std::ostream& operator<< (std::ostream&, const table&);
+	extern template std::ostream& operator<< (std::ostream&, const array&);
+	extern template std::ostream& operator<< (std::ostream&, const value<string>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<int64_t>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<double>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<bool>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<date>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<time>&);
+	extern template std::ostream& operator<< (std::ostream&, const value<date_time>&);
+	extern template std::ostream& operator<< (std::ostream&, const node_view<node>&);
+	extern template std::ostream& operator<< (std::ostream&, const node_view<const node>&);
+	extern template std::ostream& operator<< (std::ostream&, node_type);
+	extern template std::ostream& operator<< (std::ostream&, const source_region&);
+	extern template std::ostream& operator<< (std::ostream&, const source_position&);
+	extern template std::ostream& operator<< (std::ostream&, const parse_error&);
+	extern template std::ostream& operator<< (std::ostream&, const date&);
+	extern template std::ostream& operator<< (std::ostream&, const time&);
+	extern template std::ostream& operator<< (std::ostream&, const time_offset&);
+	extern template std::ostream& operator<< (std::ostream&, const date_time&);
+	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&);
+	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&&);
 }
-TOML_END
+
 
 extern template class std::unique_ptr<const Catch::IExceptionTranslator>;
 namespace Catch

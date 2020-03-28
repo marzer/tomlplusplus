@@ -595,14 +595,14 @@ def main():
 	TOML_ASSUME(codepoint >= first);				\\
 	TOML_ASSUME(codepoint <= last)
 
-TOML_IMPL_START
+namespace toml::impl
 {''', file=output_file, end='')
 		emit_function('is_unicode_letter', ('Ll', 'Lm', 'Lo', 'Lt', 'Lu'), output_file, codepoints)
 		emit_function('is_unicode_number', ('Nd', 'Nl'), output_file, codepoints)
 		emit_function('is_unicode_combining_mark', ('Mn', 'Mc'), output_file, codepoints)
 		print(
 '''}
-TOML_IMPL_END
+
 
 #undef TOML_ASSUME_CODEPOINT_BETWEEN
 

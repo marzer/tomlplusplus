@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_common.h"
 
-TOML_START
+namespace toml
 {
 	/// \brief	A local date.
 	struct TOML_TRIVIAL_ABI date final
@@ -85,7 +85,7 @@ TOML_START
 	/// 1987-03-16
 	/// \eout
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -173,7 +173,7 @@ TOML_START
 	/// 10:20:34.5
 	/// \eout
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -275,11 +275,19 @@ TOML_START
 	/// -02:30
 	/// \eout
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
+
+	#if TOML_ABI_NAMESPACES
+		#ifdef TOML_OPTIONAL_TYPE
+			inline namespace abi_custopt {
+		#else
+			inline namespace abi_stdopt {
+		#endif
+	#endif
 
 	/// \brief	A date-time.
 	struct date_time final
@@ -382,6 +390,10 @@ TOML_START
 		}
 	};
 
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_OPTIONAL_TYPE
+	#endif
+
 	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
 	/// \detail \cpp
 	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << std::endl;
@@ -395,10 +407,10 @@ TOML_START
 	/// 1987-03-16T10:20:34Z
 	/// \eout
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
 }
-TOML_END
+

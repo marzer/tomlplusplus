@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_date_time.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
@@ -21,7 +21,7 @@ TOML_IMPL_START
 
 	template <typename CHAR1, typename CHAR2>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(std::basic_string_view<CHAR1> str, std::basic_ostream<CHAR2>& stream) TOML_MAY_THROW
+	void print_to_stream(std::basic_string_view<CHAR1> str, std::basic_ostream<CHAR2>& stream)
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
@@ -30,7 +30,7 @@ TOML_IMPL_START
 
 	template <typename CHAR1, typename CHAR2>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(const std::basic_string<CHAR1>& str, std::basic_ostream<CHAR2>& stream) TOML_MAY_THROW
+	void print_to_stream(const std::basic_string<CHAR1>& str, std::basic_ostream<CHAR2>& stream)
 	{
 		static_assert(sizeof(CHAR1) == 1);
 		static_assert(sizeof(CHAR2) == 1);
@@ -39,7 +39,7 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(char character, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(char character, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		stream.put(static_cast<CHAR>(character));
@@ -47,7 +47,7 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
-	void print_to_stream(const char* str, size_t len, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(const char* str, size_t len, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		stream.write(reinterpret_cast<const CHAR*>(str), static_cast<std::streamsize>(len));
@@ -57,7 +57,7 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(char8_t character, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(char8_t character, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		stream.put(static_cast<CHAR>(character));
@@ -65,7 +65,7 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
-	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		stream.write(reinterpret_cast<const CHAR*>(str), static_cast<std::streamsize>(len));
@@ -86,7 +86,7 @@ TOML_IMPL_START
 	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
 	template <typename T, typename CHAR>
-	inline void print_integer_to_stream(T val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_integer_to_stream(T val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -98,13 +98,13 @@ TOML_IMPL_START
 		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
 	}
 
-	#define TOML_P2S_OVERLOAD(type)																\
-		template <typename CHAR>																\
-		TOML_ALWAYS_INLINE																		\
-		void print_to_stream(type val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW			\
-		{																						\
-			static_assert(sizeof(CHAR) == 1);													\
-			print_integer_to_stream(val, stream);												\
+	#define TOML_P2S_OVERLOAD(type)											\
+		template <typename CHAR>											\
+		TOML_ALWAYS_INLINE													\
+		void print_to_stream(type val, std::basic_ostream<CHAR>& stream)	\
+		{																	\
+			static_assert(sizeof(CHAR) == 1);								\
+			print_integer_to_stream(val, stream);							\
 		}
 
 	TOML_P2S_OVERLOAD(int8_t)
@@ -119,7 +119,7 @@ TOML_IMPL_START
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename T, typename CHAR>
-	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream, bool hexfloat = false) TOML_MAY_THROW
+	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream, bool hexfloat = false)
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -160,13 +160,13 @@ TOML_IMPL_START
 		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(type)																\
-		template <typename CHAR>																\
-		TOML_ALWAYS_INLINE																		\
-		void print_to_stream(type val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW			\
-		{																						\
-			static_assert(sizeof(CHAR) == 1);													\
-			print_floating_point_to_stream(val, stream);										\
+	#define TOML_P2S_OVERLOAD(type)											\
+		template <typename CHAR>											\
+		TOML_ALWAYS_INLINE													\
+		void print_to_stream(type val, std::basic_ostream<CHAR>& stream)	\
+		{																	\
+			static_assert(sizeof(CHAR) == 1);								\
+			print_floating_point_to_stream(val, stream);					\
 		}
 
 	TOML_P2S_OVERLOAD(float)
@@ -176,14 +176,14 @@ TOML_IMPL_START
 
 	template <typename CHAR>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(bool val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream(bool val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);
 	}
 
 	template <typename T, typename CHAR>
-	inline void print_to_stream(T val, std::basic_ostream<CHAR>& stream, size_t zero_pad_to_digits) TOML_MAY_THROW
+	inline void print_to_stream(T val, std::basic_ostream<CHAR>& stream, size_t zero_pad_to_digits)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		char buf[charconv_buffer_length<T>];
@@ -195,7 +195,7 @@ TOML_IMPL_START
 	}
 
 	template <typename CHAR>
-	inline void print_to_stream(const toml::date& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_to_stream(const toml::date& val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val.year, stream, 4_sz);
@@ -206,7 +206,7 @@ TOML_IMPL_START
 	}
 
 	template <typename CHAR>
-	inline void print_to_stream(const toml::time& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_to_stream(const toml::time& val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val.hour, stream, 2_sz);
@@ -229,7 +229,7 @@ TOML_IMPL_START
 	}
 
 	template <typename CHAR>
-	inline void print_to_stream(toml::time_offset val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_to_stream(toml::time_offset val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		if (!val.minutes)
@@ -258,7 +258,7 @@ TOML_IMPL_START
 	}
 
 	template <typename CHAR>
-	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		print_to_stream(val.date, stream);
@@ -272,7 +272,7 @@ TOML_IMPL_START
 	TOML_DISABLE_ALL_WARNINGS
 
 	template <typename T, typename CHAR>
-	void print_to_stream_with_escapes(T && str, std::basic_ostream<CHAR>& stream) TOML_MAY_THROW
+	void print_to_stream_with_escapes(T && str, std::basic_ostream<CHAR>& stream)
 	{
 		static_assert(sizeof(CHAR) == 1);
 		for (auto c : str)
@@ -292,13 +292,32 @@ TOML_IMPL_START
 
 	TOML_POP_WARNINGS
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
+	/// \brief	Prints a source_position to a stream.
+	///
+	/// \detail \cpp
+	/// auto tbl = toml::parse("bar = 42"sv);
+	/// 
+	/// std::cout << "The value for 'bar' was found on "sv
+	///		<< tbl.get("bar")->source()
+	///		<< std::endl;
+	/// 
+	/// \ecpp
+	/// 
+	/// \out
+	/// The value for 'bar' was found on line 1, column 7
+	/// \eout
+	/// 
+	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \param 	lhs	The stream.
+	/// \param 	rhs	The source_position.
+	///
+	/// \returns	The input stream.
 	template <typename CHAR>
 	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
-		TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -311,9 +330,28 @@ TOML_START
 		return lhs;
 	}
 
+	/// \brief	Prints a source_region to a stream.
+	///
+	/// \detail \cpp
+	/// auto tbl = toml::parse("bar = 42", "config.toml");
+	/// 
+	/// std::cout << "The value for 'bar' was found on "sv
+	///		<< tbl.get("bar")->source()
+	///		<< std::endl;
+	/// 
+	/// \ecpp
+	/// 
+	/// \out
+	/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
+	/// \eout
+	/// 
+	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \param 	lhs	The stream.
+	/// \param 	rhs	The source_position.
+	///
+	/// \returns	The input stream.
 	template <typename CHAR>
 	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
-		TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(CHAR) == 1,
@@ -329,9 +367,32 @@ TOML_START
 		return lhs;
 	}
 
+	/// \brief	Prints a parse_error to a stream.
+	///
+	/// \detail \cpp
+	/// try
+	/// {
+	/// 	auto tbl = toml::parse("enabled = trUe"sv);
+	/// }
+	/// catch (const toml::parse_error & err)
+	/// {
+	/// 	std::cerr << "Parsing failed:\n"sv << err << std::endl;
+	/// }
+	/// \ecpp
+	/// 
+	/// \out
+	/// Parsing failed:
+	/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+	///		(error occurred at line 1, column 13)
+	/// \eout
+	/// 
+	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \param 	lhs	The stream.
+	/// \param 	rhs	The parse_error.
+	///
+	/// \returns	The input stream.
 	template <typename CHAR>
 	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
-		TOML_MAY_THROW
 	{
 		impl::print_to_stream(rhs.description(), lhs);
 		impl::print_to_stream("\n\t(error occurred at "sv, lhs);
@@ -340,4 +401,4 @@ TOML_START
 		return lhs;
 	}
 }
-TOML_END
+

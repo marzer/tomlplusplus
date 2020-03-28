@@ -6,7 +6,7 @@
 #include "toml_table.h"
 #include "toml_node_view.h"
 
-TOML_START
+namespace toml
 {
 	TOML_INLINE_FUNC_IMPL
 	table::table(impl::table_init_pair* pairs, size_t count) noexcept
@@ -167,4 +167,4 @@ TOML_START
 		return !(lhs == rhs);
 	}
 }
-TOML_END
+

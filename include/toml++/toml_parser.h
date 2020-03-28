@@ -6,9 +6,13 @@
 #include "toml_table.h"
 #include "toml_utf8.h"
 
-TOML_START
+namespace toml
 {
 	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+
+	#if TOML_ABI_NAMESPACES
+		inline namespace abi_parse_noex {
+	#endif
 
 	/// \brief	The result of a parsing operation.
 	///
@@ -173,23 +177,47 @@ TOML_START
 			}
 	};
 
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
+
 	#else
 
 	using parse_result = table;
 
 	#endif
 }
-TOML_END
 
-TOML_IMPL_START
+
+namespace toml::impl
 {
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_impl_ex {
+		#else
+			inline namespace abi_impl_noex {
+		#endif
+	#endif
+
 	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
-}
-TOML_IMPL_END
 
-TOML_START
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
+}
+
+
+namespace toml
 {
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_parse_ex {
+		#else
+			inline namespace abi_parse_noex {
+		#endif
+	#endif
+
 	/// \brief	Parses a TOML document from a string view.
 	///
 	/// \detail \cpp
@@ -400,6 +428,10 @@ TOML_START
 		return parse_file(std::basic_string_view<CHAR>{ file_path });
 	}
 
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
+
 	/// \brief	Convenience literal operators for working with TOML++.
 	/// 
 	/// \detail This namespace exists so you can safely hoist the UDL operators into another scope
@@ -420,6 +452,14 @@ TOML_START
 	///
 	inline namespace literals
 	{
+		#if TOML_ABI_NAMESPACES
+			#if TOML_EXCEPTIONS
+				inline namespace abi_lit_ex {
+			#else
+				inline namespace abi_lit_noex {
+			#endif
+		#endif
+
 		/// \brief	Parses TOML data from a string.
 		/// 
 		/// \detail \cpp
@@ -440,7 +480,7 @@ TOML_START
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 		[[nodiscard]] TOML_API
-		parse_result operator"" _toml(const char* str, size_t len) noexcept;
+		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
 		#if defined(__cpp_lib_char8_t)
 
@@ -466,10 +506,13 @@ TOML_START
 		/// 
 		/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 		[[nodiscard]] TOML_API
-		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept;
+		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
 		#endif
 
+		#if TOML_ABI_NAMESPACES
+			} //end abi namespace for TOML_EXCEPTIONS
+		#endif
 	}
 }
-TOML_END
+

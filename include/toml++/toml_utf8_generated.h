@@ -13,7 +13,7 @@
 	TOML_ASSUME(codepoint >= first);				\
 	TOML_ASSUME(codepoint <= last)
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	//# Returns true if a codepoint belongs to any of these categories: Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
@@ -911,7 +911,7 @@ TOML_IMPL_START
 		//# chunk summary: 2282 codepoints from 293 ranges (spanning a search area of 917232)
 	}
 }
-TOML_IMPL_END
+
 
 #undef TOML_ASSUME_CODEPOINT_BETWEEN
 

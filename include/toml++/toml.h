@@ -49,7 +49,6 @@
 	#undef TOML_EMPTY_BASES
 	#undef TOML_CPP_VERSION
 	#undef TOML_CPP
-	#undef TOML_MAY_THROW_UNLESS
 	#undef TOML_MAY_THROW
 	#undef TOML_NO_DEFAULT_CASE
 	#undef TOML_CONSTEVAL
@@ -66,23 +65,14 @@
 	#undef TOML_UNDEF_MACROS
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
-	#undef TOML_NS1_EX
-	#undef TOML_NS2_OPT
-	#undef TOML_NS3_CHAR8
-	#undef TOML_NS4
-	#undef TOML_NS5
-	#undef TOML_START
-	#undef TOML_START_2
-	#undef TOML_START_1
-	#undef TOML_END
-	#undef TOML_IMPL_START
-	#undef TOML_IMPL_END
 	#undef TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_INLINE_FUNC_IMPL
 	#undef TOML_COMPILER_EXCEPTIONS
 	#undef TOML_LAUNDER
 	#undef TOML_TRIVIAL_ABI
+	#undef TOML_ABI_NAMESPACES
+	#undef TOML_PARSER_TYPENAME
 #endif
 
 /// \mainpage toml++
@@ -101,7 +91,8 @@
 /// - Works with or without exceptions
 /// - Doesn't require RTTI
 /// - First-class support for serializing to JSON  
-/// - Tested on Clang, GCC and MSVC (VS2019)
+/// - Tested on Clang, GCC and MSVC (VS2019)  
+/// - Tested on x64, x86 and ARM
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 

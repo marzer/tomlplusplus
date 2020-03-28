@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_print_to_stream.h"
 
-TOML_START
+namespace toml
 {
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
@@ -22,9 +22,9 @@ TOML_START
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
-TOML_END
 
-TOML_IMPL_START
+
+namespace toml::impl
 {
 	template <typename CHAR = char>
 	class formatter
@@ -63,7 +63,7 @@ TOML_IMPL_START
 				stream_ = nullptr;
 			}
 
-			void print_newline(bool force = false) TOML_MAY_THROW
+			void print_newline(bool force = false)
 			{
 				if (!naked_newline_ || force)
 				{
@@ -72,7 +72,7 @@ TOML_IMPL_START
 				}
 			}
 
-			void print_indent() TOML_MAY_THROW
+			void print_indent()
 			{
 				for (int8_t i = 0; i < indent_; i++)
 				{
@@ -81,7 +81,7 @@ TOML_IMPL_START
 				}
 			}
 
-			void print_quoted_string(toml::string_view str) TOML_MAY_THROW
+			void print_quoted_string(toml::string_view str)
 			{
 				if (str.empty())
 					print_to_stream("\"\""sv, *stream_);
@@ -95,7 +95,7 @@ TOML_IMPL_START
 			}
 
 			template <typename T>
-			void print(const value<T>& val) TOML_MAY_THROW
+			void print(const value<T>& val)
 			{
 				if constexpr (std::is_same_v<T, string>)
 				{
@@ -126,7 +126,7 @@ TOML_IMPL_START
 				}
 			}
 
-			void print(const node& val_node, node_type type) TOML_MAY_THROW
+			void print(const node& val_node, node_type type)
 			{
 				switch (type)
 				{
@@ -147,4 +147,4 @@ TOML_IMPL_START
 			{}
 	};
 }
-TOML_IMPL_END
+

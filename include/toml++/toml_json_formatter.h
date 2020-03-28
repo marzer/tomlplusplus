@@ -5,12 +5,12 @@
 #pragma once
 #include "toml_formatter.h"
 
-TOML_START
+namespace toml
 {
 	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&);
 	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
 
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
 	///
@@ -50,9 +50,9 @@ TOML_START
 		private:
 			using base = impl::formatter<CHAR>;
 
-			inline void print(const toml::table& tbl) TOML_MAY_THROW;
+			inline void print(const toml::table& tbl);
 
-			void print(const array& arr) TOML_MAY_THROW
+			void print(const array& arr)
 			{
 				if (arr.empty())
 					impl::print_to_stream("[]"sv, base::stream());
@@ -86,7 +86,7 @@ TOML_START
 				base::clear_naked_newline();
 			}
 
-			void print() TOML_MAY_THROW
+			void print()
 			{
 				switch (auto source_type = base::source().type())
 				{
@@ -108,9 +108,9 @@ TOML_START
 			{}
 
 			template <typename T, typename U>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&) TOML_MAY_THROW;
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&);
 			template <typename T, typename U>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&) TOML_MAY_THROW;
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
 	};
 
 	json_formatter(const table&) -> json_formatter<char>;
@@ -118,7 +118,7 @@ TOML_START
 	template <typename T> json_formatter(const value<T>&) -> json_formatter<char>;
 
 	template <typename CHAR>
-	inline void json_formatter<CHAR>::print(const toml::table& tbl) TOML_MAY_THROW
+	inline void json_formatter<CHAR>::print(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -158,7 +158,7 @@ TOML_START
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON.
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.print();
@@ -168,9 +168,9 @@ TOML_START
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
 }
-TOML_END
+

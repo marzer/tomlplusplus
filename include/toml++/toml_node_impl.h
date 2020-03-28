@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_node.h"
 
-TOML_START
+namespace toml
 {
 	TOML_INLINE_FUNC_IMPL
 	node::node(node && other) noexcept
@@ -56,4 +56,4 @@ TOML_START
 
 	TOML_INLINE_FUNC_IMPL const source_region& node::source() const noexcept { return source_; }
 }
-TOML_END
+

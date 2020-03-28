@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_array.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	template <bool is_const>
 	struct table_proxy_pair final
@@ -118,14 +118,14 @@ TOML_IMPL_START
 		{}
 	};
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
 	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
 	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&);
 
 	/// \brief	A TOML table.
 	/// 
@@ -137,7 +137,7 @@ TOML_START
 		: public node
 	{
 		private:
-			friend class impl::parser;
+			friend class TOML_PARSER_TYPENAME;
 
 			impl::string_map<std::unique_ptr<node>> values;
 			bool inline_ = false;
@@ -733,7 +733,7 @@ TOML_START
 			friend bool operator != (const table& lhs, const table& rhs) noexcept;
 
 			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&);
 	};
 }
-TOML_END
+

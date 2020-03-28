@@ -14,6 +14,7 @@
  - Doesn't require RTTI
  - First-class support for serializing to JSON
  - Tested on Clang, GCC and MSVC (VS2019)
+ - Tested on x64, x86 and ARM
 
 <br>
 
@@ -99,6 +100,8 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.        |
 | `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                          |
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].              |
+
+_A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally linking incompatible combinations together._
 
 <br>
 

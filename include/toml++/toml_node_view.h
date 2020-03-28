@@ -7,10 +7,10 @@
 #include "toml_array.h"
 #include "toml_value.h"
 
-TOML_START
+namespace toml
 {
 	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<T>&) TOML_MAY_THROW;
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<T>&);
 
 	/// \brief	A view of a node.
 	/// 
@@ -204,7 +204,7 @@ TOML_START
 			/// \see node::visit()
 			template <typename FUNC>
 			decltype(auto) visit(FUNC&& visitor) const
-				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&>)
+				noexcept(visit_is_nothrow<FUNC&&>)
 			{
 				using return_type = decltype(node_->visit(std::forward<FUNC>(visitor)));
 				if (node_)
@@ -339,7 +339,7 @@ TOML_START
 			}
 
 			template <typename CHAR, typename U>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<U>&) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<U>&);
 	};
 
 	#if !TOML_ALL_INLINE
@@ -349,16 +349,16 @@ TOML_START
 
 	/// \brief	Prints the viewed node out to a stream.
 	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view<T>& nv) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view<T>& nv)
 	{
 		if (nv.node_)
 		{
-			nv.node_->visit([&os](const auto& n) TOML_MAY_THROW
-				{
-					os << n;
-				});
+			nv.node_->visit([&os](const auto& n)
+			{
+				os << n;
+			});
 		}
 		return os;
 	}
 }
-TOML_END
+

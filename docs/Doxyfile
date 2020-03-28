@@ -351,8 +351,6 @@ PREDEFINED             = DOXYGEN=1 \
 						 TOML_MAY_THROW= \
 						 TOML_NODISCARD_CTOR= \
 						 TOML_ASYMMETRICAL_EQUALITY_OPS= \
-						 TOML_START="namespace toml" \
-						 TOML_END= \
 						 TOML_ALL_INLINE=0 \
 						 TOML_IMPLEMENTATION=0 \
 						 TOML_INLINE_FUNC_IMPL= \

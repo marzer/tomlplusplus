@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_common.h"
 
-TOML_START
+namespace toml
 {
 	/// \brief	A TOML node.
 	///
@@ -14,7 +14,7 @@ TOML_START
 	class TOML_INTERFACE TOML_API node
 	{
 		private:
-			friend class impl::parser;
+			friend class TOML_PARSER_TYPENAME;
 			source_region source_{};
 
 		protected:
@@ -290,8 +290,6 @@ TOML_START
 				&& can_visit<FUNC, N, time>
 				&& can_visit<FUNC, N, date_time>;
 
-			#if TOML_EXCEPTIONS
-
 			template <typename FUNC, typename N, typename T>
 			static constexpr bool visit_is_nothrow_one =
 				!can_visit<FUNC, N, T>
@@ -308,8 +306,6 @@ TOML_START
 				&& visit_is_nothrow_one<FUNC, N, date>
 				&& visit_is_nothrow_one<FUNC, N, time>
 				&& visit_is_nothrow_one<FUNC, N, date_time>;
-
-			#endif
 
 			template <typename FUNC, typename N, typename T, bool = can_visit<FUNC, N, T>>
 			struct visit_return_type final
@@ -331,7 +327,7 @@ TOML_START
 
 			template <typename N, typename FUNC>
 			static decltype(auto) do_visit(N&& n, FUNC&& visitor)
-				TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, N&&>)
+				noexcept(visit_is_nothrow<FUNC&&, N&&>)
 			{
 				static_assert(
 					can_visit_any<FUNC&&, N&&>,
@@ -465,19 +461,19 @@ TOML_START
 			/// 
 			/// \see https://en.wikipedia.org/wiki/Visitor_pattern
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) & TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&>)
+			decltype(auto) visit(FUNC&& visitor) & noexcept(visit_is_nothrow<FUNC&&, node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) && TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, node&&>)
+			decltype(auto) visit(FUNC&& visitor) && noexcept(visit_is_nothrow<FUNC&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<FUNC>(visitor));
 			}
 
 			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const& TOML_MAY_THROW_UNLESS(visit_is_nothrow<FUNC&&, const node&>)
+			decltype(auto) visit(FUNC&& visitor) const& noexcept(visit_is_nothrow<FUNC&&, const node&>)
 			{
 				return do_visit(*this, std::forward<FUNC>(visitor));
 			}
@@ -522,4 +518,4 @@ TOML_START
 			}
 	};
 }
-TOML_END
+

@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_value.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	template <bool is_const>
 	class array_iterator final
@@ -181,14 +181,14 @@ TOML_IMPL_START
 		}
 	}
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
 	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
 	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&);
 
 	/// \brief	A TOML array.
 	///
@@ -233,7 +233,7 @@ TOML_START
 		: public node
 	{
 		private:
-			friend class impl::parser;
+			friend class TOML_PARSER_TYPENAME;
 			std::vector<std::unique_ptr<node>> values;
 
 			void preinsertion_resize(size_t idx, size_t count) noexcept;
@@ -277,7 +277,7 @@ TOML_START
 			/// \param 	vals	The values used to initialize nodes 1...N.
 			template <typename U, typename... V>
 			TOML_NODISCARD_CTOR
-			explicit array(U&& val, V&&... vals) TOML_MAY_THROW
+			explicit array(U&& val, V&&... vals)
 			{
 				values.reserve(sizeof...(V) + 1_sz);
 				values.emplace_back(impl::make_node(std::forward<U>(val)));
@@ -394,7 +394,7 @@ TOML_START
 			/// \brief	Returns the number of nodes in the array.
 			[[nodiscard]] size_t size() const noexcept;
 			/// \brief	Reserves internal storage capacity up to a pre-determined number of nodes.
-			void reserve(size_t new_capacity) TOML_MAY_THROW;
+			void reserve(size_t new_capacity);
 			/// \brief	Removes all nodes from the array.
 			void clear() noexcept;
 
@@ -824,10 +824,10 @@ TOML_START
 			/// \eout
 			/// 
 			/// \remarks	Arrays inside child tables are not flattened.
-			void flatten() TOML_MAY_THROW;
+			void flatten();
 
 			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&);
 	};
 }
-TOML_END
+

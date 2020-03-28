@@ -184,12 +184,14 @@ class HTMLDocument(object):
 
 
 
-def html_find_parent(tag,name,cutoff=None):
+def html_find_parent(tag, names, cutoff=None):
+	if not is_collection(names):
+		names = [ names ]
 	parent = tag.parent
 	while (parent is not None):
 		if (cutoff is not None and parent is cutoff):
 			return None
-		if (parent.name == name):
+		if parent.name in names:
 			return parent;
 		parent = parent.parent 
 	return parent

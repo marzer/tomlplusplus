@@ -7,7 +7,7 @@
 #include "toml_common.h"
 #include "toml_utf8_generated.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
@@ -258,7 +258,7 @@ TOML_IMPL_START
 			std::basic_istream<CHAR>* source;
 
 		public:
-			explicit utf8_byte_stream(std::basic_istream<CHAR>& stream) TOML_MAY_THROW
+			explicit utf8_byte_stream(std::basic_istream<CHAR>& stream)
 				: source{ &stream }
 			{
 				if (*source)
@@ -296,7 +296,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			optional<uint8_t> operator() () TOML_MAY_THROW
+			optional<uint8_t> operator() ()
 			{
 				auto val = source->get();
 				if (val == std::basic_istream<CHAR>::traits_type::eof())
@@ -343,9 +343,15 @@ TOML_IMPL_START
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
 		#define TOML_ERROR			throw parse_error
+		#if TOML_ABI_NAMESPACES
+			inline namespace abi_impl_ex {
+		#endif
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR			err.emplace
+		#if TOML_ABI_NAMESPACES
+			inline namespace abi_impl_noex {
+		#endif
 	#endif
 
 	struct TOML_INTERFACE utf8_reader_interface
@@ -354,7 +360,7 @@ TOML_IMPL_START
 		virtual const source_path_ptr& source_path() const noexcept = 0;
 
 		[[nodiscard]]
-		virtual const utf8_codepoint* read_next() TOML_MAY_THROW = 0;
+		virtual const utf8_codepoint* read_next() = 0;
 
 		#if !TOML_EXCEPTIONS
 
@@ -385,7 +391,7 @@ TOML_IMPL_START
 
 			template <typename U, typename STR = std::string_view>
 			explicit utf8_reader(U && source, STR&& source_path = {})
-				TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
+				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
 				std::memset(codepoints, 0, sizeof(codepoints));
@@ -403,7 +409,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			const utf8_codepoint* read_next() TOML_MAY_THROW override
+			const utf8_codepoint* read_next() override
 			{
 				TOML_ERROR_CHECK;
 
@@ -421,7 +427,7 @@ TOML_IMPL_START
 				while (true)
 				{
 					optional<uint8_t> nextByte;
-					if constexpr (!TOML_EXCEPTIONS || noexcept(stream()))
+					if constexpr (noexcept(stream()) || !TOML_EXCEPTIONS)
 					{
 						nextByte = stream();
 					}
@@ -547,7 +553,7 @@ TOML_IMPL_START
 			}
 
 			[[nodiscard]]
-			const utf8_codepoint* read_next() TOML_MAY_THROW override
+			const utf8_codepoint* read_next() override
 			{
 				TOML_ERROR_CHECK;
 
@@ -611,5 +617,8 @@ TOML_IMPL_START
 
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
 }
-TOML_IMPL_END
+

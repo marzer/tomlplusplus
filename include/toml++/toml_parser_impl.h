@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_parser.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK(...)	(void)0
@@ -56,6 +56,14 @@ TOML_IMPL_START
 		static constexpr char32_t prefix_codepoint = U'x';
 		static constexpr char prefix = 'x';
 	};
+
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_impl_ex {
+		#else
+			inline namespace abi_impl_noex {
+		#endif
+	#endif
 
 	class parser final
 	{
@@ -2924,11 +2932,22 @@ TOML_IMPL_START
 	{
 		return impl::parser{ std::move(reader) };
 	}
-}
-TOML_IMPL_END
 
-TOML_START
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
+}
+
+namespace toml
 {
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_parse_ex {
+		#else
+			inline namespace abi_parse_noex {
+		#endif
+	#endif
+
 	TOML_API
 	TOML_INLINE_FUNC_IMPL
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
@@ -2961,11 +2980,23 @@ TOML_START
 
 	#endif // defined(__cpp_lib_char8_t)
 
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_EXCEPTIONS
+	#endif
+
 	inline namespace literals
 	{
+		#if TOML_ABI_NAMESPACES
+			#if TOML_EXCEPTIONS
+				inline namespace abi_lit_ex {
+			#else
+				inline namespace abi_lit_noex {
+			#endif
+		#endif
+
 		TOML_API
 		TOML_INLINE_FUNC_IMPL
-		parse_result operator"" _toml(const char* str, size_t len) noexcept
+		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::string_view{ str, len });
 		}
@@ -2974,12 +3005,16 @@ TOML_START
 
 		TOML_API
 		TOML_INLINE_FUNC_IMPL
-		parse_result operator"" _toml(const char8_t* str, size_t len) noexcept
+		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::u8string_view{ str, len });
 		}
 
 		#endif // defined(__cpp_lib_char8_t)
+
+		#if TOML_ABI_NAMESPACES
+			} //end abi namespace for TOML_EXCEPTIONS
+		#endif
 	}
 }
-TOML_END
+

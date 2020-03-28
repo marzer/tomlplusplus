@@ -8,7 +8,7 @@
 #include "toml_array.h"
 #include "toml_utf8.h"
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
@@ -151,14 +151,14 @@ TOML_IMPL_START
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
 	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
 	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
 
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
 	/// 
@@ -196,7 +196,7 @@ TOML_START
 			using base = impl::formatter<CHAR>;
 			std::vector<toml::string> key_path;
 
-			void print_key_segment(const toml::string& str) TOML_MAY_THROW
+			void print_key_segment(const toml::string& str)
 			{
 				if (str.empty())
 					impl::print_to_stream("''"sv, base::stream());
@@ -223,7 +223,7 @@ TOML_START
 				base::clear_naked_newline();
 			}
 
-			void print_key_path() TOML_MAY_THROW
+			void print_key_path()
 			{
 				for (const auto& segment : key_path)
 				{
@@ -234,9 +234,9 @@ TOML_START
 				base::clear_naked_newline();
 			}
 
-			inline void print_inline(const table& /*tbl*/) TOML_MAY_THROW;
+			inline void print_inline(const table& /*tbl*/);
 
-			void print(const array& arr) TOML_MAY_THROW
+			void print(const array& arr)
 			{
 				if (arr.empty())
 					impl::print_to_stream("[]"sv, base::stream());
@@ -296,7 +296,7 @@ TOML_START
 				base::clear_naked_newline();
 			}
 
-			void print(const table& tbl) TOML_MAY_THROW
+			void print(const table& tbl)
 			{
 				static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
 				{
@@ -416,7 +416,7 @@ TOML_START
 				}
 			}
 
-			void print() TOML_MAY_THROW
+			void print()
 			{
 				switch (auto source_type = base::source().type())
 				{
@@ -454,9 +454,9 @@ TOML_START
 			{}
 
 			template <typename T, typename U>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&) TOML_MAY_THROW;
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
 			template <typename T, typename U>
-			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&) TOML_MAY_THROW;
+			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
 	};
 
 	default_formatter(const table&) -> default_formatter<char>;
@@ -464,7 +464,7 @@ TOML_START
 	template <typename T> default_formatter(const value<T>&) -> default_formatter<char>;
 
 	template <typename CHAR>
-	inline void default_formatter<CHAR>::print_inline(const toml::table& tbl) TOML_MAY_THROW
+	inline void default_formatter<CHAR>::print_inline(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -499,7 +499,7 @@ TOML_START
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.key_path.clear();
@@ -510,21 +510,21 @@ TOML_START
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
 
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs)
 	{
 		return lhs << default_formatter<CHAR>{ rhs };
 	}
 
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const array& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const array& rhs)
 	{
 		return lhs << default_formatter<CHAR>{ rhs };
 	}
 }
-TOML_END
+

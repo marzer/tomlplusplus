@@ -9,39 +9,39 @@ template void parse_expected_value(std::string_view, const float&) noexcept;
 template void parse_expected_value(std::string_view, const double&) noexcept;
 template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
 
-TOML_IMPL_START
+namespace toml::impl
 {
 	template class formatter<char>;
 }
-TOML_IMPL_END
 
-TOML_START
+
+namespace toml
 {
 	template class default_formatter<char>;
 
-	template std::ostream& operator<< (std::ostream&, const table&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const array&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<string>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<int64_t>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<double>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<bool>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<date>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<time>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const value<date_time>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const node_view<node>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const node_view<const node>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, node_type) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const source_region&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const source_position&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const parse_error&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const date&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const time&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const time_offset&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, const date_time&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, default_formatter<char>&) TOML_MAY_THROW;
-	template std::ostream& operator<< (std::ostream&, default_formatter<char>&&) TOML_MAY_THROW;
+	template std::ostream& operator<< (std::ostream&, const table&);
+	template std::ostream& operator<< (std::ostream&, const array&);
+	template std::ostream& operator<< (std::ostream&, const value<string>&);
+	template std::ostream& operator<< (std::ostream&, const value<int64_t>&);
+	template std::ostream& operator<< (std::ostream&, const value<double>&);
+	template std::ostream& operator<< (std::ostream&, const value<bool>&);
+	template std::ostream& operator<< (std::ostream&, const value<date>&);
+	template std::ostream& operator<< (std::ostream&, const value<time>&);
+	template std::ostream& operator<< (std::ostream&, const value<date_time>&);
+	template std::ostream& operator<< (std::ostream&, const node_view<node>&);
+	template std::ostream& operator<< (std::ostream&, const node_view<const node>&);
+	template std::ostream& operator<< (std::ostream&, node_type);
+	template std::ostream& operator<< (std::ostream&, const source_region&);
+	template std::ostream& operator<< (std::ostream&, const source_position&);
+	template std::ostream& operator<< (std::ostream&, const parse_error&);
+	template std::ostream& operator<< (std::ostream&, const date&);
+	template std::ostream& operator<< (std::ostream&, const time&);
+	template std::ostream& operator<< (std::ostream&, const time_offset&);
+	template std::ostream& operator<< (std::ostream&, const date_time&);
+	template std::ostream& operator<< (std::ostream&, default_formatter<char>&);
+	template std::ostream& operator<< (std::ostream&, default_formatter<char>&&);
 }
-TOML_END
+
 
 template class std::unique_ptr<const Catch::IExceptionTranslator>;
 namespace Catch
@@ -59,7 +59,7 @@ namespace Catch
 
 #endif // TESTS_MANUAL_INSTANTIATIONS
 
-TOML_START
+namespace toml
 {
 	using std::declval;
 	using std::is_same_v;
@@ -87,4 +87,4 @@ TOML_START
 	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<array>()), const array&>);
 
 }
-TOML_END
+

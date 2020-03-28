@@ -180,12 +180,8 @@
 #endif
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
-	#define TOML_MAY_THROW_UNLESS(...)	noexcept(__VA_ARGS__)
-	#define TOML_NS1_EX
 #else
 	#define TOML_MAY_THROW				noexcept
-	#define TOML_MAY_THROW_UNLESS(...)	noexcept
-	#define TOML_NS1_EX _noex
 #endif
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
@@ -288,40 +284,6 @@
 #define TOML_LANG_EXACTLY(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
 
-#ifdef TOML_OPTIONAL_TYPE
-	#define TOML_NS2_OPT _opt
-#else
-	#define TOML_NS2_OPT
-#endif
-
-#if TOML_CHAR_8_STRINGS
-	#define TOML_NS3_CHAR8 _char8
-#else
-	#define TOML_NS3_CHAR8
-#endif
-
-#define TOML_NS4
-#define TOML_NS5
-
-#ifndef DOXYGEN
-
-	#define TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
-		namespace toml { inline namespace v##VER##ARG1##ARG2##ARG3##ARG4##ARG5
-
-	#define TOML_START_1(VER, ARG1, ARG2, ARG3, ARG4, ARG5)							\
-		TOML_START_2(VER, ARG1, ARG2, ARG3, ARG4, ARG5)
-
-	#define TOML_START																\
-		TOML_START_1(																\
-			TOML_LIB_MAJOR, TOML_NS1_EX, TOML_NS2_OPT,								\
-			TOML_NS3_CHAR8, TOML_NS4, TOML_NS5										\
-		)
-
-	#define TOML_END		}
-	
-#endif
-#define TOML_IMPL_START		TOML_START { namespace impl
-#define TOML_IMPL_END		} TOML_END
 
 ////////// INCLUDES
 
@@ -377,13 +339,17 @@ TOML_POP_WARNINGS
 	#define TOML_LAUNDER(x)	x
 #endif
 
+#if !defined(DOXYGEN) && !defined(__INTELLISENSE__)
+	#define TOML_ABI_NAMESPACES 1
+#else
+	#define TOML_ABI_NAMESPACES 0
+#endif
+
 ////////// FORWARD DECLARATIONS & TYPEDEFS
 // clang-format on
 
 /// \brief	The root namespace for all toml++ functions and types.
-namespace toml { }
-
-TOML_START
+namespace toml
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
@@ -425,7 +391,6 @@ TOML_START
 	struct date;
 	struct time;
 	struct time_offset;
-	struct date_time;
 	class node;
 	class array;
 	class table;
@@ -433,6 +398,20 @@ TOML_START
 	template <typename> class value;
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
+
+	#if TOML_ABI_NAMESPACES
+		#ifdef TOML_OPTIONAL_TYPE
+			inline namespace abi_custopt {
+		#else
+			inline namespace abi_stdopt {
+		#endif
+	#endif
+
+	struct date_time; 
+
+	#if TOML_ABI_NAMESPACES
+		} //end abi namespace for TOML_OPTIONAL_TYPE
+	#endif
 
 	#endif // !DOXYGEN
 
@@ -451,18 +430,6 @@ TOML_START
 		date_time  ///< The node is a toml::value<date_time>.
 	};
 
-	#if TOML_LARGE_FILES
-
-	using source_index = uint32_t;
-
-	#else
-
-	/// \brief	The integer type used to tally line numbers and columns.
-	/// \remarks This will be an alias for uint32_t if `TOML_LARGE_FILES` is `1`.
-	using source_index = uint16_t;
-
-	#endif
-
 	#ifdef TOML_OPTIONAL_TYPE
 
 	template <typename T>
@@ -477,6 +444,29 @@ TOML_START
 	template <typename T>
 	using optional = std::optional<T>;
 
+	#endif
+
+	#if TOML_LARGE_FILES
+
+	using source_index = uint32_t;
+
+	#else
+
+	/// \brief	The integer type used to tally line numbers and columns.
+	/// \remarks This will be an alias for uint32_t if `TOML_LARGE_FILES` is `1`.
+	using source_index = uint16_t;
+
+	#endif
+
+	/// \brief	A pointer to a shared string resource containing a source path.
+	using source_path_ptr = std::shared_ptr<const std::string>;
+
+	#if TOML_ABI_NAMESPACES
+		#if TOML_LARGE_FILES
+			inline namespace abi_lf {
+		#else
+			inline namespace abi_sf {
+		#endif
 	#endif
 
 	/// \brief	A source document line-and-column pair.
@@ -549,33 +539,7 @@ TOML_START
 			return lhs.line < rhs.line
 				|| (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
-
-		/// \brief	Prints a source_position to a stream.
-		///
-		/// \detail \cpp
-		/// auto tbl = toml::parse("bar = 42"sv);
-		/// 
-		/// std::cout << "The value for 'bar' was found on "sv
-		///		<< tbl.get("bar")->source()
-		///		<< std::endl;
-		/// 
-		/// \ecpp
-		/// 
-		/// \out
-		/// The value for 'bar' was found on line 1, column 7
-		/// \eout
-		/// 
-		/// \param 	lhs	The stream.
-		/// \param 	rhs	The source_position.
-		///
-		/// \returns	The input stream.
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
-			TOML_MAY_THROW;
 	};
-
-	/// \brief	A pointer to a shared string resource containing a source path.
-	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	/// \brief	A source document region.
 	/// 
@@ -618,35 +582,16 @@ TOML_START
  		/// 
  		/// \remarks This will be `nullptr` if no path was provided to toml::parse().
 		source_path_ptr path;
-
-		/// \brief	Prints a source_region to a stream.
-		///
-		/// \detail \cpp
-		/// auto tbl = toml::parse("bar = 42", "config.toml");
-		/// 
-		/// std::cout << "The value for 'bar' was found on "sv
-		///		<< tbl.get("bar")->source()
-		///		<< std::endl;
-		/// 
-		/// \ecpp
-		/// 
-		/// \out
-		/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
-		/// \eout
-		/// 
-		/// \param 	lhs	The stream.
-		/// \param 	rhs	The source_position.
-		///
-		/// \returns	The input stream.
-		template <typename CHAR>
-		friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
-			TOML_MAY_THROW;
 	};
 
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
 	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+
+	#if TOML_ABI_NAMESPACES
+		inline namespace abi_noex {
+	#endif
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 
@@ -690,36 +635,13 @@ TOML_START
 			{
 				return source_;
 			}
-
-			/// \brief	Prints a parse_error to a stream.
-			///
-			/// \detail \cpp
-			/// try
-			/// {
-			/// 	auto tbl = toml::parse("enabled = trUe"sv);
-			/// }
-			/// catch (const toml::parse_error & err)
-			/// {
-			/// 	std::cerr << "Parsing failed:\n"sv << err << std::endl;
-			/// }
-			/// \ecpp
-			/// 
-			/// \out
-			/// Parsing failed:
-			/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
-			///		(error occurred at line 1, column 13)
-			/// \eout
-			/// 
-			/// \param 	lhs	The stream.
-			/// \param 	rhs	The parse_error.
-			///
-			/// \returns	The input stream.
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
-				TOML_MAY_THROW;
 	};
 
 	#else
+
+	#if TOML_ABI_NAMESPACES
+		inline namespace abi_ex {
+	#endif
 
 	class parse_error final
 		: public std::runtime_error
@@ -756,19 +678,19 @@ TOML_START
 			{
 				return source_;
 			}
-
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
-				TOML_MAY_THROW;
 	};
 
 	#endif
 
 	TOML_POP_WARNINGS
-}
-TOML_END
 
-TOML_IMPL_START
+	#if TOML_ABI_NAMESPACES
+		}  //end abi namespace for TOML_EXCEPTIONS
+		} //end abi namespace for TOML_LARGE_FILES
+	#endif
+}
+
+namespace toml::impl
 {
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
@@ -820,7 +742,23 @@ TOML_IMPL_START
 		return nullptr;
 	}
 
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_impl_ex {
+			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_ex::parser
+		#else
+			inline namespace abi_impl_noex {
+			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_noex::parser
+		#endif
+	#else
+		#define TOML_PARSER_TYPENAME ::toml::impl::parser
+	#endif
+
 	class parser;
+
+	#if TOML_ABI_NAMESPACES
+		}
+	#endif
 
 	template <typename T>
 	inline constexpr bool is_value =
@@ -967,7 +905,7 @@ TOML_IMPL_START
 
 	#define TOML_P2S_DECL(linkage, type)															\
 		template <typename CHAR>																	\
-		linkage void print_to_stream(type, std::basic_ostream<CHAR>&) TOML_MAY_THROW
+		linkage void print_to_stream(type, std::basic_ostream<CHAR>&)
 
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int8_t);
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int16_t);
@@ -986,9 +924,8 @@ TOML_IMPL_START
 
 	#undef TOML_P2S_DECL
 }
-TOML_IMPL_END
 
-TOML_START
+namespace toml
 {
 	/// \brief	Metafunction for determining if a type is a toml::table.
 	template <typename T>
@@ -1037,7 +974,7 @@ TOML_START
 	/// Element [3] is: boolean
 	/// \eout
 	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs)
 	{
 		using underlying_t = std::underlying_type_t<node_type>;
 		const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
@@ -1052,4 +989,3 @@ TOML_START
 		}
 	}
 }
-TOML_END

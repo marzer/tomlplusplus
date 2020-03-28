@@ -5,7 +5,7 @@
 #pragma once
 #include "toml_array.h"
 
-TOML_START
+namespace toml
 {
 	TOML_INLINE_FUNC_IMPL
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
@@ -62,7 +62,7 @@ TOML_START
 
 	TOML_INLINE_FUNC_IMPL bool array::empty() const noexcept { return values.empty(); }
 	TOML_INLINE_FUNC_IMPL size_t array::size() const noexcept { return values.size(); }
-	TOML_INLINE_FUNC_IMPL void array::reserve(size_t new_capacity) TOML_MAY_THROW { values.reserve(new_capacity); }
+	TOML_INLINE_FUNC_IMPL void array::reserve(size_t new_capacity) { values.reserve(new_capacity); }
 	TOML_INLINE_FUNC_IMPL void array::clear() noexcept { values.clear(); }
 
 	TOML_INLINE_FUNC_IMPL
@@ -158,7 +158,7 @@ TOML_START
 	}
 
 	TOML_INLINE_FUNC_IMPL
-	void array::flatten() TOML_MAY_THROW
+	void array::flatten()
 	{
 		if (values.empty())
 			return;
@@ -204,4 +204,4 @@ TOML_START
 		}
 	}
 }
-TOML_END
+

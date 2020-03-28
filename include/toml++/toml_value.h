@@ -6,10 +6,10 @@
 #include "toml_node.h"
 #include "toml_print_to_stream.h"
 
-TOML_START
+namespace toml
 {
 	template <typename CHAR, typename T>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const value<T>&) TOML_MAY_THROW;
+	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const value<T>&);
 
 	/// \brief	A TOML value.
 	/// 		
@@ -30,7 +30,7 @@ TOML_START
 		);
 
 		private:
-			friend class impl::parser;
+			friend class TOML_PARSER_TYPENAME;
 
 			template <typename U, typename V>
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -66,7 +66,7 @@ TOML_START
 			/// \param 	args	Arguments to forward to the internal value's constructor.
 			template <typename... U>
 			TOML_NODISCARD_CTOR
-			explicit value(U&&... args) TOML_MAY_THROW_UNLESS(std::is_nothrow_constructible_v<T, U &&...>)
+			explicit value(U&&... args) noexcept(std::is_nothrow_constructible_v<T, U&&...>)
 				: val_{ std::forward<U>(args)... }
 			{}
 
@@ -168,7 +168,7 @@ TOML_START
 			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
 			template <typename CHAR, typename U>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<U>& rhs) TOML_MAY_THROW;
+			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<U>& rhs);
 
 			/// \brief	Value-assignment operator.
 			value& operator= (value_arg rhs) noexcept
@@ -341,7 +341,7 @@ TOML_START
 
 	/// \brief	Prints the value out to a stream.
 	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<T>& rhs) TOML_MAY_THROW
+	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<T>& rhs)
 	{
 		// this is the same behaviour as default_formatter, but it's so simple that there's
 		// no need to spin up a new instance of it just for individual values.
@@ -459,4 +459,4 @@ TOML_START
 		return return_type{ std::forward<T>(default_value) };
 	}
 }
-TOML_END
+
