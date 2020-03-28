@@ -72,7 +72,6 @@ C++</span></a>
               Reference
               <ul>
                 <li><a href="#pub-attribs">Public variables</a></li>
-                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -104,56 +103,6 @@ C++</span></a>
             </dt>
             <dd>The path to the corresponding source document.</dd>
           </dl>
-        </section>
-        <section id="friends">
-          <h2><a href="#friends">Friends</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab0e918c50ed25c1645506229b5e700be">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
-            </dt>
-            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ab0e918c50ed25c1645506229b5e700be"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename CHAR&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab0e918c50ed25c1645506229b5e700be">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs)</span></span>
-            </h3>
-            <p>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The stream.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The input stream.</td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="p">,</span> <span class="s">"config.toml"</span><span class="p">);</span>
-
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
-    <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
-    <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7 of 'config.toml'</span></pre>
-          </div></section>
         </section>
         <section>
           <h2>Variable documentation</h2>

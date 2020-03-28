@@ -31,6 +31,10 @@ a.tpp-external
 {
 	font-weight: normal;
 }
+pre a.tpp-external
+{
+	color: inherit;
+}
 
 .tpp-enable-if
 {

@@ -224,13 +224,13 @@ C++</span></a>
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#aba7a9dce22765e62ff2b34eab509101f">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
-              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses TOML data from a string.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a00c58d8b9c61f2e30da02e21851b2cf4">operator""_toml</a>(</span><span class="m-doc-wrap">const char8_t* str,
-              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const char8_t* str,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses TOML data from a string.</dd>
             <dt>
@@ -250,19 +250,19 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa4c43ffd6481e523fc92ca43fb353c30">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a821ef8d59a28949a22199306b97bd34d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a832376ba0ebdc3cf8be7704e6bdfcd4c">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
             </dt>
-            <dd></dd>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5b771b524273636dce82a8b2c44b75f4">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
@@ -626,13 +626,23 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa4c43ffd6481e523fc92ca43fb353c30">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs)</span></span>
             </h3>
+            <p>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">CHAR</td>
+                  <td>The output stream's underlying character type. Must be 1 byte in size.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">lhs</td>
+                  <td>lhs</td>
                   <td>The stream.</td>
                 </tr>
                 <tr>
@@ -666,13 +676,23 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a821ef8d59a28949a22199306b97bd34d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs)</span></span>
             </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">CHAR</td>
+                  <td>The output stream's underlying character type. Must be 1 byte in size.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">lhs</td>
+                  <td>lhs</td>
                   <td>The stream.</td>
                 </tr>
                 <tr>
@@ -701,13 +721,23 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a832376ba0ebdc3cf8be7704e6bdfcd4c">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs)</span></span>
             </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">CHAR</td>
+                  <td>The output stream's underlying character type. Must be 1 byte in size.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">lhs</td>
+                  <td>lhs</td>
                   <td>The stream.</td>
                 </tr>
                 <tr>

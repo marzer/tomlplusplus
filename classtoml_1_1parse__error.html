@@ -72,7 +72,6 @@ C++</span></a>
               Reference
               <ul>
                 <li><a href="#pub-methods">Public functions</a></li>
-                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -90,61 +89,6 @@ C++</span></a>
             </dt>
             <dd>Returns the region of the source document responsible for the error.</dd>
           </dl>
-        </section>
-        <section id="friends">
-          <h2><a href="#friends">Friends</a></h2>
-          <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4995870dfc15bdb599291a6446cc9e36">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
-            </dt>
-            <dd>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a4995870dfc15bdb599291a6446cc9e36"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename CHAR&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4995870dfc15bdb599291a6446cc9e36">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs)</span></span>
-            </h3>
-            <p>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The stream.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The input stream.</td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">try</span>
-<span class="p">{</span>
-    <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"enabled = trUe"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="p">}</span>
-<span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml::</span><span class="ut">parse_error</span> <span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
-<span class="p">{</span>
-    <span class="ns">std::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="p">}</span></pre><pre class="m-console"><span class="go">Parsing failed:</span>
-<span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
-<span class="go">    (error occurred at line 1, column 13)</span></pre>
-          </div></section>
         </section>
       </div>
     </div>

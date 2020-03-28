@@ -117,12 +117,6 @@ C++</span></a>
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the LHS position is before the RHS position.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename CHAR&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa87323f3ce926e11feb7e30fde4b6ec5">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp;</span>
-            </dt>
-            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</dd>
             <dt id="abb7d47c85374301ec48e7c5f3ee1c71a">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abb7d47c85374301ec48e7c5f3ee1c71a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
@@ -134,45 +128,6 @@ C++</span></a>
             </dt>
             <dd>Returns true if two source_positions represent the same line and column.</dd>
           </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="aa87323f3ce926e11feb7e30fde4b6ec5"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename CHAR&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa87323f3ce926e11feb7e30fde4b6ec5">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;CHAR&gt;&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs)</span></span>
-            </h3>
-            <p>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The stream.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>The input stream.</td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="sa">sv</span><span class="p">);</span>
-
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
-    <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
-    <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7</span></pre>
-          </div></section>
         </section>
         <section>
           <h2>Variable documentation</h2>
