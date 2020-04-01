@@ -258,7 +258,9 @@ namespace toml
 				const auto tbl = lhs.as<table>();
 				return tbl && *tbl == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, )
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, )
+			#endif
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as RHS.
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const array& rhs) noexcept
@@ -268,7 +270,9 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, )
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, )
+			#endif
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename U>
@@ -279,7 +283,9 @@ namespace toml
 				const auto val = lhs.as<U>();
 				return val && *val == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
+			#endif
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
@@ -288,11 +294,13 @@ namespace toml
 				const auto val = lhs.as<impl::promoted<U>>();
 				return val && *val == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(
-				const node_view&,
-				const U&,
-				template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
-			)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(
+					const node_view&,
+					const U&,
+					template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+				)
+			#endif
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
 			template <typename U>
@@ -301,7 +309,9 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<U>&, template <typename U>)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<U>&, template <typename U>)
+			#endif
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS vector.
 			template <typename U>
@@ -310,7 +320,9 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
+			#endif
 
 			/// \brief	Returns a view of the selected subnode.
 			///

@@ -4,6 +4,9 @@
 
 #pragma once
 #include "toml_parser.h"
+#if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
+	#error This is an implementation-only header.
+#endif
 
 namespace toml::impl
 {
@@ -179,6 +182,7 @@ namespace toml::impl
 				}
 			}
 
+			TOML_NEVER_INLINE
 			void go_back(size_t count = 1_sz) noexcept
 			{
 				TOML_ERROR_CHECK();
@@ -188,6 +192,7 @@ namespace toml::impl
 				prev_pos = cp->position;
 			}
 
+			TOML_NEVER_INLINE
 			void advance() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK();
@@ -208,6 +213,7 @@ namespace toml::impl
 					recording_buffer.append(cp->as_view<char>());
 			}
 
+			TOML_NEVER_INLINE
 			void start_recording(bool include_current = true) noexcept
 			{
 				TOML_ERROR_CHECK();
@@ -218,6 +224,7 @@ namespace toml::impl
 					recording_buffer.append(cp->as_view<char>());
 			}
 
+			TOML_NEVER_INLINE
 			void stop_recording(size_t pop_bytes = 0_sz) noexcept
 			{
 				TOML_ERROR_CHECK();
@@ -235,6 +242,7 @@ namespace toml::impl
 				}
 			}
 
+			TOML_NEVER_INLINE
 			bool consume_leading_whitespace() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -249,6 +257,7 @@ namespace toml::impl
 				return consumed;
 			}
 
+			TOML_NEVER_INLINE
 			bool consume_line_break() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -272,6 +281,7 @@ namespace toml::impl
 				return true;
 			}
 
+			TOML_NEVER_INLINE
 			bool consume_rest_of_line() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -292,6 +302,7 @@ namespace toml::impl
 				return true;
 			}
 
+			TOML_NEVER_INLINE
 			bool consume_comment() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -327,6 +338,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			bool consume_expected_sequence(std::u32string_view seq) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -344,6 +356,7 @@ namespace toml::impl
 
 			template <typename T, size_t N>
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			bool consume_digit_sequence(T(&digits)[N]) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -361,6 +374,7 @@ namespace toml::impl
 
 			template <typename T, size_t N>
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			size_t consume_variable_length_digit_sequence(T(&buffer)[N]) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -379,6 +393,7 @@ namespace toml::impl
 
 			template <bool MULTI_LINE>
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			string parse_basic_string() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -642,6 +657,7 @@ namespace toml::impl
 
 			template <bool MULTI_LINE>
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			string parse_literal_string() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -740,6 +756,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			string parse_string() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -788,6 +805,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			string parse_bare_key_segment() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -809,6 +827,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			bool parse_bool() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -841,6 +860,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			double parse_inf_or_nan() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -891,6 +911,7 @@ namespace toml::impl
 			TOML_DISABLE_INIT_WARNINGS
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			double parse_float() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1052,6 +1073,7 @@ namespace toml::impl
 			#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/562
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			double parse_hex_float() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1250,6 +1272,7 @@ namespace toml::impl
 
 			template <int base>
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			int64_t parse_integer() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1437,6 +1460,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			date parse_date(bool part_of_datetime = false) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1545,6 +1569,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			time parse_time(bool part_of_datetime = false) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1708,6 +1733,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			date_time parse_date_time() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -1825,12 +1851,13 @@ namespace toml::impl
 			TOML_POP_WARNINGS 
 
 			[[nodiscard]]
-			inline std::unique_ptr<toml::array> parse_array() TOML_MAY_THROW;
+			std::unique_ptr<toml::array> parse_array() TOML_MAY_THROW;
 
 			[[nodiscard]]
-			inline std::unique_ptr<toml::table> parse_inline_table() TOML_MAY_THROW;
+			std::unique_ptr<toml::table> parse_inline_table() TOML_MAY_THROW;
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			std::unique_ptr<node> parse_value() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -2206,6 +2233,7 @@ namespace toml::impl
 			};
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			key parse_key() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -2269,6 +2297,7 @@ namespace toml::impl
 			};
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			key_value_pair parse_key_value_pair() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -2312,6 +2341,7 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
+			TOML_NEVER_INLINE
 			table* parse_table_header() TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK({});
@@ -2523,6 +2553,7 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
+			TOML_NEVER_INLINE
 			void parse_key_value_pair_and_insert(table* tab) TOML_MAY_THROW
 			{
 				TOML_ERROR_CHECK();
@@ -2576,6 +2607,7 @@ namespace toml::impl
 				);
 			}
 
+			TOML_NEVER_INLINE
 			void parse_document() TOML_MAY_THROW
 			{
 				TOML_ASSERT(cp);
@@ -2724,7 +2756,8 @@ namespace toml::impl
 			TOML_POP_WARNINGS
 	};
 
-	inline std::unique_ptr<toml::array> parser::parse_array() TOML_MAY_THROW
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::unique_ptr<toml::array> parser::parse_array() TOML_MAY_THROW
 	{
 		TOML_ERROR_CHECK({});
 		TOML_ASSERT(cp && *cp == U'[');
@@ -2805,7 +2838,8 @@ namespace toml::impl
 		return arr;
 	}
 
-	inline std::unique_ptr<toml::table> parser::parse_inline_table() TOML_MAY_THROW
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::unique_ptr<toml::table> parser::parse_inline_table() TOML_MAY_THROW
 	{
 		TOML_ERROR_CHECK({});
 		TOML_ASSERT(cp && *cp == U'{');
@@ -2927,7 +2961,7 @@ namespace toml::impl
 	#undef TOML_NORETURN
 
 	TOML_API
-	TOML_INLINE_FUNC_IMPL
+	TOML_FUNC_EXTERNAL_LINKAGE
 	parse_result do_parse(utf8_reader_interface&& reader) TOML_MAY_THROW
 	{
 		return impl::parser{ std::move(reader) };
@@ -2949,14 +2983,14 @@ namespace toml
 	#endif
 
 	TOML_API
-	TOML_INLINE_FUNC_IMPL
+	TOML_FUNC_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
 	TOML_API
-	TOML_INLINE_FUNC_IMPL
+	TOML_FUNC_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -2965,14 +2999,14 @@ namespace toml
 	#if defined(__cpp_lib_char8_t)
 
 	TOML_API
-	TOML_INLINE_FUNC_IMPL
+	TOML_FUNC_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
 	TOML_API
-	TOML_INLINE_FUNC_IMPL
+	TOML_FUNC_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
@@ -2995,7 +3029,7 @@ namespace toml
 		#endif
 
 		TOML_API
-		TOML_INLINE_FUNC_IMPL
+		TOML_FUNC_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::string_view{ str, len });
@@ -3004,7 +3038,7 @@ namespace toml
 		#if defined(__cpp_lib_char8_t)
 
 		TOML_API
-		TOML_INLINE_FUNC_IMPL
+		TOML_FUNC_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::u8string_view{ str, len });

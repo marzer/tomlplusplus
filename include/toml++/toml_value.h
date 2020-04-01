@@ -189,7 +189,9 @@ namespace toml
 
 			/// \brief	Value equality operator.
 			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
+			#endif
 
 			/// \brief	Value less-than operator.
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
@@ -302,15 +304,31 @@ namespace toml
 	};
 
 	#if !TOML_ALL_INLINE
-	extern template class TOML_API value<string>;
-	extern template class TOML_API value<int64_t>;
-	extern template class TOML_API value<double>;
-	extern template class TOML_API value<bool>;
-	extern template class TOML_API value<date>;
-	extern template class TOML_API value<time>;
-	extern template class TOML_API value<date_time>;
+		extern template class TOML_API value<string>;
+		extern template class TOML_API value<int64_t>;
+		extern template class TOML_API value<double>;
+		extern template class TOML_API value<bool>;
+		extern template class TOML_API value<date>;
+		extern template class TOML_API value<time>;
+		extern template class TOML_API value<date_time>;
 	#endif
+}
 
+#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+namespace std
+{
+	extern template class unique_ptr<toml::value<toml::string>>;
+	extern template class unique_ptr<toml::value<int64_t>>;
+	extern template class unique_ptr<toml::value<double>>;
+	extern template class unique_ptr<toml::value<bool>>;
+	extern template class unique_ptr<toml::value<toml::date>>;
+	extern template class unique_ptr<toml::value<toml::time>>;
+	extern template class unique_ptr<toml::value<toml::date_time>>;
+}
+#endif
+
+namespace toml
+{
 	template <size_t N> value(const string_char(&)[N]) -> value<string>;
 	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
@@ -333,10 +351,10 @@ namespace toml
 	value(time) -> value<time>;
 	value(date_time) -> value<date_time>;
 	#ifdef TOML_SMALL_FLOAT_TYPE
-	value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
+		value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
 	#endif
 	#ifdef TOML_SMALL_INT_TYPE
-	value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
+		value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
 	/// \brief	Prints the value out to a stream.

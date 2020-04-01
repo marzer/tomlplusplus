@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.0.0',
+	version : '1.0.1',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',

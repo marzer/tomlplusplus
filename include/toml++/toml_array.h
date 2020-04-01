@@ -155,8 +155,10 @@ namespace toml::impl
 			}
 	};
 
-	template class array_iterator<true>;
-	template class array_iterator<false>;
+	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+		extern template class array_iterator<true>;
+		extern template class array_iterator<false>;
+	#endif
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -796,7 +798,9 @@ namespace toml
 			{
 				return container_equality(lhs, rhs);
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
+			#endif
 
 			/// \brief	Vector equality operator.
 			template <typename T>
@@ -804,7 +808,9 @@ namespace toml
 			{
 				return container_equality(lhs, rhs);
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
+			#ifndef DOXYGEN
+				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
+			#endif
 
 			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
 			/// 
@@ -831,3 +837,9 @@ namespace toml
 	};
 }
 
+#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+namespace std
+{
+	extern template class unique_ptr<toml::array>;
+}
+#endif

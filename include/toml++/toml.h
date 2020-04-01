@@ -43,6 +43,7 @@
 	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_POP_WARNINGS
 	#undef TOML_ALWAYS_INLINE
+	#undef TOML_NEVER_INLINE
 	#undef TOML_ASSUME
 	#undef TOML_UNREACHABLE
 	#undef TOML_INTERFACE
@@ -67,12 +68,13 @@
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
 	#undef TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
-	#undef TOML_INLINE_FUNC_IMPL
+	#undef TOML_FUNC_EXTERNAL_LINKAGE
 	#undef TOML_COMPILER_EXCEPTIONS
 	#undef TOML_LAUNDER
 	#undef TOML_TRIVIAL_ABI
 	#undef TOML_ABI_NAMESPACES
 	#undef TOML_PARSER_TYPENAME
+	#undef TOML_HAS_API_ANNOTATION
 #endif
 
 /// \mainpage toml++
@@ -330,7 +332,7 @@
 /// 
 /// \see
 /// 	- toml::node
-/// 	- toml::node_view  
+/// 	- toml::node_view
 /// 	- toml::value
 /// 	- toml::array
 /// 	- toml::table
@@ -357,9 +359,11 @@
 /// 		},
 /// 	}};
 ///
+///		// serializing as TOML is just writing it to a stream
 /// 	std::cout << "###### TOML ######"sv << std::endl;
 /// 	std::cout << tbl << std::endl << std::endl;
-/// 	
+/// 
+///		// serializing as JSON is _also_ just writing it to a stream, but via a json_formatter:
 /// 	std::cout << "###### JSON ######"sv << std::endl;
 /// 	std::cout << toml::json_formatter{ tbl } << std::endl;
 /// 	return 0;
@@ -402,11 +406,45 @@
 ///		- toml::default_formatter
 ///		- toml::json_formatter
 /// 
+///////////////////////////////////
+/// 
+/// \subsection mainpage-example-speed-up-compilation Speeding up compilation
+/// Because `toml++` is a header-only library of nontrivial size you might find that compilation times noticeably
+/// increase after you add it to your project, especially if you add the library's header somewhere that's visible from
+/// a large number of translation units. You can counter this by disabling 'all inline' mode and explicitly controlling
+/// where the library's implementation is compiled.
+/// 
+/// <strong>Step 1: Set `TOML_ALL_INLINE` to `0` before including `toml++`</strong>
+/// 
+/// This must be the same everywhere, so either set it as a global `#define` in your build system, or
+/// do it manually before including toml++ in some global header that's used everywhere in your project:
+/// \cpp
+/// // global_header_that_includes_toml++.h
+/// 
+/// #define TOML_ALL_INLINE 0
+/// #include <toml.hpp>
+/// \ecpp
+/// 
+/// <strong>Step 2: Define `TOML_IMPLEMENTATION` before including `toml++` in one specific translation unit</strong>
+/// 
+/// \cpp
+/// // some_code_file.cpp
+/// 
+/// #define TOML_IMPLEMENTATION 
+/// #include "global_header_that_includes_toml++.h"
+/// \ecpp
+/// 
+/// \m_class{m-note m-default}
+/// 
+/// Your project may already have a specific header/source file pair configured as a 'precompiled header'; if so,
+/// that's the ideal place to put this machinery.
+/// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-contributing Contributing
-/// Contributions are very welcome! Either by [reporting issues](https://github.com/marzer/tomlplusplus/issues) or submitting pull requests.
-/// If you wish to submit a pull request, please see [CONTRIBUTING](https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md)
+/// Contributions are very welcome! Either by [reporting issues](https://github.com/marzer/tomlplusplus/issues)
+/// or submitting pull requests. If you wish to submit a pull request,
+/// please see [CONTRIBUTING](https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md)
 /// for all the details you need to get going.
 /// 
 ///////////////////////////////////////////////////////////////////////
@@ -421,3 +459,14 @@
 /// If you're using the single-header version of the library you don't need to explicitly distribute the license file;
 /// it is embedded in the preamble at the top of the header.
 ///
+///////////////////////////////////////////////////////////////////////
+/// 
+/// \section mainpage-contact Contacting the author
+/// For bug reports and feature requests please consider using the
+/// [GitHub issues](https://github.com/marzer/tomlplusplus/issues) system. For anything else though you're welcome
+/// to reach out via other means. In order of likely response speed:
+/// - Twitter: [marzer8789](https://twitter.com/marzer8789)
+/// - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
+/// - Facebook: [marzer](https://www.facebook.com/marzer)
+/// - LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)
+/// 

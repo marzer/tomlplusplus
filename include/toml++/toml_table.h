@@ -16,6 +16,11 @@ namespace toml::impl
 		value_type& value;
 	};
 
+	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+		extern template struct table_proxy_pair<true>;
+		extern template struct table_proxy_pair<false>;
+	#endif
+
 	template <bool is_const>
 	class table_iterator final
 	{
@@ -89,10 +94,10 @@ namespace toml::impl
 			}
 	};
 
-	template struct table_proxy_pair<true>;
-	template struct table_proxy_pair<false>;
-	template class table_iterator<true>;
-	template class table_iterator<false>;
+	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+		extern template class table_iterator<true>;
+		extern template class table_iterator<false>;
+	#endif
 
 	struct table_init_pair final
 	{
@@ -737,3 +742,9 @@ namespace toml
 	};
 }
 
+#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+namespace std
+{
+	extern template class unique_ptr<toml::table>;
+}
+#endif

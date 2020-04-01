@@ -18,7 +18,7 @@
 
 <br>
 
-# Example
+# Basic usage
 
 Given a TOML file `configuration.toml` containing the following:
 ```toml
@@ -145,6 +145,18 @@ If you wish to submit a pull request, please see [CONTRIBUTING] for all the deta
 
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]'.
 
+<br>
+
+# Contact
+For bug reports and feature requests please consider using the [issues] system here on GitHub. For anything else
+though you're welcome to reach out via other means. In order of likely response time:
+- Twitter: [marzer8789](https://twitter.com/marzer8789)
+- Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
+- Facebook: [marzer](https://www.facebook.com/marzer)
+- LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)
+
+
+
 [API documentation]: https://marzer.github.io/tomlplusplus/
 [unreleased TOML language features]: #unreleased-toml-features
 [numbered version]: https://github.com/toml-lang/toml/releases
@@ -158,6 +170,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 [cpp_compilers]: https://en.cppreference.com/w/cpp/compiler_support
 [reporting issues]: https://github.com/marzer/tomlplusplus/issues
+[issues]: https://github.com/marzer/tomlplusplus/issues
 [#356]: https://github.com/toml-lang/toml/issues/356
 [#516]: https://github.com/toml-lang/toml/issues/516
 [#562]: https://github.com/toml-lang/toml/issues/562

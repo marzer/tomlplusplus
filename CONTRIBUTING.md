@@ -7,13 +7,17 @@ If you wish to submit a PR, please be aware that:
     (Visual Studio 2019). All three is a bonus.
 - You should regenerate the single-header file as part of your PR (a CI check will fail if you don't).
 
-### Regenerating toml.hpp
+<br>
+
+## Regenerating toml.hpp
 1. Make your changes as necessary
-2. If you've added a new header file that isn't going to be transitively included by one of the
-    others, add an include directive to `include/toml++/toml.h`
+    - If you've added a new header file that isn't going to be transitively included by one of the
+        others, add an include directive to `include/toml++/toml.h`
 3. Run `python/generate_single_header.py`
 
-### Building and running the tests
+<br>
+
+## Building and running the tests
 Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
 The first time you want to begin testing you'll need to ensure submodules have been fetched:  
 ```bash
@@ -21,16 +25,16 @@ git submodule update --init extern/Catch2
 git submodule update --init extern/tloptional
 ```
 
-#### Testing on Windows with Visual Studio
+### Testing on Windows with Visual Studio
 
 Install [Visual Studio 2019] and [Test Adapter for Catch2], then open `vs/toml++.sln` and build the
 projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
 allow you to run the tests directly.
 
-If test discovery fails you can usually fix it by clicking enabling
+If test discovery fails you can usually fix it by enabling
 `Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
 
-#### Testing on Linux (and WSL)
+### Testing on Linux (and WSL)
 Install [meson] and [ninja] if necessary, then test with both gcc and clang:
 ```bash
 CXX=g++ meson build-gcc

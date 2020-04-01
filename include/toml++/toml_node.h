@@ -519,3 +519,9 @@ namespace toml
 	};
 }
 
+#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+namespace std
+{
+	extern template class unique_ptr<toml::node>;
+}
+#endif
