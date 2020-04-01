@@ -79,7 +79,7 @@ C++</span></a>
             </li>
           </ul>
         </div>
-<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;toml::node&gt; with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#a58bb61e3c953a5a74abf1cce278e3e5a">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;toml::node&gt; with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#a9c2048a53d78573cd5a3b62121c24f3b">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
 
 <span class="s">    title = "my hardware store"</span>
 <span class="s">    </span>
@@ -225,8 +225,7 @@ C++</span></a>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a58bb61e3c953a5a74abf1cce278e3e5a">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9c2048a53d78573cd5a3b62121c24f3b">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
             <dt>
@@ -258,21 +257,21 @@ C++</span></a>
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a7167c0f10f6489ccca09ed23d0f794d7">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7167c0f10f6489ccca09ed23d0f794d7">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc" href="classtoml_1_1table.html">table</a> friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3b39aedbada6221a4e3857b0f0235843">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3b39aedbada6221a4e3857b0f0235843">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is an array with the same contents as RHS.</dd>
-            <dt id="ab8539b952fd0a8c5c130cd885f57ae1f">
+            <dt id="a18c80d47393c3d34824f05f58285b789">
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab8539b952fd0a8c5c130cd885f57ae1f">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
-              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt;&amp; rhs) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const U friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a18c80d47393c3d34824f05f58285b789">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
+              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is an array with the same contents as the RHS initializer list.</dd>
-            <dt id="a79ecbdc4dfc56fe8fd1124077db53cb5">
+            <dt id="a769be096b7dcec45e19b0fd5bdeedd99">
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a79ecbdc4dfc56fe8fd1124077db53cb5">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
-              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt;&amp; rhs) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt; friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a769be096b7dcec45e19b0fd5bdeedd99">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
+              const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is an array with the same contents as the RHS vector.</dd>
             <dt id="a754bdba78869afe6bccb4b51e0a77e45">
@@ -280,16 +279,16 @@ C++</span></a>
               const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is a table with the same contents as RHS.</dd>
-            <dt id="af0b8fd274ef46336f22309b951915e4c">
+            <dt id="a38abb74f319ffac9123b5a40824816a9">
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af0b8fd274ef46336f22309b951915e4c">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;U&gt;&amp; rhs) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc" href="classtoml_1_1array.html">array</a> friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a38abb74f319ffac9123b5a40824816a9">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;U&gt;&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is a value with the same value as RHS.</dd>
-            <dt id="a82e8238301cec6fafa7b2d2c97bb0a43">
+            <dt id="aeee503e9ac1711fb60a2bd9e0aed69e4">
               <div class="m-doc-template">template&lt;typename U, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="impl::is_value_or_promotable&lt;U">...</a><span>impl::is_value_or_promotable&lt;U</span></span>&gt;&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a82e8238301cec6fafa7b2d2c97bb0a43">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
-              const U&amp; rhs) -&gt; const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;U&gt; friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeee503e9ac1711fb60a2bd9e0aed69e4">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&amp; lhs,
+              const U&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is a value with the same value as RHS.</dd>
           </dl>
@@ -378,13 +377,12 @@ C++</span></a>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a58bb61e3c953a5a74abf1cce278e3e5a"><div>
+          <section class="m-doc-details" id="a9c2048a53d78573cd5a3b62121c24f3b"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
-                template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a>&lt;U&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a58bb61e3c953a5a74abf1cce278e3e5a">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9c2048a53d78573cd5a3b62121c24f3b">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the selected subnode.</p>
             <table class="m-table m-fullwidth m-flat">
