@@ -67,6 +67,9 @@
     <ClInclude Include="..\tests\catch2.h">
       <Filter>tests</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_default_formatter_impl.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

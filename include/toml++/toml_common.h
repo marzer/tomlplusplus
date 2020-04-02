@@ -24,11 +24,8 @@
 	#define TOML_IMPLEMENTATION 0
 #endif
 
-#ifdef TOML_API
-	#define TOML_HAS_API_ANNOTATION 1
-#else
+#ifndef TOML_API
 	#define TOML_API
-	#define TOML_HAS_API_ANNOTATION 0
 #endif
 
 #ifndef TOML_CHAR_8_STRINGS
@@ -94,8 +91,8 @@
 	#endif
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
-	#ifndef TOML_USE_STREAMS_FOR_FLOATS
-		#define TOML_USE_STREAMS_FOR_FLOATS 1
+	#ifndef TOML_FLOATING_POINT_CHARCONV
+		#define TOML_FLOATING_POINT_CHARCONV 0
 	#endif
 
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
@@ -151,8 +148,8 @@
 	#define TOML_UNLIKELY
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
-	#ifndef TOML_USE_STREAMS_FOR_FLOATS
-		#define TOML_USE_STREAMS_FOR_FLOATS 1
+	#ifndef TOML_FLOATING_POINT_CHARCONV
+		#define TOML_FLOATING_POINT_CHARCONV 0
 	#endif
 
 #endif
@@ -195,8 +192,8 @@
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
-#ifndef TOML_USE_STREAMS_FOR_FLOATS
-	#define TOML_USE_STREAMS_FOR_FLOATS 0
+#ifndef TOML_FLOATING_POINT_CHARCONV
+	#define TOML_FLOATING_POINT_CHARCONV 1
 #endif
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
@@ -293,8 +290,8 @@
 #define TOML_LANG_AT_LEAST(maj, min, rev)											\
 		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(maj, min, rev))
 
-#define TOML_LANG_EXACTLY(maj, min, rev)											\
-		(TOML_LANG_EFFECTIVE_VERSION == TOML_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_UNRELEASED														\
+		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
 
 ////////// INCLUDES
@@ -324,9 +321,6 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
-#endif
-#if TOML_USE_STREAMS_FOR_FLOATS
-	#include <sstream>
 #endif
 #if TOML_EXCEPTIONS
 	#include <stdexcept>
@@ -503,7 +497,7 @@ namespace toml
 	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
 	/// 		 <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off
 	/// 		 between parser complexity and correctness.
-	struct source_position
+	struct TOML_TRIVIAL_ABI source_position
 	{
 		/// \brief The line number.
 		/// \remarks Valid line numbers start at 1.
@@ -707,17 +701,8 @@ namespace toml::impl
 	template <typename T>
 	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
 
-	#if defined(__cpp_lib_remove_cvref) || (defined(_MSC_VER) && defined(_HAS_CXX20) && _HAS_CXX20)
-
-	template <typename T>
-	using remove_cvref_t = std::remove_cvref_t<T>;
-
-	#else
-
 	template <typename T>
 	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-	#endif
 
 	template <typename T, typename... U>
 	struct is_one_of_ : std::integral_constant<bool,
@@ -726,12 +711,6 @@ namespace toml::impl
 
 	template <typename T, typename... U>
 	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
-
-	template <typename T, typename... U>
-	using enable_if_one_of = std::enable_if_t<is_one_of<T, U...>>;
-
-	template <typename T, typename... U>
-	using enable_if_not_one_of = std::enable_if_t<!is_one_of<T, U...>>;
 
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -843,10 +822,10 @@ namespace toml::impl
 	template <> struct value_promoter<uint8_t> { using type = int64_t; };
 	template <> struct value_promoter<float> { using type = double; };
 	#ifdef TOML_SMALL_FLOAT_TYPE
-	template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
+		template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
 	#endif
 	#ifdef TOML_SMALL_INT_TYPE
-	template <> struct value_promoter<TOML_SMALL_INT_TYPE> { using type = int64_t; };
+		template <> struct value_promoter<TOML_SMALL_INT_TYPE> { using type = int64_t; };
 	#endif
 	template <typename T> using promoted = typename impl::value_promoter<T>::type;
 
@@ -914,10 +893,9 @@ namespace toml::impl
 		"date-time"sv
 	};
 
-
 	#define TOML_P2S_DECL(linkage, type)								\
-		template <typename CHAR>										\
-		linkage void print_to_stream(type, std::basic_ostream<CHAR>&)
+		template <typename Char>										\
+		linkage void print_to_stream(type, std::basic_ostream<Char>&)
 
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int8_t);
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int16_t);
@@ -985,19 +963,24 @@ namespace toml
 	/// Element [2] is: string
 	/// Element [3] is: boolean
 	/// \eout
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, node_type rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
 		using underlying_t = std::underlying_type_t<node_type>;
 		const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-		if constexpr (std::is_same_v<CHAR, char>)
+		if constexpr (std::is_same_v<Char, char>)
 			return lhs << str;
 		else
 		{
-			if constexpr (sizeof(CHAR) == 1)
-				return lhs << std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(str.data()), str.length() };
+			if constexpr (sizeof(Char) == 1)
+				return lhs << std::basic_string_view<Char>{ reinterpret_cast<const Char*>(str.data()), str.length() };
 			else
 				return lhs << str.data();
 		}
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
+	#endif
 }

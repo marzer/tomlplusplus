@@ -30,12 +30,13 @@
 #include "toml_array_impl.h"
 #include "toml_table_impl.h"
 #include "toml_parser_impl.h"
+#include "toml_default_formatter_impl.h"
 
 #endif
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_USE_STREAMS_FOR_FLOATS
+	#undef TOML_FLOATING_POINT_CHARCONV
 	#undef TOML_GNU_ATTR
 	#undef TOML_PUSH_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
@@ -60,7 +61,7 @@
 	#undef TOML_LANG_EFFECTIVE_VERSION
 	#undef TOML_LANG_HIGHER_THAN
 	#undef TOML_LANG_AT_LEAST
-	#undef TOML_LANG_EXACTLY
+	#undef TOML_LANG_UNRELEASED
 	#undef TOML_STRING_PREFIX_1
 	#undef TOML_STRING_PREFIX
 	#undef TOML_UNDEF_MACROS
@@ -74,19 +75,18 @@
 	#undef TOML_TRIVIAL_ABI
 	#undef TOML_ABI_NAMESPACES
 	#undef TOML_PARSER_TYPENAME
-	#undef TOML_HAS_API_ANNOTATION
 #endif
 
 /// \mainpage toml++
 /// 
-/// \image html tomlplusplus-banner-small.png width=1280px
+/// \image html banner_small.png width=1280px
 /// 
 /// \tableofcontents
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus optional support for some
+/// - [TOML v1.0.0-rc.1](https://github.com/toml-lang/toml/blob/master/README.md), plus optional support for some
 ///		unreleased TOML features
 /// - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 /// - Proper UTF-8 handling (incl. BOM)
@@ -137,10 +137,9 @@
 /// 	catch (const toml::parse_error& err)
 /// 	{
 /// 		std::cerr
-/// 			<< "Error parsing file '"sv << *err.source().path
-/// 			<< "':\n"sv << err.description()
-/// 			<< "\n  ("sv << err.source().begin << ")"sv
-/// 			<< std::endl;
+/// 			<< "Error parsing file '" << *err.source().path
+/// 			<< "':\n" << err.description()
+/// 			<< "\n  (" << err.source().begin << ")\n";
 /// 		return 1;
 /// 	}
 /// 	
@@ -164,10 +163,9 @@
 /// 	if (!tbl)
 /// 	{
 /// 		std::cerr
-/// 			<< "Error parsing file '"sv << *tbl.error().source().path
-/// 			<< "':\n"sv << tbl.error().description()
-/// 			<< "\n  ("sv << tbl.error().source().begin << ")"sv
-/// 			<< std::endl;
+/// 			<< "Error parsing file '" << *tbl.error().source().path
+/// 			<< "':\n" << tbl.error().description()
+/// 			<< "\n  (" << tbl.error().source().begin << ")\n";
 /// 		return 1;
 /// 	}
 /// 	
@@ -184,7 +182,7 @@
 ///	}
 ///	catch (const toml::parse_error & err)
 ///	{
-///		std::cerr << "Parsing failed:\n"sv << err << std::endl;
+///		std::cerr << "Parsing failed:\n" << err << "\n";
 ///		return 1;
 ///	}
 /// \ecpp
@@ -220,7 +218,7 @@
 ///		static constexpr auto source = R"(
 ///			[library]
 ///			name = "toml++"
-///			authors = ["Mark Gillard <mark@notarealwebsite.com>"]
+///			authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
 ///		
 ///			[dependencies]
 ///			cpp = 17
@@ -229,14 +227,14 @@
 ///		// parse directly from a string view:
 ///		{
 ///			auto tbl = toml::parse(source);
-///			std::cout << tbl << std::endl;
+///			std::cout << tbl << "\n";
 ///		}
 ///		
 ///		// parse from a string stream:
 ///		{
 ///			std::stringstream ss{ std::string{ source } };
 ///			auto tbl = toml::parse(ss);
-///			std::cout << tbl << std::endl;
+///			std::cout << tbl << "\n";
 ///		}
 ///		
 /// 	return 0;
@@ -284,9 +282,9 @@
 ///		
 ///		// get a view of the element 'numbers'
 ///		auto numbers = tbl["numbers"];
-///		std::cout << "table has 'numbers': "sv << !!numbers << std::endl;
-///		std::cout << "numbers is a: "sv << numbers.type() << std::endl;
-///		std::cout << "numbers: "sv << numbers << std::endl;
+///		std::cout << "table has 'numbers': " << !!numbers << "\n";
+///		std::cout << "numbers is a: " << numbers.type() << "\n";
+///		std::cout << "numbers: " << numbers << "\n";
 ///
 ///		// get the underlying array object to do some more advanced stuff
 ///		if (auto arr = numbers.as_array())
@@ -306,15 +304,15 @@
 ///			// arrays are very similar to std::vector
 ///			arr->push_back(7);
 ///			arr->emplace_back<toml::array>(8, 9);
-///			std::cout << "numbers: "sv << numbers << std::endl;
+///			std::cout << "numbers: " << numbers << "\n";
 ///		}
 ///
 ///		// node-views can be chained to quickly query deeper
-///		std::cout << "cats: "sv << tbl["animals"]["cats"] << std::endl;
-///		std::cout << "fish[1]: "sv << tbl["animals"]["fish"][1] << std::endl;
+///		std::cout << "cats: " << tbl["animals"]["cats"] << "\n";
+///		std::cout << "fish[1]: " << tbl["animals"]["fish"][1] << "\n";
 ///		
 ///		// ...even if the element doesn't exist
-///		std::cout << "dinosaurs: "sv << tbl["animals"]["dinosaurs"] << std::endl; //no dinosaurs :(
+///		std::cout << "dinosaurs: " << tbl["animals"]["dinosaurs"] << "\n"; //no dinosaurs :(
 /// 
 /// 	return 0;
 /// }
@@ -349,7 +347,7 @@
 /// 	auto tbl = toml::table{{
 /// 		{ "lib", "toml++" },
 /// 		{ "cpp", toml::array{ 17, 20, "and beyond" } },
-/// 		{ "toml", toml::array{ "0.5.0", "and beyond" } },
+/// 		{ "toml", toml::array{ "1.0.0", "and beyond" } },
 /// 		{ "repo", "https://github.com/marzer/tomlplusplus/" },
 /// 		{ "author", toml::table{{
 /// 				{ "name", "Mark Gillard" },
@@ -360,22 +358,23 @@
 /// 	}};
 ///
 ///		// serializing as TOML is just writing it to a stream
-/// 	std::cout << "###### TOML ######"sv << std::endl;
-/// 	std::cout << tbl << std::endl << std::endl;
+/// 	std::cout << "###### TOML ######" << "\n\n";
+/// 	std::cout << tbl << "\n\n";
 /// 
 ///		// serializing as JSON is _also_ just writing it to a stream, but via a json_formatter:
-/// 	std::cout << "###### JSON ######"sv << std::endl;
-/// 	std::cout << toml::json_formatter{ tbl } << std::endl;
+/// 	std::cout << "###### JSON ######" << "\n\n";
+/// 	std::cout << toml::json_formatter{ tbl } << "\n\n";
 /// 	return 0;
 /// }
 /// \ecpp
 ///
 /// \out
 /// ###### TOML ######
+///
 /// cpp = [17, 20, "and beyond"]
 /// lib = "toml++"
 /// repo = "https://github.com/marzer/tomlplusplus/"
-/// toml = ["0.5.0", "and beyond"]
+/// toml = ["1.0.0", "and beyond"]
 /// 
 /// [author]
 /// github = "https://github.com/marzer"
@@ -383,6 +382,7 @@
 /// twitter = "https://twitter.com/marzer8789"
 /// 
 /// ###### JSON ######
+///
 /// {
 ///     "author" : {
 ///         "github" : "https://github.com/marzer",
@@ -397,7 +397,7 @@
 ///     "lib" : "toml++",
 ///     "repo" : "https://github.com/marzer/tomlplusplus/",
 ///     "toml" : [
-///         "0.5.0",
+///         "1.0.0",
 ///         "and beyond"
 ///     ]
 /// }
@@ -433,11 +433,6 @@
 /// #define TOML_IMPLEMENTATION 
 /// #include "global_header_that_includes_toml++.h"
 /// \ecpp
-/// 
-/// \m_class{m-note m-default}
-/// 
-/// Your project may already have a specific header/source file pair configured as a 'precompiled header'; if so,
-/// that's the ideal place to put this machinery.
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 

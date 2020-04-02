@@ -3,11 +3,20 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
 #pragma once
-#include "toml_value.h"
-#include "toml_node_view.h"
+#include "toml_common.h"
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
+
+#if !TOML_ALL_INLINE
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+#include <ostream>
+TOML_POP_WARNINGS
+#include "toml_node_view.h"
+#include "toml_default_formatter.h"
+#include "toml_json_formatter.h"
 
 namespace toml
 {
@@ -24,34 +33,44 @@ namespace toml
 	template class TOML_API node_view<node>;
 	template class TOML_API node_view<const node>;
 
-	// table and array iterators
-	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
+	// formatters
 	namespace impl
 	{
-		template struct table_proxy_pair<true>;
-		template struct table_proxy_pair<false>;
-		template class table_iterator<true>;
-		template class table_iterator<false>;
-		template class array_iterator<true>;
-		template class array_iterator<false>;
+		template class TOML_API formatter<char>;
 	}
-	#endif
+	template class TOML_API default_formatter<char>;
+	template class TOML_API json_formatter<char>;
+
+	// various ostream operators
+	template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
+	template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
+	template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
+	template TOML_API std::ostream& operator << (std::ostream&, const date&);
+	template TOML_API std::ostream& operator << (std::ostream&, const time&);
+	template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
+	template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::string>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
+	template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
+	template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
+	template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&);
+	template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
+	template TOML_API std::ostream& operator << (std::ostream&, const table&);
+	template TOML_API std::ostream& operator << (std::ostream&, const array&);
+	template TOML_API std::ostream& operator << (std::ostream&, const node_view<node>&);
+	template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
+	template TOML_API std::ostream& operator << (std::ostream&, node_type);
+
+	namespace impl
+	{
+		template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
+		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
+	}
 }
 
-// unique_ptrs to various things
-#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-namespace std
-{
-	template class unique_ptr<toml::node>;
-	template class unique_ptr<toml::table>;
-	template class unique_ptr<toml::array>;
-	template class unique_ptr<toml::value<toml::string>>;
-	template class unique_ptr<toml::value<int64_t>>;
-	template class unique_ptr<toml::value<double>>;
-	template class unique_ptr<toml::value<bool>>;
-	template class unique_ptr<toml::value<toml::date>>;
-	template class unique_ptr<toml::value<toml::time>>;
-	template class unique_ptr<toml::value<toml::date_time>>;
-}
-#endif
-
+#endif // !TOML_ALL_INLINE

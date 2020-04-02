@@ -9,8 +9,8 @@
 
 namespace toml
 {
-	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<T>&);
+	template <typename Char, typename T>
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 
 	/// \brief	A view of a node.
 	/// 
@@ -72,9 +72,9 @@ namespace toml
 				: node_{ node }
 			{}
 
-			template <typename FUNC>
+			template <typename Func>
 			static constexpr bool visit_is_nothrow
-				= noexcept(std::declval<viewed_type*>()->visit(std::declval<FUNC&&>()));
+				= noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
 
 		public:
 
@@ -202,13 +202,13 @@ namespace toml
 			/// \remarks Has no effect if the view does not reference a node.
 			/// 
 			/// \see node::visit()
-			template <typename FUNC>
-			decltype(auto) visit(FUNC&& visitor) const
-				noexcept(visit_is_nothrow<FUNC&&>)
+			template <typename Func>
+			decltype(auto) visit(Func&& visitor) const
+				noexcept(visit_is_nothrow<Func&&>)
 			{
-				using return_type = decltype(node_->visit(std::forward<FUNC>(visitor)));
+				using return_type = decltype(node_->visit(std::forward<Func>(visitor)));
 				if (node_)
-					return node_->visit(std::forward<FUNC>(visitor));
+					return node_->visit(std::forward<Func>(visitor));
 				if constexpr (!std::is_void_v<return_type>)
 					return return_type{};
 			}
@@ -350,18 +350,14 @@ namespace toml
 				return { nullptr };
 			}
 
-			template <typename CHAR, typename U>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const node_view<U>&);
+			template <typename Char, typename U>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<U>&);
 	};
 
-	#if !TOML_ALL_INLINE
-	extern template class TOML_API node_view<node>;
-	extern template class TOML_API node_view<const node>;
-	#endif
-
 	/// \brief	Prints the viewed node out to a stream.
-	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& os, const node_view<T>& nv)
+	template <typename Char, typename T>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& os, const node_view<T>& nv)
 	{
 		if (nv.node_)
 		{
@@ -372,5 +368,12 @@ namespace toml
 		}
 		return os;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template class TOML_API node_view<node>;
+		extern template class TOML_API node_view<const node>;
+		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<node>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
+	#endif
 }
 

@@ -8,8 +8,8 @@
 
 namespace toml
 {
-	template <typename CHAR, typename T>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const value<T>&);
+	template <typename Char, typename T>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const value<T>&);
 
 	/// \brief	A TOML value.
 	/// 		
@@ -167,8 +167,8 @@ namespace toml
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
-			template <typename CHAR, typename U>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<U>& rhs);
+			template <typename Char, typename U>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<U>& rhs);
 
 			/// \brief	Value-assignment operator.
 			value& operator= (value_arg rhs) noexcept
@@ -312,23 +312,7 @@ namespace toml
 		extern template class TOML_API value<time>;
 		extern template class TOML_API value<date_time>;
 	#endif
-}
 
-#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-namespace std
-{
-	extern template class unique_ptr<toml::value<toml::string>>;
-	extern template class unique_ptr<toml::value<int64_t>>;
-	extern template class unique_ptr<toml::value<double>>;
-	extern template class unique_ptr<toml::value<bool>>;
-	extern template class unique_ptr<toml::value<toml::date>>;
-	extern template class unique_ptr<toml::value<toml::time>>;
-	extern template class unique_ptr<toml::value<toml::date_time>>;
-}
-#endif
-
-namespace toml
-{
 	template <size_t N> value(const string_char(&)[N]) -> value<string>;
 	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
 	value(const string_char*) -> value<string>;
@@ -358,8 +342,9 @@ namespace toml
 	#endif
 
 	/// \brief	Prints the value out to a stream.
-	template <typename CHAR, typename T>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const value<T>& rhs)
+	template <typename Char, typename T>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
 	{
 		// this is the same behaviour as default_formatter, but it's so simple that there's
 		// no need to spin up a new instance of it just for individual values.
@@ -375,6 +360,16 @@ namespace toml
 				
 		return lhs;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::string>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
+	#endif
 
 	template <typename T>
 	inline optional<T> node::value() const noexcept

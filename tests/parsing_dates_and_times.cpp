@@ -84,8 +84,8 @@ lt2 = 00:32:00.999999
 		parse_expected_value("1987-03-16 10:20:30.04Z"sv, val);
 	}
 
-	// toml/issues/671 - omitting seconds
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	// toml/issues/671 (allow omission of seconds)
+	#if TOML_LANG_UNRELEASED
 
 	parse_expected_value(       "10:20"sv,               toml::time{ 10, 20 } );
 	{

@@ -10,146 +10,14 @@
 
 namespace toml::impl
 {
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_ALL_WARNINGS
+	[[nodiscard]] TOML_API
+	toml::string default_formatter_make_key_segment(const toml::string& str) noexcept;
 
-	[[nodiscard]]
-	inline toml::string default_formatter_make_key_segment(const toml::string& str) noexcept
-	{
-		if (str.empty())
-			return TOML_STRING_PREFIX("''"s);
-		else
-		{
-			bool requiresQuotes = false;
-			{
-				impl::utf8_decoder decoder;
-				for (size_t i = 0; i < str.length() && !requiresQuotes; i++)
-				{
-					decoder(static_cast<uint8_t>(str[i]));
-					if (decoder.error())
-						requiresQuotes = true;
-					else if (decoder.has_code_point())
-						requiresQuotes = !impl::is_bare_key_character(decoder.codepoint);
-				}
-			}
+	[[nodiscard]] TOML_API
+	size_t default_formatter_inline_columns(const node& node) noexcept;
 
-			if (requiresQuotes)
-			{
-				toml::string s;
-				s.reserve(str.length() + 2_sz);
-				s += TOML_STRING_PREFIX('"');
-				for (auto c : str)
-				{
-					if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
-						s.append(low_character_escape_table[c]);
-					else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
-						s.append(TOML_STRING_PREFIX("\\u007F"sv));
-					else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
-						s.append(TOML_STRING_PREFIX("\\\""sv));
-					else
-						s += c;
-				}
-				s += TOML_STRING_PREFIX('"');
-				return s;
-			}
-			else
-				return str;
-		}
-	}
-
-	TOML_POP_WARNINGS
-
-	[[nodiscard]]
-	inline size_t default_formatter_inline_columns(const node& node) noexcept
-	{
-		return node.visit([](const auto& n) noexcept
-			-> size_t
-			{
-				if constexpr (is_table<decltype(n)>)
-				{
-					if (n.empty())
-						return 2_sz; // "{}"
-					size_t weight = 3_sz; // "{ }"
-					for (auto [k, v] : n)
-						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
-					return weight;
-				}
-				else if constexpr (is_array<decltype(n)>)
-				{
-					if (n.empty())
-						return 2_sz; // "[]"
-					size_t weight = 3_sz; // "[ ]"
-					for (auto& elem : n)
-						weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
-					return weight;
-				}
-				else if constexpr (is_string<decltype(n)>)
-				{
-					return n.get().length() + 2_sz; // + ""
-				}
-				else if constexpr (is_number<decltype(n)>)
-				{
-					static constexpr auto digit_count = [](auto num) noexcept
-						-> size_t
-					{
-						using number_t = decltype(num);
-						size_t digits = 1_sz;
-						while (num >= number_t{ 10 })
-						{
-							num /= number_t{ 10 };
-							digits++;
-						}
-						return digits;
-					};
-
-					if constexpr (is_integer<decltype(n)>)
-					{
-						auto v = n.get();
-						if (!v)
-							return 1_sz;
-						size_t weight = {};
-						if (v < 0)
-						{
-							weight += 1;
-							v *= -1;
-						}
-						return weight + digit_count(v);
-					}
-					else if constexpr (is_floating_point<decltype(n)>)
-					{
-						auto v = n.get();
-						if (v == 0.0)
-							return 3_sz;
-						size_t weight = 2_sz; // ".0"
-						if (v < 0.0)
-						{
-							weight += 1;
-							v *= -1.0;
-						}
-						return weight + digit_count(v);
-					}
-				}
-				else if constexpr (is_boolean<decltype(n)>)
-				{
-					return 5_sz;
-				}
-				else if constexpr (is_date<decltype(n)> || is_time<decltype(n)>)
-				{
-					return 10_sz;
-				}
-				else if constexpr (is_date_time<decltype(n)>)
-				{
-					return 30_sz;
-				}
-				TOML_UNREACHABLE;
-			});
-	}
-
-	[[nodiscard]]
-	inline bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept
-	{
-		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
-	}
+	[[nodiscard]] TOML_API
+	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept;
 }
 
 
@@ -188,12 +56,12 @@ namespace toml
 	/// foo = "bar"
 	/// \eout
 	/// 
-	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
-	template <typename CHAR = char>
-	class default_formatter final : impl::formatter<CHAR>
+	/// \tparam	Char	The underlying character type of the output stream. Must be 1 byte in size.
+	template <typename Char = char>
+	class TOML_API default_formatter final : impl::formatter<Char>
 	{
 		private:
-			using base = impl::formatter<CHAR>;
+			using base = impl::formatter<Char>;
 			std::vector<toml::string> key_path;
 
 			void print_key_segment(const toml::string& str)
@@ -459,12 +327,16 @@ namespace toml
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
 	};
 
+	#if !TOML_ALL_INLINE
+		extern template class TOML_API default_formatter<char>;
+	#endif
+
 	default_formatter(const table&) -> default_formatter<char>;
 	default_formatter(const array&) -> default_formatter<char>;
 	template <typename T> default_formatter(const value<T>&) -> default_formatter<char>;
 
-	template <typename CHAR>
-	inline void default_formatter<CHAR>::print_inline(const toml::table& tbl)
+	template <typename Char>
+	inline void default_formatter<Char>::print_inline(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -499,7 +371,8 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.key_path.clear();
@@ -510,21 +383,31 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
 
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const table& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
 	{
-		return lhs << default_formatter<CHAR>{ rhs };
+		return lhs << default_formatter<Char>{ rhs };
 	}
 
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const array& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const array& rhs)
 	{
-		return lhs << default_formatter<CHAR>{ rhs };
+		return lhs << default_formatter<Char>{ rhs };
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
+	#endif
 }
 

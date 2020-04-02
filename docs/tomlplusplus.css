@@ -193,14 +193,27 @@ pre.m-code + pre.m-console span
 .gh-badges
 {
 	padding-bottom: 0.75rem;
+	margin-left: -0.9rem;
+	margin-right: -0.9rem;
 }
 .gh-badges a
 {
-	margin-right: 0.5rem;
+	margin-right: 0.3rem;
 }
 
 /* page category subheading ("module" etc) */
 h1 span.m-thin
 {
 	color: #747474;
+}
+
+/* banner on index page */
+main > article > .m-container.m-container-inflatable > .m-row > div.m-col-l-10.m-push-l-1 > img.m-image
+{
+	border-color: #405363;
+	border-style: solid;
+	border-width: 0.1rem;
+	margin-left: -1rem;
+	margin-right: -1rem;
+	max-width: calc(100% + 2rem);
 }

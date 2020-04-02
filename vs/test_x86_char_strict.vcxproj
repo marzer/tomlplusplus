@@ -61,7 +61,10 @@
     <LocalDebuggerWorkingDirectory>..\tests\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\tests\main.cpp">
+    <ClCompile Include="..\tests\impl_catch2.cpp">
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="..\tests\impl_toml.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="..\tests\manipulating_arrays.cpp" />

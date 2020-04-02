@@ -12,63 +12,63 @@ namespace toml::impl
 	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
 	//    - I can avoid forcing users to drag in <sstream> and <iomanip>.
 
-	// Q: "there's a lot of reinterpret_casting here, is any of it UB?"
+	// Q: "there's a bit of reinterpret_casting here, is any of it UB?"
 	// A: - If the source string data is char and the output string is char8_t, then technically yes,
 	//      but not in the other direction. I test in both modes on Clang, GCC and MSVC and have yet to
 	//      see it actually causing an issue, but in the event it does present a problem it's not going to
 	//      be a show-stopper since all it means is I need to do duplicate some code.
 	//    - Strings in C++. Honestly.
 
-	template <typename CHAR1, typename CHAR2>
+	template <typename Char1, typename Char2>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(std::basic_string_view<CHAR1> str, std::basic_ostream<CHAR2>& stream)
+	void print_to_stream(std::basic_string_view<Char1> str, std::basic_ostream<Char2>& stream)
 	{
-		static_assert(sizeof(CHAR1) == 1);
-		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
+		static_assert(sizeof(Char1) == 1);
+		static_assert(sizeof(Char2) == 1);
+		stream.write(reinterpret_cast<const Char2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
-	template <typename CHAR1, typename CHAR2>
+	template <typename Char1, typename Char2>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(const std::basic_string<CHAR1>& str, std::basic_ostream<CHAR2>& stream)
+	void print_to_stream(const std::basic_string<Char1>& str, std::basic_ostream<Char2>& stream)
 	{
-		static_assert(sizeof(CHAR1) == 1);
-		static_assert(sizeof(CHAR2) == 1);
-		stream.write(reinterpret_cast<const CHAR2*>(str.data()), static_cast<std::streamsize>(str.length()));
+		static_assert(sizeof(Char1) == 1);
+		static_assert(sizeof(Char2) == 1);
+		stream.write(reinterpret_cast<const Char2*>(str.data()), static_cast<std::streamsize>(str.length()));
 	}
 
-	template <typename CHAR>
+	template <typename Char>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(char character, std::basic_ostream<CHAR>& stream)
+	void print_to_stream(char character, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
-		stream.put(static_cast<CHAR>(character));
+		static_assert(sizeof(Char) == 1);
+		stream.put(static_cast<Char>(character));
 	}
 
-	template <typename CHAR>
+	template <typename Char>
 	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
-	void print_to_stream(const char* str, size_t len, std::basic_ostream<CHAR>& stream)
+	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
-		stream.write(reinterpret_cast<const CHAR*>(str), static_cast<std::streamsize>(len));
+		static_assert(sizeof(Char) == 1);
+		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
 	}
 
 	#if defined(__cpp_lib_char8_t)
 
-	template <typename CHAR>
+	template <typename Char>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(char8_t character, std::basic_ostream<CHAR>& stream)
+	void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
-		stream.put(static_cast<CHAR>(character));
+		static_assert(sizeof(Char) == 1);
+		stream.put(static_cast<Char>(character));
 	}
 
-	template <typename CHAR>
+	template <typename Char>
 	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
-	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<CHAR>& stream)
+	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
-		stream.write(reinterpret_cast<const CHAR*>(str), static_cast<std::streamsize>(len));
+		static_assert(sizeof(Char) == 1);
+		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
 	}
 
 	#endif
@@ -85,11 +85,11 @@ namespace toml::impl
 	template <> inline constexpr size_t charconv_buffer_length<uint16_t> = 5;  // strlen("65535")
 	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
-	template <typename T, typename CHAR>
-	inline void print_integer_to_stream(T val, std::basic_ostream<CHAR>& stream)
+	template <typename T, typename Char>
+	inline void print_integer_to_stream(T val, std::basic_ostream<Char>& stream)
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
@@ -99,11 +99,11 @@ namespace toml::impl
 	}
 
 	#define TOML_P2S_OVERLOAD(type)											\
-		template <typename CHAR>											\
+		template <typename Char>											\
 		TOML_ALWAYS_INLINE													\
-		void print_to_stream(type val, std::basic_ostream<CHAR>& stream)	\
+		void print_to_stream(type val, std::basic_ostream<Char>& stream)	\
 		{																	\
-			static_assert(sizeof(CHAR) == 1);								\
+			static_assert(sizeof(Char) == 1);								\
 			print_integer_to_stream(val, stream);							\
 		}
 
@@ -118,11 +118,12 @@ namespace toml::impl
 
 	#undef TOML_P2S_OVERLOAD
 
-	template <typename T, typename CHAR>
-	inline void print_floating_point_to_stream(T val, std::basic_ostream<CHAR>& stream, bool hexfloat = false)
+	template <typename T, typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	void print_floating_point_to_stream(T val, std::basic_ostream<Char>& stream, bool hexfloat = false)
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
@@ -134,19 +135,7 @@ namespace toml::impl
 			return true;
 		};
 
-		#if TOML_USE_STREAMS_FOR_FLOATS
-		{
-			std::ostringstream ss;
-			ss.precision(std::numeric_limits<T>::digits10 + 1);
-			if (hexfloat)
-				ss << std::hexfloat;
-			ss << val;
-			const auto str = std::move(ss).str();
-			print_to_stream(str, stream);
-			if (needs_decimal_point(str))
-				print_to_stream(".0"sv, stream);
-		}
-		#else
+		#if TOML_FLOATING_POINT_CHARCONV
 		{
 			char buf[charconv_buffer_length<T>];
 			const auto res = hexfloat
@@ -154,18 +143,43 @@ namespace toml::impl
 				: std::to_chars(buf, buf + sizeof(buf), val);
 			const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
 			print_to_stream(str, stream);
-			if (needs_decimal_point(str))
+			if (!hexfloat && needs_decimal_point(str))
+				print_to_stream(".0"sv, stream);
+		}
+		#else
+		{
+			char buf[charconv_buffer_length<T> + 1_sz];
+			int len = -1;
+			if (hexfloat)
+				len = snprintf(buf, charconv_buffer_length<T> + 1_sz, "%a", static_cast<double>(val));
+			else
+				len = snprintf(
+					buf, charconv_buffer_length<T> + 1_sz, "%.*g",
+					std::numeric_limits<T>::digits10 + 1, static_cast<double>(val)
+				);
+			TOML_ASSERT(len > 0);
+			len = static_cast<int>(charconv_buffer_length<T>) < len
+				? static_cast<int>(charconv_buffer_length<T>)
+				: len;
+			const auto str = std::string_view{ buf, static_cast<size_t>(len) };
+			print_to_stream(str, stream);
+			if (!hexfloat && needs_decimal_point(str))
 				print_to_stream(".0"sv, stream);
 		}
 		#endif
 	}
 
+	#if !TOML_ALL_INLINE
+		extern template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
+		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
+	#endif
+
 	#define TOML_P2S_OVERLOAD(type)											\
-		template <typename CHAR>											\
+		template <typename Char>											\
 		TOML_ALWAYS_INLINE													\
-		void print_to_stream(type val, std::basic_ostream<CHAR>& stream)	\
+		void print_to_stream(type val, std::basic_ostream<Char>& stream)	\
 		{																	\
-			static_assert(sizeof(CHAR) == 1);								\
+			static_assert(sizeof(Char) == 1);								\
 			print_floating_point_to_stream(val, stream);					\
 		}
 
@@ -174,18 +188,18 @@ namespace toml::impl
 
 	#undef TOML_P2S_OVERLOAD
 
-	template <typename CHAR>
+	template <typename Char>
 	TOML_ALWAYS_INLINE
-	void print_to_stream(bool val, std::basic_ostream<CHAR>& stream)
+	void print_to_stream(bool val, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);
 	}
 
-	template <typename T, typename CHAR>
-	inline void print_to_stream(T val, std::basic_ostream<CHAR>& stream, size_t zero_pad_to_digits)
+	template <typename T, typename Char>
+	inline void print_to_stream(T val, std::basic_ostream<Char>& stream, size_t zero_pad_to_digits)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		char buf[charconv_buffer_length<T>];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
 		const auto len = static_cast<size_t>(res.ptr - buf);
@@ -194,10 +208,10 @@ namespace toml::impl
 		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
 	}
 
-	template <typename CHAR>
-	inline void print_to_stream(const toml::date& val, std::basic_ostream<CHAR>& stream)
+	template <typename Char>
+	inline void print_to_stream(const toml::date& val, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		print_to_stream(val.year, stream, 4_sz);
 		print_to_stream('-', stream);
 		print_to_stream(val.month, stream, 2_sz);
@@ -205,10 +219,10 @@ namespace toml::impl
 		print_to_stream(val.day, stream, 2_sz);
 	}
 
-	template <typename CHAR>
-	inline void print_to_stream(const toml::time& val, std::basic_ostream<CHAR>& stream)
+	template <typename Char>
+	inline void print_to_stream(const toml::time& val, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		print_to_stream(val.hour, stream, 2_sz);
 		print_to_stream(':', stream);
 		print_to_stream(val.minute, stream, 2_sz);
@@ -228,10 +242,10 @@ namespace toml::impl
 		}
 	}
 
-	template <typename CHAR>
-	inline void print_to_stream(toml::time_offset val, std::basic_ostream<CHAR>& stream)
+	template <typename Char>
+	inline void print_to_stream(toml::time_offset val, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		if (!val.minutes)
 			print_to_stream('Z', stream);
 		else
@@ -257,10 +271,10 @@ namespace toml::impl
 		}
 	}
 
-	template <typename CHAR>
-	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<CHAR>& stream)
+	template <typename Char>
+	inline void print_to_stream(const toml::date_time& val, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		print_to_stream(val.date, stream);
 		print_to_stream('T', stream);
 		print_to_stream(val.time, stream);
@@ -271,10 +285,10 @@ namespace toml::impl
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
 
-	template <typename T, typename CHAR>
-	void print_to_stream_with_escapes(T && str, std::basic_ostream<CHAR>& stream)
+	template <typename T, typename Char>
+	void print_to_stream_with_escapes(T && str, std::basic_ostream<Char>& stream)
 	{
-		static_assert(sizeof(CHAR) == 1);
+		static_assert(sizeof(Char) == 1);
 		for (auto c : str)
 		{
 			if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
@@ -311,16 +325,17 @@ namespace toml
 	/// The value for 'bar' was found on line 1, column 7
 	/// \eout
 	/// 
-	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 	/// \param 	lhs	The stream.
 	/// \param 	rhs	The source_position.
 	///
 	/// \returns	The input stream.
-	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_position& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_position& rhs)
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 		impl::print_to_stream("line "sv, lhs);
@@ -345,16 +360,17 @@ namespace toml
 	/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
 	/// \eout
 	/// 
-	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 	/// \param 	lhs	The stream.
 	/// \param 	rhs	The source_position.
 	///
 	/// \returns	The input stream.
-	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const source_region& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_region& rhs)
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 		lhs << rhs.begin;
@@ -386,13 +402,14 @@ namespace toml
 	///		(error occurred at line 1, column 13)
 	/// \eout
 	/// 
-	/// \tparam CHAR The output stream's underlying character type. Must be 1 byte in size.
+	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 	/// \param 	lhs	The stream.
 	/// \param 	rhs	The parse_error.
 	///
 	/// \returns	The input stream.
-	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const parse_error& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const parse_error& rhs)
 	{
 		impl::print_to_stream(rhs.description(), lhs);
 		impl::print_to_stream("\n\t(error occurred at "sv, lhs);
@@ -400,5 +417,10 @@ namespace toml
 		impl::print_to_stream(")"sv, lhs);
 		return lhs;
 	}
-}
 
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
+	#endif
+}

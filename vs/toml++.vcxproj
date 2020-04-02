@@ -62,6 +62,7 @@
     <ClInclude Include="..\include\toml++\toml_common.h" />
     <ClInclude Include="..\include\toml++\toml_date_time.h" />
     <ClInclude Include="..\include\toml++\toml_default_formatter.h" />
+    <ClInclude Include="..\include\toml++\toml_default_formatter_impl.h" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_node.h" />

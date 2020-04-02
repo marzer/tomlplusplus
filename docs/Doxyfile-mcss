@@ -7,10 +7,15 @@ HTML_EXTRA_STYLESHEET = \
 
 HTML_EXTRA_FILES = \
 	tomlplusplus.js	\
-	tomlplusplus-logo.png \
-	tomlplusplus-banner.png	\
-	tomlplusplus-banner-small.png	\
-	github-icon.png
+	logo.png \
+	banner_small.png	\
+	github-icon.png	\
+	badge-awesome.svg	\
+	badge-C++17.svg	\
+	badge-C++20.svg	\
+	badge-license-MIT.svg	\
+	badge-TOML.svg
+
 
 ##! M_THEME_COLOR				= #22272e
 ##! M_LINKS_NAVBAR1 = \
@@ -25,6 +30,6 @@ HTML_EXTRA_FILES = \
 ##!								  <a target="_blank" href="https://github.com/marzer/tomlplusplus/issues">Report an issue</a> \
 ##!								  <br><br>Documentation generated using <a href="https://mcss.mosra.cz/">m.css</a>
 ##! M_HTML_HEADER = <meta name="google-site-verification" content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" />\
-##!		<meta name="description" content="TOML parser and serializer for C++17, C++20, and whatever comes after.">\
+##!		<meta name="description" content="Header-only TOML config file parser and serializer for modern C++.">\
 ##!		<script src="tomlplusplus.js"></script>
 ##! M_FAVICON					= favicon.ico

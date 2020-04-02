@@ -1,13 +1,15 @@
-![banner](docs/tomlplusplus-banner-small.png)  
-[![C++](https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational)][cpp_compilers]
-[![TOML](https://img.shields.io/badge/TOML-v0.5.0-informational)][v0.5.0]
-[![MIT license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
-[![Releases](https://img.shields.io/github/release/marzer/tomlplusplus.svg)](https://github.com/marzer/tomlplusplus/releases)
-[![Mentioned in Awesome C++](https://awesome.re/mentioned-badge.svg)](https://github.com/fffaraz/awesome-cpp)
-[![CircleCI](https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield)](https://circleci.com/gh/marzer/tomlplusplus)
- ====
+[![banner](docs/banner_small.png)][homepage]  
+[![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
+[![C++17](docs/badge-C++17.svg)][cpp_compilers]
+[![C++20](docs/badge-C++20.svg)][cpp_compilers]
+[![TOML](docs/badge-TOML.svg)][v1.0.0-rc.1]
+[![MIT license](docs/badge-license-MIT.svg)](./LICENSE)
+[![CircleCI](https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square)](https://circleci.com/gh/marzer/tomlplusplus)
+[![Mentioned in Awesome C++](docs/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
+====
+
  - Header-only
- - [TOML v0.5.0](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md), plus optional support for some [unreleased TOML language features]
+ - [TOML v1.0.0-rc.1], plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
@@ -24,7 +26,7 @@ Given a TOML file `configuration.toml` containing the following:
 ```toml
 [library]
 name = "toml++"
-authors = ["Mark Gillard <mark@notarealwebsite.com>"]
+authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
 
 [dependencies]
 cpp = 17
@@ -69,19 +71,25 @@ You'll find some more code examples in the `examples` directory, and plenty more
 <br>
 
 # Adding toml++ to your project
-`toml++` comes in two flavours: Regular and Single-header.
+`toml++` comes in two flavours: Single-header and Regular. The API is the same for both. 
 
-### Regular mode
-1. Add `tomlplusplus/include` to your include paths
-2. `#include <toml++/toml.h>`
-
-### Single-header mode
+## 🍦 Single-header flavour
 1. Drop `toml.hpp` wherever you like in your source tree
 2. There is no step two
 
-The API is the same regardless of how you consume the library. 
+## 🍨 Regular flavour
+1. Add `tomlplusplus/include` to your include paths
+2. `#include <toml++/toml.h>`
 
-### Configuration
+## _"What about build system X, or package manager Y?"_
+Currently there's support for use as a meson submodule, which I _think_ means it can be used with Conan. That's the
+extent of my knowledge in this area; clearly an area of opportunity! If you would like me to add support for a
+particular build system or package manager please let me know by making a [feature request]. Better still, if you have
+the skills and motivation to add support yourself, I'd welcome a pull request with a smile and open arms!
+
+<br>
+
+# Configuration
 A number of configurable options are exposed in the form of preprocessor `#defines`. Most likely you
 won't need to mess with these at all, but if you do, set them before including toml++.
 
@@ -101,35 +109,39 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                          |
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].              |
 
-_A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally linking incompatible combinations together._
+> ℹ _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
+linking incompatible combinations together._
 
 <br>
 
 # TOML Language Support
-At any given time `toml++` aims to implement whatever the [numbered version] of TOML is, with the
+At any given time `toml++` aims to implement whatever the [most recently-released version] of TOML is, with the
 addition of unreleased features from the [TOML master] and some sane cherry-picks from the
 [TOML issues list] where the discussion strongly indicates inclusion in a near-future release.
 
 The library advertises the most recent numbered language version it fully supports via the preprocessor
 defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
-### **🔸Unreleased TOML features:**
-- [#356]: Allow leading zeros in the exponent part of a float
+## 🔶 **Unreleased features:**
 - [#516]: Allow newlines and trailing commas in inline tables
-- [#562]: Allow hex floatingpoint values
-- [#567]: Clarify that control characters are not permitted in comments
-- [#571]: Allow raw tabs inside strings
+- [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
-- [#665]: Make arrays heterogeneous
 - [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
 - [#687]: Relax bare key restrictions to allow additional unicode characters
 - [#709]: Include an \xHH escape code sequence
 
-_These can be disabled (and thus strict [TOML v0.5.0] compliance enforced) by specifying
+> ℹ _Unreleased features can be disabled (and thus strict [TOML v1.0.0-rc.1] compliance enforced) by specifying
 `TOML_UNRELEASED_FEATURES = 0` (see [Configuration](#Configuration))._
 
-### **🔹TOML v0.5.0 and earlier:**
-- All features supported.
+## 🟢 **TOML v1.0.0-rc.1:**
+All features supported, including:
+- [#356]: Allow leading zeros in the exponent part of a float
+- [#567]: Control characters are not permitted in comments
+- [#571]: Allow raw tabs inside strings
+- [#665]: Make arrays heterogeneous
+
+## 🟢 **TOML v0.5.0:**
+All features supported.
 
 <br>
 
@@ -158,18 +170,20 @@ though you're welcome to reach out via other means. In order of likely response 
 
 
 [API documentation]: https://marzer.github.io/tomlplusplus/
+[homepage]: https://marzer.github.io/tomlplusplus/
 [unreleased TOML language features]: #unreleased-toml-features
-[numbered version]: https://github.com/toml-lang/toml/releases
+[most recently-released version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[TOML v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
-[v0.5.0]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+[TOML v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/README.md
+[v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/README.md
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 [cpp_compilers]: https://en.cppreference.com/w/cpp/compiler_support
-[reporting issues]: https://github.com/marzer/tomlplusplus/issues
+[reporting issues]: https://github.com/marzer/tomlplusplus/issues/new/choose
+[feature request]: https://github.com/marzer/tomlplusplus/issues/new/choose
 [issues]: https://github.com/marzer/tomlplusplus/issues
 [#356]: https://github.com/toml-lang/toml/issues/356
 [#516]: https://github.com/toml-lang/toml/issues/516

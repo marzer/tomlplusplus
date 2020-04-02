@@ -325,7 +325,7 @@ namespace toml
 	/// 3
 	/// \eout
 	/// 
-	/// \tparam	CHAR			The stream's underlying character type. Must be 1 byte in size.
+	/// \tparam	Char			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
@@ -333,12 +333,12 @@ namespace toml
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	template <typename CHAR>
+	template <typename Char>
 	[[nodiscard]]
-	inline parse_result parse(std::basic_istream<CHAR>& doc, std::string_view source_path = {}) TOML_MAY_THROW
+	inline parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
@@ -360,18 +360,18 @@ namespace toml
 	/// 3
 	/// \eout
 	/// 
-	/// \tparam	CHAR			The stream's underlying character type. Must be 1 byte in size.
+	/// \tparam	Char			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	template <typename CHAR>
+	template <typename Char>
 	[[nodiscard]]
-	inline parse_result parse(std::basic_istream<CHAR>& doc, std::string&& source_path) TOML_MAY_THROW
+	inline parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
@@ -389,7 +389,7 @@ namespace toml
 	/// }
 	/// \ecpp
 	/// 
-	/// \tparam	CHAR			The path's character type. Must be 1 byte in size.
+	/// \tparam	Char			The path's character type. Must be 1 byte in size.
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
@@ -397,16 +397,16 @@ namespace toml
 	/// 
 	/// \attention You must `#include <fstream>` to use this function (toml++
 	/// 		 does not transitively include it for you).
-	template <typename CHAR>
-	inline parse_result parse_file(std::basic_string_view<CHAR> file_path) TOML_MAY_THROW
+	template <typename Char>
+	inline parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
 	{
 		static_assert(
-			sizeof(CHAR) == 1,
+			sizeof(Char) == 1,
 			"The path's character type must be 1 byte in size."
 		);
 
 		auto str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
-		auto ifs = std::basic_ifstream<CHAR>{ str };
+		auto ifs = std::basic_ifstream<Char>{ str };
 		return parse( ifs, std::move(str) );
 	}
 
@@ -416,16 +416,16 @@ namespace toml
 	//    until they're actually required, so only those users wanting to use parse_file()
 	//    are burdened by the <fstream> overhead.
 
-	template <typename CHAR>
-	inline parse_result parse_file(const std::basic_string<CHAR>& file_path) TOML_MAY_THROW
+	template <typename Char>
+	inline parse_result parse_file(const std::basic_string<Char>& file_path) TOML_MAY_THROW
 	{
-		return parse_file(std::basic_string_view<CHAR>{ file_path });
+		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
-	template <typename CHAR>
-	inline parse_result parse_file(const CHAR* file_path) TOML_MAY_THROW
+	template <typename Char>
+	inline parse_result parse_file(const Char* file_path) TOML_MAY_THROW
 	{
-		return parse_file(std::basic_string_view<CHAR>{ file_path });
+		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
 	#if TOML_ABI_NAMESPACES
@@ -438,7 +438,7 @@ namespace toml
 	/// 		 without dragging in everything in the toml namespace: \cpp
 	/// 
 	/// #include <toml++/toml.h>
-	///	using namespace toml_literals;
+	///	using namespace toml::literals;
 	///
 	///	int main()
 	///	{
