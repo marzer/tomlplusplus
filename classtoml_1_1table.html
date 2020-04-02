@@ -12,24 +12,23 @@ C++</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <meta content="TOML
+  <meta content="Header-only
+  TOML
+  config
+  file
   parser
   and
   serializer
   for
-  C++17,
-  C++20,
-  and
-  whatever
-  comes
-  after." name="description"/>
+  modern
+  C++." name="description"/>
   <script src="tomlplusplus.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="tomlplusplus-logo.png"/>toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="logo.png"/>toml++ <span class="m-thin">TOML
 for
 modern
 C++</span></a>
@@ -206,9 +205,9 @@ C++</span></a>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename ITER, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;ITER &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;ITER &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a3f3f179ba4af6327d2fbe14b4d846b36">insert</a>(</span><span class="m-doc-wrap">ITER first,
-              ITER last) <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;Iter &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
+              Iter last) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a series of key-value pairs into the table.</dd>
             <dt>
@@ -656,12 +655,12 @@ C++</span></a>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">get_as</span><span class="o">&lt;</span><span class="ut"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">(</span><span class="s">"a"</span><span class="p">))</span>
     <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an integer with value </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">**</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">node ["a"] was an integer with value 42</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a3f3f179ba4af6327d2fbe14b4d846b36"><div>
+          <section class="m-doc-details" id="acefff2dfe1efb072c9062b8f60146cd9"><div>
             <h3>
-              <div class="m-doc-template"> template&lt;typename ITER, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;ITER &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;ITER &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;
+              <div class="m-doc-template"> template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;Iter &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3f3f179ba4af6327d2fbe14b4d846b36">insert</a>(</span><span class="m-doc-wrap">ITER first,
-              ITER last) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
+              Iter last) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a series of key-value pairs into the table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -670,7 +669,7 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">ITER</td>
+                  <td style="width: 1%">Iter</td>
                   <td>An <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/InputIterator" target="_blank">InputIterator</a> to a collection of key-value pairs.</td>
                 </tr>
               </tbody>

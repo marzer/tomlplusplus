@@ -12,24 +12,23 @@ C++</title>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <meta content="TOML
+  <meta content="Header-only
+  TOML
+  config
+  file
   parser
   and
   serializer
   for
-  C++17,
-  C++20,
-  and
-  whatever
-  comes
-  after." name="description"/>
+  modern
+  C++." name="description"/>
   <script src="tomlplusplus.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="tomlplusplus-logo.png"/>toml++ <span class="m-thin">TOML
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="logo.png"/>toml++ <span class="m-thin">TOML
 for
 modern
 C++</span></a>
@@ -222,8 +221,8 @@ C++</span></a>
             </dt>
             <dd>Gets the raw value contained by this node, or a default.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename FUNC&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa1b228f99295358e10e94a9d6e6aee75">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad47390f3832260db7bf06cd282598240">visit</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on the node based on the node's concrete type.</dd>
           </dl>
@@ -415,12 +414,12 @@ C++</span></a>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ab144c1ae90338b6b03f6af0574c87993">node::<wbr/>value()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa1b228f99295358e10e94a9d6e6aee75"><div>
+          <section class="m-doc-details" id="ad47390f3832260db7bf06cd282598240"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename FUNC&gt;
+                template&lt;typename Func&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa1b228f99295358e10e94a9d6e6aee75">visit</a>(</span><span class="m-doc-wrap">FUNC&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad47390f3832260db7bf06cd282598240">visit</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Invokes a visitor on the node based on the node's concrete type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -429,7 +428,7 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">FUNC</td>
+                  <td style="width: 1%">Func</td>
                   <td>A callable type invocable with one or more of the toml++ node types.</td>
                 </tr>
               </tbody>
@@ -449,7 +448,7 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
-<p>Visitation is useful when you expect a node to be one of a set number of types and need to handle these types differently. Using <code><a class="m-doc" href="classtoml_1_1node.html#aa1b228f99295358e10e94a9d6e6aee75">visit()</a></code> allows you to eliminate some of the casting/conversion boilerplate:</p><pre class="m-code"><span class="n">node</span><span class="p">.</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">n</span><span class="p">)</span>
+<p>Visitation is useful when you expect a node to be one of a set number of types and need to handle these types differently. Using <code><a class="m-doc" href="classtoml_1_1node.html#ad47390f3832260db7bf06cd282598240">visit()</a></code> allows you to eliminate some of the casting/conversion boilerplate:</p><pre class="m-code"><span class="n">node</span><span class="p">.</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">n</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
         <span class="n">do_something_with_a_string</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">));</span> <span class="c1">//n is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;toml::string&gt;</span>
