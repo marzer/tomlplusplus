@@ -99,3 +99,15 @@ if build_tests or build_examples
 
 endif
 
+install_subdir('include/toml++/',
+	strip_directory: true,
+	install_dir: 'include/toml++'
+)
+
+pkgc = import('pkgconfig')
+pkgc.generate (
+	name: 'toml++',
+	version: meson.project_version(),
+	description: 'Header-only TOML config file parser and serializer for modern C++',
+	subdirs: 'toml++'
+)
