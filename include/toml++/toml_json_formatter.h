@@ -43,12 +43,12 @@ namespace toml
 	/// }
 	/// \eout
 	/// 
-	/// \tparam	CHAR	The underlying character type of the output stream. Must be 1 byte in size.
-	template <typename CHAR = char>
-	class json_formatter final : impl::formatter<CHAR>
+	/// \tparam	Char	The underlying character type of the output stream. Must be 1 byte in size.
+	template <typename Char = char>
+	class TOML_API json_formatter final : impl::formatter<Char>
 	{
 		private:
-			using base = impl::formatter<CHAR>;
+			using base = impl::formatter<Char>;
 
 			inline void print(const toml::table& tbl);
 
@@ -112,13 +112,17 @@ namespace toml
 			template <typename T, typename U>
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
 	};
+	
+	#if !TOML_ALL_INLINE
+		extern template class TOML_API json_formatter<char>;
+	#endif
 
 	json_formatter(const table&) -> json_formatter<char>;
 	json_formatter(const array&) -> json_formatter<char>;
 	template <typename T> json_formatter(const value<T>&) -> json_formatter<char>;
 
-	template <typename CHAR>
-	inline void json_formatter<CHAR>::print(const toml::table& tbl)
+	template <typename Char>
+	inline void json_formatter<Char>::print(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -158,7 +162,8 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON.
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.print();
@@ -168,9 +173,15 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
 	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
+	#endif
 }
 

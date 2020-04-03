@@ -457,12 +457,42 @@ class ModifiersFix2(ModifiersFixBase):
 class IndexPageFix(object): 
 
 	__badges = [
-		('C++', 'https://img.shields.io/badge/c%2B%2B-17%2C%2020-informational', 'https://en.cppreference.com/w/cpp/compiler_support'),
-		('TOML', 'https://img.shields.io/badge/TOML-v0.5.0-informational', 'https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md'),
-		('MIT License', 'https://img.shields.io/badge/license-MIT-blue.svg', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE'),
-		('Releases', 'https://img.shields.io/github/release/marzer/tomlplusplus.svg', 'https://github.com/marzer/tomlplusplus/releases'),
-		('Mentioned in Awesome C++', 'https://awesome.re/mentioned-badge.svg', 'https://github.com/fffaraz/awesome-cpp'),
-		('CircleCI', 'https://circleci.com/gh/marzer/tomlplusplus.svg?style=shield', 'https://circleci.com/gh/marzer/tomlplusplus')
+		(
+			'Releases',
+			'https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square',
+			'https://github.com/marzer/tomlplusplus/releases'
+		),
+		(
+			'C++17',
+			'badge-C++17.svg',
+			'https://en.cppreference.com/w/cpp/compiler_support'
+		),
+		(
+			'C++20',
+			'badge-C++20.svg',
+			'https://en.cppreference.com/w/cpp/compiler_support'
+		),
+		(
+			'TOML',
+			'badge-TOML.svg',
+			'https://github.com/toml-lang/toml/blob/master/README.md'
+		),
+		(
+			'MIT License',
+			'badge-license-MIT.svg',
+			'https://github.com/marzer/tomlplusplus/blob/master/LICENSE'
+		),
+		(
+			'CircleCI',
+			'https://img.shields.io/circleci/build/github/marzer/tomlplusplus'
+				+ '?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square',
+			'https://circleci.com/gh/marzer/tomlplusplus'
+		),
+		(
+			'Mentioned in Awesome C++',
+			'badge-awesome.svg',
+			'https://github.com/fffaraz/awesome-cpp'
+		)
 	]
 
 	def __call__(self, file, doc):
@@ -474,7 +504,7 @@ class IndexPageFix(object):
 		parent = doc.new_tag('div', class_='gh-badges', after=banner)
 		for (alt, src, href) in self.__badges:
 			anchor = doc.new_tag('a', parent=parent, href=href, target='_blank')
-			doc.new_tag('img', parent=anchor, src=src, alt='caption')
+			doc.new_tag('img', parent=anchor, src=src, alt=alt)
 		return True
 
 

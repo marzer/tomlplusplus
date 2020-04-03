@@ -84,12 +84,17 @@ namespace toml
 	/// \out
 	/// 1987-03-16
 	/// \eout
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const date&);
+	#endif
 
 	/// \brief	A local time-of-day.
 	struct TOML_TRIVIAL_ABI time final
@@ -172,12 +177,17 @@ namespace toml
 	/// 10:20:34
 	/// 10:20:34.5
 	/// \eout
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const time&);
+	#endif
 
 	/// \brief	A timezone offset.
 	struct TOML_TRIVIAL_ABI time_offset final
@@ -274,12 +284,17 @@ namespace toml
 	/// -01:30
 	/// -02:30
 	/// \eout
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const time_offset& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time_offset& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
+	#endif
 
 	#if TOML_ABI_NAMESPACES
 		#ifdef TOML_OPTIONAL_TYPE
@@ -406,11 +421,16 @@ namespace toml
 	/// 1987-03-16T10:20:34-02:30
 	/// 1987-03-16T10:20:34Z
 	/// \eout
-	template <typename CHAR>
-	inline std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>& lhs, const date_time& rhs)
+	template <typename Char>
+	TOML_FUNC_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date_time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
 	}
+
+	#if !TOML_ALL_INLINE
+		extern template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
+	#endif
 }
 

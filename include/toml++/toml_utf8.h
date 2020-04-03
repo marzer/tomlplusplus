@@ -36,11 +36,11 @@ namespace toml::impl
 		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
 	}
 
-	template <bool CR = true>
+	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
-		constexpr auto low_range_end = CR ? U'\r' : U'\f';
+		constexpr auto low_range_end = IncludeCarriageReturn ? U'\r' : U'\f';
 		return (codepoint >= U'\n' && codepoint <= low_range_end);
 	}
 
@@ -56,11 +56,11 @@ namespace toml::impl
 		;
 	}
 
-	template <bool CR = true>
+	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
-		return is_ascii_line_break<CR>(codepoint) || is_unicode_line_break(codepoint);
+		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_unicode_line_break(codepoint);
 	}
 
 	[[nodiscard]] TOML_ALWAYS_INLINE
@@ -110,7 +110,7 @@ namespace toml::impl
 			|| is_decimal_digit(codepoint)
 			|| codepoint == U'-'
 			|| codepoint == U'_'
-			#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/644 & toml/issues/687
+			#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
 			|| codepoint == U'+'
 			|| is_unicode_letter(codepoint)
 			|| is_unicode_number(codepoint)
@@ -122,7 +122,7 @@ namespace toml::impl
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_bare_key_start_character(codepoint)
-			#if TOML_LANG_HIGHER_THAN(0, 5, 0) // toml/issues/687
+			#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 			|| is_unicode_combining_mark(codepoint)
 			#endif
 		;
@@ -140,6 +140,20 @@ namespace toml::impl
 			|| is_unicode_line_break(codepoint)
 			|| is_unicode_whitespace(codepoint)
 		;
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
+	{
+		return codepoint <= U'\u0008'
+			|| (codepoint >= U'\u000A' && codepoint <= U'\u001F')
+			|| codepoint == U'\u007F';
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
+	{
+		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
 	struct utf8_decoder final
@@ -206,17 +220,17 @@ namespace toml::impl
 	template <typename T>
 	class utf8_byte_stream;
 
-	template <typename CHAR>
-	class utf8_byte_stream<std::basic_string_view<CHAR>> final
+	template <typename Char>
+	class utf8_byte_stream<std::basic_string_view<Char>> final
 	{
-		static_assert(sizeof(CHAR) == 1_sz);
+		static_assert(sizeof(Char) == 1_sz);
 
 		private:
-			std::basic_string_view<CHAR> source;
+			std::basic_string_view<Char> source;
 			size_t position = {};
 
 		public:
-			explicit constexpr utf8_byte_stream(std::basic_string_view<CHAR> sv) noexcept
+			explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept
 				: source{ sv }
 			{
 				if (source.length() >= 3_sz
@@ -249,16 +263,16 @@ namespace toml::impl
 			}
 	};
 
-	template <typename CHAR>
-	class utf8_byte_stream<std::basic_istream<CHAR>> final
+	template <typename Char>
+	class utf8_byte_stream<std::basic_istream<Char>> final
 	{
-		static_assert(sizeof(CHAR) == 1_sz);
+		static_assert(sizeof(Char) == 1_sz);
 
 		private:
-			std::basic_istream<CHAR>* source;
+			std::basic_istream<Char>* source;
 
 		public:
-			explicit utf8_byte_stream(std::basic_istream<CHAR>& stream)
+			explicit utf8_byte_stream(std::basic_istream<Char>& stream)
 				: source{ &stream }
 			{
 				if (*source)
@@ -299,7 +313,7 @@ namespace toml::impl
 			optional<uint8_t> operator() ()
 			{
 				auto val = source->get();
-				if (val == std::basic_istream<CHAR>::traits_type::eof())
+				if (val == std::basic_istream<Char>::traits_type::eof())
 					return {};
 				return static_cast<uint8_t>(val);
 			}
@@ -311,18 +325,18 @@ namespace toml::impl
 		string_char bytes[4];
 		source_position position;
 
-		template <typename CHAR = string_char>
+		template <typename Char = string_char>
 		[[nodiscard]] TOML_ALWAYS_INLINE
-		std::basic_string_view<CHAR> as_view() const noexcept
+		std::basic_string_view<Char> as_view() const noexcept
 		{
 			static_assert(
-				sizeof(CHAR) == 1,
+				sizeof(Char) == 1,
 				"The string view's underlying character type must be 1 byte in size."
 			);
 
 			return bytes[3]
-				? std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(bytes), 4_sz }
-				: std::basic_string_view<CHAR>{ reinterpret_cast<const CHAR*>(bytes) };
+				? std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes), 4_sz }
+				: std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes) };
 		}
 
 		[[nodiscard]]
@@ -389,8 +403,8 @@ namespace toml::impl
 
 		public:
 
-			template <typename U, typename STR = std::string_view>
-			explicit utf8_reader(U && source, STR&& source_path = {})
+			template <typename U, typename String = std::string_view>
+			explicit utf8_reader(U && source, String&& source_path = {})
 				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
 				: stream{ std::forward<U>(source) }
 			{
@@ -399,7 +413,7 @@ namespace toml::impl
 				codepoints[1].position = { 1, 1 };
 
 				if (!source_path.empty())
-					source_path_ = std::make_shared<const std::string>(std::forward<STR>(source_path));
+					source_path_ = std::make_shared<const std::string>(std::forward<String>(source_path));
 			}
 
 			[[nodiscard]]
@@ -504,17 +518,17 @@ namespace toml::impl
 			#endif
 	};
 
-	template <typename CHAR>
-	utf8_reader(std::basic_string_view<CHAR>, std::string_view) -> utf8_reader<std::basic_string_view<CHAR>>;
+	template <typename Char>
+	utf8_reader(std::basic_string_view<Char>, std::string_view) -> utf8_reader<std::basic_string_view<Char>>;
 
-	template <typename CHAR>
-	utf8_reader(std::basic_istream<CHAR>&, std::string_view) -> utf8_reader<std::basic_istream<CHAR>>;
+	template <typename Char>
+	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
 
-	template <typename CHAR>
-	utf8_reader(std::basic_string_view<CHAR>, std::string&&) -> utf8_reader<std::basic_string_view<CHAR>>;
+	template <typename Char>
+	utf8_reader(std::basic_string_view<Char>, std::string&&) -> utf8_reader<std::basic_string_view<Char>>;
 
-	template <typename CHAR>
-	utf8_reader(std::basic_istream<CHAR>&, std::string&&) -> utf8_reader<std::basic_istream<CHAR>>;
+	template <typename Char>
+	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
 
 	#if !TOML_EXCEPTIONS
 		#undef TOML_ERROR_CHECK

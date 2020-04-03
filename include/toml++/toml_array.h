@@ -7,14 +7,14 @@
 
 namespace toml::impl
 {
-	template <bool is_const>
+	template <bool IsConst>
 	class array_iterator final
 	{
 		private:
 			friend class toml::array;
 
 			using raw_iterator = std::conditional_t<
-				is_const,
+				IsConst,
 				std::vector<std::unique_ptr<node>>::const_iterator,
 				std::vector<std::unique_ptr<node>>::iterator
 			>;
@@ -31,7 +31,7 @@ namespace toml::impl
 
 		public:
 
-			using value_type = std::conditional_t<is_const, const node, node>;
+			using value_type = std::conditional_t<IsConst, const node, node>;
 			using reference = value_type&;
 			using pointer = value_type*;
 			using difference_type = ptrdiff_t;
@@ -155,11 +155,6 @@ namespace toml::impl
 			}
 	};
 
-	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-		extern template class array_iterator<true>;
-		extern template class array_iterator<false>;
-	#endif
-
 	template <typename T>
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	auto make_node(T&& val) noexcept
@@ -184,13 +179,12 @@ namespace toml::impl
 	}
 }
 
-
 namespace toml
 {
 	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
-	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&);
+	template <typename Char>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 
 	/// \brief	A TOML array.
 	///
@@ -477,14 +471,14 @@ namespace toml
 
 			/// \brief	Inserts a range of values into the array at a specific position.
 			///
-			/// \tparam	ITER	An iterator type. Must satisfy ForwardIterator.
+			/// \tparam	Iter	An iterator type. Must satisfy ForwardIterator.
 			/// \param 	pos		The insertion position.
 			/// \param 	first	Iterator to the first value being inserted.
 			/// \param 	last	Iterator to the one-past-the-last value being inserted.
 			///
 			/// \returns	An iterator to the first inserted value (or a copy of `pos` if `first` == `last`).
-			template <typename ITER>
-			iterator insert(const_iterator pos, ITER first, ITER last) noexcept
+			template <typename Iter>
+			iterator insert(const_iterator pos, Iter first, Iter last) noexcept
 			{
 				const auto count = std::distance(first, last);
 				switch (count)
@@ -832,14 +826,7 @@ namespace toml
 			/// \remarks	Arrays inside child tables are not flattened.
 			void flatten();
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const array&);
+			template <typename Char>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 	};
 }
-
-#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-namespace std
-{
-	extern template class unique_ptr<toml::array>;
-}
-#endif

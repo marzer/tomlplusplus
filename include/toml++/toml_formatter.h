@@ -26,12 +26,12 @@ namespace toml
 
 namespace toml::impl
 {
-	template <typename CHAR = char>
-	class formatter
+	template <typename Char = char>
+	class TOML_API formatter
 	{
 		private:
 			const toml::node* source_;
-			std::basic_ostream<CHAR>* stream_ = nullptr;
+			std::basic_ostream<Char>* stream_ = nullptr;
 			format_flags flags_;
 			int8_t indent_;
 			bool naked_newline_;
@@ -40,7 +40,7 @@ namespace toml::impl
 			
 			[[nodiscard]] const toml::node& source() const noexcept { return *source_; }
 			[[nodiscard]] format_flags flags() const noexcept { return flags_; }
-			[[nodiscard]] std::basic_ostream<CHAR>& stream() const noexcept { return *stream_; }
+			[[nodiscard]] std::basic_ostream<Char>& stream() const noexcept { return *stream_; }
 
 			static constexpr size_t indent_columns = 4;
 			static constexpr toml::string_view indent_string = TOML_STRING_PREFIX("    "sv);
@@ -51,7 +51,7 @@ namespace toml::impl
 
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
 
-			void attach(std::basic_ostream<CHAR>& stream) noexcept
+			void attach(std::basic_ostream<Char>& stream) noexcept
 			{
 				indent_ = {};
 				naked_newline_ = true;
@@ -146,5 +146,9 @@ namespace toml::impl
 				flags_{ flags }
 			{}
 	};
+
+	#if !TOML_ALL_INLINE
+		extern template class TOML_API formatter<char>;
+	#endif
 }
 

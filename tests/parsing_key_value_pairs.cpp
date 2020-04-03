@@ -7,14 +7,16 @@ key = "value"
 bare_key = "value"
 bare-key = "value"
 1234 = "value"
+"" = "blank"
 )"sv),
 		[](table&& tbl) noexcept
 		{
-			CHECK(tbl.size() == 4);
+			CHECK(tbl.size() == 5);
 			CHECK(tbl[S("key")] == S("value"sv));
 			CHECK(tbl[S("bare_key")] == S("value"sv));
 			CHECK(tbl[S("bare-key")] == S("value"sv));
 			CHECK(tbl[S("1234")] == S("value"sv));
+			CHECK(tbl[S("")] == S("blank"sv));
 		}
 	);
 
@@ -26,6 +28,7 @@ bare-key = "value"
 "ʎǝʞ" = "value"
 'key2' = "value"
 'quoted "value"' = "value"
+'' = 'blank'
 )"sv),
 		[](table&& tbl) noexcept
 		{
@@ -34,6 +37,7 @@ bare-key = "value"
 			CHECK(tbl[S("ʎǝʞ")] == S("value"sv));
 			CHECK(tbl[S("key2")] == S("value"sv));
 			CHECK(tbl[S("quoted \"value\"")] == S("value"sv));
+			CHECK(tbl[S("")] == S("blank"sv));
 		}
 	);
 
@@ -55,14 +59,16 @@ name = "Orange"
 physical.color = "orange"
 physical.shape = "round"
 site."google.com" = true
+3.14159 = "pi"
 )"sv),
 		[](table&& tbl) noexcept
 		{
-			CHECK(tbl.size() == 3);
+			CHECK(tbl.size() == 4);
 			CHECK(tbl[S("name")] == S("Orange"sv));
 			CHECK(tbl[S("physical")][S("color")] == S("orange"sv));
 			CHECK(tbl[S("physical")][S("shape")] == S("round"sv));
 			CHECK(tbl[S("site")][S("google.com")] == true);
+			CHECK(tbl[S("3")][S("14159")] == S("pi"sv));
 		}
 	);
 
@@ -130,22 +136,21 @@ orange.color = "orange"
 		}
 	);
 
-	// allow + in bare keys - toml/issues/644
-	// allow unicode in bare keys - toml/issues/687
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
-	parsing_should_succeed(S(R"(
-key+1 = 0
-ʎǝʞ2 = 0
-)"sv),
-		[](table&& tbl) noexcept
-		{
-			CHECK(tbl.size() == 2);
-			CHECK(tbl[S("key+1")] == 0);
-			CHECK(tbl[S("ʎǝʞ2")] == 0);
-		}
-	);
+	// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
+	#if TOML_LANG_UNRELEASED
+		parsing_should_succeed(S(R"(
+	key+1 = 0
+	ʎǝʞ2 = 0
+	)"sv),
+			[](table&& tbl) noexcept
+			{
+				CHECK(tbl.size() == 2);
+				CHECK(tbl[S("key+1")] == 0);
+				CHECK(tbl[S("ʎǝʞ2")] == 0);
+			}
+		);
 	#else
-	parsing_should_fail(R"(key+1 = 0)"sv);
-	parsing_should_fail(R"(ʎǝʞ2 = 0)"sv);
+		parsing_should_fail(R"(key+1 = 0)"sv);
+		parsing_should_fail(R"(ʎǝʞ2 = 0)"sv);
 	#endif
 }

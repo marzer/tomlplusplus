@@ -227,9 +227,9 @@ test = { val1 = "foo", val2 = [
 		}
 	);
 
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	// toml/issues/516 (newlines/trailing commas in inline tables)
+	#if TOML_LANG_UNRELEASED
 	{
-		// toml/issues/516 - allow newlines and trailing commas in inline tables
 		parsing_should_succeed(S(R"(
 name = {
 	first = "Tom",

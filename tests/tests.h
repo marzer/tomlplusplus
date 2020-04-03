@@ -30,8 +30,8 @@ using namespace Catch::literals;
 
 #define S(str) TOML_STRING_PREFIX(str)
 
-template <typename CHAR, typename FUNC>
-inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&& func, std::string_view source_path = {}) noexcept
+template <typename Char, typename Func = std::false_type>
+inline void parsing_should_succeed(std::basic_string_view<Char> toml_str, Func&& func = {}, std::string_view source_path = {}) noexcept
 {
 	INFO("String being parsed: '"sv << std::string_view( reinterpret_cast<const char*>(toml_str.data()), toml_str.length() ) << "'"sv)
 
@@ -50,19 +50,27 @@ inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&&
 		return std::move(tabl);
 	};
 
+	static constexpr auto is_functor = !std::is_same_v<impl::remove_cvref_t<Func>, std::false_type>;
+
 	#if TOML_EXCEPTIONS
 
 	try
 	{
 		{
 			INFO("Parsing string directly"sv)
-			std::forward<FUNC>(func)(validate_table(toml::parse(toml_str, source_path), source_path));
+			if constexpr (is_functor)
+				std::forward<Func>(func)(validate_table(toml::parse(toml_str, source_path), source_path));
+			else
+				validate_table(toml::parse(toml_str, source_path), source_path);
 		}
 		{
 			INFO("Parsing from a string stream"sv)
-			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
+			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-			std::forward<FUNC>(func)(validate_table(toml::parse(ss, source_path), source_path));
+			if constexpr (is_functor)
+				std::forward<Func>(func)(validate_table(toml::parse(ss, source_path), source_path));
+			else
+				validate_table(toml::parse(ss, source_path), source_path);
 		}
 	}
 	catch (const parse_error& err)
@@ -80,7 +88,12 @@ inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&&
 		INFO("Parsing string directly"sv)
 		parse_result result = toml::parse(toml_str, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
+		{
+			if constexpr (is_functor)
+				std::forward<Func>(func)(validate_table(std::move(result), source_path));
+			else
+				validate_table(std::move(result), source_path);
+		}
 		else
 		{
 			FAIL(
@@ -88,17 +101,23 @@ inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&&
 				<< ", column "sv << result.error().source().begin.column
 				<< ":\n"sv << result.error().description()
 			);
-			return;
+			std::exit(-1);
+			TOML_UNREACHABLE;
 		}
 	}
 
 	{
 		INFO("Parsing from a string stream"sv)
-		std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
+		std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 		parse_result result = toml::parse(ss, source_path);
 		if (result)
-			std::forward<FUNC>(func)(validate_table(std::move(result), source_path));
+		{
+			if constexpr (is_functor)
+				std::forward<Func>(func)(validate_table(std::move(result), source_path));
+			else
+				validate_table(std::move(result), source_path);
+		}
 		else
 		{
 			FAIL(
@@ -106,15 +125,16 @@ inline void parsing_should_succeed(std::basic_string_view<CHAR> toml_str, FUNC&&
 				<< ", column "sv << result.error().source().begin.column
 				<< ":\n"sv << result.error().description()
 			);
-			return;
+			std::exit(-1);
+			TOML_UNREACHABLE;
 		}
 	}
 
 	#endif
 }
 
-template <typename CHAR>
-inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
+template <typename Char>
+inline void parsing_should_fail(std::basic_string_view<Char> toml_str) noexcept
 {
 	INFO("String being parsed: '"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "'"sv)
 
@@ -145,7 +165,7 @@ inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 	if (run_tests([=]() { (void)toml::parse(toml_str); }))
 		run_tests([=]()
 		{
-			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
+			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			(void)toml::parse(ss);
 		});
@@ -158,7 +178,8 @@ inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 		if (result)
 		{
 			FAIL("Expected parsing failure"sv);
-			return false;
+			std::exit(-1);
+			TOML_UNREACHABLE;
 		}
 		else
 		{
@@ -170,7 +191,7 @@ inline void parsing_should_fail(std::basic_string_view<CHAR> toml_str) noexcept
 	if (run_tests([=]() noexcept { return toml::parse(toml_str); }))
 		run_tests([=]() noexcept
 		{
-			std::basic_stringstream<CHAR, std::char_traits<CHAR>, std::allocator<CHAR>> ss;
+			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			return toml::parse(ss);
 		});
@@ -291,7 +312,7 @@ inline void parse_expected_value(std::string_view value_str, const T& expected) 
 			REQUIRE(nv.get()->type() == impl::node_type_of<T>);
 
 			CHECK(nv.as<value_type>()->get() == expected);
-			CHECK(nv.value_or(T{}) == expected);
+			CHECK(nv.ref<value_type>() == expected);
 
 			val_reparsed = std::move(*nv.as<value_type>());
 		});
@@ -301,51 +322,16 @@ inline void parse_expected_value(std::string_view value_str, const T& expected) 
 }
 
 // manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
-#define TESTS_MANUAL_INSTANTIATIONS 1
-#if TESTS_MANUAL_INSTANTIATIONS
-
 extern template void parse_expected_value(std::string_view, const int&) noexcept;
 extern template void parse_expected_value(std::string_view, const unsigned int&) noexcept;
 extern template void parse_expected_value(std::string_view, const bool&) noexcept;
 extern template void parse_expected_value(std::string_view, const float&) noexcept;
 extern template void parse_expected_value(std::string_view, const double&) noexcept;
 extern template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
-
-namespace toml::impl
+namespace std
 {
-	extern template class formatter<char>;
+	extern template class unique_ptr<const Catch::IExceptionTranslator>;
 }
-
-
-namespace toml
-{
-	extern template class default_formatter<char>;
-
-	extern template std::ostream& operator<< (std::ostream&, const table&);
-	extern template std::ostream& operator<< (std::ostream&, const array&);
-	extern template std::ostream& operator<< (std::ostream&, const value<string>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<int64_t>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<double>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<bool>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<date>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<time>&);
-	extern template std::ostream& operator<< (std::ostream&, const value<date_time>&);
-	extern template std::ostream& operator<< (std::ostream&, const node_view<node>&);
-	extern template std::ostream& operator<< (std::ostream&, const node_view<const node>&);
-	extern template std::ostream& operator<< (std::ostream&, node_type);
-	extern template std::ostream& operator<< (std::ostream&, const source_region&);
-	extern template std::ostream& operator<< (std::ostream&, const source_position&);
-	extern template std::ostream& operator<< (std::ostream&, const parse_error&);
-	extern template std::ostream& operator<< (std::ostream&, const date&);
-	extern template std::ostream& operator<< (std::ostream&, const time&);
-	extern template std::ostream& operator<< (std::ostream&, const time_offset&);
-	extern template std::ostream& operator<< (std::ostream&, const date_time&);
-	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&);
-	extern template std::ostream& operator<< (std::ostream&, default_formatter<char>&&);
-}
-
-
-extern template class std::unique_ptr<const Catch::IExceptionTranslator>;
 namespace Catch
 {
 	extern template struct StringMaker<node_view<node>>;
@@ -358,6 +344,3 @@ namespace Catch
 		extern template std::string stringify(const node_view<const node>&);
 	}
 }
-
-#endif // TESTS_MANUAL_INSTANTIATIONS
-

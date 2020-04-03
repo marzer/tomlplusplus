@@ -91,8 +91,8 @@ string_array = [ "all", 'strings', """are the same""", '''type''' ]
 		}
 	);
 
-	// toml/issues/665 - heterogeneous arrays
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
+	// toml/issues/665 (heterogeneous arrays)
+	#if TOML_LANG_AT_LEAST(1, 0, 0)
 
 	parsing_should_succeed(S(R"(
 # Mixed-type arrays are allowed

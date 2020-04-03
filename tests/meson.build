@@ -1,5 +1,6 @@
 test_sources = [
-	'main.cpp',
+	'impl_toml.cpp',
+	'impl_catch2.cpp',
 	'parsing_arrays.cpp',
 	'parsing_booleans.cpp',
 	'parsing_comments.cpp',

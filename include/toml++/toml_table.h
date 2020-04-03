@@ -7,28 +7,23 @@
 
 namespace toml::impl
 {
-	template <bool is_const>
+	template <bool IsConst>
 	struct table_proxy_pair final
 	{
-		using value_type = std::conditional_t<is_const, const node, node>;
+		using value_type = std::conditional_t<IsConst, const node, node>;
 
 		const string& key;
 		value_type& value;
 	};
 
-	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-		extern template struct table_proxy_pair<true>;
-		extern template struct table_proxy_pair<false>;
-	#endif
-
-	template <bool is_const>
+	template <bool IsConst>
 	class table_iterator final
 	{
 		private:
 			friend class toml::table;
 
 			using raw_iterator = std::conditional_t<
-				is_const,
+				IsConst,
 				string_map<std::unique_ptr<node>>::const_iterator,
 				string_map<std::unique_ptr<node>>::iterator
 			>;
@@ -47,7 +42,7 @@ namespace toml::impl
 
 			table_iterator() noexcept = default;
 
-			using reference = table_proxy_pair<is_const>;
+			using reference = table_proxy_pair<IsConst>;
 			using difference_type = ptrdiff_t;
 
 			table_iterator& operator++() noexcept // ++pre
@@ -94,11 +89,6 @@ namespace toml::impl
 			}
 	};
 
-	#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-		extern template class table_iterator<true>;
-		extern template class table_iterator<false>;
-	#endif
-
 	struct table_init_pair final
 	{
 		string key;
@@ -129,8 +119,8 @@ namespace toml
 {
 	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
-	template <typename CHAR>
-	std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&);
+	template <typename Char>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 
 	/// \brief	A TOML table.
 	/// 
@@ -368,17 +358,17 @@ namespace toml
 			/// { a = 1, b = 2, c = 3, d = 42 }	//"a" already existed
 			/// \eout
 			/// 
-			/// \tparam ITER	An InputIterator to a collection of key-value pairs.
+			/// \tparam Iter	An InputIterator to a collection of key-value pairs.
 			/// \param 	first	An iterator to the first value in the input collection.
 			/// \param 	last	An iterator to one-past-the-last value in the input collection.
 			/// 
 			/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 			/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 			/// 		 table will not be replaced.
-			template <typename ITER, typename = std::enable_if_t<
-				!std::is_convertible_v<ITER&&, string_view>
+			template <typename Iter, typename = std::enable_if_t<
+				!std::is_convertible_v<Iter&&, string_view>
 			>>
-			void insert(ITER first, ITER last) noexcept
+			void insert(Iter first, Iter last) noexcept
 			{
 				if (first == last)
 					return;
@@ -609,11 +599,11 @@ namespace toml
 
 		private:
 
-			template <typename MAP, typename KEY>
-			[[nodiscard]] static auto do_get(MAP& vals, const KEY& key) noexcept
+			template <typename Map, typename Key>
+			[[nodiscard]] static auto do_get(Map& vals, const Key& key) noexcept
 			{
 				using return_type = std::conditional_t<
-					std::is_const_v<MAP>,
+					std::is_const_v<Map>,
 					const node*,
 					node*
 				>;
@@ -623,16 +613,16 @@ namespace toml
 				return return_type{};
 			}
 
-			template <typename T, typename MAP, typename KEY>
-			[[nodiscard]] static auto do_get_as(MAP& vals, const KEY& key) noexcept
+			template <typename T, typename Map, typename Key>
+			[[nodiscard]] static auto do_get_as(Map& vals, const Key& key) noexcept
 			{
 				const auto node = do_get(vals, key);
 				return node ? node->template as<T>() : nullptr;
 			}
 
-			template <typename MAP, typename KEY>
+			template <typename Map, typename Key>
 			[[nodiscard]] TOML_ALWAYS_INLINE
-			static bool do_contains(MAP& vals, const KEY& key) noexcept
+			static bool do_contains(Map& vals, const Key& key) noexcept
 			{
 				#if TOML_CPP >= 20
 				return vals.contains(key);
@@ -737,14 +727,7 @@ namespace toml
 			/// \returns	True if the tables did not contain the same keys and values.
 			friend bool operator != (const table& lhs, const table& rhs) noexcept;
 
-			template <typename CHAR>
-			friend std::basic_ostream<CHAR>& operator << (std::basic_ostream<CHAR>&, const table&);
+			template <typename Char>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
 }
-
-#if !TOML_ALL_INLINE && !TOML_HAS_API_ANNOTATION
-namespace std
-{
-	extern template class unique_ptr<toml::table>;
-}
-#endif

@@ -130,22 +130,13 @@ str = ''''That's still pointless', she said.'''
 		R"("\"\u03B1\u03B2\u03B3\"")"sv,
 	     S("\"\u03B1\u03B2\u03B3\""sv));
 
-	// toml/issues/622 - escaping alias for spaces
-	#if 0 && TOML_LANG_HIGHER_THAN(0, 5, 0)
-	parse_expected_value(
-		R"("The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv,
-		 S("The quick brown fox jumps over the lazy dog"sv));
+	// toml/pull/709 (\xHH unicode scalars)
+	#if TOML_LANG_UNRELEASED
+		parse_expected_value(
+			R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
+			 S("\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv));
 	#else
-	parsing_should_fail(R"(str = "The\squick\sbrown\sfox\sjumps\sover\sthe\slazy\sdog")"sv);
-	#endif
-
-	// toml/pull/709 - \xHH short-form unicode scalars
-	#if TOML_LANG_HIGHER_THAN(0, 5, 0)
-	parse_expected_value(
-		R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
-		 S("\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv));
-	#else
-	parsing_should_fail(R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
+		parsing_should_fail(R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
 	#endif
 
 	//check 8-digit \U scalars with insufficient digits
