@@ -122,6 +122,12 @@ namespace toml
 	template <typename Char>
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 
+	/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
+	using table_iterator = impl::table_iterator<false>;
+
+	/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
+	using const_table_iterator = impl::table_iterator<true>;
+
 	/// \brief	A TOML table.
 	/// 
 	/// \remarks The interface of this type is modeled after std::map, with some
@@ -141,10 +147,10 @@ namespace toml
 
 		public:
 
-			/// \brief A BidirectionalIterator for iterating over the key-value pairs in a table.
-			using iterator = impl::table_iterator<false>;
-			/// \brief A const BidirectionalIterator for iterating over the key-value pairs in a table.
-			using const_iterator = impl::table_iterator<true>;
+			/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
+			using iterator = table_iterator;
+			/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
+			using const_iterator = const_table_iterator;
 			
 			/// \brief	Default constructor.
 			TOML_NODISCARD_CTOR

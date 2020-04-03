@@ -186,6 +186,12 @@ namespace toml
 	template <typename Char>
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 
+	/// \brief A RandomAccessIterator for iterating over nodes in a toml::array.
+	using array_iterator = impl::array_iterator<false>;
+
+	/// \brief A RandomAccessIterator for iterating over const nodes in a toml::array.
+	using const_array_iterator = impl::array_iterator<true>;
+
 	/// \brief	A TOML array.
 	///
 	/// \detail The interface of this type is modeled after std::vector, with some
@@ -242,10 +248,10 @@ namespace toml
 			using reference = node&;
 			using const_reference = const node&;
 
-			/// \brief A RandomAccessIterator for iterating over the nodes in an array.
-			using iterator = impl::array_iterator<false>;
-			/// \brief A const RandomAccessIterator for iterating over the nodes in an array.
-			using const_iterator = impl::array_iterator<true>;
+			/// \brief A RandomAccessIterator for iterating over nodes in a toml::array.
+			using iterator = array_iterator;
+			/// \brief A RandomAccessIterator for iterating over const nodes in a toml::array.
+			using const_iterator = const_array_iterator;
 
 			/// \brief	Default constructor.
 			TOML_NODISCARD_CTOR

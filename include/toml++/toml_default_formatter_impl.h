@@ -72,7 +72,7 @@ namespace toml::impl
 					if (n.empty())
 						return 2_sz; // "{}"
 					size_t weight = 3_sz; // "{ }"
-					for (auto [k, v] : n)
+					for (auto&& [k, v] : n)
 						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
 					return weight;
 				}

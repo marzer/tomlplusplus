@@ -175,7 +175,7 @@ namespace toml
 				};
 
 				//values, arrays, and inline tables/table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
@@ -196,7 +196,7 @@ namespace toml
 				}
 
 				//non-inline tables
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if (type != node_type::table || reinterpret_cast<const table*>(&v)->is_inline())
@@ -208,7 +208,7 @@ namespace toml
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
-					for (auto [child_k, child_v] : child_tbl)
+					for (auto&& [child_k, child_v] : child_tbl)
 					{
 						const auto child_type = child_v.type();
 						switch (child_type)
@@ -258,7 +258,7 @@ namespace toml
 				}
 
 				//table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					if (!is_non_inline_array_of_tables(v))
 						continue;
@@ -345,7 +345,7 @@ namespace toml
 			impl::print_to_stream("{ "sv, base::stream());
 
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());

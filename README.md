@@ -33,6 +33,9 @@ cpp = 17
 ```
 Reading it in C++ is easy with `toml++`:
 ```cpp
+#include <toml.hpp>
+#include <fstream> //required for toml::parse_file()
+
 auto config = toml::parse_file( "configuration.toml" );
 
 // get key-value pairs
@@ -48,7 +51,7 @@ config.insert_or_assign("alternatives", toml::array{
 });
 
 // iterate & visit over the data
-for (auto [k, v] : config)
+for (auto&& [k, v] : config)
 {
     v.visit([](auto& node) noexcept
     {
@@ -176,8 +179,8 @@ though you're welcome to reach out via other means. In order of likely response 
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[TOML v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/README.md
-[v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/README.md
+[TOML v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
+[v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/

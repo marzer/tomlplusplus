@@ -36,6 +36,11 @@ namespace toml
 	///		(error occurred at line 1, column 13 of 'config.toml')
 	/// \eout
 	/// 
+	/// Getting node_views (`operator[]`) and using the iterator accessor functions (`begin(), end()` etc.) are
+	/// unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed
+	/// parse_result is also safe since `begin()` and `end()` return the same iterator and will not lead to any
+	/// dereferences and iterations.
+	/// 
 	/// \attention <strong>This type only exists when exceptions are not enabled.</strong>
 	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
 	/// #if TOML_EXCEPTIONS
@@ -62,6 +67,12 @@ namespace toml
 			}
 
 		public:
+
+			/// \brief A BidirectionalIterator for iterating over key-value pairs in a wrapped toml::table.
+			using iterator = table_iterator;
+
+			/// \brief A BidirectionalIterator for iterating over const key-value pairs in a wrapped toml::table.
+			using const_iterator = const_table_iterator;
 
 			/// \brief	Returns true if parsing succeeeded.
 			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
@@ -136,7 +147,6 @@ namespace toml
 				::new (&storage) parse_error{ std::move(err) };
 			}
 
-
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			parse_result(parse_result&& res) noexcept
@@ -174,6 +184,67 @@ namespace toml
 			~parse_result() noexcept
 			{
 				destroy();
+			}
+
+			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table.
+			///
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
+			/// 			or an empty node view.
+			///
+			/// \see toml::node_view
+			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept
+			{
+				return is_err ? node_view<node>{} : get()[key];
+			}
+
+			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
+			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept
+			{
+				return is_err ? node_view<const node>{} : get()[key];
+			}
+
+			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] table_iterator begin() noexcept
+			{
+				return is_err ? table_iterator{} : get().begin();
+			}
+
+			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] const_table_iterator begin() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().begin();
+			}
+
+			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] const_table_iterator cbegin() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().cbegin();
+			}
+
+			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] table_iterator end() noexcept
+			{
+				return is_err ? table_iterator{} : get().end();
+			}
+
+			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] const_table_iterator end() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().end();
+			}
+
+			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
+			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+			[[nodiscard]] const_table_iterator cend() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().cend();
 			}
 	};
 

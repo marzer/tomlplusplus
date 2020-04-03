@@ -86,8 +86,8 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - [TOML v1.0.0-rc.1](https://github.com/toml-lang/toml/blob/master/README.md), plus optional support for some
-///		unreleased TOML features
+/// - [TOML v1.0.0-rc.1](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md),
+///		plus optional support for some unreleased TOML features
 /// - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 /// - Proper UTF-8 handling (incl. BOM)
 /// - Works with or without exceptions
@@ -252,6 +252,8 @@
 /// ... exactly as above, but twice
 /// \eout
 /// 
+/// The error-handling semantics are the same as for toml::parse_file.
+/// 
 /// \see toml::parse()  
 /// 
 ///////////////////////////////////
@@ -347,7 +349,7 @@
 /// 	auto tbl = toml::table{{
 /// 		{ "lib", "toml++" },
 /// 		{ "cpp", toml::array{ 17, 20, "and beyond" } },
-/// 		{ "toml", toml::array{ "1.0.0", "and beyond" } },
+/// 		{ "toml", toml::array{ "1.0.0-rc.1", "and beyond" } },
 /// 		{ "repo", "https://github.com/marzer/tomlplusplus/" },
 /// 		{ "author", toml::table{{
 /// 				{ "name", "Mark Gillard" },
@@ -374,7 +376,7 @@
 /// cpp = [17, 20, "and beyond"]
 /// lib = "toml++"
 /// repo = "https://github.com/marzer/tomlplusplus/"
-/// toml = ["1.0.0", "and beyond"]
+/// toml = ["1.0.0-rc.1", "and beyond"]
 /// 
 /// [author]
 /// github = "https://github.com/marzer"
@@ -397,7 +399,7 @@
 ///     "lib" : "toml++",
 ///     "repo" : "https://github.com/marzer/tomlplusplus/",
 ///     "toml" : [
-///         "1.0.0",
+///         "1.0.0-rc.1",
 ///         "and beyond"
 ///     ]
 /// }

@@ -65,7 +65,7 @@ namespace toml
 			friend class toml::table;
 			template <typename U> friend class toml::node_view;
 
-			mutable viewed_type* node_;
+			mutable viewed_type* node_ = nullptr;
 
 			TOML_NODISCARD_CTOR
 			node_view(viewed_type* node) noexcept
@@ -77,6 +77,10 @@ namespace toml
 				= noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
 
 		public:
+
+			/// \brief	Constructs an empty node view.
+			TOML_NODISCARD_CTOR
+			node_view() noexcept = default;
 
 			/// \brief	Returns true if the view references a node.
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }

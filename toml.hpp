@@ -16,9 +16,9 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
 // TOML language specifications:
-// Latest: https://github.com/toml-lang/toml/blob/master/README.md
-// v1.0.0: https://github.com/toml-lang/toml/blob/master/README.md
-// v0.5.0: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+// Latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.1: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
+// v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -2488,6 +2488,9 @@ namespace toml
 	template <typename Char>
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 
+	using array_iterator = impl::array_iterator<false>;
+	using const_array_iterator = impl::array_iterator<true>;
+
 	class TOML_API array final
 		: public node
 	{
@@ -2504,8 +2507,8 @@ namespace toml
 			using difference_type = ptrdiff_t;
 			using reference = node&;
 			using const_reference = const node&;
-			using iterator = impl::array_iterator<false>;
-			using const_iterator = impl::array_iterator<true>;
+			using iterator = array_iterator;
+			using const_iterator = const_array_iterator;
 
 			TOML_NODISCARD_CTOR
 			array() noexcept;
@@ -2890,6 +2893,9 @@ namespace toml
 	template <typename Char>
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 
+	using table_iterator = impl::table_iterator<false>;
+	using const_table_iterator = impl::table_iterator<true>;
+
 	class TOML_API table final
 		: public node
 	{
@@ -2903,8 +2909,8 @@ namespace toml
 
 		public:
 
-			using iterator = impl::table_iterator<false>;
-			using const_iterator = impl::table_iterator<true>;
+			using iterator = table_iterator;
+			using const_iterator = const_table_iterator;
 
 			TOML_NODISCARD_CTOR
 			table() noexcept;
@@ -3098,7 +3104,7 @@ namespace toml
 			friend class toml::table;
 			template <typename U> friend class toml::node_view;
 
-			mutable viewed_type* node_;
+			mutable viewed_type* node_ = nullptr;
 
 			TOML_NODISCARD_CTOR
 			node_view(viewed_type* node) noexcept
@@ -3111,6 +3117,8 @@ namespace toml
 
 		public:
 
+			TOML_NODISCARD_CTOR
+			node_view() noexcept = default;
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			[[nodiscard]] viewed_type* get() const noexcept { return node_; }
 
@@ -4844,6 +4852,8 @@ namespace toml
 
 		public:
 
+			using iterator = table_iterator;
+			using const_iterator = const_table_iterator;
 			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
 			[[nodiscard]] bool failed() const noexcept { return is_err; }
 			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
@@ -4934,6 +4944,46 @@ namespace toml
 			~parse_result() noexcept
 			{
 				destroy();
+			}
+
+			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept
+			{
+				return is_err ? node_view<node>{} : get()[key];
+			}
+
+			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept
+			{
+				return is_err ? node_view<const node>{} : get()[key];
+			}
+
+			[[nodiscard]] table_iterator begin() noexcept
+			{
+				return is_err ? table_iterator{} : get().begin();
+			}
+
+			[[nodiscard]] const_table_iterator begin() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().begin();
+			}
+
+			[[nodiscard]] const_table_iterator cbegin() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().cbegin();
+			}
+
+			[[nodiscard]] table_iterator end() noexcept
+			{
+				return is_err ? table_iterator{} : get().end();
+			}
+
+			[[nodiscard]] const_table_iterator end() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().end();
+			}
+
+			[[nodiscard]] const_table_iterator cend() const noexcept
+			{
+				return is_err ? const_table_iterator{} : get().cend();
 			}
 	};
 
@@ -5368,7 +5418,7 @@ namespace toml
 				};
 
 				//values, arrays, and inline tables/table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
@@ -5389,7 +5439,7 @@ namespace toml
 				}
 
 				//non-inline tables
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if (type != node_type::table || reinterpret_cast<const table*>(&v)->is_inline())
@@ -5401,7 +5451,7 @@ namespace toml
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
-					for (auto [child_k, child_v] : child_tbl)
+					for (auto&& [child_k, child_v] : child_tbl)
 					{
 						const auto child_type = child_v.type();
 						switch (child_type)
@@ -5451,7 +5501,7 @@ namespace toml
 				}
 
 				//table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					if (!is_non_inline_array_of_tables(v))
 						continue;
@@ -5534,7 +5584,7 @@ namespace toml
 			impl::print_to_stream("{ "sv, base::stream());
 
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());
@@ -5693,7 +5743,7 @@ namespace toml
 			impl::print_to_stream('{', base::stream());
 			base::increase_indent();
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());
@@ -9433,7 +9483,7 @@ namespace toml::impl
 					if (n.empty())
 						return 2_sz; // "{}"
 					size_t weight = 3_sz; // "{ }"
-					for (auto [k, v] : n)
+					for (auto&& [k, v] : n)
 						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
 					return weight;
 				}
