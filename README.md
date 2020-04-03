@@ -22,6 +22,8 @@
 
 # Basic usage
 
+> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets instead, visit the project homepage at **[marzer.github.io/tomlplusplus](https://marzer.github.io/tomlplusplus/)**_
+
 Given a TOML file `configuration.toml` containing the following:
 ```toml
 [library]
