@@ -182,6 +182,18 @@ C++</span></a>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
+            <dt id="a2b0930b7b75df6f189d9815c000bef8b">
+              using <a class="m-doc-self" href="#a2b0930b7b75df6f189d9815c000bef8b">array_iterator</a> = impl::array_iterator&lt;false&gt;
+            </dt>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over nodes in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="acc99ae392186dc605aeb233d26f07013">
+              using <a class="m-doc-self" href="#acc99ae392186dc605aeb233d26f07013">const_array_iterator</a> = impl::array_iterator&lt;true&gt;
+            </dt>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const nodes in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="adeb2aa84bcd2bcb46e2cdfaa5dd6572f">
+              using <a class="m-doc-self" href="#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
+            </dt>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               using <a class="m-doc" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;T&gt;
@@ -207,6 +219,10 @@ C++</span></a>
               using <a class="m-doc" href="#a496653fce75ee70bbe451bb5f2377265">string_view</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>
             </dt>
             <dd>The string type for keys and string values.</dd>
+            <dt id="a57894617837065610e5746a3204fa8e9">
+              using <a class="m-doc-self" href="#a57894617837065610e5746a3204fa8e9">table_iterator</a> = impl::table_iterator&lt;false&gt;
+            </dt>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="func-members">

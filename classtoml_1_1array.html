@@ -118,14 +118,14 @@ C++</span></a>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="ada39844ba79a1f6fec4fbe7c8bc66eba">
-              using <a class="m-doc-self" href="#ada39844ba79a1f6fec4fbe7c8bc66eba">const_iterator</a> = impl::array_iterator&lt;true&gt;
+            <dt id="adfd38318d3390a76f073a83fd2f2aa21">
+              using <a class="m-doc-self" href="#adfd38318d3390a76f073a83fd2f2aa21">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#acc99ae392186dc605aeb233d26f07013">const_<wbr/>array_<wbr/>iterator</a>
             </dt>
-            <dd>A const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over the nodes in an array.</dd>
-            <dt id="a012d869144b5532229dd3ce1eac02bf6">
-              using <a class="m-doc-self" href="#a012d869144b5532229dd3ce1eac02bf6">iterator</a> = impl::array_iterator&lt;false&gt;
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const nodes in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="a62a18471ca7c5b06204d2e26c963f833">
+              using <a class="m-doc-self" href="#a62a18471ca7c5b06204d2e26c963f833">iterator</a> = <a class="m-doc" href="namespacetoml.html#a2b0930b7b75df6f189d9815c000bef8b">array_<wbr/>iterator</a>
             </dt>
-            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over the nodes in an array.</dd>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over nodes in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -163,19 +163,19 @@ C++</span></a>
             </dt>
             <dd>Returns a reference to the last node in the array.</dd>
             <dt id="a7cff1526a6d1f6157e0eab231b4757aa">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7cff1526a6d1f6157e0eab231b4757aa">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7cff1526a6d1f6157e0eab231b4757aa">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first node.</dd>
             <dt id="a8eb0c36b3fb969d1693011954a705161">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8eb0c36b3fb969d1693011954a705161">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8eb0c36b3fb969d1693011954a705161">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first node.</dd>
             <dt id="af625cfe09027a7b6a81988cceb3d2fad">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af625cfe09027a7b6a81988cceb3d2fad">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af625cfe09027a7b6a81988cceb3d2fad">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first node.</dd>
             <dt id="a8c3253a239b50b357abd9b6c17b14b2e">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8c3253a239b50b357abd9b6c17b14b2e">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8c3253a239b50b357abd9b6c17b14b2e">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last node.</dd>
             <dt id="adaa65bf63f29f898c27423306c165d68">
@@ -184,8 +184,8 @@ C++</span></a>
             <dd>Removes all nodes from the array.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U, typename... V&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6467e68e1b35c27f876cf04be684a692">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
-              V &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6467e68e1b35c27f876cf04be684a692">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              V &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Emplaces a new value at a specific position in the array.</dd>
             <dt>
@@ -198,20 +198,20 @@ C++</span></a>
             </dt>
             <dd>Returns true if the array is empty.</dd>
             <dt id="a778b5b807ff7329f7de10237d73f29c2">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a778b5b807ff7329f7de10237d73f29c2">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a778b5b807ff7329f7de10237d73f29c2">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last node.</dd>
             <dt id="af423a7a18a9f9891c5832478ce6399b1">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af423a7a18a9f9891c5832478ce6399b1">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af423a7a18a9f9891c5832478ce6399b1">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last node.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab2f18d46dd8d432b067f9ac950ef1221">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> first,
-              <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab2f18d46dd8d432b067f9ac950ef1221">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> first,
+              <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the nodes in the range [first, last) from the array.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4d54758d8f50af9c072bb8f15437d2b4">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4d54758d8f50af9c072bb8f15437d2b4">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the specified node from the array.</dd>
             <dt>
@@ -246,28 +246,28 @@ C++</span></a>
             <dd>Gets the node at a specific index if it is a particular type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Iter&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               Iter first,
-              Iter last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              Iter last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a range of values into the array at a specific position.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aae228e38c14c8d6247a1ab4e4ddc151d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aae228e38c14c8d6247a1ab4e4ddc151d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
-              U&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              U&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Repeatedly inserts a value starting at a specific position in the array.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2209e45b30df84c9f6da381cd0f92c07">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
-              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt; ilist) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2209e45b30df84c9f6da381cd0f92c07">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt; ilist) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a range of values into the array at a specific position.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a106930bbdf1221941813f51aba1cc17e">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
-              U&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a106930bbdf1221941813f51aba1cc17e">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              U&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a new node at a specific position in the array.</dd>
             <dt id="a17362a39f6ec6f14ce59f8a8ed2b88cf">
@@ -400,7 +400,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename U, typename... V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6467e68e1b35c27f876cf04be684a692">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6467e68e1b35c27f876cf04be684a692">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               V &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Emplaces a new value at a specific position in the array.</p>
@@ -488,8 +488,8 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="ab2f18d46dd8d432b067f9ac950ef1221"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab2f18d46dd8d432b067f9ac950ef1221">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> first,
-              <a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> last) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab2f18d46dd8d432b067f9ac950ef1221">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> first,
+              <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> last) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes the nodes in the range [first, last) from the array.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -522,7 +522,7 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="a4d54758d8f50af9c072bb8f15437d2b4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4d54758d8f50af9c072bb8f15437d2b4">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4d54758d8f50af9c072bb8f15437d2b4">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes the specified node from the array.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -694,7 +694,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename Iter&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               Iter first,
               Iter last) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
@@ -739,7 +739,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aae228e38c14c8d6247a1ab4e4ddc151d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aae228e38c14c8d6247a1ab4e4ddc151d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
               U&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
@@ -796,7 +796,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2209e45b30df84c9f6da381cd0f92c07">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2209e45b30df84c9f6da381cd0f92c07">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a>&lt;U&gt; ilist) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a range of values into the array at a specific position.</p>
@@ -836,7 +836,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a012d869144b5532229dd3ce1eac02bf6">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a106930bbdf1221941813f51aba1cc17e">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#ada39844ba79a1f6fec4fbe7c8bc66eba">const_<wbr/>iterator</a> pos,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a106930bbdf1221941813f51aba1cc17e">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               U&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a new node at a specific position in the array.</p>

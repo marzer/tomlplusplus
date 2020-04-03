@@ -92,14 +92,14 @@ C++</span></a>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
-            <dt id="a5f20440eb54f783f1704574b1e612a39">
-              using <a class="m-doc-self" href="#a5f20440eb54f783f1704574b1e612a39">const_iterator</a> = impl::table_iterator&lt;true&gt;
+            <dt id="a5a6ce59c3fe438ac94eadaa8a2b17957">
+              using <a class="m-doc-self" href="#a5a6ce59c3fe438ac94eadaa8a2b17957">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a>
             </dt>
-            <dd>A const <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over the key-value pairs in a table.</dd>
-            <dt id="aef09012c31a3d28ba1960da887872dbf">
-              using <a class="m-doc-self" href="#aef09012c31a3d28ba1960da887872dbf">iterator</a> = impl::table_iterator&lt;false&gt;
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dt id="aeecd89b0c0b321a9aff276ff1470f1d7">
+              using <a class="m-doc-self" href="#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> = <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a>
             </dt>
-            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over the key-value pairs in a table.</dd>
+            <dd>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -128,19 +128,19 @@ C++</span></a>
             </dt>
             <dd>Returns a pointer to the node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one.</dd>
             <dt id="a3352f9954e03087b6f596ae23283bd3c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3352f9954e03087b6f596ae23283bd3c">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3352f9954e03087b6f596ae23283bd3c">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair.</dd>
             <dt id="ae1cd0f9c02e3c4fe10b518d88a1a635f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae1cd0f9c02e3c4fe10b518d88a1a635f">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae1cd0f9c02e3c4fe10b518d88a1a635f">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair.</dd>
             <dt id="a6ee15bfc5321a5e581fd38b8060ad041">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6ee15bfc5321a5e581fd38b8060ad041">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6ee15bfc5321a5e581fd38b8060ad041">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair.</dd>
             <dt id="af9dadd628924c6ff979bb1e0aaf50a76">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af9dadd628924c6ff979bb1e0aaf50a76">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af9dadd628924c6ff979bb1e0aaf50a76">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
             <dt id="aa710f85c588a1b00c3192d1553de4eef">
@@ -154,7 +154,7 @@ C++</span></a>
             <dt>
               <div class="m-doc-template">template&lt;typename U, typename K, typename... V&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V &amp;&amp; ... args) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              V &amp;&amp; ... args) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Emplaces a new value at a specific key if one did not already exist.</dd>
             <dt id="a554f495f6f2ebc993be1bd0379447051">
@@ -162,24 +162,24 @@ C++</span></a>
             </dt>
             <dd>Returns true if the table is empty.</dd>
             <dt id="a40c72e81de1da66b7083cad11442cb05">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a40c72e81de1da66b7083cad11442cb05">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a40c72e81de1da66b7083cad11442cb05">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
             <dt id="a3fbd067dd4b40befb0ed0bf8a742e9b6">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3fbd067dd4b40befb0ed0bf8a742e9b6">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3fbd067dd4b40befb0ed0bf8a742e9b6">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab461d8b1b2c167d8541db465fc676909">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> first,
-              <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab461d8b1b2c167d8541db465fc676909">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> first,
+              <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the key-value pairs in the range [first, last) from the table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8cc5d9a8f1b4a7176ba9fffc5ed0614">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8cc5d9a8f1b4a7176ba9fffc5ed0614">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the specified key-value pair from the table (const iterator overload).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5e52fb19f396e83d2ba27118cf80101f">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5e52fb19f396e83d2ba27118cf80101f">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the specified key-value pair from the table.</dd>
             <dt>
@@ -213,13 +213,13 @@ C++</span></a>
             <dt>
               <div class="m-doc-template">template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a new value at a specific key if one did not already exist.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename K, typename V&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4069bd9b5caf8ba10fffe7dc9bbb3634">insert_or_assign</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts or assigns a value at a specific key.</dd>
             <dt id="a8d24e995e5cfab4933c82ccd95dd6fa3">
@@ -320,7 +320,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename U, typename K, typename... V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
               V &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Emplaces a new value at a specific key if one did not already exist.</p>
@@ -382,8 +382,8 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="ab461d8b1b2c167d8541db465fc676909"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab461d8b1b2c167d8541db465fc676909">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> first,
-              <a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> last) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab461d8b1b2c167d8541db465fc676909">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> first,
+              <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> last) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes the key-value pairs in the range [first, last) from the table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -421,7 +421,7 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="af8cc5d9a8f1b4a7176ba9fffc5ed0614"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8cc5d9a8f1b4a7176ba9fffc5ed0614">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5f20440eb54f783f1704574b1e612a39">const_<wbr/>iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8cc5d9a8f1b4a7176ba9fffc5ed0614">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes the specified key-value pair from the table (const iterator overload).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -454,7 +454,7 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="a5e52fb19f396e83d2ba27118cf80101f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5e52fb19f396e83d2ba27118cf80101f">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5e52fb19f396e83d2ba27118cf80101f">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> pos) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes the specified key-value pair from the table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -706,7 +706,7 @@ C++</span></a>
             <h3>
               <div class="m-doc-template"> template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
               V&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a new value at a specific key if one did not already exist.</p>
@@ -766,7 +766,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename K, typename V&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aef09012c31a3d28ba1960da887872dbf">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4069bd9b5caf8ba10fffe7dc9bbb3634">insert_or_assign</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4069bd9b5caf8ba10fffe7dc9bbb3634">insert_or_assign</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
               V&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts or assigns a value at a specific key.</p>
