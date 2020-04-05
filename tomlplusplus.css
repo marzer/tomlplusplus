@@ -192,13 +192,37 @@ pre.m-code + pre.m-console span
 /* github badges (index.html) */
 .gh-badges
 {
-	padding-bottom: 0.75rem;
+	padding-bottom: 0.25rem;
 	margin-left: -0.9rem;
 	margin-right: -0.9rem;
+	margin-top: -0.5rem;
 }
-.gh-badges a
+
+@media screen and (min-width: 992px)
 {
-	margin-right: 0.3rem;
+	.gh-badges
+	{
+		display: flex;
+		justify-content: space-between;		
+	}
+	.gh-badges br
+	{
+		display: none;
+	}
+}
+@media screen and (max-width: 991px)
+{
+	.gh-badges
+	{
+		text-align: center;
+		line-height: 1.75rem;
+	}
+	.gh-badges a
+	{
+		margin-left: 0.2rem;
+		margin-right: 0.2rem;
+		margin-bottom: 0.4rem;
+	}
 }
 
 /* page category subheading ("module" etc) */
@@ -215,5 +239,6 @@ main > article > .m-container.m-container-inflatable > .m-row > div.m-col-l-10.m
 	border-width: 0.1rem;
 	margin-left: -1rem;
 	margin-right: -1rem;
+	margin-top: -1.75rem;
 	max-width: calc(100% + 2rem);
 }
