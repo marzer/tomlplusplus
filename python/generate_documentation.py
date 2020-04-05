@@ -477,6 +477,7 @@ class IndexPageFix(object):
 			'badge-TOML.svg',
 			'https://github.com/toml-lang/toml/blob/master/README.md'
 		),
+		(None, None, None), # <br>
 		(
 			'MIT License',
 			'badge-license-MIT.svg',
@@ -503,8 +504,11 @@ class IndexPageFix(object):
 		parent('h1')[0].replace_with(banner)
 		parent = doc.new_tag('div', class_='gh-badges', after=banner)
 		for (alt, src, href) in self.__badges:
-			anchor = doc.new_tag('a', parent=parent, href=href, target='_blank')
-			doc.new_tag('img', parent=anchor, src=src, alt=alt)
+			if alt is None and src is None and href is None:
+				doc.new_tag('br', parent=parent)
+			else:
+				anchor = doc.new_tag('a', parent=parent, href=href, target='_blank')
+				doc.new_tag('img', parent=anchor, src=src, alt=alt)
 		return True
 
 
