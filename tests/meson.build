@@ -1,11 +1,12 @@
 test_sources = [
 	'impl_toml.cpp',
 	'impl_catch2.cpp',
+	'tests.cpp',
+	'parsing_floats.cpp',
 	'parsing_arrays.cpp',
 	'parsing_booleans.cpp',
 	'parsing_comments.cpp',
 	'parsing_dates_and_times.cpp',
-	'parsing_floats.cpp',
 	'parsing_integers.cpp',
 	'parsing_key_value_pairs.cpp',
 	'parsing_spec_example.cpp',
@@ -13,15 +14,9 @@ test_sources = [
 	'parsing_tables.cpp',
 	'manipulating_arrays.cpp',
 	'manipulating_tables.cpp',
-	'tests.cpp'
+	'manipulating_values.cpp',
 ]
 
-disable_exceptions = 'cpp_eh=none'
-no_unreleased_features = '-DTOML_UNRELEASED_FEATURES=0'
-toml_char8_strings = '-DTOML_CHAR_8_STRINGS=1'
-manually_set_cpp_std = 'cpp_std=none'
-cpp20 = '-std=c++2a'
-use_tloptional = '-DTARTANLLAMA_OPTIONAL'
 compiler_supports_char8_strings = compiler.compiles('''
 	#include <string_view>
 	#include <string>
@@ -35,137 +30,78 @@ compiler_supports_char8_strings = compiler.compiles('''
 	args : [ '-std=c++2a' ]
 )
 
-############################################################################
-### char
-############################################################################
+character_types = ['char', 'char8']
+exception_modes = [ true, false ]
+unreleased_feature_modes = [ true, false ]
+tloptional_modes = [ true, false ]
+executables = []
+foreach character_type : character_types
+	if character_type == 'char8' and not compiler_supports_char8_strings
+		continue
+	endif
+	foreach exceptions : exception_modes
+		foreach unreleased_features : unreleased_feature_modes
+			foreach tloptional : tloptional_modes
 
+				if tloptional and not (character_type =='char' and unreleased_features and exceptions)
+					continue
+				endif
 
-char = executable(
-	'char',
-	test_sources,
-	include_directories : inc
-)
-test('char', char)
+				name = character_type
+				overrides = []
+				args = []
 
+				if character_type =='char8'
+					overrides += 'cpp_std=none'
+					args += '-DTOML_CHAR_8_STRINGS=1'
+					args += '-std=c++2a'
+				endif
 
-char_noexcept = executable(
-	'char_noexcept',
-	test_sources,
-	include_directories : inc,
-	override_options : [ disable_exceptions ]
-)
-test('char_noexcept', char_noexcept)
+				if not unreleased_features
+					name = name + '_strict'
+					args += '-DTOML_UNRELEASED_FEATURES=0'
+				endif
 
+				if not exceptions
+					name = name + '_noexcept'
+					overrides += 'cpp_eh=none'
+				endif
 
-char_strict = executable(
-	'char_strict',
-	test_sources,
-	include_directories : inc,
-	cpp_args : [ no_unreleased_features ]
-)
-test('char_strict', char_strict)
+				if tloptional
+					name = name + '_tlopt'
+					args += '-DTARTANLLAMA_OPTIONAL'
+				endif
 
+				executables += [[
+					name,
+					executable(
+						name,
+						test_sources,
+						include_directories : inc,
+						cpp_args : args,
+						override_options : overrides
+					)
+				]]
 
-char_strict_noexcept = executable(
-	'char_strict_noexcept',
-	test_sources,
-	include_directories : inc,
-	override_options : [ disable_exceptions ],
-	cpp_args : [ no_unreleased_features ]
-)
-test('char_strict_noexcept', char_strict_noexcept)
+			endforeach # tloptional_modes
+		endforeach # unreleased_feature_modes
+	endforeach # exception_modes
+endforeach # character_type
 
+locales = [
+	'C',
+	'en_US.utf8',
+	'ja_JP.utf8',
+	'it_IT.utf8',
+	'tr_TR.utf8',
+	'fi_FI.utf8',
+	'fr_FR.utf8',
+	'zh_CN.utf8',
+	'de_DE.utf8'
+]
 
-############################################################################
-### char w/ tl::optional
-############################################################################
-
-
-char_tlopt = executable(
-	'char_tlopt',
-	test_sources,
-	include_directories : inc,
-	cpp_args : [ use_tloptional ]
-)
-test('char_tlopt', char_tlopt)
-
-
-char_tlopt_strict = executable(
-	'char_tlopt_strict',
-	test_sources,
-	include_directories : inc,
-	cpp_args : [ no_unreleased_features, use_tloptional ]
-)
-test('char_tlopt_strict', char_tlopt_strict)
-
-
-if compiler_supports_char8_strings
-
-
-	############################################################################
-	### char8
-	############################################################################
-
-
-	char8 = executable(
-		'char8',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, toml_char8_strings ]
-	)
-	test('char8', char8)
-
-	char8_noexcept = executable(
-		'char8_noexcept',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std, disable_exceptions ],
-		cpp_args : [ cpp20, toml_char8_strings ]
-	)
-	test('char8_noexcept', char8_noexcept)
-	
-	char8_strict = executable(
-		'char8_strict',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features ]
-	)
-	test('char8_strict', char8_strict)
-
-	char8_strict_noexcept = executable(
-		'char8_strict_noexcept',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std, disable_exceptions ],
-		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features ]
-	)
-	test('char8_strict_noexcept', char8_strict_noexcept)
-
-
-	############################################################################
-	### char8 w/ tl::optional
-	############################################################################
-
-
-	char8_tlopt = executable(
-		'char8_tlopt',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, toml_char8_strings, use_tloptional ]
-	)
-	test('char8_tlopt', char8_tlopt)
-
-	char8_tlopt_strict = executable(
-		'char8_tlopt_strict',
-		test_sources,
-		include_directories : inc,
-		override_options : [ manually_set_cpp_std ],
-		cpp_args : [ cpp20, toml_char8_strings, no_unreleased_features, use_tloptional ]
-	)
-	test('char8_tlopt_strict', char8_tlopt_strict)
-
-
-endif
+foreach locale : locales
+	foreach executable : executables
+		test(locale + '_' + executable[0], executable[1], env : ['LC_ALL=' + locale])
+	endforeach
+endforeach

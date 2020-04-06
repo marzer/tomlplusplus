@@ -210,6 +210,7 @@ namespace toml
 					size_t child_table_array_count{};
 					for (auto&& [child_k, child_v] : child_tbl)
 					{
+						(void)child_k;
 						const auto child_type = child_v.type();
 						switch (child_type)
 						{

@@ -2,7 +2,9 @@
 
 TEST_CASE("parsing - arrays")
 {
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 integers = [ 1, 2, 3 ]
 integers2 = [
   1, 2, 3
@@ -94,7 +96,9 @@ string_array = [ "all", 'strings', """are the same""", '''type''' ]
 	// toml/issues/665 (heterogeneous arrays)
 	#if TOML_LANG_AT_LEAST(1, 0, 0)
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS, 
+		S(R"(
 # Mixed-type arrays are allowed
 numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
 contributors = [
@@ -134,7 +138,7 @@ contributors = [
 
 	#else
 
-	parsing_should_fail(S("numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]"sv));
 
 	#endif
 }

@@ -2,11 +2,15 @@ version: 2.1
 
 jobs:
 
-    clang_build_with_dox:
+    debug_clang9_dox:
         docker:
             - image: marzer/misc_cpp17_dev:latest
         steps:
             - checkout
+            - run:
+                name: Initializing locales
+                command: |
+                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
                 command: |
@@ -17,14 +21,10 @@ jobs:
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building with clang
+                name: Building and testing with clang 9
                 command: |
-                    CXX=clang++-9 meson build-clang
-                    cd build-clang && ninja -v -j 4
-            - run:
-                name: Running tests
-                command: |
-                    cd build-clang && ninja test
+                    CXX=clang++-9 meson build --buildtype=debug
+                    cd build && ninja -v && ninja test
             - run:
                 name: Generating documentation
                 command: |
@@ -35,11 +35,15 @@ jobs:
                 paths: html
 
 
-    clang_build:
+    debug_clang9:
         docker:
             - image: marzer/misc_cpp17_dev:latest
         steps:
             - checkout
+            - run:
+                name: Initializing locales
+                command: |
+                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
                 command: |
@@ -50,35 +54,77 @@ jobs:
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building with clang
+                name: Building and testing with clang 9
                 command: |
-                    CXX=clang++-9 meson build-clang
-                    cd build-clang && ninja -v -j 4
-            - run:
-                name: Running tests
-                command: |
-                    cd build-clang && ninja test
+                    CXX=clang++-9 meson build --buildtype=debug
+                    cd build && ninja -v && ninja test
 
 
-    gcc_build:
+    release_clang9:
         docker:
             - image: marzer/misc_cpp17_dev:latest
         steps:
             - checkout
+            - run:
+                name: Initializing locales
+                command: |
+                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
+            - run:
+                name: Checking toml.hpp
+                command: |
+                    cd python && python3 ci_single_header_check.py
             - run:
                 name: Pulling submodules
                 command: |
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building with gcc
+                name: Building and testing with clang 9
                 command: |
-                    CXX=g++-9 meson build-gcc
-                    cd build-gcc && ninja -v -j 4  
+                    CXX=clang++-9 meson build --buildtype=release
+                    cd build && ninja -v && ninja test
+
+
+    debug_gcc9:
+        docker:
+            - image: marzer/misc_cpp17_dev:latest
+        steps:
+            - checkout
             - run:
-                name: Running tests
+                name: Initializing locales
                 command: |
-                    cd build-gcc && ninja test
+                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
+            - run:
+                name: Pulling submodules
+                command: |
+                    git submodule update --init extern/Catch2
+                    git submodule update --init extern/tloptional
+            - run:
+                name: Building and testing with gcc9
+                command: |
+                    CXX=g++-9 meson build --buildtype=debug
+                    cd build && ninja -v -j 4 && ninja test
+
+
+    release_gcc9:
+        docker:
+            - image: marzer/misc_cpp17_dev:latest
+        steps:
+            - checkout
+            - run:
+                name: Initializing locales
+                command: |
+                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
+            - run:
+                name: Pulling submodules
+                command: |
+                    git submodule update --init extern/Catch2
+                    git submodule update --init extern/tloptional
+            - run:
+                name: Building and testing with gcc9
+                command: |
+                    CXX=g++-9 meson build --buildtype=release
+                    cd build && ninja -v -j 4 && ninja test
 
 
     deploy_dox:
@@ -110,16 +156,20 @@ workflows:
     version: 2
     build:
         jobs:
-            - clang_build_with_dox:
+            - debug_clang9_dox:
                 filters:
                     branches:
                         only: master
-            - clang_build:
+            - debug_clang9:
                 filters:
                     branches:
                         ignore: master
-            - gcc_build
+            - release_clang9
+            - debug_gcc9
+            - release_gcc9
             - deploy_dox:
                 requires:
-                    - clang_build_with_dox
-                    - gcc_build
+                    - debug_clang9_dox
+                    - release_clang9
+                    - debug_gcc9
+                    - release_gcc9

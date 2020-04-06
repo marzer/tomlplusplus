@@ -72,6 +72,7 @@
     <ClCompile Include="..\tests\manipulating_arrays.cpp" />
     <ClCompile Include="..\tests\manipulating_tables.cpp" />
     <ClCompile Include="..\tests\manipulating_parse_result.cpp" />
+    <ClCompile Include="..\tests\manipulating_values.cpp" />
     <ClCompile Include="..\tests\parsing_arrays.cpp" />
     <ClCompile Include="..\tests\parsing_booleans.cpp" />
     <ClCompile Include="..\tests\parsing_comments.cpp" />

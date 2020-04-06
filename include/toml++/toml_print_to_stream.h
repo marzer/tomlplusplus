@@ -5,6 +5,19 @@
 #pragma once
 #include "toml_date_time.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+#if TOML_INTEGER_CHARCONV || TOML_FLOATING_POINT_CHARCONV
+	#include <charconv>
+#endif
+#if !TOML_INTEGER_CHARCONV || !TOML_FLOATING_POINT_CHARCONV
+	#include <sstream>
+#endif
+#if !TOML_INTEGER_CHARCONV
+	#include <iomanip>
+#endif
+TOML_POP_WARNINGS
+
 namespace toml::impl
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
@@ -93,15 +106,29 @@ namespace toml::impl
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		char buf[charconv_buffer_length<T>];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
-		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
+		#if TOML_INTEGER_CHARCONV
+
+			char buf[charconv_buffer_length<T>];
+			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+			const auto len = static_cast<size_t>(res.ptr - buf);
+			print_to_stream(buf, len, stream);
+
+		#else
+
+			std::ostringstream ss;
+			ss.imbue(std::locale::classic());
+			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
+			ss << static_cast<cast_type>(val);
+			const auto str = std::move(ss).str();
+			print_to_stream(str, stream);
+
+		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(type)											\
+	#define TOML_P2S_OVERLOAD(Type)											\
 		template <typename Char>											\
 		TOML_ALWAYS_INLINE													\
-		void print_to_stream(type val, std::basic_ostream<Char>& stream)	\
+		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
 		{																	\
 			static_assert(sizeof(Char) == 1);								\
 			print_integer_to_stream(val, stream);							\
@@ -148,20 +175,13 @@ namespace toml::impl
 		}
 		#else
 		{
-			char buf[charconv_buffer_length<T> + 1_sz];
-			int len = -1;
+			std::ostringstream ss;
+			ss.imbue(std::locale::classic());
+			ss.precision(std::numeric_limits<T>::digits10 + 1);
 			if (hexfloat)
-				len = snprintf(buf, charconv_buffer_length<T> + 1_sz, "%a", static_cast<double>(val));
-			else
-				len = snprintf(
-					buf, charconv_buffer_length<T> + 1_sz, "%.*g",
-					std::numeric_limits<T>::digits10 + 1, static_cast<double>(val)
-				);
-			TOML_ASSERT(len > 0);
-			len = static_cast<int>(charconv_buffer_length<T>) < len
-				? static_cast<int>(charconv_buffer_length<T>)
-				: len;
-			const auto str = std::string_view{ buf, static_cast<size_t>(len) };
+				ss << std::hexfloat;
+			ss << val;
+			const auto str = std::move(ss).str();
 			print_to_stream(str, stream);
 			if (!hexfloat && needs_decimal_point(str))
 				print_to_stream(".0"sv, stream);
@@ -174,10 +194,10 @@ namespace toml::impl
 		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	#endif
 
-	#define TOML_P2S_OVERLOAD(type)											\
+	#define TOML_P2S_OVERLOAD(Type)											\
 		template <typename Char>											\
 		TOML_ALWAYS_INLINE													\
-		void print_to_stream(type val, std::basic_ostream<Char>& stream)	\
+		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
 		{																	\
 			static_assert(sizeof(Char) == 1);								\
 			print_floating_point_to_stream(val, stream);					\
@@ -200,12 +220,25 @@ namespace toml::impl
 	inline void print_to_stream(T val, std::basic_ostream<Char>& stream, size_t zero_pad_to_digits)
 	{
 		static_assert(sizeof(Char) == 1);
-		char buf[charconv_buffer_length<T>];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
-		const auto len = static_cast<size_t>(res.ptr - buf);
-		for (size_t i = len; i < zero_pad_to_digits; i++)
-			print_to_stream('0', stream);
-		print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
+		#if TOML_INTEGER_CHARCONV
+
+			char buf[charconv_buffer_length<T>];
+			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+			const auto len = static_cast<size_t>(res.ptr - buf);
+			for (size_t i = len; i < zero_pad_to_digits; i++)
+				print_to_stream('0', stream);
+			print_to_stream(buf, static_cast<size_t>(res.ptr - buf), stream);
+
+		#else
+
+			std::ostringstream ss;
+			ss.imbue(std::locale::classic());
+			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
+			ss << std::setfill('0') << std::setw(zero_pad_to_digits) << static_cast<cast_type>(val);
+			const auto str = std::move(ss).str();
+			print_to_stream(str, stream);
+
+		#endif
 	}
 
 	template <typename Char>

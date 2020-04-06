@@ -1,13 +1,14 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.1.0',
+	version : '1.2.0',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
 		'warning_level=3',
 		'werror=true',
-		'cpp_eh=default'
+		'cpp_eh=default',
+		'b_ndebug=if-release'
 	]
 )
 
@@ -38,7 +39,6 @@ if build_tests or build_examples
 
 	if compiler.get_id() == 'gcc'
 		add_project_arguments([
-				'-g0',
 				'-fmax-errors=5',
 				'-march=native',
 				'-Wno-init-list-lifetime'
@@ -49,7 +49,6 @@ if build_tests or build_examples
 
 	if compiler.get_id() == 'clang'
 		add_project_arguments([
-				'-g0',
 				'-ferror-limit=5',
 				'-march=native',
 				'-fchar8_t',
@@ -108,6 +107,5 @@ pkgc = import('pkgconfig')
 pkgc.generate (
 	name: 'toml++',
 	version: meson.project_version(),
-	description: 'Header-only TOML config file parser and serializer for modern C++',
-	subdirs: 'toml++'
+	description: 'Header-only TOML config file parser and serializer for modern C++'
 )

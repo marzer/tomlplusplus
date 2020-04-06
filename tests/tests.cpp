@@ -1,11 +1,11 @@
 #include "tests.h"
 
-template void parse_expected_value(std::string_view, const int&) noexcept;
-template void parse_expected_value(std::string_view, const unsigned int&) noexcept;
-template void parse_expected_value(std::string_view, const bool&) noexcept;
-template void parse_expected_value(std::string_view, const float&) noexcept;
-template void parse_expected_value(std::string_view, const double&) noexcept;
-template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const int&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const float&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const double&) noexcept;
+template void parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&) noexcept;
 
 namespace std
 {
