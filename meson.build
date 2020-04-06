@@ -16,6 +16,7 @@ tomlplusplus_dep = declare_dependency(
 	version : meson.project_version(),
 )
 
+
 build_tests = false
 if get_option('BUILD_TESTS').auto()
 	build_tests = (not meson.is_subproject())
@@ -110,4 +111,16 @@ pkgc.generate (
 	version: meson.project_version(),
 	description: 'Header-only TOML config file parser and serializer for modern C++',
 	subdirs: 'toml++'
+)
+
+cmake = import('cmake')
+cmake.write_basic_package_version_file(
+	name: 'tomlplusplus',
+	version: meson.project_version())
+
+conf = configuration_data()
+cmake.configure_package_config_file(
+	name: 'tomlplusplus',
+	input: 'cmake/tomlplusplus.cmake.in',
+	configuration: conf,
 )
