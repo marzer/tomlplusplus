@@ -105,7 +105,7 @@ install_subdir('include/toml++/',
 
 pkgc = import('pkgconfig')
 pkgc.generate (
-	name: 'toml++',
+	name: meson.project_name(),
 	version: meson.project_version(),
 	description: 'Header-only TOML config file parser and serializer for modern C++'
 )
