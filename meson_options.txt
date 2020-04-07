@@ -1,2 +1,3 @@
-option('BUILD_TESTS', type : 'feature', value : 'auto', description : 'Whether to build tests (defaults to auto: only if not a subproject)')
-option('BUILD_EXAMPLES', type : 'feature', value : 'auto', description : 'Whether to build examples (defaults to auto: only if not a subproject)')
+option('BUILD_TESTS', 			type : 'feature', value : 'auto',	description : 'Whether to build tests (default: auto - only if not a subproject)')
+option('BUILD_EXAMPLES',		type : 'feature', value : 'auto',	description : 'Whether to build examples (default: auto - only if not a subproject)')
+option('GENERATE_CMAKE_CONFIG',	type : 'feature', value : 'auto',	description : 'Whether to generate a cmake package config file (default: auto - only if not a subproject)')

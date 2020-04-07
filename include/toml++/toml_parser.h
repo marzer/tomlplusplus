@@ -331,7 +331,7 @@ namespace toml
 	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
-	#if defined(__cpp_lib_char8_t)
+	#ifdef __cpp_lib_char8_t
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
@@ -379,7 +379,7 @@ namespace toml
 	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
-	#endif // defined(__cpp_lib_char8_t)
+	#endif // __cpp_lib_char8_t
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -553,7 +553,7 @@ namespace toml
 		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
-		#if defined(__cpp_lib_char8_t)
+		#ifdef __cpp_lib_char8_t
 
 		/// \brief	Parses TOML data from a string.
 		/// 
@@ -579,7 +579,7 @@ namespace toml
 		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
-		#endif
+		#endif // __cpp_lib_char8_t
 
 		#if TOML_ABI_NAMESPACES
 			} //end abi namespace for TOML_EXCEPTIONS

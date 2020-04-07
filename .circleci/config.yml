@@ -24,7 +24,7 @@ jobs:
             - run:
                 name: Building and testing with clang 9
                 command: |
-                    CXX=clang++-9 meson build --buildtype=debug
+                    CXX=clang++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled
                     cd build && ninja -v -j 4 && ninja test
             - run:
                 name: Generating documentation
@@ -58,7 +58,7 @@ jobs:
             - run:
                 name: Building and testing with clang 9
                 command: |
-                    CXX=clang++-9 meson build --buildtype=debug
+                    CXX=clang++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled
                     cd build && ninja -v -j 4 && ninja test
 
 
@@ -84,7 +84,7 @@ jobs:
             - run:
                 name: Building and testing with clang 9
                 command: |
-                    CXX=clang++-9 meson build --buildtype=release
+                    CXX=clang++-9 meson build --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled
                     cd build && ninja -v -j 4 && ninja test
 
 
@@ -106,7 +106,7 @@ jobs:
             - run:
                 name: Building and testing with gcc9
                 command: |
-                    CXX=g++-9 meson build --buildtype=debug
+                    CXX=g++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled
                     cd build && ninja -v -j 4 && ninja test
 
 
@@ -128,7 +128,7 @@ jobs:
             - run:
                 name: Building and testing with gcc9
                 command: |
-                    CXX=g++-9 meson build --buildtype=release
+                    CXX=g++-9 meson build --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled
                     cd build && ninja -v -j 4 && ninja test
 
 

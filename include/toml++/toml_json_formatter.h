@@ -50,7 +50,7 @@ namespace toml
 		private:
 			using base = impl::formatter<Char>;
 
-			inline void print(const toml::table& tbl);
+			void print(const toml::table& tbl);
 
 			void print(const array& arr)
 			{

@@ -111,14 +111,20 @@ pkgc.generate (
 	description: 'Header-only TOML config file parser and serializer for modern C++'
 )
 
-cmake = import('cmake')
-cmake.write_basic_package_version_file(
-	name: 'tomlplusplus',
-	version: meson.project_version())
-
-conf = configuration_data()
-cmake.configure_package_config_file(
-	name: 'tomlplusplus',
-	input: 'cmake/tomlplusplus.cmake.in',
-	configuration: conf,
-)
+# meson cmake stuff requires at least 0.50
+if meson.version().version_compare('>= 0.50')
+	if get_option('GENERATE_CMAKE_CONFIG').enabled() or (get_option('GENERATE_CMAKE_CONFIG').auto() and not meson.is_subproject())
+		cmake = import('cmake')
+		cmake.write_basic_package_version_file(
+			name: meson.project_name(),
+			version: meson.project_version()
+		)
+		
+		cmake_conf = configuration_data()
+		cmake.configure_package_config_file(
+			name: meson.project_name(),
+			input: 'cmake/tomlplusplus.cmake.in',
+			configuration: cmake_conf,
+		)
+	endif
+endif

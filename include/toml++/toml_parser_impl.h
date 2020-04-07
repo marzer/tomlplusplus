@@ -3305,7 +3305,7 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#if defined(__cpp_lib_char8_t)
+	#ifdef __cpp_lib_char8_t
 
 	TOML_API
 	TOML_FUNC_EXTERNAL_LINKAGE
@@ -3321,7 +3321,7 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#endif // defined(__cpp_lib_char8_t)
+	#endif // __cpp_lib_char8_t
 
 	#if TOML_ABI_NAMESPACES
 		} //end abi namespace for TOML_EXCEPTIONS
@@ -3344,7 +3344,7 @@ namespace toml
 			return parse(std::string_view{ str, len });
 		}
 
-		#if defined(__cpp_lib_char8_t)
+		#ifdef __cpp_lib_char8_t
 
 		TOML_API
 		TOML_FUNC_EXTERNAL_LINKAGE
@@ -3353,7 +3353,7 @@ namespace toml
 			return parse(std::u8string_view{ str, len });
 		}
 
-		#endif // defined(__cpp_lib_char8_t)
+		#endif // __cpp_lib_char8_t
 
 		#if TOML_ABI_NAMESPACES
 			} //end abi namespace for TOML_EXCEPTIONS

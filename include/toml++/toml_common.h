@@ -335,7 +335,7 @@ TOML_DISABLE_ALL_WARNINGS
 TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS
-	#if !defined(__cpp_lib_char8_t)
+	#ifndef __cpp_lib_char8_t
 		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 	#endif
 

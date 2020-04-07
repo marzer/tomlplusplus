@@ -380,7 +380,7 @@ TOML_DISABLE_ALL_WARNINGS
 TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS
-	#if !defined(__cpp_lib_char8_t)
+	#ifndef __cpp_lib_char8_t
 		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 	#endif
 
@@ -5107,7 +5107,7 @@ namespace toml
 	[[nodiscard]] TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
-	#if defined(__cpp_lib_char8_t)
+	#ifdef __cpp_lib_char8_t
 
 	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
@@ -5115,7 +5115,7 @@ namespace toml
 	[[nodiscard]] TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
-	#endif // defined(__cpp_lib_char8_t)
+	#endif // __cpp_lib_char8_t
 
 	template <typename Char>
 	[[nodiscard]]
@@ -5189,12 +5189,12 @@ namespace toml
 		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
-		#if defined(__cpp_lib_char8_t)
+		#ifdef __cpp_lib_char8_t
 
 		[[nodiscard]] TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
-		#endif
+		#endif // __cpp_lib_char8_t
 
 		#if TOML_ABI_NAMESPACES
 			} //end abi namespace for TOML_EXCEPTIONS
@@ -5421,7 +5421,7 @@ namespace toml
 				base::clear_naked_newline();
 			}
 
-			inline void print_inline(const table& /*tbl*/);
+			void print_inline(const table& /*tbl*/);
 			void print(const array& arr)
 			{
 				if (arr.empty())
@@ -5743,7 +5743,7 @@ namespace toml
 		private:
 			using base = impl::formatter<Char>;
 
-			inline void print(const toml::table& tbl);
+			void print(const toml::table& tbl);
 			void print(const array& arr)
 			{
 				if (arr.empty())
@@ -9697,7 +9697,7 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#if defined(__cpp_lib_char8_t)
+	#ifdef __cpp_lib_char8_t
 
 	TOML_API
 	TOML_FUNC_EXTERNAL_LINKAGE
@@ -9713,7 +9713,7 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#endif // defined(__cpp_lib_char8_t)
+	#endif // __cpp_lib_char8_t
 
 	#if TOML_ABI_NAMESPACES
 		} //end abi namespace for TOML_EXCEPTIONS
@@ -9736,7 +9736,7 @@ namespace toml
 			return parse(std::string_view{ str, len });
 		}
 
-		#if defined(__cpp_lib_char8_t)
+		#ifdef __cpp_lib_char8_t
 
 		TOML_API
 		TOML_FUNC_EXTERNAL_LINKAGE
@@ -9745,7 +9745,7 @@ namespace toml
 			return parse(std::u8string_view{ str, len });
 		}
 
-		#endif // defined(__cpp_lib_char8_t)
+		#endif // __cpp_lib_char8_t
 
 		#if TOML_ABI_NAMESPACES
 			} //end abi namespace for TOML_EXCEPTIONS

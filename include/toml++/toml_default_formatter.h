@@ -102,7 +102,7 @@ namespace toml
 				base::clear_naked_newline();
 			}
 
-			inline void print_inline(const table& /*tbl*/);
+			void print_inline(const table& /*tbl*/);
 
 			void print(const array& arr)
 			{

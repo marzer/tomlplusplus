@@ -67,6 +67,7 @@
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
 			<InlineFunctionExpansion Condition="$(PlatformToolsetVersion) &lt;= 141">AnySuitable</InlineFunctionExpansion> <!-- /Ob2 -->
 			<AdditionalOptions Condition="$(PlatformToolsetVersion) &gt;= 142">%(AdditionalOptions) /Ob3</AdditionalOptions> <!-- /Ob3 -->
+			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed> <!-- /Ot -->
 		</ClCompile>
 		<Link>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
