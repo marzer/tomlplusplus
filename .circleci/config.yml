@@ -10,6 +10,7 @@ jobs:
             - run:
                 name: Initializing locales
                 command: |
+                    sudo apt-get update && sudo apt-get install -y locales
                     sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
@@ -43,6 +44,7 @@ jobs:
             - run:
                 name: Initializing locales
                 command: |
+                    sudo apt-get update && sudo apt-get install -y locales
                     sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
@@ -68,6 +70,7 @@ jobs:
             - run:
                 name: Initializing locales
                 command: |
+                    sudo apt-get update && sudo apt-get install -y locales
                     sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
@@ -93,6 +96,7 @@ jobs:
             - run:
                 name: Initializing locales
                 command: |
+                    sudo apt-get update && sudo apt-get install -y locales
                     sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Pulling submodules
@@ -114,6 +118,7 @@ jobs:
             - run:
                 name: Initializing locales
                 command: |
+                    sudo apt-get update && sudo apt-get install -y locales
                     sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Pulling submodules
