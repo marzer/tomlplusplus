@@ -25,7 +25,7 @@ jobs:
                 name: Building and testing with clang 9
                 command: |
                     CXX=clang++-9 meson build --buildtype=debug
-                    cd build && ninja -v && ninja test
+                    cd build && ninja -v -j 4 && ninja test
             - run:
                 name: Generating documentation
                 command: |
@@ -59,7 +59,7 @@ jobs:
                 name: Building and testing with clang 9
                 command: |
                     CXX=clang++-9 meson build --buildtype=debug
-                    cd build && ninja -v && ninja test
+                    cd build && ninja -v -j 4 && ninja test
 
 
     release_clang9:
@@ -85,7 +85,7 @@ jobs:
                 name: Building and testing with clang 9
                 command: |
                     CXX=clang++-9 meson build --buildtype=release
-                    cd build && ninja -v && ninja test
+                    cd build && ninja -v -j 4 && ninja test
 
 
     debug_gcc9:
