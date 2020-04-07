@@ -2,7 +2,9 @@
 
 TEST_CASE("parsing - key-value pairs")
 {
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 key = "value"
 bare_key = "value"
 bare-key = "value"
@@ -20,9 +22,11 @@ bare-key = "value"
 		}
 	);
 
-	parsing_should_fail(S(R"(key = # INVALID)"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(key = # INVALID)"sv));
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 "127.0.0.1" = "value"
 "character encoding" = "value"
 "ʎǝʞ" = "value"
@@ -41,20 +45,21 @@ bare-key = "value"
 		}
 	);
 
-	parsing_should_fail(S(R"(= "no key name")"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(= "no key name")"sv));
 
-	parsing_should_fail(S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(
 # DO NOT DO THIS
 name = "Tom"
 name = "Pradyun"
-)"sv)
-	);
+)"sv));
 
 }
 
 TEST_CASE("parsing - key-value pairs (dotted)")
 {
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 name = "Orange"
 physical.color = "orange"
 physical.shape = "round"
@@ -73,7 +78,9 @@ site."google.com" = true
 	);
 
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 fruit.apple.smooth = true
 fruit.orange = 2
 )"sv),
@@ -84,14 +91,15 @@ fruit.orange = 2
 		}
 	);
 
-	parsing_should_fail(S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(
 # THIS IS INVALID
 fruit.apple = 1
 fruit.apple.smooth = true
-)"sv)
-	);
+)"sv));
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 # VALID BUT DISCOURAGED
 
 apple.type = "fruit"
@@ -114,7 +122,9 @@ orange.color = "orange"
 		}
 	);
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 # RECOMMENDED
 
 apple.type = "fruit"
@@ -138,10 +148,12 @@ orange.color = "orange"
 
 	// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
 	#if TOML_LANG_UNRELEASED
-		parsing_should_succeed(S(R"(
-	key+1 = 0
-	ʎǝʞ2 = 0
-	)"sv),
+		parsing_should_succeed(
+			FILE_LINE_ARGS,
+			S(R"(
+				key+1 = 0
+				ʎǝʞ2 = 0
+			)"sv),
 			[](table&& tbl) noexcept
 			{
 				CHECK(tbl.size() == 2);
@@ -150,7 +162,7 @@ orange.color = "orange"
 			}
 		);
 	#else
-		parsing_should_fail(R"(key+1 = 0)"sv);
-		parsing_should_fail(R"(ʎǝʞ2 = 0)"sv);
+		parsing_should_fail(FILE_LINE_ARGS, R"(key+1 = 0)"sv);
+		parsing_should_fail(FILE_LINE_ARGS, R"(ʎǝʞ2 = 0)"sv);
 	#endif
 }

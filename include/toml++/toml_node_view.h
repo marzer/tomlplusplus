@@ -167,6 +167,9 @@ namespace toml
 			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
+			TOML_PUSH_WARNINGS
+			TOML_DISABLE_INIT_WARNINGS
+
 			/// \brief	Gets the raw value contained by the referenced node.
 			/// 
 			/// \tparam	U	One of the TOML value types. Can also be a string_view.
@@ -181,6 +184,8 @@ namespace toml
 					return node_->template value<U>();
 				return {};
 			}
+
+			TOML_POP_WARNINGS
 
 			/// \brief	Gets the raw value contained by the referenced node, or a default.
 			///

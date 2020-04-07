@@ -192,8 +192,17 @@
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
+#ifndef TOML_INTEGER_CHARCONV
+	#define TOML_INTEGER_CHARCONV 1
+#endif
 #ifndef TOML_FLOATING_POINT_CHARCONV
 	#define TOML_FLOATING_POINT_CHARCONV 1
+#endif
+#if (TOML_INTEGER_CHARCONV || TOML_FLOATING_POINT_CHARCONV) && !__has_include(<charconv>)
+	#undef TOML_INTEGER_CHARCONV
+	#undef TOML_FLOATING_POINT_CHARCONV
+	#define TOML_INTEGER_CHARCONV 0
+	#define TOML_FLOATING_POINT_CHARCONV 0
 #endif
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
@@ -298,7 +307,6 @@
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-
 #if __has_include(<version>)
 	#include <version>
 #endif
@@ -310,22 +318,20 @@ TOML_DISABLE_ALL_WARNINGS
 #include <vector>
 #include <map>
 #include <iosfwd>
-#include <charconv>
-#ifndef TOML_ASSERT
-	#if !defined(NDEBUG) || defined(_DEBUG) || defined(DEBUG)
-		#include <cassert>
-		#define TOML_ASSERT(expr)			assert(expr)
-	#else
-		#define TOML_ASSERT(expr)			(void)0
-	#endif
-#endif
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
 #endif
 #if TOML_EXCEPTIONS
 	#include <stdexcept>
 #endif
-
+#ifndef TOML_ASSERT
+	#ifdef NDEBUG
+		#define TOML_ASSERT(expr)	(void)0
+	#else
+		#include <cassert>
+		#define TOML_ASSERT(expr)	assert(expr)
+	#endif
+#endif
 TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS
@@ -893,9 +899,9 @@ namespace toml::impl
 		"date-time"sv
 	};
 
-	#define TOML_P2S_DECL(linkage, type)								\
+	#define TOML_P2S_DECL(Linkage, Type)								\
 		template <typename Char>										\
-		linkage void print_to_stream(type, std::basic_ostream<Char>&)
+		Linkage void print_to_stream(Type, std::basic_ostream<Char>&)
 
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int8_t);
 	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int16_t);

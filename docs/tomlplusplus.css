@@ -94,7 +94,7 @@ pre a.tpp-injected
 	}
 }
 
-@media screen and (max-width: 576px)
+@media screen and (max-width: 575px)
 {
 	nav .m-thin, nav .github
 	{

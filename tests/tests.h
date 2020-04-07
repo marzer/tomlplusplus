@@ -25,15 +25,25 @@
 	#endif
 #endif
 
+#define FILE_LINE_ARGS std::string_view{ __FILE__ }, __LINE__
+
 using namespace toml;
 using namespace Catch::literals;
 
 #define S(str) TOML_STRING_PREFIX(str)
 
 template <typename Char, typename Func = std::false_type>
-inline void parsing_should_succeed(std::basic_string_view<Char> toml_str, Func&& func = {}, std::string_view source_path = {}) noexcept
+inline void parsing_should_succeed(
+	std::string_view test_file,
+	uint32_t test_line,
+	std::basic_string_view<Char> toml_str,
+	Func&& func = {},
+	std::string_view source_path = {}) noexcept
 {
-	INFO("String being parsed: '"sv << std::string_view( reinterpret_cast<const char*>(toml_str.data()), toml_str.length() ) << "'"sv)
+	INFO(
+		"["sv << test_file << ", line "sv << test_line << "] "sv
+		<< "parsing_should_succeed('"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "')"sv
+	)
 
 	constexpr auto validate_table = [](table&& tabl, std::string_view path) noexcept -> table&&
 	{
@@ -134,9 +144,15 @@ inline void parsing_should_succeed(std::basic_string_view<Char> toml_str, Func&&
 }
 
 template <typename Char>
-inline void parsing_should_fail(std::basic_string_view<Char> toml_str) noexcept
+inline void parsing_should_fail(
+	std::string_view test_file,
+	uint32_t test_line,
+	std::basic_string_view<Char> toml_str) noexcept
 {
-	INFO("String being parsed: '"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "'"sv)
+	INFO(
+		"["sv << test_file << ", line "sv << test_line << "] "sv
+		<< "parsing_should_fail('"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "')"sv
+	)
 
 	#if TOML_EXCEPTIONS
 
@@ -200,8 +216,14 @@ inline void parsing_should_fail(std::basic_string_view<Char> toml_str) noexcept
 }
 
 template <typename T>
-inline void parse_expected_value(std::string_view value_str, const T& expected) noexcept
+inline void parse_expected_value(
+	std::string_view test_file,
+	uint32_t test_line,
+	std::string_view value_str,
+	const T& expected) noexcept
 {
+	INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value('"sv << value_str << "')"sv)
+
 	std::string val;
 	static constexpr auto key = "val = "sv;
 	val.reserve(key.length() + value_str.length());
@@ -250,84 +272,100 @@ inline void parse_expected_value(std::string_view value_str, const T& expected) 
 
 	using value_type = impl::promoted<impl::remove_cvref_t<T>>;
 	value<value_type> val_parsed;
-
-	parsing_should_succeed(std::string_view{ val }, [&](table&& tbl) noexcept
 	{
-		CHECK(tbl.size() == 1);
-		auto nv = tbl[S("val"sv)];
-		REQUIRE(nv);
-		REQUIRE(nv.as<value_type>());
-		REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking inital parse"sv)
 
-		// check the raw value
-		CHECK(nv.get()->value<value_type>() == expected);
-		CHECK(nv.get()->value_or(T{}) == expected);
-		CHECK(nv.as<value_type>()->get() == expected);
-		CHECK(nv.value<value_type>() == expected);
-		CHECK(nv.value_or(T{}) == expected);
-		CHECK(nv.ref<value_type>() == expected);
-		CHECK(nv.get()->ref<value_type>() == expected);
+		parsing_should_succeed(
+			test_file,
+			test_line,
+			std::string_view{ val },
+			[&](table&& tbl) noexcept
+			{
+				REQUIRE(tbl.size() == 1);
+				auto nv = tbl[S("val"sv)];
+				REQUIRE(nv);
+				REQUIRE(nv.as<value_type>());
+				REQUIRE(nv.get()->type() == impl::node_type_of<T>);
 
-		// check the table relops
-		CHECK(tbl == table{ { { S("val"sv), expected } } });
-		CHECK(!(tbl != table{ { { S("val"sv), expected } } }));
+				// check the raw value
+				REQUIRE(nv.get()->value<value_type>() == expected);
+				REQUIRE(nv.get()->value_or(T{}) == expected);
+				REQUIRE(nv.as<value_type>()->get() == expected);
+				REQUIRE(nv.value<value_type>() == expected);
+				REQUIRE(nv.value_or(T{}) == expected);
+				REQUIRE(nv.ref<value_type>() == expected);
+				REQUIRE(nv.get()->ref<value_type>() == expected);
 
-		// check the value relops
-		CHECK(*nv.as<value_type>() == expected);
-		CHECK(expected == *nv.as<value_type>());
-		CHECK(!(*nv.as<value_type>() != expected));
-		CHECK(!(expected != *nv.as<value_type>()));
+				// check the table relops
+				REQUIRE(tbl == table{ { { S("val"sv), expected } } });
+				REQUIRE(!(tbl != table{ { { S("val"sv), expected } } }));
 
-		// check the node_view relops
-		CHECK(nv == expected);
-		CHECK(expected == nv);
-		CHECK(!(nv != expected));
-		CHECK(!(expected != nv));
+				// check the value relops
+				REQUIRE(*nv.as<value_type>() == expected);
+				REQUIRE(expected == *nv.as<value_type>());
+				REQUIRE(!(*nv.as<value_type>() != expected));
+				REQUIRE(!(expected != *nv.as<value_type>()));
 
-		// make sure source info is correct
-		CHECK(nv.get()->source().begin == begin);
-		CHECK(nv.get()->source().end == end);
+				// check the node_view relops
+				REQUIRE(nv == expected);
+				REQUIRE(expected == nv);
+				REQUIRE(!(nv != expected));
+				REQUIRE(!(expected != nv));
 
-		// steal the val for round-trip tests
-		val_parsed = std::move(*nv.as<value_type>());
-	});
+				// make sure source info is correct
+				REQUIRE(nv.get()->source().begin == begin);
+				REQUIRE(nv.get()->source().end == end);
+
+				// steal the val for round-trip tests
+				val_parsed = std::move(*nv.as<value_type>());
+			}
+		);
+	}
 
 	// check round-tripping
-	value<value_type> val_reparsed;
 	{
-		std::string str;
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking round-trip"sv)
+		value<value_type> val_reparsed;
 		{
-			auto tbl = table{ { { S("val"sv), *val_parsed } } };
-			std::ostringstream ss;
-			ss << tbl;
-			str = std::move(ss).str();
+			std::string str;
+			{
+				auto tbl = table{ { { S("val"sv), *val_parsed } } };
+				std::ostringstream ss;
+				ss << tbl;
+				str = std::move(ss).str();
+			}
+
+			parsing_should_succeed(
+				test_file,
+				test_line,
+				std::string_view{ str },
+				[&](table&& tbl) noexcept
+				{
+					REQUIRE(tbl.size() == 1);
+					auto nv = tbl[S("val"sv)];
+					REQUIRE(nv);
+					REQUIRE(nv.as<value_type>());
+					REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+
+					CHECK(nv.as<value_type>()->get() == expected);
+					CHECK(nv.ref<value_type>() == expected);
+
+					val_reparsed = std::move(*nv.as<value_type>());
+				}
+			);
 		}
-
-		parsing_should_succeed(std::string_view{ str }, [&](table&& tbl) noexcept
-		{
-			CHECK(tbl.size() == 1);
-			auto nv = tbl[S("val"sv)];
-			REQUIRE(nv);
-			REQUIRE(nv.as<value_type>());
-			REQUIRE(nv.get()->type() == impl::node_type_of<T>);
-
-			CHECK(nv.as<value_type>()->get() == expected);
-			CHECK(nv.ref<value_type>() == expected);
-
-			val_reparsed = std::move(*nv.as<value_type>());
-		});
+		CHECK(val_reparsed == val_parsed);
+		CHECK(val_reparsed == expected);
 	}
-	CHECK(val_reparsed == val_parsed);
-	CHECK(val_reparsed == expected);
 }
 
 // manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
-extern template void parse_expected_value(std::string_view, const int&) noexcept;
-extern template void parse_expected_value(std::string_view, const unsigned int&) noexcept;
-extern template void parse_expected_value(std::string_view, const bool&) noexcept;
-extern template void parse_expected_value(std::string_view, const float&) noexcept;
-extern template void parse_expected_value(std::string_view, const double&) noexcept;
-extern template void parse_expected_value(std::string_view, const toml::string_view&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const int&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const float&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const double&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&) noexcept;
 namespace std
 {
 	extern template class unique_ptr<const Catch::IExceptionTranslator>;

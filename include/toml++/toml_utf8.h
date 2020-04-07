@@ -9,6 +9,14 @@
 
 namespace toml::impl
 {
+	template <typename... T>
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
+	{
+		static_assert((std::is_same_v<char32_t, T> && ...));
+		return ((codepoint == vals) || ...);
+	}
+
 	[[nodiscard]] TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
@@ -101,6 +109,24 @@ namespace toml::impl
 			|| (codepoint >= U'A' && codepoint <= U'F')
 			|| is_decimal_digit(codepoint)
 		;
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr uint32_t hex_to_dec(char codepoint) noexcept
+	{
+		return codepoint >= 'A'
+			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= 'a' ? 'a' : 'A'))
+			: static_cast<uint32_t>(codepoint - '0')
+		;
+	}
+
+	[[nodiscard]] TOML_ALWAYS_INLINE
+	constexpr uint32_t hex_to_dec(char32_t codepoint) noexcept
+	{
+		return codepoint >= U'A'
+			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= U'a' ? U'a' : U'A'))
+			: static_cast<uint32_t>(codepoint - U'0')
+			;
 	}
 
 	[[nodiscard]]
@@ -632,7 +658,7 @@ namespace toml::impl
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
+		} //end abi namespace for TOML_EXCEPTIONS / !TOML_EXCEPTIONS
 	#endif
 }
 

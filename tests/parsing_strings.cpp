@@ -2,7 +2,9 @@
 
 TEST_CASE("parsing - strings")
 {
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
 
 str1 = """
@@ -16,7 +18,9 @@ Violets are blue"""
 		}
 	);
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 # The following strings are byte-for-byte equivalent:
 str1 = "The quick brown fox jumps over the lazy dog."
 
@@ -54,9 +58,11 @@ str7 = """"This," she said, "is just a pointless statement.""""
 		}
 	);
 
-	parsing_should_fail(S(R"(str5 = """Here are three quotation marks: """.""")"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(str5 = """Here are three quotation marks: """.""")"sv));
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 # What you see is what you get.
 winpath  = 'C:\Users\nodejs\templates'
 winpath2 = '\\ServerX\admin$\system32\'
@@ -85,7 +91,9 @@ trimmed in raw strings.
 		}
 	);
 
-	parsing_should_succeed(S(R"(
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		S(R"(
 quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
 
 # apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
@@ -102,57 +110,66 @@ str = ''''That's still pointless', she said.'''
 		}
 	);
 
-	parsing_should_fail(S(R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv));
 
 	//value tests
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"("The quick brown fox jumps over the lazy dog")"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"('The quick brown fox jumps over the lazy dog')"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 	  R"("""The quick brown fox jumps over the lazy dog""")"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 	  R"('''The quick brown fox jumps over the lazy dog''')"sv,
 		 S("The quick brown fox jumps over the lazy dog"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"("Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #")"sv,
 	   S(R"(Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #)"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"(" Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \"")"sv,
 	   S(R"( Âñδ ωλèñ "'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # ")"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"("Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?")"sv,
 	   S(R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv));
 	parse_expected_value(
+		FILE_LINE_ARGS,
 		R"("\"\u03B1\u03B2\u03B3\"")"sv,
 	     S("\"\u03B1\u03B2\u03B3\""sv));
 
 	// toml/pull/709 (\xHH unicode scalars)
 	#if TOML_LANG_UNRELEASED
 		parse_expected_value(
+			FILE_LINE_ARGS,
 			R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
 			 S("\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv));
 	#else
-		parsing_should_fail(R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
+		parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
 	#endif
 
 	//check 8-digit \U scalars with insufficient digits
-	parsing_should_fail(R"(str = "\U1234567")"sv);
-	parsing_should_fail(R"(str = "\U123456")"sv);
-	parsing_should_fail(R"(str = "\U12345")"sv);
-	parsing_should_fail(R"(str = "\U1234")"sv);
-	parsing_should_fail(R"(str = "\U123")"sv);
-	parsing_should_fail(R"(str = "\U12")"sv);
-	parsing_should_fail(R"(str = "\U1")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U1234567")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U123456")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U12345")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U1234")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U123")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U12")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U1")"sv);
 
 	//check 4-digit \u scalars with insufficient digits
-	parsing_should_fail(R"(str = "\u123")"sv);
-	parsing_should_fail(R"(str = "\u12")"sv);
-	parsing_should_fail(R"(str = "\u1")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u123")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u12")"sv);
+	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u1")"sv);
 
 	//check 2-digit \x scalars with insufficient digits
-	parsing_should_fail(R"(str = "\x1")"sv);
+	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x1")"sv);
 }

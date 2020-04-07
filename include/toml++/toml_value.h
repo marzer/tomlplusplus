@@ -371,6 +371,9 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
 	#endif
 
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_INIT_WARNINGS
+
 	template <typename T>
 	inline optional<T> node::value() const noexcept
 	{
@@ -451,6 +454,8 @@ namespace toml
 
 		TOML_UNREACHABLE;
 	}
+
+	TOML_POP_WARNINGS
 
 	template <typename T>
 	inline auto node::value_or(T&& default_value) const noexcept

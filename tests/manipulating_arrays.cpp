@@ -5,6 +5,7 @@ TEST_CASE("arrays - moving")
 	static constexpr auto filename = "foo.toml"sv;
 
 	parsing_should_succeed(
+		FILE_LINE_ARGS,
 		S(R"(test = [ "foo" ])"sv),
 		[&](table&& tbl) noexcept
 		{
