@@ -58,25 +58,25 @@
   <ItemGroup>
     <ClInclude Include="..\include\toml++\toml.h" />
     <ClInclude Include="..\include\toml++\toml_array.h" />
-    <ClInclude Include="..\include\toml++\toml_array_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_array.hpp" />
     <ClInclude Include="..\include\toml++\toml_common.h" />
     <ClInclude Include="..\include\toml++\toml_date_time.h" />
     <ClInclude Include="..\include\toml++\toml_default_formatter.h" />
-    <ClInclude Include="..\include\toml++\toml_default_formatter_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_default_formatter.hpp" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_node.h" />
-    <ClInclude Include="..\include\toml++\toml_node_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_node.hpp" />
     <ClInclude Include="..\include\toml++\toml_parser.h" />
     <ClInclude Include="..\include\toml++\toml_node_view.h" />
-    <ClInclude Include="..\include\toml++\toml_parser_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_parser.hpp" />
     <ClInclude Include="..\include\toml++\toml_print_to_stream.h" />
-    <ClInclude Include="..\include\toml++\toml_table_impl.h" />
+    <ClInclude Include="..\include\toml++\toml_table.hpp" />
     <ClInclude Include="..\include\toml++\toml_utf8_generated.h" />
     <ClInclude Include="..\include\toml++\toml_table.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
     <ClInclude Include="..\include\toml++\toml_value.h" />
-    <ClInclude Include="..\include\toml++\toml_instantiations.h" />
+    <ClInclude Include="..\include\toml++\toml_instantiations.hpp" />
     <ClInclude Include="..\include\toml++\toml_version.h" />
     <ClInclude Include="..\tests\catch2.h" />
   </ItemGroup>

@@ -56,6 +56,8 @@
 	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("clang diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
+	#define TOML_DISABLE_VTABLE_WARNINGS	_Pragma("clang diagnostic ignored \"-Weverything\"") \
+											_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
@@ -206,6 +208,9 @@
 #endif
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
+#endif
+#ifndef TOML_DISABLE_VTABLE_WARNINGS
+	#define TOML_DISABLE_VTABLE_WARNINGS
 #endif
 #ifndef TOML_DISABLE_ALL_WARNINGS
 	#define TOML_DISABLE_ALL_WARNINGS
@@ -598,6 +603,7 @@ namespace toml
 
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
+	TOML_DISABLE_VTABLE_WARNINGS
 
 	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 

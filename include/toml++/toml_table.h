@@ -5,6 +5,9 @@
 #pragma once
 #include "toml_array.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_VTABLE_WARNINGS
+
 namespace toml::impl
 {
 	template <bool IsConst>
@@ -737,3 +740,5 @@ namespace toml
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
 }
+
+TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS

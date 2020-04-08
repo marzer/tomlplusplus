@@ -29,6 +29,9 @@
 			<WarningLevel>Level4</WarningLevel>
 			<LanguageStandard>stdcpplatest</LanguageStandard>
 			<DiagnosticsFormat>Caret</DiagnosticsFormat>
+			<FavorSizeOrSpeed>Size</FavorSizeOrSpeed> <!-- /Os -->
+			<RuntimeTypeInfo>false</RuntimeTypeInfo>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
 			<AdditionalOptions>%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew</AdditionalOptions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_CONSOLE</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
@@ -40,6 +43,7 @@
 		<Link>
 			<TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
 			<SubSystem>Console</SubSystem>
+			<LargeAddressAware>true</LargeAddressAware>
 		</Link>
 	</ItemDefinitionGroup>
 	
@@ -65,13 +69,12 @@
 			<Optimization>MaxSpeed</Optimization>  <!-- /O2 -->
 			<OmitFramePointers>true</OmitFramePointers> <!-- /Oy -->
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);NDEBUG</PreprocessorDefinitions>
-			<InlineFunctionExpansion Condition="$(PlatformToolsetVersion) &lt;= 141">AnySuitable</InlineFunctionExpansion> <!-- /Ob2 -->
-			<AdditionalOptions Condition="$(PlatformToolsetVersion) &gt;= 142">%(AdditionalOptions) /Ob3</AdditionalOptions> <!-- /Ob3 -->
-			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed> <!-- /Ot -->
+			<InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion> <!-- /Ob2 -->
 		</ClCompile>
 		<Link>
 			<EnableCOMDATFolding>true</EnableCOMDATFolding>
 			<OptimizeReferences>true</OptimizeReferences>
+			<LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
 		</Link>
 	</ItemDefinitionGroup>
 	

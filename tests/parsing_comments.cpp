@@ -26,7 +26,7 @@ another = "# This is not a comment"
 		}
 	);
 	
-	if constexpr (TOML_LANG_AT_LEAST(1, 0, 0))
+	#if TOML_LANG_AT_LEAST(1, 0, 0)
 	{
 		// toml/issues/567 (disallow non-TAB control characters in comments)
 		// 00 - 08
@@ -69,7 +69,7 @@ another = "# This is not a comment"
 		// 7F
 		parsing_should_fail(FILE_LINE_ARGS, S("# \u007F"sv));
 	}
-	else
+	#else
 	{
 		parsing_should_succeed(FILE_LINE_ARGS, S(
 			"## 00 - 08"
@@ -109,4 +109,5 @@ another = "# This is not a comment"
 			"# \u007F  "sv
 		));
 	}
+	#endif
 }

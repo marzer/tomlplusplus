@@ -2,17 +2,21 @@
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
+//# {{
 #pragma once
 #include "toml_common.h"
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
+//# }}
 
 #if !TOML_ALL_INLINE
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #include <ostream>
+#include <istream>
+#include <fstream>
 TOML_POP_WARNINGS
 #include "toml_node_view.h"
 #include "toml_default_formatter.h"
@@ -66,11 +70,30 @@ namespace toml
 	template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
 	template TOML_API std::ostream& operator << (std::ostream&, node_type);
 
+	// print_to_stream() machinery
 	namespace impl
 	{
 		template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	}
+
+	// parse() and parse_file()
+	#if TOML_ABI_NAMESPACES
+		#if TOML_EXCEPTIONS
+			inline namespace abi_parse_ex {
+		#else
+			inline namespace abi_parse_noex {
+		#endif
+	#endif
+	template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+	template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
+	template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
+	#ifdef __cpp_lib_char8_t
+		template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
+	#endif
+	#if TOML_ABI_NAMESPACES
+			} //end abi namespace for TOML_EXCEPTIONS
+	#endif
 }
 
 #endif // !TOML_ALL_INLINE

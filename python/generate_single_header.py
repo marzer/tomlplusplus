@@ -51,6 +51,7 @@ class Preprocessor:
 
 		self.processed_includes.append(incl)
 		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
+		text = re.sub(r'//[#|]\s*[{][{].*?//[#|]\s*[}][}]', '', text, 0, re.I | re.S)
 		text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', text, 0, re.I | re.M)
 		text = re.sub(r'^\s*//\s*clang-format\s+(?:off|on)\s*$', '', text, 0, re.I | re.M)
 		

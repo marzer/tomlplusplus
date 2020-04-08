@@ -304,6 +304,8 @@ namespace toml
 	};
 
 	#if !TOML_ALL_INLINE
+		TOML_PUSH_WARNINGS
+		TOML_DISABLE_VTABLE_WARNINGS
 		extern template class TOML_API value<string>;
 		extern template class TOML_API value<int64_t>;
 		extern template class TOML_API value<double>;
@@ -311,6 +313,7 @@ namespace toml
 		extern template class TOML_API value<date>;
 		extern template class TOML_API value<time>;
 		extern template class TOML_API value<date_time>;
+		TOML_POP_WARNINGS
 	#endif
 
 	template <size_t N> value(const string_char(&)[N]) -> value<string>;

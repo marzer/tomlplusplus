@@ -25,12 +25,12 @@
 
 #if TOML_IMPLEMENTATION
 
-#include "toml_instantiations.h"
-#include "toml_node_impl.h"
-#include "toml_array_impl.h"
-#include "toml_table_impl.h"
-#include "toml_parser_impl.h"
-#include "toml_default_formatter_impl.h"
+#include "toml_instantiations.hpp"
+#include "toml_node.hpp"
+#include "toml_array.hpp"
+#include "toml_table.hpp"
+#include "toml_parser.hpp"
+#include "toml_default_formatter.hpp"
 
 #endif
 
@@ -42,6 +42,7 @@
 	#undef TOML_PUSH_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
+	#undef TOML_DISABLE_VTABLE_WARNINGS
 	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_POP_WARNINGS
 	#undef TOML_ALWAYS_INLINE

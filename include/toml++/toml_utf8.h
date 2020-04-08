@@ -365,13 +365,13 @@ namespace toml::impl
 				: std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes) };
 		}
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr operator char32_t& () noexcept
 		{
 			return value;
 		}
 
-		[[nodiscard]]
+		[[nodiscard]] TOML_ALWAYS_INLINE
 		constexpr operator const char32_t& () const noexcept
 		{
 			return value;
@@ -393,6 +393,9 @@ namespace toml::impl
 			inline namespace abi_impl_noex {
 		#endif
 	#endif
+
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_VTABLE_WARNINGS
 
 	struct TOML_INTERFACE utf8_reader_interface
 	{
@@ -655,10 +658,13 @@ namespace toml::impl
 			#endif
 	};
 
+
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 	#if TOML_ABI_NAMESPACES
 		} //end abi namespace for TOML_EXCEPTIONS / !TOML_EXCEPTIONS
 	#endif
+
+	TOML_POP_WARNINGS
 }
 

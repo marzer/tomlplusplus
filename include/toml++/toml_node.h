@@ -5,6 +5,9 @@
 #pragma once
 #include "toml_common.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_VTABLE_WARNINGS
+
 namespace toml
 {
 	/// \brief	A TOML node.
@@ -518,3 +521,5 @@ namespace toml
 			}
 	};
 }
+
+TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS

@@ -308,7 +308,8 @@ namespace toml
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	[[nodiscard]] TOML_API
+	[[nodiscard]]
+	TOML_API
 	parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
 
 	/// \brief	Parses a TOML document from a string view.
@@ -328,7 +329,8 @@ namespace toml
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	[[nodiscard]] TOML_API
+	[[nodiscard]]
+	TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#ifdef __cpp_lib_char8_t
@@ -354,7 +356,8 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-	[[nodiscard]] TOML_API
+	[[nodiscard]]
+	TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
 
 	/// \brief	Parses a TOML document from a char8_t string view.
@@ -376,7 +379,8 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
 	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-	[[nodiscard]] TOML_API
+	[[nodiscard]]
+	TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
 
 	#endif // __cpp_lib_char8_t
@@ -406,7 +410,8 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	inline parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
+	TOML_FUNC_EXTERNAL_LINKAGE
+	parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -439,7 +444,8 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	inline parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
+	TOML_FUNC_EXTERNAL_LINKAGE
+	parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -469,7 +475,9 @@ namespace toml
 	/// \attention You must `#include <fstream>` to use this function (toml++
 	/// 		 does not transitively include it for you).
 	template <typename Char>
-	inline parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
+	[[nodiscard]]
+	TOML_FUNC_EXTERNAL_LINKAGE
+	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -481,6 +489,15 @@ namespace toml
 		return parse( ifs, std::move(str) );
 	}
 
+	#if !TOML_ALL_INLINE
+		extern template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+		extern template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
+		extern template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
+		#ifdef __cpp_lib_char8_t
+			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
+		#endif
+	#endif
+
 	// Q: "why are the parse_file functions templated??"
 	// A: I don't want to force users to drag in <fstream> if they're not going to do
 	//    any parsing directly from files. Keeping them templated delays their instantiation
@@ -488,12 +505,14 @@ namespace toml
 	//    are burdened by the <fstream> overhead.
 
 	template <typename Char>
+	[[nodiscard]]
 	inline parse_result parse_file(const std::basic_string<Char>& file_path) TOML_MAY_THROW
 	{
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
 	template <typename Char>
+	[[nodiscard]]
 	inline parse_result parse_file(const Char* file_path) TOML_MAY_THROW
 	{
 		return parse_file(std::basic_string_view<Char>{ file_path });
@@ -550,7 +569,8 @@ namespace toml
 		///
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-		[[nodiscard]] TOML_API
+		[[nodiscard]]
+		TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
 		#ifdef __cpp_lib_char8_t
@@ -576,7 +596,8 @@ namespace toml
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 		/// 
 		/// \attention This overload is not available if your compiler does not support char8_t-based strings.
-		[[nodiscard]] TOML_API
+		[[nodiscard]]
+		TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
 		#endif // __cpp_lib_char8_t

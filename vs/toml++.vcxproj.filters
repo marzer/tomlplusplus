@@ -49,25 +49,25 @@
     <ClInclude Include="..\include\toml++\toml_version.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_node_impl.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_array_impl.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_table_impl.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_parser_impl.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_instantiations.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\tests\catch2.h">
       <Filter>tests</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_default_formatter_impl.h">
+    <ClInclude Include="..\include\toml++\toml_array.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_default_formatter.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_table.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_instantiations.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_node.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_parser.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>

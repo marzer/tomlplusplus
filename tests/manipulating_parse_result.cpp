@@ -45,19 +45,19 @@ TEST_CASE("parse_result - good parse")
 	CHECK(&cresult[S("key"sv)].ref<bool>() == &ctbl[S("key"sv)].ref<bool>());
 
 	size_t tbl_iterations{};
-	for (auto&& [k, v] : tbl)
+	for (auto [k, v] : tbl)
 	{
 		(void)k; (void)v;
 		tbl_iterations++;
 	}
 	size_t result_iterations{};
-	for (auto&& [k, v] : result)
+	for (auto [k, v] : result)
 	{
 		(void)k; (void)v;
 		result_iterations++;
 	}
 	size_t cresult_iterations{};
-	for (auto&& [k, v] : cresult)
+	for (auto [k, v] : cresult)
 	{
 		(void)k; (void)v;
 		cresult_iterations++;
@@ -91,12 +91,12 @@ TEST_CASE("parse_result - bad parse")
 	CHECK(cresult.cbegin() == decltype(cresult.cbegin()){});
 	CHECK(cresult.cend() == decltype(cresult.cend()){});
 
-	for (auto&& [k, v] : result)
+	for (auto [k, v] : result)
 	{
 		(void)k; (void)v;
 		FAIL("This code should not run");
 	}
-	for (auto&& [k, v] : cresult)
+	for (auto [k, v] : cresult)
 	{
 		(void)k; (void)v;
 		FAIL("This code should not run");

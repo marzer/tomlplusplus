@@ -2,11 +2,13 @@
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
+//# {{
 #pragma once
 #include "toml_default_formatter.h"
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
+//# }}
 
 namespace toml::impl
 {
@@ -64,87 +66,75 @@ namespace toml::impl
 	TOML_FUNC_EXTERNAL_LINKAGE
 	size_t default_formatter_inline_columns(const node& node) noexcept
 	{
-		return node.visit([](const auto& n) noexcept
-			-> size_t
+		switch (node.type())
+		{
+			case node_type::table:
 			{
-				if constexpr (is_table<decltype(n)>)
-				{
-					if (n.empty())
-						return 2_sz; // "{}"
-					size_t weight = 3_sz; // "{ }"
-					for (auto&& [k, v] : n)
-						weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
-					return weight;
-				}
-				else if constexpr (is_array<decltype(n)>)
-				{
-					if (n.empty())
-						return 2_sz; // "[]"
-					size_t weight = 3_sz; // "[ ]"
-					for (auto& elem : n)
-						weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
-					return weight;
-				}
-				else if constexpr (is_string<decltype(n)>)
-				{
-					return n.get().length() + 2_sz; // + ""
-				}
-				else if constexpr (is_number<decltype(n)>)
-				{
-					static constexpr auto digit_count = [](auto num) noexcept
-						-> size_t
-					{
-						using number_t = decltype(num);
-						size_t digits = 1_sz;
-						while (num >= number_t{ 10 })
-						{
-							num /= number_t{ 10 };
-							digits++;
-						}
-						return digits;
-					};
+				auto& n = *reinterpret_cast<const table*>(&node);
+				if (n.empty())
+					return 2_sz; // "{}"
+				size_t weight = 3_sz; // "{ }"
+				for (auto [k, v] : n)
+					weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
+				return weight;
+			}
 
-					if constexpr (is_integer<decltype(n)>)
-					{
-						auto v = n.get();
-						if (!v)
-							return 1_sz;
-						size_t weight = {};
-						if (v < 0)
-						{
-							weight += 1;
-							v *= -1;
-						}
-						return weight + digit_count(v);
-					}
-					else if constexpr (is_floating_point<decltype(n)>)
-					{
-						auto v = n.get();
-						if (v == 0.0)
-							return 3_sz;
-						size_t weight = 2_sz; // ".0"
-						if (v < 0.0)
-						{
-							weight += 1;
-							v *= -1.0;
-						}
-						return weight + digit_count(v);
-					}
-				}
-				else if constexpr (is_boolean<decltype(n)>)
+			case node_type::array:
+			{
+				auto& n = *reinterpret_cast<const array*>(&node);
+				if (n.empty())
+					return 2_sz; // "[]"
+				size_t weight = 3_sz; // "[ ]"
+				for (auto& elem : n)
+					weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
+				return weight;
+			}
+
+			case node_type::string:
+			{
+				auto& n = *reinterpret_cast<const value<string>*>(&node);
+				return n.get().length() + 2_sz; // + ""
+			}
+
+			case node_type::integer:
+			{
+				auto& n = *reinterpret_cast<const value<int64_t>*>(&node);
+				auto v = n.get();
+				if (!v)
+					return 1_sz;
+				size_t weight = {};
+				if (v < 0)
 				{
-					return 5_sz;
+					weight += 1;
+					v *= -1;
 				}
-				else if constexpr (is_date<decltype(n)> || is_time<decltype(n)>)
+				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1_sz;
+			}
+
+			case node_type::floating_point:
+			{
+				auto& n = *reinterpret_cast<const value<double>*>(&node);
+				auto v = n.get();
+				if (v == 0.0)
+					return 3_sz;  // "0.0"
+				size_t weight = 2_sz; // ".0"
+				if (v < 0.0)
 				{
-					return 10_sz;
+					weight += 1;
+					v *= -1.0;
 				}
-				else if constexpr (is_date_time<decltype(n)>)
-				{
-					return 30_sz;
-				}
-				TOML_UNREACHABLE;
-			});
+				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1_sz;
+				break;
+			}
+
+			case node_type::boolean: return 5_sz;
+			case node_type::date: [[fallthrough]];
+			case node_type::time: return 10_sz;
+			case node_type::date_time: return 30_sz;
+			TOML_NO_DEFAULT_CASE;
+		}
+
+		TOML_UNREACHABLE;
 	}
 
 	TOML_API

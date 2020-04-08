@@ -27,8 +27,11 @@
 
 #define FILE_LINE_ARGS std::string_view{ __FILE__ }, __LINE__
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
 using namespace toml;
 using namespace Catch::literals;
+TOML_POP_WARNINGS
 
 #define S(str) TOML_STRING_PREFIX(str)
 

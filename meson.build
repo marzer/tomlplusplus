@@ -1,14 +1,15 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.2.0',
+	version : '1.2.1',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
 		'warning_level=3',
 		'werror=true',
 		'cpp_eh=default',
-		'b_ndebug=if-release'
+		'b_ndebug=if-release',
+		'b_lto=true'
 	]
 )
 
@@ -17,20 +18,8 @@ tomlplusplus_dep = declare_dependency(
 	version : meson.project_version(),
 )
 
-
-build_tests = false
-if get_option('BUILD_TESTS').auto()
-	build_tests = (not meson.is_subproject())
-else
-	build_tests = get_option('BUILD_TESTS').enabled()
-endif
-
-build_examples = false
-if get_option('BUILD_EXAMPLES').auto()
-	build_examples = (not meson.is_subproject())
-else
-	build_examples = get_option('BUILD_EXAMPLES').enabled()
-endif
+build_tests = get_option('BUILD_TESTS').enabled() or (get_option('BUILD_TESTS').auto() and not meson.is_subproject())
+build_examples = get_option('BUILD_EXAMPLES').enabled() or (get_option('BUILD_EXAMPLES').auto() and not meson.is_subproject())
 
 if build_tests or build_examples
 
@@ -38,10 +27,23 @@ if build_tests or build_examples
 	message(['compiler ID: ', compiler.get_id()])
 	message(['compiler version: ', compiler.version()])
 
+	if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+		add_project_arguments([
+				'-Wno-unused-command-line-argument',
+				'-march=native',
+				'-fno-rtti',
+				#'-fdata-sections',
+				#'-ffunction-sections',
+				#'-Wl,--gc-sections'
+			],
+			language : 'cpp'
+		)
+
+	endif
+
 	if compiler.get_id() == 'gcc'
 		add_project_arguments([
 				'-fmax-errors=5',
-				'-march=native',
 				'-Wno-init-list-lifetime'
 			],
 			language : 'cpp'
@@ -51,18 +53,19 @@ if build_tests or build_examples
 	if compiler.get_id() == 'clang'
 		add_project_arguments([
 				'-ferror-limit=5',
-				'-march=native',
 				'-fchar8_t',
-				# '-Weverything',
+				#'-Weverything',
 				'-Wno-c++98-compat',
 				'-Wno-c++98-compat-pedantic',
 				'-Wno-float-equal',
 				'-Wno-switch-enum',
+				'-Wno-documentation',
 				'-Wno-documentation-unknown-command',
 				'-Wno-padded',
-				'-Wno-weak-vtables',
-				'-Wno-double-promotion'
-				#, '-ftime-trace'
+				#'-Wno-weak-vtables',
+				'-Wno-double-promotion',
+				'-Wno-covered-switch-default',
+				#'-ftime-trace'
 			],
 			language : 'cpp'
 		)

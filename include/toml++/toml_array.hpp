@@ -2,12 +2,14 @@
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
+//# {{
 #pragma once
 #include "toml_array.h"
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
-
+//# }}
+ 
 namespace toml
 {
 	TOML_FUNC_EXTERNAL_LINKAGE
