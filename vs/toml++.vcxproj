@@ -70,11 +70,13 @@
     <ClInclude Include="..\include\toml++\toml_parser.h" />
     <ClInclude Include="..\include\toml++\toml_node_view.h" />
     <ClInclude Include="..\include\toml++\toml_parser.hpp" />
+    <ClInclude Include="..\include\toml++\toml_parse_error.h" />
     <ClInclude Include="..\include\toml++\toml_print_to_stream.h" />
     <ClInclude Include="..\include\toml++\toml_table.hpp" />
     <ClInclude Include="..\include\toml++\toml_utf8_generated.h" />
     <ClInclude Include="..\include\toml++\toml_table.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
+    <ClInclude Include="..\include\toml++\toml_utf8_streams.h" />
     <ClInclude Include="..\include\toml++\toml_value.h" />
     <ClInclude Include="..\include\toml++\toml_instantiations.hpp" />
     <ClInclude Include="..\include\toml++\toml_version.h" />

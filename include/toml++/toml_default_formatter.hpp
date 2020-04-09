@@ -2,9 +2,9 @@
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
-//# {{
 #pragma once
 #include "toml_default_formatter.h"
+//# {{
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
@@ -16,7 +16,7 @@ namespace toml::impl
 	TOML_DISABLE_ALL_WARNINGS
 
 	TOML_API
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	toml::string default_formatter_make_key_segment(const toml::string& str) noexcept
 	{
 		if (str.empty())
@@ -63,7 +63,7 @@ namespace toml::impl
 	TOML_POP_WARNINGS
 
 	TOML_API
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	size_t default_formatter_inline_columns(const node& node) noexcept
 	{
 		switch (node.type())
@@ -138,7 +138,7 @@ namespace toml::impl
 	}
 
 	TOML_API
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;

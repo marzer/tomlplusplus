@@ -70,6 +70,12 @@
     <ClInclude Include="..\include\toml++\toml_parser.hpp">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_utf8_streams.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_parse_error.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

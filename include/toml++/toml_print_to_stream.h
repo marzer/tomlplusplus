@@ -4,16 +4,16 @@
 
 #pragma once
 #include "toml_date_time.h"
-
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-#if TOML_INTEGER_CHARCONV || TOML_FLOATING_POINT_CHARCONV
+#include <cmath>
+#if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
 #endif
-#if !TOML_INTEGER_CHARCONV || !TOML_FLOATING_POINT_CHARCONV
+#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
 	#include <sstream>
 #endif
-#if !TOML_INTEGER_CHARCONV
+#if !TOML_INT_CHARCONV
 	#include <iomanip>
 #endif
 TOML_POP_WARNINGS
@@ -59,7 +59,8 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
+	TOML_GNU_ATTR(nonnull)
+	TOML_ALWAYS_INLINE
 	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
@@ -77,7 +78,8 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull) TOML_ALWAYS_INLINE
+	TOML_GNU_ATTR(nonnull)
+	TOML_ALWAYS_INLINE
 	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
@@ -106,7 +108,7 @@ namespace toml::impl
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		#if TOML_INTEGER_CHARCONV
+		#if TOML_INT_CHARCONV
 
 			char buf[charconv_buffer_length<T>];
 			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
@@ -146,7 +148,7 @@ namespace toml::impl
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename T, typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	void print_floating_point_to_stream(T val, std::basic_ostream<Char>& stream, bool hexfloat = false)
 	{
 		static_assert(
@@ -154,39 +156,55 @@ namespace toml::impl
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		static constexpr auto needs_decimal_point = [](auto&& s) noexcept
+		switch (std::fpclassify(val))
 		{
-			for (auto c : s)
-				if (c == '.' || c == 'E' || c == 'e')
-					return false;
-			return true;
-		};
+			case FP_INFINITE:
+				if (val < T{})
+					print_to_stream('-', stream);
+				print_to_stream("inf"sv, stream);
+				return;
 
-		#if TOML_FLOATING_POINT_CHARCONV
-		{
-			char buf[charconv_buffer_length<T>];
-			const auto res = hexfloat
-				? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
-				: std::to_chars(buf, buf + sizeof(buf), val);
-			const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
-			print_to_stream(str, stream);
-			if (!hexfloat && needs_decimal_point(str))
-				print_to_stream(".0"sv, stream);
+			case FP_NAN:
+				print_to_stream("nan"sv, stream);
+				return;
+
+			default:
+			{
+				static constexpr auto needs_decimal_point = [](auto&& s) noexcept
+				{
+					for (auto c : s)
+						if (c == '.' || c == 'E' || c == 'e')
+							return false;
+					return true;
+				};
+
+				#if TOML_FLOAT_CHARCONV
+				{
+					char buf[charconv_buffer_length<T>];
+					const auto res = hexfloat
+						? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
+						: std::to_chars(buf, buf + sizeof(buf), val);
+					const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
+					print_to_stream(str, stream);
+					if (!hexfloat && needs_decimal_point(str))
+						print_to_stream(".0"sv, stream);
+				}
+				#else
+				{
+					std::ostringstream ss;
+					ss.imbue(std::locale::classic());
+					ss.precision(std::numeric_limits<T>::digits10 + 1);
+					if (hexfloat)
+						ss << std::hexfloat;
+					ss << val;
+					const auto str = std::move(ss).str();
+					print_to_stream(str, stream);
+					if (!hexfloat && needs_decimal_point(str))
+						print_to_stream(".0"sv, stream);
+				}
+				#endif
+			}
 		}
-		#else
-		{
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			ss.precision(std::numeric_limits<T>::digits10 + 1);
-			if (hexfloat)
-				ss << std::hexfloat;
-			ss << val;
-			const auto str = std::move(ss).str();
-			print_to_stream(str, stream);
-			if (!hexfloat && needs_decimal_point(str))
-				print_to_stream(".0"sv, stream);
-		}
-		#endif
 	}
 
 	#if !TOML_ALL_INLINE
@@ -220,7 +238,7 @@ namespace toml::impl
 	inline void print_to_stream(T val, std::basic_ostream<Char>& stream, size_t zero_pad_to_digits)
 	{
 		static_assert(sizeof(Char) == 1);
-		#if TOML_INTEGER_CHARCONV
+		#if TOML_INT_CHARCONV
 
 			char buf[charconv_buffer_length<T>];
 			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
@@ -364,7 +382,7 @@ namespace toml
 	///
 	/// \returns	The input stream.
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_position& rhs)
 	{
 		static_assert(
@@ -399,7 +417,7 @@ namespace toml
 	///
 	/// \returns	The input stream.
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_region& rhs)
 	{
 		static_assert(
@@ -416,44 +434,8 @@ namespace toml
 		return lhs;
 	}
 
-	/// \brief	Prints a parse_error to a stream.
-	///
-	/// \detail \cpp
-	/// try
-	/// {
-	/// 	auto tbl = toml::parse("enabled = trUe"sv);
-	/// }
-	/// catch (const toml::parse_error & err)
-	/// {
-	/// 	std::cerr << "Parsing failed:\n"sv << err << std::endl;
-	/// }
-	/// \ecpp
-	/// 
-	/// \out
-	/// Parsing failed:
-	/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
-	///		(error occurred at line 1, column 13)
-	/// \eout
-	/// 
-	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
-	/// \param 	lhs	The stream.
-	/// \param 	rhs	The parse_error.
-	///
-	/// \returns	The input stream.
-	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const parse_error& rhs)
-	{
-		impl::print_to_stream(rhs.description(), lhs);
-		impl::print_to_stream("\n\t(error occurred at "sv, lhs);
-		lhs << rhs.source();
-		impl::print_to_stream(")"sv, lhs);
-		return lhs;
-	}
-
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 	#endif
 }

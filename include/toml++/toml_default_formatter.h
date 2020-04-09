@@ -372,7 +372,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 	template <typename T, typename U>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
@@ -384,21 +384,21 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
 	template <typename T, typename U>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
 
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
 	{
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const array& rhs)
 	{
 		return lhs << default_formatter<Char>{ rhs };

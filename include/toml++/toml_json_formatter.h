@@ -162,7 +162,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON.
 	template <typename T, typename U>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
@@ -173,7 +173,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
 	template <typename T, typename U>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue

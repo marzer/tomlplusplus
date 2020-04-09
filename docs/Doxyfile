@@ -352,7 +352,7 @@ PREDEFINED             = DOXYGEN=1 \
 						 TOML_NODISCARD_CTOR= \
 						 TOML_ALL_INLINE=0 \
 						 TOML_IMPLEMENTATION=0 \
-						 TOML_FUNC_EXTERNAL_LINKAGE= \
+						 TOML_EXTERNAL_LINKAGE= \
 						 TOML_API= \
 						 __cpp_lib_char8_t=201811L
 EXPAND_AS_DEFINED      = 

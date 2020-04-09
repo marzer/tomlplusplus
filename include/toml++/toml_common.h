@@ -9,42 +9,36 @@
 
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
-	#undef TOML_CONFIG_HEADER
 #endif
-
 #if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE)
 	#undef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 1
 #endif
-
 #if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE || defined(__INTELLISENSE__)
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
 #else
 	#define TOML_IMPLEMENTATION 0
 #endif
-
 #ifndef TOML_API
 	#define TOML_API
 #endif
-
 #ifndef TOML_CHAR_8_STRINGS
 	#define TOML_CHAR_8_STRINGS 0
 #endif
-
 #ifndef TOML_UNRELEASED_FEATURES
 	#define TOML_UNRELEASED_FEATURES 1
 #endif
-
 #ifndef TOML_LARGE_FILES
 	#define TOML_LARGE_FILES 0
 #endif
-
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
-
-//TOML_ASSERT
+#ifndef TOML_PARSER
+	#define TOML_PARSER 1
+#endif
+// TOML_ASSERT
 
 ////////// COMPILER & ENVIRONMENT STUFF
 
@@ -62,7 +56,7 @@
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#define TOML_GNU_ATTR(attr)				__attribute__((attr))
+	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
@@ -93,8 +87,8 @@
 	#endif
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
-	#ifndef TOML_FLOATING_POINT_CHARCONV
-		#define TOML_FLOATING_POINT_CHARCONV 0
+	#ifndef TOML_FLOAT_CHARCONV
+		#define TOML_FLOAT_CHARCONV 0
 	#endif
 
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
@@ -132,7 +126,7 @@
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
 											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
-	#define TOML_GNU_ATTR(attr)				__attribute__((attr))
+	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_NEVER_INLINE				__attribute__((__noinline__))
 	#define TOML_UNREACHABLE				__builtin_unreachable()
@@ -150,8 +144,8 @@
 	#define TOML_UNLIKELY
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
-	#ifndef TOML_FLOATING_POINT_CHARCONV
-		#define TOML_FLOATING_POINT_CHARCONV 0
+	#ifndef TOML_FLOAT_CHARCONV
+		#define TOML_FLOAT_CHARCONV 0
 	#endif
 
 #endif
@@ -160,9 +154,9 @@
 	#define TOML_CPP_VERSION __cplusplus
 #endif
 #if TOML_CPP_VERSION < 201103L
-	#error toml++ requires C++17 or higher. For a TOML parser supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
+	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML parser supporting C++11 see https://github.com/skystrife/cpptoml
+	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/skystrife/cpptoml
 #elif TOML_CPP_VERSION >= 202600L
 	#define TOML_CPP 26
 #elif TOML_CPP_VERSION >= 202300L
@@ -194,17 +188,17 @@
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
-#ifndef TOML_INTEGER_CHARCONV
-	#define TOML_INTEGER_CHARCONV 1
+#ifndef TOML_INT_CHARCONV
+	#define TOML_INT_CHARCONV 1
 #endif
-#ifndef TOML_FLOATING_POINT_CHARCONV
-	#define TOML_FLOATING_POINT_CHARCONV 1
+#ifndef TOML_FLOAT_CHARCONV
+	#define TOML_FLOAT_CHARCONV 1
 #endif
-#if (TOML_INTEGER_CHARCONV || TOML_FLOATING_POINT_CHARCONV) && !__has_include(<charconv>)
-	#undef TOML_INTEGER_CHARCONV
-	#undef TOML_FLOATING_POINT_CHARCONV
-	#define TOML_INTEGER_CHARCONV 0
-	#define TOML_FLOATING_POINT_CHARCONV 0
+#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !__has_include(<charconv>)
+	#undef TOML_INT_CHARCONV
+	#undef TOML_FLOAT_CHARCONV
+	#define TOML_INT_CHARCONV 0
+	#define TOML_FLOAT_CHARCONV 0
 #endif
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
@@ -219,7 +213,7 @@
 	#define TOML_POP_WARNINGS
 #endif
 #ifndef TOML_GNU_ATTR
-	#define TOML_GNU_ATTR(attr)
+	#define TOML_GNU_ATTR(...)
 #endif
 #ifndef TOML_INTERFACE
 	#define TOML_INTERFACE
@@ -280,12 +274,19 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 #if TOML_ALL_INLINE
-	#define TOML_FUNC_EXTERNAL_LINKAGE	inline
+	#define TOML_EXTERNAL_LINKAGE	inline
+	#define TOML_INTERNAL_LINKAGE	inline
+	#define TOML_INTERNAL_NAMESPACE toml::impl
 #else
-	#define TOML_FUNC_EXTERNAL_LINKAGE
+	#define TOML_EXTERNAL_LINKAGE
+	#define TOML_INTERNAL_LINKAGE	static
+	#define TOML_INTERNAL_NAMESPACE
 #endif
 
 #include "toml_version.h"
+//#{{
+#define	TOML_LIB_SINGLE_HEADER 0
+//#}}
 
 #define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))
@@ -325,9 +326,6 @@ TOML_DISABLE_ALL_WARNINGS
 #include <iosfwd>
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
-#endif
-#if TOML_EXCEPTIONS
-	#include <stdexcept>
 #endif
 #ifndef TOML_ASSERT
 	#ifdef NDEBUG
@@ -373,7 +371,9 @@ namespace toml
 	using size_t = std::size_t;
 	using ptrdiff_t = std::ptrdiff_t;
 
-	[[nodiscard]] TOML_ALWAYS_INLINE
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
 	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 	{
 		return static_cast<size_t>(n);
@@ -601,109 +601,7 @@ namespace toml
 		source_path_ptr path;
 	};
 
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_INIT_WARNINGS
-	TOML_DISABLE_VTABLE_WARNINGS
-
-	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
-
 	#if TOML_ABI_NAMESPACES
-		inline namespace abi_noex {
-	#endif
-
-	/// \brief	An error thrown/returned when parsing fails.
-	/// 
-	/// \remarks This class inherits from std::runtime_error when exceptions are enabled.
-	/// 		 The public interface is the same regardless of exception mode.
-	class parse_error final
-	{
-		private:
-			std::string description_;
-			source_region source_;
-
-		public:
-
-			TOML_NODISCARD_CTOR
-			parse_error(std::string&& desc, source_region&& src) noexcept
-				: description_{ std::move(desc) },
-				source_{ std::move(src) }
-			{}
-
-			TOML_NODISCARD_CTOR
-			parse_error(std::string&& desc, const source_region& src) noexcept
-				: parse_error{ std::move(desc), source_region{ src } }
-			{}
-
-			TOML_NODISCARD_CTOR
-				parse_error(std::string&& desc, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ std::move(desc), source_region{ position, position, path } }
-			{}
-
-
-			/// \brief	Returns a textual description of the error.
-			[[nodiscard]]
-			std::string_view description() const noexcept
-			{
-				return description_;
-			}
-
-			/// \brief	Returns the region of the source document responsible for the error.
-			[[nodiscard]]
-			const source_region& source() const noexcept
-			{
-				return source_;
-			}
-	};
-
-	#else
-
-	#if TOML_ABI_NAMESPACES
-		inline namespace abi_ex {
-	#endif
-
-	class parse_error final
-		: public std::runtime_error
-	{
-		private:
-			source_region source_;
-
-		public:
-
-			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
-			parse_error(const char* desc, source_region&& src) noexcept
-				: std::runtime_error{ desc },
-				source_{ std::move(src) }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
-			parse_error(const char* desc, const source_region& src) noexcept
-				: parse_error{ desc, source_region{ src } }
-			{}
-
-			TOML_NODISCARD_CTOR TOML_GNU_ATTR(nonnull)
-			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
-				: parse_error{ desc, source_region{ position, position, path } }
-			{}
-
-			[[nodiscard]]
-			std::string_view description() const noexcept
-			{
-				return std::string_view{ what() };
-			}
-
-			[[nodiscard]]
-			const source_region& source() const noexcept
-			{
-				return source_;
-			}
-	};
-
-	#endif
-
-	TOML_POP_WARNINGS
-
-	#if TOML_ABI_NAMESPACES
-		}  //end abi namespace for TOML_EXCEPTIONS
 		} //end abi namespace for TOML_LARGE_FILES
 	#endif
 }
@@ -725,7 +623,9 @@ namespace toml::impl
 	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
 
 	template <typename T>
-	[[nodiscard]] TOML_ALWAYS_INLINE
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
 	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
@@ -976,7 +876,7 @@ namespace toml
 	/// Element [3] is: boolean
 	/// \eout
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
 		using underlying_t = std::underlying_type_t<node_type>;

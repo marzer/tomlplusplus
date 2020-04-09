@@ -51,12 +51,12 @@ flt8 = 224_617.445_991_228
 
 	//value tests
 	parse_expected_value( FILE_LINE_ARGS,               "1e1"sv,             1e1);
-	parse_expected_value( FILE_LINE_ARGS,              "1e-1"sv,            1e-1);
 	parse_expected_value( FILE_LINE_ARGS,              "1e+1"sv,            1e+1);
+	parse_expected_value( FILE_LINE_ARGS,              "1e-1"sv,            1e-1);
 	parse_expected_value( FILE_LINE_ARGS,               "1.0"sv,             1.0);
 	parse_expected_value( FILE_LINE_ARGS,             "1.0e1"sv,           1.0e1);
-	parse_expected_value( FILE_LINE_ARGS,            "1.0e-1"sv,          1.0e-1);
 	parse_expected_value( FILE_LINE_ARGS,            "1.0e+1"sv,          1.0e+1);
+	parse_expected_value( FILE_LINE_ARGS,            "1.0e-1"sv,          1.0e-1);
 	parse_expected_value( FILE_LINE_ARGS,              "+1e1"sv,            +1e1);
 	parse_expected_value( FILE_LINE_ARGS,              "+1.0"sv,            +1.0);
 	parse_expected_value( FILE_LINE_ARGS,            "+1.0e1"sv,          +1.0e1);
@@ -67,7 +67,30 @@ flt8 = 224_617.445_991_228
 	parse_expected_value( FILE_LINE_ARGS,              "-1.0"sv,            -1.0);
 	parse_expected_value( FILE_LINE_ARGS,            "-1.0e1"sv,          -1.0e1);
 	parse_expected_value( FILE_LINE_ARGS,           "-1.0e-1"sv,         -1.0e-1);
-	parse_expected_value( FILE_LINE_ARGS,               "1.0"sv,             1.0);
+	parse_expected_value( FILE_LINE_ARGS,                ".1"sv,              .1);
+	parse_expected_value( FILE_LINE_ARGS,               "+.1"sv,             +.1);
+	parse_expected_value( FILE_LINE_ARGS,               "-.1"sv,             -.1);
+	parse_expected_value( FILE_LINE_ARGS,                "1."sv,              1.);
+	parse_expected_value( FILE_LINE_ARGS,               "+1."sv,             +1.);
+	parse_expected_value( FILE_LINE_ARGS,               "-1."sv,             -1.);
+	parse_expected_value( FILE_LINE_ARGS,              "1.e1"sv,            1.e1);
+	parse_expected_value( FILE_LINE_ARGS,             "1.e+1"sv,           1.e+1);
+	parse_expected_value( FILE_LINE_ARGS,             "1.e-1"sv,           1.e-1);
+	parse_expected_value( FILE_LINE_ARGS,             "+1.e1"sv,           +1.e1);
+	parse_expected_value( FILE_LINE_ARGS,            "+1.e+1"sv,          +1.e+1);
+	parse_expected_value( FILE_LINE_ARGS,            "+1.e-1"sv,          +1.e-1);
+	parse_expected_value( FILE_LINE_ARGS,             "-1.e1"sv,           -1.e1);
+	parse_expected_value( FILE_LINE_ARGS,            "-1.e+1"sv,          -1.e+1);
+	parse_expected_value( FILE_LINE_ARGS,            "-1.e-1"sv,          -1.e-1);
+	parse_expected_value( FILE_LINE_ARGS,              ".1e1"sv,            .1e1);
+	parse_expected_value( FILE_LINE_ARGS,             ".1e+1"sv,           .1e+1);
+	parse_expected_value( FILE_LINE_ARGS,             ".1e-1"sv,           .1e-1);
+	parse_expected_value( FILE_LINE_ARGS,             "+.1e1"sv,           +.1e1);
+	parse_expected_value( FILE_LINE_ARGS,            "+.1e+1"sv,          +.1e+1);
+	parse_expected_value( FILE_LINE_ARGS,            "+.1e-1"sv,          +.1e-1);
+	parse_expected_value( FILE_LINE_ARGS,             "-.1e1"sv,           -.1e1);
+	parse_expected_value( FILE_LINE_ARGS,            "-.1e+1"sv,          -.1e+1);
+	parse_expected_value( FILE_LINE_ARGS,            "-.1e-1"sv,          -.1e-1);
 	parse_expected_value( FILE_LINE_ARGS,               "0.1"sv,             0.1);
 	parse_expected_value( FILE_LINE_ARGS,             "0.001"sv,           0.001);
 	parse_expected_value( FILE_LINE_ARGS,             "0.100"sv,           0.100);
@@ -173,4 +196,37 @@ sf6 = -nan # valid, actual encoding is implementation specific
 			CHECK(std::isnan(tbl[S("sf6")].as<double>()->get()));
 		}
 	);
+
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =     NaN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =     Nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =     NAN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    +NaN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    +Nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    +NAN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    -NaN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    -Nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    -NAN "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   1.nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   1,nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    .nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    ,nan "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   nan.1 "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   nan,1 "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    nan. "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    nan, "sv));
+
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =     Inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =     INF "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    +Inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    +INF "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    -Inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    -INF "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   1.inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   1,inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    .inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    ,inf "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   inf.1 "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =   inf,1 "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    inf. "sv));
+	parsing_should_fail(FILE_LINE_ARGS, S(" val =    inf, "sv));
 }

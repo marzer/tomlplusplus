@@ -51,7 +51,7 @@ class Preprocessor:
 
 		self.processed_includes.append(incl)
 		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
-		text = re.sub(r'//[#|]\s*[{][{].*?//[#|]\s*[}][}]', '', text, 0, re.I | re.S)
+		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]', '', text, 0, re.I | re.S)
 		text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', text, 0, re.I | re.M)
 		text = re.sub(r'^\s*//\s*clang-format\s+(?:off|on)\s*$', '', text, 0, re.I | re.M)
 		
@@ -63,10 +63,11 @@ class Preprocessor:
 			header_text = '↓ ' + raw_incl
 			lpad = 28 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.header_indent += 1
-			return '\n{}\n#pragma region {}\n\n{}\n\n#pragma endregion {}\n{}'.format(
-				make_divider(header_text, lpad), '', text, '', make_divider('↑ ' + raw_incl, lpad))
-		else:
-			return text
+			text = '{}\n#pragma region {}\n\n{}\n\n#pragma endregion {}\n{}'.format(
+				make_divider(header_text, lpad), '', text, '', make_divider('↑ ' + raw_incl, lpad)
+			)
+
+		return '\n\n' + text + '\n\n' # will get merged later
 
 	def __call__(self, file):
 		self.processed_includes = []
@@ -82,9 +83,9 @@ def main():
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
 	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
-	source_text = re.sub('(?:///[<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove inline doxy briefs
-	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
+	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
+	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
 	return_type_pattern														\
 		= r'(?:'															\
 		+ r'(?:\[\[nodiscard\]\]\s*)?'										\
@@ -163,6 +164,7 @@ v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
 #endif
+#define	TOML_LIB_SINGLE_HEADER 1
 ''', file=output_file)
 		print(source_text, file=output_file)
 		print('''

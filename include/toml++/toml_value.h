@@ -346,7 +346,7 @@ namespace toml
 
 	/// \brief	Prints the value out to a stream.
 	template <typename Char, typename T>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
 	{
 		// this is the same behaviour as default_formatter, but it's so simple that there's

@@ -365,7 +365,7 @@ namespace toml
 
 	/// \brief	Prints the viewed node out to a stream.
 	template <typename Char, typename T>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& os, const node_view<T>& nv)
 	{
 		if (nv.node_)

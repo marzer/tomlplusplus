@@ -17,6 +17,7 @@ namespace toml::impl
 {
 	//# Returns true if a codepoint belongs to any of these categories: Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
+	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_letter(char32_t codepoint) noexcept
 	{
 		if (codepoint < U'\u00AA' || codepoint > U'\U00031349')
@@ -466,6 +467,7 @@ namespace toml::impl
 
 	//# Returns true if a codepoint belongs to any of these categories: Nd, Nl
 	[[nodiscard]]
+	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_number(char32_t codepoint) noexcept
 	{
 		if (codepoint < U'\u0660' || codepoint > U'\U0001FBF9')
@@ -569,6 +571,7 @@ namespace toml::impl
 
 	//# Returns true if a codepoint belongs to any of these categories: Mn, Mc
 	[[nodiscard]]
+	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_combining_mark(char32_t codepoint) noexcept
 	{
 		if (codepoint < U'\u0300' || codepoint > U'\U000E01EF')

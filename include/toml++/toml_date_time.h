@@ -85,7 +85,7 @@ namespace toml
 	/// 1987-03-16
 	/// \eout
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
@@ -178,7 +178,7 @@ namespace toml
 	/// 10:20:34.5
 	/// \eout
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
@@ -285,7 +285,7 @@ namespace toml
 	/// -02:30
 	/// \eout
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time_offset& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
@@ -422,7 +422,7 @@ namespace toml
 	/// 1987-03-16T10:20:34Z
 	/// \eout
 	template <typename Char>
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date_time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);

@@ -3,8 +3,14 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
 #pragma once
+#include "toml_common.h"
+//# {{
+#if !TOML_PARSER
+	#error This header cannot not be included when TOML_PARSER is disabled.
+#endif
+//# }}
 #include "toml_table.h"
-#include "toml_utf8.h"
+#include "toml_utf8_streams.h"
 
 namespace toml
 {
@@ -410,7 +416,7 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
 	{
 		static_assert(
@@ -444,7 +450,7 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		static_assert(
@@ -476,7 +482,7 @@ namespace toml
 	/// 		 does not transitively include it for you).
 	template <typename Char>
 	[[nodiscard]]
-	TOML_FUNC_EXTERNAL_LINKAGE
+	TOML_EXTERNAL_LINKAGE
 	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
 	{
 		static_assert(

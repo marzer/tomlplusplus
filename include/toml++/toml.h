@@ -18,26 +18,31 @@
 #include "toml_node_view.h"
 #include "toml_utf8_generated.h"
 #include "toml_utf8.h"
-#include "toml_parser.h"
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
-
+#if TOML_PARSER
+	#include "toml_parse_error.h"
+	#include "toml_utf8_streams.h"
+	#include "toml_parser.h"
+#endif // TOML_PARSER
 #if TOML_IMPLEMENTATION
-
-#include "toml_instantiations.hpp"
-#include "toml_node.hpp"
-#include "toml_array.hpp"
-#include "toml_table.hpp"
-#include "toml_parser.hpp"
-#include "toml_default_formatter.hpp"
-
-#endif
+	#include "toml_node.hpp"
+	#include "toml_array.hpp"
+	#include "toml_table.hpp"
+	#include "toml_default_formatter.hpp"
+#if TOML_PARSER
+	#include "toml_parser.hpp"
+#endif // TOML_PARSER
+#if !TOML_ALL_INLINE
+	#include "toml_instantiations.hpp"
+#endif // !TOML_ALL_INLINE
+#endif // TOML_IMPLEMENTATION
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_INTEGER_CHARCONV
-	#undef TOML_FLOATING_POINT_CHARCONV
+	#undef TOML_INT_CHARCONV
+	#undef TOML_FLOAT_CHARCONV
 	#undef TOML_GNU_ATTR
 	#undef TOML_PUSH_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
@@ -71,7 +76,9 @@
 	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
 	#undef TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
-	#undef TOML_FUNC_EXTERNAL_LINKAGE
+	#undef TOML_EXTERNAL_LINKAGE
+	#undef TOML_INTERNAL_LINKAGE
+	#undef TOML_INTERNAL_NAMESPACE
 	#undef TOML_COMPILER_EXCEPTIONS
 	#undef TOML_LAUNDER
 	#undef TOML_TRIVIAL_ABI
@@ -432,6 +439,9 @@
 /// <strong>Step 2: Define `TOML_IMPLEMENTATION` before including `toml++` in one specific translation unit</strong>
 /// 
 /// \cpp
+/// 
+/// Additionally, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all,
+/// you can `#define TOML_PARSER 0`.
 /// // some_code_file.cpp
 /// 
 /// #define TOML_IMPLEMENTATION 

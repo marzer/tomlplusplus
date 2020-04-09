@@ -503,6 +503,7 @@ def emit_function(name, categories, file, codepoints):
 
 	print('\n\t//# Returns true if a codepoint belongs to any of these categories: {}'.format(', '.join(categories)), file=file)
 	print('\t[[nodiscard]]', file=file)
+	print('\tTOML_GNU_ATTR(const)', file=file)
 	print('\tconstexpr bool {}(char32_t codepoint) noexcept\n\t{{'.format(name), file=file)
 	root_chunk.print(file)
 	print('\t}', file=file)

@@ -2,16 +2,16 @@
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 
-//# {{
 #pragma once
 #include "toml_common.h"
+//# {{
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
+#if TOML_ALL_INLINE
+	#error This header cannot not be included when TOML_ALL_INLINE is enabled.
+#endif
 //# }}
-
-#if !TOML_ALL_INLINE
-
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #include <ostream>
@@ -48,7 +48,6 @@ namespace toml
 	// various ostream operators
 	template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
 	template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
-	template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 	template TOML_API std::ostream& operator << (std::ostream&, const date&);
 	template TOML_API std::ostream& operator << (std::ostream&, const time&);
 	template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
@@ -77,23 +76,29 @@ namespace toml
 		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	}
 
-	// parse() and parse_file()
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_parse_ex {
-		#else
-			inline namespace abi_parse_noex {
-		#endif
-	#endif
-	template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
-	template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
-	template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
-	#ifdef __cpp_lib_char8_t
-		template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
-	#endif
-	#if TOML_ABI_NAMESPACES
-			} //end abi namespace for TOML_EXCEPTIONS
-	#endif
-}
+	// parser machinery
+	#if TOML_PARSER
 
-#endif // !TOML_ALL_INLINE
+		// parse error ostream
+		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
+
+		// parse() and parse_file()
+		#if TOML_ABI_NAMESPACES
+			#if TOML_EXCEPTIONS
+				inline namespace abi_parse_ex {
+			#else
+				inline namespace abi_parse_noex {
+			#endif
+		#endif
+		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
+		template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
+		#ifdef __cpp_lib_char8_t
+			template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
+		#endif
+		#if TOML_ABI_NAMESPACES
+				} //end abi namespace for TOML_EXCEPTIONS
+		#endif
+
+	#endif // TOML_PARSER
+}

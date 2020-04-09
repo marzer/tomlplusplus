@@ -159,10 +159,11 @@ namespace toml::impl
 	};
 
 	template <typename T>
-	[[nodiscard]] TOML_ALWAYS_INLINE
+	[[nodiscard]]
+	TOML_ALWAYS_INLINE
 	auto make_node(T&& val) noexcept
 	{
-		using type = impl::unwrapped<remove_cvref_t<T>>;
+		using type = unwrapped<remove_cvref_t<T>>;
 		if constexpr (is_one_of<type, array, table>)
 		{
 			static_assert(

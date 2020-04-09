@@ -9,13 +9,12 @@
 
    <!-- Adapter Specific sections -->
    <Catch2Adapter>
-       <DebugBreak>on</DebugBreak><!-- Introduced in v1.1.0 -->
-	   <DiscoverCommandLine>--verbosity high --list-test-names-only</DiscoverCommandLine>
+	   <DiscoverCommandLine>--verbosity high --list-tests *</DiscoverCommandLine>
        <DiscoverTimeout>500</DiscoverTimeout><!-- Milliseconds -->
 	   <FilenameFilter>(?i:test)</FilenameFilter>
-	   <Logging>debug</Logging>
        <WorkingDirectoryRoot>Solution</WorkingDirectoryRoot>
        <WorkingDirectory>..\tests\</WorkingDirectory>
+	   <MessageFormat>AdditionalInfo</MessageFormat>
    </Catch2Adapter>
 
 </RunSettings>

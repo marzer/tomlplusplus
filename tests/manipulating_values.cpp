@@ -34,9 +34,14 @@ TEST_CASE("values - printing")
 	CHECK(print_value(10000.0f) == "10000.0");
 	CHECK(print_value(10000.0) == "10000.0");
 
+	CHECK(print_value(std::numeric_limits<double>::infinity()) == "inf");
+	CHECK(print_value(-std::numeric_limits<double>::infinity()) == "-inf");
+	CHECK(print_value(std::numeric_limits<double>::quiet_NaN()) == "nan");
+
 	// only integers for large values;
 	// large floats might get output as scientific notation and that's fine
 	CHECK(print_value(10000000000) == "10000000000");
 	CHECK(print_value(100000000000000) == "100000000000000");
+
 }
 
