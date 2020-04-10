@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>Library Configuration module | toml++ TOML
+for
+modern
+C++</title>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="tomlplusplus.css" rel="stylesheet"/>
+  <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
+  <meta content="Header-only
+  TOML
+  config
+  file
+  parser
+  and
+  serializer
+  for
+  modern
+  C++." name="description"/>
+  <script src="tomlplusplus.js"></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img src="logo.png"/>toml++ <span class="m-thin">TOML
+for
+modern
+C++</span></a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="2">
+            <li><a href="annotated.html">Classes</a></li>
+            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          Library Configuration <span class="m-thin">module</span></h1>
+        <p>Preprocessor macros for configuring library functionality.</p>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#define-members">Defines</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<p>Define these before including <code>toml++</code> to alter the way it functions.</p><aside class="m-note m-default"><h4>Remark</h4><p>Some of these options have ABI implications; inline namespaces are used to prevent you from trying to link incompatible combinations together.</p></aside>
+        <section id="define-members">
+          <h2><a href="#define-members">Defines</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>
+            </dt>
+            <dd>Sets whether the library is entirely inline.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gad443ebc67d9e196f296f2038b2ad5e46">TOML_API</a></span>
+            </dt>
+            <dd>An annotation to add to public symbols.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga8c407a8f6fe52a795db35be3f00393f8">TOML_ASSERT</a>(</span><span class="m-doc-wrap">expr)</span>
+            </dt>
+            <dd>Sets the assert function used by the library.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gab7db106da27ae46e214f77807b0d16a0">TOML_CHAR_8_STRINGS</a></span>
+            </dt>
+            <dd>Uses C++20 <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings as the toml string data type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
+            </dt>
+            <dd>An additional header to include before any other <code>toml++</code> header files.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga93097ecd88ca4bca393f60a78bda643b">TOML_EXCEPTIONS</a></span>
+            </dt>
+            <dd>Sets whether the library uses exceptions to report parsing failures.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_IMPLEMENTATION</a></span>
+            </dt>
+            <dd>Enables the library's implementation when <a class="m-doc" href="group__configuration.html#ga997dc4b397795ca35126850cac05ec8e">TOML_<wbr/>ALL_<wbr/>INLINE</a> is enabled.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga55379d57f896d97994e0aca167297c7f">TOML_LARGE_FILES</a></span>
+            </dt>
+            <dd>Sets whether line and column indices are 32-bit integers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga9c2c03f867eb6d76a5f65b06eeb1186e">TOML_OPTIONAL_TYPE</a></span>
+            </dt>
+            <dd>Overrides the <code>optional&lt;T&gt;</code> type used by the library.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga53c34f99a546e479d2440b60e3e6588d">TOML_PARSER</a></span>
+            </dt>
+            <dd>Sets whether the parser-related parts of the library are included.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga11a3368da40938a6b5cfd898320706f7">TOML_SMALL_FLOAT_TYPE</a></span>
+            </dt>
+            <dd>If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga0722fa2c57da6360c7f2ba08c60e1a81">TOML_SMALL_INT_TYPE</a></span>
+            </dt>
+            <dd>If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga337ec177a5d46e3b6d8fa4f23edf98e2">TOML_UNRELEASED_FEATURES</a></span>
+            </dt>
+            <dd>Enables support for unreleased TOML language features not yet part of a <a href="https://github.com/toml-lang/toml/releases">numbered version</a>.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Define documentation</h2>
+          <section class="m-doc-details" id="ga997dc4b397795ca35126850cac05ec8e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>
+            </h3>
+            <p>Sets whether the library is entirely inline.</p>
+<p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <code>TOML_IMPLEMENTATION</code> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
+<span class="cp">#define TOML_ALL_INLINE 0</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span><span class="cp"></span>
+
+<span class="c1">// some_code_file.cpp</span>
+<span class="cp">#define TOML_IMPLEMENTATION </span>
+<span class="cp">#include</span> <span class="cpf">"global_header_that_includes_toml++.h"</span><span class="cp"></span></pre></aside>
+          </div></section>
+          <section class="m-doc-details" id="gad443ebc67d9e196f296f2038b2ad5e46"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gad443ebc67d9e196f296f2038b2ad5e46">TOML_API</a></span>
+            </h3>
+            <p>An annotation to add to public symbols.</p>
+<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You'd override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga8c407a8f6fe52a795db35be3f00393f8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga8c407a8f6fe52a795db35be3f00393f8">TOML_ASSERT</a>(</span><span class="m-doc-wrap">expr)</span>
+            </h3>
+            <p>Sets the assert function used by the library.</p>
+<p>Defaults to the standard C <code>assert()</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="gab7db106da27ae46e214f77807b0d16a0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gab7db106da27ae46e214f77807b0d16a0">TOML_CHAR_8_STRINGS</a></span>
+            </h3>
+            <p>Uses C++20 <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings as the toml string data type.</p>
+<p>Defaults to <code>0</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga09204feb4a3ff5534623c2bd052dcec0"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
+            </h3>
+            <p>An additional header to include before any other <code>toml++</code> header files.</p>
+<p>Not defined by default.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga93097ecd88ca4bca393f60a78bda643b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga93097ecd88ca4bca393f60a78bda643b">TOML_EXCEPTIONS</a></span>
+            </h3>
+            <p>Sets whether the library uses exceptions to report parsing failures.</p>
+<p>Defaults to <code>1</code> or <code>0</code> according to your compiler's exception mode.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga27ee69835a1ddff9dbaf3015b4b08a11"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_IMPLEMENTATION</a></span>
+            </h3>
+            <p>Enables the library's implementation when <a class="m-doc" href="group__configuration.html#ga997dc4b397795ca35126850cac05ec8e">TOML_<wbr/>ALL_<wbr/>INLINE</a> is enabled.</p>
+<p>Not defined by default. Meaningless when <a class="m-doc" href="group__configuration.html#ga997dc4b397795ca35126850cac05ec8e">TOML_<wbr/>ALL_<wbr/>INLINE</a> is disabled.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga55379d57f896d97994e0aca167297c7f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga55379d57f896d97994e0aca167297c7f">TOML_LARGE_FILES</a></span>
+            </h3>
+            <p>Sets whether line and column indices are 32-bit integers.</p>
+<p>Defaults to <code>0</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">toml::<wbr/>source_index</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga9c2c03f867eb6d76a5f65b06eeb1186e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga9c2c03f867eb6d76a5f65b06eeb1186e">TOML_OPTIONAL_TYPE</a></span>
+            </h3>
+            <p>Overrides the <code>optional&lt;T&gt;</code> type used by the library.</p>
+<p>Not defined by default (use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>).</p><aside class="m-note m-danger"><h4>Warning</h4><p>The library uses optionals internally in a few places; if you choose to replace the optional type it must be with something that is still API-compatible with <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a> (e.g. <a href="https://github.com/TartanLlama/optional">tl::<wbr/>optional</a>).</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga53c34f99a546e479d2440b60e3e6588d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga53c34f99a546e479d2440b60e3e6588d">TOML_PARSER</a></span>
+            </h3>
+            <p>Sets whether the parser-related parts of the library are included.</p>
+<p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>If you don't need to parse TOML data from any strings or files (e.g. you're only using the library to serialize data as TOML), setting <code>TOML_PARSER</code> to <code>0</code> can yield decent compilation speed improvements.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga11a3368da40938a6b5cfd898320706f7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga11a3368da40938a6b5cfd898320706f7">TOML_SMALL_FLOAT_TYPE</a></span>
+            </h3>
+            <p>If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.</p>
+<p>Not defined by default.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga0722fa2c57da6360c7f2ba08c60e1a81"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga0722fa2c57da6360c7f2ba08c60e1a81">TOML_SMALL_INT_TYPE</a></span>
+            </h3>
+            <p>If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.</p>
+<p>Not defined by default.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga337ec177a5d46e3b6d8fa4f23edf98e2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga337ec177a5d46e3b6d8fa4f23edf98e2">TOML_UNRELEASED_FEATURES</a></span>
+            </h3>
+            <p>Enables support for unreleased TOML language features not yet part of a <a href="https://github.com/toml-lang/toml/releases">numbered version</a>.</p>
+<p>Defaults to <code>0</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a href="https://github.com/marzer/tomlplusplus/blob/master/README.md#toml-language-support">TOML Language Support</a></p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script async="async" src="searchdata-v1.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+•
+
+<a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+an
+issue</a>
+
+<br/><br/>Documentation
+generated
+using
+<a href="https://mcss.mosra.cz/">m.css</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>
