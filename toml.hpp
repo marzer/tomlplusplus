@@ -49,7 +49,7 @@
 #endif
 #define	TOML_LIB_SINGLE_HEADER 1
 
-//-----------------  ↓ toml_common.h  ----------------------------------------------------------------------------------
+//--------------  ↓ toml_preprocessor.h  -------------------------------------------------------------------------------
 #pragma region
 
 #ifdef TOML_CONFIG_HEADER
@@ -72,7 +72,7 @@
 	#define TOML_CHAR_8_STRINGS 0
 #endif
 #ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 1
+	#define TOML_UNRELEASED_FEATURES 0
 #endif
 #ifndef TOML_LARGE_FILES
 	#define TOML_LARGE_FILES 0
@@ -83,8 +83,9 @@
 #ifndef TOML_PARSER
 	#define TOML_PARSER 1
 #endif
-// TOML_ASSERT
-
+#ifndef TOML_DOXYGEN
+	#define TOML_DOXYGEN 0
+#endif
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
@@ -190,7 +191,6 @@
 	#ifndef TOML_FLOAT_CHARCONV
 		#define TOML_FLOAT_CHARCONV 0
 	#endif
-
 #endif
 
 #ifndef TOML_CPP_VERSION
@@ -228,9 +228,6 @@
 #else
 	#define TOML_MAY_THROW				noexcept
 #endif
-#ifndef TOML_DISABLE_INIT_WARNINGS
-	#define	TOML_DISABLE_INIT_WARNINGS
-#endif
 #ifndef TOML_INT_CHARCONV
 	#define TOML_INT_CHARCONV 1
 #endif
@@ -245,6 +242,12 @@
 #endif
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
+#endif
+#ifndef TOML_DISABLE_SWITCH_WARNINGS
+	#define	TOML_DISABLE_SWITCH_WARNINGS
+#endif
+#ifndef TOML_DISABLE_INIT_WARNINGS
+	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
 #ifndef TOML_DISABLE_VTABLE_WARNINGS
 	#define TOML_DISABLE_VTABLE_WARNINGS
@@ -277,12 +280,13 @@
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
+
 #ifdef __cpp_consteval
 	#define TOML_CONSTEVAL		consteval
 #else
 	#define TOML_CONSTEVAL		constexpr
 #endif
-#ifndef __INTELLISENSE__
+#if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY [[likely]]
 	#endif
@@ -292,18 +296,18 @@
 	#if __has_cpp_attribute(nodiscard) >= 201907L
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
-#endif //__INTELLISENSE__
+#endif
 #ifndef TOML_LIKELY
 	#define TOML_LIKELY
 #endif
 #ifndef TOML_UNLIKELY
 	#define TOML_UNLIKELY
 #endif
-#ifndef TOML_TRIVIAL_ABI
-	#define TOML_TRIVIAL_ABI
-#endif
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
+#endif
+#ifndef TOML_TRIVIAL_ABI
+	#define TOML_TRIVIAL_ABI
 #endif
 #ifndef TOML_RELOPS_REORDERING
 	#define TOML_RELOPS_REORDERING 0
@@ -325,7 +329,6 @@
 	#define TOML_INTERNAL_LINKAGE	static
 	#define TOML_INTERNAL_NAMESPACE
 #endif
-
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		2
 #define TOML_LIB_PATCH		2
@@ -344,7 +347,6 @@
 	#define TOML_LANG_EFFECTIVE_VERSION												\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 #endif
-
 #define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
 		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
 
@@ -354,8 +356,48 @@
 #define TOML_LANG_UNRELEASED														\
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
+#if TOML_DOXYGEN || defined(__INTELLISENSE__)
+	#define TOML_ABI_NAMESPACES					0
+	#define TOML_ABI_NAMESPACE_START(name)
+	#define TOML_ABI_NAMESPACE_END
+#else
+	#define TOML_ABI_NAMESPACES					1
+	#define TOML_ABI_NAMESPACE_START(name)		inline namespace abi_##name {
+	#define TOML_ABI_NAMESPACE_END				}
+#endif
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
+#ifndef TOML_ASSERT
+	#ifdef NDEBUG
+		#define TOML_ASSERT(expr)	(void)0
+	#else
+		#include <cassert>
+		#define TOML_ASSERT(expr)	assert(expr)
+	#endif
+#endif
+TOML_POP_WARNINGS
+
+#if TOML_CHAR_8_STRINGS
+	#ifndef __cpp_lib_char8_t
+		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
+	#endif
+
+	#define TOML_STRING_PREFIX_1(S) u8##S
+	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
+#else
+	#define TOML_STRING_PREFIX(S) S
+#endif
+
+#pragma endregion
+//--------------  ↑ toml_preprocessor.h  -------------------------------------------------------------------------------
+
+//------------------------------------------  ↓ toml_common.h  ---------------------------------------------------------
+#pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+
 #if __has_include(<version>)
 	#include <version>
 #endif
@@ -378,29 +420,11 @@ TOML_DISABLE_ALL_WARNINGS
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
+
 TOML_POP_WARNINGS
 
-#if TOML_CHAR_8_STRINGS
-	#ifndef __cpp_lib_char8_t
-		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
-	#endif
-
-	#define TOML_STRING_PREFIX_1(S) u8##S
-	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
-#else
-	#define TOML_STRING_PREFIX(S) S
-#endif
-
-#ifdef __cpp_lib_launder
-	#define TOML_LAUNDER(x)	std::launder(x)
-#else
-	#define TOML_LAUNDER(x)	x
-#endif
-
-#if !defined(DOXYGEN) && !defined(__INTELLISENSE__)
-	#define TOML_ABI_NAMESPACES 1
-#else
-	#define TOML_ABI_NAMESPACES 0
+#if TOML_CHAR_8_STRINGS && !defined(__cpp_lib_char8_t)
+	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 #endif
 
 namespace toml
@@ -432,7 +456,7 @@ namespace toml
 
 	#endif
 
-	#ifndef DOXYGEN
+	#if !TOML_DOXYGEN
 
 	// foward declarations are hidden from doxygen
 	// because they fuck it up =/
@@ -447,21 +471,17 @@ namespace toml
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
 
-	#if TOML_ABI_NAMESPACES
-		#ifdef TOML_OPTIONAL_TYPE
-			inline namespace abi_custopt {
-		#else
-			inline namespace abi_stdopt {
-		#endif
+	#ifdef TOML_OPTIONAL_TYPE
+		TOML_ABI_NAMESPACE_START(custopt)
+	#else
+		TOML_ABI_NAMESPACE_START(stdopt)
 	#endif
 
 	struct date_time;
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_OPTIONAL_TYPE
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
 
-	#endif // !DOXYGEN
+	#endif // !TOML_DOXYGEN
 
 	enum class node_type : uint8_t
 	{
@@ -501,12 +521,10 @@ namespace toml
 
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_lf {
-		#else
-			inline namespace abi_sf {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(lf)
+	#else
+		TOML_ABI_NAMESPACE_START(sf)
 	#endif
 
 	struct TOML_TRIVIAL_ABI source_position
@@ -556,9 +574,7 @@ namespace toml
 		source_path_ptr path;
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 }
 
 namespace toml::impl
@@ -602,10 +618,10 @@ namespace toml::impl
 
 	#if TOML_ABI_NAMESPACES
 		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
+			TOML_ABI_NAMESPACE_START(impl_ex)
 			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_ex::parser
 		#else
-			inline namespace abi_impl_noex {
+			TOML_ABI_NAMESPACE_START(impl_noex)
 			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_noex::parser
 		#endif
 	#else
@@ -614,9 +630,7 @@ namespace toml::impl
 
 	class parser;
 
-	#if TOML_ABI_NAMESPACES
-		}
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	template <typename T>
 	inline constexpr bool is_value =
@@ -828,14 +842,14 @@ namespace toml
 }
 
 #pragma endregion
-//-----------------  ↑ toml_common.h  ----------------------------------------------------------------------------------
+//------------------------------------------  ↑ toml_common.h  ---------------------------------------------------------
 
-//----------------------------------------  ↓ toml_date_time.h  --------------------------------------------------------
+//-----------------------------------------------------------------  ↓ toml_date_time.h  -------------------------------
 #pragma region
 
 namespace toml
 {
-	struct TOML_TRIVIAL_ABI date final
+	struct TOML_TRIVIAL_ABI date
 	{
 		uint16_t year;
 		uint8_t month;
@@ -906,7 +920,7 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date&);
 	#endif
 
-	struct TOML_TRIVIAL_ABI time final
+	struct TOML_TRIVIAL_ABI time
 	{
 		uint8_t hour;
 		uint8_t minute;
@@ -978,7 +992,7 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time&);
 	#endif
 
-	struct TOML_TRIVIAL_ABI time_offset final
+	struct TOML_TRIVIAL_ABI time_offset
 	{
 		int16_t minutes;
 
@@ -1041,15 +1055,13 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		#ifdef TOML_OPTIONAL_TYPE
-			inline namespace abi_custopt {
-		#else
-			inline namespace abi_stdopt {
-		#endif
+	#ifdef TOML_OPTIONAL_TYPE
+		TOML_ABI_NAMESPACE_START(custopt)
+	#else
+		TOML_ABI_NAMESPACE_START(stdopt)
 	#endif
 
-	struct date_time final
+	struct date_time
 	{
 		toml::date date;
 		toml::time time;
@@ -1127,9 +1139,7 @@ namespace toml
 		}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_OPTIONAL_TYPE
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
 
 	template <typename Char>
 	TOML_EXTERNAL_LINKAGE
@@ -1145,9 +1155,9 @@ namespace toml
 }
 
 #pragma endregion
-//----------------------------------------  ↑ toml_date_time.h  --------------------------------------------------------
+//-----------------------------------------------------------------  ↑ toml_date_time.h  -------------------------------
 
-//--------------------------------------------------------------  ↓ toml_print_to_stream.h  ----------------------------
+//---------------------------------------------------------------------------------------  ↓ toml_print_to_stream.h  ---
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -1546,9 +1556,9 @@ namespace toml
 }
 
 #pragma endregion
-//--------------------------------------------------------------  ↑ toml_print_to_stream.h  ----------------------------
+//---------------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ---
 
-//---------------------------------------------------------------------------------------------  ↓ toml_node.h  --------
+//------------------  ↓ toml_node.h  -----------------------------------------------------------------------------------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -1910,9 +1920,9 @@ namespace toml
 TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 #pragma endregion
-//---------------------------------------------------------------------------------------------  ↑ toml_node.h  --------
+//------------------  ↑ toml_node.h  -----------------------------------------------------------------------------------
 
-//-----------------  ↓ toml_value.h  -----------------------------------------------------------------------------------
+//------------------------------------------  ↓ toml_value.h  ----------------------------------------------------------
 #pragma region
 
 namespace toml
@@ -2029,10 +2039,7 @@ namespace toml
 			}
 
 			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
-			#endif
-
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
 			[[nodiscard]] friend bool operator <  (value_arg lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
 			[[nodiscard]] friend bool operator <= (const value& lhs, value_arg rhs) noexcept { return lhs.val_ <= rhs; }
@@ -2272,9 +2279,9 @@ namespace toml
 }
 
 #pragma endregion
-//-----------------  ↑ toml_value.h  -----------------------------------------------------------------------------------
+//------------------------------------------  ↑ toml_value.h  ----------------------------------------------------------
 
-//------------------------------------------  ↓ toml_array.h  ----------------------------------------------------------
+//-------------------------------------------------------------------  ↓ toml_array.h  ---------------------------------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -2725,19 +2732,14 @@ namespace toml
 			{
 				return container_equality(lhs, rhs);
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
 
 			template <typename T>
 			[[nodiscard]] friend bool operator == (const array& lhs, const std::vector<T>& rhs) noexcept
 			{
 				return container_equality(lhs, rhs);
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
-			#endif
-
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
 			void flatten();
 
 			template <typename Char>
@@ -2748,9 +2750,9 @@ namespace toml
 TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 #pragma endregion
-//------------------------------------------  ↑ toml_array.h  ----------------------------------------------------------
+//-------------------------------------------------------------------  ↑ toml_array.h  ---------------------------------
 
-//-------------------------------------------------------------------  ↓ toml_table.h  ---------------------------------
+//--------------------------------------------------------------------------------------------  ↓ toml_table.h  --------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -3028,9 +3030,9 @@ namespace toml
 			static bool do_contains(Map& vals, const Key& key) noexcept
 			{
 				#if TOML_CPP >= 20
-				return vals.contains(key);
+					return vals.contains(key);
 				#else
-				return do_get(vals, key) != nullptr;
+					return do_get(vals, key) != nullptr;
 				#endif
 			}
 
@@ -3065,9 +3067,9 @@ namespace toml
 TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 #pragma endregion
-//-------------------------------------------------------------------  ↑ toml_table.h  ---------------------------------
+//--------------------------------------------------------------------------------------------  ↑ toml_table.h  --------
 
-//------------------------------------------------------------------------------------------  ↓ toml_node_view.h  ------
+//---------------  ↓ toml_node_view.h  ---------------------------------------------------------------------------------
 #pragma region
 
 namespace toml
@@ -3076,7 +3078,7 @@ namespace toml
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 
 	template <typename T>
-	class TOML_API node_view final
+	class TOML_API TOML_TRIVIAL_ABI node_view
 	{
 		public:
 			using viewed_type = T;
@@ -3201,10 +3203,7 @@ namespace toml
 				const auto tbl = lhs.as<table>();
 				return tbl && *tbl == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, )
-			#endif
-
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, )
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const array& rhs) noexcept
 			{
 				if (lhs.node_ == &rhs)
@@ -3212,9 +3211,7 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, )
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, )
 
 			template <typename U>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const toml::value<U>& rhs) noexcept
@@ -3224,9 +3221,7 @@ namespace toml
 				const auto val = lhs.as<U>();
 				return val && *val == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
 
 			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const U& rhs) noexcept
@@ -3234,13 +3229,11 @@ namespace toml
 				const auto val = lhs.as<impl::promoted<U>>();
 				return val && *val == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(
+			TOML_ASYMMETRICAL_EQUALITY_OPS(
 					const node_view&,
 					const U&,
 					template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
-				)
-			#endif
+			)
 
 			template <typename U>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const std::initializer_list<U>& rhs) noexcept
@@ -3248,9 +3241,7 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<U>&, template <typename U>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<U>&, template <typename U>)
 
 			template <typename U>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const std::vector<U>& rhs) noexcept
@@ -3258,9 +3249,7 @@ namespace toml
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<U>&, template <typename U>)
 
 			[[nodiscard]] node_view operator[] (string_view key) const noexcept
 			{
@@ -3303,9 +3292,9 @@ namespace toml
 }
 
 #pragma endregion
-//------------------------------------------------------------------------------------------  ↑ toml_node_view.h  ------
+//---------------  ↑ toml_node_view.h  ---------------------------------------------------------------------------------
 
-//-------------  ↓ toml_utf8_generated.h  ------------------------------------------------------------------------------
+//--------------------------------------  ↓ toml_utf8_generated.h  -----------------------------------------------------
 #pragma region
 
 #if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
@@ -4178,9 +4167,9 @@ namespace toml::impl
 #endif // TOML_LANG_UNRELEASED
 
 #pragma endregion
-//-------------  ↑ toml_utf8_generated.h  ------------------------------------------------------------------------------
+//--------------------------------------  ↑ toml_utf8_generated.h  -----------------------------------------------------
 
-//-------------------------------------------  ↓ toml_utf8.h  ----------------------------------------------------------
+//--------------------------------------------------------------------  ↓ toml_utf8.h  ---------------------------------
 #pragma region
 
 namespace toml::impl
@@ -4449,9 +4438,9 @@ namespace toml::impl
 }
 
 #pragma endregion
-//-------------------------------------------  ↑ toml_utf8.h  ----------------------------------------------------------
+//--------------------------------------------------------------------  ↑ toml_utf8.h  ---------------------------------
 
-//-----------------------------------------------------------------  ↓ toml_formatter.h  -------------------------------
+//------------------------------------------------------------------------------------------  ↓ toml_formatter.h  ------
 #pragma region
 
 namespace toml
@@ -4598,9 +4587,9 @@ namespace toml::impl
 }
 
 #pragma endregion
-//-----------------------------------------------------------------  ↑ toml_formatter.h  -------------------------------
+//------------------------------------------------------------------------------------------  ↑ toml_formatter.h  ------
 
-//--------------------------------------------------------------------------------------  ↓ toml_default_formatter.h  --
+//-----------  ↓ toml_default_formatter.h  -----------------------------------------------------------------------------
 #pragma region
 
 namespace toml::impl
@@ -4971,9 +4960,9 @@ namespace toml
 }
 
 #pragma endregion
-//--------------------------------------------------------------------------------------  ↑ toml_default_formatter.h  --
+//-----------  ↑ toml_default_formatter.h  -----------------------------------------------------------------------------
 
-//-------------  ↓ toml_json_formatter.h  ------------------------------------------------------------------------------
+//--------------------------------------  ↓ toml_json_formatter.h  -----------------------------------------------------
 #pragma region
 
 namespace toml
@@ -5118,11 +5107,11 @@ namespace toml
 }
 
 #pragma endregion
-//-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
+//--------------------------------------  ↑ toml_json_formatter.h  -----------------------------------------------------
 
 #if TOML_PARSER
 
-//---------------------------------------  ↓ toml_parse_error.h  -------------------------------------------------------
+//----------------------------------------------------------------  ↓ toml_parse_error.h  ------------------------------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -5138,20 +5127,15 @@ TOML_DISABLE_VTABLE_WARNINGS
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_lf {
-		#else
-			inline namespace abi_sf {
-		#endif
-		#if TOML_EXCEPTIONS
-			inline namespace abi_ex {
-		#else
-			inline namespace abi_noex {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(lf)
+	#else
+		TOML_ABI_NAMESPACE_START(sf)
 	#endif
 
-	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+
+	TOML_ABI_NAMESPACE_START(noex)
 
 	class parse_error final
 	{
@@ -5191,6 +5175,8 @@ namespace toml
 	};
 
 	#else
+
+	TOML_ABI_NAMESPACE_START(ex)
 
 	class parse_error final
 		: public std::runtime_error
@@ -5234,10 +5220,8 @@ namespace toml
 
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		}  //end abi namespace for TOML_EXCEPTIONS
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
 	template <typename Char>
 	TOML_EXTERNAL_LINKAGE
@@ -5258,9 +5242,9 @@ namespace toml
 TOML_POP_WARNINGS
 
 #pragma endregion
-//---------------------------------------  ↑ toml_parse_error.h  -------------------------------------------------------
+//----------------------------------------------------------------  ↑ toml_parse_error.h  ------------------------------
 
-//----------------------------------------------------------------  ↓ toml_utf8_streams.h  -----------------------------
+//-----------------------------------------------------------------------------------------  ↓ toml_utf8_streams.h  ----
 #pragma region
 
 namespace toml::impl
@@ -5367,12 +5351,10 @@ namespace toml::impl
 			}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_impl_lf {
-		#else
-			inline namespace abi_impl_lf {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(impl_lf)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_sf)
 	#endif
 
 	struct utf8_codepoint final
@@ -5410,22 +5392,16 @@ namespace toml::impl
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
 		#define TOML_ERROR			throw parse_error
-		#if TOML_ABI_NAMESPACES
-			inline namespace abi_impl_ex {
-		#endif
+		TOML_ABI_NAMESPACE_START(impl_ex)
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR			err.emplace
-		#if TOML_ABI_NAMESPACES
-			inline namespace abi_impl_noex {
-		#endif
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	TOML_PUSH_WARNINGS
@@ -5694,26 +5670,27 @@ namespace toml::impl
 
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS / !TOML_EXCEPTIONS
-	#endif
-
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	TOML_POP_WARNINGS
 }
 
 #pragma endregion
-//----------------------------------------------------------------  ↑ toml_utf8_streams.h  -----------------------------
+//-----------------------------------------------------------------------------------------  ↑ toml_utf8_streams.h  ----
 
-//--------------------------------------------------------------------------------------------  ↓ toml_parser.h  -------
+//-----------------  ↓ toml_parser.h  ----------------------------------------------------------------------------------
 #pragma region
 
 namespace toml
 {
-	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
-	#if TOML_ABI_NAMESPACES
-		inline namespace abi_parse_noex {
+	#ifdef __cpp_lib_launder
+		#define TOML_LAUNDER(x)	std::launder(x)
+	#else
+		#define TOML_LAUNDER(x)	x
 	#endif
+
+	TOML_ABI_NAMESPACE_START(parse_noex)
 
 	class parse_result final
 	{
@@ -5868,9 +5845,9 @@ namespace toml
 			}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END
+
+	#undef TOML_LAUNDER
 
 	#else
 
@@ -5881,30 +5858,24 @@ namespace toml
 
 namespace toml::impl
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
-		#else
-			inline namespace abi_impl_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(impl_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 }
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_parse_ex {
-		#else
-			inline namespace abi_parse_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(parse_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(parse_noex)
 	#endif
 
 	[[nodiscard]]
@@ -5997,18 +5968,14 @@ namespace toml
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	inline namespace literals
 	{
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_lit_ex {
-			#else
-				inline namespace abi_lit_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(lit_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(lit_noex)
 		#endif
 
 		[[nodiscard]]
@@ -6023,19 +5990,17 @@ namespace toml
 
 		#endif // __cpp_lib_char8_t
 
-		#if TOML_ABI_NAMESPACES
-			} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
 
 #pragma endregion
-//--------------------------------------------------------------------------------------------  ↑ toml_parser.h  -------
+//-----------------  ↑ toml_parser.h  ----------------------------------------------------------------------------------
 
 #endif // TOML_PARSER
 #if TOML_IMPLEMENTATION
 
-//-----------------  ↓ toml_node.hpp  ----------------------------------------------------------------------------------
+//------------------------------------------  ↓ toml_node.hpp  ---------------------------------------------------------
 #pragma region
 
 namespace toml
@@ -6091,9 +6056,9 @@ namespace toml
 }
 
 #pragma endregion
-//-----------------  ↑ toml_node.hpp  ----------------------------------------------------------------------------------
+//------------------------------------------  ↑ toml_node.hpp  ---------------------------------------------------------
 
-//-----------------------------------------  ↓ toml_array.hpp  ---------------------------------------------------------
+//------------------------------------------------------------------  ↓ toml_array.hpp  --------------------------------
 #pragma region
 
 namespace toml
@@ -6297,9 +6262,9 @@ namespace toml
 }
 
 #pragma endregion
-//-----------------------------------------  ↑ toml_array.hpp  ---------------------------------------------------------
+//------------------------------------------------------------------  ↑ toml_array.hpp  --------------------------------
 
-//------------------------------------------------------------------  ↓ toml_table.hpp  --------------------------------
+//-------------------------------------------------------------------------------------------  ↓ toml_table.hpp  -------
 #pragma region
 
 namespace toml
@@ -6465,9 +6430,9 @@ namespace toml
 }
 
 #pragma endregion
-//------------------------------------------------------------------  ↑ toml_table.hpp  --------------------------------
+//-------------------------------------------------------------------------------------------  ↑ toml_table.hpp  -------
 
-//-------------------------------------------------------------------------------------  ↓ toml_default_formatter.hpp  -
+//----------  ↓ toml_default_formatter.hpp  ----------------------------------------------------------------------------
 #pragma region
 
 namespace toml::impl
@@ -6606,11 +6571,11 @@ namespace toml::impl
 }
 
 #pragma endregion
-//-------------------------------------------------------------------------------------  ↑ toml_default_formatter.hpp  -
+//----------  ↑ toml_default_formatter.hpp  ----------------------------------------------------------------------------
 
 #if TOML_PARSER
 
-//----------------  ↓ toml_parser.hpp  ---------------------------------------------------------------------------------
+//-----------------------------------------  ↓ toml_parser.hpp  --------------------------------------------------------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -6774,12 +6739,10 @@ namespace toml::impl
 		#define TOML_NOT_EOF TOML_ASSERT(cp != nullptr)
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
-		#else
-			inline namespace abi_impl_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(impl_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	class parser final
@@ -9834,10 +9797,7 @@ namespace toml::impl
 		return impl::parser{ std::move(reader) };
 	}
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
-
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 	#undef TOML_NORETURN
@@ -9846,12 +9806,10 @@ namespace toml::impl
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_parse_ex {
-		#else
-			inline namespace abi_parse_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(parse_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(parse_noex)
 	#endif
 
 	TOML_API
@@ -9886,18 +9844,14 @@ namespace toml
 
 	#endif // __cpp_lib_char8_t
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	inline namespace literals
 	{
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_lit_ex {
-			#else
-				inline namespace abi_lit_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(lit_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(lit_noex)
 		#endif
 
 		TOML_API
@@ -9918,19 +9872,17 @@ namespace toml
 
 		#endif // __cpp_lib_char8_t
 
-		#if TOML_ABI_NAMESPACES
-			} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
 
 #pragma endregion
-//----------------  ↑ toml_parser.hpp  ---------------------------------------------------------------------------------
+//-----------------------------------------  ↑ toml_parser.hpp  --------------------------------------------------------
 
 #endif // TOML_PARSER
 #if !TOML_ALL_INLINE
 
-//-------------------------------------  ↓ toml_instantiations.hpp  ----------------------------------------------------
+//--------------------------------------------------------------  ↓ toml_instantiations.hpp  ---------------------------
 #pragma region
 
 TOML_PUSH_WARNINGS
@@ -10001,12 +9953,10 @@ namespace toml
 		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 
 		// parse() and parse_file()
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_parse_ex {
-			#else
-				inline namespace abi_parse_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(parse_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(parse_noex)
 		#endif
 		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
 		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
@@ -10014,15 +9964,13 @@ namespace toml
 		#ifdef __cpp_lib_char8_t
 			template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
 		#endif
-		#if TOML_ABI_NAMESPACES
-				} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	#endif // TOML_PARSER
 }
 
 #pragma endregion
-//-------------------------------------  ↑ toml_instantiations.hpp  ----------------------------------------------------
+//--------------------------------------------------------------  ↑ toml_instantiations.hpp  ---------------------------
 
 #endif // !TOML_ALL_INLINE
 #endif // TOML_IMPLEMENTATION
@@ -10068,9 +10016,10 @@ namespace toml
 	#undef TOML_INTERNAL_LINKAGE
 	#undef TOML_INTERNAL_NAMESPACE
 	#undef TOML_COMPILER_EXCEPTIONS
-	#undef TOML_LAUNDER
 	#undef TOML_TRIVIAL_ABI
 	#undef TOML_ABI_NAMESPACES
+	#undef TOML_ABI_NAMESPACE_START
+	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_PARSER_TYPENAME
 #endif
 

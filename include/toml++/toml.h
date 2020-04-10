@@ -1,6 +1,7 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 
@@ -8,6 +9,7 @@
 //# they're listed explicitly here because this file
 //# is used as the source for generate_single_header.py.
 
+#include "toml_preprocessor.h"
 #include "toml_common.h"
 #include "toml_date_time.h"
 #include "toml_print_to_stream.h"
@@ -21,22 +23,27 @@
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
+
 #if TOML_PARSER
 	#include "toml_parse_error.h"
 	#include "toml_utf8_streams.h"
 	#include "toml_parser.h"
 #endif // TOML_PARSER
+
 #if TOML_IMPLEMENTATION
 	#include "toml_node.hpp"
 	#include "toml_array.hpp"
 	#include "toml_table.hpp"
 	#include "toml_default_formatter.hpp"
+
 #if TOML_PARSER
 	#include "toml_parser.hpp"
 #endif // TOML_PARSER
+
 #if !TOML_ALL_INLINE
 	#include "toml_instantiations.hpp"
 #endif // !TOML_ALL_INLINE
+
 #endif // TOML_IMPLEMENTATION
 
 // macro hygiene
@@ -80,9 +87,10 @@
 	#undef TOML_INTERNAL_LINKAGE
 	#undef TOML_INTERNAL_NAMESPACE
 	#undef TOML_COMPILER_EXCEPTIONS
-	#undef TOML_LAUNDER
 	#undef TOML_TRIVIAL_ABI
 	#undef TOML_ABI_NAMESPACES
+	#undef TOML_ABI_NAMESPACE_START
+	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_PARSER_TYPENAME
 #endif
 
@@ -111,7 +119,8 @@
 /// It's header-only library so really all you have to do is clone
 /// [the repository](https://github.com/marzer/tomlplusplus/) from GitHub and set your include paths.
 /// There's some minor configuration you can do to customize some basic library functionality, but that's totally
-/// optional. See the [README](https://github.com/marzer/tomlplusplus/blob/master/README.md) for more info.
+/// optional.
+/// \see \ref configuration
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
@@ -439,15 +448,15 @@
 /// <strong>Step 2: Define `TOML_IMPLEMENTATION` before including `toml++` in one specific translation unit</strong>
 /// 
 /// \cpp
-/// 
-/// Additionally, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all,
-/// you can `#define TOML_PARSER 0`.
 /// // some_code_file.cpp
 /// 
 /// #define TOML_IMPLEMENTATION 
 /// #include "global_header_that_includes_toml++.h"
 /// \ecpp
 /// 
+/// Additionally, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all,
+/// you can `#define TOML_PARSER 0`.
+///
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-contributing Contributing

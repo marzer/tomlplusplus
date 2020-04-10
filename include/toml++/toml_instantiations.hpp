@@ -1,10 +1,12 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_common.h"
 //# {{
+#include "toml_preprocessor.h"
+#if !TOML_DOXYGEN
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
@@ -83,12 +85,10 @@ namespace toml
 		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 
 		// parse() and parse_file()
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_parse_ex {
-			#else
-				inline namespace abi_parse_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(parse_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(parse_noex)
 		#endif
 		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
 		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
@@ -96,9 +96,11 @@ namespace toml
 		#ifdef __cpp_lib_char8_t
 			template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
 		#endif
-		#if TOML_ABI_NAMESPACES
-				} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	#endif // TOML_PARSER
 }
+
+//# {{
+#endif // !TOML_DOXYGEN
+//# }} 

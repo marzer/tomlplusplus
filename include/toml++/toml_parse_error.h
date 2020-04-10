@@ -1,10 +1,11 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_common.h"
 //# {{
+#include "toml_preprocessor.h"
 #if !TOML_PARSER
 	#error This header cannot not be included when TOML_PARSER is disabled.
 #endif
@@ -22,20 +23,15 @@ TOML_DISABLE_VTABLE_WARNINGS
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_lf {
-		#else
-			inline namespace abi_sf {
-		#endif
-		#if TOML_EXCEPTIONS
-			inline namespace abi_ex {
-		#else
-			inline namespace abi_noex {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(lf)
+	#else
+		TOML_ABI_NAMESPACE_START(sf)
 	#endif
 
-	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+
+	TOML_ABI_NAMESPACE_START(noex)
 
 	/// \brief	An error thrown/returned when parsing fails.
 	/// 
@@ -83,6 +79,8 @@ namespace toml
 
 	#else
 
+	TOML_ABI_NAMESPACE_START(ex)
+
 	class parse_error final
 		: public std::runtime_error
 	{
@@ -125,10 +123,8 @@ namespace toml
 
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		}  //end abi namespace for TOML_EXCEPTIONS
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
 	/// \brief	Prints a parse_error to a stream.
 	///

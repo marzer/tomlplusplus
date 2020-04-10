@@ -1,10 +1,12 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include "toml_parser.h"
 //# {{
+#if !TOML_DOXYGEN
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
@@ -170,12 +172,10 @@ namespace toml::impl
 		#define TOML_NOT_EOF TOML_ASSERT(cp != nullptr)
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
-		#else
-			inline namespace abi_impl_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(impl_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	class parser final
@@ -3231,10 +3231,7 @@ namespace toml::impl
 		return impl::parser{ std::move(reader) };
 	}
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
-
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
 	#undef TOML_NORETURN
@@ -3243,12 +3240,10 @@ namespace toml::impl
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_parse_ex {
-		#else
-			inline namespace abi_parse_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(parse_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(parse_noex)
 	#endif
 
 	TOML_API
@@ -3283,18 +3278,14 @@ namespace toml
 
 	#endif // __cpp_lib_char8_t
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	inline namespace literals
 	{
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_lit_ex {
-			#else
-				inline namespace abi_lit_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(lit_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(lit_noex)
 		#endif
 
 		TOML_API
@@ -3315,9 +3306,10 @@ namespace toml
 
 		#endif // __cpp_lib_char8_t
 
-		#if TOML_ABI_NAMESPACES
-			} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
 
+//# {{
+#endif // !TOML_DOXYGEN
+//# }} 

@@ -57,7 +57,9 @@ foreach character_type : character_types
 					args += '-std=c++2a'
 				endif
 
-				if not unreleased_features
+				if unreleased_features
+					args += '-DTOML_UNRELEASED_FEATURES=1'
+				else
 					name = name + '_strict'
 					args += '-DTOML_UNRELEASED_FEATURES=0'
 				endif

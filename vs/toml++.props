@@ -31,7 +31,7 @@
 			<DiagnosticsFormat>Caret</DiagnosticsFormat>
 			<FavorSizeOrSpeed>Size</FavorSizeOrSpeed> <!-- /Os -->
 			<RuntimeTypeInfo>false</RuntimeTypeInfo>
-			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<MultiProcessorCompilation>false</MultiProcessorCompilation>
 			<AdditionalOptions>%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew</AdditionalOptions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_CONSOLE</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>

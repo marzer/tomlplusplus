@@ -1,6 +1,7 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include "toml_value.h"
@@ -802,9 +803,7 @@ namespace toml
 			{
 				return container_equality(lhs, rhs);
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
 
 			/// \brief	Vector equality operator.
 			template <typename T>
@@ -812,9 +811,7 @@ namespace toml
 			{
 				return container_equality(lhs, rhs);
 			}
-			#ifndef DOXYGEN
-				TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
-			#endif
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
 
 			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
 			/// 

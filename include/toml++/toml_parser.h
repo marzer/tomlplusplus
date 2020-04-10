@@ -1,10 +1,11 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_common.h"
 //# {{
+#include "toml_preprocessor.h"
 #if !TOML_PARSER
 	#error This header cannot not be included when TOML_PARSER is disabled.
 #endif
@@ -14,11 +15,15 @@
 
 namespace toml
 {
-	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
-	#if TOML_ABI_NAMESPACES
-		inline namespace abi_parse_noex {
+	#ifdef __cpp_lib_launder
+		#define TOML_LAUNDER(x)	std::launder(x)
+	#else
+		#define TOML_LAUNDER(x)	x
 	#endif
+
+	TOML_ABI_NAMESPACE_START(parse_noex)
 
 	/// \brief	The result of a parsing operation.
 	///
@@ -254,9 +259,9 @@ namespace toml
 			}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END
+
+	#undef TOML_LAUNDER
 
 	#else
 
@@ -268,31 +273,25 @@ namespace toml
 
 namespace toml::impl
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
-		#else
-			inline namespace abi_impl_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(impl_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 }
 
 
 namespace toml
 {
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			inline namespace abi_parse_ex {
-		#else
-			inline namespace abi_parse_noex {
-		#endif
+	#if TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_START(parse_ex)
+	#else
+		TOML_ABI_NAMESPACE_START(parse_noex)
 	#endif
 
 	/// \brief	Parses a TOML document from a string view.
@@ -524,9 +523,7 @@ namespace toml
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	/// \brief	Convenience literal operators for working with TOML++.
 	/// 
@@ -548,12 +545,10 @@ namespace toml
 	///
 	inline namespace literals
 	{
-		#if TOML_ABI_NAMESPACES
-			#if TOML_EXCEPTIONS
-				inline namespace abi_lit_ex {
-			#else
-				inline namespace abi_lit_noex {
-			#endif
+		#if TOML_EXCEPTIONS
+			TOML_ABI_NAMESPACE_START(lit_ex)
+		#else
+			TOML_ABI_NAMESPACE_START(lit_noex)
 		#endif
 
 		/// \brief	Parses TOML data from a string.
@@ -608,9 +603,7 @@ namespace toml
 
 		#endif // __cpp_lib_char8_t
 
-		#if TOML_ABI_NAMESPACES
-			} //end abi namespace for TOML_EXCEPTIONS
-		#endif
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
 

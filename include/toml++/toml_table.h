@@ -1,6 +1,7 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include "toml_array.h"
@@ -634,9 +635,9 @@ namespace toml
 			static bool do_contains(Map& vals, const Key& key) noexcept
 			{
 				#if TOML_CPP >= 20
-				return vals.contains(key);
+					return vals.contains(key);
 				#else
-				return do_get(vals, key) != nullptr;
+					return do_get(vals, key) != nullptr;
 				#endif
 			}
 

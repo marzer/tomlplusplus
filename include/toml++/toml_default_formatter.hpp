@@ -1,10 +1,12 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include "toml_default_formatter.h"
 //# {{
+#if !TOML_DOXYGEN
 #if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
@@ -144,3 +146,7 @@ namespace toml::impl
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
+
+//# {{
+#endif // !TOML_DOXYGEN
+//# }}

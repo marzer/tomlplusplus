@@ -1,6 +1,7 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
 #include "toml_common.h"
@@ -8,7 +9,7 @@
 namespace toml
 {
 	/// \brief	A local date.
-	struct TOML_TRIVIAL_ABI date final
+	struct TOML_TRIVIAL_ABI date
 	{
 		/// \brief	The year component.
 		uint16_t year;
@@ -97,7 +98,7 @@ namespace toml
 	#endif
 
 	/// \brief	A local time-of-day.
-	struct TOML_TRIVIAL_ABI time final
+	struct TOML_TRIVIAL_ABI time
 	{
 		/// \brief	The hour component, from 0 - 23.
 		uint8_t hour;
@@ -190,7 +191,7 @@ namespace toml
 	#endif
 
 	/// \brief	A timezone offset.
-	struct TOML_TRIVIAL_ABI time_offset final
+	struct TOML_TRIVIAL_ABI time_offset
 	{
 		/// \brief	Offset from UTC+0, in minutes.
 		int16_t minutes;
@@ -296,16 +297,14 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
-	#if TOML_ABI_NAMESPACES
-		#ifdef TOML_OPTIONAL_TYPE
-			inline namespace abi_custopt {
-		#else
-			inline namespace abi_stdopt {
-		#endif
+	#ifdef TOML_OPTIONAL_TYPE
+		TOML_ABI_NAMESPACE_START(custopt)
+	#else
+		TOML_ABI_NAMESPACE_START(stdopt)
 	#endif
 
 	/// \brief	A date-time.
-	struct date_time final
+	struct date_time
 	{
 		/// \brief	The date component.
 		toml::date date;
@@ -405,9 +404,7 @@ namespace toml
 		}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_OPTIONAL_TYPE
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
 
 	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
 	/// \detail \cpp

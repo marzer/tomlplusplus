@@ -71,6 +71,7 @@
     <ClInclude Include="..\include\toml++\toml_node_view.h" />
     <ClInclude Include="..\include\toml++\toml_parser.hpp" />
     <ClInclude Include="..\include\toml++\toml_parse_error.h" />
+    <ClInclude Include="..\include\toml++\toml_preprocessor.h" />
     <ClInclude Include="..\include\toml++\toml_print_to_stream.h" />
     <ClInclude Include="..\include\toml++\toml_table.hpp" />
     <ClInclude Include="..\include\toml++\toml_utf8_generated.h" />

@@ -51,6 +51,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>..\tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 	  <PreprocessorDefinitions>TOML_CHAR_8_STRINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <PreprocessorDefinitions>TOML_UNRELEASED_FEATURES=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>tests.h</PrecompiledHeaderFile>
       <PreprocessorDefinitions Condition="'%(PrecompiledHeader)'=='Use'">USING_PCH=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>

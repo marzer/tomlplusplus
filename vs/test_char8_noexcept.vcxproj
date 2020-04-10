@@ -51,6 +51,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>..\tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TOML_CHAR_8_STRINGS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+	  <PreprocessorDefinitions>TOML_UNRELEASED_FEATURES=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 	  <PreprocessorDefinitions>_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>false</ExceptionHandling>
       <PrecompiledHeader>Use</PrecompiledHeader>

@@ -112,8 +112,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_PARSER`              |     boolean    | `1`                               | Disable this to prevent inclusion of the parser-related parts of the library if you don't need them.       |
 | `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.   |
 | `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.        |
-| `TOML_UNDEF_MACROS`        |     boolean    | `1`                               | `#undefs` the library's internal macros at the end of the header.                                          |
-| `TOML_UNRELEASED_FEATURES` |     boolean    | `1`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].              |
+| `TOML_UNRELEASED_FEATURES` |     boolean    | `0`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].              |
 
 > ℹ _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
 linking incompatible combinations together._
@@ -121,14 +120,14 @@ linking incompatible combinations together._
 <br>
 
 # TOML Language Support
-At any given time `toml++` aims to implement whatever the [most recently-released version] of TOML is, with the
-addition of unreleased features from the [TOML master] and some sane cherry-picks from the
+At any given time `toml++` aims to implement whatever the [most recently-released version] of TOML is, with opt-in
+support for a number of unreleased features from the [TOML master] and some sane cherry-picks from the
 [TOML issues list] where the discussion strongly indicates inclusion in a near-future release.
 
 The library advertises the most recent numbered language version it fully supports via the preprocessor
 defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
-## 🔶 **Unreleased features:**
+## 🟡 **Unreleased features:**
 - [#516]: Allow newlines and trailing commas in inline tables
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
@@ -136,8 +135,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#687]: Relax bare key restrictions to allow additional unicode characters
 - [#709]: Include an \xHH escape code sequence
 
-> ℹ _Unreleased features can be disabled (and thus strict [TOML v1.0.0-rc.1] compliance enforced) by specifying
-`TOML_UNRELEASED_FEATURES = 0` (see [Configuration](#Configuration))._
+> ℹ _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
 ## 🟢 **TOML v1.0.0-rc.1:**
 All features supported, including:
@@ -179,6 +177,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [homepage]: https://marzer.github.io/tomlplusplus/
 [unreleased TOML language features]: #unreleased-toml-features
 [most recently-released version]: https://github.com/toml-lang/toml/releases
+[numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues

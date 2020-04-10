@@ -76,6 +76,9 @@
     <ClInclude Include="..\include\toml++\toml_parse_error.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_preprocessor.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

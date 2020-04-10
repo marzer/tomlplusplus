@@ -1,318 +1,16 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
-
-////////// CONFIGURATION
-// clang-format off
-
-#ifdef TOML_CONFIG_HEADER
-	#include TOML_CONFIG_HEADER
-#endif
-#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE)
-	#undef TOML_ALL_INLINE
-	#define TOML_ALL_INLINE 1
-#endif
-#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE || defined(__INTELLISENSE__)
-	#undef TOML_IMPLEMENTATION
-	#define TOML_IMPLEMENTATION 1
-#else
-	#define TOML_IMPLEMENTATION 0
-#endif
-#ifndef TOML_API
-	#define TOML_API
-#endif
-#ifndef TOML_CHAR_8_STRINGS
-	#define TOML_CHAR_8_STRINGS 0
-#endif
-#ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 1
-#endif
-#ifndef TOML_LARGE_FILES
-	#define TOML_LARGE_FILES 0
-#endif
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
-#endif
-#ifndef TOML_PARSER
-	#define TOML_PARSER 1
-#endif
-// TOML_ASSERT
-
-////////// COMPILER & ENVIRONMENT STUFF
-
-#ifndef __cplusplus
-	#error toml++ is a C++ library.
-#endif
-#ifdef __clang__
-
-	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("clang diagnostic ignored \"-Wswitch\"")
-	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
-	#define TOML_DISABLE_VTABLE_WARNINGS	_Pragma("clang diagnostic ignored \"-Weverything\"") \
-											_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
-	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
-	#define TOML_ASSUME(cond)				__builtin_assume(cond)
-	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
-	#if defined(_MSC_VER) // msvc compat mode
-		#ifdef __has_declspec_attribute
-			#if __has_declspec_attribute(novtable)
-				#define TOML_INTERFACE		__declspec(novtable)
-			#endif
-			#if __has_declspec_attribute(empty_bases)
-				#define TOML_EMPTY_BASES	__declspec(empty_bases)
-			#endif
-			#define TOML_ALWAYS_INLINE		__forceinline
-			#define TOML_NEVER_INLINE		__declspec(noinline)
-		#endif
-	#endif
-	#ifdef __has_attribute
-		#if !defined(TOML_ALWAYS_INLINE) && __has_attribute(always_inline)
-			#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-		#endif
-		#if !defined(TOML_NEVER_INLINE) && __has_attribute(noinline)
-			#define TOML_NEVER_INLINE		__attribute__((__noinline__))
-		#endif
-		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
-			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
-		#endif
-	#endif
-	#ifdef __EXCEPTIONS
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-
-	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
-	#ifndef TOML_FLOAT_CHARCONV
-		#define TOML_FLOAT_CHARCONV 0
-	#endif
-
-#elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
-
-	#define TOML_CPP_VERSION				_MSVC_LANG
-	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
-	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
-	#define TOML_DISABLE_ALL_WARNINGS		__pragma(warning(pop))	\
-											__pragma(warning(push, 0))
-	#define TOML_POP_WARNINGS				__pragma(warning(pop))
-	#define TOML_ALWAYS_INLINE				__forceinline
-	#define TOML_NEVER_INLINE				__declspec(noinline)
-	#define TOML_ASSUME(cond)				__assume(cond)
-	#define TOML_UNREACHABLE				__assume(0)
-	#define TOML_INTERFACE					__declspec(novtable)
-	#define TOML_EMPTY_BASES				__declspec(empty_bases)
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
-	#endif
-	#ifdef _CPPUNWIND
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-
-#elif defined(__GNUC__)
-
-	#define TOML_PUSH_WARNINGS				_Pragma("GCC diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")
-	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-											_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-											_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
-											_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
-											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
-											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
-	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
-	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
-	#define TOML_NEVER_INLINE				__attribute__((__noinline__))
-	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
-	#endif
-	#ifdef __cpp_exceptions
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-
-	// these pass the __has_attribute() test but cause warnings on if/else branches =/
-	#define TOML_LIKELY
-	#define TOML_UNLIKELY
-
-	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
-	#ifndef TOML_FLOAT_CHARCONV
-		#define TOML_FLOAT_CHARCONV 0
-	#endif
-
-#endif
-
-#ifndef TOML_CPP_VERSION
-	#define TOML_CPP_VERSION __cplusplus
-#endif
-#if TOML_CPP_VERSION < 201103L
-	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
-#elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/skystrife/cpptoml
-#elif TOML_CPP_VERSION >= 202600L
-	#define TOML_CPP 26
-#elif TOML_CPP_VERSION >= 202300L
-	#define TOML_CPP 23
-#elif TOML_CPP_VERSION >= 202002L
-	#define TOML_CPP 20
-#elif TOML_CPP_VERSION >= 201703L
-	#define TOML_CPP 17
-#endif
-#ifndef TOML_COMPILER_EXCEPTIONS
-	#define TOML_COMPILER_EXCEPTIONS 1
-#endif
-#if TOML_COMPILER_EXCEPTIONS
-	#ifndef TOML_EXCEPTIONS
-		#define TOML_EXCEPTIONS 1
-	#endif
-#else
-	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
-		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
-	#endif
-	#undef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS	0
-#endif
-#if TOML_EXCEPTIONS
-	#define TOML_MAY_THROW
-#else
-	#define TOML_MAY_THROW				noexcept
-#endif
-#ifndef TOML_DISABLE_INIT_WARNINGS
-	#define	TOML_DISABLE_INIT_WARNINGS
-#endif
-#ifndef TOML_INT_CHARCONV
-	#define TOML_INT_CHARCONV 1
-#endif
-#ifndef TOML_FLOAT_CHARCONV
-	#define TOML_FLOAT_CHARCONV 1
-#endif
-#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !__has_include(<charconv>)
-	#undef TOML_INT_CHARCONV
-	#undef TOML_FLOAT_CHARCONV
-	#define TOML_INT_CHARCONV 0
-	#define TOML_FLOAT_CHARCONV 0
-#endif
-#ifndef TOML_PUSH_WARNINGS
-	#define TOML_PUSH_WARNINGS
-#endif
-#ifndef TOML_DISABLE_VTABLE_WARNINGS
-	#define TOML_DISABLE_VTABLE_WARNINGS
-#endif
-#ifndef TOML_DISABLE_ALL_WARNINGS
-	#define TOML_DISABLE_ALL_WARNINGS
-#endif
-#ifndef TOML_POP_WARNINGS
-	#define TOML_POP_WARNINGS
-#endif
-#ifndef TOML_GNU_ATTR
-	#define TOML_GNU_ATTR(...)
-#endif
-#ifndef TOML_INTERFACE
-	#define TOML_INTERFACE
-#endif
-#ifndef TOML_EMPTY_BASES
-	#define TOML_EMPTY_BASES
-#endif
-#ifndef TOML_ALWAYS_INLINE
-	#define TOML_ALWAYS_INLINE	inline
-#endif
-#ifndef TOML_NEVER_INLINE
-	#define TOML_NEVER_INLINE
-#endif
-#ifndef TOML_ASSUME
-	#define TOML_ASSUME(cond)	(void)0
-#endif
-#ifndef TOML_UNREACHABLE
-	#define TOML_UNREACHABLE	TOML_ASSERT(false)
-#endif
-#define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
-#ifdef __cpp_consteval
-	#define TOML_CONSTEVAL		consteval
-#else
-	#define TOML_CONSTEVAL		constexpr
-#endif
-#ifndef __INTELLISENSE__
-	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
-		#define TOML_LIKELY [[likely]]
-	#endif
-	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
-		#define TOML_UNLIKELY [[unlikely]]
-	#endif
-	#if __has_cpp_attribute(nodiscard) >= 201907L
-		#define TOML_NODISCARD_CTOR [[nodiscard]]
-	#endif
-#endif //__INTELLISENSE__
-#ifndef TOML_LIKELY
-	#define TOML_LIKELY
-#endif
-#ifndef TOML_UNLIKELY
-	#define TOML_UNLIKELY
-#endif
-#ifndef TOML_TRIVIAL_ABI
-	#define TOML_TRIVIAL_ABI
-#endif
-#ifndef TOML_NODISCARD_CTOR
-	#define TOML_NODISCARD_CTOR
-#endif
-#ifndef TOML_RELOPS_REORDERING
-	#define TOML_RELOPS_REORDERING 0
-#endif
-#if TOML_RELOPS_REORDERING
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(...)
-#else
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
-		__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
-#endif
-#if TOML_ALL_INLINE
-	#define TOML_EXTERNAL_LINKAGE	inline
-	#define TOML_INTERNAL_LINKAGE	inline
-	#define TOML_INTERNAL_NAMESPACE toml::impl
-#else
-	#define TOML_EXTERNAL_LINKAGE
-	#define TOML_INTERNAL_LINKAGE	static
-	#define TOML_INTERNAL_NAMESPACE
-#endif
-
-#include "toml_version.h"
-//#{{
-#define	TOML_LIB_SINGLE_HEADER 0
-//#}}
-
-#define TOML_MAKE_VERSION(maj, min, rev)											\
-		((maj) * 1000 + (min) * 25 + (rev))
-
-#if TOML_UNRELEASED_FEATURES
-	#define TOML_LANG_EFFECTIVE_VERSION												\
-		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH+1)
-#else
-	#define TOML_LANG_EFFECTIVE_VERSION												\
-		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
-#endif
-
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
-		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
-
-#define TOML_LANG_AT_LEAST(maj, min, rev)											\
-		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(maj, min, rev))
-
-#define TOML_LANG_UNRELEASED														\
-		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
-
+#include "toml_preprocessor.h"
 
 ////////// INCLUDES
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
+
 #if __has_include(<version>)
 	#include <version>
 #endif
@@ -335,33 +33,14 @@ TOML_DISABLE_ALL_WARNINGS
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
+
 TOML_POP_WARNINGS
 
-#if TOML_CHAR_8_STRINGS
-	#ifndef __cpp_lib_char8_t
-		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
-	#endif
-
-	#define TOML_STRING_PREFIX_1(S) u8##S
-	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
-#else
-	#define TOML_STRING_PREFIX(S) S
-#endif
-
-#ifdef __cpp_lib_launder
-	#define TOML_LAUNDER(x)	std::launder(x)
-#else
-	#define TOML_LAUNDER(x)	x
-#endif
-
-#if !defined(DOXYGEN) && !defined(__INTELLISENSE__)
-	#define TOML_ABI_NAMESPACES 1
-#else
-	#define TOML_ABI_NAMESPACES 0
+#if TOML_CHAR_8_STRINGS && !defined(__cpp_lib_char8_t)
+	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 #endif
 
 ////////// FORWARD DECLARATIONS & TYPEDEFS
-// clang-format on
 
 /// \brief	The root namespace for all toml++ functions and types.
 namespace toml
@@ -388,20 +67,20 @@ namespace toml
 	#else
 
 	/// \brief	The base character type for keys and string values.
-	/// \remarks This will be an alias for char8_t if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for char8_t if #TOML_CHAR_8_STRINGS is enabled.
 	using string_char = char;
 
 	/// \brief	The string type for keys and string values.
-	/// \remarks This will be an alias for std::u8string if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for std::u8string if #TOML_CHAR_8_STRINGS is enabled.
 	using string = std::string;
 
 	/// \brief	The string type for keys and string values.
-	/// \remarks This will be an alias for std::u8string_view if `TOML_CHAR_8_STRINGS` is `1`.
+	/// \remarks This will be an alias for std::u8string_view if #TOML_CHAR_8_STRINGS is enabled.
 	using string_view = std::string_view;
 
 	#endif
 
-	#ifndef DOXYGEN
+	#if !TOML_DOXYGEN
 
 	// foward declarations are hidden from doxygen
 	// because they fuck it up =/
@@ -416,21 +95,17 @@ namespace toml
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
 
-	#if TOML_ABI_NAMESPACES
-		#ifdef TOML_OPTIONAL_TYPE
-			inline namespace abi_custopt {
-		#else
-			inline namespace abi_stdopt {
-		#endif
+	#ifdef TOML_OPTIONAL_TYPE
+		TOML_ABI_NAMESPACE_START(custopt)
+	#else
+		TOML_ABI_NAMESPACE_START(stdopt)
 	#endif
 
 	struct date_time; 
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_OPTIONAL_TYPE
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
 
-	#endif // !DOXYGEN
+	#endif // !TOML_DOXYGEN
 
 	/// \brief	TOML node type identifiers.
 	enum class node_type : uint8_t
@@ -457,7 +132,7 @@ namespace toml
 	/// \brief	The 'optional' type used throughout the library.
 	/// 
 	/// \remarks By default this will be a simple alias for std::optional, but you can change the optional type
-	/// 		 used by the library by setting `TOML_OPTIONAL_TYPE`.
+	/// 		 used by the library by defining #TOML_OPTIONAL_TYPE.
 	template <typename T>
 	using optional = std::optional<T>;
 
@@ -470,7 +145,7 @@ namespace toml
 	#else
 
 	/// \brief	The integer type used to tally line numbers and columns.
-	/// \remarks This will be an alias for uint32_t if `TOML_LARGE_FILES` is `1`.
+	/// \remarks This will be an alias for uint32_t if #TOML_LARGE_FILES is enabled.
 	using source_index = uint16_t;
 
 	#endif
@@ -478,12 +153,10 @@ namespace toml
 	/// \brief	A pointer to a shared string resource containing a source path.
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_lf {
-		#else
-			inline namespace abi_sf {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(lf)
+	#else
+		TOML_ABI_NAMESPACE_START(sf)
 	#endif
 
 	/// \brief	A source document line-and-column pair.
@@ -601,9 +274,7 @@ namespace toml
 		source_path_ptr path;
 	};
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 }
 
 namespace toml::impl
@@ -647,10 +318,10 @@ namespace toml::impl
 
 	#if TOML_ABI_NAMESPACES
 		#if TOML_EXCEPTIONS
-			inline namespace abi_impl_ex {
+			TOML_ABI_NAMESPACE_START(impl_ex)
 			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_ex::parser
 		#else
-			inline namespace abi_impl_noex {
+			TOML_ABI_NAMESPACE_START(impl_noex)
 			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_noex::parser
 		#endif
 	#else
@@ -659,9 +330,7 @@ namespace toml::impl
 
 	class parser;
 
-	#if TOML_ABI_NAMESPACES
-		}
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	template <typename T>
 	inline constexpr bool is_value =

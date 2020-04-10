@@ -1,10 +1,11 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_common.h"
 //# {{
+#include "toml_preprocessor.h"
 #if !TOML_PARSER
 	#error This header cannot not be included when TOML_PARSER is disabled.
 #endif
@@ -116,12 +117,10 @@ namespace toml::impl
 			}
 	};
 
-	#if TOML_ABI_NAMESPACES
-		#if TOML_LARGE_FILES
-			inline namespace abi_impl_lf {
-		#else
-			inline namespace abi_impl_lf {
-		#endif
+	#if TOML_LARGE_FILES
+		TOML_ABI_NAMESPACE_START(impl_lf)
+	#else
+		TOML_ABI_NAMESPACE_START(impl_sf)
 	#endif
 
 	struct utf8_codepoint final
@@ -159,22 +158,16 @@ namespace toml::impl
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_LARGE_FILES
-	#endif
+	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
 		#define TOML_ERROR			throw parse_error
-		#if TOML_ABI_NAMESPACES
-			inline namespace abi_impl_ex {
-		#endif
+		TOML_ABI_NAMESPACE_START(impl_ex)
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR			err.emplace
-		#if TOML_ABI_NAMESPACES
-			inline namespace abi_impl_noex {
-		#endif
+		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
 
 	TOML_PUSH_WARNINGS
@@ -444,9 +437,6 @@ namespace toml::impl
 
 	#undef TOML_ERROR_CHECK
 	#undef TOML_ERROR
-	#if TOML_ABI_NAMESPACES
-		} //end abi namespace for TOML_EXCEPTIONS / !TOML_EXCEPTIONS
-	#endif
-
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	TOML_POP_WARNINGS
 }

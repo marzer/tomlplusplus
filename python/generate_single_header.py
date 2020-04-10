@@ -2,6 +2,7 @@
 # This file is a part of toml++ and is subject to the the terms of the MIT license.
 # Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
 # See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+# SPDX-License-Identifier: MIT
 
 import sys
 import re
@@ -53,8 +54,8 @@ class Preprocessor:
 		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
 		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]', '', text, 0, re.I | re.S)
 		text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', text, 0, re.I | re.M)
-		text = re.sub(r'^\s*//\s*clang-format\s+(?:off|on)\s*$', '', text, 0, re.I | re.M)
-		
+		text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', text, 0, re.I | re.M)
+		text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', text, 0, re.I | re.M)
 		self.current_level += 1
 		text = re.sub(r'^\s*#\s*include\s+"(.+?)"', lambda m : self.preprocess(m), text, 0, re.I | re.M)
 		self.current_level -= 1
@@ -86,6 +87,11 @@ def main():
 	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
+	source_text = re.sub(  # blank lines between various preprocessor directives
+		'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#]((?:end)?ifn?(?:def)?|define)',
+		'#\\1\n#\\2',
+		source_text, 0, re.I | re.M
+	)
 	return_type_pattern														\
 		= r'(?:'															\
 		+ r'(?:\[\[nodiscard\]\]\s*)?'										\
