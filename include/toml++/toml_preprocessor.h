@@ -77,15 +77,11 @@
 				#define TOML_EMPTY_BASES	__declspec(empty_bases)
 			#endif
 			#define TOML_ALWAYS_INLINE		__forceinline
-			#define TOML_NEVER_INLINE		__declspec(noinline)
 		#endif
 	#endif
 	#ifdef __has_attribute
 		#if !defined(TOML_ALWAYS_INLINE) && __has_attribute(always_inline)
 			#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-		#endif
-		#if !defined(TOML_NEVER_INLINE) && __has_attribute(noinline)
-			#define TOML_NEVER_INLINE		__attribute__((__noinline__))
 		#endif
 		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
 			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
@@ -111,7 +107,6 @@
 											__pragma(warning(push, 0))
 	#define TOML_POP_WARNINGS				__pragma(warning(pop))
 	#define TOML_ALWAYS_INLINE				__forceinline
-	#define TOML_NEVER_INLINE				__declspec(noinline)
 	#define TOML_ASSUME(cond)				__assume(cond)
 	#define TOML_UNREACHABLE				__assume(0)
 	#define TOML_INTERFACE					__declspec(novtable)
@@ -139,7 +134,6 @@
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
-	#define TOML_NEVER_INLINE				__attribute__((__noinline__))
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
@@ -246,10 +240,6 @@
 
 #ifndef TOML_ALWAYS_INLINE
 	#define TOML_ALWAYS_INLINE	inline
-#endif
-
-#ifndef TOML_NEVER_INLINE
-	#define TOML_NEVER_INLINE
 #endif
 
 #ifndef TOML_ASSUME

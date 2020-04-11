@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.2.2',
+	version : '1.2.3',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
@@ -32,9 +32,7 @@ if build_tests or build_examples
 				'-Wno-unused-command-line-argument',
 				'-march=native',
 				'-fno-rtti',
-				#'-fdata-sections',
-				#'-ffunction-sections',
-				#'-Wl,--gc-sections'
+				[ '-fdata-sections', '-ffunction-sections', '-Wl,--gc-sections' ]
 			],
 			language : 'cpp'
 		)
@@ -44,7 +42,8 @@ if build_tests or build_examples
 	if compiler.get_id() == 'gcc'
 		add_project_arguments([
 				'-fmax-errors=5',
-				'-Wno-init-list-lifetime'
+				'-Wno-init-list-lifetime',
+				'-fmerge-constants'
 			],
 			language : 'cpp'
 		)
@@ -54,6 +53,7 @@ if build_tests or build_examples
 		add_project_arguments([
 				'-ferror-limit=5',
 				'-fchar8_t',
+				'-fmerge-all-constants',
 				#'-Weverything',
 				'-Wno-c++98-compat',
 				'-Wno-c++98-compat-pedantic',
@@ -62,7 +62,6 @@ if build_tests or build_examples
 				'-Wno-documentation',
 				'-Wno-documentation-unknown-command',
 				'-Wno-padded',
-				#'-Wno-weak-vtables',
 				'-Wno-double-promotion',
 				'-Wno-covered-switch-default',
 				#'-ftime-trace'

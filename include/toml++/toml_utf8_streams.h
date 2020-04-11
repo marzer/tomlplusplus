@@ -130,7 +130,8 @@ namespace toml::impl
 		source_position position;
 
 		template <typename Char = string_char>
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
+		TOML_ALWAYS_INLINE
 		std::basic_string_view<Char> as_view() const noexcept
 		{
 			static_assert(
@@ -143,13 +144,17 @@ namespace toml::impl
 				: std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes) };
 		}
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
+		TOML_GNU_ATTR(pure)
+		TOML_ALWAYS_INLINE
 		constexpr operator char32_t& () noexcept
 		{
 			return value;
 		}
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
+		TOML_GNU_ATTR(pure)
+		TOML_ALWAYS_INLINE
 		constexpr operator const char32_t& () const noexcept
 		{
 			return value;

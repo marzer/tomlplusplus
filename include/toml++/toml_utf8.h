@@ -12,7 +12,6 @@ namespace toml::impl
 	template <typename... T>
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
 	{
 		static_assert((std::is_same_v<char32_t, T> && ...));
@@ -156,7 +155,7 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_bare_key_start_character(char32_t codepoint) noexcept
+	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint)
 			|| is_decimal_digit(codepoint)
@@ -166,16 +165,6 @@ namespace toml::impl
 			|| codepoint == U'+'
 			|| is_unicode_letter(codepoint)
 			|| is_unicode_number(codepoint)
-			#endif
-		;
-	}
-
-	[[nodiscard]]
-	TOML_GNU_ATTR(const)
-	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
-	{
-		return is_bare_key_start_character(codepoint)
-			#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 			|| is_unicode_combining_mark(codepoint)
 			#endif
 		;

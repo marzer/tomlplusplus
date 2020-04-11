@@ -1,19 +1,25 @@
+// This file is a part of toml++ and is subject to the the terms of the MIT license.
+// Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+// See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
+/*
+
+	This example demonstrates how to parse TOML from a file and
+	re-serialize it (print it out) to stdout.
+
+*/
 #include <iostream>
 #include <fstream>
+#include "utf8_console.h"
+#define TOML_UNRELEASED_FEATURES 1
 #include <toml++/toml.h>
-#ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-#include <Windows.h>
-#endif
 using namespace std::string_view_literals;
 
 int main(int argc, char** argv)
 {
-	#ifdef _WIN32
-	SetConsoleOutputCP(65001); //UTF-8 console output
-	#endif
+	init_utf8_console();
 
-	//read from a file
+	// read from a file if a path argument is given
 	if (argc > 1)
 	{
 		auto path = std::string{ argv[1] };
@@ -31,23 +37,23 @@ int main(int argc, char** argv)
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cerr << "Error parsing file:\n"sv << err << std::endl;
+			std::cerr << err << std::endl;
 
 			return 1;
 		}
 	}
 
-	//read directly from stdin
+	// otherwise read directly from stdin
 	else 
 	{
 		try
 		{
-			const auto table = toml::parse(std::cin);
+			const auto table = toml::parse(std::cin, "stdin"sv);
 			std::cout << toml::json_formatter{ table } << std::endl;
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cerr << "Error parsing stdin:\n"sv << err << std::endl;
+			std::cerr << err << std::endl;
 
 			return 1;
 		}
