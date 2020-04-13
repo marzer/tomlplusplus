@@ -80,6 +80,10 @@ namespace toml
 
 	#endif
 
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_PADDING_WARNINGS
+	TOML_DISABLE_SHADOW_WARNINGS // false positive on gcc
+
 	#if !TOML_DOXYGEN
 
 	// foward declarations are hidden from doxygen
@@ -121,6 +125,8 @@ namespace toml
 		time,  ///< The node is a toml::value<time>.
 		date_time  ///< The node is a toml::value<date_time>.
 	};
+
+	TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS
 
 	#ifdef TOML_OPTIONAL_TYPE
 

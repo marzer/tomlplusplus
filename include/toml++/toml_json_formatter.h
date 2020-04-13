@@ -6,6 +6,10 @@
 #pragma once
 #include "toml_formatter.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	template <typename T, typename U>
@@ -70,12 +74,13 @@ namespace toml
 
 						auto& v = arr[i];
 						const auto type = v.type();
+						TOML_ASSUME(type != node_type::none);
 						switch (type)
 						{
 							case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 							case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 							default:
-								base::print(v, type);
+								base::print_value(v, type);
 						}
 
 					}
@@ -93,7 +98,7 @@ namespace toml
 				{
 					case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-					default: base::print(base::source(), source_type);
+					default: base::print_value(base::source(), source_type);
 				}
 			}
 
@@ -144,12 +149,13 @@ namespace toml
 				impl::print_to_stream(" : "sv, base::stream());
 
 				const auto type = v.type();
+				TOML_ASSUME(type != node_type::none);
 				switch (type)
 				{
 					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 					default:
-						base::print(v, type);
+						base::print_value(v, type);
 				}
 
 			}
@@ -186,3 +192,4 @@ namespace toml
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

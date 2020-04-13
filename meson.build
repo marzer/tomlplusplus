@@ -1,15 +1,14 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.2.3',
+	version : '1.2.4',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
 		'warning_level=3',
 		'werror=true',
 		'cpp_eh=default',
-		'b_ndebug=if-release',
-		'b_lto=true'
+		'b_ndebug=if-release'
 	]
 )
 
@@ -26,50 +25,105 @@ if build_tests or build_examples
 	compiler = meson.get_compiler('cpp')
 	message(['compiler ID: ', compiler.get_id()])
 	message(['compiler version: ', compiler.version()])
-
+	
+	# GCC or Clang
 	if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
 		add_project_arguments([
-				'-Wno-unused-command-line-argument',
 				'-march=native',
 				'-fno-rtti',
-				[ '-fdata-sections', '-ffunction-sections', '-Wl,--gc-sections' ]
 			],
 			language : 'cpp'
-		)
-
+		)	
+		if get_option('SMALL_BINARIES')
+			add_project_arguments([ '-fdata-sections', '-ffunction-sections', '-Wl,--gc-sections', '-Wl,-s' ], language : 'cpp')
+		endif
 	endif
 
+	# GCC
 	if compiler.get_id() == 'gcc'
 		add_project_arguments([
 				'-fmax-errors=5',
-				'-Wno-init-list-lifetime',
-				'-fmerge-constants'
+				'-Wno-init-list-lifetime'
 			],
 			language : 'cpp'
 		)
+		if get_option('ALL_WARNINGS')
+			add_project_arguments([
+					'-Wcast-align',
+					'-Wcast-qual',
+					'-Wctor-dtor-privacy',
+					'-Wdisabled-optimization',
+					'-Wextra',
+					'-Wfloat-equal',
+					'-Wimport',
+					'-Winit-self',
+					'-Winline',
+					'-Wlogical-op',
+					'-Wmissing-declarations',
+					'-Wmissing-field-initializers',
+					'-Wmissing-format-attribute',
+					'-Wmissing-include-dirs',
+					'-Wmissing-noreturn',
+					'-Wnoexcept',
+					'-Wold-style-cast',
+					'-Woverloaded-virtual',
+					'-Wpacked',
+					'-Wpadded',
+					'-Wpedantic',
+					'-Wpointer-arith',
+					'-Wredundant-decls',
+					'-Wshadow',
+					'-Wsign-conversion',
+					'-Wsign-promo',
+					'-Wstack-protector',
+					'-Wstrict-null-sentinel',
+					'-Wswitch-default',
+					'-Wswitch-enum',
+					'-Wundef',
+					'-Wunreachable-code',
+					'-Wunused',
+					'-Wunused-parameter',
+					'-Wvariadic-macros',
+					'-Wwrite-strings',
+				],
+				language : 'cpp'
+			)
+		endif
+		if get_option('SMALL_BINARIES')
+			add_project_arguments([ '-fmerge-constants' ], language : 'cpp')
+		endif
 	endif
 
+	# Clang
 	if compiler.get_id() == 'clang'
+	
+		if get_option('ALL_WARNINGS')
+			add_project_arguments([ '-Weverything' ], language : 'cpp')
+		endif
 		add_project_arguments([
 				'-ferror-limit=5',
-				'-fchar8_t',
-				'-fmerge-all-constants',
-				#'-Weverything',
+				'-fchar8_t',			
+				'-Wno-unused-command-line-argument',
+
+				# flags from here down are disabling stupidly pedantic warnings that only appear with -Weverything
 				'-Wno-c++98-compat',
 				'-Wno-c++98-compat-pedantic',
-				'-Wno-float-equal',
-				'-Wno-switch-enum',
 				'-Wno-documentation',
 				'-Wno-documentation-unknown-command',
-				'-Wno-padded',
-				'-Wno-double-promotion',
-				'-Wno-covered-switch-default',
-				#'-ftime-trace'
+				'-Wno-switch-enum',
+				'-Wno-covered-switch-default'		
 			],
 			language : 'cpp'
 		)
+		if get_option('TIME_TRACE')
+			add_project_arguments([ '-ftime-trace' ], language : 'cpp')
+		endif
+		if get_option('SMALL_BINARIES')
+			add_project_arguments([ '-Oz', '-fmerge-all-constants' ], language : 'cpp')
+		endif
 	endif
 
+	# ICC's visual studio frontend, ICL
 	if compiler.get_id() == 'intel-cl'
 		add_project_arguments([
 				'/Qoption,cpp,--unicode_source_kind,UTF-8',

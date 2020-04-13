@@ -253,7 +253,7 @@ namespace toml::impl
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
 			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-			ss << std::setfill('0') << std::setw(zero_pad_to_digits) << static_cast<cast_type>(val);
+			ss << std::setfill('0') << std::setw(static_cast<int>(zero_pad_to_digits)) << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
 			print_to_stream(str, stream);
 

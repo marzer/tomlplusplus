@@ -1,3 +1,11 @@
+#if !defined(_MSC_VER) || !defined(_M_IX86)
+	#define TOML_ALL_INLINE 0
+	#define TOML_IMPLEMENTATION
+#endif
+#include "../include/toml++/toml_preprocessor.h"
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
 #ifdef TARTANLLAMA_OPTIONAL
 	#if __has_include(<tloptional/include/tl/optional.hpp>)
 		#include <tloptional/include/tl/optional.hpp>
@@ -7,10 +15,8 @@
 	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
 #include <ostream>
-#if !defined(_MSC_VER) || !defined(_M_IX86)
-	#define TOML_ALL_INLINE 0
-	#define TOML_IMPLEMENTATION
-#endif
+TOML_POP_WARNINGS
+
 #include "../include/toml++/toml.h"
 
 namespace toml

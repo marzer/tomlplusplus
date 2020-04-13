@@ -7,6 +7,10 @@
 #include "toml_node.h"
 #include "toml_print_to_stream.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	template <typename Char, typename T>
@@ -480,3 +484,4 @@ namespace toml
 	}
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

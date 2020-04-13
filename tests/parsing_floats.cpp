@@ -1,5 +1,7 @@
 #include "tests.h"
 
+TOML_DISABLE_FLOAT_WARNINGS
+
 TEST_CASE("parsing - floats")
 {
 	parsing_should_succeed(
@@ -49,7 +51,7 @@ flt8 = 224_617.445_991_228
 		}
 	);
 
-	//value tests
+	// value tests
 	parse_expected_value( FILE_LINE_ARGS,               "1e1"sv,             1e1);
 	parse_expected_value( FILE_LINE_ARGS,              "1e+1"sv,            1e+1);
 	parse_expected_value( FILE_LINE_ARGS,              "1e-1"sv,            1e-1);
@@ -128,7 +130,7 @@ flt8 = 224_617.445_991_228
 	parse_expected_value( FILE_LINE_ARGS,          "6.02e+23"sv,        6.02e+23);
 	parse_expected_value( FILE_LINE_ARGS,  "1.112_650_06e-17"sv,  1.11265006e-17);
 
-	//toml/issues/562 (hexfloats)
+	// toml/issues/562 (hexfloats)
 	#if TOML_LANG_UNRELEASED
 		parse_expected_value(FILE_LINE_ARGS, "       0x1.2p3"sv,         0x1.2p3);
 		parse_expected_value(FILE_LINE_ARGS, "        0x10p1"sv,          0x10p1);

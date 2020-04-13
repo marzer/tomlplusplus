@@ -175,7 +175,7 @@ TEST_CASE("tables - insertion and erasure")
 	static constexpr const string_char* a = S("a");
 	res = tbl.insert_or_assign(a, 69);
 	CHECK(res.first == tbl.begin());
-	CHECK(res.second == false); //should assign
+	CHECK(res.second == false); // should assign
 	CHECK(tbl.size() == 1_sz);
 	REQUIRE(tbl.get_as<int64_t>(S("a")));
 	CHECK(*tbl.get_as<int64_t>(S("a")) == 69);
@@ -183,7 +183,7 @@ TEST_CASE("tables - insertion and erasure")
 
 	res = tbl.insert_or_assign(S("b"), S("kek"));
 	CHECK(res.first == advance(tbl.begin(), 1));
-	CHECK(res.second == true); //should insert
+	CHECK(res.second == true); // should insert
 	CHECK(tbl.size() == 2_sz);
 	REQUIRE(tbl.get_as<string>(S("b")));
 	CHECK(*tbl.get_as<string>(S("b")) == S("kek"sv));
@@ -212,7 +212,7 @@ TEST_CASE("tables - insertion and erasure")
 
 	res = tbl.insert_or_assign(S("a"sv), 69);
 	CHECK(res.first == tbl.begin());
-	CHECK(res.second == true); //should insert
+	CHECK(res.second == true); // should insert
 	CHECK(tbl.size() == 3_sz);
 	REQUIRE(tbl.get_as<int64_t>(S("a")));
 	CHECK(*tbl.get_as<int64_t>(S("a")) == 69);

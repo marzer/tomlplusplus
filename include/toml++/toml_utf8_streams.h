@@ -13,6 +13,9 @@
 #include "toml_utf8.h"
 #include "toml_parse_error.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml::impl
 {
 	template <typename T>
@@ -445,3 +448,5 @@ namespace toml::impl
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	TOML_POP_WARNINGS
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS

@@ -25,6 +25,10 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 TOML_POP_WARNINGS
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace TOML_INTERNAL_NAMESPACE
 {
 	template <uint64_t> struct parse_integer_traits;
@@ -160,6 +164,17 @@ namespace TOML_INTERNAL_NAMESPACE
 	#define push_parse_scope_2(desc, line)		scope_stack.push_back(desc); parse_scope ps_##line{ scope_stack }
 	#define push_parse_scope_1(desc, line)		push_parse_scope_2(desc, line)
 	#define push_parse_scope(desc)				push_parse_scope_1(desc, __LINE__)
+
+	struct parsed_key final
+	{
+		std::vector<toml::string> segments;
+	};
+
+	struct parsed_key_value_pair final
+	{
+		parsed_key key;
+		std::unique_ptr<toml::node> value;
+	};
 }
 
 namespace toml::impl
@@ -498,10 +513,18 @@ namespace toml::impl
 				// skip the '"'
 				advance_and_return_if_error_or_eof({});
 
+				// multiline strings ignore a single line ending right at the beginning
+				if constexpr (MultiLine)
+				{
+					consume_line_break();
+					return_if_error({});
+					set_error_and_return_if_eof({});
+				}
+
 				string str;
 				bool escaped = false;
 				[[maybe_unused]] bool skipping_whitespace = false;
-				while (!is_eof())
+				do
 				{
 					if (escaped)
 					{
@@ -601,32 +624,49 @@ namespace toml::impl
 						{
 							if constexpr (MultiLine)
 							{
-								advance_and_return_if_error_or_eof({});
-								const auto second = cp->value;
-
-								advance_and_return_if_error_or_eof({});
-								const auto third = cp->value;
-
-								if (second == U'"' && third == U'"')
+								size_t lookaheads = {};
+								size_t consecutive_delimiters = 1_sz;
+								do
 								{
-									advance_and_return_if_error({}); // skip the third closing delimiter
-
-									//multi-line basic strings are allowed one additional terminating '"'
-									//so that things like this work: """this is a "quote""""
+									advance_and_return_if_error({});
+									lookaheads++;
 									if (!is_eof() && *cp == U'"')
-									{
-										str += TOML_STRING_PREFIX('"');
-										advance_and_return_if_error({}); // skip the final closing delimiter
-									}
-
-									return str;
+										consecutive_delimiters++;
+									else
+										break;
 								}
-								else
+								while (lookaheads < 4_sz);
+
+								switch (consecutive_delimiters)
 								{
-									str += TOML_STRING_PREFIX('"');
-									go_back(1_sz);
-									skipping_whitespace = false;
-									continue;
+									// """ " (one quote somewhere in a ML string)
+									case 1_sz:
+										str += TOML_STRING_PREFIX('"');
+										skipping_whitespace = false;
+										continue;
+
+									// """ "" (two quotes somewhere in a ML string)
+									case 2_sz:
+										str.append(TOML_STRING_PREFIX("\"\""sv));
+										skipping_whitespace = false;
+										continue;
+
+									// """ """ (the end of the string)
+									case 3_sz:
+										return str;
+
+									// """ """" (one at the end of the string)
+									case 4_sz:
+										str += TOML_STRING_PREFIX('"');
+										return str;
+
+									// """ """"" (two quotes at the end of the string)
+									case 5_sz:
+										str.append(TOML_STRING_PREFIX("\"\""sv));
+										advance_and_return_if_error({}); // skip the last '"'
+										return str;
+
+									TOML_NO_DEFAULT_CASE;
 								}
 							}
 							else
@@ -652,7 +692,7 @@ namespace toml::impl
 							{
 								consume_line_break();
 								return_if_error({});
-								if (!str.empty() && !skipping_whitespace)
+								if (!skipping_whitespace)
 									str += TOML_STRING_PREFIX('\n');
 								continue;
 							}
@@ -687,6 +727,7 @@ namespace toml::impl
 						advance_and_return_if_error({});
 					}
 				}
+				while (!is_eof());
 
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
@@ -703,8 +744,16 @@ namespace toml::impl
 				// skip the delimiter
 				advance_and_return_if_error_or_eof({});
 
+				// multiline strings ignore a single line ending right at the beginning
+				if constexpr (MultiLine)
+				{
+					consume_line_break();
+					return_if_error({});
+					set_error_and_return_if_eof({});
+				}
+
 				string str;
-				while (!is_eof())
+				do
 				{
 					assert_not_error();
 
@@ -713,22 +762,47 @@ namespace toml::impl
 					{
 						if constexpr (MultiLine)
 						{
-							advance_and_return_if_error_or_eof({});
-							const auto second = cp->value;
-
-							advance_and_return_if_error_or_eof({});
-							const auto third = cp->value;
-
-							if (second == U'\'' && third == U'\'')
+							size_t lookaheads = {};
+							size_t consecutive_delimiters = 1_sz;
+							do
 							{
-								advance_and_return_if_error({}); // skip the third closing delimiter
-								return str;
+								advance_and_return_if_error({});
+								lookaheads++;
+								if (!is_eof() && *cp == U'\'')
+									consecutive_delimiters++;
+								else
+									break;
 							}
-							else
+							while (lookaheads < 4_sz);
+
+							switch (consecutive_delimiters)
 							{
-								str += TOML_STRING_PREFIX('\'');
-								go_back(1_sz);
-								continue;
+								// ''' ' (one quote somewhere in a ML string)
+								case 1_sz:
+									str += TOML_STRING_PREFIX('\'');
+									continue;
+
+								// ''' '' (two quotes somewhere in a ML string)
+								case 2_sz:
+									str.append(TOML_STRING_PREFIX("''"sv));
+									continue;
+
+								// ''' ''' (the end of the string)
+								case 3_sz:
+									return str;
+
+								// ''' '''' (one at the end of the string)
+								case 4_sz:
+									str += TOML_STRING_PREFIX('\'');
+									return str;
+
+								// ''' ''''' (two quotes at the end of the string)
+								case 5_sz:
+									str.append(TOML_STRING_PREFIX("''"sv));
+									advance_and_return_if_error({}); // skip the last '
+									return str;
+
+								TOML_NO_DEFAULT_CASE;
 							}
 						}
 						else
@@ -744,8 +818,7 @@ namespace toml::impl
 						if (is_line_break(*cp))
 						{
 							consume_line_break();
-							if (!str.empty())
-								str += TOML_STRING_PREFIX('\n');
+							str += TOML_STRING_PREFIX('\n');
 							continue;
 						}
 					}
@@ -768,6 +841,7 @@ namespace toml::impl
 					str.append(cp->as_view());
 					advance_and_return_if_error({});
 				}
+				while (!is_eof());
 
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
@@ -2041,20 +2115,15 @@ namespace toml::impl
 				return val;
 			}
 
-			struct key final
-			{
-				std::vector<string> segments;
-			};
-
 			[[nodiscard]]
-			key parse_key() TOML_MAY_THROW
+			parsed_key parse_key() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
 				assert_or_assume(is_bare_key_character(*cp) || is_string_delimiter(*cp));
 				push_parse_scope("key"sv);
 
-				key key;
+				parsed_key key;
 
 				while (!is_error())
 				{
@@ -2100,14 +2169,8 @@ namespace toml::impl
 				return key;
 			}
 
-			struct key_value_pair final
-			{
-				parser::key key;
-				std::unique_ptr<node> value;
-			};
-
 			[[nodiscard]]
-			key_value_pair parse_key_value_pair() TOML_MAY_THROW
+			parsed_key_value_pair parse_key_value_pair() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -2148,7 +2211,7 @@ namespace toml::impl
 
 				const auto header_begin_pos = cp->position;
 				source_position header_end_pos;
-				key key;
+				parsed_key key;
 				bool is_arr = false;
 
 				//parse header
@@ -2748,6 +2811,8 @@ namespace toml
 		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 //# {{
 #endif // !TOML_DOXYGEN

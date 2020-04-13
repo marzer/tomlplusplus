@@ -1,6 +1,11 @@
+#include "../include/toml++/toml_preprocessor.h"
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
 #define CATCH_CONFIG_RUNNER
 #include "catch2.h"
 #include <clocale>
+TOML_POP_WARNINGS
 
 int main(int argc, char* argv[])
 {

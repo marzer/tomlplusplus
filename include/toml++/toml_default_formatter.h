@@ -9,6 +9,10 @@
 #include "toml_array.h"
 #include "toml_utf8.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml::impl
 {
 	[[nodiscard]] TOML_API
@@ -20,7 +24,6 @@ namespace toml::impl
 	[[nodiscard]] TOML_API
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept;
 }
-
 
 namespace toml
 {
@@ -143,12 +146,13 @@ namespace toml
 
 						auto& v = arr[i];
 						const auto type = v.type();
+						TOML_ASSUME(type != node_type::none);
 						switch (type)
 						{
 							case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 							case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 							default:
-								base::print(v, type);
+								base::print_value(v, type);
 						}
 
 					}
@@ -187,12 +191,13 @@ namespace toml
 					base::print_indent();
 					print_key_segment(k);
 					impl::print_to_stream(" = "sv, base::stream());
+					TOML_ASSUME(type != node_type::none);
 					switch (type)
 					{
 						case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 						case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 						default:
-							base::print(v, type);
+							base::print_value(v, type);
 					}
 				}
 
@@ -213,6 +218,7 @@ namespace toml
 					{
 						(void)child_k;
 						const auto child_type = child_v.type();
+						TOML_ASSUME(child_type != node_type::none);
 						switch (child_type)
 						{
 							case node_type::table:
@@ -308,7 +314,7 @@ namespace toml
 						break;
 
 					default:
-						base::print(base::source(), source_type);
+						base::print_value(base::source(), source_type);
 				}
 			}
 
@@ -357,12 +363,13 @@ namespace toml
 				impl::print_to_stream(" = "sv, base::stream());
 
 				const auto type = v.type();
+				TOML_ASSUME(type != node_type::none);
 				switch (type)
 				{
 					case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 					default:
-						base::print(v, type);
+						base::print_value(v, type);
 				}
 			}
 
@@ -413,3 +420,4 @@ namespace toml
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

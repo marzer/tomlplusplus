@@ -10,11 +10,17 @@ str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
 str1 = """
 Roses are red
 Violets are blue"""
+
+str2 = """
+
+Roses are red
+Violets are blue"""
 )"sv),
 		[](table&& tbl) noexcept
 		{
 			CHECK(tbl[S("str")] == S("I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."sv));
 			CHECK(tbl[S("str1")] == S("Roses are red\nViolets are blue"sv));
+			CHECK(tbl[S("str2")] == S("\nRoses are red\nViolets are blue"sv));
 		}
 	);
 
@@ -75,6 +81,13 @@ trimmed in raw strings.
    All other whitespace
    is preserved.
 '''
+lines2  = '''
+
+The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+'''
 )"sv),
 		[](table&& tbl) noexcept
 		{
@@ -84,6 +97,12 @@ trimmed in raw strings.
 			CHECK(tbl[S("regex")] == S(R"(<\i\c*\s*>)"sv));
 			CHECK(tbl[S("regex2")] == S(R"(I [dw]on't need \d{2} apples)"sv));
 			CHECK(tbl[S("lines")] == S(R"(The first newline is
+trimmed in raw strings.
+   All other whitespace
+   is preserved.
+)"sv));
+			CHECK(tbl[S("lines2")] == S(R"(
+The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
@@ -112,7 +131,7 @@ str = ''''That's still pointless', she said.'''
 
 	parsing_should_fail(FILE_LINE_ARGS, S(R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv));
 
-	//value tests
+	// value tests
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("The quick brown fox jumps over the lazy dog")"sv,
@@ -156,7 +175,7 @@ str = ''''That's still pointless', she said.'''
 		parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
 	#endif
 
-	//check 8-digit \U scalars with insufficient digits
+	// check 8-digit \U scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U1234567")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U123456")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U12345")"sv);
@@ -165,11 +184,31 @@ str = ''''That's still pointless', she said.'''
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U12")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\U1")"sv);
 
-	//check 4-digit \u scalars with insufficient digits
+	// check 4-digit \u scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u123")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u12")"sv);
 	parsing_should_fail(FILE_LINE_ARGS,R"(str = "\u1")"sv);
 
-	//check 2-digit \x scalars with insufficient digits
+	// check 2-digit \x scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x1")"sv);
+
+	// ML string examples from https://github.com/toml-lang/toml/issues/725
+	parse_expected_value(FILE_LINE_ARGS,  R"( """ """          )"sv,	S(R"( )"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( """ """"         )"sv,	S(R"( ")"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( """ """""        )"sv,	S(R"( "")"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(v= """ """"""       )"sv);
+	parse_expected_value(FILE_LINE_ARGS,  R"( ''' '''          )"sv,	S(R"( )"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( ''' ''''         )"sv,	S(R"( ')"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( ''' '''''        )"sv,	S(R"( '')"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(v= ''' ''''''       )"sv);
+	parse_expected_value(FILE_LINE_ARGS,  R"( """"""           )"sv,	S(R"()"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( """" """         )"sv,	S(R"(" )"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( """"" """        )"sv,	S(R"("" )"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(v= """""" """       )"sv);
+	parse_expected_value(FILE_LINE_ARGS,  R"( ''''''           )"sv,	S(R"()"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( '''' '''         )"sv,	S(R"(' )"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( ''''' '''        )"sv,	S(R"('' )"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(v= '''''' '''       )"sv);
+	parse_expected_value(FILE_LINE_ARGS,  R"( """""\""""""     )"sv,	S(R"(""""")"sv));
+	parse_expected_value(FILE_LINE_ARGS,  R"( """""\"""\"""""" )"sv,	S(R"("""""""")"sv));
 }

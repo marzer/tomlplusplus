@@ -1,19 +1,9 @@
 #pragma once
-#ifdef TARTANLLAMA_OPTIONAL
-	#if __has_include(<tloptional/include/tl/optional.hpp>)
-		#include <tloptional/include/tl/optional.hpp>
-	#else
-		#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
-	#endif
-	#define TOML_OPTIONAL_TYPE tl::optional
-#endif
-#include "catch2.h"
-#include <sstream>
 #define TOML_UNDEF_MACROS 0
 #if !defined(_MSC_VER) || !defined(_M_IX86)
 	#define TOML_ALL_INLINE 0
 #endif
-#include "../include/toml++/toml.h"
+#include "../include/toml++/toml_preprocessor.h"
 
 #if TOML_COMPILER_EXCEPTIONS
 	#if !TOML_EXCEPTIONS
@@ -25,15 +15,30 @@
 	#endif
 #endif
 
-#define FILE_LINE_ARGS std::string_view{ __FILE__ }, __LINE__
-
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-using namespace toml;
+#ifdef TARTANLLAMA_OPTIONAL
+	#if __has_include(<tloptional/include/tl/optional.hpp>)
+		#include <tloptional/include/tl/optional.hpp>
+	#else
+		#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
+	#endif
+	#define TOML_OPTIONAL_TYPE tl::optional
+#endif
+#include "catch2.h"
+#include <sstream>
+namespace toml {}
 using namespace Catch::literals;
+using namespace toml;
 TOML_POP_WARNINGS
 
-#define S(str) TOML_STRING_PREFIX(str)
+#include "../include/toml++/toml.h"
+
+#define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
+#define S(str)			TOML_STRING_PREFIX(str)
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_FLOAT_WARNINGS
 
 template <typename Char, typename Func = std::false_type>
 inline void parsing_should_succeed(
@@ -385,3 +390,5 @@ namespace Catch
 		extern template std::string stringify(const node_view<const node>&);
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS

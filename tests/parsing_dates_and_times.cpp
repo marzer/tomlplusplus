@@ -41,7 +41,7 @@ lt2 = 00:32:00.999999
 		}
 	);
 
-	//value tests
+	// value tests
 	parse_expected_value(FILE_LINE_ARGS,   "1987-03-16"sv,                date{ 1987, 3, 16 } );
 	parse_expected_value(FILE_LINE_ARGS,     "10:20:30"sv,           toml::time{ 10, 20, 30 } );
 	parse_expected_value(FILE_LINE_ARGS,  "10:20:30.04"sv, toml::time{ 10, 20, 30, 40000000 } );

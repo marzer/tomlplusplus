@@ -12,6 +12,10 @@
 #endif
 //# }}
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_FLOAT_WARNINGS
+
 namespace toml::impl
 {
 	TOML_PUSH_WARNINGS
@@ -133,6 +137,7 @@ namespace toml::impl
 			case node_type::date: [[fallthrough]];
 			case node_type::time: return 10_sz;
 			case node_type::date_time: return 30_sz;
+			case node_type::none: TOML_UNREACHABLE;
 			TOML_NO_DEFAULT_CASE;
 		}
 
@@ -146,6 +151,8 @@ namespace toml::impl
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
 
 //# {{
 #endif // !TOML_DOXYGEN

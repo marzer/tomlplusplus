@@ -6,6 +6,10 @@
 #pragma once
 #include "toml_print_to_stream.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
@@ -14,16 +18,23 @@ namespace toml
 		none,
 		quote_dates_and_times = 1
 	};
-	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
-	[[nodiscard]] constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
 }
-
 
 namespace toml::impl
 {
@@ -127,8 +138,9 @@ namespace toml::impl
 				}
 			}
 
-			void print(const node& val_node, node_type type)
+			void print_value(const node& val_node, node_type type)
 			{
+				TOML_ASSUME(type > node_type::array);
 				switch (type)
 				{
 					case node_type::string:			print(*reinterpret_cast<const value<string>*>(&val_node)); break;
@@ -153,3 +165,4 @@ namespace toml::impl
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

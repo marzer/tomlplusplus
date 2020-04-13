@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.2.3
+// toml++ v1.2.4
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -42,7 +42,8 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 // clang-format off
-#pragma once
+#ifndef TOMLPLUSPLUS_SINGLE_HEADER_H
+#define TOMLPLUSPLUS_SINGLE_HEADER_H
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -96,6 +97,10 @@
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
 	#define TOML_DISABLE_VTABLE_WARNINGS	_Pragma("clang diagnostic ignored \"-Weverything\"") \
 											_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
+	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("clang diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
+											_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"")
+	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("clang diagnostic ignored \"-Wshadow\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
@@ -156,14 +161,25 @@
 #elif defined(__GNUC__)
 
 	#define TOML_PUSH_WARNINGS				_Pragma("GCC diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")
+	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
+											_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
+											_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")
 	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 											_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 											_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
+	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")
+	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wshadow\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
 											_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
-											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+											TOML_DISABLE_SWITCH_WARNINGS										\
+											TOML_DISABLE_INIT_WARNINGS											\
+											TOML_DISABLE_PADDING_WARNINGS										\
+											TOML_DISABLE_FLOAT_WARNINGS											\
+											TOML_DISABLE_SHADOW_WARNINGS
+
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
@@ -246,6 +262,15 @@
 #ifndef TOML_DISABLE_VTABLE_WARNINGS
 	#define TOML_DISABLE_VTABLE_WARNINGS
 #endif
+#ifndef TOML_DISABLE_PADDING_WARNINGS
+	#define TOML_DISABLE_PADDING_WARNINGS
+#endif
+#ifndef TOML_DISABLE_FLOAT_WARNINGS
+	#define TOML_DISABLE_FLOAT_WARNINGS
+#endif
+#ifndef TOML_DISABLE_SHADOW_WARNINGS
+	#define TOML_DISABLE_SHADOW_WARNINGS
+#endif
 #ifndef TOML_DISABLE_ALL_WARNINGS
 	#define TOML_DISABLE_ALL_WARNINGS
 #endif
@@ -322,7 +347,7 @@
 #endif
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		2
-#define TOML_LIB_PATCH		3
+#define TOML_LIB_PATCH		4
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -370,10 +395,6 @@ TOML_DISABLE_ALL_WARNINGS
 TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS
-	#ifndef __cpp_lib_char8_t
-		#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
-	#endif
-
 	#define TOML_STRING_PREFIX_1(S) u8##S
 	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
 #else
@@ -447,6 +468,10 @@ namespace toml
 
 	#endif
 
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_PADDING_WARNINGS
+	TOML_DISABLE_SHADOW_WARNINGS // false positive on gcc
+
 	#if !TOML_DOXYGEN
 
 	// foward declarations are hidden from doxygen
@@ -487,6 +512,8 @@ namespace toml
 		time,
 		date_time
 	};
+
+	TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS
 
 	#ifdef TOML_OPTIONAL_TYPE
 
@@ -838,6 +865,9 @@ namespace toml
 //-----------------------------------------------------------------  ↓ toml_date_time.h  -------------------------------
 #pragma region
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	struct TOML_TRIVIAL_ABI date
@@ -1145,6 +1175,8 @@ namespace toml
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+
 #pragma endregion
 //-----------------------------------------------------------------  ↑ toml_date_time.h  -------------------------------
 
@@ -1399,7 +1431,7 @@ namespace toml::impl
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
 			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-			ss << std::setfill('0') << std::setw(zero_pad_to_digits) << static_cast<cast_type>(val);
+			ss << std::setfill('0') << std::setw(static_cast<int>(zero_pad_to_digits)) << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
 			print_to_stream(str, stream);
 
@@ -1820,6 +1852,7 @@ namespace toml
 							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
 						break;
 
+					case node_type::none: TOML_UNREACHABLE;
 					TOML_NO_DEFAULT_CASE;
 				}
 
@@ -1915,6 +1948,10 @@ TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 //------------------------------------------  ↓ toml_value.h  ----------------------------------------------------------
 #pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
@@ -2268,6 +2305,8 @@ namespace toml
 		return return_type{ std::forward<T>(default_value) };
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #pragma endregion
 //------------------------------------------  ↑ toml_value.h  ----------------------------------------------------------
@@ -2748,6 +2787,7 @@ TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml::impl
 {
@@ -3055,7 +3095,7 @@ namespace toml
 	};
 }
 
-TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_VTABLE_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #pragma endregion
 //--------------------------------------------------------------------------------------------  ↑ toml_table.h  --------
@@ -3065,6 +3105,9 @@ TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
 namespace toml
 {
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_FLOAT_WARNINGS
+
 	template <typename Char, typename T>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 
@@ -3280,6 +3323,8 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<node>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
 	#endif
+
+	TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS
 }
 
 #pragma endregion
@@ -4423,6 +4468,10 @@ namespace toml::impl
 //------------------------------------------------------------------------------------------  ↓ toml_formatter.h  ------
 #pragma region
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	enum class format_flags : uint8_t
@@ -4430,11 +4479,19 @@ namespace toml
 		none,
 		quote_dates_and_times = 1
 	};
-	[[nodiscard]] constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
-	[[nodiscard]] constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
@@ -4540,8 +4597,9 @@ namespace toml::impl
 				}
 			}
 
-			void print(const node& val_node, node_type type)
+			void print_value(const node& val_node, node_type type)
 			{
+				TOML_ASSUME(type > node_type::array);
 				switch (type)
 				{
 					case node_type::string:			print(*reinterpret_cast<const value<string>*>(&val_node)); break;
@@ -4566,11 +4624,17 @@ namespace toml::impl
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+
 #pragma endregion
 //------------------------------------------------------------------------------------------  ↑ toml_formatter.h  ------
 
 //-----------  ↓ toml_default_formatter.h  -----------------------------------------------------------------------------
 #pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml::impl
 {
@@ -4675,12 +4739,13 @@ namespace toml
 
 						auto& v = arr[i];
 						const auto type = v.type();
+						TOML_ASSUME(type != node_type::none);
 						switch (type)
 						{
 							case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 							case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 							default:
-								base::print(v, type);
+								base::print_value(v, type);
 						}
 
 					}
@@ -4719,12 +4784,13 @@ namespace toml
 					base::print_indent();
 					print_key_segment(k);
 					impl::print_to_stream(" = "sv, base::stream());
+					TOML_ASSUME(type != node_type::none);
 					switch (type)
 					{
 						case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 						case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 						default:
-							base::print(v, type);
+							base::print_value(v, type);
 					}
 				}
 
@@ -4745,6 +4811,7 @@ namespace toml
 					{
 						(void)child_k;
 						const auto child_type = child_v.type();
+						TOML_ASSUME(child_type != node_type::none);
 						switch (child_type)
 						{
 							case node_type::table:
@@ -4840,7 +4907,7 @@ namespace toml
 						break;
 
 					default:
-						base::print(base::source(), source_type);
+						base::print_value(base::source(), source_type);
 				}
 			}
 
@@ -4885,12 +4952,13 @@ namespace toml
 				impl::print_to_stream(" = "sv, base::stream());
 
 				const auto type = v.type();
+				TOML_ASSUME(type != node_type::none);
 				switch (type)
 				{
 					case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 					default:
-						base::print(v, type);
+						base::print_value(v, type);
 				}
 			}
 
@@ -4939,11 +5007,17 @@ namespace toml
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+
 #pragma endregion
 //-----------  ↑ toml_default_formatter.h  -----------------------------------------------------------------------------
 
 //--------------------------------------  ↓ toml_json_formatter.h  -----------------------------------------------------
 #pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
@@ -4976,12 +5050,13 @@ namespace toml
 
 						auto& v = arr[i];
 						const auto type = v.type();
+						TOML_ASSUME(type != node_type::none);
 						switch (type)
 						{
 							case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 							case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 							default:
-								base::print(v, type);
+								base::print_value(v, type);
 						}
 
 					}
@@ -4999,7 +5074,7 @@ namespace toml
 				{
 					case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-					default: base::print(base::source(), source_type);
+					default: base::print_value(base::source(), source_type);
 				}
 			}
 
@@ -5046,12 +5121,13 @@ namespace toml
 				impl::print_to_stream(" : "sv, base::stream());
 
 				const auto type = v.type();
+				TOML_ASSUME(type != node_type::none);
 				switch (type)
 				{
 					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 					default:
-						base::print(v, type);
+						base::print_value(v, type);
 				}
 
 			}
@@ -5085,6 +5161,8 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
 	#endif
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #pragma endregion
 //--------------------------------------  ↑ toml_json_formatter.h  -----------------------------------------------------
@@ -5226,6 +5304,9 @@ TOML_POP_WARNINGS
 
 //-----------------------------------------------------------------------------------------  ↓ toml_utf8_streams.h  ----
 #pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml::impl
 {
@@ -5659,11 +5740,16 @@ namespace toml::impl
 	TOML_POP_WARNINGS
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+
 #pragma endregion
 //-----------------------------------------------------------------------------------------  ↑ toml_utf8_streams.h  ----
 
 //-----------------  ↓ toml_parser.h  ----------------------------------------------------------------------------------
 #pragma region
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
@@ -5978,6 +6064,8 @@ namespace toml
 		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
 #pragma endregion
 //-----------------  ↑ toml_parser.h  ----------------------------------------------------------------------------------
@@ -6420,6 +6508,10 @@ namespace toml
 //----------  ↓ toml_default_formatter.hpp  ----------------------------------------------------------------------------
 #pragma region
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_FLOAT_WARNINGS
+
 namespace toml::impl
 {
 	TOML_PUSH_WARNINGS
@@ -6541,6 +6633,7 @@ namespace toml::impl
 			case node_type::date: [[fallthrough]];
 			case node_type::time: return 10_sz;
 			case node_type::date_time: return 30_sz;
+			case node_type::none: TOML_UNREACHABLE;
 			TOML_NO_DEFAULT_CASE;
 		}
 
@@ -6554,6 +6647,8 @@ namespace toml::impl
 		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
 
 #pragma endregion
 //----------  ↑ toml_default_formatter.hpp  ----------------------------------------------------------------------------
@@ -6576,6 +6671,10 @@ TOML_DISABLE_ALL_WARNINGS
 	using namespace std::string_view_literals;
 #endif
 TOML_POP_WARNINGS
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace TOML_INTERNAL_NAMESPACE
 {
@@ -6712,6 +6811,17 @@ namespace TOML_INTERNAL_NAMESPACE
 	#define push_parse_scope_2(desc, line)		scope_stack.push_back(desc); parse_scope ps_##line{ scope_stack }
 	#define push_parse_scope_1(desc, line)		push_parse_scope_2(desc, line)
 	#define push_parse_scope(desc)				push_parse_scope_1(desc, __LINE__)
+
+	struct parsed_key final
+	{
+		std::vector<toml::string> segments;
+	};
+
+	struct parsed_key_value_pair final
+	{
+		parsed_key key;
+		std::unique_ptr<toml::node> value;
+	};
 }
 
 namespace toml::impl
@@ -7050,10 +7160,18 @@ namespace toml::impl
 				// skip the '"'
 				advance_and_return_if_error_or_eof({});
 
+				// multiline strings ignore a single line ending right at the beginning
+				if constexpr (MultiLine)
+				{
+					consume_line_break();
+					return_if_error({});
+					set_error_and_return_if_eof({});
+				}
+
 				string str;
 				bool escaped = false;
 				[[maybe_unused]] bool skipping_whitespace = false;
-				while (!is_eof())
+				do
 				{
 					if (escaped)
 					{
@@ -7153,32 +7271,49 @@ namespace toml::impl
 						{
 							if constexpr (MultiLine)
 							{
-								advance_and_return_if_error_or_eof({});
-								const auto second = cp->value;
-
-								advance_and_return_if_error_or_eof({});
-								const auto third = cp->value;
-
-								if (second == U'"' && third == U'"')
+								size_t lookaheads = {};
+								size_t consecutive_delimiters = 1_sz;
+								do
 								{
-									advance_and_return_if_error({}); // skip the third closing delimiter
-
-									//multi-line basic strings are allowed one additional terminating '"'
-									//so that things like this work: """this is a "quote""""
+									advance_and_return_if_error({});
+									lookaheads++;
 									if (!is_eof() && *cp == U'"')
-									{
-										str += TOML_STRING_PREFIX('"');
-										advance_and_return_if_error({}); // skip the final closing delimiter
-									}
-
-									return str;
+										consecutive_delimiters++;
+									else
+										break;
 								}
-								else
+								while (lookaheads < 4_sz);
+
+								switch (consecutive_delimiters)
 								{
-									str += TOML_STRING_PREFIX('"');
-									go_back(1_sz);
-									skipping_whitespace = false;
-									continue;
+									// """ " (one quote somewhere in a ML string)
+									case 1_sz:
+										str += TOML_STRING_PREFIX('"');
+										skipping_whitespace = false;
+										continue;
+
+									// """ "" (two quotes somewhere in a ML string)
+									case 2_sz:
+										str.append(TOML_STRING_PREFIX("\"\""sv));
+										skipping_whitespace = false;
+										continue;
+
+									// """ """ (the end of the string)
+									case 3_sz:
+										return str;
+
+									// """ """" (one at the end of the string)
+									case 4_sz:
+										str += TOML_STRING_PREFIX('"');
+										return str;
+
+									// """ """"" (two quotes at the end of the string)
+									case 5_sz:
+										str.append(TOML_STRING_PREFIX("\"\""sv));
+										advance_and_return_if_error({}); // skip the last '"'
+										return str;
+
+									TOML_NO_DEFAULT_CASE;
 								}
 							}
 							else
@@ -7204,7 +7339,7 @@ namespace toml::impl
 							{
 								consume_line_break();
 								return_if_error({});
-								if (!str.empty() && !skipping_whitespace)
+								if (!skipping_whitespace)
 									str += TOML_STRING_PREFIX('\n');
 								continue;
 							}
@@ -7239,6 +7374,7 @@ namespace toml::impl
 						advance_and_return_if_error({});
 					}
 				}
+				while (!is_eof());
 
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
@@ -7255,8 +7391,16 @@ namespace toml::impl
 				// skip the delimiter
 				advance_and_return_if_error_or_eof({});
 
+				// multiline strings ignore a single line ending right at the beginning
+				if constexpr (MultiLine)
+				{
+					consume_line_break();
+					return_if_error({});
+					set_error_and_return_if_eof({});
+				}
+
 				string str;
-				while (!is_eof())
+				do
 				{
 					assert_not_error();
 
@@ -7265,22 +7409,47 @@ namespace toml::impl
 					{
 						if constexpr (MultiLine)
 						{
-							advance_and_return_if_error_or_eof({});
-							const auto second = cp->value;
-
-							advance_and_return_if_error_or_eof({});
-							const auto third = cp->value;
-
-							if (second == U'\'' && third == U'\'')
+							size_t lookaheads = {};
+							size_t consecutive_delimiters = 1_sz;
+							do
 							{
-								advance_and_return_if_error({}); // skip the third closing delimiter
-								return str;
+								advance_and_return_if_error({});
+								lookaheads++;
+								if (!is_eof() && *cp == U'\'')
+									consecutive_delimiters++;
+								else
+									break;
 							}
-							else
+							while (lookaheads < 4_sz);
+
+							switch (consecutive_delimiters)
 							{
-								str += TOML_STRING_PREFIX('\'');
-								go_back(1_sz);
-								continue;
+								// ''' ' (one quote somewhere in a ML string)
+								case 1_sz:
+									str += TOML_STRING_PREFIX('\'');
+									continue;
+
+								// ''' '' (two quotes somewhere in a ML string)
+								case 2_sz:
+									str.append(TOML_STRING_PREFIX("''"sv));
+									continue;
+
+								// ''' ''' (the end of the string)
+								case 3_sz:
+									return str;
+
+								// ''' '''' (one at the end of the string)
+								case 4_sz:
+									str += TOML_STRING_PREFIX('\'');
+									return str;
+
+								// ''' ''''' (two quotes at the end of the string)
+								case 5_sz:
+									str.append(TOML_STRING_PREFIX("''"sv));
+									advance_and_return_if_error({}); // skip the last '
+									return str;
+
+								TOML_NO_DEFAULT_CASE;
 							}
 						}
 						else
@@ -7296,8 +7465,7 @@ namespace toml::impl
 						if (is_line_break(*cp))
 						{
 							consume_line_break();
-							if (!str.empty())
-								str += TOML_STRING_PREFIX('\n');
+							str += TOML_STRING_PREFIX('\n');
 							continue;
 						}
 					}
@@ -7320,6 +7488,7 @@ namespace toml::impl
 					str.append(cp->as_view());
 					advance_and_return_if_error({});
 				}
+				while (!is_eof());
 
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
@@ -8591,20 +8760,15 @@ namespace toml::impl
 				return val;
 			}
 
-			struct key final
-			{
-				std::vector<string> segments;
-			};
-
 			[[nodiscard]]
-			key parse_key() TOML_MAY_THROW
+			parsed_key parse_key() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
 				assert_or_assume(is_bare_key_character(*cp) || is_string_delimiter(*cp));
 				push_parse_scope("key"sv);
 
-				key key;
+				parsed_key key;
 
 				while (!is_error())
 				{
@@ -8650,14 +8814,8 @@ namespace toml::impl
 				return key;
 			}
 
-			struct key_value_pair final
-			{
-				parser::key key;
-				std::unique_ptr<node> value;
-			};
-
 			[[nodiscard]]
-			key_value_pair parse_key_value_pair() TOML_MAY_THROW
+			parsed_key_value_pair parse_key_value_pair() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -8698,7 +8856,7 @@ namespace toml::impl
 
 				const auto header_begin_pos = cp->position;
 				source_position header_end_pos;
-				key key;
+				parsed_key key;
 				bool is_arr = false;
 
 				//parse header
@@ -9296,6 +9454,8 @@ namespace toml
 	}
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+
 #pragma endregion
 //-----------------------------------------  ↑ toml_parser.hpp  --------------------------------------------------------
 
@@ -9404,6 +9564,8 @@ namespace toml
 	#undef TOML_DISABLE_SWITCH_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_VTABLE_WARNINGS
+	#undef TOML_DISABLE_PADDING_WARNINGS
+	#undef TOML_DISABLE_FLOAT_WARNINGS
 	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_POP_WARNINGS
 	#undef TOML_ALWAYS_INLINE
@@ -9445,4 +9607,5 @@ namespace toml
 #ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
+#endif // TOMLPLUSPLUS_SINGLE_HEADER_H
 // clang-format on

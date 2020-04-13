@@ -116,23 +116,27 @@ def main():
 	source_text = source_text.strip()
 
 	# extract library version
-	library_version = [0,0,0]
+	library_version = {
+		'major': 0,
+		'minor': 0,
+		'patch': 0
+	}
 	match = re.search(r'^\s*#\s*define\s+TOML_LIB_MAJOR\s+([0-9]+)\s*$', source_text, re.I | re.M)
 	if match is not None:
-		library_version[0] = match.group(1)
+		library_version['major'] = match.group(1)
 	match = re.search(r'^\s*#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)\s*$', source_text, re.I | re.M)
 	if match is not None:
-		library_version[1] = match.group(1)
+		library_version['minor'] = match.group(1)
 	match = re.search(r'^\s*#\s*define\s+TOML_LIB_(?:REVISION|PATCH)\s+([0-9]+)\s*$', source_text, re.I | re.M)
 	if match is not None:
-		library_version[2] = match.group(1)
+		library_version['patch'] = match.group(1)
 
 	# build the preamble (license etc)
 	preamble = []
 	preamble.append('''
-toml++ v{}
+toml++ v{major}.{minor}.{patch}
 https://github.com/marzer/tomlplusplus
-SPDX-License-Identifier: MIT'''.format('.'.join(str(x) for x in library_version)))
+SPDX-License-Identifier: MIT'''.format(**library_version))
 	preamble.append('''
 -         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
 
@@ -165,7 +169,8 @@ v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5
 			print('//', file=output_file)
 			print(make_divider(), file=output_file)
 		print('''// clang-format off
-#pragma once
+#ifndef TOMLPLUSPLUS_SINGLE_HEADER_H
+#define TOMLPLUSPLUS_SINGLE_HEADER_H
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -177,6 +182,7 @@ v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5
 #ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
+#endif // TOMLPLUSPLUS_SINGLE_HEADER_H
 // clang-format on''', file=output_file)
 
 

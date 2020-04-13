@@ -385,6 +385,7 @@ namespace toml
 							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
 						break;
 
+					case node_type::none: TOML_UNREACHABLE;
 					TOML_NO_DEFAULT_CASE;
 				}
 

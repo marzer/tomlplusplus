@@ -10,6 +10,9 @@
 
 namespace toml
 {
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_FLOAT_WARNINGS
+
 	template <typename Char, typename T>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 
@@ -373,5 +376,7 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<node>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
 	#endif
+
+	TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS
 }
 

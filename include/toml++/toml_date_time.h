@@ -6,6 +6,9 @@
 #pragma once
 #include "toml_common.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	/// \brief	A local date.
@@ -431,3 +434,4 @@ namespace toml
 	#endif
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS

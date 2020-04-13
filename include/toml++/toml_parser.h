@@ -13,6 +13,9 @@
 #include "toml_table.h"
 #include "toml_utf8_streams.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+
 namespace toml
 {
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
@@ -607,3 +610,4 @@ namespace toml
 	}
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
