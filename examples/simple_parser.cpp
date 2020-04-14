@@ -17,6 +17,7 @@ using namespace std::string_view_literals;
 
 int main(int argc, char** argv)
 {
+	std::ios_base::sync_with_stdio(false);
 	init_utf8_console();
 
 	auto path = std::string{ argc > 1 ? argv[1] : "example.toml" };

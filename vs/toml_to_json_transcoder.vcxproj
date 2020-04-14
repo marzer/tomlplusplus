@@ -65,5 +65,8 @@
   <ItemGroup>
     <Natvis Include="toml++.natvis" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\examples\meson.build" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

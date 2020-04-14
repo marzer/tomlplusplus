@@ -42,8 +42,8 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 // clang-format off
-#ifndef TOMLPLUSPLUS_SINGLE_HEADER_H
-#define TOMLPLUSPLUS_SINGLE_HEADER_H
+#ifndef INCLUDE_TOMLPLUSPLUS_H
+#define INCLUDE_TOMLPLUSPLUS_H
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -6802,15 +6802,25 @@ namespace TOML_INTERNAL_NAMESPACE
 
 	struct parse_scope final
 	{
-		std::vector<std::string_view>& stack_;
+		std::string_view& storage_;
+		std::string_view parent_;
 
 		TOML_NODISCARD_CTOR
-		explicit parse_scope(std::vector<std::string_view>& stack) noexcept : stack_{ stack } {}
-		~parse_scope() noexcept { stack_.pop_back(); }
+		explicit parse_scope(std::string_view& current_scope, std::string_view new_scope) noexcept
+			: storage_{ current_scope },
+			parent_{ current_scope }
+		{
+			storage_ = new_scope;
+		}
+
+		~parse_scope() noexcept
+		{
+			storage_ = parent_;
+		}
 	};
-	#define push_parse_scope_2(desc, line)		scope_stack.push_back(desc); parse_scope ps_##line{ scope_stack }
-	#define push_parse_scope_1(desc, line)		push_parse_scope_2(desc, line)
-	#define push_parse_scope(desc)				push_parse_scope_1(desc, __LINE__)
+	#define push_parse_scope_2(scope, line)		parse_scope ps_##line{ current_scope, scope }
+	#define push_parse_scope_1(scope, line)		push_parse_scope_2(scope, line)
+	#define push_parse_scope(scope)				push_parse_scope_1(scope, __LINE__)
 
 	struct parsed_key final
 	{
@@ -6894,8 +6904,8 @@ namespace toml::impl
 			std::vector<table*> dotted_key_tables;
 			std::vector<array*> table_arrays;
 			std::string recording_buffer; //for diagnostics
-			bool recording = false;
-			std::vector<std::string_view> scope_stack;
+			bool recording = false, recording_whitespace = true;
+			std::string_view current_scope;
 			#if !TOML_EXCEPTIONS
 			mutable optional<toml::parse_error> err;
 			#endif
@@ -6918,14 +6928,13 @@ namespace toml::impl
 					return;
 				#endif
 
-				const auto current_scope = scope_stack.empty() ? ""sv : scope_stack.back();
 				static constexpr auto buf_size = 512_sz;
 				char buf[buf_size];
 				auto write_pos = buf;
 				const auto max_write_pos = buf + (buf_size - 1_sz); //allow for null terminator
 				concatenate(write_pos, max_write_pos, "Error while parsing "sv);
 				concatenate(write_pos, max_write_pos, current_scope);
-				concatenate(write_pos, max_write_pos, "; "sv);
+				concatenate(write_pos, max_write_pos, ": "sv);
 				(concatenate(write_pos, max_write_pos, reason), ...);
 				*write_pos = '\0';
 				#if TOML_EXCEPTIONS
@@ -6973,7 +6982,10 @@ namespace toml::impl
 				#endif
 
 				if (recording && !is_eof())
-					recording_buffer.append(cp->as_view<char>());
+				{
+					if (recording_whitespace || !(is_whitespace(*cp) || is_line_break(*cp)))
+						recording_buffer.append(cp->as_view<char>());
+				}
 			}
 
 			void start_recording(bool include_current = true) noexcept
@@ -6981,6 +6993,7 @@ namespace toml::impl
 				return_if_error();
 
 				recording = true;
+				recording_whitespace = true;
 				recording_buffer.clear();
 				if (include_current && !is_eof())
 					recording_buffer.append(cp->as_view<char>());
@@ -6995,6 +7008,8 @@ namespace toml::impl
 				{
 					if (pop_bytes >= recording_buffer.length())
 						recording_buffer.clear();
+					else if (pop_bytes == 1_sz)
+						recording_buffer.pop_back();
 					else
 						recording_buffer.erase(
 							recording_buffer.begin() + static_cast<ptrdiff_t>(recording_buffer.length() - pop_bytes),
@@ -7074,16 +7089,13 @@ namespace toml::impl
 						// toml/issues/567 (disallow non-TAB control characters in comments)
 						if (is_nontab_control_character(*cp))
 							set_error_and_return_default(
-								"control characters "
-								"other than TAB (U+0009) are explicitly prohibited from appearing "
-								"in comments."sv
+								"control characters other than TAB (U+0009) are explicitly prohibited"sv
 							);
 
 						// toml/pull/720 (disallow surrogates in comments)
 						else if (is_unicode_surrogate(*cp))
 							set_error_and_return_default(
-								"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited "
-								"from appearing in comments."sv
+								"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv
 							);
 					}
 					advance_and_return_if_error({});
@@ -7189,12 +7201,9 @@ namespace toml::impl
 							}
 						}
 
-						// skip the escaped character
-						const auto escaped_codepoint = cp->value;
-						advance_and_return_if_error_or_eof({});
-
+						bool skipped_escaped_codepoint = false;
 						assert_not_eof();
-						switch (escaped_codepoint)
+						switch (const auto escaped_codepoint = *cp)
 						{
 							// 'regular' escape codes
 							case U'b': str += TOML_STRING_PREFIX('\b'); break;
@@ -7210,7 +7219,7 @@ namespace toml::impl
 								if constexpr (!TOML_LANG_UNRELEASED) // toml/pull/709 (\xHH unicode scalar sequences)
 								{
 									set_error_and_return_default(
-										"escape sequence '\\x' is not supported in TOML 1.0.0 and earlier."sv
+										"escape sequence '\\x' is not supported in TOML 1.0.0 and earlier"sv
 									);
 								}
 								[[fallthrough]];
@@ -7218,13 +7227,18 @@ namespace toml::impl
 							case U'U':
 							{
 								push_parse_scope("unicode scalar escape sequence"sv);
-								uint32_t place_value = escaped_codepoint == U'U' ? 0x10000000u : (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
+								advance_and_return_if_error_or_eof({});
+								skipped_escaped_codepoint = true;
+
+								uint32_t place_value = escaped_codepoint == U'U'
+									? 0x10000000u
+									: (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
 								uint32_t sequence_value{};
 								while (place_value)
 								{
 									set_error_and_return_if_eof({});
 									if (!is_hexadecimal_digit(*cp))
-										set_error_and_return_default("expected hex digit, saw '\\"sv, *cp, "'"sv);
+										set_error_and_return_default("expected hex digit, saw '"sv, *cp, "'"sv);
 									sequence_value += place_value * hex_to_dec(*cp);
 									place_value /= 16u;
 									advance_and_return_if_error({});
@@ -7232,10 +7246,10 @@ namespace toml::impl
 
 								if (is_unicode_surrogate(sequence_value))
 									set_error_and_return_default(
-										"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited."sv
+										"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv
 									);
 								else if (sequence_value > 0x10FFFFu)
-									set_error_and_return_default("values greater than U+10FFFF are invalid."sv);
+									set_error_and_return_default("values greater than U+10FFFF are invalid"sv);
 								else if (sequence_value <= 0x7Fu) //ascii
 									str += static_cast<string_char>(sequence_value & 0x7Fu);
 								else if (sequence_value <= 0x7FFu)
@@ -7263,6 +7277,10 @@ namespace toml::impl
 							default:
 								set_error_and_return_default("unknown escape sequence '\\"sv, *cp, "'"sv);
 						}
+
+						// skip the escaped character
+						if (!skipped_escaped_codepoint)
+							advance_and_return_if_error_or_eof({});
 					}
 					else TOML_LIKELY
 					{
@@ -7326,7 +7344,7 @@ namespace toml::impl
 						// handle escapes
 						else if (*cp == U'\\')
 						{
-							advance_and_return_if_error({}); // skip the '\'
+							advance_and_return_if_error_or_eof({}); // skip the '\'
 							skipping_whitespace = false;
 							escaped = true;
 							continue;
@@ -7348,7 +7366,7 @@ namespace toml::impl
 						// handle control characters
 						if (is_nontab_control_character(*cp))
 							set_error_and_return_default(
-								"unescaped control characters other than TAB (U+0009) are explicitly prohibited."sv
+								"unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv
 							);
 
 						// handle surrogates in strings (1.0.0 and later)
@@ -7356,7 +7374,7 @@ namespace toml::impl
 						{
 							if (is_unicode_surrogate(*cp))
 								set_error_and_return_default(
-									"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited."sv
+									"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv
 								);
 						}
 
@@ -7473,7 +7491,7 @@ namespace toml::impl
 					// handle control characters
 					if (is_nontab_control_character(*cp))
 						set_error_and_return_default(
-							"control characters other than TAB (U+0009) are explicitly prohibited."sv
+							"control characters other than TAB (U+0009) are explicitly prohibited"sv
 						);
 
 					// handle surrogates in strings (1.0.0 and later)
@@ -7481,7 +7499,7 @@ namespace toml::impl
 					{
 						if (is_unicode_surrogate(*cp))
 							set_error_and_return_default(
-								"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited."sv
+								"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv
 							);
 					}
 
@@ -8306,7 +8324,7 @@ namespace toml::impl
 							if (!val->ref_cast<array>().is_homogeneous())
 								set_error_at(
 									begin_pos,
-									"arrays cannot contain values of different types before TOML 1.0.0."
+									"arrays cannot contain values of different types before TOML 1.0.0"
 								);
 						}
 					}
@@ -8333,7 +8351,7 @@ namespace toml::impl
 
 					// underscores at the beginning
 					else if (*cp == U'_')
-						set_error_and_return_default("values may not begin with underscores."sv);
+						set_error_and_return_default("values may not begin with underscores"sv);
 
 					return_if_error({});
 					if (val)
@@ -8769,6 +8787,7 @@ namespace toml::impl
 				push_parse_scope("key"sv);
 
 				parsed_key key;
+				recording_whitespace = false;
 
 				while (!is_error())
 				{
@@ -8784,7 +8803,11 @@ namespace toml::impl
 
 					// "quoted key segment"
 					else if (is_string_delimiter(*cp))
+					{
+						recording_whitespace = true;
 						key.segments.push_back(parse_string());
+						recording_whitespace = false;
+					}
 
 					// ???
 					else
@@ -8796,14 +8819,8 @@ namespace toml::impl
 					consume_leading_whitespace();
 
 					// eof or no more key to come
-					if (is_eof())
+					if (is_eof() || *cp != U'.')
 						break;
-					if (*cp != U'.')
-					{
-						if (recording)
-							stop_recording(1_sz);
-						break;
-					}
 
 					// was a dotted key, so go around again to consume the next segment
 					advance_and_return_if_error_or_eof({});
@@ -8824,7 +8841,8 @@ namespace toml::impl
 
 				// get the key
 				start_recording();
-				auto key = parse_key(); //parse_key() calls stop_recording()
+				auto key = parse_key();
+				stop_recording(1_sz);
 
 				// skip past any whitespace that followed the key
 				consume_leading_whitespace();
@@ -8877,7 +8895,8 @@ namespace toml::impl
 
 					// get the actual key
 					start_recording();
-					key = parse_key(); //parse_key() calls stop_recording()
+					key = parse_key();
+					stop_recording(1_sz);
 					return_if_error({});
 
 					// skip past any whitespace that followed the key
@@ -9096,6 +9115,8 @@ namespace toml::impl
 					// "quoted keys"
 					else if (is_bare_key_character(*cp) || is_string_delimiter(*cp))
 					{
+						push_parse_scope("key-value pair"sv);
+
 						parse_key_value_pair_and_insert(current_table);
 
 						// handle the rest of the line after the kvp
@@ -9173,10 +9194,7 @@ namespace toml::impl
 				#endif
 
 				if (cp)
-				{
-					scope_stack.reserve(20_sz);
 					parse_document();
-				}
 
 				update_region_ends(root);
 			}
@@ -9607,5 +9625,5 @@ namespace toml
 #ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
-#endif // TOMLPLUSPLUS_SINGLE_HEADER_H
+#endif // INCLUDE_TOMLPLUSPLUS_H
 // clang-format on

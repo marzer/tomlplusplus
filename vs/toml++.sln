@@ -47,6 +47,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "simple_parser", "simple_par
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toml_generator", "toml_generator.vcxproj", "{23CE3B73-FEE7-436C-9B4E-3DFB202EE9A2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "error_printer", "error_printer.vcxproj", "{DAB4634D-8145-4860-AE45-5198E76FF324}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -215,6 +217,14 @@ Global
 		{23CE3B73-FEE7-436C-9B4E-3DFB202EE9A2}.Release|Win32.Build.0 = Release|Win32
 		{23CE3B73-FEE7-436C-9B4E-3DFB202EE9A2}.Release|x64.ActiveCfg = Release|x64
 		{23CE3B73-FEE7-436C-9B4E-3DFB202EE9A2}.Release|x64.Build.0 = Release|x64
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Debug|Win32.Build.0 = Debug|Win32
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Debug|x64.ActiveCfg = Debug|x64
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Debug|x64.Build.0 = Debug|x64
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Release|Win32.ActiveCfg = Release|Win32
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Release|Win32.Build.0 = Release|Win32
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Release|x64.ActiveCfg = Release|x64
+		{DAB4634D-8145-4860-AE45-5198E76FF324}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,6 +249,7 @@ Global
 		{0CAD095A-C9F2-49FC-9C9F-4508498BE488} = {4E25CF88-D7D8-4A9C-A52E-0D78281E82EC}
 		{259FCEE5-3442-4076-9547-2BA793ECA1CB} = {412816A5-9D22-4A30-BCDF-ABFB54BB3735}
 		{23CE3B73-FEE7-436C-9B4E-3DFB202EE9A2} = {412816A5-9D22-4A30-BCDF-ABFB54BB3735}
+		{DAB4634D-8145-4860-AE45-5198E76FF324} = {412816A5-9D22-4A30-BCDF-ABFB54BB3735}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0926DDCC-88CD-4839-A82D-D9B99E02A0B1}

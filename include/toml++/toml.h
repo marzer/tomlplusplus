@@ -3,7 +3,10 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#pragma once
+//# {{
+#ifndef INCLUDE_TOMLPLUSPLUS_H
+#define INCLUDE_TOMLPLUSPLUS_H
+//# }}
 
 //# Note: most of these would be included transitively but
 //# they're listed explicitly here because this file
@@ -489,3 +492,7 @@
 /// - Facebook: [marzer](https://www.facebook.com/marzer)
 /// - LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)
 /// 
+
+//# {{
+#endif // INCLUDE_TOMLPLUSPLUS_H
+//# }}

@@ -53,9 +53,6 @@ class Preprocessor:
 		self.processed_includes.append(incl)
 		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
 		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]', '', text, 0, re.I | re.S)
-		text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', text, 0, re.I | re.M)
-		text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', text, 0, re.I | re.M)
-		text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', text, 0, re.I | re.M)
 		self.current_level += 1
 		text = re.sub(r'^\s*#\s*include\s+"(.+?)"', lambda m : self.preprocess(m), text, 0, re.I | re.M)
 		self.current_level -= 1
@@ -83,6 +80,9 @@ def main():
 	# preprocess header(s)
 	source_text = Preprocessor()('toml.h')
 	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
+	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M) # 'pragma once'
+	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M) # clang-format directives
+	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M) # spdx
 	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
 	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
@@ -169,8 +169,8 @@ v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5
 			print('//', file=output_file)
 			print(make_divider(), file=output_file)
 		print('''// clang-format off
-#ifndef TOMLPLUSPLUS_SINGLE_HEADER_H
-#define TOMLPLUSPLUS_SINGLE_HEADER_H
+#ifndef INCLUDE_TOMLPLUSPLUS_H
+#define INCLUDE_TOMLPLUSPLUS_H
 #ifdef __GNUC__
 	#pragma GCC diagnostic push
 	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
@@ -182,7 +182,7 @@ v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5
 #ifdef __GNUC__
 	#pragma GCC diagnostic pop
 #endif
-#endif // TOMLPLUSPLUS_SINGLE_HEADER_H
+#endif // INCLUDE_TOMLPLUSPLUS_H
 // clang-format on''', file=output_file)
 
 

@@ -24,3 +24,10 @@ toml_generator = executable(
 	include_directories : inc,
 	cpp_args : args
 )
+
+error_printer = executable(
+	'error_printer',
+	[ 'error_printer.cpp' ],
+	include_directories : inc,
+	cpp_args : args
+)

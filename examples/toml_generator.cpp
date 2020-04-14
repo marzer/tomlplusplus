@@ -108,6 +108,7 @@ namespace
 
 int main(int argc, char** argv)
 {
+	std::ios_base::sync_with_stdio(false);
 	init_utf8_console();
 	srand(static_cast<unsigned int>(time(nullptr)));
 
