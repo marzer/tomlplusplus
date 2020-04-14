@@ -59,7 +59,7 @@
     <LocalDebuggerWorkingDirectory>$(SolutionDir)..\examples\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\examples\parse_file.cpp" />
+    <ClCompile Include="..\examples\simple_parser.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\examples\example.toml" />

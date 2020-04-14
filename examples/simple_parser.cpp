@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: MIT
 /*
 
-	This example demonstrates how to use the toml::json_formatter to
-	re-serialize TOML data as JSON.
+	This example demonstrates how to parse TOML from a file and
+	re-serialize it (print it out) to stdout.
 
 */
 #include <iostream>
@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	try
 	{
 		const auto tbl = toml::parse(file, std::move(path));
-		std::cout << tbl << std::endl;
+		//std::cout << tbl << std::endl;
 	}
 	catch (const toml::parse_error& err)
 	{
