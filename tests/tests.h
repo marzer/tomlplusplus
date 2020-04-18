@@ -46,14 +46,14 @@ inline void parsing_should_succeed(
 	uint32_t test_line,
 	std::basic_string_view<Char> toml_str,
 	Func&& func = {},
-	std::string_view source_path = {}) noexcept
+	std::string_view source_path = {})
 {
 	INFO(
 		"["sv << test_file << ", line "sv << test_line << "] "sv
 		<< "parsing_should_succeed('"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "')"sv
 	)
 
-	constexpr auto validate_table = [](table&& tabl, std::string_view path) noexcept -> table&&
+	constexpr auto validate_table = [](table&& tabl, std::string_view path)  -> table&&
 	{
 		INFO("Validating table source information"sv)
 		CHECK(tabl.source().begin != source_position{});
@@ -155,7 +155,7 @@ template <typename Char>
 inline void parsing_should_fail(
 	std::string_view test_file,
 	uint32_t test_line,
-	std::basic_string_view<Char> toml_str) noexcept
+	std::basic_string_view<Char> toml_str)
 {
 	INFO(
 		"["sv << test_file << ", line "sv << test_line << "] "sv
@@ -164,7 +164,7 @@ inline void parsing_should_fail(
 
 	#if TOML_EXCEPTIONS
 
-	static constexpr auto run_tests = [](auto&& fn) noexcept
+	static constexpr auto run_tests = [](auto&& fn)
 	{
 		try
 		{
@@ -196,7 +196,7 @@ inline void parsing_should_fail(
 
 	#else
 
-	static constexpr auto run_tests = [](auto&& fn) noexcept
+	static constexpr auto run_tests = [](auto&& fn)
 	{
 		parse_result result = fn();
 		if (result)
@@ -212,8 +212,8 @@ inline void parsing_should_fail(
 		}
 	};
 
-	if (run_tests([=]() noexcept { return toml::parse(toml_str); }))
-		run_tests([=]() noexcept
+	if (run_tests([=]() { return toml::parse(toml_str); }))
+		run_tests([=]()
 		{
 			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
@@ -228,7 +228,7 @@ inline void parse_expected_value(
 	std::string_view test_file,
 	uint32_t test_line,
 	std::string_view value_str,
-	const T& expected) noexcept
+	const T& expected)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value('"sv << value_str << "')"sv)
 
@@ -238,7 +238,7 @@ inline void parse_expected_value(
 	val.append(key);
 	val.append(value_str);
 
-	static constexpr auto is_val = [](char32_t codepoint) noexcept
+	static constexpr auto is_val = [](char32_t codepoint)
 	{
 		if constexpr (std::is_same_v<string, impl::promoted<T>>)
 			return codepoint == U'"' || codepoint == U'\'';
@@ -287,7 +287,7 @@ inline void parse_expected_value(
 			test_file,
 			test_line,
 			std::string_view{ val },
-			[&](table&& tbl) noexcept
+			[&](table&& tbl)
 			{
 				REQUIRE(tbl.size() == 1);
 				auto nv = tbl[S("val"sv)];
@@ -347,7 +347,7 @@ inline void parse_expected_value(
 				test_file,
 				test_line,
 				std::string_view{ str },
-				[&](table&& tbl) noexcept
+				[&](table&& tbl)
 				{
 					REQUIRE(tbl.size() == 1);
 					auto nv = tbl[S("val"sv)];
@@ -368,12 +368,12 @@ inline void parse_expected_value(
 }
 
 // manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const int&) noexcept;
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&) noexcept;
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&) noexcept;
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const float&) noexcept;
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const double&) noexcept;
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&) noexcept;
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&);
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
+extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&);
 namespace std
 {
 	extern template class unique_ptr<const Catch::IExceptionTranslator>;

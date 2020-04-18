@@ -7,7 +7,7 @@ TEST_CASE("arrays - moving")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(test = [ "foo" ])"sv),
-		[&](table&& tbl) noexcept
+		[&](table&& tbl)
 		{
 			CHECK(tbl.source().begin == source_position{ 1, 1 });
 			CHECK(tbl.source().end == source_position{ 1, 17 });

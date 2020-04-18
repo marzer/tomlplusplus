@@ -8,7 +8,7 @@ TEST_CASE("parsing - booleans")
 bool1 = true
 bool2 = false
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("bool1")] == true);
 			CHECK(tbl[S("bool2")] == false);

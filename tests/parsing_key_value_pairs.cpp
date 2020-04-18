@@ -11,7 +11,7 @@ bare-key = "value"
 1234 = "value"
 "" = "blank"
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 5);
 			CHECK(tbl[S("key")] == S("value"sv));
@@ -34,7 +34,7 @@ bare-key = "value"
 'quoted "value"' = "value"
 '' = 'blank'
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("127.0.0.1")] == S("value"sv));
 			CHECK(tbl[S("character encoding")] == S("value"sv));
@@ -66,7 +66,7 @@ physical.shape = "round"
 site."google.com" = true
 3.14159 = "pi"
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 4);
 			CHECK(tbl[S("name")] == S("Orange"sv));
@@ -84,7 +84,7 @@ site."google.com" = true
 fruit.apple.smooth = true
 fruit.orange = 2
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("fruit")][S("apple")][S("smooth")] == true);
 			CHECK(tbl[S("fruit")][S("orange")] == 2);
@@ -111,7 +111,7 @@ orange.skin = "thick"
 apple.color = "red"
 orange.color = "orange"
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("apple")][S("type")] == S("fruit"sv));
 			CHECK(tbl[S("apple")][S("skin")] == S("thin"sv));
@@ -135,7 +135,7 @@ orange.type = "fruit"
 orange.skin = "thick"
 orange.color = "orange"
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("apple")][S("type")] == S("fruit"sv));
 			CHECK(tbl[S("apple")][S("skin")] == S("thin"sv));
@@ -154,7 +154,7 @@ orange.color = "orange"
 				key+1 = 0
 				ʎǝʞ2 = 0
 			)"sv),
-			[](table&& tbl) noexcept
+			[](table&& tbl)
 			{
 				CHECK(tbl.size() == 2);
 				CHECK(tbl[S("key+1")] == 0);

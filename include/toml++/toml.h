@@ -195,7 +195,7 @@
 /// 	return 0;
 /// }
 /// \ecpp
-/// 
+///
 /// Instances of toml::parse_error can be printed directly to streams:
 /// \cpp
 /// try
@@ -217,7 +217,16 @@
 /// 
 /// If the default error formatting is not be suitable for your use-case you can access the error's
 /// toml::source_region and description directly from the error object (as in the examples above).
-/// 
+///
+/// \m_class{m-note m-warning}
+///
+/// \parblock
+/// <h3>Don't forget &lt;fstream&gt;!</h3>
+/// Not everyone who uses the library is going to work directly from files, so not everybody is forced to pay
+/// the compilation overhead of including `<fstream>`. You need to explicitly include it if you're going to be calling
+/// toml::parse_file().
+/// \endparblock
+///
 /// \see
 ///		- toml::parse_file()  
 ///		- toml::parse_result  

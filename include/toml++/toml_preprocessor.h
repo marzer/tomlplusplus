@@ -96,6 +96,8 @@
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
+	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
@@ -158,10 +160,8 @@
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
-
-	// these pass the __has_attribute() test but cause warnings on if/else branches =/
-	#define TOML_LIKELY
-	#define TOML_UNLIKELY
+	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
@@ -284,10 +284,10 @@
 
 #if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
-		#define TOML_LIKELY [[likely]]
+		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
 	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
-		#define TOML_UNLIKELY [[unlikely]]
+		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 	#endif
 	#if __has_cpp_attribute(nodiscard) >= 201907L
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
@@ -295,10 +295,10 @@
 #endif
 
 #ifndef TOML_LIKELY
-	#define TOML_LIKELY
+	#define TOML_LIKELY(...)	(__VA_ARGS__)
 #endif
 #ifndef TOML_UNLIKELY
-	#define TOML_UNLIKELY
+	#define TOML_UNLIKELY(...)	(__VA_ARGS__)
 #endif
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR

@@ -49,11 +49,11 @@ namespace toml::impl
 				s += TOML_STRING_PREFIX('"');
 				for (auto c : str)
 				{
-					if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+					if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
 						s.append(low_character_escape_table[c]);
-					else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
+					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
 						s.append(TOML_STRING_PREFIX("\\u007F"sv));
-					else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
+					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))
 						s.append(TOML_STRING_PREFIX("\\\""sv));
 					else
 						s += c;

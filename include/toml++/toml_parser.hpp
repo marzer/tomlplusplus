@@ -95,9 +95,9 @@ namespace TOML_INTERNAL_NAMESPACE
 		else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 		{
 			string_view cp_view;
-			if (arg.value <= U'\x1F') TOML_UNLIKELY
+			if TOML_UNLIKELY(arg.value <= U'\x1F')
 				cp_view = low_character_escape_table[arg.value];
-			else if (arg.value == U'\x7F')  TOML_UNLIKELY
+			else if TOML_UNLIKELY(arg.value == U'\x7F')
 				cp_view = TOML_STRING_PREFIX("\\u007F"sv);
 			else
 				cp_view = arg.template as_view<string_char>();
@@ -635,7 +635,7 @@ namespace toml::impl
 						if (!skipped_escaped_codepoint)
 							advance_and_return_if_error_or_eof({});
 					}
-					else TOML_LIKELY
+					else
 					{
 						// handle closing delimiters
 						if (*cp == U'"')
@@ -1661,11 +1661,24 @@ namespace toml::impl
 				assert_or_assume(!is_value_terminator(*cp));
 				push_parse_scope("value"sv);
 
+				// check if it begins with some control character
+				// (note that this will also fail for whitespace but we're assuming we've
+				// called consume_leading_whitespace() before calling parse_value())
+				if TOML_UNLIKELY(is_control_character(*cp))
+					set_error_and_return_default("unexpected control character"sv);
+
+				// underscores at the beginning
+				else if (*cp == U'_')
+					set_error_and_return_default("values may not begin with underscores"sv);
+
 				const auto begin_pos = cp->position;
 				std::unique_ptr<node> val;
 
 				do
 				{
+					assert_or_assume(!is_control_character(*cp));
+					assert_or_assume(*cp != U'_');
+
 					// detect the value type and parse accordingly,
 					// starting with value types that can be detected
 					// unambiguously from just one character.
@@ -1703,10 +1716,6 @@ namespace toml::impl
 					// inf or nan
 					else if (is_match(*cp, U'i', U'n', U'I', U'N'))
 						val = std::make_unique<value<double>>(parse_inf_or_nan());
-
-					// underscores at the beginning
-					else if (*cp == U'_')
-						set_error_and_return_default("values may not begin with underscores"sv);
 
 					return_if_error({});
 					if (val)
@@ -1760,68 +1769,76 @@ namespace toml::impl
 					bool eof_while_scanning = false;
 					const auto scan = [&]() TOML_MAY_THROW
 					{
-						while (advance_count < utf8_buffered_reader::max_history_length)
+						if (is_eof())
+							return;
+						assert_or_assume(!is_value_terminator(*cp));
+
+						do
 						{
-							if (!cp || is_value_terminator(*cp))
+							if (const auto c = **cp; c != U'_')
 							{
-								eof_while_scanning = !cp;
-								break;
-							}
+								chars[char_count++] = c;
 
-							if (*cp != U'_')
-							{
-								chars[char_count++] = *cp;
-								switch (*cp)
+								if (is_decimal_digit(c))
+									add_trait(has_digits);
+								else if (is_ascii_letter(c))
 								{
-									case U'B': [[fallthrough]];
-									case U'b':
-										if (char_count == 2_sz && has_any(begins_zero))
-											add_trait(has_b);
-										break;
+									assert_or_assume((c >= U'a' && c <= U'z') || (c >= U'A' && c <= U'Z'));
+									switch (static_cast<char32_t>(c | 32u))
+									{
+										case U'b':
+											if (char_count == 2_sz && has_any(begins_zero))
+												add_trait(has_b);
+											break;
 
-									case U'E': [[fallthrough]];
-									case U'e':
-										if (char_count > 1_sz
-											&& has_none(has_b | has_o | has_p | has_t | has_x | has_z | has_colon)
-											&& (has_none(has_plus | has_minus) || has_any(begins_sign)))
-											add_trait(has_e);
-										break;
+										case U'e':
+											if (char_count > 1_sz
+												&& has_none(has_b | has_o | has_p | has_t | has_x | has_z | has_colon)
+												&& (has_none(has_plus | has_minus) || has_any(begins_sign)))
+												add_trait(has_e);
+											break;
 
-									case U'O': [[fallthrough]];
-									case U'o':
-										if (char_count == 2_sz && has_any(begins_zero))
-											add_trait(has_o);
-										break;
+										case U'o':
+											if (char_count == 2_sz && has_any(begins_zero))
+												add_trait(has_o);
+											break;
 
-									case U'P': [[fallthrough]];
-									case U'p':
-										if (has_any(has_x))
-											add_trait(has_p);
-										break;
+										case U'p':
+											if (has_any(has_x))
+												add_trait(has_p);
+											break;
 
-									case U'X': [[fallthrough]];
-									case U'x':
-										if ((char_count == 2_sz && has_any(begins_zero))
-											|| (char_count == 3_sz && has_any(begins_sign) && chars[1] == U'0'))
-											add_trait(has_x);
-										break;
+										case U'x':
+											if ((char_count == 2_sz && has_any(begins_zero))
+												|| (char_count == 3_sz && has_any(begins_sign) && chars[1] == U'0'))
+												add_trait(has_x);
+											break;
 
-									case U'T': add_trait(has_t); break;
-									case U'Z': add_trait(has_z); break;
-									case U'+': add_trait(has_plus); break;
-									case U'-': add_trait(has_minus); break;
-									case U'.': add_trait(has_dot); break;
-									case U':': add_trait(has_colon); break;
-
-									default:
-										if (is_decimal_digit(*cp))
-											add_trait(has_digits);
+										case U't': add_trait(has_t); break;
+										case U'z': add_trait(has_z); break;
+									}
+								}
+								else if (c <= U':')
+								{
+									assert_or_assume(c < U'0' || c > U'9');
+									switch (c)
+									{
+										case U'+': add_trait(has_plus); break;
+										case U'-': add_trait(has_minus); break;
+										case U'.': add_trait(has_dot); break;
+										case U':': add_trait(has_colon); break;
+									}
 								}
 							}
 
 							advance_and_return_if_error();
 							advance_count++;
+							eof_while_scanning = is_eof();
 						}
+						while (advance_count < utf8_buffered_reader::max_history_length
+							&& !is_eof()
+							&& !is_value_terminator(*cp)
+						);
 					};
 					scan();
 					return_if_error({});
@@ -1831,7 +1848,7 @@ namespace toml::impl
 						&& traits == (bdigit_msk | has_minus)
 						&& chars[4] == U'-'
 						&& chars[7] == U'-'
-						&& cp
+						&& !is_eof()
 						&& *cp == U' ')
 					{
 						const auto pre_advance_count = advance_count;
@@ -1850,7 +1867,7 @@ namespace toml::impl
 						advance_and_return_if_error({});
 						advance_count++;
 
-						if (!cp || !is_decimal_digit(*cp))
+						if (is_eof() || !is_decimal_digit(*cp))
 							backpedal();
 						else
 						{

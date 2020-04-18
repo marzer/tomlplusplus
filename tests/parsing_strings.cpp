@@ -16,7 +16,7 @@ str2 = """
 Roses are red
 Violets are blue"""
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("str")] == S("I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."sv));
 			CHECK(tbl[S("str1")] == S("Roses are red\nViolets are blue"sv));
@@ -51,7 +51,7 @@ str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
 # "This," she said, "is just a pointless statement."
 str7 = """"This," she said, "is just a pointless statement.""""
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			static constexpr auto quick_brown_fox = S("The quick brown fox jumps over the lazy dog."sv);
 			CHECK(tbl[S("str1")] == quick_brown_fox);
@@ -89,7 +89,7 @@ trimmed in raw strings.
    is preserved.
 '''
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("winpath")] == S(R"(C:\Users\nodejs\templates)"sv));
 			CHECK(tbl[S("winpath2")] == S(R"(\\ServerX\admin$\system32\)"sv));
@@ -121,7 +121,7 @@ apos15 = "Here are fifteen apostrophes: '''''''''''''''"
 # 'That's still pointless', she said.
 str = ''''That's still pointless', she said.'''
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("quot15")] == S(R"(Here are fifteen quotation marks: """"""""""""""")"sv));
 			CHECK(tbl[S("apos15")] == S(R"(Here are fifteen apostrophes: ''''''''''''''')"sv));

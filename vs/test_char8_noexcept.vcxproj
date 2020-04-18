@@ -86,6 +86,8 @@
     <ClCompile Include="..\tests\tests.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\tests\unicode.cpp" />
+    <ClCompile Include="..\tests\unicode_generated.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />

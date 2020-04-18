@@ -13,7 +13,7 @@ int5 = 1_000
 int6 = 5_349_221
 int7 = 1_2_3_4_5     # VALID but discouraged
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("int1")] == 99);
 			CHECK(tbl[S("int2")] == 42);
@@ -43,7 +43,7 @@ int7 = 1_2_3_4_5     # VALID but discouraged
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S("zeroes = [-0, +0]"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("zeroes")][0] == 0);
 			CHECK(tbl[S("zeroes")][1] == 0);
@@ -87,7 +87,7 @@ oct2 = 0o755 # useful for Unix file permissions
 # binary with prefix `0b`
 bin1 = 0b11010110
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
 			CHECK(tbl[S("hex2")] == 0xDEADBEEF);
@@ -118,7 +118,7 @@ oct1 = 0o0001234567
 oct2 = 0o000755
 bin1 = 0b0000011010110
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
 			CHECK(tbl[S("hex2")] == 0xDEADBEEF);

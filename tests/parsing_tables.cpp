@@ -38,7 +38,7 @@ apple.taste.sweet = true
 smooth = true
 
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("table")].as<table>());
 			CHECK(tbl[S("table")].as<table>()->size() == 0_sz);
@@ -128,7 +128,7 @@ apple.taste.sweet = true
 [animal]
 [fruit.orange]
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("animal")].as<table>());
 			CHECK(tbl[S("animal")].as<table>()->size() == 0_sz);
@@ -150,7 +150,7 @@ apple.taste.sweet = true
 [fruit.orange]
 [animal]
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("animal")].as<table>());
 			CHECK(tbl[S("animal")].as<table>()->size() == 0_sz);
@@ -176,7 +176,7 @@ animal = { type.name = "pug" }
 [product]
 type = { name = "Nail" }
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("name")].as<table>());
 			CHECK(tbl[S("name")].as<table>()->size() == 2_sz);
@@ -223,7 +223,7 @@ test = { val1 = "foo", val2 = [
 	3
 ], val3 = "bar" }
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("test")].as<table>());
 			CHECK(tbl[S("test")].as<table>()->size() == 3_sz);
@@ -248,7 +248,7 @@ name = {
 	last = "Preston-Werner",
 }
 )"sv),
-			[](table&& tbl) noexcept
+			[](table&& tbl)
 			{
 				REQUIRE(tbl[S("name")].as<table>());
 				CHECK(tbl[S("name")].as<table>()->size() == 2_sz);
@@ -317,7 +317,7 @@ color = "gray"
     name = "plantain"
 
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("points")].as<array>());
 			CHECK(tbl[S("points")].as<array>()->size() == 3_sz);

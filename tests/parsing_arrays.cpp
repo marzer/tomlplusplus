@@ -18,7 +18,7 @@ nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ]
 nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
 string_array = [ "all", 'strings', """are the same""", '''type''' ]
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("integers")].as<array>());
 			CHECK(tbl[S("integers")].as<array>()->is_homogeneous());
@@ -106,7 +106,7 @@ contributors = [
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
 ]
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("numbers")].as<array>());
 			CHECK(!tbl[S("numbers")].as<array>()->is_homogeneous());

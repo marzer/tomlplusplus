@@ -162,6 +162,14 @@ namespace toml::impl
 		{
 			return value;
 		}
+
+		[[nodiscard]]
+		TOML_GNU_ATTR(pure)
+		TOML_ALWAYS_INLINE
+		constexpr const char32_t& operator* () const noexcept
+		{
+			return value;
+		}
 	};
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
@@ -399,13 +407,13 @@ namespace toml::impl
 				else
 				{
 					// first character read from stream
-					if (!history.count && !head) TOML_UNLIKELY
+					if TOML_UNLIKELY(!history.count && !head)
 						head = reader.read_next();
 
 					// subsequent characters and not eof
 					else if (head)
 					{
-						if (history.count < history_buffer_size) TOML_UNLIKELY
+						if TOML_UNLIKELY(history.count < history_buffer_size)
 							history.buffer[history.count++] = *head;
 						else
 							history.buffer[(history.first++ + history_buffer_size) % history_buffer_size] = *head;

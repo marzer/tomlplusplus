@@ -2,7 +2,7 @@
 
 TEST_CASE("values - printing")
 {
-	static constexpr auto print_value = [](auto&& raw) noexcept
+	static constexpr auto print_value = [](auto&& raw)
 	{
 		auto val = toml::value{ std::forward<decltype(raw)>(raw) };
 		std::stringstream ss;

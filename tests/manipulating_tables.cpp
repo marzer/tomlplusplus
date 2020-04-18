@@ -7,7 +7,7 @@ TEST_CASE("tables - moving")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(test = { val1 = "foo" })"sv),
-		[&](table&& tbl) noexcept
+		[&](table&& tbl)
 		{
 			CHECK(tbl.source().begin == source_position{ 1, 1 });
 			CHECK(tbl.source().end == source_position{ 1, 24 });
@@ -136,7 +136,7 @@ TEST_CASE("tables - equality")
 namespace
 {
 	template <typename T>
-	static auto advance(T iter, ptrdiff_t offset) noexcept
+	static auto advance(T iter, ptrdiff_t offset)
 	{
 		while (offset > 0)
 		{

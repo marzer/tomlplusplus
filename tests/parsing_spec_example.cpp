@@ -43,7 +43,7 @@ hosts = [
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		toml_text,
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 5);
 

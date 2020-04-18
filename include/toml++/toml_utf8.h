@@ -123,16 +123,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_hexadecimal_digit(char32_t codepoint) noexcept
-	{
-		return (codepoint >= U'a' && codepoint <= U'f')
-			|| (codepoint >= U'A' && codepoint <= U'F')
-			|| is_decimal_digit(codepoint)
-		;
-	}
-
-	[[nodiscard]]
-	TOML_GNU_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr uint32_t hex_to_dec(char codepoint) noexcept
 	{
@@ -183,6 +173,14 @@ namespace toml::impl
 			|| is_unicode_line_break(codepoint)
 			|| is_unicode_whitespace(codepoint)
 		;
+	}
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr bool is_control_character(char32_t codepoint) noexcept
+	{
+		return codepoint <= U'\u001F' || codepoint == U'\u007F';
 	}
 
 	[[nodiscard]]

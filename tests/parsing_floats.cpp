@@ -22,7 +22,7 @@ flt7 = 6.626e-34
 
 flt8 = 224_617.445_991_228
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("flt1")] == 1.0);
 			CHECK(tbl[S("flt2")] == 3.1415);
@@ -44,7 +44,7 @@ flt8 = 224_617.445_991_228
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(zeroes = [-0.0, +0.0])"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("zeroes")][0] == -0.0);
 			CHECK(tbl[S("zeroes")][1] == +0.0);
@@ -188,7 +188,7 @@ sf4 = nan  # actual sNaN/qNaN encoding is implementation specific
 sf5 = +nan # same as `nan`
 sf6 = -nan # valid, actual encoding is implementation specific
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl[S("sf1")] == std::numeric_limits<double>::infinity());
 			CHECK(tbl[S("sf2")] == std::numeric_limits<double>::infinity());

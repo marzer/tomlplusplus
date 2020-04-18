@@ -9,7 +9,7 @@ TEST_CASE("parsing - comments")
 key = "value"  # This is a comment at the end of a line
 another = "# This is not a comment"
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 2);
 			CHECK(tbl[S("key")] == S("value"sv));
@@ -20,7 +20,7 @@ another = "# This is not a comment"
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(# this = "looks like a KVP but is commented out)"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 0);
 		}

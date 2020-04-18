@@ -18,7 +18,7 @@ ld1 = 1979-05-27
 lt1 = 07:32:00
 lt2 = 00:32:00.999999
 )"sv),
-		[](table&& tbl) noexcept
+		[](table&& tbl)
 		{
 			static constexpr auto odt1 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
 			CHECK(tbl[S("odt1")] == odt1);

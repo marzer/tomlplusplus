@@ -15,6 +15,8 @@ test_sources = [
 	'manipulating_arrays.cpp',
 	'manipulating_tables.cpp',
 	'manipulating_values.cpp',
+	'unicode.cpp',
+	'unicode_generated.cpp',
 ]
 
 compiler_supports_char8_strings = compiler.compiles('''

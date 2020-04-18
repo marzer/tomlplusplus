@@ -130,6 +130,8 @@
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
+	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
@@ -192,10 +194,8 @@
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
-
-	// these pass the __has_attribute() test but cause warnings on if/else branches =/
-	#define TOML_LIKELY
-	#define TOML_UNLIKELY
+	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
@@ -304,20 +304,20 @@
 #endif
 #if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
-		#define TOML_LIKELY [[likely]]
+		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
 	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
-		#define TOML_UNLIKELY [[unlikely]]
+		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 	#endif
 	#if __has_cpp_attribute(nodiscard) >= 201907L
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
 #endif
 #ifndef TOML_LIKELY
-	#define TOML_LIKELY
+	#define TOML_LIKELY(...)	(__VA_ARGS__)
 #endif
 #ifndef TOML_UNLIKELY
-	#define TOML_UNLIKELY
+	#define TOML_UNLIKELY(...)	(__VA_ARGS__)
 #endif
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
@@ -1521,13 +1521,13 @@ namespace toml::impl
 		static_assert(sizeof(Char) == 1);
 		for (auto c : str)
 		{
-			if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+			if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
 				print_to_stream(low_character_escape_table[c], stream);
-			else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
+			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
 				print_to_stream(TOML_STRING_PREFIX("\\u007F"sv), stream);
-			else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
+			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))
 				print_to_stream(TOML_STRING_PREFIX("\\\""sv), stream);
-			else if (c == TOML_STRING_PREFIX('\\')) TOML_UNLIKELY
+			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\\'))
 				print_to_stream(TOML_STRING_PREFIX("\\\\"sv), stream);
 			else
 				print_to_stream(c, stream);
@@ -3333,874 +3333,904 @@ namespace toml
 //--------------------------------------  ↓ toml_utf8_generated.h  -----------------------------------------------------
 #pragma region
 
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
-
-#define TOML_ASSUME_CODEPOINT_BETWEEN(first, last)	\
-	TOML_ASSUME(codepoint >= first);				\
-	TOML_ASSUME(codepoint <= last)
-
 namespace toml::impl
 {
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_unicode_letter(char32_t codepoint) noexcept
+	constexpr bool is_hexadecimal_digit(char32_t cp) noexcept
 	{
-		if (codepoint < U'\u00AA' || codepoint > U'\U00031349')
+		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<uint_least64_t>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
+	}
+
+	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	constexpr bool is_unicode_letter(char32_t cp) noexcept
+	{
+		if (cp < U'\u00AA' || cp > U'\U00031349')
 			return false;
 
-		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u00AA', U'\U00031349');
-		switch ((static_cast<uint_least32_t>(codepoint) - 0xAAu) / 3147u)
+		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0xAAull) / 0xC4Bull;
+		if ((1ull << child_index_0) & 0x8A7FFC004001CFA0ull)
+			return true;
+		if ((1ull << child_index_0) & 0x26180C0000ull)
+			return false;
+		switch (child_index_0)
 		{
-			case 0:
+			case 0x00: // [0] 00AA - 0CF4
 			{
-				if (codepoint > U'\u0CF2')
+				if (cp > U'\u0CF2')
+					return false;
+				TOML_ASSUME(cp >= U'\u00AA');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFDFFFFFC10801ull,	0xFFFFFFFFFFFFDFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x07C000FFF0FFFFFFull,	0x0000000000000014ull,	0x0000000000000000ull,	0xFEFFFFF5D02F37C0ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFEFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFF00FFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFC09FFFFFFFFFBFull,	0x000000007FFFFFFFull,
+					0xFFFFFFC000000000ull,	0xFFC00000000001E1ull,	0x00000001FFFFFFFFull,	0xFFFFFFFFFFFFFFB0ull,
+					0x18000BFFFFFFFFFFull,	0xFFFFFF4000270030ull,	0xFFFFFFF80000003Full,	0x0FFFFFFFFFFFFFFFull,
+					0xFFFFFFFF00000080ull,	0x44010FFFFFC10C01ull,	0xFFC07FFFFFC00000ull,	0xFFC0000000000001ull,
+					0x000000003FFFF7FFull,	0xFFFFFFFFFC000000ull,	0x00FFC0400008FFFFull,	0x7FFFFE67F87FFF80ull,
+					0x00EC00100008F17Full,	0x7FFFFE61F80400C0ull,	0x001780000000DB7Full,	0x7FFFFEEFF8000700ull,
+					0x00C000400008FB7Full,	0x7FFFFE67F8008000ull,	0x00EC00000008FB7Full,	0xC6358F71FA000080ull,
+					0x000000400000FFF1ull,	0x7FFFFF77F8000000ull,	0x00C1C0000008FFFFull,	0x7FFFFF77F8400000ull,
+					0x00D000000008FBFFull,	0x0000000000000180ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xAAull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xAAull) % 0x40ull));
+			}
+			case 0x01: // [1] 0CF5 - 193F
+			{
+				if (cp < U'\u0D04' || cp > U'\u191E')
 					return false;
 
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u00AA', U'\u0CF2');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xAAu) / 63u)
+				constexpr uint_least64_t lookup_table_1[] =
 				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAAull)) & 0x7FFFDFFFFFC10801ull;
-					case 1: return codepoint != U'\u00F7';
-					case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x2A2ull)) & 0x4000FFF0FFFFFFFFull;
-					case 9: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x2E1u)) & 0x280Fu;
-					case 10: return false;
-					case 11: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x370ull)) & 0x3FFFD740BCDFull;
-					case 12: return codepoint != U'\u03A2';
-					case 13: return codepoint != U'\u03F6';
-					case 15: return codepoint <= U'\u0481' || codepoint >= U'\u048A';
-					case 18: return codepoint != U'\u0530';
-					case 19: return codepoint <= U'\u0559' || codepoint >= U'\u0560';
-					case 21: return codepoint <= U'\u05EA' || codepoint >= U'\u05EF';
-					case 23: return codepoint != U'\u0653';
-					case 25: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x6D1ull)) & 0x4E0060300017ull;
-					case 26: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x710ull)) & 0x60000000FFFFFFFDull;
-					case 28: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x78Eull)) & 0x7000000800FFFFFFull;
-					case 29: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x7CDull)) & 0x7FF821803FFFFFFFull;
-					case 30: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x80Cull)) & 0x7FF00000110043FFull;
-					case 31: return codepoint <= U'\u0858' || codepoint >= U'\u0860';
-					case 32: return codepoint != U'\u088A';
-					case 34: return codepoint <= U'\u0939' || codepoint >= U'\u093D';
-					case 35: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x950ull)) & 0x21FFFE0003FF01ull;
-					case 36: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x986ull)) & 0x8F17F7FFFFE67Full;
-					case 37: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x9CEull)) & 0x400C000EC001ull;
-					case 38: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA05ull)) & 0x1B6FEFFFFFCC3Full;
-					case 39: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA59u)) & 0xE00002Fu;
-					case 40: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA85ull)) & 0x11F6FEFFFFFDDFFull;
-					case 41: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAD0ull)) & 0x20000030001ull;
-					case 42: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xB05ull)) & 0x11F6FEFFFFFCCFFull;
-					case 43: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xB5Cu)) & 0x20003Bu;
-					case 44: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xB83ull)) & 0x7FF8E31AC7B8FDull;
-					case 46: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC05ull)) & 0x1FFFEFFFFFEEFFull;
-					case 47: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC3Dull)) & 0x1838000001ull;
-					case 48: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC80ull)) & 0x1EFFDFFFFFDDFE1ull;
-					case 49: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xCB9ull)) & 0x30001A000000011ull;
+					0x027FFFFFFFFFDDFFull,	0x0FC0000038070400ull,	0xF2FFBFFFFFC7FFFEull,	0xE000000000000007ull,
+					0xF000DFFFFFFFFFFFull,	0x6000000000000007ull,	0xF200DFFAFFFFFF7Dull,	0x100000000F000005ull,
+					0xF000000000000000ull,	0x000001FFFFFFFFEFull,	0x00000000000001F0ull,	0xF000000000000000ull,
+					0x0800007FFFFFFFFFull,	0x3FFE1C0623C3F000ull,	0xFFFFFFFFF0000400ull,	0xFF7FFFFFFFFFF20Bull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFF3D7F3DFull,	0xD7F3DFFFFFFFF3DFull,	0xFFFFFFFFFFF7FFF3ull,
+					0xFFFFFFFFFFF3DFFFull,	0xF0000000007FFFFFull,	0xFFFFFFFFF0000FFFull,	0xE3F3FFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xEFFFF9FFFFFFFFFFull,	0xFFFFFFFFF07FFFFFull,	0xF01FE07FFFFFFFFFull,
+					0xF0003FFFF0003DFFull,	0xF0001DFFF0003FFFull,	0x0000FFFFFFFFFFFFull,	0x0000000001080000ull,
+					0xFFFFFFFFF0000000ull,	0xF01FFFFFFFFFFFFFull,	0xFFFFF05FFFFFFFF9ull,	0xF003FFFFFFFFFFFFull,
+					0x0000000007FFFFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xD04ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xD04ull) % 0x40ull));
+			}
+			case 0x02: // [2] 1940 - 258A
+			{
+				if (cp < U'\u1950' || cp > U'\u2184')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFF001F3FFFFFFFull,	0x03FFFFFF0FFFFFFFull,	0xFFFF000000000000ull,	0xFFFFFFFFFFFF007Full,
+					0x000000000000001Full,	0x0000000000800000ull,	0xFFE0000000000000ull,	0x0FE0000FFFFFFFFFull,
+					0xFFF8000000000000ull,	0xFFFFFC00C001FFFFull,	0xFFFF0000003FFFFFull,	0xE0000000000FFFFFull,
+					0x01FF3FFFFFFFFC00ull,	0x0000E7FFFFFFFFFFull,	0xFFFF046FDE000000ull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0x0000FFFFFFFFFFFFull,	0xFFFF000000000000ull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x3F3FFFFFFFFF3F3Full,
+					0xFFFF3FFFFFFFAAFFull,	0x1FDC5FDFFFFFFFFFull,	0x00001FDC1FFF0FCFull,	0x0000000000000000ull,
+					0x0000800200000000ull,	0x0000000000001FFFull,	0xFC84000000000000ull,	0x43E0F3FFBD503E2Full,
+					0x0018000000000000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1950ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x1950ull) % 0x40ull));
+			}
+			case 0x03: // [3] 258B - 31D5
+			{
+				if (cp < U'\u2C00' || cp > U'\u31BF')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFF7FFFFFFFFFFFull,	0xFFFFFFFF7FFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x000C781FFFFFFFFFull,
+					0xFFFF20BFFFFFFFFFull,	0x000080FFFFFFFFFFull,	0x7F7F7F7F007FFFFFull,	0x000000007F7F7F7Full,
+					0x0000800000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x183E000000000060ull,	0xFFFFFFFFFFFFFFFEull,	0xFFFFFFFEE07FFFFFull,	0xF7FFFFFFFFFFFFFFull,
+					0xFFFEFFFFFFFFFFE0ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFF00007FFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x2C00ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x04: return (cp >= U'\u31F0' && cp <= U'\u31FF') || (cp >= U'\u3400' && cp <= U'\u3E20');
+			case 0x06: return (cp >= U'\u4A6C' && cp <= U'\u4DBE') || (cp >= U'\u4E00' && cp <= U'\u56B6');
+			case 0x0C: return (cp >= U'\u942E' && cp <= U'\u9FFB') || (cp >= U'\uA000' && cp <= U'\uA078');
+			case 0x0D: // [13] A079 - ACC3
+			{
+				TOML_ASSUME(cp >= U'\uA079' && cp <= U'\uACC3');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x00000000000FFFFFull,	0xFFFFFFFFFF800000ull,	0xFFFFFFFFFFFFFF9Full,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0006007FFF8FFFFFull,	0x003FFFFFFFFFFF80ull,
+					0xFFFFFF9FFFFFFFC0ull,	0x00001FFFFFFFFFFFull,	0xFFFFFE7FC0000000ull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFCFFFFull,	0xF00000000003FE7Full,	0x000003FFFFFBDDFFull,	0x07FFFFFFFFFFFF80ull,
+					0x07FFFFFFFFFFFE00ull,	0x7E00000000000000ull,	0xFF801FFFFFFE0034ull,	0xFFFFFF8000003FFFull,
+					0x03FFFFFFFFFFF80Full,	0x007FEF8000400000ull,	0x0000FFFFFFFFFFBEull,	0x3FFFFF800007FB80ull,
+					0x317FFFFFFFFFFFE2ull,	0x0E03FF9C0000029Full,	0xFFBFBF803F3F3F00ull,	0xFF81FFFBFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0x000003FFFFFFFFFFull,	0xFFFFFFFFFFFFFF80ull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0x00000000000007FFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA079ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA079ull) % 0x40ull));
+			}
+			case 0x11: return (cp >= U'\uD1A5' && cp <= U'\uD7A2') || (cp >= U'\uD7B0' && cp <= U'\uD7C6')
+				|| (cp >= U'\uD7CB' && cp <= U'\uD7FB');
+			case 0x14: // [20] F686 - 102D0
+			{
+				if (cp < U'\uF900')
+					return false;
+				TOML_ASSUME(cp <= U'\U000102D0');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFF3FFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0000000003FFFFFFull,
+					0x5F7FFDFFA0F8007Full,	0xFFFFFFFFFFFFFFDBull,	0x0003FFFFFFFFFFFFull,	0xFFFFFFFFFFF80000ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x3FFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFF0000ull,	0xFFFFFFFFFFFCFFFFull,	0x0FFF0000000000FFull,
+					0x0000000000000000ull,	0xFFDF000000000000ull,	0xFFFFFFFFFFFFFFFFull,	0x1FFFFFFFFFFFFFFFull,
+					0x07FFFFFE00000000ull,	0xFFFFFFC007FFFFFEull,	0x7FFFFFFFFFFFFFFFull,	0x000000001CFCFCFCull,
+					0xB7FFFF7FFFFFEFFFull,	0x000000003FFF3FFFull,	0xFFFFFFFFFFFFFFFFull,	0x07FFFFFFFFFFFFFFull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFF1FFFFFFFull,	0x000000000001FFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xF900ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x15: // [21] 102D1 - 10F1B
+			{
+				if (cp < U'\U00010300')
+					return false;
+				TOML_ASSUME(cp <= U'\U00010F1B');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFE000FFFFFFFFull,	0x003FFFFFFFFF03FDull,	0xFFFFFFFF3FFFFFFFull,	0x000000000000FF0Full,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFF00003FFFFFFFull,	0x0FFFFFFFFF0FFFFFull,
+					0xFFFF00FFFFFFFFFFull,	0x0000000FFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x007FFFFFFFFFFFFFull,	0x000000FF003FFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x91BFFFFFFFFFFD3Full,	0x007FFFFF003FFFFFull,	0x000000007FFFFFFFull,	0x0037FFFF00000000ull,
+					0x03FFFFFF003FFFFFull,	0x0000000000000000ull,	0xC0FFFFFFFFFFFFFFull,	0x0000000000000000ull,
+					0x003FFFFFFEEF0001ull,	0x1FFFFFFF00000000ull,	0x000000001FFFFFFFull,	0x0000001FFFFFFEFFull,
+					0x003FFFFFFFFFFFFFull,	0x0007FFFF003FFFFFull,	0x000000000003FFFFull,	0x0000000000000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0x00000000000001FFull,	0x0007FFFFFFFFFFFFull,	0x0007FFFFFFFFFFFFull,
+					0x0000000FFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x000303FFFFFFFFFFull,	0x0000000000000000ull,
+					0x000000000FFFFFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10300ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x16: // [22] 10F1C - 11B66
+			{
+				if (cp > U'\U00011AF8')
+					return false;
+				TOML_ASSUME(cp >= U'\U00010F1C');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x000003FFFFF00801ull,	0x0000000000000000ull,	0x000001FFFFF00000ull,	0xFFFFFF8007FFFFF0ull,
+					0x000000000FFFFFFFull,	0xFFFFFF8000000000ull,	0xFFF00000000FFFFFull,	0xFFFFFF8000001FFFull,
+					0xFFF00900000007FFull,	0xFFFFFF80047FFFFFull,	0x400001E0007FFFFFull,	0xFFBFFFF000000001ull,
+					0x000000000000FFFFull,	0xFFFBD7F000000000ull,	0xFFFFFFFFFFF01FFBull,	0xFF99FE0000000007ull,
+					0x001000023EDFDFFFull,	0x000000000000003Eull,	0x0000000000000000ull,	0xFFFFFFF000000000ull,
+					0x0000780001FFFFFFull,	0xFFFFFFF000000038ull,	0x00000B00000FFFFFull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0xFFFFFFF000000000ull,	0xF00000000007FFFFull,	0xFFFFFFF000000000ull,
+					0x00000100000FFFFFull,	0xFFFFFFF000000000ull,	0x0000000010007FFFull,	0x7FFFFFF000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFF000000000ull,
+					0x000000000000FFFFull,	0x0000000000000000ull,	0xFFFFFFFFFFFFFFF0ull,	0xF6FF27F80000000Full,
+					0x00000028000FFFFFull,	0x0000000000000000ull,	0x001FFFFFFFFFCFF0ull,	0xFFFF8010000000A0ull,
+					0x00100000407FFFFFull,	0x00003FFFFFFFFFFFull,	0xFFFFFFF000000002ull,	0x000000001FFFFFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10F1Cull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x10F1Cull) % 0x40ull));
+			}
+			case 0x17: // [23] 11B67 - 127B1
+			{
+				if (cp < U'\U00011C00' || cp > U'\U00012543')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x00007FFFFFFFFDFFull,	0xFFFC000000000001ull,	0x000000000000FFFFull,	0x0000000000000000ull,
+					0x0001FFFFFFFFFB7Full,	0xFFFFFDBF00000040ull,	0x00000000010003FFull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0007FFFF00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0001000000000000ull,	0x0000000000000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0000000003FFFFFFull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0x000000000000000Full,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x11C00ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x18: return cp >= U'\U00013000';
+			case 0x19: return cp <= U'\U0001342E';
+			case 0x1A: return (cp >= U'\U00014400' && cp <= U'\U00014646');
+			case 0x1D: // [29] 16529 - 17173
+			{
+				if (cp < U'\U00016800')
+					return false;
+				TOML_ASSUME(cp <= U'\U00017173');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x01FFFFFFFFFFFFFFull,	0x000000007FFFFFFFull,	0x0000000000000000ull,	0x00003FFFFFFF0000ull,
+					0x0000FFFFFFFFFFFFull,	0xE0FFFFF80000000Full,	0x000000000000FFFFull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0xFFFFFFFFFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0x00000000000107FFull,	0x00000000FFF80000ull,	0x0000000B00000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0x000FFFFFFFFFFFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16800ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x1F: return (cp >= U'\U00017DBF' && cp <= U'\U000187F6') || (cp >= U'\U00018800' && cp <= U'\U00018A09');
+			case 0x20: return (cp >= U'\U00018A0A' && cp <= U'\U00018CD5') || (cp >= U'\U00018D00' && cp <= U'\U00018D07');
+			case 0x23: // [35] 1AEEB - 1BB35
+			{
+				if (cp < U'\U0001B000' || cp > U'\U0001B2FB')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0x000000007FFFFFFFull,	0xFFFF00F000070000ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0FFFFFFFFFFFFFFFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1B000ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x24: // [36] 1BB36 - 1C780
+			{
+				if (cp < U'\U0001BC00' || cp > U'\U0001BC99')
+					return false;
+
+				switch ((static_cast<uint_least64_t>(cp) - 0x1BC00ull) / 0x40ull)
+				{
+					case 0x01: return (cp <= U'\U0001BC7C' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1BC40ull)) & 0x1FFF07FFFFFFFFFFull);
+					case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
 			}
-			case 1:
+			case 0x26: // [38] 1D3CC - 1E016
 			{
-				if (codepoint < U'\u0D04' || codepoint > U'\u191E')
+				if (cp < U'\U0001D400' || cp > U'\U0001D7CB')
 					return false;
 
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0D04', U'\u191E');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xD04u) / 64u)
+				constexpr uint_least64_t lookup_table_1[] =
 				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xD04ull)) & 0x27FFFFFFFFFDDFFull;
-					case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xD4Eull)) & 0x3F000000E01C1ull;
-					case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xD85ull)) & 0x797FDFFFFFE3FFFFull;
-					case 3: return codepoint <= U'\u0DC6' || codepoint >= U'\u0E01';
-					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xE04ull)) & 0xF000DFFFFFFFFFFFull;
-					case 5: return codepoint <= U'\u0E46' || codepoint >= U'\u0E81';
-					case 6: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xE84ull)) & 0xF200DFFAFFFFFF7Dull;
-					case 7: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xEC4ull)) & 0x100000000F000005ull;
-					case 9: return codepoint != U'\u0F48';
-					case 12: return codepoint <= U'\u102A' || codepoint >= U'\u103F';
-					case 13: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1050ull)) & 0x3FFE1C0623C3Full;
-					case 14: return codepoint <= U'\u108E' || codepoint >= U'\u10A0';
-					case 15: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10C4ull)) & 0xFF7FFFFFFFFFF20Bull;
-					case 21: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1244ull)) & 0xFFFFFFFFF3D7F3DFull;
-					case 22: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1284ull)) & 0xD7F3DFFFFFFFF3DFull;
-					case 23: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x12C4ull)) & 0xFFFFFFFFFFF7FFF3ull;
-					case 24: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1304ull)) & 0xFFFFFFFFFFF3DFFFull;
-					case 25: return codepoint <= U'\u135A' || codepoint >= U'\u1380';
-					case 26: return codepoint <= U'\u138F' || codepoint >= U'\u13A0';
-					case 27: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x13C4ull)) & 0xE3F3FFFFFFFFFFFFull;
-					case 37: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1644ull)) & 0xEFFFF9FFFFFFFFFFull;
-					case 38: return codepoint <= U'\u169A' || codepoint >= U'\u16A0';
-					case 39: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x16C4ull)) & 0xF01FE07FFFFFFFFFull;
-					case 40: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1704ull)) & 0xF0003FFFF0003DFFull;
-					case 41: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1744ull)) & 0xF0001DFFF0003FFFull;
-					case 43: return codepoint <= U'\u17D7' || codepoint >= U'\u17DC';
-					case 45: return codepoint <= U'\u1878' || codepoint >= U'\u1880';
-					case 46: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1884ull)) & 0xFFFFF05FFFFFFFF9ull;
-					case 47: return codepoint <= U'\u18F5' || codepoint >= U'\u1900';
-					default: return true;
-				}
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFDFFFFFull,	0xEBFFDE64DFFFFFFFull,	0xFFFFFFFFFFFFFFEFull,
+					0x7BFFFFFFDFDFE7BFull,	0xFFFFFFFFFFFDFC5Full,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFF3FFFFFFFFFull,	0xF7FFFFFFF7FFFFFDull,
+					0xFFDFFFFFFFDFFFFFull,	0xFFFF7FFFFFFF7FFFull,	0xFFFFFDFFFFFFFDFFull,	0x0000000000000FF7ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1D400ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
 			}
-			case 2:
+			case 0x27: // [39] 1E017 - 1EC61
 			{
-				if (codepoint < U'\u1950' || codepoint > U'\u2184')
+				if (cp < U'\U0001E100' || cp > U'\U0001E94B')
 					return false;
 
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1950', U'\u2184');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1950u) / 64u)
+				constexpr uint_least64_t lookup_table_1[] =
 				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1950ull)) & 0xFFFF001F3FFFFFFFull;
-					case 1: return codepoint <= U'\u19AB' || codepoint >= U'\u19B0';
-					case 3: return codepoint <= U'\u1A16' || codepoint >= U'\u1A20';
-					case 7: return codepoint <= U'\u1B33' || codepoint >= U'\u1B45';
-					case 9: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1B90ull)) & 0xFFFFFC00C001FFFFull;
-					case 10: return codepoint <= U'\u1BE5' || codepoint >= U'\u1C00';
-					case 11: return codepoint <= U'\u1C23' || codepoint >= U'\u1C4D';
-					case 12: return codepoint <= U'\u1C7D' || codepoint >= U'\u1C80';
-					case 13: return codepoint <= U'\u1CBA' || codepoint >= U'\u1CBD';
-					case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1CE9ull)) & 0x7FFF8237EFull;
-					case 23: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1F10ull)) & 0x3F3FFFFFFFFF3F3Full;
-					case 24: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1F50ull)) & 0xFFFF3FFFFFFFAAFFull;
-					case 25: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1F90ull)) & 0x1FDC5FDFFFFFFFFFull;
-					case 26: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1FD0ull)) & 0x1FDC1FFF0FCFull;
-					case 27: return false;
-					case 28: return codepoint <= U'\u2071' || codepoint >= U'\u207F';
-					case 30: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x2102u)) & 0x3F21u;
-					case 31: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x2110ull)) & 0x43E0F3FFBD503E2Full;
-					default: return true;
-				}
+					0x3F801FFFFFFFFFFFull,	0x0000000000004000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x00000FFFFFFFFFFFull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x000000000000001Full,
+					0xFFFFFFFFFFFFFFFFull,	0x000000000000080Full,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1E100ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
 			}
-			case 3:
+			case 0x28: // [40] 1EC62 - 1F8AC
 			{
-				if (codepoint < U'\u2C00' || codepoint > U'\u31BF')
+				if (cp < U'\U0001EE00' || cp > U'\U0001EEBB')
 					return false;
 
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u2C00', U'\u31BF');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x2C00u) / 64u)
+				switch ((static_cast<uint_least64_t>(cp) - 0x1EE00ull) / 0x40ull)
 				{
-					case 0: return codepoint != U'\u2C2F';
-					case 1: return codepoint != U'\u2C5F';
-					case 2: return true;
-					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x2CC0ull)) & 0xC781FFFFFFFFFull;
-					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x2D00ull)) & 0xFFFF20BFFFFFFFFFull;
-					case 5: return codepoint <= U'\u2D67' || codepoint >= U'\u2D6F';
-					case 6: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x2D80ull)) & 0x7F7F7F7F007FFFFFull;
-					case 7: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x2DC0u)) & 0x7F7F7F7Fu;
-					case 8: return true;
-					case 16: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x3005ull)) & 0xC1F00000000003ull;
-					case 17: return true;
-					case 18: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x3080ull)) & 0xFFFFFFFEE07FFFFFull;
-					case 19: return codepoint != U'\u30FB';
-					case 20: return codepoint != U'\u3100';
-					case 21: return true;
-					case 22: return codepoint <= U'\u318E' || codepoint >= U'\u31A0';
-					default: return false;
-				}
-			}
-			case 4: return codepoint <= U'\u31FF' || codepoint >= U'\u3400';
-			case 6: return codepoint <= U'\u4DBE' || codepoint >= U'\u4E00';
-			case 12: return codepoint <= U'\u9FFB' || codepoint >= U'\uA000';
-			case 13:
-			{
-				if (codepoint < U'\uA079' || codepoint > U'\uACC3')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\uA079', U'\uACC3');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xA079u) / 63u)
-				{
-					case 18: return codepoint <= U'\uA4FD' || codepoint >= U'\uA500';
-					case 22: return codepoint <= U'\uA60C' || codepoint >= U'\uA610';
-					case 23: return codepoint <= U'\uA62B' || codepoint >= U'\uA640';
-					case 24: return codepoint <= U'\uA66E' || codepoint >= U'\uA67F';
-					case 26: return codepoint <= U'\uA6E5' || codepoint >= U'\uA717';
-					case 27: return codepoint <= U'\uA71F' || codepoint >= U'\uA722';
-					case 28: return codepoint <= U'\uA788' || codepoint >= U'\uA78B';
-					case 29: return codepoint <= U'\uA7BF' || codepoint >= U'\uA7C2';
-					case 30: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA7F5ull)) & 0x1FFFBDDFFFull;
-					case 31: return codepoint <= U'\uA822' || codepoint >= U'\uA840';
-					case 32: return codepoint <= U'\uA873' || codepoint >= U'\uA882';
-					case 34: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA8F2ull)) & 0xFFF001A3Full;
-					case 35: return codepoint <= U'\uA925' || codepoint >= U'\uA930';
-					case 36: return codepoint <= U'\uA97C' || codepoint >= U'\uA984';
-					case 37: return codepoint <= U'\uA9B2' || codepoint >= U'\uA9CF';
-					case 38: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA9E0ull)) & 0x3FFFF7C00FFDFull;
-					case 39: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAA12ull)) & 0x3FDC000007FFFFFull;
-					case 40: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAA60ull)) & 0xFFFFC47FFFFFull;
-					case 41: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAA90ull)) & 0x53E62FFFFFFFFull;
-					case 42: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAADBull)) & 0x7CFC00380FFE7ull;
-					case 43: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAB0Eull)) & 0x7FFFFFFDFDFC01F9ull;
-					case 44: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAB4Dull)) & 0x7FFFFFF81FFFBFFFull;
-					case 46: return codepoint <= U'\uABE2' || codepoint >= U'\uAC00';
-					default: return true;
-				}
-			}
-			case 17: return codepoint <= U'\uD7A2' || (codepoint >= U'\uD7B0' && codepoint <= U'\uD7C6')
-					|| codepoint >= U'\uD7CB';
-			case 18: return false;
-			case 19: return false;
-			case 20:
-			{
-				if (codepoint < U'\uF900' || codepoint > U'\U000102D0')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\uF900', U'\U000102D0');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xF900u) / 63u)
-				{
-					case 5: return codepoint <= U'\uFA6D' || codepoint >= U'\uFA70';
-					case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xFB00ull)) & 0x7FFDFFA0F8007Full;
-					case 9: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xFB38ull)) & 0x3FFFFFFFFFFFDB5Full;
-					case 17: return codepoint <= U'\uFD3D' || codepoint >= U'\uFD50';
-					case 18: return codepoint <= U'\uFD8F' || codepoint >= U'\uFD92';
-					case 21: return false;
-					case 22: return codepoint != U'\uFE6A';
-					case 24: return codepoint <= U'\uFEFC' || codepoint >= U'\uFF21';
-					case 25: return codepoint <= U'\uFF3A' || codepoint >= U'\uFF41';
-					case 27: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xFFA5ull)) & 0xE7E7E7E3FFFFFFull;
-					case 28: return codepoint != U'\uFFE4';
-					case 29: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10023ull)) & 0x7FFE7FFF6FFFFEFull;
-					case 33: return false;
-					case 34: return false;
-					case 35: return false;
-					case 36: return false;
-					case 37: return false;
-					case 39: return codepoint <= U'\U0001029C' || codepoint >= U'\U000102A0';
-					default: return true;
-				}
-			}
-			case 21:
-			{
-				if (codepoint < U'\U00010300' || codepoint > U'\U00010F1B')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010300', U'\U00010F1B');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x10300u) / 64u)
-				{
-					case 0: return codepoint <= U'\U0001031F' || codepoint >= U'\U0001032D';
-					case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10340ull)) & 0x3FFFFFFFFF03FDull;
-					case 2: return codepoint <= U'\U0001039D' || codepoint >= U'\U000103A0';
-					case 3: return codepoint <= U'\U000103C3' || codepoint >= U'\U000103C8';
-					case 6: return codepoint <= U'\U0001049D' || codepoint >= U'\U000104B0';
-					case 7: return codepoint <= U'\U000104D3' || codepoint >= U'\U000104D8';
-					case 8: return codepoint <= U'\U00010527' || codepoint >= U'\U00010530';
-					case 10: return false;
-					case 11: return false;
-					case 17: return codepoint <= U'\U00010755' || codepoint >= U'\U00010760';
-					case 18: return false;
-					case 19: return false;
-					case 20: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10800ull)) & 0x91BFFFFFFFFFFD3Full;
-					case 21: return codepoint <= U'\U00010855' || codepoint >= U'\U00010860';
-					case 23: return codepoint != U'\U000108C0';
-					case 24: return codepoint <= U'\U00010915' || codepoint >= U'\U00010920';
-					case 25: return false;
-					case 26: return codepoint <= U'\U000109B7' || codepoint >= U'\U000109BE';
-					case 27: return false;
-					case 28: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10A00ull)) & 0x3FFFFFFEEF0001ull;
-					case 31: return codepoint != U'\U00010AC8';
-					case 33: return codepoint <= U'\U00010B55' || codepoint >= U'\U00010B60';
-					case 35: return false;
-					case 41: return false;
-					case 42: return false;
-					case 43: return false;
-					case 44: return false;
-					case 45: return false;
-					case 46: return codepoint <= U'\U00010EA9' || codepoint >= U'\U00010EB0';
-					case 47: return false;
-					default: return true;
-				}
-			}
-			case 22:
-			{
-				if (codepoint < U'\U00010F1C' || codepoint > U'\U00011AF8')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010F1C', U'\U00011AF8');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x10F1Cu) / 64u)
-				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10F1Cull)) & 0x3FFFFF00801ull;
-					case 1: return false;
-					case 3: return codepoint <= U'\U00010FF6' || codepoint >= U'\U00011003';
-					case 6: return codepoint <= U'\U000110AF' || codepoint >= U'\U000110D0';
-					case 7: return codepoint <= U'\U000110E8' || codepoint >= U'\U00011103';
-					case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1111Cull)) & 0xFFF00900000007FFull;
-					case 9: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1115Cull)) & 0xFFFFFF80047FFFFFull;
-					case 10: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1119Cull)) & 0x400001E0007FFFFFull;
-					case 11: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x111DCull)) & 0xFFBFFFF000000001ull;
-					case 13: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11280u)) & 0xFFFBD7Fu;
-					case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1129Cull)) & 0xFFFFFFFFFFF01FFBull;
-					case 15: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x112DCull)) & 0xFF99FE0000000007ull;
-					case 16: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1131Cull)) & 0x1000023EDFDFFFull;
-					case 18: return false;
-					case 20: return codepoint <= U'\U00011434' || codepoint >= U'\U00011447';
-					case 21: return codepoint <= U'\U00011461' || codepoint >= U'\U00011480';
-					case 22: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1149Cull)) & 0xB00000FFFFFull;
-					case 23: return false;
-					case 24: return false;
-					case 26: return codepoint <= U'\U000115AE' || codepoint >= U'\U000115D8';
-					case 28: return codepoint <= U'\U0001162F' || codepoint >= U'\U00011644';
-					case 30: return codepoint <= U'\U000116AA' || codepoint >= U'\U000116B8';
-					case 32: return false;
-					case 33: return false;
-					case 34: return false;
-					case 37: return false;
-					case 39: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x118DCull)) & 0xF6FF27F80000000Full;
-					case 40: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1191Cull)) & 0x28000FFFFFull;
-					case 41: return false;
-					case 42: return codepoint <= U'\U000119A7' || codepoint >= U'\U000119AA';
-					case 43: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x119E1ull)) & 0x7FFFC0080000005ull;
-					case 44: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11A1Cull)) & 0x100000407FFFFFull;
-					case 46: return codepoint <= U'\U00011A9D' || codepoint >= U'\U00011AC0';
-					default: return true;
-				}
-			}
-			case 23:
-			{
-				if (codepoint < U'\U00011C00' || codepoint > U'\U00012543')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00011C00', U'\U00012543');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x11C00u) / 63u)
-				{
-					case 0: return codepoint != U'\U00011C09';
-					case 1: return codepoint <= U'\U00011C40' || codepoint >= U'\U00011C72';
-					case 3: return false;
-					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11D00ull)) & 0x1FFFFFFFFFB7Full;
-					case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11D46ull)) & 0xFFFF6FC000001ull;
-					case 6: return codepoint <= U'\U00011D89' || codepoint >= U'\U00011D98';
-					case 7: return false;
-					case 8: return false;
-					case 9: return false;
-					case 10: return false;
-					case 12: return false;
-					case 13: return false;
-					case 15: return false;
-					case 31: return false;
-					case 32: return false;
-					case 33: return false;
-					default: return true;
-				}
-			}
-			case 27: return false;
-			case 28: return false;
-			case 29:
-			{
-				if (codepoint < U'\U00016800' || codepoint > U'\U00017173')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00016800', U'\U00017173');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x16800u) / 64u)
-				{
-					case 10: return false;
-					case 13: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x16B40ull)) & 0xE0FFFFF80000000Full;
-					case 15: return false;
-					case 16: return false;
-					case 17: return false;
-					case 18: return false;
-					case 19: return false;
-					case 20: return false;
-					case 21: return false;
-					case 22: return false;
-					case 23: return false;
-					case 24: return false;
-					case 26: return false;
-					case 27: return false;
-					case 29: return codepoint <= U'\U00016F4A' || codepoint >= U'\U00016F50';
-					case 31: return codepoint != U'\U00016FC0';
-					default: return true;
-				}
-			}
-			case 31: return codepoint <= U'\U000187F6' || codepoint >= U'\U00018800';
-			case 32: return codepoint <= U'\U00018CD5' || codepoint >= U'\U00018D00';
-			case 33: return false;
-			case 34: return false;
-			case 35: return codepoint <= U'\U0001B11E' || (codepoint >= U'\U0001B150' && codepoint <= U'\U0001B152')
-					|| (codepoint >= U'\U0001B164' && codepoint <= U'\U0001B167') || codepoint >= U'\U0001B170';
-			case 36: return codepoint <= U'\U0001BC6A' || (codepoint >= U'\U0001BC70' && codepoint <= U'\U0001BC7C')
-					|| (codepoint >= U'\U0001BC80' && codepoint <= U'\U0001BC88') || codepoint >= U'\U0001BC90';
-			case 37: return false;
-			case 38:
-			{
-				if (codepoint < U'\U0001D400' || codepoint > U'\U0001D7CB')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D400', U'\U0001D7CB');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1D400u) / 61u)
-				{
-					case 1: return codepoint != U'\U0001D455';
-					case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D47Aull)) & 0x1FF79937FFFFFFFFull;
-					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D4B7ull)) & 0x1FFFFFFFFFFFDFD7ull;
-					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D4F4ull)) & 0x1FFFFDFDFE7BFFFFull;
-					case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D531ull)) & 0x1FFFFFFEFE2FBDFFull;
-					case 11: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D69Full)) & 0xFFFFFFBFFFFFE7Full;
-					case 12: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D6DCull)) & 0x1DFFFFFF7FFFFFFFull;
-					case 13: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D719ull)) & 0x1FBFFFFFEFFFFFFFull;
-					case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D756ull)) & 0x1FF7FFFFFDFFFFFFull;
-					case 15: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D793ull)) & 0x1FEFFFFFFBFFFFFull;
-					default: return true;
-				}
-			}
-			case 39:
-			{
-				if (codepoint < U'\U0001E100' || codepoint > U'\U0001E94B')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001E100', U'\U0001E94B');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1E100u) / 63u)
-				{
-					case 0: return codepoint <= U'\U0001E12C' || codepoint >= U'\U0001E137';
-					case 1: return true;
-					case 7: return true;
-					case 28: return true;
-					case 29: return true;
-					case 30: return true;
-					case 31: return true;
-					case 32: return true;
-					case 33: return codepoint <= U'\U0001E943' || codepoint >= U'\U0001E94B';
-					default: return false;
-				}
-			}
-			case 40:
-			{
-				if (codepoint < U'\U0001EE00' || codepoint > U'\U0001EEBB')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001EE00', U'\U0001EEBB');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1EE00u) / 63u)
-				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull;
-					case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1EE42ull)) & 0x7BDFDE5AAA5BAA1ull;
-					case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1EE7Eull)) & 0x3FFFEFB83FFFEFFDull;
+					case 0x00: return (cp <= U'\U0001EE3B' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull);
+					case 0x01: return (cp >= U'\U0001EE42' && cp <= U'\U0001EE7E' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE42ull)) & 0x17BDFDE5AAA5BAA1ull);
+					case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE80ull)) & 0xFFFFBEE0FFFFBFFull;
 					TOML_NO_DEFAULT_CASE;
 				}
 			}
-			case 55: return codepoint <= U'\U0002A6DC' || codepoint >= U'\U0002A700';
-			case 56: return codepoint <= U'\U0002B733' || (codepoint >= U'\U0002B740' && codepoint <= U'\U0002B81C')
-					|| codepoint >= U'\U0002B820';
-			case 58: return codepoint <= U'\U0002CEA0' || codepoint >= U'\U0002CEB0';
-			default: return true;
+			case 0x29: return cp >= U'\U00020000';
+			case 0x37: return (cp >= U'\U0002A4C7' && cp <= U'\U0002A6DC') || (cp >= U'\U0002A700' && cp <= U'\U0002B111');
+			case 0x38: return (cp >= U'\U0002B112' && cp <= U'\U0002B733') || (cp >= U'\U0002B740' && cp <= U'\U0002B81C')
+				|| (cp >= U'\U0002B820' && cp <= U'\U0002BD5C');
+			case 0x3A: return (cp >= U'\U0002C9A8' && cp <= U'\U0002CEA0') || (cp >= U'\U0002CEB0' && cp <= U'\U0002D5F2');
+			case 0x3C: return cp <= U'\U0002EBDF';
+			case 0x3D: return (cp >= U'\U0002F800' && cp <= U'\U0002FA1D');
+			case 0x3E: return cp >= U'\U00030000';
+			TOML_NO_DEFAULT_CASE;
 		}
 	}
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_unicode_number(char32_t codepoint) noexcept
+	constexpr bool is_unicode_number(char32_t cp) noexcept
 	{
-		if (codepoint < U'\u0660' || codepoint > U'\U0001FBF9')
+		if (cp < U'\u0660' || cp > U'\U0001FBF9')
 			return false;
 
-		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0660', U'\U0001FBF9');
-		switch ((static_cast<uint_least32_t>(codepoint) - 0x660u) / 2007u)
+		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0x660ull) / 0x7D7ull;
+		if ((1ull << child_index_0) & 0x47FFDFE07FCFFFD0ull)
+			return false;
+		switch (child_index_0)
 		{
-			case 0:
+			case 0x00: // [0] 0660 - 0E36
 			{
-				if (codepoint > U'\u0DEF')
+				if (cp > U'\u0DEF')
 					return false;
+				TOML_ASSUME(cp >= U'\u0660');
 
-				return ((static_cast<uint_least32_t>(codepoint) - 0x660u) / 63u) & 0x55555025ull;
-			}
-			case 1:
-			{
-				if (codepoint < U'\u0E50' || codepoint > U'\u1099')
-					return false;
-
-				return ((static_cast<uint_least32_t>(codepoint) - 0xE50u) / 59u) & 0x30Dull;
-			}
-			case 2:
-			{
-				if (codepoint < U'\u16EE' || codepoint > U'\u1C59')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u16EE', U'\u1C59');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x16EEu) / 64u)
+				constexpr uint_least64_t lookup_table_1[] =
 				{
-					case 0: return true;
-					case 3: return true;
-					case 4: return true;
-					case 9: return true;
-					case 11: return true;
-					case 14: return codepoint <= U'\u1A89' || codepoint >= U'\u1A90';
-					case 17: return true;
-					case 19: return true;
-					case 21: return codepoint <= U'\u1C49' || codepoint >= U'\u1C50';
-					default: return false;
-				}
+					0x00000000000003FFull,	0x0000000000000000ull,	0x0000000003FF0000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x000003FF00000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,	0x0000000000000000ull,
+					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,	0x0000000000000000ull,
+					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,	0x0000000000000000ull,
+					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,	0x0000000000000000ull,
+					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x660ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x660ull) % 0x40ull));
 			}
-			case 3: return codepoint <= U'\u2182' || codepoint >= U'\u2185';
-			case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x3007ull)) & 0xE0007FC000001ull;
-			case 20:
+			case 0x01: // [1] 0E37 - 160D
 			{
-				if (codepoint < U'\uA620' || codepoint > U'\uAA59')
+				if (cp < U'\u0E50' || cp > U'\u1099')
 					return false;
 
-				return ((static_cast<uint_least32_t>(codepoint) - 0xA620u) / 64u) & 0x1CC09ull;
-			}
-			case 21: return true;
-			case 31: return true;
-			case 32:
-			{
-				if (codepoint < U'\U00010140' || codepoint > U'\U000104A9')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010140', U'\U000104A9');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x10140u) / 63u)
+				constexpr uint_least64_t lookup_table_1[] =
 				{
-					case 0: return true;
-					case 8: return codepoint <= U'\U00010341' || codepoint >= U'\U0001034A';
-					case 10: return true;
-					case 13: return true;
-					default: return false;
-				}
+					0x00000000000003FFull,	0x0000000000000000ull,	0x00000000000003FFull,	0x0000000003FF0000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x03FF000000000000ull,
+					0x0000000000000000ull,	0x00000000000003FFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xE50ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xE50ull) % 0x40ull));
 			}
-			case 33: return codepoint <= U'\U00010D39' || codepoint >= U'\U00011066';
-			case 34:
+			case 0x02: // [2] 160E - 1DE4
 			{
-				if (codepoint < U'\U000110F0' || codepoint > U'\U00011739')
+				if (cp < U'\u16EE' || cp > U'\u1C59')
 					return false;
 
-				return ((static_cast<uint_least32_t>(codepoint) - 0x110F0u) / 62u) & 0x341610Bull;
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x0000000000000007ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0FFC000000000000ull,
+					0x00000FFC00000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x00000003FF000000ull,	0x0000000000000000ull,	0x00000FFC00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x00000FFC0FFC0000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x00000FFC00000000ull,	0x0000000000000000ull,	0x0000000000000FFCull,
+					0x0000000000000000ull,	0x00000FFC0FFC0000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16EEull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x16EEull) % 0x40ull));
 			}
-			case 35:
+			case 0x03: return (cp >= U'\u2160' && cp <= U'\u2188' && (1ull << (static_cast<uint_least64_t>(cp) - 0x2160ull)) & 0x1E7FFFFFFFFull);
+			case 0x05: return (cp >= U'\u3007' && cp <= U'\u303A' && (1ull << (static_cast<uint_least64_t>(cp) - 0x3007ull)) & 0xE0007FC000001ull);
+			case 0x14: // [20] A32C - AB02
 			{
-				if (codepoint < U'\U000118E0' || codepoint > U'\U00011DA9')
+				if (cp < U'\uA620' || cp > U'\uAA59')
 					return false;
 
-				return ((static_cast<uint_least32_t>(codepoint) - 0x118E0u) / 62u) & 0xC4003ull;
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x00000000000003FFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x000000000000FFC0ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x03FF000000000000ull,	0x000003FF00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000003FF0000ull,
+					0x03FF000000000000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA620ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA620ull) % 0x40ull));
 			}
-			case 36: return true;
-			case 45: return codepoint <= U'\U00016A69' || codepoint >= U'\U00016B50';
-			case 59: return true;
-			case 60: return codepoint <= U'\U0001E149' || codepoint >= U'\U0001E2F0';
-			case 61: return true;
-			case 63: return true;
-			default: return false;
+			case 0x15: return (cp >= U'\uABF0' && cp <= U'\uABF9');
+			case 0x1F: return (cp >= U'\uFF10' && cp <= U'\uFF19');
+			case 0x20: // [32] 10140 - 10916
+			{
+				if (cp > U'\U000104A9')
+					return false;
+				TOML_ASSUME(cp >= U'\U00010140');
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x001FFFFFFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000402ull,	0x0000000000000000ull,	0x00000000003E0000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x000003FF00000000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10140ull) / 0x40ull]
+					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+			}
+			case 0x21: return (cp >= U'\U00010D30' && cp <= U'\U00010D39') || (cp >= U'\U00011066' && cp <= U'\U0001106F');
+			case 0x22: // [34] 110EE - 118C4
+			{
+				if (cp < U'\U000110F0' || cp > U'\U00011739')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x00000000000003FFull,	0x000000000000FFC0ull,	0x0000000000000000ull,	0x000003FF00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x00000000000003FFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x000003FF00000000ull,	0x0000000000000000ull,	0x000003FF00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x000003FF00000000ull,	0x0000000000000000ull,	0x0000000003FF0000ull,
+					0x0000000000000000ull,	0x00000000000003FFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x110F0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x110F0ull) % 0x40ull));
+			}
+			case 0x23: // [35] 118C5 - 1209B
+			{
+				if (cp < U'\U000118E0' || cp > U'\U00011DA9')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x00000000000003FFull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x00000000000003FFull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x118E0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x118E0ull) % 0x40ull));
+			}
+			case 0x24: return (cp >= U'\U00012400' && cp <= U'\U0001246E');
+			case 0x2D: return (cp >= U'\U00016A60' && cp <= U'\U00016A69') || (cp >= U'\U00016B50' && cp <= U'\U00016B59');
+			case 0x3B: return (cp >= U'\U0001D7CE' && cp <= U'\U0001D7FF');
+			case 0x3C: return (cp >= U'\U0001E140' && cp <= U'\U0001E149') || (cp >= U'\U0001E2F0' && cp <= U'\U0001E2F9');
+			case 0x3D: return (cp >= U'\U0001E950' && cp <= U'\U0001E959');
+			case 0x3F: return cp >= U'\U0001FBF0';
+			TOML_NO_DEFAULT_CASE;
 		}
 	}
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_unicode_combining_mark(char32_t codepoint) noexcept
+	constexpr bool is_unicode_combining_mark(char32_t cp) noexcept
 	{
-		if (codepoint < U'\u0300' || codepoint > U'\U000E01EF')
+		if (cp < U'\u0300' || cp > U'\U000E01EF')
 			return false;
 
-		TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\U000E01EF');
-		switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 14332u)
+		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0x300ull) / 0x37FCull;
+		if ((1ull << child_index_0) & 0x7FFFFFFFFFFFFE02ull)
+			return false;
+		switch (child_index_0)
 		{
-			case 0:
+			case 0x00: // [0] 0300 - 3AFB
 			{
-				if (codepoint > U'\u309A')
+				if (cp > U'\u309A')
 					return false;
+				TOML_ASSUME(cp >= U'\u0300');
 
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\u309A');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 1460u)
+				const auto child_index_1 = (static_cast<uint_least64_t>(cp) - 0x300ull) / 0xB7ull;
+				if ((1ull << child_index_1) & 0x63FFFDC00FB00002ull)
+					return false;
+				switch (child_index_1)
 				{
-					case 0:
+					case 0x00: return cp <= U'\u036F';
+					case 0x02: return (cp >= U'\u0483' && cp <= U'\u0487');
+					case 0x03: return (cp >= U'\u0591' && cp <= U'\u05C7' && (1ull << (static_cast<uint_least64_t>(cp) - 0x591ull)) & 0x5B5FFFFFFFFFFFull);
+					case 0x04: return (cp >= U'\u0610' && cp <= U'\u061A') || (cp >= U'\u064B' && cp <= U'\u065F')
+						|| cp == U'\u0670';
+					case 0x05: // [5] 0693 - 0749
 					{
-						if (codepoint > U'\u085B')
+						if (cp < U'\u06D6')
 							return false;
+						TOML_ASSUME(cp <= U'\u0749');
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0300', U'\u085B');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x300u) / 63u)
+						switch ((static_cast<uint_least64_t>(cp) - 0x6D6ull) / 0x40ull)
 						{
-							case 0: return true;
-							case 1: return true;
-							case 6: return true;
-							case 10: return true;
-							case 11: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x5B5u)) & 0x5B5FFu;
-							case 12: return true;
-							case 13: return codepoint <= U'\u065F' || codepoint >= U'\u0670';
-							case 15: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x6D6u)) & 0xF67E7Fu;
-							case 16: return true;
-							case 17: return true;
-							case 18: return true;
-							case 19: return codepoint <= U'\u07B0' || codepoint >= U'\u07EB';
-							case 20: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x7ECull)) & 0x6EFFBC00000200FFull;
-							case 21: return codepoint <= U'\u082D' || codepoint >= U'\u0859';
-							default: return false;
-						}
-					}
-					case 1:
-					{
-						if (codepoint < U'\u08D3' || codepoint > U'\u0E4E')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u08D3', U'\u0E4E');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x8D3u) / 64u)
-						{
-							case 0: return codepoint != U'\u08E2';
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x93Au)) & 0x1BFFFF7u;
-							case 2: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x953ull)) & 0x1C0000001801Full;
-							case 3: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x9BCu)) & 0x399FDu;
-							case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x9D7ull)) & 0x1C8000001801ull;
-							case 5: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA3Cu)) & 0x23987Du;
-							case 6: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA70u)) & 0xE0023u;
-							case 7: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xABCu)) & 0x3BBFDu;
-							case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAE2ull)) & 0x3BF000003ull;
-							case 9: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xB3Cu)) & 0x399FDu;
-							case 10: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xB55ull)) & 0x200000006007ull;
-							case 11: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xBBEu)) & 0xF71Fu;
-							case 12: return codepoint <= U'\u0BD7' || codepoint >= U'\u0C00';
-							case 13: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xC3Eu)) & 0xF77Fu;
-							case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xC55ull)) & 0x700000006003ull;
-							case 15: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xCBCu)) & 0x3DDFDu;
-							case 16: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xCD5ull)) & 0x780000006003ull;
-							case 17: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xD3Bu)) & 0x7BBFBu;
-							case 18: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xD57ull)) & 0x1C0000001801ull;
-							case 19: return codepoint <= U'\u0DCA' || codepoint >= U'\u0DCF';
-							case 20: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xDD3ull)) & 0x180001FEBull;
-							case 21: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xE31u)) & 0x3FC003F9u;
+							case 0x00: return (cp <= U'\u0711' && (1ull << (static_cast<uint_least64_t>(cp) - 0x6D6ull)) & 0x800000000F67E7Full);
+							case 0x01: return cp >= U'\u0730';
 							TOML_NO_DEFAULT_CASE;
 						}
 					}
-					case 2:
+					case 0x06: // [6] 074A - 0800
 					{
-						if (codepoint < U'\u0EB1' || codepoint > U'\u135F')
+						if (cp > U'\u07FD')
 							return false;
+						TOML_ASSUME(cp >= U'\u074A');
 
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u0EB1', U'\u135F');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0xEB1u) / 64u)
+						switch ((static_cast<uint_least64_t>(cp) - 0x74Aull) / 0x40ull)
 						{
-							case 0: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xEB1u)) & 0x1F800FF9u;
-							case 1: return true;
-							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xF35u)) & 0x615u;
-							case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xF71ull)) & 0xFFFFFF7FF06FFFFFull;
-							case 4: return codepoint <= U'\u0FBC' || codepoint >= U'\u0FC6';
-							case 5: return true;
-							case 6: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1031ull)) & 0x1FCEE1E000003FFFull;
-							case 7: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1071ull)) & 0x1E005FFE000Full;
-							case 18: return true;
-							default: return false;
-						}
-					}
-					case 3:
-					{
-						if (codepoint < U'\u1712' || codepoint > U'\u193B')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1712', U'\u193B');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1712u) / 62u)
-						{
-							case 0: return codepoint <= U'\u1714' || codepoint >= U'\u1732';
-							case 1: return codepoint <= U'\u1753' || codepoint >= U'\u1772';
-							case 3: return codepoint <= U'\u17D3' || codepoint >= U'\u17DD';
-							case 6: return codepoint <= U'\u1886' || codepoint >= U'\u18A9';
-							case 7: return false;
-							case 8: return codepoint <= U'\u192B' || codepoint >= U'\u1930';
-							default: return true;
-						}
-					}
-					case 4:
-					{
-						if (codepoint < U'\u1A17' || codepoint > U'\u1DFF')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\u1A17', U'\u1DFF');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1A17u) / 63u)
-						{
-							case 0: return codepoint <= U'\u1A1B' || codepoint >= U'\u1A55';
-							case 1: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1A56ull)) & 0x27FFFFFFDFFull;
-							case 2: return codepoint != U'\u1A95';
-							case 5: return codepoint <= U'\u1B73' || codepoint >= U'\u1B80';
-							case 9: return false;
-							case 10: return false;
-							case 11: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1CD0ull)) & 0x39021FFFFF7ull;
-							case 12: return false;
-							case 13: return false;
-							case 15: return codepoint != U'\u1DFA';
-							default: return true;
-						}
-					}
-					case 5: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x20D0ull)) & 0x1FFE21FFFull;
-					case 7:
-					{
-						if (codepoint < U'\u2CEF')
-							return false;
-
-						return ((static_cast<uint_least32_t>(codepoint) - 0x2CEFu) / 63u) & 0x601Dull;
-					}
-					default: return false;
-				}
-			}
-			case 2:
-			{
-				if (codepoint < U'\uA66F' || codepoint > U'\uAAEF')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\uA66F', U'\uAAEF');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xA66Fu) / 61u)
-				{
-					case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xA66Full)) & 0x1800000007FE1ull;
-					case 1: return false;
-					case 3: return false;
-					case 4: return false;
-					case 5: return false;
-					case 6: return (1u << (static_cast<uint_least32_t>(codepoint) - 0xA802u)) & 0x211u;
-					case 7: return codepoint <= U'\uA827' || codepoint >= U'\uA82C';
-					case 10: return codepoint <= U'\uA8F1' || codepoint >= U'\uA8FF';
-					case 11: return codepoint <= U'\uA92D' || codepoint >= U'\uA947';
-					case 12: return codepoint <= U'\uA953' || codepoint >= U'\uA980';
-					case 16: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAA43ull)) & 0x100000000000601ull;
-					case 17: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAA7Cull)) & 0x19D0000000000003ull;
-					case 18: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0xAABEull)) & 0x3E0000000000Bull;
-					default: return true;
-				}
-			}
-			case 3: return codepoint <= U'\uAAF6' || (codepoint >= U'\uABE3' && codepoint <= U'\uABEA')
-					|| codepoint >= U'\uABEC';
-			case 4:
-			{
-				if (codepoint < U'\uFB1E' || codepoint > U'\U00011A99')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\uFB1E', U'\U00011A99');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0xFB1Eu) / 1008u)
-				{
-					case 0: return codepoint == U'\uFB1E' || (codepoint >= U'\uFE00' && codepoint <= U'\uFE0F')
-							|| codepoint >= U'\uFE20';
-					case 1: return codepoint <= U'\U000101FD' || codepoint >= U'\U000102E0';
-					case 3: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x10A01ull)) & 0x4380000000007837ull;
-					case 4: return codepoint <= U'\U00010AE6' || (codepoint >= U'\U00010D24' && codepoint <= U'\U00010D27')
-							|| codepoint >= U'\U00010EAB';
-					case 5:
-					{
-						if (codepoint < U'\U00010F46' || codepoint > U'\U0001123E')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00010F46', U'\U0001123E');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x10F46u) / 64u)
-						{
-							case 1: return false;
-							case 4: return codepoint <= U'\U00011046' || codepoint >= U'\U0001107F';
-							case 7: return codepoint <= U'\U00011134' || codepoint >= U'\U00011145';
-							case 8: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11146ull)) & 0x1C00200000000001ull;
-							case 10: return codepoint != U'\U000111C6';
-							case 11: return codepoint <= U'\U00011237' || codepoint >= U'\U0001123E';
-							default: return true;
-						}
-					}
-					case 6:
-					{
-						if (codepoint < U'\U000112DF' || codepoint > U'\U000116AD')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U000112DF', U'\U000116AD');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x112DFu) / 61u)
-						{
-							case 0: return codepoint <= U'\U000112EA' || codepoint >= U'\U00011300';
-							case 1: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x1133Bu)) & 0x100733FBu;
-							case 2: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11362u)) & 0x7C7F3u;
-							case 3: return false;
-							case 4: return false;
-							case 8: return false;
-							case 9: return false;
-							case 10: return false;
-							case 11: return codepoint <= U'\U000115B5' || codepoint >= U'\U000115B8';
-							case 12: return codepoint <= U'\U000115C0' || codepoint >= U'\U000115DC';
-							default: return true;
-						}
-					}
-					case 7:
-					{
-						if (codepoint < U'\U000116AE')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U000116AE', U'\U00011A99');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x116AEu) / 63u)
-						{
-							case 0: return true;
-							case 1: return true;
-							case 6: return true;
-							case 10: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11930u)) & 0xD79BFu;
-							case 12: return codepoint <= U'\U000119D7' || codepoint >= U'\U000119DA';
-							case 13: return codepoint <= U'\U000119E4' || codepoint >= U'\U00011A01';
-							case 14: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x11A33ull)) & 0x1FFC0100F7Full;
-							case 15: return true;
-							default: return false;
-						}
-					}
-					default: return true;
-				}
-			}
-			case 5:
-			{
-				if (codepoint < U'\U00011C2F' || codepoint > U'\U00011EF6')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00011C2F', U'\U00011EF6');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x11C2Fu) / 60u)
-				{
-					case 0: return codepoint != U'\U00011C37';
-					case 1: return true;
-					case 2: return codepoint != U'\U00011CA8';
-					case 4: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11D31u)) & 0x5FDA3Fu;
-					case 5: return (1u << (static_cast<uint_least32_t>(codepoint) - 0x11D8Au)) & 0x1EDFu;
-					case 6: return true;
-					case 11: return true;
-					default: return false;
-				}
-			}
-			case 6:
-			{
-				if (codepoint < U'\U00016AF0' || codepoint > U'\U00016FF1')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U00016AF0', U'\U00016FF1');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x16AF0u) / 62u)
-				{
-					case 0: return true;
-					case 1: return true;
-					case 18: return codepoint != U'\U00016F4C';
-					case 19: return true;
-					case 20: return codepoint <= U'\U00016FE4' || codepoint >= U'\U00016FF0';
-					default: return false;
-				}
-			}
-			case 7: return true;
-			case 8:
-			{
-				if (codepoint < U'\U0001D165' || codepoint > U'\U0001E94A')
-					return false;
-
-				TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001E94A');
-				switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 765u)
-				{
-					case 0:
-					{
-						if (codepoint > U'\U0001D244')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001D165', U'\U0001D244');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1D165u) / 56u)
-						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1D165ull)) & 0x7F3FC03F1Full;
-							case 2: return false;
-							default: return true;
-						}
-					}
-					case 2: return codepoint <= U'\U0001DA36' || codepoint >= U'\U0001DA3B';
-					case 3:
-					{
-						if (codepoint < U'\U0001DA5C' || codepoint > U'\U0001DAAF')
-							return false;
-
-						TOML_ASSUME_CODEPOINT_BETWEEN(U'\U0001DA5C', U'\U0001DAAF');
-						switch ((static_cast<uint_least32_t>(codepoint) - 0x1DA5Cu) / 42u)
-						{
-							case 0: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1DA5Cull)) & 0x1000201FFFFull;
-							case 1: return codepoint != U'\U0001DA86';
+							case 0x00: return cp == U'\u074A';
+							case 0x01: return (cp >= U'\u07A6' && cp <= U'\u07B0');
+							case 0x02: return (cp >= U'\u07EB' && (1u << (static_cast<uint_least32_t>(cp) - 0x7EBu)) & 0x401FFu);
 							TOML_NO_DEFAULT_CASE;
 						}
 					}
-					case 4: return (1ull << (static_cast<uint_least64_t>(codepoint) - 0x1E000ull)) & 0x7DBF9FFFF7Full;
-					case 5: return codepoint <= U'\U0001E136' || codepoint >= U'\U0001E2EC';
-					case 7: return codepoint <= U'\U0001E8D6' || codepoint >= U'\U0001E944';
-					default: return false;
+					case 0x07: // [7] 0801 - 08B7
+					{
+						if (cp < U'\u0816' || cp > U'\u085B')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x816ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u082D' && (1u << (static_cast<uint_least32_t>(cp) - 0x816u)) & 0xFBBFEFu);
+							case 0x01: return cp >= U'\u0859';
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x08: // [8] 08B8 - 096E
+					{
+						if (cp < U'\u08D3' || cp > U'\u0963')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x8D3ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0903' && (1ull << (static_cast<uint_least64_t>(cp) - 0x8D3ull)) & 0x1FFFFFFFF7FFFull);
+							case 0x01: return (cp >= U'\u093A' && (1u << (static_cast<uint_least32_t>(cp) - 0x93Au)) & 0x1BFFFF7u);
+							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0x953u)) & 0x1801Fu;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x09: // [9] 096F - 0A25
+					{
+						if (cp < U'\u0981' || cp > U'\u0A03')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x981ull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x981ull)) & 0xE800000000000007ull;
+							case 0x01: return (cp <= U'\u09FE' && (1ull << (static_cast<uint_least64_t>(cp) - 0x9C1ull)) & 0x2000000600401CCFull);
+							default: return true;
+						}
+					}
+					case 0x0A: // [10] 0A26 - 0ADC
+					{
+						if (cp < U'\u0A3C' || cp > U'\u0ACD')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xA3Cull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0A75' && (1ull << (static_cast<uint_least64_t>(cp) - 0xA3Cull)) & 0x23000000023987Dull);
+							case 0x01: return (cp >= U'\u0A81' && cp <= U'\u0A83');
+							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xABCu)) & 0x3BBFDu;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x0B: // [11] 0ADD - 0B93
+					{
+						if (cp < U'\u0AE2' || cp > U'\u0B82')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xAE2ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0B03' && (1ull << (static_cast<uint_least64_t>(cp) - 0xAE2ull)) & 0x3BF000003ull);
+							case 0x01: return (cp >= U'\u0B3C' && cp <= U'\u0B57' && (1u << (static_cast<uint_least32_t>(cp) - 0xB3Cu)) & 0xE0399FDu);
+							case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0xB62ull)) & 0x100000003ull;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x0C: // [12] 0B94 - 0C4A
+					{
+						if (cp < U'\u0BBE')
+							return false;
+						TOML_ASSUME(cp <= U'\u0C4A');
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xBBEull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0BD7' && (1u << (static_cast<uint_least32_t>(cp) - 0xBBEu)) & 0x200F71Fu);
+							case 0x01: return (cp >= U'\u0C00' && cp <= U'\u0C04');
+							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xC3Eu)) & 0x177Fu;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x0D: // [13] 0C4B - 0D01
+					{
+						TOML_ASSUME(cp >= U'\u0C4B' && cp <= U'\u0D01');
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xC4Bull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0C83' && (1ull << (static_cast<uint_least64_t>(cp) - 0xC4Bull)) & 0x1C0000001800C07ull);
+							case 0x01: return (cp >= U'\u0CBC' && (1u << (static_cast<uint_least32_t>(cp) - 0xCBCu)) & 0x5DFDu);
+							case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0xCCBull)) & 0x60000001800C07ull;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x0E: // [14] 0D02 - 0DB8
+					{
+						if (cp > U'\u0D83')
+							return false;
+						TOML_ASSUME(cp >= U'\u0D02');
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xD02ull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0xD02ull)) & 0xF600000000000003ull;
+							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0xD42ull)) & 0x8000000300200F77ull;
+							default: return true;
+						}
+					}
+					case 0x0F: // [15] 0DB9 - 0E6F
+					{
+						if (cp < U'\u0DCA' || cp > U'\u0E4E')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xDCAull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0DF3' && (1ull << (static_cast<uint_least64_t>(cp) - 0xDCAull)) & 0x300003FD7E1ull);
+							case 0x01: return (cp >= U'\u0E31' && (1u << (static_cast<uint_least32_t>(cp) - 0xE31u)) & 0x1C003F9u);
+							default: return true;
+						}
+					}
+					case 0x10: // [16] 0E70 - 0F26
+					{
+						if (cp < U'\u0EB1' || cp > U'\u0F19')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xEB1ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u0ECD' && (1u << (static_cast<uint_least32_t>(cp) - 0xEB1u)) & 0x1F800FF9u);
+							case 0x01: return cp >= U'\u0F18';
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x11: // [17] 0F27 - 0FDD
+					{
+						if (cp < U'\u0F35' || cp > U'\u0FC6')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0xF35ull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0xF35ull)) & 0xF000000000000615ull;
+							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0xF75ull)) & 0xFFFFFFF7FF06FFFFull;
+							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xFB5u)) & 0x200FFu;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x12: // [18] 0FDE - 1094
+					{
+						if (cp < U'\u102B' || cp > U'\u108F')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x102Bull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x102Bull)) & 0xF3B87800000FFFFFull;
+							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x106Bull)) & 0x17FF8003C7ull;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x13: return (cp >= U'\u109A' && cp <= U'\u109D');
+					case 0x16: return (cp >= U'\u135D' && cp <= U'\u135F');
+					case 0x1C: // [28] 1704 - 17BA
+					{
+						if (cp < U'\u1712')
+							return false;
+						TOML_ASSUME(cp <= U'\u17BA');
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x1712ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u1734' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1712ull)) & 0x700000007ull);
+							case 0x01: return (cp <= U'\u1773' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1752ull)) & 0x300000003ull);
+							case 0x02: return cp >= U'\u17B4';
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x1D: return (cp >= U'\u17BB' && cp <= U'\u17D3') || (cp >= U'\u180B' && cp <= U'\u180D')
+						|| cp == U'\u17DD';
+					case 0x1E: return (cp >= U'\u1885' && cp <= U'\u1886') || (cp >= U'\u1920' && cp <= U'\u1928')
+						|| cp == U'\u18A9';
+					case 0x1F: return (cp <= U'\u193B' && (1u << (static_cast<uint_least32_t>(cp) - 0x1929u)) & 0x7FF87u);
+					case 0x20: // [32] 19E0 - 1A96
+					{
+						if (cp < U'\u1A17' || cp > U'\u1A7F')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x1A17ull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1A17ull)) & 0xC00000000000001Full;
+							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1A57ull)) & 0x13FFFFFFEFFull;
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x21: // [33] 1A97 - 1B4D
+					{
+						if (cp < U'\u1AB0' || cp > U'\u1B44')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x1AB0ull) / 0x40ull)
+						{
+							case 0x00: return (cp <= U'\u1AC0' && (1u << (static_cast<uint_least32_t>(cp) - 0x1AB0u)) & 0x1BFFFu);
+							case 0x01: return (cp >= U'\u1B00' && cp <= U'\u1B04');
+							case 0x02: return cp >= U'\u1B34';
+							TOML_NO_DEFAULT_CASE;
+						}
+					}
+					case 0x22: // [34] 1B4E - 1C04
+					{
+						if (cp < U'\u1B6B' || cp > U'\u1BF3')
+							return false;
+
+						switch ((static_cast<uint_least64_t>(cp) - 0x1B6Bull) / 0x40ull)
+						{
+							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1B6Bull)) & 0xFFC0000000E001FFull;
+							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1BABull)) & 0xF800000000000007ull;
+							default: return true;
+						}
+					}
+					case 0x23: return (cp >= U'\u1C24' && cp <= U'\u1C37');
+					case 0x24: return (cp >= U'\u1CD0' && cp <= U'\u1CF9' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1CD0ull)) & 0x39021FFFFF7ull);
+					case 0x25: return (cp >= U'\u1DC0' && cp <= U'\u1DFF' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1DC0ull)) & 0xFBFFFFFFFFFFFFFFull);
+					case 0x29: return (cp >= U'\u20D0' && cp <= U'\u20F0' && (1ull << (static_cast<uint_least64_t>(cp) - 0x20D0ull)) & 0x1FFE21FFFull);
+					case 0x3A: return (cp >= U'\u2CEF' && cp <= U'\u2CF1');
+					case 0x3B: return (cp >= U'\u2DE0' && cp <= U'\u2DE3') || cp == U'\u2D7F';
+					case 0x3C: return cp <= U'\u2DFF';
+					case 0x3F: return (cp >= U'\u302A' && cp <= U'\u302F') || (cp >= U'\u3099' && cp <= U'\u309A');
+					TOML_NO_DEFAULT_CASE;
 				}
 			}
-			case 63: return true;
-			default: return false;
+			case 0x02: // [2] 72F8 - AAF3
+			{
+				if (cp < U'\uA66F' || cp > U'\uAAEF')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x0001800000007FE1ull,	0x0000000000000000ull,	0x0000000000000006ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x21F0000010880000ull,	0x0000000000000000ull,
+					0x0000000000060000ull,	0xFFFE0000007FFFE0ull,	0x7F80000000010007ull,	0x0000001FFF000000ull,
+					0x00000000001E0000ull,	0x004000000003FFF0ull,	0xFC00000000000000ull,	0x00000000601000FFull,
+					0x0000000000007000ull,	0xF00000000005833Aull,	0x0000000000000001ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA66Full) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA66Full) % 0x40ull));
+			}
+			case 0x03: return (cp >= U'\uAAF5' && cp <= U'\uAAF6') || (cp >= U'\uABE3' && cp <= U'\uABEA')
+				|| (cp >= U'\uABEC' && cp <= U'\uABED');
+			case 0x04: // [4] E2F0 - 11AEB
+			{
+				if (cp < U'\uFB1E' || cp > U'\U00011A99')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x0000000000000001ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0003FFFC00000000ull,
+					0x000000000003FFFCull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000080000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000004ull,
+					0x0000000000000000ull,	0x000000001F000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0003C1B800000000ull,
+					0x000000021C000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000180ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x00000000000003C0ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000006000ull,	0x0000000000000000ull,
+					0x0007FF0000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000001C00000000ull,
+					0x000001FFFC000000ull,	0x0000001E00000000ull,	0x000000001FFC0000ull,	0x0000001C00000000ull,
+					0x00000180007FFE00ull,	0x0000001C00200000ull,	0x00037807FFE00000ull,	0x0000000000000000ull,
+					0x0000000103FFC000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000003C00001FFEull,
+					0x0200E67F60000000ull,	0x00000000007C7F30ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x000001FFFF800000ull,	0x0000000000000001ull,	0x0000003FFFFC0000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xC0000007FCFE0000ull,	0x0000000000000000ull,
+					0x00000007FFFC0000ull,	0x0000000000000000ull,	0x0000000003FFE000ull,	0x8000000000000000ull,
+					0x0000000000003FFFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x000000001FFFC000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x00000035E6FC0000ull,	0x0000000000000000ull,	0xF3F8000000000000ull,	0x00001FF800000047ull,
+					0x3FF80201EFE00000ull,	0x0FFFF00000000000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xFB1Eull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xFB1Eull) % 0x40ull));
+			}
+			case 0x05: // [5] 11AEC - 152E7
+			{
+				if (cp < U'\U00011C2F' || cp > U'\U00011EF6')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x000000000001FEFFull,	0xFDFFFFF800000000ull,	0x00000000000000FFull,	0x0000000000000000ull,
+					0x00000000017F68FCull,	0x000001F6F8000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x00000000000000F0ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x11C2Full) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x11C2Full) % 0x40ull));
+			}
+			case 0x06: // [6] 152E8 - 18AE3
+			{
+				if (cp < U'\U00016AF0' || cp > U'\U00016FF1')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x000000000000001Full,	0x000000000000007Full,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0xFFFFFFFE80000000ull,	0x0000000780FFFFFFull,	0x0010000000000000ull,
+					0x0000000000000003ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16AF0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x16AF0ull) % 0x40ull));
+			}
+			case 0x07: return (cp >= U'\U0001BC9D' && cp <= U'\U0001BC9E');
+			case 0x08: // [8] 1C2E0 - 1FADB
+			{
+				if (cp < U'\U0001D165' || cp > U'\U0001E94A')
+					return false;
+
+				constexpr uint_least64_t lookup_table_1[] =
+				{
+					0x0000007F3FC03F1Full,	0x00000000000001E0ull,	0x0000000000000000ull,	0x00000000E0000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFFF8000000ull,	0xFFFFFFFFFFC3FFFFull,
+					0xF7C00000800100FFull,	0x00000000000007FFull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xDFCFFFFBF8000000ull,	0x000000000000003Eull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x000000000003F800ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000780ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0003F80000000000ull,	0x0000000000000000ull,	0x0000003F80000000ull,
+				};
+				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1D165ull) / 0x40ull]
+					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x1D165ull) % 0x40ull));
+			}
+			case 0x3F: return cp >= U'\U000E0100';
+			TOML_NO_DEFAULT_CASE;
 		}
 	}
-}
 
-#undef TOML_ASSUME_CODEPOINT_BETWEEN
-
-#endif // TOML_LANG_UNRELEASED
+	#endif // TOML_LANG_UNRELEASED
+} // toml::impl
 
 #pragma endregion
 //--------------------------------------  ↑ toml_utf8_generated.h  -----------------------------------------------------
@@ -4324,16 +4354,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
-	constexpr bool is_hexadecimal_digit(char32_t codepoint) noexcept
-	{
-		return (codepoint >= U'a' && codepoint <= U'f')
-			|| (codepoint >= U'A' && codepoint <= U'F')
-			|| is_decimal_digit(codepoint)
-		;
-	}
-
-	[[nodiscard]]
-	TOML_GNU_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr uint32_t hex_to_dec(char codepoint) noexcept
 	{
@@ -4384,6 +4404,14 @@ namespace toml::impl
 			|| is_unicode_line_break(codepoint)
 			|| is_unicode_whitespace(codepoint)
 		;
+	}
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr bool is_control_character(char32_t codepoint) noexcept
+	{
+		return codepoint <= U'\u001F' || codepoint == U'\u007F';
 	}
 
 	[[nodiscard]]
@@ -5454,6 +5482,14 @@ namespace toml::impl
 		{
 			return value;
 		}
+
+		[[nodiscard]]
+		TOML_GNU_ATTR(pure)
+		TOML_ALWAYS_INLINE
+		constexpr const char32_t& operator* () const noexcept
+		{
+			return value;
+		}
 	};
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
@@ -5691,13 +5727,13 @@ namespace toml::impl
 				else
 				{
 					// first character read from stream
-					if (!history.count && !head) TOML_UNLIKELY
+					if TOML_UNLIKELY(!history.count && !head)
 						head = reader.read_next();
 
 					// subsequent characters and not eof
 					else if (head)
 					{
-						if (history.count < history_buffer_size) TOML_UNLIKELY
+						if TOML_UNLIKELY(history.count < history_buffer_size)
 							history.buffer[history.count++] = *head;
 						else
 							history.buffer[(history.first++ + history_buffer_size) % history_buffer_size] = *head;
@@ -6545,11 +6581,11 @@ namespace toml::impl
 				s += TOML_STRING_PREFIX('"');
 				for (auto c : str)
 				{
-					if (c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F')) TOML_UNLIKELY
+					if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
 						s.append(low_character_escape_table[c]);
-					else if (c == TOML_STRING_PREFIX('\x7F')) TOML_UNLIKELY
+					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
 						s.append(TOML_STRING_PREFIX("\\u007F"sv));
-					else if (c == TOML_STRING_PREFIX('"')) TOML_UNLIKELY
+					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))
 						s.append(TOML_STRING_PREFIX("\\\""sv));
 					else
 						s += c;
@@ -6742,9 +6778,9 @@ namespace TOML_INTERNAL_NAMESPACE
 		else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
 		{
 			string_view cp_view;
-			if (arg.value <= U'\x1F') TOML_UNLIKELY
+			if TOML_UNLIKELY(arg.value <= U'\x1F')
 				cp_view = low_character_escape_table[arg.value];
-			else if (arg.value == U'\x7F')  TOML_UNLIKELY
+			else if TOML_UNLIKELY(arg.value == U'\x7F')
 				cp_view = TOML_STRING_PREFIX("\\u007F"sv);
 			else
 				cp_view = arg.template as_view<string_char>();
@@ -7282,7 +7318,7 @@ namespace toml::impl
 						if (!skipped_escaped_codepoint)
 							advance_and_return_if_error_or_eof({});
 					}
-					else TOML_LIKELY
+					else
 					{
 						// handle closing delimiters
 						if (*cp == U'"')
@@ -8306,11 +8342,24 @@ namespace toml::impl
 				assert_or_assume(!is_value_terminator(*cp));
 				push_parse_scope("value"sv);
 
+				// check if it begins with some control character
+				// (note that this will also fail for whitespace but we're assuming we've
+				// called consume_leading_whitespace() before calling parse_value())
+				if TOML_UNLIKELY(is_control_character(*cp))
+					set_error_and_return_default("unexpected control character"sv);
+
+				// underscores at the beginning
+				else if (*cp == U'_')
+					set_error_and_return_default("values may not begin with underscores"sv);
+
 				const auto begin_pos = cp->position;
 				std::unique_ptr<node> val;
 
 				do
 				{
+					assert_or_assume(!is_control_character(*cp));
+					assert_or_assume(*cp != U'_');
+
 					// detect the value type and parse accordingly,
 					// starting with value types that can be detected
 					// unambiguously from just one character.
@@ -8348,10 +8397,6 @@ namespace toml::impl
 					// inf or nan
 					else if (is_match(*cp, U'i', U'n', U'I', U'N'))
 						val = std::make_unique<value<double>>(parse_inf_or_nan());
-
-					// underscores at the beginning
-					else if (*cp == U'_')
-						set_error_and_return_default("values may not begin with underscores"sv);
 
 					return_if_error({});
 					if (val)
@@ -8405,68 +8450,76 @@ namespace toml::impl
 					bool eof_while_scanning = false;
 					const auto scan = [&]() TOML_MAY_THROW
 					{
-						while (advance_count < utf8_buffered_reader::max_history_length)
+						if (is_eof())
+							return;
+						assert_or_assume(!is_value_terminator(*cp));
+
+						do
 						{
-							if (!cp || is_value_terminator(*cp))
+							if (const auto c = **cp; c != U'_')
 							{
-								eof_while_scanning = !cp;
-								break;
-							}
+								chars[char_count++] = c;
 
-							if (*cp != U'_')
-							{
-								chars[char_count++] = *cp;
-								switch (*cp)
+								if (is_decimal_digit(c))
+									add_trait(has_digits);
+								else if (is_ascii_letter(c))
 								{
-									case U'B': [[fallthrough]];
-									case U'b':
-										if (char_count == 2_sz && has_any(begins_zero))
-											add_trait(has_b);
-										break;
+									assert_or_assume((c >= U'a' && c <= U'z') || (c >= U'A' && c <= U'Z'));
+									switch (static_cast<char32_t>(c | 32u))
+									{
+										case U'b':
+											if (char_count == 2_sz && has_any(begins_zero))
+												add_trait(has_b);
+											break;
 
-									case U'E': [[fallthrough]];
-									case U'e':
-										if (char_count > 1_sz
-											&& has_none(has_b | has_o | has_p | has_t | has_x | has_z | has_colon)
-											&& (has_none(has_plus | has_minus) || has_any(begins_sign)))
-											add_trait(has_e);
-										break;
+										case U'e':
+											if (char_count > 1_sz
+												&& has_none(has_b | has_o | has_p | has_t | has_x | has_z | has_colon)
+												&& (has_none(has_plus | has_minus) || has_any(begins_sign)))
+												add_trait(has_e);
+											break;
 
-									case U'O': [[fallthrough]];
-									case U'o':
-										if (char_count == 2_sz && has_any(begins_zero))
-											add_trait(has_o);
-										break;
+										case U'o':
+											if (char_count == 2_sz && has_any(begins_zero))
+												add_trait(has_o);
+											break;
 
-									case U'P': [[fallthrough]];
-									case U'p':
-										if (has_any(has_x))
-											add_trait(has_p);
-										break;
+										case U'p':
+											if (has_any(has_x))
+												add_trait(has_p);
+											break;
 
-									case U'X': [[fallthrough]];
-									case U'x':
-										if ((char_count == 2_sz && has_any(begins_zero))
-											|| (char_count == 3_sz && has_any(begins_sign) && chars[1] == U'0'))
-											add_trait(has_x);
-										break;
+										case U'x':
+											if ((char_count == 2_sz && has_any(begins_zero))
+												|| (char_count == 3_sz && has_any(begins_sign) && chars[1] == U'0'))
+												add_trait(has_x);
+											break;
 
-									case U'T': add_trait(has_t); break;
-									case U'Z': add_trait(has_z); break;
-									case U'+': add_trait(has_plus); break;
-									case U'-': add_trait(has_minus); break;
-									case U'.': add_trait(has_dot); break;
-									case U':': add_trait(has_colon); break;
-
-									default:
-										if (is_decimal_digit(*cp))
-											add_trait(has_digits);
+										case U't': add_trait(has_t); break;
+										case U'z': add_trait(has_z); break;
+									}
+								}
+								else if (c <= U':')
+								{
+									assert_or_assume(c < U'0' || c > U'9');
+									switch (c)
+									{
+										case U'+': add_trait(has_plus); break;
+										case U'-': add_trait(has_minus); break;
+										case U'.': add_trait(has_dot); break;
+										case U':': add_trait(has_colon); break;
+									}
 								}
 							}
 
 							advance_and_return_if_error();
 							advance_count++;
+							eof_while_scanning = is_eof();
 						}
+						while (advance_count < utf8_buffered_reader::max_history_length
+							&& !is_eof()
+							&& !is_value_terminator(*cp)
+						);
 					};
 					scan();
 					return_if_error({});
@@ -8476,7 +8529,7 @@ namespace toml::impl
 						&& traits == (bdigit_msk | has_minus)
 						&& chars[4] == U'-'
 						&& chars[7] == U'-'
-						&& cp
+						&& !is_eof()
 						&& *cp == U' ')
 					{
 						const auto pre_advance_count = advance_count;
@@ -8495,7 +8548,7 @@ namespace toml::impl
 						advance_and_return_if_error({});
 						advance_count++;
 
-						if (!cp || !is_decimal_digit(*cp))
+						if (is_eof() || !is_decimal_digit(*cp))
 							backpedal();
 						else
 						{
