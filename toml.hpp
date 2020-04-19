@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.2.4
+// toml++ v1.2.5
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -347,7 +347,7 @@
 #endif
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		2
-#define TOML_LIB_PATCH		4
+#define TOML_LIB_PATCH		5
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -3339,7 +3339,9 @@ namespace toml::impl
 	TOML_GNU_ATTR(const)
 	constexpr bool is_hexadecimal_digit(char32_t cp) noexcept
 	{
-		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<uint_least64_t>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
+		using ui64 = std::uint_least64_t;
+
+		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<ui64>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
 	}
 
 	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
@@ -3348,10 +3350,13 @@ namespace toml::impl
 	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_letter(char32_t cp) noexcept
 	{
+		using ui64 = std::uint_least64_t;
+		using ui32 = std::uint_least32_t;
+
 		if (cp < U'\u00AA' || cp > U'\U00031349')
 			return false;
 
-		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0xAAull) / 0xC4Bull;
+		const auto child_index_0 = (static_cast<ui64>(cp) - 0xAAull) / 0xC4Bull;
 		if ((1ull << child_index_0) & 0x8A7FFC004001CFA0ull)
 			return true;
 		if ((1ull << child_index_0) & 0x26180C0000ull)
@@ -3364,7 +3369,7 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp >= U'\u00AA');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFDFFFFFC10801ull,	0xFFFFFFFFFFFFDFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
@@ -3380,15 +3385,15 @@ namespace toml::impl
 					0x000000400000FFF1ull,	0x7FFFFF77F8000000ull,	0x00C1C0000008FFFFull,	0x7FFFFF77F8400000ull,
 					0x00D000000008FBFFull,	0x0000000000000180ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xAAull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xAAull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xAAull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xAAull) % 0x40ull));
 			}
 			case 0x01: // [1] 0CF5 - 193F
 			{
 				if (cp < U'\u0D04' || cp > U'\u191E')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x027FFFFFFFFFDDFFull,	0x0FC0000038070400ull,	0xF2FFBFFFFFC7FFFEull,	0xE000000000000007ull,
 					0xF000DFFFFFFFFFFFull,	0x6000000000000007ull,	0xF200DFFAFFFFFF7Dull,	0x100000000F000005ull,
@@ -3404,15 +3409,15 @@ namespace toml::impl
 					0xFFFFFFFFF0000000ull,	0xF01FFFFFFFFFFFFFull,	0xFFFFF05FFFFFFFF9ull,	0xF003FFFFFFFFFFFFull,
 					0x0000000007FFFFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xD04ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xD04ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xD04ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xD04ull) % 0x40ull));
 			}
 			case 0x02: // [2] 1940 - 258A
 			{
 				if (cp < U'\u1950' || cp > U'\u2184')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFF001F3FFFFFFFull,	0x03FFFFFF0FFFFFFFull,	0xFFFF000000000000ull,	0xFFFFFFFFFFFF007Full,
 					0x000000000000001Full,	0x0000000000800000ull,	0xFFE0000000000000ull,	0x0FE0000FFFFFFFFFull,
@@ -3424,15 +3429,15 @@ namespace toml::impl
 					0x0000800200000000ull,	0x0000000000001FFFull,	0xFC84000000000000ull,	0x43E0F3FFBD503E2Full,
 					0x0018000000000000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1950ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x1950ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x1950ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x1950ull) % 0x40ull));
 			}
 			case 0x03: // [3] 258B - 31D5
 			{
 				if (cp < U'\u2C00' || cp > U'\u31BF')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFF7FFFFFFFFFFFull,	0xFFFFFFFF7FFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x000C781FFFFFFFFFull,
 					0xFFFF20BFFFFFFFFFull,	0x000080FFFFFFFFFFull,	0x7F7F7F7F007FFFFFull,	0x000000007F7F7F7Full,
@@ -3441,17 +3446,17 @@ namespace toml::impl
 					0x183E000000000060ull,	0xFFFFFFFFFFFFFFFEull,	0xFFFFFFFEE07FFFFFull,	0xF7FFFFFFFFFFFFFFull,
 					0xFFFEFFFFFFFFFFE0ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFF00007FFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x2C00ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x2C00ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x04: return (cp >= U'\u31F0' && cp <= U'\u31FF') || (cp >= U'\u3400' && cp <= U'\u3E20');
-			case 0x06: return (cp >= U'\u4A6C' && cp <= U'\u4DBE') || (cp >= U'\u4E00' && cp <= U'\u56B6');
-			case 0x0C: return (cp >= U'\u942E' && cp <= U'\u9FFB') || (cp >= U'\uA000' && cp <= U'\uA078');
+			case 0x04: return ((cp >= U'\u31F0' && cp <= U'\u31FF') || (cp >= U'\u3400' && cp <= U'\u3E20'));
+			case 0x06: return ((cp >= U'\u4A6C' && cp <= U'\u4DBE') || (cp >= U'\u4E00' && cp <= U'\u56B6'));
+			case 0x0C: return ((cp >= U'\u942E' && cp <= U'\u9FFB') || (cp >= U'\uA000' && cp <= U'\uA078'));
 			case 0x0D: // [13] A079 - ACC3
 			{
 				TOML_ASSUME(cp >= U'\uA079' && cp <= U'\uACC3');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
@@ -3467,18 +3472,18 @@ namespace toml::impl
 					0xFFFFFFFFFFFFFFFFull,	0x000003FFFFFFFFFFull,	0xFFFFFFFFFFFFFF80ull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0x00000000000007FFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA079ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA079ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA079ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xA079ull) % 0x40ull));
 			}
-			case 0x11: return (cp >= U'\uD1A5' && cp <= U'\uD7A2') || (cp >= U'\uD7B0' && cp <= U'\uD7C6')
-				|| (cp >= U'\uD7CB' && cp <= U'\uD7FB');
+			case 0x11: return ((cp >= U'\uD1A5' && cp <= U'\uD7A2') || (cp >= U'\uD7B0' && cp <= U'\uD7C6')
+				|| (cp >= U'\uD7CB' && cp <= U'\uD7FB'));
 			case 0x14: // [20] F686 - 102D0
 			{
 				if (cp < U'\uF900')
 					return false;
 				TOML_ASSUME(cp <= U'\U000102D0');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFF3FFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0000000003FFFFFFull,
@@ -3491,8 +3496,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFF1FFFFFFFull,	0x000000000001FFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xF900ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xF900ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x15: // [21] 102D1 - 10F1B
 			{
@@ -3500,7 +3505,7 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp <= U'\U00010F1B');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFE000FFFFFFFFull,	0x003FFFFFFFFF03FDull,	0xFFFFFFFF3FFFFFFFull,	0x000000000000FF0Full,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFF00003FFFFFFFull,	0x0FFFFFFFFF0FFFFFull,
@@ -3516,8 +3521,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0x0000000000000000ull,	0x000303FFFFFFFFFFull,	0x0000000000000000ull,
 					0x000000000FFFFFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10300ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x10300ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x16: // [22] 10F1C - 11B66
 			{
@@ -3525,7 +3530,7 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp >= U'\U00010F1C');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x000003FFFFF00801ull,	0x0000000000000000ull,	0x000001FFFFF00000ull,	0xFFFFFF8007FFFFF0ull,
 					0x000000000FFFFFFFull,	0xFFFFFF8000000000ull,	0xFFF00000000FFFFFull,	0xFFFFFF8000001FFFull,
@@ -3540,15 +3545,15 @@ namespace toml::impl
 					0x00000028000FFFFFull,	0x0000000000000000ull,	0x001FFFFFFFFFCFF0ull,	0xFFFF8010000000A0ull,
 					0x00100000407FFFFFull,	0x00003FFFFFFFFFFFull,	0xFFFFFFF000000002ull,	0x000000001FFFFFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10F1Cull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x10F1Cull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x10F1Cull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x10F1Cull) % 0x40ull));
 			}
 			case 0x17: // [23] 11B67 - 127B1
 			{
 				if (cp < U'\U00011C00' || cp > U'\U00012543')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00007FFFFFFFFDFFull,	0xFFFC000000000001ull,	0x000000000000FFFFull,	0x0000000000000000ull,
 					0x0001FFFFFFFFFB7Full,	0xFFFFFDBF00000040ull,	0x00000000010003FFull,	0x0000000000000000ull,
@@ -3561,8 +3566,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0x000000000000000Full,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x11C00ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x11C00ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x18: return cp >= U'\U00013000';
 			case 0x19: return cp <= U'\U0001342E';
@@ -3573,7 +3578,7 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp <= U'\U00017173');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
@@ -3586,34 +3591,34 @@ namespace toml::impl
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0x000FFFFFFFFFFFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16800ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16800ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x1F: return (cp >= U'\U00017DBF' && cp <= U'\U000187F6') || (cp >= U'\U00018800' && cp <= U'\U00018A09');
-			case 0x20: return (cp >= U'\U00018A0A' && cp <= U'\U00018CD5') || (cp >= U'\U00018D00' && cp <= U'\U00018D07');
+			case 0x1F: return ((cp >= U'\U00017DBF' && cp <= U'\U000187F6') || (cp >= U'\U00018800' && cp <= U'\U00018A09'));
+			case 0x20: return ((cp >= U'\U00018A0A' && cp <= U'\U00018CD5') || (cp >= U'\U00018D00' && cp <= U'\U00018D07'));
 			case 0x23: // [35] 1AEEB - 1BB35
 			{
 				if (cp < U'\U0001B000' || cp > U'\U0001B2FB')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0x000000007FFFFFFFull,	0xFFFF00F000070000ull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x0FFFFFFFFFFFFFFFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1B000ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x1B000ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x24: // [36] 1BB36 - 1C780
 			{
 				if (cp < U'\U0001BC00' || cp > U'\U0001BC99')
 					return false;
 
-				switch ((static_cast<uint_least64_t>(cp) - 0x1BC00ull) / 0x40ull)
+				switch ((static_cast<ui64>(cp) - 0x1BC00ull) / 0x40ull)
 				{
-					case 0x01: return (cp <= U'\U0001BC7C' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1BC40ull)) & 0x1FFF07FFFFFFFFFFull);
-					case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0x1BC80u)) & 0x3FF01FFu;
+					case 0x01: return (cp <= U'\U0001BC7C' && (1ull << (static_cast<ui64>(cp) - 0x1BC40ull)) & 0x1FFF07FFFFFFFFFFull);
+					case 0x02: return (1u << (static_cast<ui32>(cp) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
 			}
@@ -3622,22 +3627,22 @@ namespace toml::impl
 				if (cp < U'\U0001D400' || cp > U'\U0001D7CB')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFDFFFFFull,	0xEBFFDE64DFFFFFFFull,	0xFFFFFFFFFFFFFFEFull,
 					0x7BFFFFFFDFDFE7BFull,	0xFFFFFFFFFFFDFC5Full,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFF3FFFFFFFFFull,	0xF7FFFFFFF7FFFFFDull,
 					0xFFDFFFFFFFDFFFFFull,	0xFFFF7FFFFFFF7FFFull,	0xFFFFFDFFFFFFFDFFull,	0x0000000000000FF7ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1D400ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x1D400ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x27: // [39] 1E017 - 1EC61
 			{
 				if (cp < U'\U0001E100' || cp > U'\U0001E94B')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x3F801FFFFFFFFFFFull,	0x0000000000004000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x00000FFFFFFFFFFFull,
@@ -3649,27 +3654,27 @@ namespace toml::impl
 					0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0xFFFFFFFFFFFFFFFFull,	0x000000000000001Full,
 					0xFFFFFFFFFFFFFFFFull,	0x000000000000080Full,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1E100ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x1E100ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x28: // [40] 1EC62 - 1F8AC
 			{
 				if (cp < U'\U0001EE00' || cp > U'\U0001EEBB')
 					return false;
 
-				switch ((static_cast<uint_least64_t>(cp) - 0x1EE00ull) / 0x40ull)
+				switch ((static_cast<ui64>(cp) - 0x1EE00ull) / 0x40ull)
 				{
-					case 0x00: return (cp <= U'\U0001EE3B' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull);
-					case 0x01: return (cp >= U'\U0001EE42' && cp <= U'\U0001EE7E' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE42ull)) & 0x17BDFDE5AAA5BAA1ull);
-					case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1EE80ull)) & 0xFFFFBEE0FFFFBFFull;
+					case 0x00: return (cp <= U'\U0001EE3B' && (1ull << (static_cast<ui64>(cp) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull);
+					case 0x01: return (cp >= U'\U0001EE42' && cp <= U'\U0001EE7E' && (1ull << (static_cast<ui64>(cp) - 0x1EE42ull)) & 0x17BDFDE5AAA5BAA1ull);
+					case 0x02: return (1ull << (static_cast<ui64>(cp) - 0x1EE80ull)) & 0xFFFFBEE0FFFFBFFull;
 					TOML_NO_DEFAULT_CASE;
 				}
 			}
 			case 0x29: return cp >= U'\U00020000';
-			case 0x37: return (cp >= U'\U0002A4C7' && cp <= U'\U0002A6DC') || (cp >= U'\U0002A700' && cp <= U'\U0002B111');
-			case 0x38: return (cp >= U'\U0002B112' && cp <= U'\U0002B733') || (cp >= U'\U0002B740' && cp <= U'\U0002B81C')
-				|| (cp >= U'\U0002B820' && cp <= U'\U0002BD5C');
-			case 0x3A: return (cp >= U'\U0002C9A8' && cp <= U'\U0002CEA0') || (cp >= U'\U0002CEB0' && cp <= U'\U0002D5F2');
+			case 0x37: return ((cp >= U'\U0002A4C7' && cp <= U'\U0002A6DC') || (cp >= U'\U0002A700' && cp <= U'\U0002B111'));
+			case 0x38: return ((cp >= U'\U0002B112' && cp <= U'\U0002B733') || (cp >= U'\U0002B740' && cp <= U'\U0002B81C')
+				|| (cp >= U'\U0002B820' && cp <= U'\U0002BD5C'));
+			case 0x3A: return ((cp >= U'\U0002C9A8' && cp <= U'\U0002CEA0') || (cp >= U'\U0002CEB0' && cp <= U'\U0002D5F2'));
 			case 0x3C: return cp <= U'\U0002EBDF';
 			case 0x3D: return (cp >= U'\U0002F800' && cp <= U'\U0002FA1D');
 			case 0x3E: return cp >= U'\U00030000';
@@ -3681,10 +3686,12 @@ namespace toml::impl
 	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_number(char32_t cp) noexcept
 	{
+		using ui64 = std::uint_least64_t;
+
 		if (cp < U'\u0660' || cp > U'\U0001FBF9')
 			return false;
 
-		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0x660ull) / 0x7D7ull;
+		const auto child_index_0 = (static_cast<ui64>(cp) - 0x660ull) / 0x7D7ull;
 		if ((1ull << child_index_0) & 0x47FFDFE07FCFFFD0ull)
 			return false;
 		switch (child_index_0)
@@ -3695,7 +3702,7 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp >= U'\u0660');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00000000000003FFull,	0x0000000000000000ull,	0x0000000003FF0000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x000003FF00000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -3706,29 +3713,29 @@ namespace toml::impl
 					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,	0x0000000000000000ull,
 					0x000000000000FFC0ull,	0x0000000000000000ull,	0x000000000000FFC0ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x660ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x660ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x660ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x660ull) % 0x40ull));
 			}
 			case 0x01: // [1] 0E37 - 160D
 			{
 				if (cp < U'\u0E50' || cp > U'\u1099')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00000000000003FFull,	0x0000000000000000ull,	0x00000000000003FFull,	0x0000000003FF0000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x03FF000000000000ull,
 					0x0000000000000000ull,	0x00000000000003FFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xE50ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xE50ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xE50ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xE50ull) % 0x40ull));
 			}
 			case 0x02: // [2] 160E - 1DE4
 			{
 				if (cp < U'\u16EE' || cp > U'\u1C59')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x0000000000000007ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0FFC000000000000ull,
 					0x00000FFC00000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -3737,17 +3744,17 @@ namespace toml::impl
 					0x0000000000000000ull,	0x00000FFC00000000ull,	0x0000000000000000ull,	0x0000000000000FFCull,
 					0x0000000000000000ull,	0x00000FFC0FFC0000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16EEull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x16EEull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16EEull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x16EEull) % 0x40ull));
 			}
-			case 0x03: return (cp >= U'\u2160' && cp <= U'\u2188' && (1ull << (static_cast<uint_least64_t>(cp) - 0x2160ull)) & 0x1E7FFFFFFFFull);
-			case 0x05: return (cp >= U'\u3007' && cp <= U'\u303A' && (1ull << (static_cast<uint_least64_t>(cp) - 0x3007ull)) & 0xE0007FC000001ull);
+			case 0x03: return (cp >= U'\u2160' && cp <= U'\u2188' && (1ull << (static_cast<ui64>(cp) - 0x2160ull)) & 0x1E7FFFFFFFFull);
+			case 0x05: return (cp >= U'\u3007' && cp <= U'\u303A' && (1ull << (static_cast<ui64>(cp) - 0x3007ull)) & 0xE0007FC000001ull);
 			case 0x14: // [20] A32C - AB02
 			{
 				if (cp < U'\uA620' || cp > U'\uAA59')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00000000000003FFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x000000000000FFC0ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -3755,8 +3762,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000003FF0000ull,
 					0x03FF000000000000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA620ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA620ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA620ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xA620ull) % 0x40ull));
 			}
 			case 0x15: return (cp >= U'\uABF0' && cp <= U'\uABF9');
 			case 0x1F: return (cp >= U'\uFF10' && cp <= U'\uFF19');
@@ -3766,23 +3773,23 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp >= U'\U00010140');
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x001FFFFFFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000402ull,	0x0000000000000000ull,	0x00000000003E0000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x000003FF00000000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x10140ull) / 0x40ull]
-					& (0x1ull << (static_cast<uint_least64_t>(cp) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x10140ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x21: return (cp >= U'\U00010D30' && cp <= U'\U00010D39') || (cp >= U'\U00011066' && cp <= U'\U0001106F');
+			case 0x21: return ((cp >= U'\U00010D30' && cp <= U'\U00010D39') || (cp >= U'\U00011066' && cp <= U'\U0001106F'));
 			case 0x22: // [34] 110EE - 118C4
 			{
 				if (cp < U'\U000110F0' || cp > U'\U00011739')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00000000000003FFull,	0x000000000000FFC0ull,	0x0000000000000000ull,	0x000003FF00000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -3792,15 +3799,15 @@ namespace toml::impl
 					0x0000000000000000ull,	0x000003FF00000000ull,	0x0000000000000000ull,	0x0000000003FF0000ull,
 					0x0000000000000000ull,	0x00000000000003FFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x110F0ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x110F0ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x110F0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x110F0ull) % 0x40ull));
 			}
 			case 0x23: // [35] 118C5 - 1209B
 			{
 				if (cp < U'\U000118E0' || cp > U'\U00011DA9')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x00000000000003FFull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -3808,13 +3815,13 @@ namespace toml::impl
 					0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x03FF000000000000ull,	0x0000000000000000ull,	0x00000000000003FFull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x118E0ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x118E0ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x118E0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x118E0ull) % 0x40ull));
 			}
 			case 0x24: return (cp >= U'\U00012400' && cp <= U'\U0001246E');
-			case 0x2D: return (cp >= U'\U00016A60' && cp <= U'\U00016A69') || (cp >= U'\U00016B50' && cp <= U'\U00016B59');
+			case 0x2D: return ((cp >= U'\U00016A60' && cp <= U'\U00016A69') || (cp >= U'\U00016B50' && cp <= U'\U00016B59'));
 			case 0x3B: return (cp >= U'\U0001D7CE' && cp <= U'\U0001D7FF');
-			case 0x3C: return (cp >= U'\U0001E140' && cp <= U'\U0001E149') || (cp >= U'\U0001E2F0' && cp <= U'\U0001E2F9');
+			case 0x3C: return ((cp >= U'\U0001E140' && cp <= U'\U0001E149') || (cp >= U'\U0001E2F0' && cp <= U'\U0001E2F9'));
 			case 0x3D: return (cp >= U'\U0001E950' && cp <= U'\U0001E959');
 			case 0x3F: return cp >= U'\U0001FBF0';
 			TOML_NO_DEFAULT_CASE;
@@ -3825,10 +3832,12 @@ namespace toml::impl
 	TOML_GNU_ATTR(const)
 	constexpr bool is_unicode_combining_mark(char32_t cp) noexcept
 	{
+		using ui64 = std::uint_least64_t;
+
 		if (cp < U'\u0300' || cp > U'\U000E01EF')
 			return false;
 
-		const auto child_index_0 = (static_cast<uint_least64_t>(cp) - 0x300ull) / 0x37FCull;
+		const auto child_index_0 = (static_cast<ui64>(cp) - 0x300ull) / 0x37FCull;
 		if ((1ull << child_index_0) & 0x7FFFFFFFFFFFFE02ull)
 			return false;
 		switch (child_index_0)
@@ -3839,269 +3848,64 @@ namespace toml::impl
 					return false;
 				TOML_ASSUME(cp >= U'\u0300');
 
-				const auto child_index_1 = (static_cast<uint_least64_t>(cp) - 0x300ull) / 0xB7ull;
-				if ((1ull << child_index_1) & 0x63FFFDC00FB00002ull)
-					return false;
-				switch (child_index_1)
+				constexpr ui64 bitmask_table_1[] =
 				{
-					case 0x00: return cp <= U'\u036F';
-					case 0x02: return (cp >= U'\u0483' && cp <= U'\u0487');
-					case 0x03: return (cp >= U'\u0591' && cp <= U'\u05C7' && (1ull << (static_cast<uint_least64_t>(cp) - 0x591ull)) & 0x5B5FFFFFFFFFFFull);
-					case 0x04: return (cp >= U'\u0610' && cp <= U'\u061A') || (cp >= U'\u064B' && cp <= U'\u065F')
-						|| cp == U'\u0670';
-					case 0x05: // [5] 0693 - 0749
-					{
-						if (cp < U'\u06D6')
-							return false;
-						TOML_ASSUME(cp <= U'\u0749');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x6D6ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0711' && (1ull << (static_cast<uint_least64_t>(cp) - 0x6D6ull)) & 0x800000000F67E7Full);
-							case 0x01: return cp >= U'\u0730';
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x06: // [6] 074A - 0800
-					{
-						if (cp > U'\u07FD')
-							return false;
-						TOML_ASSUME(cp >= U'\u074A');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x74Aull) / 0x40ull)
-						{
-							case 0x00: return cp == U'\u074A';
-							case 0x01: return (cp >= U'\u07A6' && cp <= U'\u07B0');
-							case 0x02: return (cp >= U'\u07EB' && (1u << (static_cast<uint_least32_t>(cp) - 0x7EBu)) & 0x401FFu);
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x07: // [7] 0801 - 08B7
-					{
-						if (cp < U'\u0816' || cp > U'\u085B')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x816ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u082D' && (1u << (static_cast<uint_least32_t>(cp) - 0x816u)) & 0xFBBFEFu);
-							case 0x01: return cp >= U'\u0859';
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x08: // [8] 08B8 - 096E
-					{
-						if (cp < U'\u08D3' || cp > U'\u0963')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x8D3ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0903' && (1ull << (static_cast<uint_least64_t>(cp) - 0x8D3ull)) & 0x1FFFFFFFF7FFFull);
-							case 0x01: return (cp >= U'\u093A' && (1u << (static_cast<uint_least32_t>(cp) - 0x93Au)) & 0x1BFFFF7u);
-							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0x953u)) & 0x1801Fu;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x09: // [9] 096F - 0A25
-					{
-						if (cp < U'\u0981' || cp > U'\u0A03')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x981ull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x981ull)) & 0xE800000000000007ull;
-							case 0x01: return (cp <= U'\u09FE' && (1ull << (static_cast<uint_least64_t>(cp) - 0x9C1ull)) & 0x2000000600401CCFull);
-							default: return true;
-						}
-					}
-					case 0x0A: // [10] 0A26 - 0ADC
-					{
-						if (cp < U'\u0A3C' || cp > U'\u0ACD')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xA3Cull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0A75' && (1ull << (static_cast<uint_least64_t>(cp) - 0xA3Cull)) & 0x23000000023987Dull);
-							case 0x01: return (cp >= U'\u0A81' && cp <= U'\u0A83');
-							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xABCu)) & 0x3BBFDu;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x0B: // [11] 0ADD - 0B93
-					{
-						if (cp < U'\u0AE2' || cp > U'\u0B82')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xAE2ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0B03' && (1ull << (static_cast<uint_least64_t>(cp) - 0xAE2ull)) & 0x3BF000003ull);
-							case 0x01: return (cp >= U'\u0B3C' && cp <= U'\u0B57' && (1u << (static_cast<uint_least32_t>(cp) - 0xB3Cu)) & 0xE0399FDu);
-							case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0xB62ull)) & 0x100000003ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x0C: // [12] 0B94 - 0C4A
-					{
-						if (cp < U'\u0BBE')
-							return false;
-						TOML_ASSUME(cp <= U'\u0C4A');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xBBEull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0BD7' && (1u << (static_cast<uint_least32_t>(cp) - 0xBBEu)) & 0x200F71Fu);
-							case 0x01: return (cp >= U'\u0C00' && cp <= U'\u0C04');
-							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xC3Eu)) & 0x177Fu;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x0D: // [13] 0C4B - 0D01
-					{
-						TOML_ASSUME(cp >= U'\u0C4B' && cp <= U'\u0D01');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xC4Bull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0C83' && (1ull << (static_cast<uint_least64_t>(cp) - 0xC4Bull)) & 0x1C0000001800C07ull);
-							case 0x01: return (cp >= U'\u0CBC' && (1u << (static_cast<uint_least32_t>(cp) - 0xCBCu)) & 0x5DFDu);
-							case 0x02: return (1ull << (static_cast<uint_least64_t>(cp) - 0xCCBull)) & 0x60000001800C07ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x0E: // [14] 0D02 - 0DB8
-					{
-						if (cp > U'\u0D83')
-							return false;
-						TOML_ASSUME(cp >= U'\u0D02');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xD02ull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0xD02ull)) & 0xF600000000000003ull;
-							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0xD42ull)) & 0x8000000300200F77ull;
-							default: return true;
-						}
-					}
-					case 0x0F: // [15] 0DB9 - 0E6F
-					{
-						if (cp < U'\u0DCA' || cp > U'\u0E4E')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xDCAull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0DF3' && (1ull << (static_cast<uint_least64_t>(cp) - 0xDCAull)) & 0x300003FD7E1ull);
-							case 0x01: return (cp >= U'\u0E31' && (1u << (static_cast<uint_least32_t>(cp) - 0xE31u)) & 0x1C003F9u);
-							default: return true;
-						}
-					}
-					case 0x10: // [16] 0E70 - 0F26
-					{
-						if (cp < U'\u0EB1' || cp > U'\u0F19')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xEB1ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u0ECD' && (1u << (static_cast<uint_least32_t>(cp) - 0xEB1u)) & 0x1F800FF9u);
-							case 0x01: return cp >= U'\u0F18';
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x11: // [17] 0F27 - 0FDD
-					{
-						if (cp < U'\u0F35' || cp > U'\u0FC6')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0xF35ull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0xF35ull)) & 0xF000000000000615ull;
-							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0xF75ull)) & 0xFFFFFFF7FF06FFFFull;
-							case 0x02: return (1u << (static_cast<uint_least32_t>(cp) - 0xFB5u)) & 0x200FFu;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x12: // [18] 0FDE - 1094
-					{
-						if (cp < U'\u102B' || cp > U'\u108F')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x102Bull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x102Bull)) & 0xF3B87800000FFFFFull;
-							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x106Bull)) & 0x17FF8003C7ull;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x13: return (cp >= U'\u109A' && cp <= U'\u109D');
-					case 0x16: return (cp >= U'\u135D' && cp <= U'\u135F');
-					case 0x1C: // [28] 1704 - 17BA
-					{
-						if (cp < U'\u1712')
-							return false;
-						TOML_ASSUME(cp <= U'\u17BA');
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x1712ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u1734' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1712ull)) & 0x700000007ull);
-							case 0x01: return (cp <= U'\u1773' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1752ull)) & 0x300000003ull);
-							case 0x02: return cp >= U'\u17B4';
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x1D: return (cp >= U'\u17BB' && cp <= U'\u17D3') || (cp >= U'\u180B' && cp <= U'\u180D')
-						|| cp == U'\u17DD';
-					case 0x1E: return (cp >= U'\u1885' && cp <= U'\u1886') || (cp >= U'\u1920' && cp <= U'\u1928')
-						|| cp == U'\u18A9';
-					case 0x1F: return (cp <= U'\u193B' && (1u << (static_cast<uint_least32_t>(cp) - 0x1929u)) & 0x7FF87u);
-					case 0x20: // [32] 19E0 - 1A96
-					{
-						if (cp < U'\u1A17' || cp > U'\u1A7F')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x1A17ull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1A17ull)) & 0xC00000000000001Full;
-							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1A57ull)) & 0x13FFFFFFEFFull;
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x21: // [33] 1A97 - 1B4D
-					{
-						if (cp < U'\u1AB0' || cp > U'\u1B44')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x1AB0ull) / 0x40ull)
-						{
-							case 0x00: return (cp <= U'\u1AC0' && (1u << (static_cast<uint_least32_t>(cp) - 0x1AB0u)) & 0x1BFFFu);
-							case 0x01: return (cp >= U'\u1B00' && cp <= U'\u1B04');
-							case 0x02: return cp >= U'\u1B34';
-							TOML_NO_DEFAULT_CASE;
-						}
-					}
-					case 0x22: // [34] 1B4E - 1C04
-					{
-						if (cp < U'\u1B6B' || cp > U'\u1BF3')
-							return false;
-
-						switch ((static_cast<uint_least64_t>(cp) - 0x1B6Bull) / 0x40ull)
-						{
-							case 0x00: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1B6Bull)) & 0xFFC0000000E001FFull;
-							case 0x01: return (1ull << (static_cast<uint_least64_t>(cp) - 0x1BABull)) & 0xF800000000000007ull;
-							default: return true;
-						}
-					}
-					case 0x23: return (cp >= U'\u1C24' && cp <= U'\u1C37');
-					case 0x24: return (cp >= U'\u1CD0' && cp <= U'\u1CF9' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1CD0ull)) & 0x39021FFFFF7ull);
-					case 0x25: return (cp >= U'\u1DC0' && cp <= U'\u1DFF' && (1ull << (static_cast<uint_least64_t>(cp) - 0x1DC0ull)) & 0xFBFFFFFFFFFFFFFFull);
-					case 0x29: return (cp >= U'\u20D0' && cp <= U'\u20F0' && (1ull << (static_cast<uint_least64_t>(cp) - 0x20D0ull)) & 0x1FFE21FFFull);
-					case 0x3A: return (cp >= U'\u2CEF' && cp <= U'\u2CF1');
-					case 0x3B: return (cp >= U'\u2DE0' && cp <= U'\u2DE3') || cp == U'\u2D7F';
-					case 0x3C: return cp <= U'\u2DFF';
-					case 0x3F: return (cp >= U'\u302A' && cp <= U'\u302F') || (cp >= U'\u3099' && cp <= U'\u309A');
-					TOML_NO_DEFAULT_CASE;
-				}
+					0xFFFFFFFFFFFFFFFFull,	0x0000FFFFFFFFFFFFull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x00000000000000F8ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0xBFFFFFFFFFFE0000ull,	0x00000000000000B6ull,
+					0x0000000007FF0000ull,	0x00010000FFFFF800ull,	0x0000000000000000ull,	0x00003D9F9FC00000ull,
+					0xFFFF000000020000ull,	0x00000000000007FFull,	0x0001FFC000000000ull,	0x200FF80000000000ull,
+					0x00003EEFFBC00000ull,	0x000000000E000000ull,	0x0000000000000000ull,	0xFFFFFFFBFFF80000ull,
+					0xDC0000000000000Full,	0x0000000C00FEFFFFull,	0xD00000000000000Eull,	0x4000000C0080399Full,
+					0xD00000000000000Eull,	0x0023000000023987ull,	0xD00000000000000Eull,	0xFC00000C00003BBFull,
+					0xD00000000000000Eull,	0x0000000C00E0399Full,	0xC000000000000004ull,	0x0000000000803DC7ull,
+					0xC00000000000001Full,	0x0000000C00603DDFull,	0xD00000000000000Eull,	0x0000000C00603DDFull,
+					0xD80000000000000Full,	0x0000000C00803DDFull,	0x000000000000000Eull,	0x000C0000FF5F8400ull,
+					0x07F2000000000000ull,	0x0000000000007F80ull,	0x1FF2000000000000ull,	0x0000000000003F00ull,
+					0xC2A0000003000000ull,	0xFFFE000000000000ull,	0x1FFFFFFFFEFFE0DFull,	0x0000000000000040ull,
+					0x7FFFF80000000000ull,	0x001E3F9DC3C00000ull,	0x000000003C00BFFCull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x00000000E0000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x001C0000001C0000ull,	0x000C0000000C0000ull,	0xFFF0000000000000ull,	0x00000000200FFFFFull,
+					0x0000000000003800ull,	0x0000000000000000ull,	0x0000020000000060ull,	0x0000000000000000ull,
+					0x0FFF0FFF00000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x000000000F800000ull,	0x9FFFFFFF7FE00000ull,	0xBFFF000000000000ull,	0x0000000000000001ull,
+					0xFFF000000000001Full,	0x000FF8000000001Full,	0x00003FFE00000007ull,	0x000FFFC000000000ull,
+					0x00FFFFF000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x039021FFFFF70000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0xFBFFFFFFFFFFFFFFull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0001FFE21FFF0000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0003800000000000ull,
+					0x0000000000000000ull,	0x8000000000000000ull,	0x0000000000000000ull,	0xFFFFFFFF00000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
+					0x0000FC0000000000ull,	0x0000000000000000ull,	0x0000000006000000ull,
+				};
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x300ull) / 0x40ull]
+					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
 			case 0x02: // [2] 72F8 - AAF3
 			{
 				if (cp < U'\uA66F' || cp > U'\uAAEF')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x0001800000007FE1ull,	0x0000000000000000ull,	0x0000000000000006ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x21F0000010880000ull,	0x0000000000000000ull,
@@ -4109,17 +3913,17 @@ namespace toml::impl
 					0x00000000001E0000ull,	0x004000000003FFF0ull,	0xFC00000000000000ull,	0x00000000601000FFull,
 					0x0000000000007000ull,	0xF00000000005833Aull,	0x0000000000000001ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xA66Full) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xA66Full) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA66Full) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xA66Full) % 0x40ull));
 			}
-			case 0x03: return (cp >= U'\uAAF5' && cp <= U'\uAAF6') || (cp >= U'\uABE3' && cp <= U'\uABEA')
-				|| (cp >= U'\uABEC' && cp <= U'\uABED');
+			case 0x03: return ((cp >= U'\uAAF5' && cp <= U'\uAAF6') || (cp >= U'\uABE3' && cp <= U'\uABEA')
+				|| (cp >= U'\uABEC' && cp <= U'\uABED'));
 			case 0x04: // [4] E2F0 - 11AEB
 			{
 				if (cp < U'\uFB1E' || cp > U'\U00011A99')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x0000000000000001ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -4154,29 +3958,29 @@ namespace toml::impl
 					0x00000035E6FC0000ull,	0x0000000000000000ull,	0xF3F8000000000000ull,	0x00001FF800000047ull,
 					0x3FF80201EFE00000ull,	0x0FFFF00000000000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0xFB1Eull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0xFB1Eull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0xFB1Eull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0xFB1Eull) % 0x40ull));
 			}
 			case 0x05: // [5] 11AEC - 152E7
 			{
 				if (cp < U'\U00011C2F' || cp > U'\U00011EF6')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x000000000001FEFFull,	0xFDFFFFF800000000ull,	0x00000000000000FFull,	0x0000000000000000ull,
 					0x00000000017F68FCull,	0x000001F6F8000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x00000000000000F0ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x11C2Full) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x11C2Full) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x11C2Full) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x11C2Full) % 0x40ull));
 			}
 			case 0x06: // [6] 152E8 - 18AE3
 			{
 				if (cp < U'\U00016AF0' || cp > U'\U00016FF1')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x000000000000001Full,	0x000000000000007Full,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -4185,8 +3989,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0xFFFFFFFE80000000ull,	0x0000000780FFFFFFull,	0x0010000000000000ull,
 					0x0000000000000003ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x16AF0ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x16AF0ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16AF0ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x16AF0ull) % 0x40ull));
 			}
 			case 0x07: return (cp >= U'\U0001BC9D' && cp <= U'\U0001BC9E');
 			case 0x08: // [8] 1C2E0 - 1FADB
@@ -4194,7 +3998,7 @@ namespace toml::impl
 				if (cp < U'\U0001D165' || cp > U'\U0001E94A')
 					return false;
 
-				constexpr uint_least64_t lookup_table_1[] =
+				constexpr ui64 bitmask_table_1[] =
 				{
 					0x0000007F3FC03F1Full,	0x00000000000001E0ull,	0x0000000000000000ull,	0x00000000E0000000ull,
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
@@ -4221,8 +4025,8 @@ namespace toml::impl
 					0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,	0x0000000000000000ull,
 					0x0000000000000000ull,	0x0003F80000000000ull,	0x0000000000000000ull,	0x0000003F80000000ull,
 				};
-				return lookup_table_1[(static_cast<uint_least64_t>(cp) - 0x1D165ull) / 0x40ull]
-					& (0x1ull << ((static_cast<uint_least64_t>(cp) - 0x1D165ull) % 0x40ull));
+				return bitmask_table_1[(static_cast<ui64>(cp) - 0x1D165ull) / 0x40ull]
+					& (0x1ull << ((static_cast<ui64>(cp) - 0x1D165ull) % 0x40ull));
 			}
 			case 0x3F: return cp >= U'\U000E0100';
 			TOML_NO_DEFAULT_CASE;

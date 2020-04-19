@@ -4,7 +4,7 @@
 # See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 # SPDX-License-Identifier: MIT
 
-# godbolt session for experimenting with this script: https://godbolt.org/z/Vrcvqv
+# godbolt session for experimenting with this script: https://godbolt.org/z/Vp-zzE
 
 import sys
 import re
@@ -20,10 +20,10 @@ import bisect
 
 
 class G: # G for Globals
+	generate_tests				= True
 	hoist_constant_children		= True
 	bitmask_expressions			= True
-	elide_switches				= False
-	lookup_tables				= True
+	bitmask_tables				= True
 	depth_limit					= 0
 	word_size					= 64
 
@@ -58,7 +58,7 @@ def make_bitmask_index_test_expression(index, bitmask, index_offset = 0, bits = 
 	if not bits:
 		bits = 64 if (bitmask >> 32) > 0 else 32
 	suffix = 'ull' if bits >= 64 else 'u'
-	s = 'static_cast<uint_least{}_t>({})'.format(bits, index) if cast else str(index)
+	s = 'static_cast<ui{}>({})'.format(bits, index) if cast else str(index)
 	if index_offset != 0:
 		s = '({} {} 0x{:X}{})'.format(s, '-' if index_offset < 0 else '+', abs(index_offset), suffix)
 	return '(1{} << {}) & {}'.format(suffix, s, make_bitmask_literal(bitmask, bits))
@@ -138,6 +138,8 @@ def compound_and(*bools):
 	if 'false' in bools:
 		return 'false'
 	s = ' && '.join(bools)
+	if len(bools) > 1:
+		s = '({})'.format(s)
 	return s
 
 
@@ -446,8 +448,9 @@ class CodepointChunk:
 		self.__finished = False
 		self.__children = None
 		self.__expr = None
-		self.__expr_clamp_low = False
-		self.__expr_clamp_high = False
+		self.__expr_handles_low_end = True
+		self.__expr_handles_high_end = True
+		self.__uint_typedefs = set()
 		if data is not None:
 			if not isinstance(data, self.__Data):
 				raise Exception("nope")
@@ -492,6 +495,9 @@ class CodepointChunk:
 	def span_size(self):
 		return (self.span_last() - self.span_first()) + 1
 
+	def required_uint_typedefs(self):
+		return iter(self.__uint_typedefs)
+
 	def level(self):
 		return self.__data.level
 
@@ -507,16 +513,17 @@ class CodepointChunk:
 	def has_expression(self):
 		return self.__expr is not None
 
-	def makes_lookup_table(self):
-		return (G.lookup_tables
-			and (self.last() - self.first() + 1) >= 512
-			and (self.last() - self.first() + 1) <= 8192
+	def makes_bitmask_table(self):
+		return (G.bitmask_tables
+			and (self.last() - self.first() + 1) >= G.word_size * 4
+			and (self.last() - self.first() + 1) <= G.word_size * 256
 			and not self.range().contiguous()
 			# and (len(self) / float(self.last() - self.first() + 1)) > 0.10
 		)
 
 	def child_selector(self):
-		s = 'static_cast<uint_least64_t>(cp)'
+		self.__uint_typedefs.add(64)
+		s = 'static_cast<ui64>(cp)'
 		if (self.first() > 0):
 			s = '({} - 0x{:X}ull)'.format(s, self.first())
 		return s + ' / 0x{:X}ull'.format(self.__children[0].span_size())
@@ -524,11 +531,11 @@ class CodepointChunk:
 	def expression(self, clamp = False):
 		if self.__expr is None:
 			return None
-		if not clamp or not (self.__expr_clamp_low or self.__expr_clamp_high):
+		if not clamp or (self.__expr_handles_low_end and self.__expr_handles_high_end):
 			return self.__expr
 		return '{}{}{}'.format(
-			'cp >= {} && '.format(self.span_first_lit()) if self.__expr_clamp_low else '',
-			'cp <= {} && '.format(self.span_last_lit()) if self.__expr_clamp_high else '',
+			'cp >= {} && '.format(self.span_first_lit()) if not self.__expr_handles_low_end else '',
+			'cp <= {} && '.format(self.span_last_lit()) if not self.__expr_handles_high_end else '',
 			self.__expr
 		)
 
@@ -558,7 +565,9 @@ class CodepointChunk:
 
 		# true
 		elif self.always_returns_true():
-			self.__expr = '(cp >= {} && cp <= {})'.format(self.first_lit(), self.last_lit()) if self.root() else 'true'
+			self.__expr = 'true'
+			self.__expr_handles_low_end = False
+			self.__expr_handles_high_end = False
 
 		# cp != A
 		elif (len(self) == self.span_size() - 1):
@@ -567,9 +576,10 @@ class CodepointChunk:
 				if i not in self.range():
 					gap = i
 					break
+			assert gap is not None
 			self.__expr = 'cp != ' + make_literal(gap)
-			self.__expr_clamp_low = gap > self.span_first()
-			self.__expr_clamp_high = gap < self.span_last()
+			self.__expr_handles_low_end = gap == self.span_first()
+			self.__expr_handles_high_end = gap == self.span_last()
 
 		# cp == A
 		# cp >= A
@@ -582,12 +592,12 @@ class CodepointChunk:
 			elif self.last() < self.span_last():
 				assert self.first() == self.span_first()
 				self.__expr = 'cp <= ' + self.last_lit()
-				self.__expr_clamp_high = True
+				self.__expr_handles_low_end = False
 			else:
 				assert self.first() > self.span_first()
 				assert self.last() == self.span_last(), "{} {}".format(self.last(), self.span_last())
 				self.__expr = 'cp >= ' + self.first_lit()
-				self.__expr_clamp_low = True
+				self.__expr_handles_high_end = False
 
 		if self.__expr is not None:
 			return
@@ -605,24 +615,20 @@ class CodepointChunk:
 					if not ok:
 						break;
 				if ok:
-					s = 'static_cast<uint_least32_t>(cp)'
+					s = 'static_cast<ui32>(cp)'
+					self.__uint_typedefs.add(32)
 					if (add):
 						s = '({} + {}u)'.format(s, add)
-					s = '({} % {}u) == 0u'.format(s, div)
-
-					self.__expr_clamp_low = self.root()
-					self.__expr_clamp_high = self.root()
-					if (self.first() > self.span_first() or self.last() < self.span_last()):
-						if (self.last() < self.span_last()):
-							s = 'cp <= {} && {}'.format(self.last_lit(), s)
-							self.__expr_clamp_high = False
-						if (self.first() > self.span_first()):
-							s = 'cp >= {} && {}'.format(self.first_lit(), s)
-							self.__expr_clamp_low = False
-						s = '({})'.format(s)
-					self.__expr = s
-
-
+					bools = [ '({} % {}u) == 0u'.format(s, div) ]
+					self.__expr_handles_low_end = False
+					self.__expr_handles_high_end = False
+					if (self.last() < self.span_last()):
+						bools.insert(0, 'cp <= {}'.format(self.last_lit()))
+						self.__expr_handles_high_end = True
+					if (self.first() > self.span_first()):
+						bools.insert(0, 'cp >= {}'.format(self.first_lit()))
+						self.__expr_handles_low_end = True
+					self.__expr = compound_and(*bools)
 					break
 			if self.__expr:
 				break
@@ -638,18 +644,17 @@ class CodepointChunk:
 				if shift >= G.word_size:
 					break
 				bitmask |= 1 << shift
-			s = make_bitmask_index_test_expression('cp', bitmask, -self.first())
-			self.__expr_clamp_low = self.root()
-			self.__expr_clamp_high = self.root()
-			if (self.first() > self.span_first() or self.last() < self.span_last()):
-				if (self.last() < self.span_last()):
-					s = 'cp <= {} && {}'.format(self.last_lit(), s)
-					self.__expr_clamp_high = False
-				if (self.first() > self.span_first()):
-					s = 'cp >= {} && {}'.format(self.first_lit(), s)
-					self.__expr_clamp_low = False
-				s = '({})'.format(s)
-			self.__expr = s
+			bools = [ make_bitmask_index_test_expression('cp', bitmask, -self.first()) ]
+			self.__uint_typedefs.add(64 if bitmask > 0xFFFFFFFF else 32)
+			self.__expr_handles_low_end = False
+			self.__expr_handles_high_end = False
+			if (self.last() < self.span_last()):
+				bools.insert(0, 'cp <= {}'.format(self.last_lit()))
+				self.__expr_handles_high_end = True
+			if (self.first() > self.span_first()):
+				bools.insert(0, 'cp >= {}'.format(self.first_lit()))
+				self.__expr_handles_low_end = True
+			self.__expr = compound_and(*bools)
 
 
 		if self.__expr is not None:
@@ -665,32 +670,34 @@ class CodepointChunk:
 		)
 
 		# (cp >= A && cp <= B) || cp == C || cp == D ...
-		if ((self.range().sparse_value_count() + self.range().contiguous_subrange_count() <= 3)
-			or not subdivision_allowed):
-			self.__expr_clamp_low = True
-			self.__expr_clamp_high = True
+		if (self.range().sparse_value_count() + self.range().contiguous_subrange_count()) <= 3 or not subdivision_allowed:
+			self.__expr_handles_low_end = False
+			self.__expr_handles_high_end = False
 			bools = []
 			for f, l in self.range().contiguous_subranges():
 				bools.append('(cp >= {} && cp <= {})'.format(make_literal(f), make_literal(l)))
-				self.__expr_clamp_low = self.__expr_clamp_low and f > self.span_first()
-				self.__expr_clamp_high = self.__expr_clamp_high and l < self.span_last()
+				self.__expr_handles_low_end = self.__expr_handles_low_end or f == self.span_first()
+				self.__expr_handles_high_end = self.__expr_handles_high_end or l == self.span_last()
 			for v in self.range().sparse_values():
 				bools.append('cp == ' + make_literal(v))
-				self.__expr_clamp_low = self.__expr_clamp_low and v > self.span_first()
-				self.__expr_clamp_high = self.__expr_clamp_high and v < self.span_last()
+				self.__expr_handles_low_end = self.__expr_handles_low_end or v == self.span_first()
+				self.__expr_handles_high_end = self.__expr_handles_high_end or v == self.span_last()
 			self.__expr = '\n\t\t|| '.join([' || '.join(b) for b in chunks(bools, 2)])
+			if len(bools) > 1:
+				self.__expr = '({})'.format(self.__expr)
 
 
 		if self.__expr is not None:
 			return
 
 		# haven't been able to make an expression so check if the chunk
-		# can be made into a lookup table
-		if self.makes_lookup_table():
+		# can be made into a bitmask lookup table
+		if self.makes_bitmask_table():
+			self.__uint_typedefs.add(G.word_size)
 			return
 
-		# couldn't figure out a return expression or make a lookup table, so subdivide
-
+		# couldn't figure out a return expression or make a bitmask lookup table, so subdivide
+		self.__uint_typedefs.add(G.word_size)
 		child_node_max_size = calc_child_size(child_span)
 		child_nodes = ceil(child_span / float(child_node_max_size))
 		self.__children = [None] * child_nodes
@@ -710,6 +717,8 @@ class CodepointChunk:
 		for i in range(0, child_nodes):
 			if self.__children[i] is not None:
 				self.__children[i] = CodepointChunk(self.__children[i])
+				for ui in self.__children[i].required_uint_typedefs():
+					self.__uint_typedefs.add(ui)
 		for child_index in range(0, child_nodes):
 			child = self.__children[child_index]
 			if child is None:
@@ -720,10 +729,14 @@ class CodepointChunk:
 
 	def __str__(self):
 		self.__finish()
+		s = ''
+		if self.root() and len(self.__uint_typedefs) > 0:
+			for ui in self.__uint_typedefs:
+				s += 'using ui{} = std::uint_least{}_t;\n'.format(ui, ui)
+			s += '\n'
 		if self.has_expression():
-			return 'return {};'.format(self.expression(self.root()))
+			return s + 'return {};'.format(self.expression(self.root()))
 		else:
-			s = ''
 			exclusions = []
 			assumptions = []
 			if self.first() > 0 and (self.root() or self.first() > self.span_first()):
@@ -737,13 +750,24 @@ class CodepointChunk:
 			if exclusions:
 				s += 'if ({})\n\treturn false;\n'.format(' || '.join(exclusions))
 			if assumptions:
-				s += 'TOML_ASSUME({});\n'.format(compound_and(*assumptions))
+				s += 'TOML_ASSUME{}{}{};'.format(
+					'(' if len(assumptions) == 1 else '',
+					compound_and(*assumptions),
+					')' if len(assumptions) == 1 else ''
+				)
+				s += '\n'
 			if exclusions or assumptions:
 				s += '\n'
 
-			if (self.makes_lookup_table()):
-				table_name = 'lookup_table_' + str(self.level())
-				s += 'constexpr uint_least{}_t {}[] = \n{{'.format(G.word_size, table_name)
+			summary = "//# chunk summary: {} codepoints from {} ranges (spanning a search area of {})".format(
+				len(self),
+				self.range().sparse_value_count() + self.range().contiguous_subrange_count(),
+				self.span_size()
+			)
+
+			if (self.makes_bitmask_table()):
+				table_name = 'bitmask_table_' + str(self.level())
+				s += 'constexpr ui{} {}[] = \n{{'.format(G.word_size, table_name)
 				fmt_str = "\t0x{{:0{}X}}{{}},".format(int(G.word_size/4))
 				idx = -1
 				for v in range(self.first(), self.last() + 1, G.word_size):
@@ -755,12 +779,12 @@ class CodepointChunk:
 						if i in self.range():
 							mask = mask | (1 << (i - v))
 					s += fmt_str.format(mask, 'ull' if G.word_size > 32 else 'u')
-				element_selector = '(static_cast<uint_least{}_t>(cp) - {}) / {}'.format(
+				element_selector = '(static_cast<ui{}>(cp) - {}) / {}'.format(
 					G.word_size,
 					make_bitmask_literal(self.first(), G.word_size),
 					make_bitmask_literal(G.word_size, G.word_size)
 				)
-				bit_selector = 'static_cast<uint_least{}_t>(cp)'.format(G.word_size)
+				bit_selector = 'static_cast<ui{}>(cp)'.format(G.word_size)
 				if (self.first() % G.word_size != 0):
 					bit_selector = '({} - {})'.format(bit_selector, make_bitmask_literal(self.first(), G.word_size))
 				bit_selector = '{} % {}'.format(bit_selector, make_bitmask_literal(G.word_size, G.word_size))
@@ -771,12 +795,13 @@ class CodepointChunk:
 					make_bitmask_literal(1, G.word_size),
 					bit_selector
 				)
+				s += '\n' + summary
 				return s
 
 			always_true = []
 			always_false = []
 			expressions_or_switches = []
-			selector_references = 0
+			selector_references = 1
 			for i in range(0, len(self.__children)):
 				if self.__children[i].always_returns_false():
 					always_false.append((i,self.__children[i]))
@@ -832,15 +857,12 @@ class CodepointChunk:
 			if defaulted == 0:
 				default = None
 
-			requires_switch = not G.elide_switches or len(emittables) >= 2 or not emittables_all_have_expressions
-			if requires_switch:
-				selector_references += 1
-
 			selector = self.child_selector()
 			selector_name = 'child_index_{}'.format(self.level())
 			if selector_references > 1:
 				s += 'const auto {} = {};\n'.format(selector_name, selector)
 
+			requires_switch = len(emittables) > 1 or not emittables_all_have_expressions
 			return_trues = []
 			if always_true_selector:
 				return_trues.append(always_true_selector)
@@ -867,7 +889,17 @@ class CodepointChunk:
 						'' if v else ')'
 					)
 
-			if requires_switch:
+			if len(emittables) == 0 and default is not None:
+				s += 'return {};\n'.format(str(default).lower())
+			elif not requires_switch:
+				if default is True:
+					s += 'return ((@@SELECTOR@@) != {})\n\t|| ({});'.format(emittables[0][0], emittables[0][1].expression())
+				elif default is False:
+					s += 'return ((@@SELECTOR@@) == {})\n\t&& ({});'.format(emittables[0][0], emittables[0][1].expression())
+				else:
+					selector_references -= 1
+					s += 'return {};'.format(emittables[0][1].expression())
+			else:
 				s += "switch (@@SELECTOR@@)\n"
 				s += "{\n"
 				emitted = 0
@@ -882,12 +914,12 @@ class CodepointChunk:
 				s += '\t{};\n'.format('TOML_NO_DEFAULT_CASE' if default is None else 'default: return '+str(default).lower())
 				s += "}"
 				if (emitted <= 1):
-					s += "\n/* FIX ME: switch has only {} case{}! */".format(emitted, 's' if emitted > 1 else '')
-			else:
-				if default is not None:
-					s += 'return '+str(default).lower()+';'
-				s += "\n/* CHECK ME */"
-			return s.replace('@@SELECTOR@@', selector_name if selector_references > 1 else selector)
+						s += "\n/* FIX ME: switch has only {} case{}! */".format(emitted, 's' if emitted > 1 else '')
+				s += '\n' + summary
+
+			if selector_references > 0:
+				s = s.replace('@@SELECTOR@@', selector_name if selector_references > 1 else selector)
+			return s
 
 
 
@@ -1022,7 +1054,7 @@ def append_codepoint(codepoints, codepoint, category):
 
 def write_to_files(codepoints, header_file, test_file):
 	header = lambda txt: print(txt, file=header_file)
-	test = lambda txt: print(txt, file=test_file)
+	test = lambda txt: print(txt, file=test_file) if test_file is not None else None
 	both = lambda txt: (header(txt), test(txt))
 
 	header('//# This file is a part of toml++ and is subject to the the terms of the MIT license.')
@@ -1111,9 +1143,12 @@ def main():
 	test_file_path = path.join(get_script_folder(), '..', 'tests', 'unicode_generated.cpp')
 	print("Writing to {}".format(header_file_path))
 	with open(header_file_path, 'w', encoding='utf-8', newline='\n') as header_file:
-		print("Writing to {}".format(test_file_path))
-		with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
-			write_to_files(codepoints, header_file, test_file)
+		if G.generate_tests:
+			print("Writing to {}".format(test_file_path))
+			with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
+				write_to_files(codepoints, header_file, test_file)
+		else:
+			write_to_files(codepoints, header_file, None)
 
 
 
