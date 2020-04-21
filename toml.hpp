@@ -3449,9 +3449,9 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x2C00ull) / 0x40ull]
 					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x04: return ((cp >= U'\u31F0' && cp <= U'\u31FF') || (cp >= U'\u3400' && cp <= U'\u3E20'));
-			case 0x06: return ((cp >= U'\u4A6C' && cp <= U'\u4DBE') || (cp >= U'\u4E00' && cp <= U'\u56B6'));
-			case 0x0C: return ((cp >= U'\u942E' && cp <= U'\u9FFB') || (cp >= U'\uA000' && cp <= U'\uA078'));
+			case 0x04: return (cp >= U'\u31F0' && cp <= U'\u31FF') || (cp >= U'\u3400' && cp <= U'\u3E20');
+			case 0x06: return (cp >= U'\u4A6C' && cp <= U'\u4DBE') || (cp >= U'\u4E00' && cp <= U'\u56B6');
+			case 0x0C: return (cp >= U'\u942E' && cp <= U'\u9FFB') || (cp >= U'\uA000' && cp <= U'\uA078');
 			case 0x0D: // [13] A079 - ACC3
 			{
 				TOML_ASSUME(cp >= U'\uA079' && cp <= U'\uACC3');
@@ -3475,8 +3475,8 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA079ull) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0xA079ull) % 0x40ull));
 			}
-			case 0x11: return ((cp >= U'\uD1A5' && cp <= U'\uD7A2') || (cp >= U'\uD7B0' && cp <= U'\uD7C6')
-				|| (cp >= U'\uD7CB' && cp <= U'\uD7FB'));
+			case 0x11: return (cp >= U'\uD1A5' && cp <= U'\uD7A2') || (cp >= U'\uD7B0' && cp <= U'\uD7C6')
+				|| (cp >= U'\uD7CB' && cp <= U'\uD7FB');
 			case 0x14: // [20] F686 - 102D0
 			{
 				if (cp < U'\uF900')
@@ -3571,7 +3571,7 @@ namespace toml::impl
 			}
 			case 0x18: return cp >= U'\U00013000';
 			case 0x19: return cp <= U'\U0001342E';
-			case 0x1A: return (cp >= U'\U00014400' && cp <= U'\U00014646');
+			case 0x1A: return cp >= U'\U00014400' && cp <= U'\U00014646';
 			case 0x1D: // [29] 16529 - 17173
 			{
 				if (cp < U'\U00016800')
@@ -3594,8 +3594,8 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16800ull) / 0x40ull]
 					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x1F: return ((cp >= U'\U00017DBF' && cp <= U'\U000187F6') || (cp >= U'\U00018800' && cp <= U'\U00018A09'));
-			case 0x20: return ((cp >= U'\U00018A0A' && cp <= U'\U00018CD5') || (cp >= U'\U00018D00' && cp <= U'\U00018D07'));
+			case 0x1F: return (cp >= U'\U00017DBF' && cp <= U'\U000187F6') || (cp >= U'\U00018800' && cp <= U'\U00018A09');
+			case 0x20: return (cp >= U'\U00018A0A' && cp <= U'\U00018CD5') || (cp >= U'\U00018D00' && cp <= U'\U00018D07');
 			case 0x23: // [35] 1AEEB - 1BB35
 			{
 				if (cp < U'\U0001B000' || cp > U'\U0001B2FB')
@@ -3617,7 +3617,8 @@ namespace toml::impl
 
 				switch ((static_cast<ui64>(cp) - 0x1BC00ull) / 0x40ull)
 				{
-					case 0x01: return (cp <= U'\U0001BC7C' && (1ull << (static_cast<ui64>(cp) - 0x1BC40ull)) & 0x1FFF07FFFFFFFFFFull);
+					case 0x01: return cp <= U'\U0001BC7C'
+						&& (1ull << (static_cast<ui64>(cp) - 0x1BC40ull)) & 0x1FFF07FFFFFFFFFFull;
 					case 0x02: return (1u << (static_cast<ui32>(cp) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
@@ -3664,19 +3665,21 @@ namespace toml::impl
 
 				switch ((static_cast<ui64>(cp) - 0x1EE00ull) / 0x40ull)
 				{
-					case 0x00: return (cp <= U'\U0001EE3B' && (1ull << (static_cast<ui64>(cp) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull);
-					case 0x01: return (cp >= U'\U0001EE42' && cp <= U'\U0001EE7E' && (1ull << (static_cast<ui64>(cp) - 0x1EE42ull)) & 0x17BDFDE5AAA5BAA1ull);
+					case 0x00: return cp <= U'\U0001EE3B'
+						&& (1ull << (static_cast<ui64>(cp) - 0x1EE00ull)) & 0xAF7FE96FFFFFFEFull;
+					case 0x01: return cp >= U'\U0001EE42' && cp <= U'\U0001EE7E'
+						&& (1ull << (static_cast<ui64>(cp) - 0x1EE42ull)) & 0x17BDFDE5AAA5BAA1ull;
 					case 0x02: return (1ull << (static_cast<ui64>(cp) - 0x1EE80ull)) & 0xFFFFBEE0FFFFBFFull;
 					TOML_NO_DEFAULT_CASE;
 				}
 			}
 			case 0x29: return cp >= U'\U00020000';
-			case 0x37: return ((cp >= U'\U0002A4C7' && cp <= U'\U0002A6DC') || (cp >= U'\U0002A700' && cp <= U'\U0002B111'));
-			case 0x38: return ((cp >= U'\U0002B112' && cp <= U'\U0002B733') || (cp >= U'\U0002B740' && cp <= U'\U0002B81C')
-				|| (cp >= U'\U0002B820' && cp <= U'\U0002BD5C'));
-			case 0x3A: return ((cp >= U'\U0002C9A8' && cp <= U'\U0002CEA0') || (cp >= U'\U0002CEB0' && cp <= U'\U0002D5F2'));
+			case 0x37: return (cp >= U'\U0002A4C7' && cp <= U'\U0002A6DC') || (cp >= U'\U0002A700' && cp <= U'\U0002B111');
+			case 0x38: return (cp >= U'\U0002B112' && cp <= U'\U0002B733') || (cp >= U'\U0002B740' && cp <= U'\U0002B81C')
+				|| (cp >= U'\U0002B820' && cp <= U'\U0002BD5C');
+			case 0x3A: return (cp >= U'\U0002C9A8' && cp <= U'\U0002CEA0') || (cp >= U'\U0002CEB0' && cp <= U'\U0002D5F2');
 			case 0x3C: return cp <= U'\U0002EBDF';
-			case 0x3D: return (cp >= U'\U0002F800' && cp <= U'\U0002FA1D');
+			case 0x3D: return cp >= U'\U0002F800' && cp <= U'\U0002FA1D';
 			case 0x3E: return cp >= U'\U00030000';
 			TOML_NO_DEFAULT_CASE;
 		}
@@ -3747,8 +3750,10 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16EEull) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0x16EEull) % 0x40ull));
 			}
-			case 0x03: return (cp >= U'\u2160' && cp <= U'\u2188' && (1ull << (static_cast<ui64>(cp) - 0x2160ull)) & 0x1E7FFFFFFFFull);
-			case 0x05: return (cp >= U'\u3007' && cp <= U'\u303A' && (1ull << (static_cast<ui64>(cp) - 0x3007ull)) & 0xE0007FC000001ull);
+			case 0x03: return cp >= U'\u2160' && cp <= U'\u2188'
+				&& (1ull << (static_cast<ui64>(cp) - 0x2160ull)) & 0x1E7FFFFFFFFull;
+			case 0x05: return cp >= U'\u3007' && cp <= U'\u303A'
+				&& (1ull << (static_cast<ui64>(cp) - 0x3007ull)) & 0xE0007FC000001ull;
 			case 0x14: // [20] A32C - AB02
 			{
 				if (cp < U'\uA620' || cp > U'\uAA59')
@@ -3765,8 +3770,8 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA620ull) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0xA620ull) % 0x40ull));
 			}
-			case 0x15: return (cp >= U'\uABF0' && cp <= U'\uABF9');
-			case 0x1F: return (cp >= U'\uFF10' && cp <= U'\uFF19');
+			case 0x15: return cp >= U'\uABF0' && cp <= U'\uABF9';
+			case 0x1F: return cp >= U'\uFF10' && cp <= U'\uFF19';
 			case 0x20: // [32] 10140 - 10916
 			{
 				if (cp > U'\U000104A9')
@@ -3783,7 +3788,7 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x10140ull) / 0x40ull]
 					& (0x1ull << (static_cast<ui64>(cp) % 0x40ull));
 			}
-			case 0x21: return ((cp >= U'\U00010D30' && cp <= U'\U00010D39') || (cp >= U'\U00011066' && cp <= U'\U0001106F'));
+			case 0x21: return (cp >= U'\U00010D30' && cp <= U'\U00010D39') || (cp >= U'\U00011066' && cp <= U'\U0001106F');
 			case 0x22: // [34] 110EE - 118C4
 			{
 				if (cp < U'\U000110F0' || cp > U'\U00011739')
@@ -3818,11 +3823,11 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x118E0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0x118E0ull) % 0x40ull));
 			}
-			case 0x24: return (cp >= U'\U00012400' && cp <= U'\U0001246E');
-			case 0x2D: return ((cp >= U'\U00016A60' && cp <= U'\U00016A69') || (cp >= U'\U00016B50' && cp <= U'\U00016B59'));
-			case 0x3B: return (cp >= U'\U0001D7CE' && cp <= U'\U0001D7FF');
-			case 0x3C: return ((cp >= U'\U0001E140' && cp <= U'\U0001E149') || (cp >= U'\U0001E2F0' && cp <= U'\U0001E2F9'));
-			case 0x3D: return (cp >= U'\U0001E950' && cp <= U'\U0001E959');
+			case 0x24: return cp >= U'\U00012400' && cp <= U'\U0001246E';
+			case 0x2D: return (cp >= U'\U00016A60' && cp <= U'\U00016A69') || (cp >= U'\U00016B50' && cp <= U'\U00016B59');
+			case 0x3B: return cp >= U'\U0001D7CE' && cp <= U'\U0001D7FF';
+			case 0x3C: return (cp >= U'\U0001E140' && cp <= U'\U0001E149') || (cp >= U'\U0001E2F0' && cp <= U'\U0001E2F9');
+			case 0x3D: return cp >= U'\U0001E950' && cp <= U'\U0001E959';
 			case 0x3F: return cp >= U'\U0001FBF0';
 			TOML_NO_DEFAULT_CASE;
 		}
@@ -3916,8 +3921,8 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0xA66Full) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0xA66Full) % 0x40ull));
 			}
-			case 0x03: return ((cp >= U'\uAAF5' && cp <= U'\uAAF6') || (cp >= U'\uABE3' && cp <= U'\uABEA')
-				|| (cp >= U'\uABEC' && cp <= U'\uABED'));
+			case 0x03: return cp == U'\uAAF5' || cp == U'\uAAF6' || (cp >= U'\uABE3' && cp <= U'\uABEA') || cp == U'\uABEC'
+				|| cp == U'\uABED';
 			case 0x04: // [4] E2F0 - 11AEB
 			{
 				if (cp < U'\uFB1E' || cp > U'\U00011A99')
@@ -3992,7 +3997,7 @@ namespace toml::impl
 				return bitmask_table_1[(static_cast<ui64>(cp) - 0x16AF0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<ui64>(cp) - 0x16AF0ull) % 0x40ull));
 			}
-			case 0x07: return (cp >= U'\U0001BC9D' && cp <= U'\U0001BC9E');
+			case 0x07: return cp >= U'\U0001BC9D' && cp <= U'\U0001BC9E';
 			case 0x08: // [8] 1C2E0 - 1FADB
 			{
 				if (cp < U'\U0001D165' || cp > U'\U0001E94A')
@@ -4156,26 +4161,19 @@ namespace toml::impl
 		return (codepoint >= U'0' && codepoint <= U'9');
 	}
 
+	template <typename T>
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
 	TOML_ALWAYS_INLINE
-	constexpr uint32_t hex_to_dec(char codepoint) noexcept
+	constexpr std::uint_least32_t hex_to_dec(T codepoint) noexcept
 	{
-		return codepoint >= 'A'
-			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= 'a' ? 'a' : 'A'))
-			: static_cast<uint32_t>(codepoint - '0')
-		;
-	}
-
-	[[nodiscard]]
-	TOML_GNU_ATTR(const)
-	TOML_ALWAYS_INLINE
-	constexpr uint32_t hex_to_dec(char32_t codepoint) noexcept
-	{
-		return codepoint >= U'A'
-			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= U'a' ? U'a' : U'A'))
-			: static_cast<uint32_t>(codepoint - U'0')
+		if constexpr (std::is_same_v<remove_cvref_t<T>, std::uint_least32_t>)
+			return codepoint >= 0x41u // >= 'A'
+				? 10u + (codepoint | 0x20u) - 0x61u // - 'a'
+				: codepoint - 0x30u // - '0'
 			;
+		else
+			return hex_to_dec(static_cast<std::uint_least32_t>(codepoint));
 	}
 
 	[[nodiscard]]

@@ -121,26 +121,19 @@ namespace toml::impl
 		return (codepoint >= U'0' && codepoint <= U'9');
 	}
 
+	template <typename T>
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
 	TOML_ALWAYS_INLINE
-	constexpr uint32_t hex_to_dec(char codepoint) noexcept
+	constexpr std::uint_least32_t hex_to_dec(T codepoint) noexcept
 	{
-		return codepoint >= 'A'
-			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= 'a' ? 'a' : 'A'))
-			: static_cast<uint32_t>(codepoint - '0')
-		;
-	}
-
-	[[nodiscard]]
-	TOML_GNU_ATTR(const)
-	TOML_ALWAYS_INLINE
-	constexpr uint32_t hex_to_dec(char32_t codepoint) noexcept
-	{
-		return codepoint >= U'A'
-			? 10u + static_cast<uint32_t>(codepoint - (codepoint >= U'a' ? U'a' : U'A'))
-			: static_cast<uint32_t>(codepoint - U'0')
+		if constexpr (std::is_same_v<remove_cvref_t<T>, std::uint_least32_t>)
+			return codepoint >= 0x41u // >= 'A'
+				? 10u + (codepoint | 0x20u) - 0x61u // - 'a'
+				: codepoint - 0x30u // - '0'
 			;
+		else
+			return hex_to_dec(static_cast<std::uint_least32_t>(codepoint));
 	}
 
 	[[nodiscard]]

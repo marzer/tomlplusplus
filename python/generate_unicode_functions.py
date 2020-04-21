@@ -144,6 +144,34 @@ def compound_and(*bools):
 
 
 
+def strip_brackets(s):
+	if s.startswith('(') and s.endswith(')'):
+		return s[1:-1]
+	return s
+
+
+
+def wrap_lines(s, sep = '||', wrap_prefix = '\t', assumed_indent = 0):
+	elems = [s.strip() for s in s.split(sep)]
+	line_len = 0
+	s = ''
+	wrap_prefix_len = 0
+	for c in wrap_prefix:
+		wrap_prefix_len += 4 if c == '\t' else 1
+	for e in elems:
+		if line_len + len(e) + assumed_indent >= 100:
+			s += '\n{}{} {}'.format(wrap_prefix, sep, e)
+			line_len = len(sep) + len(e) + 1 + wrap_prefix_len
+		elif len(s) > 0:
+			s += ' {} {}'.format(sep, e)
+			line_len += len(sep) + len(e) + 2
+		else:
+			s = e
+			line_len = len(e)
+	return s
+
+
+
 def ceil(val):
 	return int(math.ceil(val))
 
@@ -518,7 +546,7 @@ class CodepointChunk:
 			and (self.last() - self.first() + 1) >= G.word_size * 4
 			and (self.last() - self.first() + 1) <= G.word_size * 256
 			and not self.range().contiguous()
-			# and (len(self) / float(self.last() - self.first() + 1)) > 0.10
+			and (len(self) / float(self.last() - self.first() + 1)) >= 0.025
 		)
 
 	def child_selector(self):
@@ -654,7 +682,7 @@ class CodepointChunk:
 			if (self.first() > self.span_first()):
 				bools.insert(0, 'cp >= {}'.format(self.first_lit()))
 				self.__expr_handles_low_end = True
-			self.__expr = compound_and(*bools)
+			self.__expr = wrap_lines(compound_and(*bools), sep='&&', wrap_prefix='\t\t', assumed_indent=self.level()*8)
 
 
 		if self.__expr is not None:
@@ -675,16 +703,22 @@ class CodepointChunk:
 			self.__expr_handles_high_end = False
 			bools = []
 			for f, l in self.range().contiguous_subranges():
-				bools.append('(cp >= {} && cp <= {})'.format(make_literal(f), make_literal(l)))
+				if l == f + 1:
+					if f > 0:
+						bools.append('cp == {}'.format(make_literal(f)))
+					bools.append('cp == {}'.format(make_literal(l)))
+				else:
+					if f > 0:
+						bools.append('(cp >= {} && cp <= {})'.format(make_literal(f), make_literal(l)))
+					else:
+						bools.append('cp <= {}'.format(make_literal(l)))
 				self.__expr_handles_low_end = self.__expr_handles_low_end or f == self.span_first()
 				self.__expr_handles_high_end = self.__expr_handles_high_end or l == self.span_last()
 			for v in self.range().sparse_values():
 				bools.append('cp == ' + make_literal(v))
 				self.__expr_handles_low_end = self.__expr_handles_low_end or v == self.span_first()
 				self.__expr_handles_high_end = self.__expr_handles_high_end or v == self.span_last()
-			self.__expr = '\n\t\t|| '.join([' || '.join(b) for b in chunks(bools, 2)])
-			if len(bools) > 1:
-				self.__expr = '({})'.format(self.__expr)
+			self.__expr = wrap_lines(compound_or(*bools), wrap_prefix='\t\t')
 
 
 		if self.__expr is not None:
@@ -735,7 +769,7 @@ class CodepointChunk:
 				s += 'using ui{} = std::uint_least{}_t;\n'.format(ui, ui)
 			s += '\n'
 		if self.has_expression():
-			return s + 'return {};'.format(self.expression(self.root()))
+			return s + 'return {};'.format(strip_brackets(self.expression(self.root())))
 		else:
 			exclusions = []
 			assumptions = []
@@ -748,13 +782,9 @@ class CodepointChunk:
 			else:
 				assumptions.append('cp <= ' + self.last_lit())
 			if exclusions:
-				s += 'if ({})\n\treturn false;\n'.format(' || '.join(exclusions))
+				s += 'if ({})\n\treturn false;\n'.format(strip_brackets(compound_or(*exclusions)))
 			if assumptions:
-				s += 'TOML_ASSUME{}{}{};'.format(
-					'(' if len(assumptions) == 1 else '',
-					compound_and(*assumptions),
-					')' if len(assumptions) == 1 else ''
-				)
+				s += 'TOML_ASSUME({});'.format(strip_brackets(compound_and(*assumptions)))
 				s += '\n'
 			if exclusions or assumptions:
 				s += '\n'
@@ -885,7 +915,7 @@ class CodepointChunk:
 				else:
 					s += 'return {}{}{};'.format(
 						'' if v else '!(',
-						ret,
+						strip_brackets(ret),
 						'' if v else ')'
 					)
 
@@ -893,12 +923,18 @@ class CodepointChunk:
 				s += 'return {};\n'.format(str(default).lower())
 			elif not requires_switch:
 				if default is True:
-					s += 'return ((@@SELECTOR@@) != {})\n\t|| ({});'.format(emittables[0][0], emittables[0][1].expression())
+					s += 'return ((@@SELECTOR@@) != {})\n\t|| ({});'.format(
+						emittables[0][0],
+						strip_brackets(emittables[0][1].expression())
+					)
 				elif default is False:
-					s += 'return ((@@SELECTOR@@) == {})\n\t&& ({});'.format(emittables[0][0], emittables[0][1].expression())
+					s += 'return ((@@SELECTOR@@) == {})\n\t&& ({});'.format(
+						emittables[0][0],
+						strip_brackets(emittables[0][1].expression())
+					)
 				else:
 					selector_references -= 1
-					s += 'return {};'.format(emittables[0][1].expression())
+					s += 'return {};'.format(strip_brackets(emittables[0][1].expression()))
 			else:
 				s += "switch (@@SELECTOR@@)\n"
 				s += "{\n"
@@ -946,22 +982,33 @@ def emit_function(name, header_file, test_file, codepoints, test_func, descripti
 	if not test_file:
 		return
 	test = lambda txt: print(txt, file=test_file)
-	test('	//----- {} {}'.format(name, '-' * (80 - len(name) - 4)))
-	test('	{')
-	test('		INFO("{}"sv)'.format(name))
-	test('		static constexpr auto fn = {};'.format(name))
+	test('TEST_CASE("unicode - {}")'.format(name))
+	test('{')
+	test('	static constexpr auto fn = {};'.format(name))
 
 	if root_chunk.range().contiguous_subrange_count():
 		test('')
-		test('		// contiguous ranges of values which should return true')
-		for f, l in root_chunk.range().contiguous_subranges():
-			test('		REQUIRE(in(fn, {{ {}, {} }}));'.format(make_literal(f), make_literal(l)))
+		test('	// contiguous ranges of values which should return true')
+		test('	static constexpr codepoint_range inclusive_ranges[] = ')
+		test('	{')
+		test('		'+'\n		'.join([' '.join(r) for r in chunks(
+			['{{ {}, {} }},'.format(make_literal(f), make_literal(l)) for f, l in root_chunk.range().contiguous_subranges()], 3
+		)]))
+		test('	};')
+		test('	for (const auto& r : inclusive_ranges)')
+		test('		REQUIRE(in(fn, r));')
+
 	if root_chunk.range().sparse_value_count():
 		test('')
-		test('		// individual values which should return true')
-		for v in root_chunk.range().sparse_values():
-			test('		REQUIRE(fn({}));'.format(make_literal(v)))
-
+		test('	// individual values which should return true')
+		test('	static constexpr char32_t inclusive_values[] = ')
+		test('	{')
+		test('		'+'\n		'.join([' '.join(r) for r in chunks(
+			['{},'.format(make_literal(v)) for v in root_chunk.range().sparse_values()], 6
+		)]))
+		test('	};')
+		test('	for (auto v : inclusive_values)')
+		test('		REQUIRE(fn(v));')
 
 	unicode_max = 0x10FFFF
 	if len(root_chunk.range()) < (unicode_max + 1):
@@ -982,18 +1029,32 @@ def emit_function(name, header_file, test_file, codepoints, test_func, descripti
 		if root_chunk.range().last() < unicode_max:
 			exclusive_values.add(root_chunk.range().last()+1, unicode_max)
 		exclusive_values.finish()
+
 		if exclusive_values.contiguous_subrange_count():
 			test('')
-			test('		// contiguous ranges of values which should return false')
-			for f, l in exclusive_values.contiguous_subranges():
-				test('		REQUIRE(not_in(fn, {{ {}, {} }}));'.format(make_literal(f), make_literal(l)))
+			test('	// contiguous ranges of values which should return false')
+			test('	static constexpr codepoint_range exclusive_ranges[] = ')
+			test('	{')
+			test('		'+'\n		'.join([' '.join(r) for r in chunks(
+				['{{ {}, {} }},'.format(make_literal(f), make_literal(l)) for f, l in exclusive_values.contiguous_subranges()], 3
+			)]))
+			test('	};')
+			test('	for (const auto& r : exclusive_ranges)')
+			test('		REQUIRE(not_in(fn, r));')
+
 		if exclusive_values.sparse_value_count():
 			test('')
-			test('		// individual values which should return false')
-			for v in exclusive_values.sparse_values():
-				test('		REQUIRE(!fn({}));'.format(make_literal(v)))
+			test('	// individual values which should return false')
+			test('	static constexpr char32_t exclusive_values[] = ')
+			test('	{')
+			test('		'+'\n		'.join([' '.join(r) for r in chunks(
+				['{},'.format(make_literal(v)) for v in exclusive_values.sparse_values()], 6
+			)]))
+			test('	};')
+			test('	for (auto v : exclusive_values)')
+			test('		REQUIRE(!fn(v));')
 
-	test('	}')
+	test('}')
 	test('')
 
 
@@ -1074,8 +1135,6 @@ def write_to_files(codepoints, header_file, test_file):
 	test('#include "unicode.h"')
 	test('using namespace toml::impl;')
 	test('')
-	test('TEST_CASE("unicode - generated functions")')
-	test('{')
 
 	emit_character_function('is_hexadecimal_digit', header_file, test_file, codepoints, ('a', 'f'), ('A', 'F'), ('0', '9'))
 
@@ -1090,7 +1149,6 @@ def write_to_files(codepoints, header_file, test_file):
 	both('	#endif // TOML_LANG_UNRELEASED')
 
 	header('} // toml::impl')
-	test('}')
 
 
 def main():

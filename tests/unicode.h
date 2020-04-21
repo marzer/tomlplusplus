@@ -44,7 +44,7 @@ struct codepoint_range
 	char32_t last;
 
 	template <typename T, typename U>
-	codepoint_range(T first_, U last_) noexcept
+	constexpr codepoint_range(T first_, U last_) noexcept
 		: first{ static_cast<char32_t>(first_) },
 		last{ static_cast<char32_t>(last_) }
 	{
@@ -53,7 +53,7 @@ struct codepoint_range
 	}
 
 	template <typename T>
-	codepoint_range(T first_) noexcept
+	constexpr codepoint_range(T first_) noexcept
 		: first{ static_cast<char32_t>(first_) },
 		last{ first }
 	{}
