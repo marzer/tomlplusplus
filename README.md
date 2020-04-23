@@ -57,7 +57,7 @@ for (auto&& [k, v] : config)
 {
     v.visit([](auto& node) noexcept
     {
-        std::cout << node << std:endl;
+        std::cout << node << std::endl;
         if constexpr (toml::is_string<decltype(node)>)
             do_something_with_string_values(node);
     });
