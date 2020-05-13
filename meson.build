@@ -57,7 +57,6 @@ if build_tests or build_examples
 					'-Wfloat-equal',
 					'-Wimport',
 					'-Winit-self',
-					'-Winline',
 					'-Wlogical-op',
 					'-Wmissing-declarations',
 					'-Wmissing-field-initializers',
