@@ -65,6 +65,7 @@
     <ClInclude Include="..\include\toml++\toml_default_formatter.hpp" />
     <ClInclude Include="..\include\toml++\toml_formatter.h" />
     <ClInclude Include="..\include\toml++\toml_json_formatter.h" />
+    <ClInclude Include="..\include\toml++\toml_json_formatter.hpp" />
     <ClInclude Include="..\include\toml++\toml_node.h" />
     <ClInclude Include="..\include\toml++\toml_node.hpp" />
     <ClInclude Include="..\include\toml++\toml_parser.h" />

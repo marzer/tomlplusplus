@@ -79,6 +79,9 @@
     <ClInclude Include="..\include\toml++\toml_preprocessor.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\toml++\toml_json_formatter.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

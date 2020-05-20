@@ -343,41 +343,6 @@ namespace toml
 	default_formatter(const array&) -> default_formatter<char>;
 	template <typename T> default_formatter(const value<T>&) -> default_formatter<char>;
 
-	template <typename Char>
-	inline void default_formatter<Char>::print_inline(const toml::table& tbl)
-	{
-		if (tbl.empty())
-			impl::print_to_stream("{}"sv, base::stream());
-		else
-		{
-			impl::print_to_stream("{ "sv, base::stream());
-
-			bool first = false;
-			for (auto [k, v] : tbl)
-			{
-				if (first)
-					impl::print_to_stream(", "sv, base::stream());
-				first = true;
-
-				print_key_segment(k);
-				impl::print_to_stream(" = "sv, base::stream());
-
-				const auto type = v.type();
-				TOML_ASSUME(type != node_type::none);
-				switch (type)
-				{
-					case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default:
-						base::print_value(v, type);
-				}
-			}
-
-			impl::print_to_stream(" }"sv, base::stream());
-		}
-		base::clear_naked_newline();
-	}
-
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 	template <typename T, typename U>
 	TOML_EXTERNAL_LINKAGE

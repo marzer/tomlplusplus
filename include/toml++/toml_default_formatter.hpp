@@ -152,6 +152,45 @@ namespace toml::impl
 	}
 }
 
+namespace toml
+{
+	template <typename Char>
+	TOML_EXTERNAL_LINKAGE
+	void default_formatter<Char>::print_inline(const toml::table& tbl)
+	{
+		if (tbl.empty())
+			impl::print_to_stream("{}"sv, base::stream());
+		else
+		{
+			impl::print_to_stream("{ "sv, base::stream());
+
+			bool first = false;
+			for (auto [k, v] : tbl)
+			{
+				if (first)
+					impl::print_to_stream(", "sv, base::stream());
+				first = true;
+
+				print_key_segment(k);
+				impl::print_to_stream(" = "sv, base::stream());
+
+				const auto type = v.type();
+				TOML_ASSUME(type != node_type::none);
+				switch (type)
+				{
+					case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
+					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+					default:
+						base::print_value(v, type);
+				}
+			}
+
+			impl::print_to_stream(" }"sv, base::stream());
+		}
+		base::clear_naked_newline();
+	}
+}
+
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
 
 //# {{

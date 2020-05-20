@@ -127,46 +127,6 @@ namespace toml
 	json_formatter(const array&) -> json_formatter<char>;
 	template <typename T> json_formatter(const value<T>&) -> json_formatter<char>;
 
-	template <typename Char>
-	inline void json_formatter<Char>::print(const toml::table& tbl)
-	{
-		if (tbl.empty())
-			impl::print_to_stream("{}"sv, base::stream());
-		else
-		{
-			impl::print_to_stream('{', base::stream());
-			base::increase_indent();
-			bool first = false;
-			for (auto [k, v] : tbl)
-			{
-				if (first)
-					impl::print_to_stream(", "sv, base::stream());
-				first = true;
-				base::print_newline(true);
-				base::print_indent();
-
-				base::print_quoted_string(k);
-				impl::print_to_stream(" : "sv, base::stream());
-
-				const auto type = v.type();
-				TOML_ASSUME(type != node_type::none);
-				switch (type)
-				{
-					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default:
-						base::print_value(v, type);
-				}
-
-			}
-			base::decrease_indent();
-			base::print_newline(true);
-			base::print_indent();
-			impl::print_to_stream('}', base::stream());
-		}
-		base::clear_naked_newline();
-	}
-
 	/// \brief	Prints the bound TOML object out to the stream as JSON.
 	template <typename T, typename U>
 	TOML_EXTERNAL_LINKAGE

@@ -38,6 +38,7 @@
 	#include "toml_array.hpp"
 	#include "toml_table.hpp"
 	#include "toml_default_formatter.hpp"
+	#include "toml_json_formatter.hpp"
 
 #if TOML_PARSER
 	#include "toml_parser.hpp"
