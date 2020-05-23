@@ -133,7 +133,7 @@ int main(int argc, char** argv)
 			new_node = &(*tree.back()->ref<toml::table>().insert_or_assign(
 				rand_string(rand<size_t>(1u, 4u), '-'),
 				std::forward<decltype(obj)>(obj)
-			).first).value;
+			).first).second;
 
 		if constexpr (toml::is_array<decltype(obj)> || toml::is_table<decltype(obj)>)
 		{

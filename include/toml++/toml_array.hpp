@@ -72,6 +72,17 @@ namespace toml
 	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity) { values.reserve(new_capacity); }
 	TOML_EXTERNAL_LINKAGE void array::clear() noexcept { values.clear(); }
 
+	TOML_EXTERNAL_LINKAGE size_t array::max_size() const noexcept { return values.max_size(); }
+	TOML_EXTERNAL_LINKAGE size_t array::capacity() const noexcept { return values.capacity(); }
+	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit() { values.shrink_to_fit(); }
+
+	TOML_EXTERNAL_LINKAGE
+	void array::truncate(size_t new_size)
+	{
+		if (new_size < values.size())
+			values.resize(new_size);
+	}
+
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator pos) noexcept
 	{

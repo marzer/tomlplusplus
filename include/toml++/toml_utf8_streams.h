@@ -21,6 +21,8 @@ namespace toml::impl
 	template <typename T>
 	class utf8_byte_stream;
 
+	inline constexpr auto utf8_byte_order_mark = "\xEF\xBB\xBF"sv;
+
 	template <typename Char>
 	class utf8_byte_stream<std::basic_string_view<Char>> final
 	{
@@ -34,13 +36,8 @@ namespace toml::impl
 			explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept
 				: source{ sv }
 			{
-				if (source.length() >= 3_sz
-					&& static_cast<uint8_t>(source[0]) == static_cast<uint8_t>(0xEFu)
-					&& static_cast<uint8_t>(source[1]) == static_cast<uint8_t>(0xBBu)
-					&& static_cast<uint8_t>(source[2]) == static_cast<uint8_t>(0xBFu))
-				{
+				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
-				}
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -76,26 +73,22 @@ namespace toml::impl
 			explicit utf8_byte_stream(std::basic_istream<Char>& stream)
 				: source{ &stream }
 			{
-				if (*source)
-				{
-					static constexpr uint8_t bom[] {
-						0xEF,
-						0xBB,
-						0xBF
-					};
+				if (!*source)
+					return;
 
-					using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
-					const auto initial_pos = source->tellg();
-					size_t bom_pos{};
-					auto bom_char = source->get();
-					while (*source && bom_char != stream_traits::eof() && bom_char == bom[bom_pos])
-					{
-						bom_pos++;
-						bom_char = source->get();
-					}
-					if (!(*source) || bom_pos < 3_sz)
-						source->seekg(initial_pos);
+				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
+				const auto initial_pos = source->tellg();
+				size_t bom_pos{};
+				char bom[3];
+				for (; bom_pos < 3_sz && *source; bom_pos++)
+				{
+					const auto next = source->get();
+					if (next == stream_traits::eof())
+						break;
+					bom[bom_pos] = static_cast<char>(next);
 				}
+				if (!*source || bom_pos < 3_sz || memcmp(utf8_byte_order_mark.data(), bom, 3_sz) != 0)
+					source->seekg(initial_pos);
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE

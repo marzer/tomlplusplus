@@ -230,3 +230,34 @@ TEST_CASE("arrays - flattening")
 		REQUIRE(arr == array{ 1 });
 	}
 }
+
+TEST_CASE("arrays - resizing and truncation")
+{
+	array arr{ 1, 2, 3, 4, 5 };
+	REQUIRE(arr.size() == 5_sz);
+
+	// truncate with no change
+	arr.truncate(5_sz);
+	REQUIRE(arr.size() == 5_sz);
+	REQUIRE(arr == array{ 1, 2, 3, 4, 5 });
+
+	// truncate down to three elements
+	arr.truncate(3_sz);
+	REQUIRE(arr.size() == 3_sz);
+	REQUIRE(arr == array{ 1, 2, 3 });
+
+	// resize down to two elements
+	arr.resize(2_sz, 42);
+	REQUIRE(arr.size() == 2_sz);
+	REQUIRE(arr == array{ 1, 2 });
+
+	// resize with no change
+	arr.resize(2_sz, 42);
+	REQUIRE(arr.size() == 2_sz);
+	REQUIRE(arr == array{ 1, 2 });
+
+	//resize up to six elements
+	arr.resize(6_sz, 42);
+	REQUIRE(arr.size() == 6_sz);
+	REQUIRE(arr == array{ 1, 2, 42, 42, 42, 42 });
+}

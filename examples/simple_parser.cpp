@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	try
 	{
 		const auto tbl = toml::parse(file, std::move(path));
-		//std::cout << tbl << std::endl;
+		std::cout << tbl << std::endl;
 	}
 	catch (const toml::parse_error& err)
 	{

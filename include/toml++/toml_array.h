@@ -15,22 +15,22 @@ namespace toml::impl
 	class array_iterator final
 	{
 		private:
-			friend class toml::array;
+			friend class ::toml::array;
 
-			using raw_iterator = std::conditional_t<
-				IsConst,
-				std::vector<std::unique_ptr<node>>::const_iterator,
-				std::vector<std::unique_ptr<node>>::iterator
-			>;
+			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
+			using raw_const_iterator = std::vector<std::unique_ptr<node>>::const_iterator;
+			using raw_iterator = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 				
 			mutable raw_iterator raw_;
 
-			array_iterator(const raw_iterator& raw) noexcept
+			array_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
 
-			array_iterator(raw_iterator&& raw) noexcept
-				: raw_{ std::move(raw) }
+			template <bool C = IsConst, typename = std::enable_if_t<C>>
+			TOML_NODISCARD_CTOR
+			array_iterator(raw_const_iterator raw) noexcept
+				: raw_{ raw }
 			{}
 
 		public:
@@ -41,6 +41,8 @@ namespace toml::impl
 			using difference_type = ptrdiff_t;
 
 			array_iterator() noexcept = default;
+			array_iterator(const array_iterator&) noexcept = default;
+			array_iterator& operator = (const array_iterator&) noexcept = default;
 
 			array_iterator& operator++() noexcept // ++pre
 			{
@@ -156,6 +158,13 @@ namespace toml::impl
 			reference operator[] (ptrdiff_t idx) const noexcept
 			{
 				return *(raw_ + idx)->get();
+			}
+
+			template <bool C = IsConst, typename = std::enable_if_t<!C>>
+			[[nodiscard]]
+			operator array_iterator<true>() const noexcept
+			{
+				return array_iterator<true>{ raw_ };
 			}
 	};
 
@@ -405,6 +414,13 @@ namespace toml
 			/// \brief	Removes all nodes from the array.
 			void clear() noexcept;
 
+			/// \brief	Returns the maximum number of nodes that can be stored in an array on the current platform.
+			[[nodiscard]] size_t max_size() const noexcept;
+			/// \brief	Returns the current max number of nodes that may be held in the array's internal storage.
+			[[nodiscard]] size_t capacity() const noexcept;
+			/// \brief	Requests the removal of any unused internal storage capacity.
+			void shrink_to_fit();
+
 			/// \brief	Inserts a new node at a specific position in the array.
 			///
 			/// \detail \cpp
@@ -510,7 +526,7 @@ namespace toml
 
 			/// \brief	Inserts a range of values into the array at a specific position.
 			///
-			/// \tparam	U		One of the TOML node or value types (or a type promotable to one).
+			/// \tparam	U		One of the TOML value types (or a type promotable to one).
 			/// \param 	pos		The insertion position.
 			/// \param 	ilist	An initializer list containing the values to be inserted.
 			///
@@ -612,6 +628,65 @@ namespace toml
 			/// 
 			/// \returns Iterator to the first node immediately following the last removed node.
 			iterator erase(const_iterator first, const_iterator last) noexcept;
+
+
+			/// \brief	Resizes the array.
+			/// 
+			/// \detail \cpp
+			/// auto arr = toml::array{ 1, 2, 3 };
+			/// std::cout << arr << std::endl;
+			/// 
+			/// arr.resize(6, 42);
+			/// std::cout << arr << std::endl;
+			/// 
+			/// arr.resize(2, 0);
+			/// std::cout << arr << std::endl;
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, 3]
+			/// [1, 2, 3, 42, 42, 42]
+			/// [1, 2]
+			/// \eout
+			/// 
+			/// \tparam	U		One of the TOML value types (or a type promotable to one).
+			/// 
+			/// \param 	new_size			New number of elements the array will have.
+			/// \param 	default_init_val	The value used to initialize new elements if the array needs to grow.
+			template <typename U>
+			void resize(size_t new_size, U&& default_init_val) noexcept
+			{
+				if (!new_size)
+					values.clear();
+				else if (new_size < values.size())
+					values.resize(new_size);
+				else if (new_size > values.size())
+					insert(cend(), new_size - values.size(), std::forward<U>(default_init_val));
+			}
+
+			/// \brief	Shrinks the array to the given size.
+			/// 
+			/// \detail \cpp
+			/// auto arr = toml::array{ 1, 2, 3 };
+			/// std::cout << arr << std::endl;
+			/// 
+			/// arr.truncate(5); // no-op
+			/// std::cout << arr << std::endl;
+			/// 
+			/// arr.truncate(1);
+			/// std::cout << arr << std::endl;
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// [1, 2, 3]
+			/// [1, 2, 3]
+			/// [1]
+			/// \eout
+			/// 
+			/// \remarks	Does nothing if the requested size is larger than or equal to the current size.
+			void truncate(size_t new_size);
 
 			/// \brief	Appends a new value to the end of the array.
 			///

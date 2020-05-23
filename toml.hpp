@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.2.5
+// toml++ v1.3.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -346,8 +346,8 @@
 	#define TOML_INTERNAL_NAMESPACE
 #endif
 #define TOML_LIB_MAJOR		1
-#define TOML_LIB_MINOR		2
-#define TOML_LIB_PATCH		5
+#define TOML_LIB_MINOR		3
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -437,6 +437,11 @@ TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS && !defined(__cpp_lib_char8_t)
 	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
+#endif
+#ifdef __cpp_lib_launder
+	#define TOML_LAUNDER(x)	std::launder(x)
+#else
+	#define TOML_LAUNDER(x)	x
 #endif
 
 namespace toml
@@ -2323,22 +2328,22 @@ namespace toml::impl
 	class array_iterator final
 	{
 		private:
-			friend class toml::array;
+			friend class ::toml::array;
 
-			using raw_iterator = std::conditional_t<
-				IsConst,
-				std::vector<std::unique_ptr<node>>::const_iterator,
-				std::vector<std::unique_ptr<node>>::iterator
-			>;
+			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
+			using raw_const_iterator = std::vector<std::unique_ptr<node>>::const_iterator;
+			using raw_iterator = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
 			mutable raw_iterator raw_;
 
-			array_iterator(const raw_iterator& raw) noexcept
+			array_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
 
-			array_iterator(raw_iterator&& raw) noexcept
-				: raw_{ std::move(raw) }
+			template <bool C = IsConst, typename = std::enable_if_t<C>>
+			TOML_NODISCARD_CTOR
+			array_iterator(raw_const_iterator raw) noexcept
+				: raw_{ raw }
 			{}
 
 		public:
@@ -2349,6 +2354,8 @@ namespace toml::impl
 			using difference_type = ptrdiff_t;
 
 			array_iterator() noexcept = default;
+			array_iterator(const array_iterator&) noexcept = default;
+			array_iterator& operator = (const array_iterator&) noexcept = default;
 
 			array_iterator& operator++() noexcept // ++pre
 			{
@@ -2464,6 +2471,13 @@ namespace toml::impl
 			reference operator[] (ptrdiff_t idx) const noexcept
 			{
 				return *(raw_ + idx)->get();
+			}
+
+			template <bool C = IsConst, typename = std::enable_if_t<!C>>
+			[[nodiscard]]
+			operator array_iterator<true>() const noexcept
+			{
+				return array_iterator<true>{ raw_ };
 			}
 	};
 
@@ -2599,6 +2613,10 @@ namespace toml
 			void reserve(size_t new_capacity);
 			void clear() noexcept;
 
+			[[nodiscard]] size_t max_size() const noexcept;
+			[[nodiscard]] size_t capacity() const noexcept;
+			void shrink_to_fit();
+
 			template <typename U>
 			iterator insert(const_iterator pos, U&& val) noexcept
 			{
@@ -2679,6 +2697,19 @@ namespace toml
 
 			iterator erase(const_iterator pos) noexcept;
 			iterator erase(const_iterator first, const_iterator last) noexcept;
+
+			template <typename U>
+			void resize(size_t new_size, U&& default_init_val) noexcept
+			{
+				if (!new_size)
+					values.clear();
+				else if (new_size < values.size())
+					values.resize(new_size);
+				else if (new_size > values.size())
+					insert(cend(), new_size - values.size(), std::forward<U>(default_init_val));
+			}
+
+			void truncate(size_t new_size);
 
 			template <typename U>
 			decltype(auto) push_back(U&& val) noexcept
@@ -2796,42 +2827,71 @@ namespace toml::impl
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const string& key;
-		value_type& value;
+		const string& first;
+		value_type& second;
 	};
 
 	template <bool IsConst>
 	class table_iterator final
 	{
 		private:
-			friend class toml::table;
+			friend class ::toml::table;
 
-			using raw_iterator = std::conditional_t<
-				IsConst,
-				string_map<std::unique_ptr<node>>::const_iterator,
-				string_map<std::unique_ptr<node>>::iterator
-			>;
+			using proxy_type = table_proxy_pair<IsConst>;
+			using raw_mutable_iterator = string_map<std::unique_ptr<node>>::iterator;
+			using raw_const_iterator = string_map<std::unique_ptr<node>>::const_iterator;
+			using raw_iterator = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
 			mutable raw_iterator raw_;
+			mutable std::aligned_storage_t<sizeof(proxy_type), alignof(proxy_type)> proxy;
+			mutable bool proxy_instantiated = false;
 
-			table_iterator(const raw_iterator& raw) noexcept
+			[[nodiscard]]
+			proxy_type* get_proxy() const noexcept
+			{
+				if (!proxy_instantiated)
+				{
+					auto p = new (&proxy) proxy_type{ raw_->first, *raw_->second.get() };
+					proxy_instantiated = true;
+					return p;
+				}
+				else
+					return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy));
+			}
+
+			table_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
 
-			table_iterator(raw_iterator&& raw) noexcept
-				: raw_{ std::move(raw) }
+			template <bool C = IsConst, typename = std::enable_if_t<C>>
+			TOML_NODISCARD_CTOR
+			table_iterator(raw_const_iterator raw) noexcept
+				: raw_{ raw }
 			{}
 
 		public:
 
 			table_iterator() noexcept = default;
 
-			using reference = table_proxy_pair<IsConst>;
-			using difference_type = ptrdiff_t;
+			table_iterator(const table_iterator& other) noexcept
+				: raw_{ other.raw_ }
+			{}
+
+			table_iterator& operator = (const table_iterator& rhs) noexcept
+			{
+				raw_ = rhs.raw_;
+				proxy_instantiated = false;
+				return *this;
+			}
+
+			using value_type = table_proxy_pair<IsConst>;
+			using reference = value_type&;
+			using pointer = value_type*;
 
 			table_iterator& operator++() noexcept // ++pre
 			{
 				++raw_;
+				proxy_instantiated = false;
 				return *this;
 			}
 
@@ -2839,12 +2899,14 @@ namespace toml::impl
 			{
 				table_iterator out{ raw_ };
 				++raw_;
+				proxy_instantiated = false;
 				return out;
 			}
 
 			table_iterator& operator--() noexcept // --pre
 			{
 				--raw_;
+				proxy_instantiated = false;
 				return *this;
 			}
 
@@ -2852,12 +2914,20 @@ namespace toml::impl
 			{
 				table_iterator out{ raw_ };
 				--raw_;
+				proxy_instantiated = false;
 				return out;
 			}
 
+			[[nodiscard]]
 			reference operator* () const noexcept
 			{
-				return { raw_->first, *raw_->second.get() };
+				return *get_proxy();
+			}
+
+			[[nodiscard]]
+			pointer operator -> () const noexcept
+			{
+				return get_proxy();
 			}
 
 			[[nodiscard]]
@@ -2870,6 +2940,13 @@ namespace toml::impl
 			friend constexpr bool operator != (const table_iterator& lhs, const table_iterator& rhs) noexcept
 			{
 				return lhs.raw_ != rhs.raw_;
+			}
+
+			template <bool C = IsConst, typename = std::enable_if_t<!C>>
+			[[nodiscard]]
+			operator table_iterator<true>() const noexcept
+			{
+				return table_iterator<true>{ raw_ };
 			}
 	};
 
@@ -5068,6 +5145,8 @@ namespace toml::impl
 	template <typename T>
 	class utf8_byte_stream;
 
+	inline constexpr auto utf8_byte_order_mark = "\xEF\xBB\xBF"sv;
+
 	template <typename Char>
 	class utf8_byte_stream<std::basic_string_view<Char>> final
 	{
@@ -5081,13 +5160,8 @@ namespace toml::impl
 			explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept
 				: source{ sv }
 			{
-				if (source.length() >= 3_sz
-					&& static_cast<uint8_t>(source[0]) == static_cast<uint8_t>(0xEFu)
-					&& static_cast<uint8_t>(source[1]) == static_cast<uint8_t>(0xBBu)
-					&& static_cast<uint8_t>(source[2]) == static_cast<uint8_t>(0xBFu))
-				{
+				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
-				}
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -5123,26 +5197,22 @@ namespace toml::impl
 			explicit utf8_byte_stream(std::basic_istream<Char>& stream)
 				: source{ &stream }
 			{
-				if (*source)
-				{
-					static constexpr uint8_t bom[] {
-						0xEF,
-						0xBB,
-						0xBF
-					};
+				if (!*source)
+					return;
 
-					using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
-					const auto initial_pos = source->tellg();
-					size_t bom_pos{};
-					auto bom_char = source->get();
-					while (*source && bom_char != stream_traits::eof() && bom_char == bom[bom_pos])
-					{
-						bom_pos++;
-						bom_char = source->get();
-					}
-					if (!(*source) || bom_pos < 3_sz)
-						source->seekg(initial_pos);
+				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
+				const auto initial_pos = source->tellg();
+				size_t bom_pos{};
+				char bom[3];
+				for (; bom_pos < 3_sz && *source; bom_pos++)
+				{
+					const auto next = source->get();
+					if (next == stream_traits::eof())
+						break;
+					bom[bom_pos] = static_cast<char>(next);
 				}
+				if (!*source || bom_pos < 3_sz || memcmp(utf8_byte_order_mark.data(), bom, 3_sz) != 0)
+					source->seekg(initial_pos);
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -5518,12 +5588,6 @@ namespace toml
 {
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
-	#ifdef __cpp_lib_launder
-		#define TOML_LAUNDER(x)	std::launder(x)
-	#else
-		#define TOML_LAUNDER(x)	x
-	#endif
-
 	TOML_ABI_NAMESPACE_START(parse_noex)
 
 	class parse_result final
@@ -5680,8 +5744,6 @@ namespace toml
 	};
 
 	TOML_ABI_NAMESPACE_END
-
-	#undef TOML_LAUNDER
 
 	#else
 
@@ -5956,6 +6018,17 @@ namespace toml
 	TOML_EXTERNAL_LINKAGE size_t array::size() const noexcept { return values.size(); }
 	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity) { values.reserve(new_capacity); }
 	TOML_EXTERNAL_LINKAGE void array::clear() noexcept { values.clear(); }
+
+	TOML_EXTERNAL_LINKAGE size_t array::max_size() const noexcept { return values.max_size(); }
+	TOML_EXTERNAL_LINKAGE size_t array::capacity() const noexcept { return values.capacity(); }
+	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit() { values.shrink_to_fit(); }
+
+	TOML_EXTERNAL_LINKAGE
+	void array::truncate(size_t new_size)
+	{
+		if (new_size < values.size())
+			values.resize(new_size);
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator pos) noexcept
@@ -9494,6 +9567,7 @@ namespace toml
 	#undef TOML_ABI_NAMESPACE_START
 	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_PARSER_TYPENAME
+	#undef TOML_LAUNDER
 #endif
 
 #ifdef __GNUC__

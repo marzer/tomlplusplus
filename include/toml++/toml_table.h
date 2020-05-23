@@ -17,42 +17,71 @@ namespace toml::impl
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const string& key;
-		value_type& value;
+		const string& first;
+		value_type& second;
 	};
 
 	template <bool IsConst>
 	class table_iterator final
 	{
 		private:
-			friend class toml::table;
+			friend class ::toml::table;
 
-			using raw_iterator = std::conditional_t<
-				IsConst,
-				string_map<std::unique_ptr<node>>::const_iterator,
-				string_map<std::unique_ptr<node>>::iterator
-			>;
-				
+			using proxy_type = table_proxy_pair<IsConst>;
+			using raw_mutable_iterator = string_map<std::unique_ptr<node>>::iterator;
+			using raw_const_iterator = string_map<std::unique_ptr<node>>::const_iterator;
+			using raw_iterator = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
+			
 			mutable raw_iterator raw_;
+			mutable std::aligned_storage_t<sizeof(proxy_type), alignof(proxy_type)> proxy;
+			mutable bool proxy_instantiated = false;
 
-			table_iterator(const raw_iterator& raw) noexcept
+			[[nodiscard]]
+			proxy_type* get_proxy() const noexcept
+			{
+				if (!proxy_instantiated)
+				{
+					auto p = new (&proxy) proxy_type{ raw_->first, *raw_->second.get() };
+					proxy_instantiated = true;
+					return p;
+				}
+				else
+					return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy));
+			}
+
+			table_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
 
-			table_iterator(raw_iterator&& raw) noexcept
-				: raw_{ std::move(raw) }
+			template <bool C = IsConst, typename = std::enable_if_t<C>>
+			TOML_NODISCARD_CTOR
+			table_iterator(raw_const_iterator raw) noexcept
+				: raw_{ raw }
 			{}
 
 		public:
 
 			table_iterator() noexcept = default;
 
-			using reference = table_proxy_pair<IsConst>;
-			using difference_type = ptrdiff_t;
+			table_iterator(const table_iterator& other) noexcept
+				: raw_{ other.raw_ }
+			{}
+
+			table_iterator& operator = (const table_iterator& rhs) noexcept
+			{
+				raw_ = rhs.raw_;
+				proxy_instantiated = false;
+				return *this;
+			}
+
+			using value_type = table_proxy_pair<IsConst>;
+			using reference = value_type&;
+			using pointer = value_type*;
 
 			table_iterator& operator++() noexcept // ++pre
 			{
 				++raw_;
+				proxy_instantiated = false;
 				return *this;
 			}
 
@@ -60,12 +89,14 @@ namespace toml::impl
 			{
 				table_iterator out{ raw_ };
 				++raw_;
+				proxy_instantiated = false;
 				return out;
 			}
 
 			table_iterator& operator--() noexcept // --pre
 			{
 				--raw_;
+				proxy_instantiated = false;
 				return *this;
 			}
 
@@ -73,12 +104,20 @@ namespace toml::impl
 			{
 				table_iterator out{ raw_ };
 				--raw_;
+				proxy_instantiated = false;
 				return out;
 			}
 
+			[[nodiscard]]
 			reference operator* () const noexcept
 			{
-				return { raw_->first, *raw_->second.get() };
+				return *get_proxy();
+			}
+
+			[[nodiscard]]
+			pointer operator -> () const noexcept
+			{
+				return get_proxy();
 			}
 
 			[[nodiscard]]
@@ -91,6 +130,13 @@ namespace toml::impl
 			friend constexpr bool operator != (const table_iterator& lhs, const table_iterator& rhs) noexcept
 			{
 				return lhs.raw_ != rhs.raw_;
+			}
+
+			template <bool C = IsConst, typename = std::enable_if_t<!C>>
+			[[nodiscard]]
+			operator table_iterator<true>() const noexcept
+			{
+				return table_iterator<true>{ raw_ };
 			}
 	};
 

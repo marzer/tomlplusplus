@@ -20,12 +20,6 @@ namespace toml
 {
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
-	#ifdef __cpp_lib_launder
-		#define TOML_LAUNDER(x)	std::launder(x)
-	#else
-		#define TOML_LAUNDER(x)	x
-	#endif
-
 	TOML_ABI_NAMESPACE_START(parse_noex)
 
 	/// \brief	The result of a parsing operation.
@@ -263,8 +257,6 @@ namespace toml
 	};
 
 	TOML_ABI_NAMESPACE_END
-
-	#undef TOML_LAUNDER
 
 	#else
 

@@ -40,6 +40,12 @@ TOML_POP_WARNINGS
 	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 #endif
 
+#ifdef __cpp_lib_launder
+	#define TOML_LAUNDER(x)	std::launder(x)
+#else
+	#define TOML_LAUNDER(x)	x
+#endif
+
 ////////// FORWARD DECLARATIONS & TYPEDEFS
 
 /// \brief	The root namespace for all toml++ functions and types.

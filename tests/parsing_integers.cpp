@@ -4,7 +4,7 @@ TEST_CASE("parsing - integers (decimal)")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		BOM_PREFIX S(R"(
 int1 = +99
 int2 = 42
 int3 = 0

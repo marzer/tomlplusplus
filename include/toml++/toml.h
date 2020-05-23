@@ -97,6 +97,7 @@
 	#undef TOML_ABI_NAMESPACE_START
 	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_PARSER_TYPENAME
+	#undef TOML_LAUNDER
 #endif
 
 /// \mainpage toml++

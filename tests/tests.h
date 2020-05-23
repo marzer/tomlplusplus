@@ -37,8 +37,18 @@ TOML_POP_WARNINGS
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
 #define S(str)			TOML_STRING_PREFIX(str)
 
+// some tests include a byte-order-mark "just because", but there's some weird interplay
+// when using char8 mode that I can't figure out. Char8 mode is 'experimental' so I don't mind
+// that BOMs might cause failures in this mode- it's a 'buyer beware' feature!
+#if !TOML_CHAR_8_STRINGS
+	#define BOM_PREFIX "\xEF\xBB\xBF"
+#else
+	#define BOM_PREFIX
+#endif
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
+
 
 template <typename Char, typename Func = std::false_type>
 inline void parsing_should_succeed(
