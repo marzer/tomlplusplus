@@ -170,6 +170,10 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8ee8179ddf1cb44fdf0b8d0700f55c2f">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first node.</dd>
+            <dt id="a02b773a1ff337692e78da429030c1610">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a02b773a1ff337692e78da429030c1610">capacity</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the current max number of nodes that may be held in the array's internal storage.</dd>
             <dt id="a56d1cba006dccc5ad9982b58a8b2ddc1">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a56d1cba006dccc5ad9982b58a8b2ddc1">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -291,6 +295,10 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7a38831cec7e7215a6101ba40fc1ce11">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Always returns <code>false</code> for array nodes.</dd>
+            <dt id="ae65a76add6d756fc7ba8f12a5aad983c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae65a76add6d756fc7ba8f12a5aad983c">max_size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the maximum number of nodes that can be stored in an array on the current platform.</dd>
             <dt id="a7e5e45777e08941abb2069a5991e1f31">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7e5e45777e08941abb2069a5991e1f31">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -316,10 +324,24 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a1ba073adc52c3df5ad29cfd7e5daa1d5">reserve</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_capacity)</span>
             </dt>
             <dd>Reserves internal storage capacity up to a pre-determined number of nodes.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a016212c1705aa9e8864c4a2b1a754e25">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
+              U&amp;&amp; default_init_val) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Resizes the array.</dd>
+            <dt id="a718c2031ead428aa52912741f6d094aa">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a718c2031ead428aa52912741f6d094aa">shrink_to_fit</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Requests the removal of any unused internal storage capacity.</dd>
             <dt id="af81d7b6a1257ad766a47d9276855a7c9">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af81d7b6a1257ad766a47d9276855a7c9">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of nodes in the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span>
+            </dt>
+            <dd>Shrinks the array to the given size.</dd>
             <dt id="a10f914637ff56f5bc6f96b089fd141a3">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10f914637ff56f5bc6f96b089fd141a3">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -807,7 +829,7 @@ C++</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">U</td>
-                  <td>One of the TOML node or value types (or a type promotable to one).</td>
+                  <td>One of the TOML value types (or a type promotable to one).</td>
                 </tr>
               </tbody>
               <thead>
@@ -948,6 +970,66 @@ C++</span></a>
 <span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mf">4.0</span><span class="p">);</span>
 <span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">5</span><span class="p">,</span> <span class="s">"six"</span><span class="sa">sv</span> <span class="p">});</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[1, 2, 3, 4.0, [5, "six"]]</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a016212c1705aa9e8864c4a2b1a754e25"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename U&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a016212c1705aa9e8864c4a2b1a754e25">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
+              U&amp;&amp; default_init_val) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Resizes the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">U</td>
+                  <td>One of the TOML value types (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>new_size</td>
+                  <td>New number of elements the array will have.</td>
+                </tr>
+                <tr>
+                  <td>default_init_val</td>
+                  <td>The value used to initialize new elements if the array needs to grow.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[1, 2, 3]</span>
+<span class="go">[1, 2, 3, 42, 42, 42]</span>
+<span class="go">[1, 2]</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a6e3ac9962c706a88c1001ff83a4084f3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span></span>
+            </h3>
+            <p>Shrinks the array to the given size.</p>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// no-op</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[1, 2, 3]</span>
+<span class="go">[1, 2, 3]</span>
+<span class="go">[1]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Does nothing if the requested size is larger than or equal to the current size.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af06c7437a0946a9d5e093d903b59f6a4"><div>
             <h3>
