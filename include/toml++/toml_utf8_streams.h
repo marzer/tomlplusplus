@@ -79,13 +79,13 @@ namespace toml::impl
 				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
 				const auto initial_pos = source->tellg();
 				size_t bom_pos{};
-				char bom[3];
+				Char bom[3];
 				for (; bom_pos < 3_sz && *source; bom_pos++)
 				{
 					const auto next = source->get();
 					if (next == stream_traits::eof())
 						break;
-					bom[bom_pos] = static_cast<char>(next);
+					bom[bom_pos] = static_cast<Char>(next);
 				}
 				if (!*source || bom_pos < 3_sz || memcmp(utf8_byte_order_mark.data(), bom, 3_sz) != 0)
 					source->seekg(initial_pos);
