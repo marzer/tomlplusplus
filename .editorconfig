@@ -13,7 +13,7 @@ indent_style = space
 [*.{natvis, props, vcxproj, sln, runsettings}]
 end_of_line = crlf
 
-[*.{c, cpp, cxx, h, hpp, hxx, inl, toml, xml, py, natvis, props, build, vcxproj, runsettings, yml}]
+[*.{c, cpp, cxx, h, hpp, hxx, inl, toml, xml, py, natvis, props, build, vcxproj, runsettings, yml, ini, json}]
 charset = utf-8
 trim_trailing_whitespace = true
 
