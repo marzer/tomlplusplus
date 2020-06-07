@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.3.0
+// toml++ v1.3.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -347,7 +347,7 @@
 #endif
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -5171,6 +5171,12 @@ namespace toml::impl
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
+			constexpr bool peek_eof() const noexcept
+			{
+				return eof();
+			}
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
 			constexpr bool error() const noexcept
 			{
 				return false;
@@ -5219,6 +5225,13 @@ namespace toml::impl
 			bool eof() const noexcept
 			{
 				return source->eof();
+			}
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			bool peek_eof() const
+			{
+				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
+				return eof() || source->peek() == stream_traits::eof();
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -5313,6 +5326,8 @@ namespace toml::impl
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() = 0;
+		[[nodiscard]]
+		virtual bool peek_eof() const = 0;
 
 		#if !TOML_EXCEPTIONS
 
@@ -5445,6 +5460,12 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
+			[[nodiscard]]
+			bool peek_eof() const override
+			{
+				return stream.peek_eof();
+			}
+
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
@@ -5554,6 +5575,12 @@ namespace toml::impl
 				return negative_offset
 					? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
 					: head;
+			}
+
+			[[nodiscard]]
+			bool peek_eof() const override
+			{
+				return reader.peek_eof();
 			}
 
 			#if !TOML_EXCEPTIONS
@@ -9130,18 +9157,21 @@ namespace toml::impl
 			{
 				root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
-				cp = reader.read_next();
-
-				#if !TOML_EXCEPTIONS
-				if (reader.error())
+				if (!reader.peek_eof())
 				{
-					err = std::move(reader.error());
-					return;
-				}
-				#endif
+					cp = reader.read_next();
 
-				if (cp)
-					parse_document();
+					#if !TOML_EXCEPTIONS
+					if (reader.error())
+					{
+						err = std::move(reader.error());
+						return;
+					}
+					#endif
+
+					if (cp)
+						parse_document();
+				}
 
 				update_region_ends(root);
 			}

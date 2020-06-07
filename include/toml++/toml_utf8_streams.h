@@ -47,6 +47,12 @@ namespace toml::impl
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
+			constexpr bool peek_eof() const noexcept
+			{
+				return eof();
+			}
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
 			constexpr bool error() const noexcept
 			{
 				return false;
@@ -95,6 +101,13 @@ namespace toml::impl
 			bool eof() const noexcept
 			{
 				return source->eof();
+			}
+
+			[[nodiscard]] TOML_ALWAYS_INLINE
+			bool peek_eof() const
+			{
+				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
+				return eof() || source->peek() == stream_traits::eof();
 			}
 
 			[[nodiscard]] TOML_ALWAYS_INLINE
@@ -189,6 +202,9 @@ namespace toml::impl
 
 		[[nodiscard]]
 		virtual const utf8_codepoint* read_next() = 0;
+
+		[[nodiscard]]
+		virtual bool peek_eof() const = 0;
 
 		#if !TOML_EXCEPTIONS
 
@@ -321,6 +337,12 @@ namespace toml::impl
 				TOML_UNREACHABLE;
 			}
 
+			[[nodiscard]]
+			bool peek_eof() const override
+			{
+				return stream.peek_eof();
+			}
+
 			#if !TOML_EXCEPTIONS
 
 			[[nodiscard]]
@@ -430,6 +452,12 @@ namespace toml::impl
 				return negative_offset
 					? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
 					: head;
+			}
+
+			[[nodiscard]]
+			bool peek_eof() const override
+			{
+				return reader.peek_eof();
 			}
 
 			#if !TOML_EXCEPTIONS

@@ -2557,18 +2557,21 @@ namespace toml::impl
 			{
 				root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
-				cp = reader.read_next();
-
-				#if !TOML_EXCEPTIONS
-				if (reader.error())
+				if (!reader.peek_eof())
 				{
-					err = std::move(reader.error());
-					return;
-				}
-				#endif
+					cp = reader.read_next();
 
-				if (cp)
-					parse_document();
+					#if !TOML_EXCEPTIONS
+					if (reader.error())
+					{
+						err = std::move(reader.error());
+						return;
+					}
+					#endif
+
+					if (cp)
+						parse_document();
+				}
 
 				update_region_ends(root);
 			}
