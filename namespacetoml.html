@@ -370,8 +370,8 @@ C++</span></a>
             </dt>
             <dd>Parses a TOML document from a <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a> string view.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Char&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1000595fe5e209e6fb5278ec0492d13d">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;Char&gt; file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <div class="m-doc-template">template&lt;typename Char, typename StreamChar = char&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3ed2791fdc270afa33bc0cb1a902c7df">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;Char&gt; file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a file.</dd>
           </dl>
@@ -1070,12 +1070,12 @@ C++</span></a>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>This overload is not available if your compiler does not support <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a1000595fe5e209e6fb5278ec0492d13d"><div>
+          <section class="m-doc-details" id="a3ed2791fdc270afa33bc0cb1a902c7df"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename Char&gt;
+                template&lt;typename Char, typename StreamChar = char&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1000595fe5e209e6fb5278ec0492d13d">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;Char&gt; file_path)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3ed2791fdc270afa33bc0cb1a902c7df">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;Char&gt; file_path)</span></span>
             </h3>
             <p>Parses a TOML document from a file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1086,6 +1086,10 @@ C++</span></a>
                 <tr>
                   <td style="width: 1%">Char</td>
                   <td>The path's character type. Must be 1 byte in size.</td>
+                </tr>
+                <tr>
+                  <td>StreamChar</td>
+                  <td></td>
                 </tr>
               </tbody>
               <thead>
