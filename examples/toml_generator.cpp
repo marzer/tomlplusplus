@@ -9,7 +9,6 @@
 
 */
 #include <iostream>
-#include <fstream>
 #include <array>
 #include <ctime>
 #include "utf8_console.h"
@@ -138,7 +137,7 @@ int main(int argc, char** argv)
 		if constexpr (toml::is_array<decltype(obj)> || toml::is_table<decltype(obj)>)
 		{
 			tree.push_back(new_node);
-			container_min_values = rand(2, 6);
+			container_min_values = rand(1, 4);
 		}
 		else
 			container_min_values--;
@@ -152,7 +151,7 @@ int main(int argc, char** argv)
 		if (rand(100) >= 75)
 		{
 			if (container_min_values <= 0 && tree.size() < max_depth)
-				add(toml::table{}).ref<toml::table>().is_inline(tree.size() >= max_depth - 2u && rand(100) >= 70);
+				add(toml::table{}).ref<toml::table>().is_inline(tree.size() >= max_depth - 2u && rand(100) >= 85);
 		}
 		else
 		{

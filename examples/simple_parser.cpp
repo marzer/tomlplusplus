@@ -21,15 +21,9 @@ int main(int argc, char** argv)
 	init_utf8_console();
 
 	auto path = std::string{ argc > 1 ? argv[1] : "example.toml" };
-	auto file = std::ifstream{ path };
-	if (!file)
-	{
-		std::cerr << "The file '"sv << path << "' could not be opened for reading."sv << std::endl;
-		return 1;
-	}
 	try
 	{
-		const auto tbl = toml::parse(file, std::move(path));
+		const auto tbl = toml::parse_file(path);
 		std::cout << tbl << std::endl;
 	}
 	catch (const toml::parse_error& err)

@@ -23,23 +23,14 @@ int main(int argc, char** argv)
 	// read from a file if a path argument is given
 	if (argc > 1)
 	{
-		auto path = std::string{ argv[1] };
-		auto file = std::ifstream{ path };
-		if (!file)
-		{
-			std::cerr << "The file '"sv << path << "' could not be opened for reading."sv << std::endl;
-			return -1;
-		}
-
 		try
 		{
-			const auto table = toml::parse(file, std::move(path));
+			const auto table = toml::parse_file(argv[1]);
 			std::cout << toml::json_formatter{ table } << std::endl;
 		}
 		catch (const toml::parse_error& err)
 		{
 			std::cerr << err << std::endl;
-
 			return 1;
 		}
 	}
@@ -55,7 +46,6 @@ int main(int argc, char** argv)
 		catch (const toml::parse_error& err)
 		{
 			std::cerr << err << std::endl;
-
 			return 1;
 		}
 	}

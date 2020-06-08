@@ -180,11 +180,15 @@ inline void parsing_should_fail(
 		catch (const std::exception& exc)
 		{
 			FAIL("Expected parsing failure, saw exception: "sv << exc.what());
+			return false;
 		}
 		catch (...)
 		{
-			FAIL("Expected parsing failure, saw unspecified error"sv);
+			FAIL("Expected parsing failure, saw unspecified exception"sv);
+			return false;
 		}
+
+		FAIL("Expected parsing failure"sv);
 		return false;
 	};
 

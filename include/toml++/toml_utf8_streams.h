@@ -59,11 +59,11 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			constexpr optional<uint8_t> operator() () noexcept
+			constexpr unsigned int operator() () noexcept
 			{
 				if (position >= source.length())
-					return {};
-				return static_cast<uint8_t>(source[position++]);
+					return 0xFFFFFFFFu;
+				return static_cast<unsigned int>(static_cast<uint8_t>(source[position++]));
 			}
 	};
 
@@ -117,12 +117,12 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			optional<uint8_t> operator() ()
+			unsigned int operator() ()
 			{
 				auto val = source->get();
 				if (val == std::basic_istream<Char>::traits_type::eof())
-					return {};
-				return static_cast<uint8_t>(val);
+					return 0xFFFFFFFFu;
+				return static_cast<unsigned int>(val);
 			}
 	};
 
@@ -270,53 +270,57 @@ namespace toml::impl
 
 				while (true)
 				{
-					optional<uint8_t> nextByte;
-					if constexpr (noexcept(stream()) || !TOML_EXCEPTIONS)
+					uint8_t next_byte;
 					{
-						nextByte = stream();
-					}
-					#if TOML_EXCEPTIONS
-					else
-					{
-						try
+						unsigned int next_byte_raw{ 0xFFFFFFFFu };
+						if constexpr (noexcept(stream()) || !TOML_EXCEPTIONS)
 						{
-							nextByte = stream();
+							next_byte_raw = stream();
 						}
-						catch (const std::exception& exc)
-						{
-							throw parse_error{ exc.what(), prev.position, source_path_ };
-						}
-						catch (...)
-						{
-							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
-						}
-					}
-					#endif
-
-					if (!nextByte)
-					{
-						if (stream.eof())
-						{
-							if (decoder.needs_more_input())
-								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
-									prev.position, source_path_);
-							return nullptr;
-						}
+						#if TOML_EXCEPTIONS
 						else
-							TOML_ERROR("An error occurred while reading from the underlying stream",
-								prev.position, source_path_);
+						{
+							try
+							{
+								next_byte_raw = stream();
+							}
+							catch (const std::exception& exc)
+							{
+								throw parse_error{ exc.what(), prev.position, source_path_ };
+							}
+							catch (...)
+							{
+								throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
+							}
+						}
+						#endif
+
+						if (next_byte_raw >= 256u)
+						{
+							if (stream.eof())
+							{
+								if (decoder.needs_more_input())
+									TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
+										prev.position, source_path_);
+								return nullptr;
+							}
+							else
+								TOML_ERROR("An error occurred while reading from the underlying stream",
+									prev.position, source_path_);
+						}
+
+						TOML_ERROR_CHECK;
+						next_byte = static_cast<uint8_t>(next_byte_raw);
 					}
 
-					TOML_ERROR_CHECK;
-
-					decoder(*nextByte);
+					decoder(next_byte);
 					if (decoder.error())
 						TOML_ERROR( "Encountered invalid utf-8 sequence", prev.position, source_path_ );
 
 					TOML_ERROR_CHECK;
 
 					auto& current = codepoints[cp_idx % 2_sz];
-					current.bytes[current_byte_count++] = static_cast<string_char>(*nextByte);
+					current.bytes[current_byte_count++] = static_cast<string_char>(next_byte);
 					if (decoder.has_code_point())
 					{
 						//store codepoint

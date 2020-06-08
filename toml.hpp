@@ -4428,6 +4428,8 @@ namespace toml::impl
 			void indent(int8_t level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
+
+			TOML_ALWAYS_INLINE
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
 			void attach(std::basic_ostream<Char>& stream) noexcept
 			{
@@ -4680,7 +4682,7 @@ namespace toml
 				};
 
 				//values, arrays, and inline tables/table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
@@ -4702,7 +4704,7 @@ namespace toml
 				}
 
 				//non-inline tables
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
 					if (type != node_type::table || reinterpret_cast<const table*>(&v)->is_inline())
@@ -4714,7 +4716,7 @@ namespace toml
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
-					for (auto [child_k, child_v] : child_tbl)
+					for (auto&& [child_k, child_v] : child_tbl)
 					{
 						(void)child_k;
 						const auto child_type = child_v.type();
@@ -4766,7 +4768,7 @@ namespace toml
 				}
 
 				//table arrays
-				for (auto [k, v] : tbl)
+				for (auto&& [k, v] : tbl)
 				{
 					if (!is_non_inline_array_of_tables(v))
 						continue;
@@ -5183,11 +5185,11 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			constexpr optional<uint8_t> operator() () noexcept
+			constexpr unsigned int operator() () noexcept
 			{
 				if (position >= source.length())
-					return {};
-				return static_cast<uint8_t>(source[position++]);
+					return 0xFFFFFFFFu;
+				return static_cast<unsigned int>(static_cast<uint8_t>(source[position++]));
 			}
 	};
 
@@ -5241,12 +5243,12 @@ namespace toml::impl
 			}
 
 			[[nodiscard]]
-			optional<uint8_t> operator() ()
+			unsigned int operator() ()
 			{
 				auto val = source->get();
 				if (val == std::basic_istream<Char>::traits_type::eof())
-					return {};
-				return static_cast<uint8_t>(val);
+					return 0xFFFFFFFFu;
+				return static_cast<unsigned int>(val);
 			}
 	};
 
@@ -5393,53 +5395,57 @@ namespace toml::impl
 
 				while (true)
 				{
-					optional<uint8_t> nextByte;
-					if constexpr (noexcept(stream()) || !TOML_EXCEPTIONS)
+					uint8_t next_byte;
 					{
-						nextByte = stream();
-					}
-					#if TOML_EXCEPTIONS
-					else
-					{
-						try
+						unsigned int next_byte_raw{ 0xFFFFFFFFu };
+						if constexpr (noexcept(stream()) || !TOML_EXCEPTIONS)
 						{
-							nextByte = stream();
+							next_byte_raw = stream();
 						}
-						catch (const std::exception& exc)
-						{
-							throw parse_error{ exc.what(), prev.position, source_path_ };
-						}
-						catch (...)
-						{
-							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
-						}
-					}
-					#endif
-
-					if (!nextByte)
-					{
-						if (stream.eof())
-						{
-							if (decoder.needs_more_input())
-								TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
-									prev.position, source_path_);
-							return nullptr;
-						}
+						#if TOML_EXCEPTIONS
 						else
-							TOML_ERROR("An error occurred while reading from the underlying stream",
-								prev.position, source_path_);
+						{
+							try
+							{
+								next_byte_raw = stream();
+							}
+							catch (const std::exception& exc)
+							{
+								throw parse_error{ exc.what(), prev.position, source_path_ };
+							}
+							catch (...)
+							{
+								throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
+							}
+						}
+						#endif
+
+						if (next_byte_raw >= 256u)
+						{
+							if (stream.eof())
+							{
+								if (decoder.needs_more_input())
+									TOML_ERROR("Encountered EOF during incomplete utf-8 code point sequence",
+										prev.position, source_path_);
+								return nullptr;
+							}
+							else
+								TOML_ERROR("An error occurred while reading from the underlying stream",
+									prev.position, source_path_);
+						}
+
+						TOML_ERROR_CHECK;
+						next_byte = static_cast<uint8_t>(next_byte_raw);
 					}
 
-					TOML_ERROR_CHECK;
-
-					decoder(*nextByte);
+					decoder(next_byte);
 					if (decoder.error())
 						TOML_ERROR( "Encountered invalid utf-8 sequence", prev.position, source_path_ );
 
 					TOML_ERROR_CHECK;
 
 					auto& current = codepoints[cp_idx % 2_sz];
-					current.bytes[current_byte_count++] = static_cast<string_char>(*nextByte);
+					current.bytes[current_byte_count++] = static_cast<string_char>(next_byte);
 					if (decoder.has_code_point())
 					{
 						//store codepoint
@@ -5847,7 +5853,13 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	template <typename Char>
+	// Q: "why are the parse_file functions templated??"
+	// A: I don't want to force users to drag in <fstream> if they're not going to do
+	//    any parsing directly from files. Keeping them templated delays their instantiation
+	//    until they're actually required, so only those users wanting to use parse_file()
+	//    are burdened by the <fstream> overhead.
+
+	template <typename Char, typename StreamChar = char>
 	[[nodiscard]]
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
@@ -5856,10 +5868,54 @@ namespace toml
 			sizeof(Char) == 1,
 			"The path's character type must be 1 byte in size."
 		);
+		static_assert(
+			sizeof(StreamChar) == 1,
+			"The stream's character type must be 1 byte in size."
+		);
 
-		auto str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
-		auto ifs = std::basic_ifstream<Char>{ str };
-		return parse( ifs, std::move(str) );
+		#if TOML_EXCEPTIONS
+			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
+				throw parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }
+		#else
+			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
+				return parse_result{																		\
+					parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }	\
+				}
+		#endif
+
+		auto file_path_str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
+
+		// open file with a custom-sized stack buffer
+		using ifstream = std::basic_ifstream<StreamChar>;
+		ifstream file;
+		StreamChar file_buffer[sizeof(void*) * 4096_sz];
+		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
+		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
+		if (!file.is_open())
+			TOML_PARSE_FILE_ERROR("File could not be opened for reading", source_position{});
+
+		// get size
+		const auto file_size = file.tellg();
+		if (file_size == -1)
+			TOML_PARSE_FILE_ERROR("Could not determine file size", source_position{});
+		file.seekg(0, std::ios::beg);
+
+		// if the file size is the sweet spot, read the whole thing into memory and parse from there
+		constexpr auto small_file_threshold = 1024 * 32; //32 kilobytes
+		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 8; // 64 megabytes on 64-bit
+		if (file_size >= small_file_threshold && file_size <= large_file_threshold)
+		{
+			std::vector<StreamChar> file_data;
+			file_data.resize(static_cast<size_t>(file_size));
+			file.read(file_data.data(), file_size);
+			return parse(std::basic_string_view<StreamChar>{ file_data.data(), file_data.size() }, std::move(file_path_str));
+		}
+
+		// otherwise parse it using the streams
+		else
+			return parse(file, std::move(file_path_str));
+
+		#undef TOML_PARSE_FILE_ERROR
 	}
 
 	#if !TOML_ALL_INLINE
@@ -5870,12 +5926,6 @@ namespace toml
 			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
 		#endif
 	#endif
-
-	// Q: "why are the parse_file functions templated??"
-	// A: I don't want to force users to drag in <fstream> if they're not going to do
-	//    any parsing directly from files. Keeping them templated delays their instantiation
-	//    until they're actually required, so only those users wanting to use parse_file()
-	//    are burdened by the <fstream> overhead.
 
 	template <typename Char>
 	[[nodiscard]]
@@ -6377,6 +6427,8 @@ TOML_DISABLE_FLOAT_WARNINGS
 
 namespace toml::impl
 {
+	inline constexpr size_t default_formatter_line_wrap = 120_sz;
+
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
 
@@ -6439,8 +6491,12 @@ namespace toml::impl
 				if (n.empty())
 					return 2_sz; // "{}"
 				size_t weight = 3_sz; // "{ }"
-				for (auto [k, v] : n)
+				for (auto&& [k, v] : n)
+				{
 					weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
+					if (weight >= default_formatter_line_wrap)
+						break;
+				}
 				return weight;
 			}
 
@@ -6451,7 +6507,11 @@ namespace toml::impl
 					return 2_sz; // "[]"
 				size_t weight = 3_sz; // "[ ]"
 				for (auto& elem : n)
+				{
 					weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
+					if (weight >= default_formatter_line_wrap)
+						break;
+				}
 				return weight;
 			}
 
@@ -6507,7 +6567,7 @@ namespace toml::impl
 	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
-		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
+		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
 	}
 }
 
@@ -6524,7 +6584,7 @@ namespace toml
 			impl::print_to_stream("{ "sv, base::stream());
 
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());
@@ -6574,7 +6634,7 @@ namespace toml
 			impl::print_to_stream('{', base::stream());
 			base::increase_indent();
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());
@@ -7468,8 +7528,14 @@ namespace toml::impl
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
 
+			struct parsed_string final
+			{
+				string value;
+				bool was_multi_line;
+			};
+
 			[[nodiscard]]
-			string parse_string() TOML_MAY_THROW
+			parsed_string parse_string() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -7488,7 +7554,7 @@ namespace toml::impl
 				if (is_eof())
 				{
 					if (second == first)
-						return string{};
+						return {};
 
 					set_error_and_return_default("encountered end-of-file"sv);
 				}
@@ -7497,9 +7563,13 @@ namespace toml::impl
 				// it's a multi-line string.
 				else if (first == second && first == third)
 				{
-					return first == U'\''
-						? parse_literal_string<true>()
-						: parse_basic_string<true>();
+					return
+					{
+						first == U'\''
+							? parse_literal_string<true>()
+							: parse_basic_string<true>(),
+						true
+					};
 				}
 
 				// otherwise it's just a regular string.
@@ -7509,9 +7579,13 @@ namespace toml::impl
 					// character is the string delimiter
 					go_back(2_sz);
 
-					return first == U'\''
-						? parse_literal_string<false>()
-						: parse_basic_string<false>();
+					return
+					{
+						first == U'\''
+							? parse_literal_string<false>()
+							: parse_basic_string<false>(),
+						false
+					};
 				}
 			}
 
@@ -7979,7 +8053,7 @@ namespace toml::impl
 				if constexpr (base == 10)
 				{
 					if (chars[0] == '0')
-						set_error_and_return_default("leading zeroes are not allowed"sv);
+						set_error_and_return_default("leading zeroes are prohibited"sv);
 				}
 
 				// single digits can be converted trivially
@@ -8309,7 +8383,7 @@ namespace toml::impl
 
 					// strings
 					else if (is_string_delimiter(*cp))
-						val = std::make_unique<value<string>>(parse_string());
+						val = std::make_unique<value<string>>(std::move(parse_string().value));
 
 					// bools
 					else if (is_match(*cp, U't', U'f', U'T', U'F'))
@@ -8773,14 +8847,30 @@ namespace toml::impl
 
 					// bare_key_segment
 					if (is_bare_key_character(*cp))
-						key.segments.push_back(parse_bare_key_segment());
+						key.segments.emplace_back(parse_bare_key_segment());
 
 					// "quoted key segment"
 					else if (is_string_delimiter(*cp))
 					{
+						const auto begin_pos = cp->position;
+
 						recording_whitespace = true;
-						key.segments.push_back(parse_string());
+						auto str = parse_string();
 						recording_whitespace = false;
+						return_if_error({});
+
+						if (str.was_multi_line)
+						{
+							set_error_at(
+								begin_pos,
+								"multi-line strings are prohibited in "sv,
+								key.segments.empty() ? ""sv : "dotted "sv,
+								"keys"sv
+							);
+							return_after_error({});
+						}
+						else
+							key.segments.emplace_back(std::move(str.value));
 					}
 
 					// ???

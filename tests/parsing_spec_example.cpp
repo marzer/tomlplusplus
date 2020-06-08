@@ -5,40 +5,41 @@ TOML_DISABLE_INIT_WARNINGS
 
 TEST_CASE("parsing - TOML spec example")
 {
-	static constexpr auto toml_text =
-S(R"(# This is a TOML document.
+	static constexpr auto toml_text = S(R"(
+		# This is a TOML document.
 
-title = "TOML Example"
+		title = "TOML Example"
 
-[owner]
-name = "Tom Preston-Werner"
-dob = 1979-05-27T07:32:00-08:00 # First class dates
+		[owner]
+		name = "Tom Preston-Werner"
+		dob = 1979-05-27T07:32:00-08:00 # First class dates
 
-[database]
-server = "192.168.1.1"
-ports = [ 8001, 8001, 8002 ]
-connection_max = 5000
-enabled = true
+		[database]
+		server = "192.168.1.1"
+		ports = [ 8001, 8001, 8002 ]
+		connection_max = 5000
+		enabled = true
 
-[servers]
+		[servers]
 
-  # Indentation (tabs and/or spaces) is allowed but not required
-  [servers.alpha]
-  ip = "10.0.0.1"
-  dc = "eqdc10"
+		  # Indentation (tabs and/or spaces) is allowed but not required
+		  [servers.alpha]
+		  ip = "10.0.0.1"
+		  dc = "eqdc10"
 
-  [servers.beta]
-  ip = "10.0.0.2"
-  dc = "eqdc10"
+		  [servers.beta]
+		  ip = "10.0.0.2"
+		  dc = "eqdc10"
 
-[clients]
-data = [ ["gamma", "delta"], [1, 2] ]
+		[clients]
+		data = [ ["gamma", "delta"], [1, 2] ]
 
-# Line breaks are OK when inside arrays
-hosts = [
-  "alpha",
-  "omega"
-])"sv);
+		# Line breaks are OK when inside arrays
+		hosts = [
+		  "alpha",
+		  "omega"
+		]
+	)"sv);
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,

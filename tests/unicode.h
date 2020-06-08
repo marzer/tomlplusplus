@@ -1,7 +1,7 @@
 #pragma once
 #include "tests.h"
 
-using func_type = bool(char32_t);
+using func_type = bool(char32_t)noexcept;
 inline constexpr func_type* funcs[] =
 {
 	// these must be mutually-exclusive
@@ -44,6 +44,7 @@ struct codepoint_range
 	char32_t last;
 
 	template <typename T, typename U>
+	TOML_NODISCARD_CTOR
 	constexpr codepoint_range(T first_, U last_) noexcept
 		: first{ static_cast<char32_t>(first_) },
 		last{ static_cast<char32_t>(last_) }
@@ -53,6 +54,7 @@ struct codepoint_range
 	}
 
 	template <typename T>
+	TOML_NODISCARD_CTOR
 	constexpr codepoint_range(T first_) noexcept
 		: first{ static_cast<char32_t>(first_) },
 		last{ first }

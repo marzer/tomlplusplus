@@ -18,6 +18,8 @@ TOML_DISABLE_FLOAT_WARNINGS
 
 namespace toml::impl
 {
+	inline constexpr size_t default_formatter_line_wrap = 120_sz;
+
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_ALL_WARNINGS
 
@@ -80,8 +82,12 @@ namespace toml::impl
 				if (n.empty())
 					return 2_sz; // "{}"
 				size_t weight = 3_sz; // "{ }"
-				for (auto [k, v] : n)
+				for (auto&& [k, v] : n)
+				{
 					weight += k.length() + default_formatter_inline_columns(v) + 2_sz; // +  ", "
+					if (weight >= default_formatter_line_wrap)
+						break;
+				}
 				return weight;
 			}
 
@@ -92,7 +98,11 @@ namespace toml::impl
 					return 2_sz; // "[]"
 				size_t weight = 3_sz; // "[ ]"
 				for (auto& elem : n)
+				{
 					weight += default_formatter_inline_columns(elem) + 2_sz; // +  ", "
+					if (weight >= default_formatter_line_wrap)
+						break;
+				}
 				return weight;
 			}
 
@@ -148,7 +158,7 @@ namespace toml::impl
 	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
-		return (default_formatter_inline_columns(node) + starting_column_bias) > 120_sz;
+		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
 	}
 }
 
@@ -165,7 +175,7 @@ namespace toml
 			impl::print_to_stream("{ "sv, base::stream());
 
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());

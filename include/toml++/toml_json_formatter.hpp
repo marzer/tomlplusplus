@@ -28,7 +28,7 @@ namespace toml
 			impl::print_to_stream('{', base::stream());
 			base::increase_indent();
 			bool first = false;
-			for (auto [k, v] : tbl)
+			for (auto&& [k, v] : tbl)
 			{
 				if (first)
 					impl::print_to_stream(", "sv, base::stream());

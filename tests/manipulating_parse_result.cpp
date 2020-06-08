@@ -45,13 +45,13 @@ TEST_CASE("parse_result - good parse")
 	CHECK(&cresult[S("key"sv)].ref<bool>() == &ctbl[S("key"sv)].ref<bool>());
 
 	size_t tbl_iterations{};
-	for (auto [k, v] : tbl)
+	for (auto&& [k, v] : tbl)
 	{
 		(void)k; (void)v;
 		tbl_iterations++;
 	}
 	size_t result_iterations{};
-	for (auto [k, v] : result)
+	for (auto& [k, v] : result)
 	{
 		(void)k; (void)v;
 		result_iterations++;

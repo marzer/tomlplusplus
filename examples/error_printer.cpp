@@ -56,6 +56,8 @@ namespace
 		"[foo.bar]\n[foo]\nbar = 'kek'"sv,
 		"[foo]\nbar = 'kek'\nbar.kek = 7"sv,
 		"[foo]\nbar.? = 'kek'"sv,
+		R"('''val''' = 1)"sv,
+		R"(a."""val""" = 1)"sv,
 
 		"########## values"sv,
 		"val = _"sv,
@@ -104,15 +106,18 @@ int main(int /*argc*/, char** /*argv*/)
 			cols -= substr.length() + 2_sz;
 			while (cols--)
 				std::cout.put('#');
+
+			std::cout << "\n\n"sv;
 		}
 		else
 		{
 			auto result = toml::parse(str);
 			if (!result)
+			{
 				std::cout << result.error();
+				std::cout << "\n\n"sv;
+			}
 		}
-
-		std::cout << "\n\n"sv;
 	}
 	return 0;
 }

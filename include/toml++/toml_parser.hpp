@@ -864,8 +864,14 @@ namespace toml::impl
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
 
+			struct parsed_string final
+			{
+				string value;
+				bool was_multi_line;
+			};
+
 			[[nodiscard]]
-			string parse_string() TOML_MAY_THROW
+			parsed_string parse_string() TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -884,7 +890,7 @@ namespace toml::impl
 				if (is_eof())
 				{
 					if (second == first)
-						return string{};
+						return {};
 
 					set_error_and_return_default("encountered end-of-file"sv);
 				}
@@ -893,9 +899,13 @@ namespace toml::impl
 				// it's a multi-line string.
 				else if (first == second && first == third)
 				{
-					return first == U'\''
-						? parse_literal_string<true>()
-						: parse_basic_string<true>();
+					return
+					{
+						first == U'\''
+							? parse_literal_string<true>()
+							: parse_basic_string<true>(),
+						true
+					};
 				}
 
 				// otherwise it's just a regular string.
@@ -905,9 +915,13 @@ namespace toml::impl
 					// character is the string delimiter
 					go_back(2_sz);
 
-					return first == U'\''
-						? parse_literal_string<false>()
-						: parse_basic_string<false>();
+					return
+					{
+						first == U'\''
+							? parse_literal_string<false>()
+							: parse_basic_string<false>(),
+						false
+					};
 				}
 			}
 
@@ -1376,7 +1390,7 @@ namespace toml::impl
 				if constexpr (base == 10)
 				{
 					if (chars[0] == '0')
-						set_error_and_return_default("leading zeroes are not allowed"sv);
+						set_error_and_return_default("leading zeroes are prohibited"sv);
 				}
 
 				// single digits can be converted trivially
@@ -1707,7 +1721,7 @@ namespace toml::impl
 
 					// strings
 					else if (is_string_delimiter(*cp))
-						val = std::make_unique<value<string>>(parse_string());
+						val = std::make_unique<value<string>>(std::move(parse_string().value));
 
 					// bools
 					else if (is_match(*cp, U't', U'f', U'T', U'F'))
@@ -2171,14 +2185,30 @@ namespace toml::impl
 
 					// bare_key_segment
 					if (is_bare_key_character(*cp))
-						key.segments.push_back(parse_bare_key_segment());
+						key.segments.emplace_back(parse_bare_key_segment());
 
 					// "quoted key segment"
 					else if (is_string_delimiter(*cp))
 					{
+						const auto begin_pos = cp->position;
+
 						recording_whitespace = true;
-						key.segments.push_back(parse_string());
+						auto str = parse_string();
 						recording_whitespace = false;
+						return_if_error({});
+
+						if (str.was_multi_line)
+						{
+							set_error_at(
+								begin_pos,
+								"multi-line strings are prohibited in "sv,
+								key.segments.empty() ? ""sv : "dotted "sv,
+								"keys"sv
+							);
+							return_after_error({});
+						}
+						else
+							key.segments.emplace_back(std::move(str.value));
 					}
 
 					// ???

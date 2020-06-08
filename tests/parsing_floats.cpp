@@ -7,21 +7,21 @@ TEST_CASE("parsing - floats")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(
-# fractional
-flt1 = +1.0
-flt2 = 3.1415
-flt3 = -0.01
+			# fractional
+			flt1 = +1.0
+			flt2 = 3.1415
+			flt3 = -0.01
 
-# exponent
-flt4 = 5e+22
-flt5 = 1e06
-flt6 = -2E-2
+			# exponent
+			flt4 = 5e+22
+			flt5 = 1e06
+			flt6 = -2E-2
 
-# both
-flt7 = 6.626e-34
+			# both
+			flt7 = 6.626e-34
 
-flt8 = 224_617.445_991_228
-)"sv),
+			flt8 = 224_617.445_991_228
+		)"sv),
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("flt1")] == 1.0);
@@ -178,16 +178,16 @@ TEST_CASE("parsing - inf and nan")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(
-# infinity
-sf1 = inf  # positive infinity
-sf2 = +inf # positive infinity
-sf3 = -inf # negative infinity
+			# infinity
+			sf1 = inf  # positive infinity
+			sf2 = +inf # positive infinity
+			sf3 = -inf # negative infinity
 
-# not a number
-sf4 = nan  # actual sNaN/qNaN encoding is implementation specific
-sf5 = +nan # same as `nan`
-sf6 = -nan # valid, actual encoding is implementation specific
-)"sv),
+			# not a number
+			sf4 = nan  # actual sNaN/qNaN encoding is implementation specific
+			sf5 = +nan # same as `nan`
+			sf6 = -nan # valid, actual encoding is implementation specific
+		)"sv),
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("sf1")] == std::numeric_limits<double>::infinity());

@@ -5,14 +5,14 @@ TEST_CASE("parsing - integers (decimal)")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		BOM_PREFIX S(R"(
-int1 = +99
-int2 = 42
-int3 = 0
-int4 = -17
-int5 = 1_000
-int6 = 5_349_221
-int7 = 1_2_3_4_5     # VALID but discouraged
-)"sv),
+			int1 = +99
+			int2 = 42
+			int3 = 0
+			int4 = -17
+			int5 = 1_000
+			int6 = 5_349_221
+			int7 = 1_2_3_4_5     # VALID but discouraged
+		)"sv),
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("int1")] == 99);
@@ -75,18 +75,18 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(
-# hexadecimal with prefix `0x`
-hex1 = 0xDEADBEEF
-hex2 = 0xdeadbeef
-hex3 = 0xdead_beef
+			# hexadecimal with prefix `0x`
+			hex1 = 0xDEADBEEF
+			hex2 = 0xdeadbeef
+			hex3 = 0xdead_beef
 
-# octal with prefix `0o`
-oct1 = 0o01234567
-oct2 = 0o755 # useful for Unix file permissions
+			# octal with prefix `0o`
+			oct1 = 0o01234567
+			oct2 = 0o755 # useful for Unix file permissions
 
-# binary with prefix `0b`
-bin1 = 0b11010110
-)"sv),
+			# binary with prefix `0b`
+			bin1 = 0b11010110
+		)"sv),
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
@@ -111,13 +111,13 @@ bin1 = 0b11010110
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		S(R"(
-hex1 = 0x000DEADBEEF
-hex2 = 0x00000deadbeef
-hex3 = 0x0dead_beef
-oct1 = 0o0001234567
-oct2 = 0o000755
-bin1 = 0b0000011010110
-)"sv),
+			hex1 = 0x000DEADBEEF
+			hex2 = 0x00000deadbeef
+			hex3 = 0x0dead_beef
+			oct1 = 0o0001234567
+			oct2 = 0o000755
+			bin1 = 0b0000011010110
+		)"sv),
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);

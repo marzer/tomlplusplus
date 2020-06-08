@@ -455,6 +455,14 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
+
+	// Q: "why are the parse_file functions templated??"
+	// A: I don't want to force users to drag in <fstream> if they're not going to do
+	//    any parsing directly from files. Keeping them templated delays their instantiation
+	//    until they're actually required, so only those users wanting to use parse_file()
+	//    are burdened by the <fstream> overhead.
+
+
 	/// \brief	Parses a TOML document from a file.
 	///
 	/// \detail \cpp
@@ -474,7 +482,7 @@ namespace toml
 	/// 
 	/// \attention You must `#include <fstream>` to use this function (toml++
 	/// 		 does not transitively include it for you).
-	template <typename Char>
+	template <typename Char, typename StreamChar = char>
 	[[nodiscard]]
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
@@ -483,10 +491,54 @@ namespace toml
 			sizeof(Char) == 1,
 			"The path's character type must be 1 byte in size."
 		);
+		static_assert(
+			sizeof(StreamChar) == 1,
+			"The stream's character type must be 1 byte in size."
+		);
 
-		auto str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
-		auto ifs = std::basic_ifstream<Char>{ str };
-		return parse( ifs, std::move(str) );
+		#if TOML_EXCEPTIONS
+			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
+				throw parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }
+		#else
+			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
+				return parse_result{																		\
+					parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }	\
+				}
+		#endif
+
+		auto file_path_str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
+
+		// open file with a custom-sized stack buffer
+		using ifstream = std::basic_ifstream<StreamChar>;
+		ifstream file;
+		StreamChar file_buffer[sizeof(void*) * 4096_sz];
+		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
+		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
+		if (!file.is_open())
+			TOML_PARSE_FILE_ERROR("File could not be opened for reading", source_position{});
+
+		// get size
+		const auto file_size = file.tellg();
+		if (file_size == -1)
+			TOML_PARSE_FILE_ERROR("Could not determine file size", source_position{});
+		file.seekg(0, std::ios::beg);
+
+		// if the file size is the sweet spot, read the whole thing into memory and parse from there
+		constexpr auto small_file_threshold = 1024 * 32; //32 kilobytes
+		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 8; // 64 megabytes on 64-bit
+		if (file_size >= small_file_threshold && file_size <= large_file_threshold)
+		{
+			std::vector<StreamChar> file_data;
+			file_data.resize(static_cast<size_t>(file_size));
+			file.read(file_data.data(), file_size);
+			return parse(std::basic_string_view<StreamChar>{ file_data.data(), file_data.size() }, std::move(file_path_str));
+		}
+
+		// otherwise parse it using the streams
+		else
+			return parse(file, std::move(file_path_str));
+
+		#undef TOML_PARSE_FILE_ERROR
 	}
 
 	#if !TOML_ALL_INLINE
@@ -497,12 +549,6 @@ namespace toml
 			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
 		#endif
 	#endif
-
-	// Q: "why are the parse_file functions templated??"
-	// A: I don't want to force users to drag in <fstream> if they're not going to do
-	//    any parsing directly from files. Keeping them templated delays their instantiation
-	//    until they're actually required, so only those users wanting to use parse_file()
-	//    are burdened by the <fstream> overhead.
 
 	template <typename Char>
 	[[nodiscard]]

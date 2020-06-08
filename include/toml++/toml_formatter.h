@@ -61,6 +61,7 @@ namespace toml::impl
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
 
+			TOML_ALWAYS_INLINE
 			void clear_naked_newline() noexcept { naked_newline_ = false; }
 
 			void attach(std::basic_ostream<Char>& stream) noexcept
