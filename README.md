@@ -87,10 +87,14 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ## _"What about build system X, or package manager Y?"_
-Currently there's support for use as a meson submodule, which I _think_ means it can be used with Conan. That's the
-extent of my knowledge in this area; clearly an area of opportunity! If you would like me to add support for a
-particular build system or package manager please let me know by making a [feature request]. Better still, if you have
-the skills and motivation to add support yourself, I'd welcome a pull request with a smile and open arms!
+Currently there's support for use as a meson submodule. That's the extent of my knowledge in this area; clearly an area
+of opportunity! If you would like me to add support for a particular build system or package manager please let me
+know by making a [feature request]. Better still, if you have the skills and motivation to add support yourself, I'd 
+welcome a pull request with a smile and open arms!
+
+### Conan
+`toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need to add `tomlplusplus/1.2.3` to your _conanfile_ to include this in your project. The default options are set for the single-header
+flavour, however specifying the option `"multiple_headers": True` is available.
 
 <br>
 
