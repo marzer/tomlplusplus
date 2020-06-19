@@ -5,14 +5,8 @@
 #endif
 #include "../include/toml++/toml_preprocessor.h"
 
-#if TOML_COMPILER_EXCEPTIONS
-	#if !TOML_EXCEPTIONS
-		#error Exceptions were enabled but TOML_EXCEPTIONS was auto-set to disabled
-	#endif
-#else
-	#if TOML_EXCEPTIONS
-		#error Exceptions were disabled but TOML_EXCEPTIONS was auto-set to enabled
-	#endif
+#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
+	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
 
 TOML_PUSH_WARNINGS
@@ -38,12 +32,25 @@ TOML_POP_WARNINGS
 #define S(str)			TOML_STRING_PREFIX(str)
 #define BOM_PREFIX "\xEF\xBB\xBF"
 
+#if TOML_EXCEPTIONS
+	#define FORCE_FAIL(...) FAIL(__VA_ARGS__)
+#else
+	#define FORCE_FAIL(...)		\
+	do							\
+	{							\
+		FAIL(__VA_ARGS__);		\
+		std::exit(-1);			\
+		TOML_UNREACHABLE;		\
+	}							\
+	while (false)
+#endif
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
 
 
 template <typename Char, typename Func = std::false_type>
-inline void parsing_should_succeed(
+inline bool parsing_should_succeed(
 	std::string_view test_file,
 	uint32_t test_line,
 	std::basic_string_view<Char> toml_str,
@@ -52,7 +59,7 @@ inline void parsing_should_succeed(
 {
 	INFO(
 		"["sv << test_file << ", line "sv << test_line << "] "sv
-		<< "parsing_should_succeed('"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "')"sv
+		<< "parsing_should_succeed(\""sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "\")"sv
 	)
 
 	constexpr auto validate_table = [](table&& tabl, std::string_view path)  -> table&&
@@ -95,11 +102,12 @@ inline void parsing_should_succeed(
 	}
 	catch (const parse_error& err)
 	{
-		FAIL(
+		FORCE_FAIL(
 			"Parse error on line "sv << err.source().begin.line
 			<< ", column "sv << err.source().begin.column
 			<< ":\n"sv << err.description()
 		);
+		return false;
 	}
 
 	#else
@@ -116,13 +124,11 @@ inline void parsing_should_succeed(
 		}
 		else
 		{
-			FAIL(
+			FORCE_FAIL(
 				"Parse error on line "sv << result.error().source().begin.line
 				<< ", column "sv << result.error().source().begin.column
 				<< ":\n"sv << result.error().description()
 			);
-			std::exit(-1);
-			TOML_UNREACHABLE;
 		}
 	}
 
@@ -140,28 +146,28 @@ inline void parsing_should_succeed(
 		}
 		else
 		{
-			FAIL(
+			FORCE_FAIL(
 				"Parse error on line "sv << result.error().source().begin.line
 				<< ", column "sv << result.error().source().begin.column
 				<< ":\n"sv << result.error().description()
 			);
-			std::exit(-1);
-			TOML_UNREACHABLE;
 		}
 	}
 
 	#endif
+
+	return true;
 }
 
 template <typename Char>
-inline void parsing_should_fail(
+inline bool parsing_should_fail(
 	std::string_view test_file,
 	uint32_t test_line,
 	std::basic_string_view<Char> toml_str)
 {
 	INFO(
 		"["sv << test_file << ", line "sv << test_line << "] "sv
-		<< "parsing_should_fail('"sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "')"sv
+		<< "parsing_should_fail(\""sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "\")"sv
 	)
 
 	#if TOML_EXCEPTIONS
@@ -179,21 +185,21 @@ inline void parsing_should_fail(
 		}
 		catch (const std::exception& exc)
 		{
-			FAIL("Expected parsing failure, saw exception: "sv << exc.what());
+			FORCE_FAIL("Expected parsing failure, saw exception: "sv << exc.what());
 			return false;
 		}
 		catch (...)
 		{
-			FAIL("Expected parsing failure, saw unspecified exception"sv);
+			FORCE_FAIL("Expected parsing failure, saw unspecified exception"sv);
 			return false;
 		}
 
-		FAIL("Expected parsing failure"sv);
+		FORCE_FAIL("Expected parsing failure"sv);
 		return false;
 	};
 
-	if (run_tests([=]() { (void)toml::parse(toml_str); }))
-		run_tests([=]()
+	return run_tests([=]() { (void)toml::parse(toml_str); })
+		&& run_tests([=]()
 		{
 			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
@@ -204,22 +210,17 @@ inline void parsing_should_fail(
 
 	static constexpr auto run_tests = [](auto&& fn)
 	{
-		parse_result result = fn();
-		if (result)
+		if (parse_result result = fn(); !result)
 		{
-			FAIL("Expected parsing failure"sv);
-			std::exit(-1);
-			TOML_UNREACHABLE;
-		}
-		else
-		{
-			SUCCEED("parse_error returned OK"sv);
+			SUCCEED("parse_error generated OK"sv);
 			return true;
 		}
+
+		FORCE_FAIL("Expected parsing failure"sv);
 	};
 
-	if (run_tests([=]() { return toml::parse(toml_str); }))
-		run_tests([=]()
+	return run_tests([=]() { return toml::parse(toml_str); })
+		&& run_tests([=]()
 		{
 			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
@@ -230,13 +231,13 @@ inline void parsing_should_fail(
 }
 
 template <typename T>
-inline void parse_expected_value(
+inline bool parse_expected_value(
 	std::string_view test_file,
 	uint32_t test_line,
 	std::string_view value_str,
 	const T& expected)
 {
-	INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value('"sv << value_str << "')"sv)
+	INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value(\""sv << value_str << "\")"sv)
 
 	std::string val;
 	static constexpr auto key = "val = "sv;
@@ -254,42 +255,45 @@ inline void parse_expected_value(
 
 	source_position pos{ 1,  static_cast<source_index>(key.length()) };
 	source_position begin{}, end{};
-	impl::utf8_decoder decoder;
-	for (auto c : value_str)
 	{
-		decoder(static_cast<uint8_t>(c));
-		if (!decoder.has_code_point())
-			continue;
-
-		if (impl::is_line_break(decoder.codepoint))
+		impl::utf8_decoder decoder;
+		for (auto c : value_str)
 		{
-			if (decoder.codepoint != U'\r')
+			decoder(static_cast<uint8_t>(c));
+			if (!decoder.has_code_point())
+				continue;
+
+			if (impl::is_line_break(decoder.codepoint))
 			{
-				pos.line++;
-				pos.column = source_index{ 1 };
+				if (decoder.codepoint != U'\r')
+				{
+					pos.line++;
+					pos.column = source_index{ 1 };
+				}
+				continue;
 			}
-			continue;
-		}
 
-		pos.column++;
-		if (is_val(decoder.codepoint))
-		{
-			if (!begin)
-				begin = pos;
-			else
-				end = pos;
+			pos.column++;
+			if (is_val(decoder.codepoint))
+			{
+				if (!begin)
+					begin = pos;
+				else
+					end = pos;
+			}
 		}
+		if (!end)
+			end = begin;
+		end.column++;
 	}
-	if (!end)
-		end = begin;
-	end.column++;
 
 	using value_type = impl::promoted<impl::remove_cvref_t<T>>;
 	value<value_type> val_parsed;
 	{
-		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking inital parse"sv)
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking initial parse"sv)
 
-		parsing_should_succeed(
+		bool stolen_value = false; // parsing_should_succeed invokes the functor more than once
+		const auto result = parsing_should_succeed(
 			test_file,
 			test_line,
 			std::string_view{ val },
@@ -331,15 +335,21 @@ inline void parse_expected_value(
 				REQUIRE(nv.get()->source().end == end);
 
 				// steal the val for round-trip tests
-				val_parsed = std::move(*nv.as<value_type>());
+				if (!stolen_value)
+				{
+					val_parsed = std::move(*nv.as<value_type>());
+					stolen_value = true;
+				}
 			}
 		);
+
+		if (!result)
+			return false;
 	}
 
 	// check round-tripping
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking round-trip"sv)
-		value<value_type> val_reparsed;
 		{
 			std::string str;
 			{
@@ -349,7 +359,8 @@ inline void parse_expected_value(
 				str = std::move(ss).str();
 			}
 
-			parsing_should_succeed(
+			bool value_ok = true;
+			const auto parse_ok = parsing_should_succeed(
 				test_file,
 				test_line,
 				std::string_view{ str },
@@ -361,25 +372,29 @@ inline void parse_expected_value(
 					REQUIRE(nv.as<value_type>());
 					REQUIRE(nv.get()->type() == impl::node_type_of<T>);
 
-					CHECK(nv.as<value_type>()->get() == expected);
-					CHECK(nv.ref<value_type>() == expected);
-
-					val_reparsed = std::move(*nv.as<value_type>());
+					if (value_ok && nv.ref<value_type>() != expected)
+					{
+						value_ok = false;
+						FORCE_FAIL("Value was not the same after round-tripping"sv);
+					}
 				}
 			);
+
+			if (!parse_ok || value_ok)
+				return false;
 		}
-		CHECK(val_reparsed == val_parsed);
-		CHECK(val_reparsed == expected);
 	}
+
+	return true;
 }
 
 // manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&);
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
-extern template void parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&);
 namespace std
 {
 	extern template class unique_ptr<const Catch::IExceptionTranslator>;

@@ -50,6 +50,13 @@ TEST_CASE("parsing - integers (decimal)")
 		}
 	);
 
+	// "64 bit (signed long) range expected (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)."
+	parse_expected_value(FILE_LINE_ARGS,         "9223372036854775807"sv, INT64_MAX);
+	parse_expected_value(FILE_LINE_ARGS,        "-9223372036854775808"sv, INT64_MIN);
+	parsing_should_fail(FILE_LINE_ARGS, S("val =  9223372036854775808"sv)); // INT64_MAX + 1
+	parsing_should_fail(FILE_LINE_ARGS, S("val = -9223372036854775809"sv)); // INT64_MIN - 1
+
+	// signs in weird places
 	parsing_should_fail(FILE_LINE_ARGS, S("val = +-1"sv));
 	parsing_should_fail(FILE_LINE_ARGS, S("val = -+1"sv));
 	parsing_should_fail(FILE_LINE_ARGS, S("val = ++1"sv));
@@ -60,10 +67,13 @@ TEST_CASE("parsing - integers (decimal)")
 	parsing_should_fail(FILE_LINE_ARGS, S("val = +1-"sv));
 
 	// value tests
+	parse_expected_value(FILE_LINE_ARGS,            "0"sv,          0);
+	parse_expected_value(FILE_LINE_ARGS,            "1"sv,          1);
+	parse_expected_value(FILE_LINE_ARGS,           "+1"sv,          1);
+	parse_expected_value(FILE_LINE_ARGS,           "-1"sv,         -1);
 	parse_expected_value(FILE_LINE_ARGS,         "1234"sv,       1234);
 	parse_expected_value(FILE_LINE_ARGS,        "+1234"sv,       1234);
 	parse_expected_value(FILE_LINE_ARGS,        "-1234"sv,      -1234);
-	parse_expected_value(FILE_LINE_ARGS,            "0"sv,          0);
 	parse_expected_value(FILE_LINE_ARGS,      "1_2_3_4"sv,       1234);
 	parse_expected_value(FILE_LINE_ARGS,     "+1_2_3_4"sv,       1234);
 	parse_expected_value(FILE_LINE_ARGS,     "-1_2_3_4"sv,      -1234);
@@ -129,14 +139,19 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 		}
 	);
 
-	// "64 bit (signed long) range expected (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)."
-	parsing_should_fail(FILE_LINE_ARGS, S("val = −9223372036854775809"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = 9223372036854775808"sv));
-
 	// "***Non-negative*** integer values may also be expressed in hexadecimal, octal, or binary"
+	parsing_should_fail(FILE_LINE_ARGS, S("val = -0x1"sv));
 	parsing_should_fail(FILE_LINE_ARGS, S("val = -0o1"sv));
 	parsing_should_fail(FILE_LINE_ARGS, S("val = -0b1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -0x1"sv));
+
+	// "64 bit (signed long) range expected (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)."
+	// (ignoring INT64_MIN because toml doesn't allow these forms to represent negative values)
+	parse_expected_value(FILE_LINE_ARGS,      "0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
+	parse_expected_value(FILE_LINE_ARGS, "0o777777777777777777777"sv, INT64_MAX);
+	parse_expected_value(FILE_LINE_ARGS, "0b111111111111111111111111111111111111111111111111111111111111111"sv, INT64_MAX);
+	parsing_should_fail(FILE_LINE_ARGS, S("val =       0x8000000000000000"sv)); // INT64_MAX + 1
+	parsing_should_fail(FILE_LINE_ARGS, S("val = 0o1000000000000000000000"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("val = 0b1000000000000000000000000000000000000000000000000000000000000000"sv));
 
 	// value tests
     parse_expected_value(FILE_LINE_ARGS,   "0xDEADBEEF"sv, 0xDEADBEEF);
@@ -155,4 +170,5 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
     parse_expected_value(FILE_LINE_ARGS,     "0b010000"sv,    0b10000);
     parse_expected_value(FILE_LINE_ARGS,   "0b01_00_00"sv,    0b10000);
     parse_expected_value(FILE_LINE_ARGS,     "0b111111"sv,   0b111111);
+
 }

@@ -1947,7 +1947,7 @@ namespace toml::impl
 						{
 							val = std::make_unique<value<int64_t>>(
 								static_cast<int64_t>(chars[1] - U'0')
-								* (chars[1] == U'-' ? -1LL : 1LL)
+								* (chars[0] == U'-' ? -1LL : 1LL)
 							);
 							advance(); //skip the sign
 							advance(); //skip the digit

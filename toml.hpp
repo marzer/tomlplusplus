@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.3.1
+// toml++ v1.3.2
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -347,7 +347,7 @@
 #endif
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		1
+#define TOML_LIB_PATCH		2
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -5162,6 +5162,20 @@ namespace toml::impl
 			explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept
 				: source{ sv }
 			{
+				// trim trailing nulls
+				size_t actual_len = source.length();
+				for (size_t i = actual_len; i --> 0_sz;)
+				{
+					if (source[i] != Char{}) // not '\0'
+					{
+						actual_len = i + 1_sz;
+						break;
+					}
+				}
+				if (source.length() != actual_len) // not '\0'
+					source = source.substr(0_sz, actual_len);
+
+				// skip bom
 				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
 			}
@@ -5504,7 +5518,7 @@ namespace toml::impl
 		: public utf8_reader_interface
 	{
 		public:
-			static constexpr size_t max_history_length = 64;
+			static constexpr size_t max_history_length = 72;
 
 		private:
 			static constexpr size_t history_buffer_size = max_history_length - 1; //'head' is stored in the reader
@@ -8609,7 +8623,7 @@ namespace toml::impl
 						{
 							val = std::make_unique<value<int64_t>>(
 								static_cast<int64_t>(chars[1] - U'0')
-								* (chars[1] == U'-' ? -1LL : 1LL)
+								* (chars[0] == U'-' ? -1LL : 1LL)
 							);
 							advance(); //skip the sign
 							advance(); //skip the digit

@@ -29,7 +29,7 @@ TEST_CASE("parsing - comments")
 	{
 		// toml/issues/567 (disallow non-TAB control characters in comments)
 		// 00 - 08
-		parsing_should_fail(FILE_LINE_ARGS, S("# \u0000"sv));
+		parsing_should_fail(FILE_LINE_ARGS, S("# \u0000 some trailing garbage"sv));
 		parsing_should_fail(FILE_LINE_ARGS, S("# \u0001"sv));
 		parsing_should_fail(FILE_LINE_ARGS, S("# \u0002"sv));
 		parsing_should_fail(FILE_LINE_ARGS, S("# \u0003"sv));

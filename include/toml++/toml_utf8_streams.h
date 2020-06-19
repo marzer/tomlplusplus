@@ -36,6 +36,20 @@ namespace toml::impl
 			explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept
 				: source{ sv }
 			{
+				// trim trailing nulls
+				size_t actual_len = source.length();
+				for (size_t i = actual_len; i --> 0_sz;)
+				{
+					if (source[i] != Char{}) // not '\0'
+					{
+						actual_len = i + 1_sz;
+						break;
+					}
+				}
+				if (source.length() != actual_len) // not '\0'
+					source = source.substr(0_sz, actual_len);
+
+				// skip bom
 				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
 			}
@@ -379,7 +393,7 @@ namespace toml::impl
 		: public utf8_reader_interface
 	{
 		public:
-			static constexpr size_t max_history_length = 64;
+			static constexpr size_t max_history_length = 72;
 
 		private:
 			static constexpr size_t history_buffer_size = max_history_length - 1; //'head' is stored in the reader
