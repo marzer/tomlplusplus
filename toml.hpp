@@ -8100,7 +8100,7 @@ namespace toml::impl
 				}
 
 				// range check
-				if (result > static_cast<uint64_t>(std::numeric_limits<int64_t>::max()) + (sign < 0 ? 1ull : 0ull))
+				if (result > static_cast<uint64_t>((std::numeric_limits<int64_t>::max)()) + (sign < 0 ? 1ull : 0ull))
 					set_error_and_return_default(
 						"'"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
 					);
