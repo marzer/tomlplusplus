@@ -195,7 +195,7 @@ namespace toml::impl
 		#define TOML_RETURNS_BY_THROWING
 	#endif
 
-	#ifdef NDEBUG
+	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define assert_or_assume(cond)			TOML_ASSUME(cond)
 	#else
 		#define assert_or_assume(cond)			TOML_ASSERT(cond)

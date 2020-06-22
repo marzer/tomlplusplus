@@ -368,7 +368,7 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #ifndef TOML_ASSERT
-	#ifdef NDEBUG
+	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define TOML_ASSERT(expr)	(void)0
 	#else
 		#include <cassert>

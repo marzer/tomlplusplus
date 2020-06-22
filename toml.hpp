@@ -385,7 +385,7 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #ifndef TOML_ASSERT
-	#ifdef NDEBUG
+	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define TOML_ASSERT(expr)	(void)0
 	#else
 		#include <cassert>
@@ -423,14 +423,6 @@ TOML_DISABLE_ALL_WARNINGS
 #include <iosfwd>
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
-#endif
-#ifndef TOML_ASSERT
-	#ifdef NDEBUG
-		#define TOML_ASSERT(expr)	(void)0
-	#else
-		#include <cassert>
-		#define TOML_ASSERT(expr)	assert(expr)
-	#endif
 #endif
 
 TOML_POP_WARNINGS
@@ -6873,7 +6865,7 @@ namespace toml::impl
 		#define TOML_RETURNS_BY_THROWING
 	#endif
 
-	#ifdef NDEBUG
+	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define assert_or_assume(cond)			TOML_ASSUME(cond)
 	#else
 		#define assert_or_assume(cond)			TOML_ASSERT(cond)

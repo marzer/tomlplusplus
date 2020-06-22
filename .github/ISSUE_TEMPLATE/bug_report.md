@@ -11,7 +11,7 @@ Replace the _italic_ text below with the relevant information to help me underst
 
 ## Environment
 **Compiler:**  
-_The compiler & version, e.g. "Clang 9"_  
+_The compiler & version, e.g. "Clang 9, Visual Studio 2019 16.5"_  
 
 **C++ standard mode (e.g. 17, 20, 'latest'):**  
 _The C++ standard level you were targeting, e.g. C++17_  

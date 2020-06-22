@@ -25,14 +25,6 @@ TOML_DISABLE_ALL_WARNINGS
 #ifndef TOML_OPTIONAL_TYPE
 	#include <optional>
 #endif
-#ifndef TOML_ASSERT
-	#ifdef NDEBUG
-		#define TOML_ASSERT(expr)	(void)0
-	#else
-		#include <cassert>
-		#define TOML_ASSERT(expr)	assert(expr)
-	#endif
-#endif
 
 TOML_POP_WARNINGS
 
