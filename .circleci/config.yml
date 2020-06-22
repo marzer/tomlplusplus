@@ -1,4 +1,4 @@
-version: 2.1
+version: 2
 
 jobs:
 
@@ -134,7 +134,7 @@ jobs:
 
     deploy_dox:
         docker:
-            - image: node:8.10.0
+            - image: node:14.4.0
         steps:
             - checkout
             - attach_workspace:
@@ -146,7 +146,7 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    npm install -g --silent gh-pages
+                    npm install -g --silent gh-pages@3.0.0
                     git config user.email "ci-build@tomlplusplus.com"
                     git config user.name "ci-build"
             - add_ssh_keys:
