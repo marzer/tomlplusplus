@@ -166,17 +166,17 @@ If you wish to submit a pull request, please see [CONTRIBUTING] for all the deta
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]'.
 
 ### With thanks to:
-- **[@bjadamson](github.com/bjadamson)** - Reported some bugs and helped design a new feature
-- **[@bobfang1992](github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
-- **[@GiulioRomualdi](github.com/GiulioRomualdi)** - Added cmake+meson support
-- **[@mosra](github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
-- **[@ned14](github.com/ned14)** - Reported a bunch of bugs and helped design some new features
-- **[@okureta](github.com/okureta)** - Reported a bug
-- **[@prince-chrismc](github.com/prince-chrismc)** - Added `toml++` to ConanCenter, and fixed some typos
-- **[@rbrugo](github.com/rbrugo)** - Helped design a new feature
-- **[@shdnx](github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
-- **[@traversaro](github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
-- **[@ximion](github.com/ximion)** - Added support for installation with meson
+- **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
+- **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
+- **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
+- **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
+- **[@ned14](https://github.com/ned14)** - Reported a bunch of bugs and helped design some new features
+- **[@okureta](https://github.com/okureta)** - Reported a bug
+- **[@prince-chrismc](https://github.com/prince-chrismc)** - Added `toml++` to ConanCenter, and fixed some typos
+- **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
+- **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
+- **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
+- **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 
 <br>
 
