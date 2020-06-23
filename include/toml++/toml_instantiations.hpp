@@ -6,14 +6,14 @@
 #pragma once
 //# {{
 #include "toml_preprocessor.h"
-#if !TOML_DOXYGEN
-#if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
+#if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
 #if TOML_ALL_INLINE
 	#error This header cannot not be included when TOML_ALL_INLINE is enabled.
 #endif
 //# }}
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #include <ostream>
@@ -100,7 +100,3 @@ namespace toml
 
 	#endif // TOML_PARSER
 }
-
-//# {{
-#endif // !TOML_DOXYGEN
-//# }} 

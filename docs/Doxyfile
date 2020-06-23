@@ -133,50 +133,8 @@ WARN_LOGFILE           = ./doc/doxygen_warnings.log
 #---------------------------------------------------------------------------
 INPUT                  = ../include
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.c \
-                         *.cc \
-                         *.cxx \
-                         *.cpp \
-                         *.c++ \
-                         *.java \
-                         *.ii \
-                         *.ixx \
-                         *.ipp \
-                         *.i++ \
-                         *.inl \
-                         *.idl \
-                         *.ddl \
-                         *.odl \
-                         *.h \
-                         *.hh \
-                         *.hxx \
-                         *.hpp \
-                         *.h++ \
-                         *.cs \
-                         *.d \
-                         *.php \
-                         *.php4 \
-                         *.php5 \
-                         *.phtml \
-                         *.inc \
-                         *.m \
-                         *.markdown \
-                         *.md \
-                         *.mm \
-                         *.dox \
-                         *.py \
-                         *.pyw \
-                         *.f90 \
-                         *.f95 \
-                         *.f03 \
-                         *.f08 \
-                         *.f \
-                         *.for \
-                         *.tcl \
-                         *.vhd \
-                         *.vhdl \
-                         *.ucf \
-                         *.qsf
+FILE_PATTERNS          = *.h \
+                         *.dox
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
@@ -346,11 +304,9 @@ SEARCH_INCLUDES        = NO
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = TOML_DOXYGEN=1 \
-						 __cplusplus=201703L \
 						 TOML_ALWAYS_INLINE=inline \
 						 TOML_MAY_THROW= \
 						 TOML_NODISCARD_CTOR= \
-						 TOML_IMPLEMENTATION=1 \
 						 TOML_EXTERNAL_LINKAGE= \
 						 TOML_API= \
 						 TOML_ABI_NAMESPACE_START(x)= \
@@ -365,9 +321,10 @@ PREDEFINED             = TOML_DOXYGEN=1 \
 						 TOML_DISABLE_SHADOW_WARNINGS= \
 						 TOML_DISABLE_ALL_WARNINGS= \
 						 TOML_POP_WARNINGS= \
+						 TOML_ASYMMETRICAL_EQUALITY_OPS(...)=	\
+						 __cplusplus=201703L \
 						 __has_include(x)=0 \
 						 __has_attribute(x)=0 \
-						 TOML_ASYMMETRICAL_EQUALITY_OPS(...)=	\
 						 __cpp_lib_char8_t=201811L
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO

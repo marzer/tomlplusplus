@@ -4,13 +4,17 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_parser.h"
 //# {{
-#if !TOML_DOXYGEN
-#if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
+#include "toml_preprocessor.h"
+#if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
+#if !TOML_PARSER
+	#error This header cannot not be included when TOML_PARSER is disabled.
+#endif
 //# }}
+
+#include "toml_parser.h"
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
 #include <cmath>
@@ -2881,7 +2885,3 @@ namespace toml
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
-
-//# {{
-#endif // !TOML_DOXYGEN
-//# }} 

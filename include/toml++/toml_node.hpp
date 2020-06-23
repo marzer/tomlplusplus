@@ -4,13 +4,14 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_node.h"
 //# {{
-#if !TOML_DOXYGEN
-#if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
+#include "toml_preprocessor.h"
+#if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
 //# }}
+
+#include "toml_node.h"
 
 namespace toml
 {
@@ -63,7 +64,3 @@ namespace toml
 
 	TOML_EXTERNAL_LINKAGE const source_region& node::source() const noexcept { return source_; }
 }
-
-//# {{
-#endif // !TOML_DOXYGEN
-//# }} 

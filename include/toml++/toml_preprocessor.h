@@ -8,16 +8,25 @@
 
 ////////// CONFIGURATION
 
+#ifndef TOML_DOXYGEN
+	#define TOML_DOXYGEN 0
+#endif
+
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
 #endif
 
-#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE)
+#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE) || defined(__INTELLISENSE__)
 	#undef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 1
 #endif
 
-#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE || defined(__INTELLISENSE__)
+#if TOML_DOXYGEN
+	#undef TOML_ALL_INLINE
+	#define TOML_ALL_INLINE 0
+#endif
+
+#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
 #else
@@ -50,9 +59,6 @@
 
 ////////// COMPILER & ENVIRONMENT
 
-#ifndef TOML_DOXYGEN
-	#define TOML_DOXYGEN 0
-#endif
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif

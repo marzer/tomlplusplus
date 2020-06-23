@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "toml_table.h"
-#include "toml_node_view.h"
 //# {{
-#if !TOML_DOXYGEN
-#if !defined(TOML_IMPLEMENTATION) || !TOML_IMPLEMENTATION
+#include "toml_preprocessor.h"
+#if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
 //# }}
+
+#include "toml_table.h"
+#include "toml_node_view.h"
 
 namespace toml
 {
@@ -174,7 +175,3 @@ namespace toml
 		return !(lhs == rhs);
 	}
 }
-
-//# {{
-#endif // !TOML_DOXYGEN
-//# }} 
