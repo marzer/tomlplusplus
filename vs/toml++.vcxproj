@@ -82,7 +82,8 @@
     <ClInclude Include="..\include\toml++\toml_value.h" />
     <ClInclude Include="..\include\toml++\toml_instantiations.hpp" />
     <ClInclude Include="..\include\toml++\toml_version.h" />
-    <ClInclude Include="..\tests\catch2.h" />
+    <ClInclude Include="..\tests\settings.h" />
+    <ClInclude Include="..\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
@@ -97,7 +98,6 @@
     <None Include="..\python\generate_single_header.py" />
     <None Include="..\python\generate_unicode_functions.py" />
     <None Include="..\README.md" />
-    <None Include="..\tests\meson.build" />
     <None Include="toml++.props" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

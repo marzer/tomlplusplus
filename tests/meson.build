@@ -37,6 +37,7 @@ exception_modes = [ true, false ]
 unreleased_feature_modes = [ true, false ]
 tloptional_modes = [ true, false ]
 executables = []
+counter = 0
 foreach character_type : character_types
 	if character_type == 'char8' and not compiler_supports_char8_strings
 		continue
@@ -73,7 +74,20 @@ foreach character_type : character_types
 
 				if tloptional
 					name = name + '_tlopt'
-					args += '-DTARTANLLAMA_OPTIONAL'
+					args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
+				endif
+
+				args += '-DTEST_BUILD_ID=@0@'.format(counter)
+
+				if compiler.get_id() == 'gcc'
+					args += '-Wno-padded'
+					args += '-Wno-float-equal'
+				endif
+
+				if compiler.get_id() == 'clang'
+					args += '-Wno-padded'
+					args += '-Wno-float-equal'
+					args += '-Wno-double-promotion'
 				endif
 
 				executables += [[
@@ -86,6 +100,8 @@ foreach character_type : character_types
 						override_options : overrides
 					)
 				]]
+
+				counter = counter + 1
 
 			endforeach # tloptional_modes
 		endforeach # unreleased_feature_modes

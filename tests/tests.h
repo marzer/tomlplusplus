@@ -1,32 +1,28 @@
 #pragma once
-#define TOML_UNDEF_MACROS 0
-#if !defined(_MSC_VER) || !defined(_M_IX86)
-	#define TOML_ALL_INLINE 0
-#endif
-#include "../include/toml++/toml_preprocessor.h"
+#include "settings.h"
 
-#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
-	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
-#endif
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
-#ifdef TARTANLLAMA_OPTIONAL
+#if USE_TARTANLLAMA_OPTIONAL
 	#if __has_include(<tloptional/include/tl/optional.hpp>)
 		#include <tloptional/include/tl/optional.hpp>
 	#else
 		#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
 	#endif
-	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
+
+#if USE_SINGLE_HEADER
+	#include "../toml.hpp"
+#else
+	#include "../include/toml++/toml.h"
+#endif
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
 #include "catch2.h"
 #include <sstream>
 namespace toml {}
 using namespace Catch::literals;
 using namespace toml;
 TOML_POP_WARNINGS
-
-#include "../include/toml++/toml.h"
 
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
 #define S(str)			TOML_STRING_PREFIX(str)
@@ -47,7 +43,6 @@ TOML_POP_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
-
 
 template <typename Char, typename Func = std::false_type>
 inline bool parsing_should_succeed(

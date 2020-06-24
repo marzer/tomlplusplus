@@ -26,13 +26,24 @@ def read_all_text_from_file(path):
 
 
 
-def make_divider(text = None, text_col = 40):
+def repeat_pattern(pattern, count):
+	if len(pattern) == 1:
+		return pattern * count
+
+	text = ''
+	for i in range(0, count):
+		text = text + pattern[i % len(pattern)]
+	return text
+
+
+
+def make_divider(text = None, text_col = 40, pattern = '-'):
 	if (text is None):
-		return "//" + ('-' * 118)
+		return "//" + repeat_pattern(pattern, 118)
 	else:
-		text = "//{}  {}  ".format('-' * (text_col - 2),text);
+		text = "//{}  {}  ".format(repeat_pattern(pattern, text_col - 2), text);
 		if (len(text) < 120):
-			return text + ('-' * (120 - len(text)))
+			return text + repeat_pattern(pattern, 120 - len(text))
 		else:
 			return text
 
@@ -51,8 +62,9 @@ class Preprocessor:
 			return ''
 
 		self.processed_includes.append(incl)
-		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl))
-		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]', '', text, 0, re.I | re.S)
+		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl)).strip() + '\n'
+		text = re.sub('\r\n', '\n', text, 0, re.I | re.M) # convert windows newlines
+		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]*?\n', '', text, 0, re.I | re.S) # strip {{ }} blocks
 		self.current_level += 1
 		text = re.sub(r'^\s*#\s*include\s+"(.+?)"', lambda m : self.preprocess(m), text, 0, re.I | re.M)
 		self.current_level -= 1
@@ -61,8 +73,8 @@ class Preprocessor:
 			header_text = '↓ ' + raw_incl
 			lpad = 28 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.header_indent += 1
-			text = '{}\n#pragma region {}\n\n{}\n\n#pragma endregion {}\n{}'.format(
-				make_divider(header_text, lpad), '', text, '', make_divider('↑ ' + raw_incl, lpad)
+			text = '{}\n#if 1\n\n{}\n\n#endif\n{}\n'.format(
+				make_divider(header_text, lpad), text, make_divider('↑ ' + raw_incl, lpad)
 			)
 
 		return '\n\n' + text + '\n\n' # will get merged later
@@ -79,7 +91,6 @@ def main():
 
 	# preprocess header(s)
 	source_text = Preprocessor()('toml.h')
-	source_text = re.sub('\r\n', '\n', source_text, 0, re.I | re.M) # convert windows newlines
 	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M) # 'pragma once'
 	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M) # clang-format directives
 	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M) # spdx
@@ -87,11 +98,11 @@ def main():
 	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
-	source_text = re.sub(  # blank lines between various preprocessor directives
-		'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#]((?:end)?ifn?(?:def)?|define)',
-		'#\\1\n#\\2',
-		source_text, 0, re.I | re.M
-	)
+	# source_text = re.sub(  # blank lines between various preprocessor directives
+	# 	'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#](ifn?(?:def)?|define)',
+	# 	'#\\1\n#\\2',
+	# 	source_text, 0, re.I | re.M
+	# )
 	return_type_pattern														\
 		= r'(?:'															\
 		+ r'(?:\[\[nodiscard\]\]\s*)?'										\
@@ -113,7 +124,7 @@ def main():
 				+ '\n\n([ \t]*[a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)', '\\1\n\\2',
 				source_text, 0, re.I | re.M)
 		source_text = re.sub(blank_lines_between_returns_pattern, '\\1\n\\2', source_text, 0, re.I | re.M)
-	source_text = source_text.strip()
+	source_text = source_text.strip() + '\n'
 
 	# extract library version
 	library_version = {
@@ -171,17 +182,11 @@ v0.5.0:      https://toml.io/en/v0.5.0''')
 		print('''// clang-format off
 #ifndef INCLUDE_TOMLPLUSPLUS_H
 #define INCLUDE_TOMLPLUSPLUS_H
-#ifdef __GNUC__
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#endif
+
 #define	TOML_LIB_SINGLE_HEADER 1
 ''', file=output_file)
 		print(source_text, file=output_file)
 		print('''
-#ifdef __GNUC__
-	#pragma GCC diagnostic pop
-#endif
 #endif // INCLUDE_TOMLPLUSPLUS_H
 // clang-format on''', file=output_file)
 

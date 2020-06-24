@@ -1,23 +1,30 @@
-#if !defined(_MSC_VER) || !defined(_M_IX86)
-	#define TOML_ALL_INLINE 0
+#include "settings.h"
+#if !TOML_ALL_INLINE
 	#define TOML_IMPLEMENTATION
 #endif
-#include "../include/toml++/toml_preprocessor.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
-#ifdef TARTANLLAMA_OPTIONAL
+#if USE_TARTANLLAMA_OPTIONAL
 	#if __has_include(<tloptional/include/tl/optional.hpp>)
 		#include <tloptional/include/tl/optional.hpp>
 	#else
 		#error TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
 	#endif
-	#define TOML_OPTIONAL_TYPE tl::optional
 #endif
+
+#if USE_SINGLE_HEADER
+	#include "../toml.hpp"
+#else
+	#include "../include/toml++/toml.h"
+#endif
+
+#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
+	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
+#endif
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
 #include <ostream>
 TOML_POP_WARNINGS
-
-#include "../include/toml++/toml.h"
 
 namespace toml
 {

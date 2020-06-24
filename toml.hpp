@@ -44,53 +44,61 @@
 // clang-format off
 #ifndef INCLUDE_TOMLPLUSPLUS_H
 #define INCLUDE_TOMLPLUSPLUS_H
-#ifdef __GNUC__
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wunknown-pragmas"
-#endif
+
 #define	TOML_LIB_SINGLE_HEADER 1
 
 //--------------  ↓ toml_preprocessor.h  -------------------------------------------------------------------------------
-#pragma region
+#if 1
 
 #ifndef TOML_DOXYGEN
 	#define TOML_DOXYGEN 0
 #endif
+
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
 #endif
+
 #if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE) || defined(__INTELLISENSE__)
 	#undef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 1
 #endif
+
 #if TOML_DOXYGEN
 	#undef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 0
 #endif
+
 #if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
 #else
 	#define TOML_IMPLEMENTATION 0
 #endif
+
 #ifndef TOML_API
 	#define TOML_API
 #endif
+
 #ifndef TOML_CHAR_8_STRINGS
 	#define TOML_CHAR_8_STRINGS 0
 #endif
+
 #ifndef TOML_UNRELEASED_FEATURES
 	#define TOML_UNRELEASED_FEATURES 0
 #endif
+
 #ifndef TOML_LARGE_FILES
 	#define TOML_LARGE_FILES 0
 #endif
+
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
+
 #ifndef TOML_PARSER
 	#define TOML_PARSER 1
 #endif
+
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
@@ -107,6 +115,7 @@
 	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("clang diagnostic ignored \"-Wshadow\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
+
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
@@ -144,12 +153,13 @@
 
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
-	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
 	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
 	#define TOML_DISABLE_ALL_WARNINGS		__pragma(warning(pop))	\
 											__pragma(warning(push, 0))
 	#define TOML_POP_WARNINGS				__pragma(warning(pop))
+
+	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_ALWAYS_INLINE				__forceinline
 	#define TOML_ASSUME(cond)				__assume(cond)
 	#define TOML_UNREACHABLE				__assume(0)
@@ -185,8 +195,8 @@
 											TOML_DISABLE_PADDING_WARNINGS										\
 											TOML_DISABLE_FLOAT_WARNINGS											\
 											TOML_DISABLE_SHADOW_WARNINGS
-
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
+
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
@@ -205,11 +215,13 @@
 	#ifndef TOML_FLOAT_CHARCONV
 		#define TOML_FLOAT_CHARCONV 0
 	#endif
+
 #endif
 
 #ifndef TOML_CPP_VERSION
 	#define TOML_CPP_VERSION __cplusplus
 #endif
+
 #if TOML_CPP_VERSION < 201103L
 	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
@@ -223,6 +235,7 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
+
 #ifndef TOML_COMPILER_EXCEPTIONS
 	#define TOML_COMPILER_EXCEPTIONS 1
 #endif
@@ -237,11 +250,13 @@
 	#undef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS	0
 #endif
+
 #if TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
 #else
 	#define TOML_MAY_THROW				noexcept
 #endif
+
 #ifndef TOML_INT_CHARCONV
 	#define TOML_INT_CHARCONV 1
 #endif
@@ -254,6 +269,7 @@
 	#define TOML_INT_CHARCONV 0
 	#define TOML_FLOAT_CHARCONV 0
 #endif
+
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS
 #endif
@@ -281,24 +297,31 @@
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS
 #endif
+
 #ifndef TOML_GNU_ATTR
 	#define TOML_GNU_ATTR(...)
 #endif
+
 #ifndef TOML_INTERFACE
 	#define TOML_INTERFACE
 #endif
+
 #ifndef TOML_EMPTY_BASES
 	#define TOML_EMPTY_BASES
 #endif
+
 #ifndef TOML_ALWAYS_INLINE
 	#define TOML_ALWAYS_INLINE	inline
 #endif
+
 #ifndef TOML_ASSUME
 	#define TOML_ASSUME(cond)	(void)0
 #endif
+
 #ifndef TOML_UNREACHABLE
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
+
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
 #ifdef __cpp_consteval
@@ -306,6 +329,7 @@
 #else
 	#define TOML_CONSTEVAL		constexpr
 #endif
+
 #if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
@@ -317,6 +341,7 @@
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
 #endif
+
 #ifndef TOML_LIKELY
 	#define TOML_LIKELY(...)	(__VA_ARGS__)
 #endif
@@ -326,9 +351,11 @@
 #ifndef TOML_NODISCARD_CTOR
 	#define TOML_NODISCARD_CTOR
 #endif
+
 #ifndef TOML_TRIVIAL_ABI
 	#define TOML_TRIVIAL_ABI
 #endif
+
 #ifndef TOML_RELOPS_REORDERING
 	#define TOML_RELOPS_REORDERING 0
 #endif
@@ -340,6 +367,7 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
+
 #if TOML_ALL_INLINE
 	#define TOML_EXTERNAL_LINKAGE	inline
 	#define TOML_INTERNAL_LINKAGE	inline
@@ -349,6 +377,7 @@
 	#define TOML_INTERNAL_LINKAGE	static
 	#define TOML_INTERNAL_NAMESPACE
 #endif
+
 #define TOML_LIB_MAJOR		1
 #define TOML_LIB_MINOR		3
 #define TOML_LIB_PATCH		2
@@ -367,6 +396,7 @@
 	#define TOML_LANG_EFFECTIVE_VERSION												\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 #endif
+
 #define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
 		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
 
@@ -405,11 +435,11 @@ TOML_POP_WARNINGS
 	#define TOML_STRING_PREFIX(S) S
 #endif
 
-#pragma endregion
+#endif
 //--------------  ↑ toml_preprocessor.h  -------------------------------------------------------------------------------
 
 //------------------------------------------  ↓ toml_common.h  ---------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -434,6 +464,7 @@ TOML_POP_WARNINGS
 #if TOML_CHAR_8_STRINGS && !defined(__cpp_lib_char8_t)
 	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
 #endif
+
 #ifdef __cpp_lib_launder
 	#define TOML_LAUNDER(x)	std::launder(x)
 #else
@@ -860,11 +891,11 @@ namespace toml
 	#endif
 }
 
-#pragma endregion
+#endif
 //------------------------------------------  ↑ toml_common.h  ---------------------------------------------------------
 
 //-----------------------------------------------------------------  ↓ toml_date_time.h  -------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -1178,11 +1209,11 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //-----------------------------------------------------------------  ↑ toml_date_time.h  -------------------------------
 
 //---------------------------------------------------------------------------------------  ↓ toml_print_to_stream.h  ---
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -1579,11 +1610,11 @@ namespace toml
 	#endif
 }
 
-#pragma endregion
+#endif
 //---------------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ---
 
 //------------------  ↓ toml_node.h  -----------------------------------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
@@ -1944,11 +1975,11 @@ namespace toml
 
 TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
-#pragma endregion
+#endif
 //------------------  ↑ toml_node.h  -----------------------------------------------------------------------------------
 
 //------------------------------------------  ↓ toml_value.h  ----------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
@@ -2309,11 +2340,11 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //------------------------------------------  ↑ toml_value.h  ----------------------------------------------------------
 
 //-------------------------------------------------------------------  ↓ toml_array.h  ---------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
@@ -2806,11 +2837,11 @@ namespace toml
 
 TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
 
-#pragma endregion
+#endif
 //-------------------------------------------------------------------  ↑ toml_array.h  ---------------------------------
 
 //--------------------------------------------------------------------------------------------  ↓ toml_table.h  --------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
@@ -3170,11 +3201,11 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_VTABLE_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //--------------------------------------------------------------------------------------------  ↑ toml_table.h  --------
 
 //---------------  ↓ toml_node_view.h  ---------------------------------------------------------------------------------
-#pragma region
+#if 1
 
 namespace toml
 {
@@ -3400,11 +3431,11 @@ namespace toml
 	TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS
 }
 
-#pragma endregion
+#endif
 //---------------  ↑ toml_node_view.h  ---------------------------------------------------------------------------------
 
 //--------------------------------------  ↓ toml_utf8_generated.h  -----------------------------------------------------
-#pragma region
+#if 1
 
 namespace toml::impl
 {
@@ -4114,11 +4145,11 @@ namespace toml::impl
 	#endif // TOML_LANG_UNRELEASED
 } // toml::impl
 
-#pragma endregion
+#endif
 //--------------------------------------  ↑ toml_utf8_generated.h  -----------------------------------------------------
 
 //--------------------------------------------------------------------  ↓ toml_utf8.h  ---------------------------------
-#pragma region
+#if 1
 
 namespace toml::impl
 {
@@ -4365,11 +4396,11 @@ namespace toml::impl
 	};
 }
 
-#pragma endregion
+#endif
 //--------------------------------------------------------------------  ↑ toml_utf8.h  ---------------------------------
 
 //------------------------------------------------------------------------------------------  ↓ toml_formatter.h  ------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -4531,11 +4562,11 @@ namespace toml::impl
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //------------------------------------------------------------------------------------------  ↑ toml_formatter.h  ------
 
 //-----------  ↓ toml_default_formatter.h  -----------------------------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -4879,11 +4910,11 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //-----------  ↑ toml_default_formatter.h  -----------------------------------------------------------------------------
 
 //--------------------------------------  ↓ toml_json_formatter.h  -----------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -4994,13 +5025,13 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //--------------------------------------  ↑ toml_json_formatter.h  -----------------------------------------------------
 
 #if TOML_PARSER
 
 //----------------------------------------------------------------  ↓ toml_parse_error.h  ------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -5129,11 +5160,11 @@ namespace toml
 
 TOML_POP_WARNINGS
 
-#pragma endregion
+#endif
 //----------------------------------------------------------------  ↑ toml_parse_error.h  ------------------------------
 
 //-----------------------------------------------------------------------------------------  ↓ toml_utf8_streams.h  ----
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -5618,11 +5649,11 @@ namespace toml::impl
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //-----------------------------------------------------------------------------------------  ↑ toml_utf8_streams.h  ----
 
 //-----------------  ↓ toml_parser.h  ----------------------------------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -5979,14 +6010,15 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //-----------------  ↑ toml_parser.h  ----------------------------------------------------------------------------------
 
 #endif // TOML_PARSER
+
 #if TOML_IMPLEMENTATION
 
 //------------------------------------------  ↓ toml_node.hpp  ---------------------------------------------------------
-#pragma region
+#if 1
 
 namespace toml
 {
@@ -6040,11 +6072,11 @@ namespace toml
 	TOML_EXTERNAL_LINKAGE const source_region& node::source() const noexcept { return source_; }
 }
 
-#pragma endregion
+#endif
 //------------------------------------------  ↑ toml_node.hpp  ---------------------------------------------------------
 
 //------------------------------------------------------------------  ↓ toml_array.hpp  --------------------------------
-#pragma region
+#if 1
 
 namespace toml
 {
@@ -6257,11 +6289,11 @@ namespace toml
 	}
 }
 
-#pragma endregion
+#endif
 //------------------------------------------------------------------  ↑ toml_array.hpp  --------------------------------
 
 //-------------------------------------------------------------------------------------------  ↓ toml_table.hpp  -------
-#pragma region
+#if 1
 
 namespace toml
 {
@@ -6425,11 +6457,11 @@ namespace toml
 	}
 }
 
-#pragma endregion
+#endif
 //-------------------------------------------------------------------------------------------  ↑ toml_table.hpp  -------
 
 //----------  ↓ toml_default_formatter.hpp  ----------------------------------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -6622,11 +6654,11 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
 
-#pragma endregion
+#endif
 //----------  ↑ toml_default_formatter.hpp  ----------------------------------------------------------------------------
 
 //-------------------------------------  ↓ toml_json_formatter.hpp  ----------------------------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -6677,13 +6709,13 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#pragma endregion
+#endif
 //-------------------------------------  ↑ toml_json_formatter.hpp  ----------------------------------------------------
 
 #if TOML_PARSER
 
 //------------------------------------------------------------------  ↓ toml_parser.hpp  -------------------------------
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -9551,14 +9583,15 @@ namespace toml
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
-#pragma endregion
+#endif
 //------------------------------------------------------------------  ↑ toml_parser.hpp  -------------------------------
 
 #endif // TOML_PARSER
+
 #if !TOML_ALL_INLINE
 
 //---------------------------------------------------------------------------------------  ↓ toml_instantiations.hpp  --
-#pragma region
+#if 1
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -9644,10 +9677,11 @@ namespace toml
 	#endif // TOML_PARSER
 }
 
-#pragma endregion
+#endif
 //---------------------------------------------------------------------------------------  ↑ toml_instantiations.hpp  --
 
 #endif // !TOML_ALL_INLINE
+
 #endif // TOML_IMPLEMENTATION
 
 // macro hygiene
@@ -9700,8 +9734,6 @@ namespace toml
 	#undef TOML_LAUNDER
 #endif
 
-#ifdef __GNUC__
-	#pragma GCC diagnostic pop
-#endif
+
 #endif // INCLUDE_TOMLPLUSPLUS_H
 // clang-format on

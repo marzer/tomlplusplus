@@ -41,9 +41,11 @@
 #if TOML_PARSER
 	#include "toml_parser.hpp"
 #endif // TOML_PARSER
+
 #if !TOML_ALL_INLINE
 	#include "toml_instantiations.hpp"
 #endif // !TOML_ALL_INLINE
+
 #endif // TOML_IMPLEMENTATION
 
 // macro hygiene

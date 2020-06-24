@@ -193,7 +193,7 @@ though you're welcome to reach out via other means. In order of likely response 
 
 [API documentation]: https://marzer.github.io/tomlplusplus/
 [homepage]: https://marzer.github.io/tomlplusplus/
-[unreleased TOML language features]: #unreleased-toml-features
+[unreleased TOML language features]: #-unreleased-language-features
 [most recently-released version]: https://github.com/toml-lang/toml/releases
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t

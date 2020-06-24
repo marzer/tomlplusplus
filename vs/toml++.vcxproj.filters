@@ -49,9 +49,6 @@
     <ClInclude Include="..\include\toml++\toml_version.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\tests\catch2.h">
-      <Filter>tests</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\toml++\toml_array.hpp">
       <Filter>include</Filter>
     </ClInclude>
@@ -80,6 +77,10 @@
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\toml++\toml_json_formatter.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\toml.hpp" />
+    <ClInclude Include="..\tests\settings.h">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -112,9 +113,6 @@
     </None>
     <None Include="..\CONTRIBUTING.md" />
     <None Include="..\meson.build" />
-    <None Include="..\tests\meson.build">
-      <Filter>tests</Filter>
-    </None>
     <None Include="toml++.props" />
   </ItemGroup>
   <ItemGroup>
@@ -126,9 +124,6 @@
     </Filter>
     <Filter Include="doc">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="tests">
-      <UniqueIdentifier>{b838dba3-02f6-446f-840e-6b4c62d2fb0c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

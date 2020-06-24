@@ -23,5 +23,3 @@ namespace Catch
 		template std::string stringify(const node_view<const node>&);
 	}
 }
-
-

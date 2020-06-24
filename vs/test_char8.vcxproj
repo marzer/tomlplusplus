@@ -91,7 +91,12 @@
     <Natvis Include="toml++.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\tests\settings.h" />
     <ClInclude Include="..\tests\tests.h" />
+    <ClInclude Include="..\tests\unicode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\tests\meson.build" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

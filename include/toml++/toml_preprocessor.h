@@ -75,6 +75,7 @@
 	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("clang diagnostic ignored \"-Wshadow\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
 	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
+
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
@@ -112,12 +113,13 @@
 
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
-	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
 	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
 	#define TOML_DISABLE_ALL_WARNINGS		__pragma(warning(pop))	\
 											__pragma(warning(push, 0))
 	#define TOML_POP_WARNINGS				__pragma(warning(pop))
+
+	#define TOML_CPP_VERSION				_MSVC_LANG
 	#define TOML_ALWAYS_INLINE				__forceinline
 	#define TOML_ASSUME(cond)				__assume(cond)
 	#define TOML_UNREACHABLE				__assume(0)
@@ -153,8 +155,8 @@
 											TOML_DISABLE_PADDING_WARNINGS										\
 											TOML_DISABLE_FLOAT_WARNINGS											\
 											TOML_DISABLE_SHADOW_WARNINGS
-
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
+
 	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
 	#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#define TOML_UNREACHABLE				__builtin_unreachable()
