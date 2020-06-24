@@ -9,13 +9,13 @@
 ====
 
  - Header-only
- - [TOML v1.0.0-rc.1], plus optional support for some [unreleased TOML language features]
+ - Supports the latest [TOML] release ([v1.0.0-rc.1]), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
  - Doesn't require RTTI
  - First-class support for serializing to JSON
- - Tested on Clang, GCC and MSVC (VS2019)
+ - Tested on Clang (7+), GCC (7+) and MSVC (VS2019)
  - Tested on x64, x86 and ARM
 
 <br>
@@ -24,7 +24,7 @@
 
 > ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets instead, visit the project homepage at **[marzer.github.io/tomlplusplus](https://marzer.github.io/tomlplusplus/)**_
 
-Given a TOML file `configuration.toml` containing the following:
+Given a [TOML] file `configuration.toml` containing the following:
 ```toml
 [library]
 name = "toml++"
@@ -33,7 +33,7 @@ authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
 [dependencies]
 cpp = 17
 ```
-Reading it in C++ is easy with `toml++`:
+Reading it in C++ is easy with toml++:
 ```cpp
 #include <toml.hpp>
 #include <fstream> //required for toml::parse_file()
@@ -93,8 +93,9 @@ know by making a [feature request]. Better still, if you have the skills and mot
 welcome a pull request with a smile and open arms!
 
 ### Conan
-`toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need to add `tomlplusplus/1.2.3` to your _conanfile_ to include this in your project. The default options are set for the single-header
-flavour, however specifying the option `"multiple_headers": True` is available.
+`toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need
+to add `tomlplusplus/1.2.3` to your _conanfile_ to include this in your project. The default options are set for the
+single-header flavour, however specifying the option `"multiple_headers": True` is available.
 
 <br>
 
@@ -124,7 +125,7 @@ linking incompatible combinations together._
 <br>
 
 # TOML Language Support
-At any given time `toml++` aims to implement whatever the [most recently-released version] of TOML is, with opt-in
+At any given time the library aims to support whatever the [most recently-released version] of TOML is, with opt-in
 support for a number of unreleased features from the [TOML master] and some sane cherry-picks from the
 [TOML issues list] where the discussion strongly indicates inclusion in a near-future release.
 
@@ -161,7 +162,7 @@ If you wish to submit a pull request, please see [CONTRIBUTING] for all the deta
 
 # License and Attribution
 
-`toml++` is licensed under the terms of the MIT license - see [LICENSE].
+toml++ is licensed under the terms of the MIT license - see [LICENSE].
 
 UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[Flexible and Economical UTF-8 Decoder]'.
 
@@ -172,7 +173,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
 - **[@ned14](https://github.com/ned14)** - Reported a bunch of bugs and helped design some new features
 - **[@okureta](https://github.com/okureta)** - Reported a bug
-- **[@prince-chrismc](https://github.com/prince-chrismc)** - Added `toml++` to ConanCenter, and fixed some typos
+- **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
@@ -196,10 +197,10 @@ though you're welcome to reach out via other means. In order of likely response 
 [most recently-released version]: https://github.com/toml-lang/toml/releases
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t
+[TOML]: https://toml.io/
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[TOML v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
-[v1.0.0-rc.1]: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
+[v1.0.0-rc.1]: https://toml.io/en/v1.0.0-rc.1
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/

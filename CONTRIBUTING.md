@@ -13,7 +13,7 @@ If you wish to submit a PR, please be aware that:
 1. Make your changes as necessary
     - If you've added a new header file that isn't going to be transitively included by one of the
         others, add an include directive to `include/toml++/toml.h`
-3. Run `python/generate_single_header.py`
+2. Run `python/generate_single_header.py`
 
 <br>
 

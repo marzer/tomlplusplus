@@ -293,10 +293,10 @@ class RegexReplacer(object):
 
 
 
-# allows the injection of <div> and <span> tags using [div] and [span] proxies.
+# allows the injection of custom tags using square-bracketed proxies.
 class CustomTagsFix(object): 
-	__expression = re.compile(r"\[\s*(span|div)(.*?)\s*\](.*?)\[\s*/\s*\1\s*\]", re.I)
-	__allowedNames = ['dd', 'p']
+	__expression = re.compile(r"\[\s*(span|div|code|pre)(.*?)\s*\](.*?)\[\s*/\s*\1\s*\]", re.I)
+	__allowedNames = ['dd', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
 	
 	@classmethod
 	def __substitute(cls, m):
@@ -474,9 +474,9 @@ class IndexPageFix(object):
 			'https://en.cppreference.com/w/cpp/compiler_support'
 		),
 		(
-			'TOML',
+			'TOML v1.0.0-rc.1',
 			'badge-TOML.svg',
-			'https://github.com/toml-lang/toml/blob/master/README.md'
+			'https://toml.io/en/v1.0.0-rc.1'
 		),
 		(None, None, None), # <br>
 		(

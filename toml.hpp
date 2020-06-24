@@ -17,8 +17,8 @@
 //
 // TOML language specifications:
 // Latest:      https://github.com/toml-lang/toml/blob/master/README.md
-// v1.0.0-rc.1: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
-// v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md
+// v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
+// v0.5.0:      https://toml.io/en/v0.5.0
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -213,7 +213,7 @@
 #if TOML_CPP_VERSION < 201103L
 	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/skystrife/cpptoml
+	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
 #elif TOML_CPP_VERSION >= 202600L
 	#define TOML_CPP 26
 #elif TOML_CPP_VERSION >= 202300L

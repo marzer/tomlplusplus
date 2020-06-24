@@ -26,7 +26,6 @@
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
-
 #if TOML_PARSER
 	#include "toml_parse_error.h"
 	#include "toml_utf8_streams.h"
@@ -39,15 +38,12 @@
 	#include "toml_table.hpp"
 	#include "toml_default_formatter.hpp"
 	#include "toml_json_formatter.hpp"
-
 #if TOML_PARSER
 	#include "toml_parser.hpp"
 #endif // TOML_PARSER
-
 #if !TOML_ALL_INLINE
 	#include "toml_instantiations.hpp"
 #endif // !TOML_ALL_INLINE
-
 #endif // TOML_IMPLEMENTATION
 
 // macro hygiene
@@ -109,14 +105,15 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - [TOML v1.0.0-rc.1](https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md),
-///		plus optional support for some unreleased TOML features
+/// - Header-only
+/// - Supports the latest [TOML](https://toml.io/) release ([v1.0.0-rc.1](https://toml.io/en/v1.0.0-rc.1)), plus
+///   optional support for some unreleased TOML features
 /// - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 /// - Proper UTF-8 handling (incl. BOM)
 /// - Works with or without exceptions
 /// - Doesn't require RTTI
-/// - First-class support for serializing to JSON  
-/// - Tested on Clang, GCC and MSVC (VS2019)  
+/// - First-class support for serializing to JSON
+/// - Tested on Clang (7+), GCC (7+) and MSVC (VS2019)
 /// - Tested on x64, x86 and ARM
 /// 
 ///////////////////////////////////////////////////////////////////////
@@ -124,13 +121,13 @@
 /// \section mainpage-adding-lib Adding toml++ to your project
 /// It's header-only library so really all you have to do is clone
 /// [the repository](https://github.com/marzer/tomlplusplus/) from GitHub and set your include paths.
-/// There's some minor configuration you can do to customize some basic library functionality, but that's totally
+/// There's some minor configuration you can do to customize some basic library functionality, but it's totally
 /// optional.
 /// \see \ref configuration
 /// 
 ///////////////////////////////////////////////////////////////////////
 /// 
-/// \section mainpage-api-documentation API Documentation
+/// \section mainpage-api-documentation API documentation
 /// You're looking at it! Browse the docs using the links at the top of the page.
 /// You can search from anywhere by pressing the TAB key.
 /// 
@@ -140,16 +137,13 @@
 /// 
 ///////////////////////////////////
 /// 
-/// \subsection mainpage-example-parsing-files Parsing TOML files
-/// toml++ works whether you have exceptions enabled or not. For the most part the usage is the same,
-/// the main difference being how parsing errors are reported to the caller. When exceptions are enabled
-/// a successful call to a parsing function simply returns a toml::table, whereas a failed call sees a toml::parse_error
-/// thrown directly from the site of the error:
+/// \subsection mainpage-example-parsing-files Parsing files
+/// Call toml::parse_file() and work with the toml::table you get back, or handle any toml::parse_error that gets thrown:
+/// 
 /// \cpp
 /// #include <iostream>
 /// #include <fstream> //required for parse_file()
 /// #include <toml++/toml.h>
-/// using namespace std::string_view_literals;
 /// 
 /// int main()
 /// {
@@ -160,86 +154,32 @@
 /// 	}
 /// 	catch (const toml::parse_error& err)
 /// 	{
-/// 		std::cerr
-/// 			<< "Error parsing file '" << *err.source().path
-/// 			<< "':\n" << err.description()
-/// 			<< "\n  (" << err.source().begin << ")\n";
+///			std::cerr << "Parsing failed:\n" << err << "\n";
 /// 		return 1;
 /// 	}
-/// 	
+///
 /// 	do_stuff_with_your_config(tbl);
+///
 /// 	return 0;
 /// }
 /// 
 /// \ecpp
 /// 
-/// When exceptions are disabled parsing functions return a toml::parse_result instead and it is up to the caller
-/// to check if parsing has been successful by examining the return value:
-/// \cpp
-/// #include <iostream>
-/// #include <fstream> //required for parse_file()
-/// #include <toml++/toml.h>
-/// using namespace std::string_view_literals;
-/// 
-/// int main()
-/// {
-/// 	toml::parse_result tbl = toml::parse_file("configuration.toml");
-/// 	if (!tbl)
-/// 	{
-/// 		std::cerr
-/// 			<< "Error parsing file '" << *tbl.error().source().path
-/// 			<< "':\n" << tbl.error().description()
-/// 			<< "\n  (" << tbl.error().source().begin << ")\n";
-/// 		return 1;
-/// 	}
-/// 	
-/// 	do_stuff_with_your_config(tbl); //toml::parse_result is convertible to toml::table
-/// 	return 0;
-/// }
-/// \ecpp
-///
-/// Instances of toml::parse_error can be printed directly to streams:
-/// \cpp
-/// try
-///	{
-///		auto tbl = toml::parse("enabled = trUe"sv); //fails; TOML booleans are case-sensitive
-///	}
-///	catch (const toml::parse_error & err)
-///	{
-///		std::cerr << "Parsing failed:\n" << err << "\n";
-///		return 1;
-///	}
-/// \ecpp
-/// 	 
-/// \out
-/// Parsing failed:
-/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
-///		(error occurred at line 1, column 13)
-/// \eout
-/// 
-/// If the default error formatting is not be suitable for your use-case you can access the error's
-/// toml::source_region and description directly from the error object (as in the examples above).
-///
 /// \m_class{m-note m-warning}
 ///
 /// \parblock
-/// <h3>Don't forget &lt;fstream&gt;!</h3>
+/// <h3>Don't forget [code]#include &lt;fstream&gt;[/code]!</h3>
 /// Not everyone who uses the library is going to work directly from files, so not everybody is forced to pay
 /// the compilation overhead of including `<fstream>`. You need to explicitly include it if you're going to be calling
 /// toml::parse_file().
 /// \endparblock
-///
-/// \see
-///		- toml::parse_file()  
-///		- toml::parse_result  
-///		- toml::parse_error  
-///		- toml::source_region  
-///		- toml::source_position
 /// 
 ///////////////////////////////////
 /// 
-/// \subsection mainpage-example-parsing-strings Parsing TOML directly from strings and streams
-/// Strings and std::istreams can be read directly using toml::parse():
+/// \subsection mainpage-example-parsing-strings Parsing strings and iostreams
+/// 
+/// Call toml::parse() and work with the toml::table you get back, or handle any toml::parse_error that gets thrown:
+/// 
 /// \cpp
 /// #include <iostream>
 /// #include <sstream>
@@ -248,50 +188,112 @@
 /// 
 /// int main()
 /// {
-///		static constexpr auto source = R"(
+///		static constexpr std::string_view some_toml = R"(
 ///			[library]
 ///			name = "toml++"
 ///			authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
-///		
-///			[dependencies]
 ///			cpp = 17
 ///		)"sv;
 ///		
-///		// parse directly from a string view:
-///		{
-///			auto tbl = toml::parse(source);
-///			std::cout << tbl << "\n";
+///		try
+/// 	{
+///			// parse directly from a string view:
+///			{
+///				auto tbl = toml::parse(some_toml);
+///				std::cout << tbl << "\n";
+///			}
+///			
+///			// parse from a string stream:
+///			{
+///				std::stringstream ss{ std::string{ some_toml } };
+///				auto tbl = toml::parse(ss);
+///				std::cout << tbl << "\n";
+///			}
 ///		}
-///		
-///		// parse from a string stream:
-///		{
-///			std::stringstream ss{ std::string{ source } };
-///			auto tbl = toml::parse(ss);
-///			std::cout << tbl << "\n";
-///		}
+/// 	catch (const toml::parse_error& err)
+/// 	{
+///			std::cerr << "Parsing failed:\n" << err << "\n";
+/// 		return 1;
+/// 	}
 ///		
 /// 	return 0;
 /// }
 /// \ecpp
 /// 
 /// \out
-/// [dependencies]
-/// cpp = 17
-/// 
 /// [library]
-/// authors = ["Mark Gillard <mark@notarealwebsite.com>"]
+/// authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
+/// cpp = 17
 /// name = "toml++"
 /// 
-/// ... exactly as above, but twice
+/// ... twice
 /// \eout
-/// 
-/// The error-handling semantics are the same as for toml::parse_file.
-/// 
-/// \see toml::parse()  
 /// 
 ///////////////////////////////////
 /// 
-/// \subsection mainpage-example-manipulations Traversing and manipulating data
+/// \subsection mainpage-example-parsing-without-exceptions Parsing without using exceptions
+/// Can't (or won't) use exceptions? That's fine too. You can disable exceptions in your compiler flags and/or
+/// explicitly disable the library's use of them by setting the option \ref TOML_EXCEPTIONS to `0`. In either case,
+/// the parsing functions return a toml::parse_result instead of a toml::table:
+/// 
+/// \cpp
+/// #include <iostream>
+/// #include <fstream>
+/// 
+/// #define TOML_EXCEPTIONS 0 // only necessary if you've left them enabled in your compiler
+/// #include <toml++/toml.h>
+/// 
+/// int main()
+/// {
+/// 	toml::parse_result result = toml::parse_file("configuration.toml");
+/// 	if (!result)
+/// 	{
+///			std::cerr << "Parsing failed:\n" << result.error() << "\n";
+/// 		return 1;
+/// 	}
+/// 	
+/// 	do_stuff_with_your_config(result); //toml::parse_result is convertible to toml::table
+/// 	return 0;
+/// }
+/// \ecpp
+/// 
+///////////////////////////////////
+/// 
+/// \subsection mainpage-example-custom-error-formatting Custom error formatting
+/// The examples above use an overloaded `operator<<` with ostreams to print basic error messages, and look like this:
+/// \out
+/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
+///		(error occurred at line 1, column 13)
+/// \eout
+/// 
+/// In order to keep the library as small as possible I haven't bent over backwards to support things like custom
+/// colouring of the text in TTY environments, et cetera. That being said, the library provides the requisite information 
+/// for you to build these yourself if necessary via toml::parse_error's source() and description() members:
+/// 
+/// \cpp
+/// toml::table tbl;
+/// try
+/// {
+/// 	tbl = toml::parse_file("configuration.toml");
+/// }
+/// catch (const toml::parse_error& err)
+/// {
+/// 	std::cerr
+/// 		<< "Error parsing file '" << *err.source().path
+/// 		<< "':\n" << err.description()
+/// 		<< "\n  (" << err.source().begin << ")\n";
+/// 	return 1;
+/// }
+/// \ecpp
+/// 
+/// \see
+///		- toml::parse_error  
+///		- toml::source_region  
+///		- toml::source_position
+/// 
+///////////////////////////////////
+/// 
+/// \subsection mainpage-example-manipulations Working with TOML data
 /// A TOML document is a tree of values, arrays and tables, represented as the toml::value, toml::array
 /// and toml::table, respectively. All three inherit from toml::node, and can be easily accessed via
 /// the toml::node_view:
@@ -444,12 +446,12 @@
 ///////////////////////////////////
 /// 
 /// \subsection mainpage-example-speed-up-compilation Speeding up compilation
-/// Because `toml++` is a header-only library of nontrivial size you might find that compilation times noticeably
+/// Because toml++ is a header-only library of nontrivial size you might find that compilation times noticeably
 /// increase after you add it to your project, especially if you add the library's header somewhere that's visible from
 /// a large number of translation units. You can counter this by disabling 'all inline' mode and explicitly controlling
 /// where the library's implementation is compiled.
 /// 
-/// <strong>Step 1: Set `TOML_ALL_INLINE` to `0` before including `toml++`</strong>
+/// <strong>Step 1: Set \ref TOML_ALL_INLINE to `0` before including toml++</strong>
 /// 
 /// This must be the same everywhere, so either set it as a global `#define` in your build system, or
 /// do it manually before including toml++ in some global header that's used everywhere in your project:
@@ -460,7 +462,7 @@
 /// #include <toml.hpp>
 /// \ecpp
 /// 
-/// <strong>Step 2: Define `TOML_IMPLEMENTATION` before including `toml++` in one specific translation unit</strong>
+/// <strong>Step 2: Define `TOML_IMPLEMENTATION` before including toml++ in one specific translation unit</strong>
 /// 
 /// \cpp
 /// // some_code_file.cpp
@@ -471,6 +473,8 @@
 /// 
 /// Additionally, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all,
 /// you can `#define TOML_PARSER 0`.
+/// 
+/// \see \ref configuration
 ///
 ///////////////////////////////////////////////////////////////////////
 /// 

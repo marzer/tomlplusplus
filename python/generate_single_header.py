@@ -147,8 +147,8 @@ that contributed to this header can be found at the beginnings and ends of the c
 	preamble.append('''
 TOML language specifications:
 Latest:      https://github.com/toml-lang/toml/blob/master/README.md
-v1.0.0-rc.1: https://github.com/toml-lang/toml/blob/master/versions/en/toml-v1.0.0-rc.1.md
-v0.5.0:      https://github.com/toml-lang/toml/blob/master/versions/en/toml-v0.5.0.md''')
+v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
+v0.5.0:      https://toml.io/en/v0.5.0''')
 	preamble.append(read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE')))
 
 	# write the output file

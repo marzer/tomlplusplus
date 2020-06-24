@@ -33,7 +33,7 @@ namespace toml
 
 	TOML_ABI_NAMESPACE_START(noex)
 
-	/// \brief	An error thrown/returned when parsing fails.
+	/// \brief	An error generated when parsing fails.
 	/// 
 	/// \remarks This class inherits from std::runtime_error when exceptions are enabled.
 	/// 		 The public interface is the same regardless of exception mode.
@@ -63,6 +63,7 @@ namespace toml
 
 
 			/// \brief	Returns a textual description of the error.
+			/// \remark The backing string is guaranteed to be null-terminated.
 			[[nodiscard]]
 			std::string_view description() const noexcept
 			{

@@ -480,8 +480,7 @@ namespace toml
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
-	/// \attention You must `#include <fstream>` to use this function (toml++
-	/// 		 does not transitively include it for you).
+	/// \attention You must `#include <fstream>` to use this function (toml++ does not transitively include it for you).
 	template <typename Char, typename StreamChar = char>
 	[[nodiscard]]
 	TOML_EXTERNAL_LINKAGE
@@ -566,7 +565,7 @@ namespace toml
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
-	/// \brief	Convenience literal operators for working with TOML++.
+	/// \brief	Convenience literal operators for working with toml++.
 	/// 
 	/// \detail This namespace exists so you can safely hoist the UDL operators into another scope
 	/// 		 without dragging in everything in the toml namespace: \cpp

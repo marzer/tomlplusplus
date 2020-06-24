@@ -183,7 +183,7 @@
 #if TOML_CPP_VERSION < 201103L
 	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/skystrife/cpptoml
+	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
 #elif TOML_CPP_VERSION >= 202600L
 	#define TOML_CPP 26
 #elif TOML_CPP_VERSION >= 202300L
@@ -395,7 +395,7 @@ TOML_POP_WARNINGS
 
 /// \addtogroup		configuration		Library Configuration
 /// \brief Preprocessor macros for configuring library functionality.
-/// \detail Define these before including `toml++` to alter the way it functions. 
+/// \detail Define these before including toml++ to alter the way it functions.
 /// \remarks Some of these options have ABI implications; inline namespaces are used to prevent
 /// 		 you from trying to link incompatible combinations together.
 /// @{
@@ -437,7 +437,7 @@ TOML_POP_WARNINGS
 
 #define TOML_CONFIG_HEADER
 /// \def TOML_CONFIG_HEADER
-/// \brief An additional header to include before any other `toml++` header files.
+/// \brief An additional header to include before any other toml++ header files.
 /// \detail Not defined by default.
 
 
