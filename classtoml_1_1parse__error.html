@@ -63,7 +63,7 @@ C++</span></a>
         <h1>
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_error <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
-        <p>An error thrown/returned when parsing fails.</p>
+        <p>An error generated when parsing fails.</p>
         <div class="m-block m-default">
           <h3>Contents</h3>
           <ul>
@@ -79,8 +79,8 @@ C++</span></a>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="a5582e9d66f8aa3f6ef442c0a04d5282f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a textual description of the error.</dd>
             <dt id="a8168b4941305654cf4ba8fc96efd0514">
@@ -88,6 +88,16 @@ C++</span></a>
             </dt>
             <dd>Returns the region of the source document responsible for the error.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5582e9d66f8aa3f6ef442c0a04d5282f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> toml::<wbr/>parse_error::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a textual description of the error.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The backing string is guaranteed to be null-terminated.</p></aside>
+          </div></section>
         </section>
       </div>
     </div>
