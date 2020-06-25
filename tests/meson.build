@@ -1,4 +1,5 @@
 test_sources = [
+	'conformance.cpp',
 	'impl_toml.cpp',
 	'impl_catch2.cpp',
 	'tests.cpp',

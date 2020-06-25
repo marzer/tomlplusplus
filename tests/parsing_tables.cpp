@@ -162,6 +162,8 @@ apple.taste.sweet = true
 			REQUIRE(tbl[S("fruit")][S("orange")].as<table>());
 		}
 	);
+
+	parsing_should_fail(FILE_LINE_ARGS, S(R"([])"sv));
 }
 
 TEST_CASE("parsing - inline tables")

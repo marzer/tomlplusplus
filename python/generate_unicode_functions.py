@@ -7,13 +7,13 @@
 # godbolt session for experimenting with this script: https://godbolt.org/z/Vp-zzE
 
 import sys
-import re
-import os
 import os.path as path
+import utils
+import re
 import math
 import requests
-import traceback
 import bisect
+
 
 
 #### SETTINGS / MISC ##################################################################################################
@@ -97,17 +97,6 @@ def is_pow2(v):
 
 
 
-def in_collection(target, collection):
-	for v in collection:
-		if isinstance(v, (list, tuple, dict, set, range)):
-			if target in v:
-				return True
-		elif v == target:
-			return True
-	return False
-
-
-
 def binary_search(elements, value):
 	index = bisect.bisect_left(elements, value)
 	if index < len(elements) and elements[index] == value:
@@ -178,7 +167,6 @@ def ceil(val):
 
 
 def calc_child_size(span_size):
-
 	if span_size <= G.word_size:
 		return span_size
 	elif span_size <= G.word_size * G.word_size:
@@ -216,6 +204,7 @@ def chunks(l, n):
 
 
 #### SPARSE RANGE #####################################################################################################
+
 
 
 class SparseRange:
@@ -461,6 +450,7 @@ class SparseRange:
 
 
 #### CODEPOINT CHUNK ##################################################################################################
+
 
 
 class CodepointChunk:
@@ -1098,11 +1088,6 @@ def emit_character_function(name, header_file, test_file, codepoints, *character
 
 
 
-def get_script_folder():
-	return path.dirname(path.realpath(sys.argv[0]))
-
-
-
 def append_codepoint(codepoints, codepoint, category):
 	# if (0xD800 <= codepoint <= 0xF8FF # surrogates & private use area
 	# 	or 0x40000 <= codepoint <= 0xDFFFF # planes 4-13
@@ -1138,7 +1123,7 @@ def write_to_files(codepoints, header_file, test_file):
 
 	emit_character_function('is_hexadecimal_digit', header_file, test_file, codepoints, ('a', 'f'), ('A', 'F'), ('0', '9'))
 
-	both('	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)')
+	both('#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)')
 	both('')
 	unicode_exclusions = SparseRange()
 	unicode_exclusions.add(0, 127) # ascii block
@@ -1146,7 +1131,7 @@ def write_to_files(codepoints, header_file, test_file):
 	emit_category_function('is_unicode_letter', header_file, test_file, codepoints, ('Ll', 'Lm', 'Lo', 'Lt', 'Lu'), unicode_exclusions)
 	emit_category_function('is_unicode_number', header_file, test_file, codepoints, ('Nd', 'Nl'), unicode_exclusions)
 	emit_category_function('is_unicode_combining_mark', header_file, test_file, codepoints, ('Mn', 'Mc'), unicode_exclusions)
-	both('	#endif // TOML_LANG_UNRELEASED')
+	both('#endif // TOML_LANG_UNRELEASED')
 
 	header('} // toml::impl')
 
@@ -1155,7 +1140,7 @@ def main():
 
 	# get unicode character database
 	codepoint_list = ''
-	codepoint_file_path = path.join(get_script_folder(), 'UnicodeData.txt')
+	codepoint_file_path = path.join(utils.get_script_folder(), 'UnicodeData.txt')
 	if (not path.exists(codepoint_file_path)):
 		print("Couldn't find unicode database file, will download")
 		response = requests.get(
@@ -1197,8 +1182,8 @@ def main():
 	codepoints.sort(key=lambda r:r[0])
 
 	# write the output files
-	header_file_path = path.join(get_script_folder(), '..', 'include', 'toml++', 'toml_utf8_generated.h')
-	test_file_path = path.join(get_script_folder(), '..', 'tests', 'unicode_generated.cpp')
+	header_file_path = path.join(utils.get_script_folder(), '..', 'include', 'toml++', 'toml_utf8_generated.h')
+	test_file_path = path.join(utils.get_script_folder(), '..', 'tests', 'unicode_generated.cpp')
 	print("Writing to {}".format(header_file_path))
 	with open(header_file_path, 'w', encoding='utf-8', newline='\n') as header_file:
 		if G.generate_tests:
@@ -1211,16 +1196,4 @@ def main():
 
 
 if __name__ == '__main__':
-	try:
-		main()
-	except Exception as err:
-		print(
-			'Fatal error: [{}] {}'.format(
-				type(err).__name__,
-				str(err)
-			),
-			file=sys.stderr
-		)
-		traceback.print_exc(file=sys.stderr)
-		sys.exit(1)
-	sys.exit()
+	utils.run(main)

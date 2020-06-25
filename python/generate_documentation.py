@@ -5,17 +5,15 @@
 # SPDX-License-Identifier: MIT
 
 import sys
-import re
 import os
 import os.path as path
+import utils
+import re
 import traceback
-import datetime
 import subprocess
 import random
-import concurrent.futures
-import shutil
+import concurrent.futures as futures
 import html
-import fnmatch
 import bs4 as soup
 
 
@@ -90,46 +88,6 @@ string_literals = [
 	'_toml'
 ]
 
-def is_tool(name):
-	return shutil.which(name) is not None
-
-
-
-def is_collection(val):
-	if isinstance(val, (list, tuple, dict, set)):
-		return True
-	return False
-
-
-
-def read_all_text_from_file(path):
-	print("Reading {}".format(path))
-	with open(path, 'r', encoding='utf-8') as file:
-		text = file.read()
-	return text
-
-
-
-def get_all_files(dir, all=None, any=None):
-	files = [f for f in [path.join(dir, f) for f in os.listdir(dir)] if path.isfile(f)]
-	if (files and all is not None):
-		if (not is_collection(all)):
-			all = (all,)
-		all = [f for f in all if f is not None]
-		for fil in all:
-			files = fnmatch.filter(files, fil)
-				
-	if (files and any is not None):
-		if (not is_collection(any)):
-			any = (any,)
-		any = [f for f in any if f is not None]
-		if any:
-			results = set()
-			for fil in any:
-				results.update(fnmatch.filter(files, fil))
-			files = [f for f in results]
-	return files
-
 
 
 class HTMLDocument(object):
@@ -186,7 +144,7 @@ class HTMLDocument(object):
 
 
 def html_find_parent(tag, names, cutoff=None):
-	if not is_collection(names):
+	if not utils.is_collection(names):
 		names = [ names ]
 	parent = tag.parent
 	while (parent is not None):
@@ -224,7 +182,7 @@ def html_shallow_search(starting_tag, names, filter = None):
 	if isinstance(starting_tag, soup.NavigableString):
 		return []
 	
-	if not is_collection(names):
+	if not utils.is_collection(names):
 		names = [ names ]
 		
 	if starting_tag.name in names:
@@ -947,22 +905,8 @@ def postprocess_file(dir, file, fixes):
 
 
 
-def delete_directory(dir_path):
-	if (path.exists(dir_path)):
-		print('Deleting {}'.format(dir_path))
-		shutil.rmtree(dir_path)
 
 
-
-def get_script_folder():
-	return path.dirname(path.realpath(sys.argv[0]))
-
-
-
-def run_python_script(script_path, *args):
-	subprocess.check_call(
-		['py' if is_tool('py') else 'python3', script_path] + [arg for arg in args]
-	)
 
 
 
@@ -975,7 +919,7 @@ def main():
 	global _threadError
 	
 	num_threads = os.cpu_count() * 2
-	root_dir = path.join(get_script_folder(), '..')
+	root_dir = path.join(utils.get_script_folder(), '..')
 	docs_dir = path.join(root_dir, 'docs')
 	xml_dir = path.join(docs_dir, 'xml')
 	html_dir = path.join(docs_dir, 'html')
@@ -983,8 +927,8 @@ def main():
 	doxygen = path.join(mcss_dir, 'documentation', 'doxygen.py')
 
 	# delete any previously generated html and xml
-	delete_directory(xml_dir)
-	delete_directory(html_dir)
+	utils.delete_directory(xml_dir)
+	utils.delete_directory(html_dir)
 
 	# run doxygen
 	subprocess.check_call( ['doxygen', 'Doxyfile'], shell=True, cwd=docs_dir )
@@ -993,10 +937,10 @@ def main():
 	preprocess_xml(xml_dir)
 
 	# run doxygen.py (m.css)
-	run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'), '--no-doxygen')
+	utils.run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'), '--no-doxygen')
 
 	# delete xml
-	delete_directory(xml_dir)
+	utils.delete_directory(xml_dir)
 		
 	# post-process html files
 	fixes = [
@@ -1012,11 +956,11 @@ def main():
 		, ExtDocLinksFix()
 		, EnableIfFix()
 	]
-	files = [path.split(f) for f in get_all_files(html_dir, any=('*.html', '*.htm'))]
+	files = [path.split(f) for f in utils.get_all_files(html_dir, any=('*.html', '*.htm'))]
 	if files:
-		with concurrent.futures.ThreadPoolExecutor(max_workers=min(len(files), num_threads)) as executor:
+		with futures.ThreadPoolExecutor(max_workers=min(len(files), num_threads)) as executor:
 			jobs = { executor.submit(postprocess_file, dir, file, fixes) : file for dir, file in files }
-			for job in concurrent.futures.as_completed(jobs):
+			for job in futures.as_completed(jobs):
 				if _threadError:
 					executor.shutdown(False)
 					break
@@ -1024,20 +968,8 @@ def main():
 					file = jobs[job]
 					print('Finished processing {}.'.format(file))
 		if _threadError:
-			sys.exit(1)
+			return 1
 
 
 if __name__ == '__main__':
-	try:
-		main()
-	except Exception as err:
-		print(
-			'Error: [{}] {}'.format(
-				type(err).__name__,
-				str(err)
-			),
-			file=sys.stderr
-		)
-		traceback.print_exc(file=sys.stderr)
-		sys.exit(1)
-	sys.exit()
+	utils.run(main)

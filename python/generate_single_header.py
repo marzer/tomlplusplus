@@ -5,45 +5,19 @@
 # SPDX-License-Identifier: MIT
 
 import sys
-import re
-import os
 import os.path as path
-import traceback
-
-
-
-
-def get_script_folder():
-	return path.dirname(path.realpath(sys.argv[0]))
-
-
-
-def read_all_text_from_file(path):
-	print("Reading {}".format(path))
-	with open(path, 'r', encoding='utf-8') as file:
-		text = file.read()
-	return text
-
-
-
-def repeat_pattern(pattern, count):
-	if len(pattern) == 1:
-		return pattern * count
-
-	text = ''
-	for i in range(0, count):
-		text = text + pattern[i % len(pattern)]
-	return text
+import utils
+import re
 
 
 
 def make_divider(text = None, text_col = 40, pattern = '-'):
 	if (text is None):
-		return "//" + repeat_pattern(pattern, 118)
+		return "//" + utils.repeat_pattern(pattern, 118)
 	else:
-		text = "//{}  {}  ".format(repeat_pattern(pattern, text_col - 2), text);
+		text = "//{}  {}  ".format(utils.repeat_pattern(pattern, text_col - 2), text);
 		if (len(text) < 120):
-			return text + repeat_pattern(pattern, 120 - len(text))
+			return text + utils.repeat_pattern(pattern, 120 - len(text))
 		else:
 			return text
 
@@ -62,7 +36,7 @@ class Preprocessor:
 			return ''
 
 		self.processed_includes.append(incl)
-		text = read_all_text_from_file(path.join(get_script_folder(), '..', 'include', 'toml++', incl)).strip() + '\n'
+		text = utils.read_all_text_from_file(path.join(utils.get_script_folder(), '..', 'include', 'toml++', incl)).strip() + '\n'
 		text = re.sub('\r\n', '\n', text, 0, re.I | re.M) # convert windows newlines
 		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]*?\n', '', text, 0, re.I | re.S) # strip {{ }} blocks
 		self.current_level += 1
@@ -160,10 +134,10 @@ TOML language specifications:
 Latest:      https://github.com/toml-lang/toml/blob/master/README.md
 v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
 v0.5.0:      https://toml.io/en/v0.5.0''')
-	preamble.append(read_all_text_from_file(path.join(get_script_folder(), '..', 'LICENSE')))
+	preamble.append(utils.read_all_text_from_file(path.join(utils.get_script_folder(), '..', 'LICENSE')))
 
 	# write the output file
-	output_file_path = path.join(get_script_folder(), '..', 'toml.hpp')
+	output_file_path = path.join(utils.get_script_folder(), '..', 'toml.hpp')
 	print("Writing to {}".format(output_file_path))
 	with open(output_file_path,'w', encoding='utf-8', newline='\n') as output_file:
 		if (len(preamble) > 0):
@@ -192,17 +166,6 @@ v0.5.0:      https://toml.io/en/v0.5.0''')
 
 
 
+
 if __name__ == '__main__':
-	try:
-		main()
-	except Exception as err:
-		print(
-			'Fatal error: [{}] {}'.format(
-				type(err).__name__,
-				str(err)
-			),
-			file=sys.stderr
-		)
-		traceback.print_exc(file=sys.stderr)
-		sys.exit(1)
-	sys.exit()
+	utils.run(main)

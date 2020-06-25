@@ -193,13 +193,17 @@ inline bool parsing_should_fail(
 		return false;
 	};
 
-	return run_tests([=]() { (void)toml::parse(toml_str); })
-		&& run_tests([=]()
-		{
-			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
-			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-			(void)toml::parse(ss);
-		});
+	auto result = run_tests([=]()
+	{
+		[[maybe_unused]] auto res = toml::parse(toml_str);
+	});
+	result = result && run_tests([=]()
+	{
+		std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
+		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
+		[[maybe_unused]] auto res = toml::parse(ss);
+	});
+	return result;
 
 	#else
 

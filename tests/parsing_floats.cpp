@@ -51,6 +51,35 @@ TEST_CASE("parsing - floats")
 		}
 	);
 
+	// "A float consists of an integer part followed by a fractional part and/or an exponent part"
+	// (i.e. omitting the leading digits before the '.' is not legal in TOML)
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = .1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +.1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -.1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = .1e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = .1e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = .1e-1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +.1e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +.1e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +.1e-1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -.1e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -.1e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -.1e-1"sv));
+
+	// likewise, so is omitting digits _after_ the '.'
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = 1."sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +1."sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -1."sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = 1.e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = 1.e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = 1.e-1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +1.e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +1.e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = +1.e-1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -1.e1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -1.e+1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, S("flt = -1.e-1"sv));
+
 	// value tests
 	parse_expected_value( FILE_LINE_ARGS,               "1e1"sv,             1e1);
 	parse_expected_value( FILE_LINE_ARGS,              "1e+1"sv,            1e+1);
@@ -69,30 +98,6 @@ TEST_CASE("parsing - floats")
 	parse_expected_value( FILE_LINE_ARGS,              "-1.0"sv,            -1.0);
 	parse_expected_value( FILE_LINE_ARGS,            "-1.0e1"sv,          -1.0e1);
 	parse_expected_value( FILE_LINE_ARGS,           "-1.0e-1"sv,         -1.0e-1);
-	parse_expected_value( FILE_LINE_ARGS,                ".1"sv,              .1);
-	parse_expected_value( FILE_LINE_ARGS,               "+.1"sv,             +.1);
-	parse_expected_value( FILE_LINE_ARGS,               "-.1"sv,             -.1);
-	parse_expected_value( FILE_LINE_ARGS,                "1."sv,              1.);
-	parse_expected_value( FILE_LINE_ARGS,               "+1."sv,             +1.);
-	parse_expected_value( FILE_LINE_ARGS,               "-1."sv,             -1.);
-	parse_expected_value( FILE_LINE_ARGS,              "1.e1"sv,            1.e1);
-	parse_expected_value( FILE_LINE_ARGS,             "1.e+1"sv,           1.e+1);
-	parse_expected_value( FILE_LINE_ARGS,             "1.e-1"sv,           1.e-1);
-	parse_expected_value( FILE_LINE_ARGS,             "+1.e1"sv,           +1.e1);
-	parse_expected_value( FILE_LINE_ARGS,            "+1.e+1"sv,          +1.e+1);
-	parse_expected_value( FILE_LINE_ARGS,            "+1.e-1"sv,          +1.e-1);
-	parse_expected_value( FILE_LINE_ARGS,             "-1.e1"sv,           -1.e1);
-	parse_expected_value( FILE_LINE_ARGS,            "-1.e+1"sv,          -1.e+1);
-	parse_expected_value( FILE_LINE_ARGS,            "-1.e-1"sv,          -1.e-1);
-	parse_expected_value( FILE_LINE_ARGS,              ".1e1"sv,            .1e1);
-	parse_expected_value( FILE_LINE_ARGS,             ".1e+1"sv,           .1e+1);
-	parse_expected_value( FILE_LINE_ARGS,             ".1e-1"sv,           .1e-1);
-	parse_expected_value( FILE_LINE_ARGS,             "+.1e1"sv,           +.1e1);
-	parse_expected_value( FILE_LINE_ARGS,            "+.1e+1"sv,          +.1e+1);
-	parse_expected_value( FILE_LINE_ARGS,            "+.1e-1"sv,          +.1e-1);
-	parse_expected_value( FILE_LINE_ARGS,             "-.1e1"sv,           -.1e1);
-	parse_expected_value( FILE_LINE_ARGS,            "-.1e+1"sv,          -.1e+1);
-	parse_expected_value( FILE_LINE_ARGS,            "-.1e-1"sv,          -.1e-1);
 	parse_expected_value( FILE_LINE_ARGS,               "0.1"sv,             0.1);
 	parse_expected_value( FILE_LINE_ARGS,             "0.001"sv,           0.001);
 	parse_expected_value( FILE_LINE_ARGS,             "0.100"sv,           0.100);

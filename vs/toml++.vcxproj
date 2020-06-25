@@ -94,9 +94,11 @@
     <None Include="..\docs\tomlplusplus.js" />
     <None Include="..\meson.build" />
     <None Include="..\python\ci_single_header_check.py" />
+    <None Include="..\python\generate_conformance_tests.py" />
     <None Include="..\python\generate_documentation.py" />
     <None Include="..\python\generate_single_header.py" />
     <None Include="..\python\generate_unicode_functions.py" />
+    <None Include="..\python\utils.py" />
     <None Include="..\README.md" />
     <None Include="toml++.props" />
   </ItemGroup>

@@ -1022,6 +1022,7 @@ namespace toml::impl
 				size_t length = {};
 				const utf8_codepoint* prev = {};
 				bool seen_decimal = false, seen_exponent = false;
+				char first_integer_part = '\0';
 				while (!is_eof() && !is_value_terminator(*cp))
 				{
 					if (*cp == U'_')
@@ -1037,8 +1038,14 @@ namespace toml::impl
 						set_error_and_return_default("underscores must be followed by digits."sv);
 					else if (*cp == U'.')
 					{
+						// .1
+						// -.1
+						// +.1 (no integer part)
+						if (!first_integer_part)
+							set_error_and_return_default("expected decimal digit, saw '.'"sv);
+
 						// 1.0e+.10 (exponent cannot have '.')
-						if (seen_exponent)
+						else if (seen_exponent)
 							set_error_and_return_default("expected exponent decimal digit or sign, saw '.'"sv);
 
 						// 1.0.e+.10
@@ -1051,8 +1058,11 @@ namespace toml::impl
 					}
 					else if (is_match(*cp, U'e', U'E'))
 					{
+						if (prev && !is_decimal_digit(*prev))
+							set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
+
 						// 1.0ee+10 (multiple 'e')
-						if (seen_exponent)
+						else if (seen_exponent)
 							set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
 
 						seen_decimal = true; // implied
@@ -1068,11 +1078,20 @@ namespace toml::impl
 						else if (!is_match(*prev, U'e', U'E'))
 							set_error_and_return_default("expected exponent digit, saw '"sv, *cp, '\'');
 					}
-					else if (!is_decimal_digit(*cp))
-						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
 					else if (length == sizeof(chars))
 						set_error_and_return_default("exceeds maximum length of "sv, sizeof(chars), " characters."sv);
-
+					else if (is_decimal_digit(*cp))
+					{
+						if (!seen_decimal)
+						{
+							if (!first_integer_part)
+								first_integer_part = static_cast<char>(cp->bytes[0]);
+							else if (first_integer_part == '0')
+								set_error_and_return_default("leading zeroes are prohibited"sv);
+						}
+					}
+					else
+						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
 
 					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
@@ -1087,10 +1106,10 @@ namespace toml::impl
 						set_error_and_return_if_eof({});
 						set_error_and_return_default("underscores must be followed by digits."sv);
 					}
-					else if (is_match(*prev, U'e', U'E', U'+', U'-'))
+					else if (is_match(*prev, U'e', U'E', U'+', U'-', U'.'))
 					{
 						set_error_and_return_if_eof({});
-						set_error_and_return_default("expected exponent digit, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
 					}
 				}
 
@@ -2288,17 +2307,30 @@ namespace toml::impl
 					// skip first '['
 					advance_and_return_if_error_or_eof({});
 
+					// skip past any whitespace that followed the '['
+					const bool had_leading_whitespace = consume_leading_whitespace();
+					set_error_and_return_if_eof({});
+
 					// skip second '[' (if present)
 					if (*cp == U'[')
 					{
+						if (had_leading_whitespace)
+							set_error_and_return_default(
+								"[[array-of-table]] brackets must be contiguous (i.e. [ [ this ] ] is prohibited)"sv
+							);
+
 						is_arr = true;
 						advance_and_return_if_error_or_eof({});
+
+						// skip past any whitespace that followed the '['
+						consume_leading_whitespace();
+						set_error_and_return_if_eof({});
 					}
 
-					// skip past any whitespace that followed the '['
-					consume_leading_whitespace();
-					set_error_and_return_if_eof({});
-
+					// check for a premature closing ']'
+					if (*cp == U']')
+						set_error_and_return_default("tables with blank bare keys are explicitly prohibited"sv);
+				
 					// get the actual key
 					start_recording();
 					key = parse_key();

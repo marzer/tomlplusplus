@@ -114,6 +114,12 @@
     <None Include="..\CONTRIBUTING.md" />
     <None Include="..\meson.build" />
     <None Include="toml++.props" />
+    <None Include="..\python\utils.py">
+      <Filter>python</Filter>
+    </None>
+    <None Include="..\python\generate_conformance_tests.py">
+      <Filter>python</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

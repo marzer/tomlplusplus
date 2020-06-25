@@ -34,11 +34,13 @@ namespace
 		"val = {?='b'}"sv,
 
 		"########## tables"sv,
+		"[]"sv,
 		"[foo"sv,
 		"[foo] ?"sv,
 		"[foo] [bar]"sv,
 		"[foo]\n[foo]"sv,
 		"? = 'foo' ?"sv,
+		"[ [foo] ]"sv
 
 		"########## arrays"sv,
 		"val = [,]"sv,
