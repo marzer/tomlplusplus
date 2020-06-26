@@ -193,7 +193,26 @@ namespace toml
 			}
 
 			/// \brief	Value equality operator.
-			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept
+			{
+				if constexpr (std::is_same_v<value_type, double>)
+				{
+					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
+					{
+						return ((static_cast<uint64_t>(l) << 32) | static_cast<uint64_t>(r));
+					};
+					
+					switch (pack(std::fpclassify(lhs.val_), std::fpclassify(rhs)))
+					{
+						case pack(FP_INFINITE, FP_INFINITE): return (lhs.val_ < 0.0) == (rhs < 0.0);
+						case pack(FP_NAN, FP_NAN): return true;
+						default: return lhs.val_ == rhs;
+					}
+				}
+				else
+					return lhs.val_ == rhs;
+
+			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 
 			/// \brief	Value less-than operator.
@@ -224,7 +243,7 @@ namespace toml
 			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
-					return lhs.val_ == rhs.val_;
+					return lhs == rhs.val_; //calls asymmetrical value-equality operator defined above
 				else
 					return false;
 			}

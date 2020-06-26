@@ -549,9 +549,14 @@ namespace toml::impl
 						// handle 'line ending slashes' in multi-line mode
 						if constexpr (MultiLine)
 						{
-							if (is_line_break(*cp))
+							//consume_leading_whitespace
+							if (is_line_break(*cp) || is_whitespace(*cp))
 							{
-								consume_line_break();
+								consume_leading_whitespace();
+								if (!consume_line_break())
+									set_error_and_return_default(
+										"line-ending backslashes must be the last non-whitespace character on the line"sv
+									);
 								skipping_whitespace = true;
 								return_if_error({});
 								continue;

@@ -74,7 +74,8 @@ type_names = [
 	'parse_error',
 	'json_formatter',
 	'default_formatter',
-	'format_flags'
+	'format_flags',
+	'inserter',
 ]
 all_namespaces = [
 	'std',

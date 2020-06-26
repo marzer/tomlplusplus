@@ -568,4 +568,27 @@ namespace toml
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
 	#endif
+
+	/// \brief	Helper class for suppressing move-construction in single-argument array constructors.
+	///
+	/// \detail \cpp
+	/// // desired result: [ [ 42 ] ]
+	/// auto bad = toml::array{ toml::array{ 42 } }
+	/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } }
+	/// std::cout << "bad: " << bad << std::endl;
+	/// std::cout << "good:" << good << std::endl;
+	/// \ecpp
+	/// 
+	/// \out
+	/// bad:  [ 42 ]
+	/// good: [ [ 42 ] ]
+	/// \eout
+	/// 
+	/// \see toml::array
+	template <typename T>
+	struct TOML_TRIVIAL_ABI inserter
+	{
+		T&& value;
+	};
+	template <typename T> inserter(T&&) -> inserter<T>;
 }

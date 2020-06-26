@@ -889,6 +889,13 @@ namespace toml
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
 	#endif
+
+	template <typename T>
+	struct TOML_TRIVIAL_ABI inserter
+	{
+		T&& value;
+	};
+	template <typename T> inserter(T&&) -> inserter<T>;
 }
 
 #endif
@@ -2098,7 +2105,26 @@ namespace toml
 				return *this;
 			}
 
-			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept { return lhs.val_ == rhs; }
+			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept
+			{
+				if constexpr (std::is_same_v<value_type, double>)
+				{
+					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
+					{
+						return ((static_cast<uint64_t>(l) << 32) | static_cast<uint64_t>(r));
+					};
+
+					switch (pack(std::fpclassify(lhs.val_), std::fpclassify(rhs)))
+					{
+						case pack(FP_INFINITE, FP_INFINITE): return (lhs.val_ < 0.0) == (rhs < 0.0);
+						case pack(FP_NAN, FP_NAN): return true;
+						default: return lhs.val_ == rhs;
+					}
+				}
+				else
+					return lhs.val_ == rhs;
+
+			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
 			[[nodiscard]] friend bool operator <  (value_arg lhs, const value& rhs) noexcept { return lhs < rhs.val_; }
@@ -2113,7 +2139,7 @@ namespace toml
 			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
-					return lhs.val_ == rhs.val_;
+					return lhs == rhs.val_; //calls asymmetrical value-equality operator defined above
 				else
 					return false;
 			}
@@ -2530,6 +2556,14 @@ namespace toml::impl
 			);
 			return new value{ std::forward<T>(val) };
 		}
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ALWAYS_INLINE
+	auto make_node(inserter<T>&& val) noexcept
+	{
+		return make_node(std::move(val.value));
 	}
 }
 
@@ -3448,7 +3482,7 @@ namespace toml::impl
 		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<ui64>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
 	}
 
-	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
@@ -4142,7 +4176,7 @@ namespace toml::impl
 		}
 	}
 
-	#endif // TOML_LANG_UNRELEASED
+#endif // TOML_LANG_UNRELEASED
 } // toml::impl
 
 #endif
@@ -7246,9 +7280,14 @@ namespace toml::impl
 						// handle 'line ending slashes' in multi-line mode
 						if constexpr (MultiLine)
 						{
-							if (is_line_break(*cp))
+							//consume_leading_whitespace
+							if (is_line_break(*cp) || is_whitespace(*cp))
 							{
-								consume_line_break();
+								consume_leading_whitespace();
+								if (!consume_line_break())
+									set_error_and_return_default(
+										"line-ending backslashes must be the last non-whitespace character on the line"sv
+									);
 								skipping_whitespace = true;
 								return_if_error({});
 								continue;

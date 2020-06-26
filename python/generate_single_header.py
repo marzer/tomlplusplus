@@ -11,18 +11,6 @@ import re
 
 
 
-def make_divider(text = None, text_col = 40, pattern = '-'):
-	if (text is None):
-		return "//" + utils.repeat_pattern(pattern, 118)
-	else:
-		text = "//{}  {}  ".format(utils.repeat_pattern(pattern, text_col - 2), text);
-		if (len(text) < 120):
-			return text + utils.repeat_pattern(pattern, 120 - len(text))
-		else:
-			return text
-
-
-
 class Preprocessor:
 
 	def __init__(self):
@@ -48,7 +36,7 @@ class Preprocessor:
 			lpad = 28 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.header_indent += 1
 			text = '{}\n#if 1\n\n{}\n\n#endif\n{}\n'.format(
-				make_divider(header_text, lpad), text, make_divider('↑ ' + raw_incl, lpad)
+				utils.make_divider(header_text, lpad), text, utils.make_divider('↑ ' + raw_incl, lpad)
 			)
 
 		return '\n\n' + text + '\n\n' # will get merged later
@@ -141,7 +129,7 @@ v0.5.0:      https://toml.io/en/v0.5.0''')
 	print("Writing to {}".format(output_file_path))
 	with open(output_file_path,'w', encoding='utf-8', newline='\n') as output_file:
 		if (len(preamble) > 0):
-			print(make_divider(), file=output_file)
+			print(utils.make_divider(), file=output_file)
 		for pre in preamble:
 			print('//', file=output_file)
 			for line in pre.strip().splitlines():
@@ -152,7 +140,7 @@ v0.5.0:      https://toml.io/en/v0.5.0''')
 				else:
 					print('\n', file=output_file, end = '')
 			print('//', file=output_file)
-			print(make_divider(), file=output_file)
+			print(utils.make_divider(), file=output_file)
 		print('''// clang-format off
 #ifndef INCLUDE_TOMLPLUSPLUS_H
 #define INCLUDE_TOMLPLUSPLUS_H

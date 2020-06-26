@@ -21,7 +21,7 @@ namespace toml::impl
 		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<ui64>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
 	}
 
-	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Ll, Lm, Lo, Lt, Lu
@@ -752,5 +752,5 @@ namespace toml::impl
 		//# chunk summary: 2282 codepoints from 293 ranges (spanning a search area of 917232)
 	}
 
-	#endif // TOML_LANG_UNRELEASED
+#endif // TOML_LANG_UNRELEASED
 } // toml::impl

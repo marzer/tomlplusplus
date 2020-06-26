@@ -191,6 +191,14 @@ namespace toml::impl
 			return new value{ std::forward<T>(val) };
 		}
 	}
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ALWAYS_INLINE
+	auto make_node(inserter<T>&& val) noexcept
+	{
+		return make_node(std::move(val.value));
+	}
 }
 
 namespace toml
@@ -286,11 +294,30 @@ namespace toml
 			/// \out
 			/// [1, 2.0, "three", [4, 5]]
 			/// \eout
-			/// 	 
-			/// \tparam	U		One of the TOML node or value types (or a type promotable to one).
-			/// \tparam	V		One of the TOML node or value types (or a type promotable to one).
-			/// \param 	val		The value used to initialize node 0.
+			/// 
+			/// \remark	\parblock If you need to construct an array with one child array element, the array's move constructor
+			/// 		will take precedence and perform a move-construction instead. You can use toml::inserter to
+			/// 		suppress this behaviour: \cpp
+			/// // desired result: [ [ 42 ] ]
+			/// auto bad = toml::array{ toml::array{ 42 } }
+			/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } }
+			/// std::cout << "bad: " << bad << std::endl;
+			/// std::cout << "good:" << good << std::endl;
+			/// \ecpp
+			/// 
+			/// \out
+			/// bad:  [ 42 ]
+			/// good: [ [ 42 ] ]
+			/// \eout
+			/// 
+			/// \endparblock
+			/// 
+			/// \tparam	U	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam	V	One of the TOML node or value types (or a type promotable to one).
+			/// \param 	val 	The value used to initialize node 0.
 			/// \param 	vals	The values used to initialize nodes 1...N.
+			///
+			/// \returns	A TOML_NODISCARD_CTOR.
 			template <typename U, typename... V>
 			TOML_NODISCARD_CTOR
 			explicit array(U&& val, V&&... vals)

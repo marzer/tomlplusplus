@@ -86,6 +86,18 @@ def get_all_files(dir, all=None, any=None):
 
 
 
+def make_divider(text = None, text_col = 40, pattern = '-', line_length = 120):
+	if (text is None):
+		return "//" + repeat_pattern(pattern, line_length-2)
+	else:
+		text = "//{}  {}  ".format(repeat_pattern(pattern, text_col - 2), text);
+		if (len(text) < line_length):
+			return text + repeat_pattern(pattern, line_length - len(text))
+		else:
+			return text
+
+
+
 def run(main_func):
 	try:
 		result = main_func()
