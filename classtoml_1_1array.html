@@ -413,9 +413,20 @@ C++</span></a>
                   <td>The values used to initialize nodes 1...N.</td>
                 </tr>
               </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A TOML_NODISCARD_CTOR.</td>
+                </tr>
+              </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"three"</span><span class="sa">sv</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">}</span> <span class="p">};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[1, 2.0, "three", [4, 5]]</span></pre>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[1, 2.0, "three", [4, 5]]</span></pre><aside class="m-note m-default"><h4>Remark</h4><div><p>If you need to construct an array with one child array element, the array's move constructor will take precedence and perform a move-construction instead. You can use <a class="m-doc" href="structtoml_1_1inserter.html">toml::<wbr/>inserter</a> to suppress this behaviour:</p><pre class="m-code"><span class="c1">// desired result: [ [ 42 ] ]</span>
+<span class="k">auto</span> <span class="n">bad</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">}</span>
+<span class="k">auto</span> <span class="n">good</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="ns">toml::</span><span class="ut">inserter</span><span class="p">{</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"bad: "</span> <span class="o">&lt;&lt;</span> <span class="n">bad</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"good:"</span> <span class="o">&lt;&lt;</span> <span class="n">good</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">bad:  [ 42 ]</span>
+<span class="go">good: [ [ 42 ] ]</span></pre></div></aside>
           </div></section>
           <section class="m-doc-details" id="a6467e68e1b35c27f876cf04be684a692"><div>
             <h3>
