@@ -156,18 +156,24 @@ namespace toml
 			/// 
 			/// if (auto val = tbl.get("int_val"sv)->value<int64_t>())
 			///		std::cout << "'int_val' as int64_t: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("int_val"sv)->value<double>())
 			///		std::cout << "'int_val' as double: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("float_val"sv)->value<int64_t>())
 			///		std::cout << "'float_val' as int64_t: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("float_val"sv)->value<double>())
 			///		std::cout << "'float_val' as double: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("string_val"sv)->value<std::string>())
 			///		std::cout << "'string_val' as std::string: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("string_val"sv)->value<std::string_view>())
 			///		std::cout << "'string_val' as std::string_view: "sv << *val << std::endl;
+			///		
 			/// if (auto val = tbl.get("string_val"sv)->value<int64_t>())
-			///		std::cout << "this line won't be printed."sv << std::endl;
+			///		std::cout << "this line won't be printed because string_val wasn't an int."sv << std::endl;
 			/// \ecpp
 			/// 
 			/// \out
@@ -187,12 +193,12 @@ namespace toml
 
 			/// \brief	Gets the raw value contained by this node, or a default.
 			///
-			/// \tparam	T	Default value type. Must be (or be promotable to) one of the TOML value types.
+			/// \tparam	T				Default value type. Must be (or be promotable to) one of the TOML value types.
 			/// \param 	default_value	The default value to return if the node wasn't a value, wasn't the
 			/// 						correct type, or no conversion was possible.
 			///
 			/// \returns	The node's underlying value, or the default if the node wasn't a value, wasn't the
-			/// 						correct type, or no conversion was possible.
+			/// 			correct type, or no conversion was possible.
 			/// 
 			/// \see node::value()
 			template <typename T>
@@ -202,15 +208,15 @@ namespace toml
 			///
 			/// \details \cpp
 			/// 
-			/// auto int_value = node->as<int64_t>();
-			/// auto tbl = node->as<toml::table>();
+			/// toml::value<int64_t>* int_value = node->as<int64_t>();
+			/// toml::table* tbl = node->as<toml::table>();
 			/// if (int_value)
 			///		std::cout << "Node is a value<int64_t>" << std::endl;
 			/// else if (tbl)
 			///		std::cout << "Node is a table" << std::endl;
 			///	
-			///	// fully-qualified value node types also work:
-			///	auto int_value2 = node->as<toml::value<int64_t>>();
+			///	// fully-qualified value node types also work (useful for template code):
+			///	toml::value<int64_t>* int_value2 = node->as<toml::value<int64_t>>();
 			/// if (int_value2)
 			///		std::cout << "Node is a value<int64_t>" << std::endl;
 			///		
@@ -471,12 +477,14 @@ namespace toml
 				return do_visit(*this, std::forward<Func>(visitor));
 			}
 
+			/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
 			template <typename Func>
 			decltype(auto) visit(Func&& visitor) && noexcept(visit_is_nothrow<Func&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<Func>(visitor));
 			}
 
+			/// \brief	Invokes a visitor on the node based on the node's concrete type (const lvalue overload).
 			template <typename Func>
 			decltype(auto) visit(Func&& visitor) const& noexcept(visit_is_nothrow<Func&&, const node&>)
 			{
@@ -490,14 +498,12 @@ namespace toml
 			///			 will fire when invalid accesses are attempted: \cpp
 			///
 			/// auto tbl = toml::parse(R"(
-			/// 
-			///	min = 32
-			///	max = 45
-			///	
+			///		min = 32
+			///		max = 45
 			/// )"sv);
 			/// 
-			/// auto& min_ref = tbl.get("min")->ref<int64_t>(); // this is OK
-			/// auto& max_ref = tbl.get("max")->ref<double>();  // hits assertion because the type is wrong
+			/// int64_t& min_ref = tbl.get("min")->ref<int64_t>(); // matching type
+			/// double& max_ref = tbl.get("max")->ref<double>();  // mismatched type, hits assert()
 			///
 			/// \ecpp
 			/// 
@@ -510,12 +516,14 @@ namespace toml
 				return do_ref<T>(*this);
 			}
 
+			/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
 			template <typename T>
 			[[nodiscard]] impl::unwrapped<T>&& ref() && noexcept
 			{
 				return do_ref<T>(std::move(*this));
 			}
 
+			/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
 			template <typename T>
 			[[nodiscard]] const impl::unwrapped<T>& ref() const& noexcept
 			{

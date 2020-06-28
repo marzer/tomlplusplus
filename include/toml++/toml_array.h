@@ -316,8 +316,6 @@ namespace toml
 			/// \tparam	V	One of the TOML node or value types (or a type promotable to one).
 			/// \param 	val 	The value used to initialize node 0.
 			/// \param 	vals	The values used to initialize nodes 1...N.
-			///
-			/// \returns	A TOML_NODISCARD_CTOR.
 			template <typename U, typename... V>
 			TOML_NODISCARD_CTOR
 			explicit array(U&& val, V&&... vals)
@@ -589,7 +587,7 @@ namespace toml
 			/// \ecpp
 			/// 
 			/// \out
-			/// [1, "drill" 2]
+			/// [1, "drill", 2]
 			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML node or value types.
@@ -933,7 +931,15 @@ namespace toml
 			/// \eout
 			/// 
 			/// \remarks	Arrays inside child tables are not flattened.
-			void flatten();
+			/// 
+			/// A reference to the array.
+			array& flatten() &;
+
+			/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
+			array&& flatten()&&
+			{
+				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
+			}
 
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);

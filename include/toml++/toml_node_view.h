@@ -233,15 +233,13 @@ namespace toml
 			/// 		 actual type. In debug builds an assertion will fire when invalid accesses are attempted: \cpp
 			///
 			/// auto tbl = toml::parse(R"(
-			///	
-			///	min = 32
-			///	max = 45
-			/// 
+			///		min = 32
+			///		max = 45
 			/// )"sv);
 			/// 
-			/// auto& min_ref = tbl["min"].ref<int64_t>(); // this is OK
-			/// auto& max_ref = tbl["max"].ref<double>(); // hits assertion because the type is wrong
-			/// auto& min_ref = tbl["foo"].ref<int64_t>(); // hits assertion because "foo" didn't exist
+			/// int64_t& min_ref = tbl["min"].ref<int64_t>(); // matching type
+			/// double& max_ref = tbl["max"].ref<double>();  // mismatched type, hits assert()
+			/// int64_t& foo_ref = tbl["foo"].ref<int64_t>(); // nonexistent key, hits assert()
 			///
 			/// \ecpp
 			/// 

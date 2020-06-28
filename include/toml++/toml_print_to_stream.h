@@ -368,7 +368,7 @@ namespace toml
 	/// auto tbl = toml::parse("bar = 42"sv);
 	/// 
 	/// std::cout << "The value for 'bar' was found on "sv
-	///		<< tbl.get("bar")->source()
+	///		<< tbl.get("bar")->source().begin()
 	///		<< std::endl;
 	/// 
 	/// \ecpp

@@ -549,7 +549,6 @@ namespace toml::impl
 						// handle 'line ending slashes' in multi-line mode
 						if constexpr (MultiLine)
 						{
-							//consume_leading_whitespace
 							if (is_line_break(*cp) || is_whitespace(*cp))
 							{
 								consume_leading_whitespace();

@@ -121,7 +121,7 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-adding-lib Adding toml++ to your project
-/// It's header-only library so really all you have to do is clone
+/// It's a header-only library so really all you have to do is clone
 /// [the repository](https://github.com/marzer/tomlplusplus/) from GitHub and set your include paths.
 /// There's some minor configuration you can do to customize some basic library functionality, but it's totally
 /// optional.
@@ -175,6 +175,11 @@
 /// the compilation overhead of including `<fstream>`. You need to explicitly include it if you're going to be calling
 /// toml::parse_file().
 /// \endparblock
+/// 
+/// \see
+/// 	- toml::parse_file()  
+/// 	- toml::table  
+/// 	- toml::parse_error
 /// 
 ///////////////////////////////////
 /// 
@@ -231,9 +236,14 @@
 /// ... twice
 /// \eout
 /// 
+/// \see
+/// 	- toml::parse_file()  
+/// 	- toml::table  
+/// 	- toml::parse_error
+/// 
 ///////////////////////////////////
 /// 
-/// \subsection mainpage-example-parsing-without-exceptions Parsing without using exceptions
+/// \subsection mainpage-example-parsing-without-exceptions Handling errors without exceptions
 /// Can't (or won't) use exceptions? That's fine too. You can disable exceptions in your compiler flags and/or
 /// explicitly disable the library's use of them by setting the option \ref TOML_EXCEPTIONS to `0`. In either case,
 /// the parsing functions return a toml::parse_result instead of a toml::table:
@@ -264,8 +274,8 @@
 /// \subsection mainpage-example-custom-error-formatting Custom error formatting
 /// The examples above use an overloaded `operator<<` with ostreams to print basic error messages, and look like this:
 /// \out
-/// Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'
-///		(error occurred at line 1, column 13)
+/// Error while parsing key: expected bare key starting character or string delimiter, saw '?'
+/// (error occurred at line 2, column 5)
 /// \eout
 /// 
 /// In order to keep the library as small as possible I haven't bent over backwards to support things like custom
@@ -501,13 +511,12 @@
 ///////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-contact Contacting the author
-/// For bug reports and feature requests please consider using the
-/// [GitHub issues](https://github.com/marzer/tomlplusplus/issues) system. For anything else though you're welcome
-/// to reach out via other means. In order of likely response speed:
+/// For bug reports and feature requests please use the [GitHub issues](https://github.com/marzer/tomlplusplus/issues)
+/// system. For anything else you're welcome to reach out via other means. In order of likely response speed:
 /// - Twitter: [marzer8789](https://twitter.com/marzer8789)
 /// - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
 /// - Facebook: [marzer](https://www.facebook.com/marzer)
-/// - LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)
+/// - LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)  
 /// 
 
 //# {{

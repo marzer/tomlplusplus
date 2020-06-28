@@ -2862,7 +2862,11 @@ namespace toml
 				return container_equality(lhs, rhs);
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
-			void flatten();
+			array& flatten() &;
+			array&& flatten()&&
+			{
+				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
+			}
 
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
@@ -6271,10 +6275,10 @@ namespace toml
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void array::flatten()
+	array& array::flatten() &
 	{
 		if (values.empty())
-			return;
+			return *this;
 
 		bool requires_flattening = false;
 		size_t size_after_flattening = values.size();
@@ -6295,7 +6299,7 @@ namespace toml
 		}
 
 		if (!requires_flattening)
-			return;
+			return *this;
 
 		values.reserve(size_after_flattening);
 
@@ -6315,6 +6319,8 @@ namespace toml
 				preinsertion_resize(i + 1_sz, leaf_count - 1_sz);
 			flatten_child(std::move(*arr), i); //increments i
 		}
+
+		return *this;
 	}
 }
 
@@ -7280,7 +7286,6 @@ namespace toml::impl
 						// handle 'line ending slashes' in multi-line mode
 						if constexpr (MultiLine)
 						{
-							//consume_leading_whitespace
 							if (is_line_break(*cp) || is_whitespace(*cp))
 							{
 								consume_leading_whitespace();
