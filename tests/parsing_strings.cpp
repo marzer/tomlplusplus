@@ -9,7 +9,7 @@ TEST_CASE("parsing - strings")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."
 
 str1 = """
@@ -20,7 +20,7 @@ str2 = """
 
 Roses are red
 Violets are blue"""
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("str")] == S("I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."sv));
@@ -31,7 +31,7 @@ Violets are blue"""
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 # The following strings are byte-for-byte equivalent:
 str1 = "The quick brown fox jumps over the lazy dog."
 
@@ -55,7 +55,7 @@ str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
 
 # "This," she said, "is just a pointless statement."
 str7 = """"This," she said, "is just a pointless statement.""""
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			static constexpr auto quick_brown_fox = S("The quick brown fox jumps over the lazy dog."sv);
@@ -69,11 +69,11 @@ str7 = """"This," she said, "is just a pointless statement.""""
 		}
 	);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(str5 = """Here are three quotation marks: """.""")"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(str5 = """Here are three quotation marks: """.""")"sv);
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 # What you see is what you get.
 winpath  = 'C:\Users\nodejs\templates'
 winpath2 = '\\ServerX\admin$\system32\'
@@ -93,7 +93,7 @@ trimmed in raw strings.
    All other whitespace
    is preserved.
 '''
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("winpath")] == S(R"(C:\Users\nodejs\templates)"sv));
@@ -117,7 +117,7 @@ trimmed in raw strings.
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
 
 # apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
@@ -125,7 +125,7 @@ apos15 = "Here are fifteen apostrophes: '''''''''''''''"
 
 # 'That's still pointless', she said.
 str = ''''That's still pointless', she said.'''
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("quot15")] == S(R"(Here are fifteen quotation marks: """"""""""""""")"sv));
@@ -134,7 +134,7 @@ str = ''''That's still pointless', she said.'''
 		}
 	);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv);
 
 	// value tests
 	parse_expected_value(

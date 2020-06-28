@@ -9,7 +9,7 @@ TEST_CASE("parsing - arrays")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 			integers = [ 1, 2, 3 ]
 			integers2 = [
 			  1, 2, 3
@@ -22,7 +22,7 @@ TEST_CASE("parsing - arrays")
 			nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ]
 			nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ]
 			string_array = [ "all", 'strings', """are the same""", '''type''' ]
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("integers")].as<array>());
@@ -103,14 +103,14 @@ TEST_CASE("parsing - arrays")
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS, 
-		S(R"(
+		R"(
 			# Mixed-type arrays are allowed
 			numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
 			contributors = [
 			  "Foo Bar <foo@example.com>",
 			  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
 			]
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("numbers")].as<array>());

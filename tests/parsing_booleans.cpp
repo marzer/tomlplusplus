@@ -9,10 +9,10 @@ TEST_CASE("parsing - booleans")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 			bool1 = true
 			bool2 = false
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("bool1")] == true);
@@ -21,12 +21,12 @@ TEST_CASE("parsing - booleans")
 	);
 
 	// "Always lowercase."
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = True"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = TRUE"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = tRUE"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = False"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = FALSE"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bool = fALSE"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "bool = True"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bool = TRUE"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bool = tRUE"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bool = False"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bool = FALSE"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bool = fALSE"sv);
 
 	// value tests
 	parse_expected_value(FILE_LINE_ARGS, " true",  true);

@@ -26,11 +26,6 @@
 	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
-#include <ostream>
-TOML_POP_WARNINGS
-
 namespace toml
 {
 	using std::declval;

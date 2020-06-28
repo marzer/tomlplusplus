@@ -10,7 +10,7 @@ TOML_DISABLE_INIT_WARNINGS
 
 TEST_CASE("parsing - TOML spec example")
 {
-	static constexpr auto toml_text = S(R"(
+	static constexpr auto toml_text = R"(
 		# This is a TOML document.
 
 		title = "TOML Example"
@@ -44,7 +44,7 @@ TEST_CASE("parsing - TOML spec example")
 		  "alpha",
 		  "omega"
 		]
-	)"sv);
+	)"sv;
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,

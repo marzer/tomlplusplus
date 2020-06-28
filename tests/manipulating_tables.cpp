@@ -11,7 +11,7 @@ TEST_CASE("tables - moving")
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(test = { val1 = "foo" })"sv),
+		R"(test = { val1 = "foo" })"sv,
 		[&](table&& tbl)
 		{
 			CHECK(tbl.source().begin == source_position{ 1, 1 });

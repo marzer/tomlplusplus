@@ -15,21 +15,21 @@ namespace {
 
 namespace valid
 {
-	static constexpr auto burntsushi_array_empty = S(R"(thevoid = [[[[[]]]]])"sv);
-	static constexpr auto burntsushi_array_nospaces = S(R"(ints = [1,2,3])"sv);
-	static constexpr auto burntsushi_array_string_quote_comma_2 = S(R"(title = [ " \", ",])"sv);
-	static constexpr auto burntsushi_array_string_quote_comma = S(R"(title = [
+	static constexpr auto burntsushi_array_empty = R"(thevoid = [[[[[]]]]])"sv;
+	static constexpr auto burntsushi_array_nospaces = R"(ints = [1,2,3])"sv;
+	static constexpr auto burntsushi_array_string_quote_comma_2 = R"(title = [ " \", ",])"sv;
+	static constexpr auto burntsushi_array_string_quote_comma = R"(title = [
 "Client: \"XXXX\", Job: XXXX",
 "Code: XXXX"
-])"sv);
-	static constexpr auto burntsushi_array_string_with_comma = S(R"(title = [
+])"sv;
+	static constexpr auto burntsushi_array_string_with_comma = R"(title = [
 "Client: XXXX, Job: XXXX",
 "Code: XXXX"
-])"sv);
-	static constexpr auto burntsushi_array_table_array_string_backslash = S(R"(foo = [ { bar="\"{{baz}}\""} ])"sv);
-	static constexpr auto burntsushi_arrays_hetergeneous = S(R"(mixed = [[1, 2], ["a", "b"], [1.1, 2.1]])"sv);
-	static constexpr auto burntsushi_arrays_nested = S(R"(nest = [["a"], ["b"]])"sv);
-	static constexpr auto burntsushi_arrays = S(R"(ints = [1, 2, 3]
+])"sv;
+	static constexpr auto burntsushi_array_table_array_string_backslash = R"(foo = [ { bar="\"{{baz}}\""} ])"sv;
+	static constexpr auto burntsushi_arrays_hetergeneous = R"(mixed = [[1, 2], ["a", "b"], [1.1, 2.1]])"sv;
+	static constexpr auto burntsushi_arrays_nested = R"(nest = [["a"], ["b"]])"sv;
+	static constexpr auto burntsushi_arrays = R"(ints = [1, 2, 3]
 floats = [1.1, 2.1, 3.1]
 strings = ["a", "b", "c"]
 dates = [
@@ -40,14 +40,14 @@ dates = [
 comments = [
          1,
          2, #this is ok
-])"sv);
-	static constexpr auto burntsushi_bool = S(R"(t = true
-f = false)"sv);
-	static constexpr auto burntsushi_comments_at_eof = S(R"(# This is a full-line comment
-key = "value" # This is a comment at the end of a line)"sv);
-	static constexpr auto burntsushi_comments_at_eof2 = S(R"(# This is a full-line comment
-key = "value" # This is a comment at the end of a line)"sv);
-	static constexpr auto burntsushi_comments_everywhere = S(R"(# Top comment.
+])"sv;
+	static constexpr auto burntsushi_bool = R"(t = true
+f = false)"sv;
+	static constexpr auto burntsushi_comments_at_eof = R"(# This is a full-line comment
+key = "value" # This is a comment at the end of a line)"sv;
+	static constexpr auto burntsushi_comments_at_eof2 = R"(# This is a full-line comment
+key = "value" # This is a comment at the end of a line)"sv;
+	static constexpr auto burntsushi_comments_everywhere = R"(# Top comment.
   # Top comment.
 # Top comment.
 
@@ -70,63 +70,63 @@ more = [ # Comment
           # Evil.
 # Evil.
 # ] Did I fool you?
-] # Hopefully not.)"sv);
-	static constexpr auto burntsushi_datetime_timezone = S(R"(bestdayever = 2017-06-06T12:34:56-05:00)"sv);
-	static constexpr auto burntsushi_double_quote_escape = S(R"(test = "\"one\"")"sv);
-	static constexpr auto burntsushi_empty = S(R"()"sv);
-	static constexpr auto burntsushi_escaped_escape = S(R"(answer = "\\x64")"sv);
-	static constexpr auto burntsushi_example = S(R"(best-day-ever = 1987-07-05T17:45:00Z
+] # Hopefully not.)"sv;
+	static constexpr auto burntsushi_datetime_timezone = R"(bestdayever = 2017-06-06T12:34:56-05:00)"sv;
+	static constexpr auto burntsushi_double_quote_escape = R"(test = "\"one\"")"sv;
+	static constexpr auto burntsushi_empty = R"()"sv;
+	static constexpr auto burntsushi_escaped_escape = R"(answer = "\\x64")"sv;
+	static constexpr auto burntsushi_example = R"(best-day-ever = 1987-07-05T17:45:00Z
 
 [numtheory]
 boring = false
-perfection = [6, 28, 496])"sv);
-	static constexpr auto burntsushi_exponent_part_float = S(R"(million = 1e6
+perfection = [6, 28, 496])"sv;
+	static constexpr auto burntsushi_exponent_part_float = R"(million = 1e6
 minustenth = -1E-1
-beast = 6.66E2)"sv);
-	static constexpr auto burntsushi_float_exponent = S(R"(lower = 3e2
+beast = 6.66E2)"sv;
+	static constexpr auto burntsushi_float_exponent = R"(lower = 3e2
 upper = 3E2
 neg = 3e-2
 pos = 3E+2
 zero = 3e0
 pointlower = 3.1e2
-pointupper = 3.1E2)"sv);
-	static constexpr auto burntsushi_float_underscore = S(R"(before = 3_141.5927
+pointupper = 3.1E2)"sv;
+	static constexpr auto burntsushi_float_underscore = R"(before = 3_141.5927
 after = 3141.592_7
-exponent = 3e1_4)"sv);
-	static constexpr auto burntsushi_float = S(R"(pi = 3.14
+exponent = 3e1_4)"sv;
+	static constexpr auto burntsushi_float = R"(pi = 3.14
 pospi = +3.14
 negpi = -3.14
-zero-intpart = 0.123)"sv);
-	static constexpr auto burntsushi_implicit_and_explicit_after = S(R"([a.b.c]
+zero-intpart = 0.123)"sv;
+	static constexpr auto burntsushi_implicit_and_explicit_after = R"([a.b.c]
 answer = 42
 
 [a]
-better = 43)"sv);
-	static constexpr auto burntsushi_implicit_and_explicit_before = S(R"([a]
+better = 43)"sv;
+	static constexpr auto burntsushi_implicit_and_explicit_before = R"([a]
 better = 43
 
 [a.b.c]
-answer = 42)"sv);
-	static constexpr auto burntsushi_implicit_groups = S(R"([a.b.c]
-answer = 42)"sv);
-	static constexpr auto burntsushi_inline_table_array = S(R"(people = [{first_name = "Bruce", last_name = "Springsteen"},
+answer = 42)"sv;
+	static constexpr auto burntsushi_implicit_groups = R"([a.b.c]
+answer = 42)"sv;
+	static constexpr auto burntsushi_inline_table_array = R"(people = [{first_name = "Bruce", last_name = "Springsteen"},
           {first_name = "Eric", last_name = "Clapton"},
-          {first_name = "Bob", last_name = "Seger"}])"sv);
-	static constexpr auto burntsushi_inline_table = S(R"(name = { first = "Tom", last = "Preston-Werner" }
+          {first_name = "Bob", last_name = "Seger"}])"sv;
+	static constexpr auto burntsushi_inline_table = R"(name = { first = "Tom", last = "Preston-Werner" }
 point = { x = 1, y = 2 }
 simple = { a = 1 }
 str-key = { "a" = 1 }
-table-array = [{ "a" = 1 }, { "b" = 2 }])"sv);
-	static constexpr auto burntsushi_integer_underscore = S(R"(kilo = 1_000)"sv);
-	static constexpr auto burntsushi_integer = S(R"(answer = 42
+table-array = [{ "a" = 1 }, { "b" = 2 }])"sv;
+	static constexpr auto burntsushi_integer_underscore = R"(kilo = 1_000)"sv;
+	static constexpr auto burntsushi_integer = R"(answer = 42
 posanswer = +42
 neganswer = -42
-zero = 0)"sv);
-	static constexpr auto burntsushi_key_equals_nospace = S(R"(answer=42)"sv);
-	static constexpr auto burntsushi_key_numeric = S(R"(1 = 1)"sv);
-	static constexpr auto burntsushi_key_space = S(R"("a b" = 1)"sv);
-	static constexpr auto burntsushi_key_special_chars = S(R"("~!@$^&*()_+-`1234567890[]|/?><.,;:'" = 1)"sv);
-	static constexpr auto burntsushi_keys_with_dots = S(R"(plain = 1
+zero = 0)"sv;
+	static constexpr auto burntsushi_key_equals_nospace = R"(answer=42)"sv;
+	static constexpr auto burntsushi_key_numeric = R"(1 = 1)"sv;
+	static constexpr auto burntsushi_key_space = R"("a b" = 1)"sv;
+	static constexpr auto burntsushi_key_special_chars = R"("~!@$^&*()_+-`1234567890[]|/?><.,;:'" = 1)"sv;
+	static constexpr auto burntsushi_keys_with_dots = R"(plain = 1
 "with.dot" = 2
 
 [plain_table]
@@ -135,12 +135,12 @@ plain = 3
 
 [table.withdot]
 plain = 5
-"key.with.dots" = 6)"sv);
-	static constexpr auto burntsushi_long_float = S(R"(longpi = 3.141592653589793
-neglongpi = -3.141592653589793)"sv);
-	static constexpr auto burntsushi_long_integer = S(R"(answer = 9223372036854775807
-neganswer = -9223372036854775808)"sv);
-	static constexpr auto burntsushi_multiline_string = S(R"(multiline_empty_one = """"""
+"key.with.dots" = 6)"sv;
+	static constexpr auto burntsushi_long_float = R"(longpi = 3.141592653589793
+neglongpi = -3.141592653589793)"sv;
+	static constexpr auto burntsushi_long_integer = R"(answer = 9223372036854775807
+neganswer = -9223372036854775808)"sv;
+	static constexpr auto burntsushi_multiline_string = R"(multiline_empty_one = """"""
 multiline_empty_two = """
 """
 multiline_empty_three = """\
@@ -162,13 +162,13 @@ equivalent_three = """\
        The quick brown \
        fox jumps over \
        the lazy dog.\
-       """)"sv);
-	static constexpr auto burntsushi_nested_inline_table_array = S(R"(a = [ { b = {} } ])"sv);
-	static constexpr auto burntsushi_newline_crlf = S(R"(os = "DOS"
-newline = "crlf")"sv);
-	static constexpr auto burntsushi_newline_lf = S(R"(os = "unix"
-newline = "lf")"sv);
-	static constexpr auto burntsushi_raw_multiline_string = S(R"(oneline = '''This string has a ' quote character.'''
+       """)"sv;
+	static constexpr auto burntsushi_nested_inline_table_array = R"(a = [ { b = {} } ])"sv;
+	static constexpr auto burntsushi_newline_crlf = R"(os = "DOS"
+newline = "crlf")"sv;
+	static constexpr auto burntsushi_newline_lf = R"(os = "unix"
+newline = "lf")"sv;
+	static constexpr auto burntsushi_raw_multiline_string = R"(oneline = '''This string has a ' quote character.'''
 firstnl = '''
 This string has a ' quote character.'''
 multiline = '''
@@ -176,28 +176,28 @@ This string
 has ' a quote character
 and more than
 one newline
-in it.''')"sv);
-	static constexpr auto burntsushi_raw_string = S(R"(backspace = 'This string has a \b backspace character.'
+in it.''')"sv;
+	static constexpr auto burntsushi_raw_string = R"(backspace = 'This string has a \b backspace character.'
 tab = 'This string has a \t tab character.'
 newline = 'This string has a \n new line character.'
 formfeed = 'This string has a \f form feed character.'
 carriage = 'This string has a \r carriage return character.'
 slash = 'This string has a \/ slash character.'
-backslash = 'This string has a \\ backslash character.')"sv);
-	static constexpr auto burntsushi_right_curly_brace_after_boolean = S(R"(black = { python=">3.6", version=">=18.9b0", allow_prereleases=true })"sv);
-	static constexpr auto burntsushi_string_empty = S(R"(answer = "")"sv);
-	static constexpr auto burntsushi_string_nl = S(R"(nl_mid = "val\nue"
+backslash = 'This string has a \\ backslash character.')"sv;
+	static constexpr auto burntsushi_right_curly_brace_after_boolean = R"(black = { python=">3.6", version=">=18.9b0", allow_prereleases=true })"sv;
+	static constexpr auto burntsushi_string_empty = R"(answer = "")"sv;
+	static constexpr auto burntsushi_string_nl = R"(nl_mid = "val\nue"
 nl_end = """value\n"""
 
 lit_nl_end = '''value\n'''
 lit_nl_mid = 'val\nue'
-lit_nl_uni = 'val\ue')"sv);
-	static constexpr auto burntsushi_string_simple = S(R"(answer = "You are not drinking enough whisky.")"sv);
-	static constexpr auto burntsushi_string_with_pound = S(R"(pound = "We see no # comments here."
-poundcomment = "But there are # some comments here." # Did I # mess you up?)"sv);
-	static constexpr auto burntsushi_table_array_implicit = S(R"([[albums.songs]]
-name = "Glory Days")"sv);
-	static constexpr auto burntsushi_table_array_many = S(R"([[people]]
+lit_nl_uni = 'val\ue')"sv;
+	static constexpr auto burntsushi_string_simple = R"(answer = "You are not drinking enough whisky.")"sv;
+	static constexpr auto burntsushi_string_with_pound = R"(pound = "We see no # comments here."
+poundcomment = "But there are # some comments here." # Did I # mess you up?)"sv;
+	static constexpr auto burntsushi_table_array_implicit = R"([[albums.songs]]
+name = "Glory Days")"sv;
+	static constexpr auto burntsushi_table_array_many = R"([[people]]
 first_name = "Bruce"
 last_name = "Springsteen"
 
@@ -207,8 +207,8 @@ last_name = "Clapton"
 
 [[people]]
 first_name = "Bob"
-last_name = "Seger")"sv);
-	static constexpr auto burntsushi_table_array_nest = S(R"([[albums]]
+last_name = "Seger")"sv;
+	static constexpr auto burntsushi_table_array_nest = R"([[albums]]
 name = "Born to Run"
 
   [[albums.songs]]
@@ -224,55 +224,55 @@ name = "Born in the USA"
   name = "Glory Days"
 
   [[albums.songs]]
-  name = "Dancing in the Dark")"sv);
-	static constexpr auto burntsushi_table_array_one = S(R"([[people]]
+  name = "Dancing in the Dark")"sv;
+	static constexpr auto burntsushi_table_array_one = R"([[people]]
 first_name = "Bruce"
-last_name = "Springsteen")"sv);
-	static constexpr auto burntsushi_table_array_table_array = S(R"([[a]]
+last_name = "Springsteen")"sv;
+	static constexpr auto burntsushi_table_array_table_array = R"([[a]]
     [[a.b]]
         [a.b.c]
             d = "val0"
     [[a.b]]
         [a.b.c]
-            d = "val1")"sv);
-	static constexpr auto burntsushi_table_empty = S(R"([a])"sv);
-	static constexpr auto burntsushi_table_no_eol = S(R"([table])"sv);
-	static constexpr auto burntsushi_table_sub_empty = S(R"([a]
-[a.b])"sv);
-	static constexpr auto burntsushi_table_whitespace = S(R"(["valid key"])"sv);
-	static constexpr auto burntsushi_table_with_literal_string = S(R"(['a']
+            d = "val1")"sv;
+	static constexpr auto burntsushi_table_empty = R"([a])"sv;
+	static constexpr auto burntsushi_table_no_eol = R"([table])"sv;
+	static constexpr auto burntsushi_table_sub_empty = R"([a]
+[a.b])"sv;
+	static constexpr auto burntsushi_table_whitespace = R"(["valid key"])"sv;
+	static constexpr auto burntsushi_table_with_literal_string = R"(['a']
 [a.'"b"']
 [a.'"b"'.c]
-answer = 42)"sv);
-	static constexpr auto burntsushi_table_with_pound = S(R"(["key#group"]
-answer = 42)"sv);
-	static constexpr auto burntsushi_table_with_single_quotes = S(R"(['a']
+answer = 42)"sv;
+	static constexpr auto burntsushi_table_with_pound = R"(["key#group"]
+answer = 42)"sv;
+	static constexpr auto burntsushi_table_with_single_quotes = R"(['a']
 [a.'b']
 [a.'b'.c]
-answer = 42)"sv);
-	static constexpr auto burntsushi_underscored_float = S(R"(electron_mass = 9_109.109_383e-3_4)"sv);
-	static constexpr auto burntsushi_underscored_integer = S(R"(million = 1_000_000)"sv);
-	static constexpr auto burntsushi_unicode_escape = S(R"(answer4 = "\u03B4"
-answer8 = "\U000003B4")"sv);
-	static constexpr auto burntsushi_unicode_literal = S(R"(answer = "δ")"sv);
-	static constexpr auto iarna_spec_array_1 = S(R"(integers = [ 1, 2, 3 ])"sv);
-	static constexpr auto iarna_spec_array_2 = S(R"(colors = [ "red", "yellow", "green" ])"sv);
-	static constexpr auto iarna_spec_array_3 = S(R"(nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ])"sv);
-	static constexpr auto iarna_spec_array_4 = S(R"(string_array = [ "all", 'strings', """are the same""", '''type'''])"sv);
-	static constexpr auto iarna_spec_array_5 = S(R"(nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ])"sv);
-	static constexpr auto iarna_spec_array_7 = S(R"(integers2 = [
+answer = 42)"sv;
+	static constexpr auto burntsushi_underscored_float = R"(electron_mass = 9_109.109_383e-3_4)"sv;
+	static constexpr auto burntsushi_underscored_integer = R"(million = 1_000_000)"sv;
+	static constexpr auto burntsushi_unicode_escape = R"(answer4 = "\u03B4"
+answer8 = "\U000003B4")"sv;
+	static constexpr auto burntsushi_unicode_literal = R"(answer = "δ")"sv;
+	static constexpr auto iarna_spec_array_1 = R"(integers = [ 1, 2, 3 ])"sv;
+	static constexpr auto iarna_spec_array_2 = R"(colors = [ "red", "yellow", "green" ])"sv;
+	static constexpr auto iarna_spec_array_3 = R"(nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ])"sv;
+	static constexpr auto iarna_spec_array_4 = R"(string_array = [ "all", 'strings', """are the same""", '''type'''])"sv;
+	static constexpr auto iarna_spec_array_5 = R"(nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ])"sv;
+	static constexpr auto iarna_spec_array_7 = R"(integers2 = [
   1, 2, 3
-])"sv);
-	static constexpr auto iarna_spec_array_8 = S(R"(integers3 = [
+])"sv;
+	static constexpr auto iarna_spec_array_8 = R"(integers3 = [
   1,
   2, # this is ok
-])"sv);
-	static constexpr auto iarna_spec_array_mixed_number_types = S(R"(numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ])"sv);
-	static constexpr auto iarna_spec_array_more_mixed_types = S(R"(contributors = [
+])"sv;
+	static constexpr auto iarna_spec_array_mixed_number_types = R"(numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ])"sv;
+	static constexpr auto iarna_spec_array_more_mixed_types = R"(contributors = [
   "Foo Bar <foo@example.com>",
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-])"sv);
-	static constexpr auto iarna_spec_array_of_tables_1 = S(R"([[products]]
+])"sv;
+	static constexpr auto iarna_spec_array_of_tables_1 = R"([[products]]
 name = "Hammer"
 sku = 738594937
 
@@ -281,8 +281,8 @@ sku = 738594937
 [[products]]
 name = "Nail"
 sku = 284758393
-color = "gray")"sv);
-	static constexpr auto iarna_spec_array_of_tables_2 = S(R"([[fruit]]
+color = "gray")"sv;
+	static constexpr auto iarna_spec_array_of_tables_2 = R"([[fruit]]
   name = "apple"
 
   [fruit.physical]
@@ -299,47 +299,47 @@ color = "gray")"sv);
   name = "banana"
 
   [[fruit.variety]]
-    name = "plantain")"sv);
-	static constexpr auto iarna_spec_array_of_tables_3 = S(R"(points = [ { x = 1, y = 2, z = 3 },
+    name = "plantain")"sv;
+	static constexpr auto iarna_spec_array_of_tables_3 = R"(points = [ { x = 1, y = 2, z = 3 },
            { x = 7, y = 8, z = 9 },
-           { x = 2, y = 4, z = 8 } ])"sv);
-	static constexpr auto iarna_spec_boolean_1 = S(R"(bool1 = true)"sv);
-	static constexpr auto iarna_spec_boolean_2 = S(R"(bool1 = false)"sv);
-	static constexpr auto iarna_spec_case_sensitive = S(R"(# TOML is case sensitive.
+           { x = 2, y = 4, z = 8 } ])"sv;
+	static constexpr auto iarna_spec_boolean_1 = R"(bool1 = true)"sv;
+	static constexpr auto iarna_spec_boolean_2 = R"(bool1 = false)"sv;
+	static constexpr auto iarna_spec_case_sensitive = R"(# TOML is case sensitive.
 abc = 123
-ABC = 456)"sv);
-	static constexpr auto iarna_spec_comment_mid_array = S(R"(# eol commetns can go anywhere
+ABC = 456)"sv;
+	static constexpr auto iarna_spec_comment_mid_array = R"(# eol commetns can go anywhere
 abc = [ # this is valid
   123,#as is this
   456    #so is  this
   ]# and this
-# here too)"sv);
-	static constexpr auto iarna_spec_comment_mid_string = S(R"(another = "# This is not a comment")"sv);
-	static constexpr auto iarna_spec_comment_tab = S(R"(# This is a full-line	comment with a tab in the middle
-key = "value" # This is a commen	with a tab in the middle at the end of a line)"sv);
-	static constexpr auto iarna_spec_comment = S(R"(# This is a full-line comment
-key = "value" # This is a comment at the end of a line)"sv);
-	static constexpr auto iarna_spec_date_local_1 = S(R"(ld1 = 1979-05-27)"sv);
-	static constexpr auto iarna_spec_date_time_1 = S(R"(odt1 = 1979-05-27T07:32:00Z)"sv);
-	static constexpr auto iarna_spec_date_time_2 = S(R"(odt2 = 1979-05-27T00:32:00-07:00)"sv);
-	static constexpr auto iarna_spec_date_time_3 = S(R"(odt3 = 1979-05-27T00:32:00.999999-07:00)"sv);
-	static constexpr auto iarna_spec_date_time_4 = S(R"(odt4 = 1979-05-27 07:32:00Z)"sv);
-	static constexpr auto iarna_spec_date_time_5 = S(R"(odt5 = 1979-05-27T07:32:00.123Z)"sv);
-	static constexpr auto iarna_spec_date_time_local_1 = S(R"(ldt1 = 1979-05-27T07:32:00)"sv);
-	static constexpr auto iarna_spec_dotted_keys_1 = S(R"(name = "Orange"
+# here too)"sv;
+	static constexpr auto iarna_spec_comment_mid_string = R"(another = "# This is not a comment")"sv;
+	static constexpr auto iarna_spec_comment_tab = R"(# This is a full-line	comment with a tab in the middle
+key = "value" # This is a commen	with a tab in the middle at the end of a line)"sv;
+	static constexpr auto iarna_spec_comment = R"(# This is a full-line comment
+key = "value" # This is a comment at the end of a line)"sv;
+	static constexpr auto iarna_spec_date_local_1 = R"(ld1 = 1979-05-27)"sv;
+	static constexpr auto iarna_spec_date_time_1 = R"(odt1 = 1979-05-27T07:32:00Z)"sv;
+	static constexpr auto iarna_spec_date_time_2 = R"(odt2 = 1979-05-27T00:32:00-07:00)"sv;
+	static constexpr auto iarna_spec_date_time_3 = R"(odt3 = 1979-05-27T00:32:00.999999-07:00)"sv;
+	static constexpr auto iarna_spec_date_time_4 = R"(odt4 = 1979-05-27 07:32:00Z)"sv;
+	static constexpr auto iarna_spec_date_time_5 = R"(odt5 = 1979-05-27T07:32:00.123Z)"sv;
+	static constexpr auto iarna_spec_date_time_local_1 = R"(ldt1 = 1979-05-27T07:32:00)"sv;
+	static constexpr auto iarna_spec_dotted_keys_1 = R"(name = "Orange"
 physical.color = "orange"
 physical.shape = "round"
-site."google.com" = true)"sv);
-	static constexpr auto iarna_spec_dotted_keys_2 = S(R"(a  .  b = 23)"sv);
-	static constexpr auto iarna_spec_dotted_keys_3 = S(R"(a  	.  b = 23)"sv);
-	static constexpr auto iarna_spec_empty_key_name_1 = S(R"("" = "blank"     # VALID but discouraged)"sv);
-	static constexpr auto iarna_spec_empty_key_name_2 = S(R"('' = "blank"     # VALID but discouraged)"sv);
-	static constexpr auto iarna_spec_extend_dotted_object_1 = S(R"(# This makes the key "fruit" into a table.
+site."google.com" = true)"sv;
+	static constexpr auto iarna_spec_dotted_keys_2 = R"(a  .  b = 23)"sv;
+	static constexpr auto iarna_spec_dotted_keys_3 = R"(a  	.  b = 23)"sv;
+	static constexpr auto iarna_spec_empty_key_name_1 = R"("" = "blank"     # VALID but discouraged)"sv;
+	static constexpr auto iarna_spec_empty_key_name_2 = R"('' = "blank"     # VALID but discouraged)"sv;
+	static constexpr auto iarna_spec_extend_dotted_object_1 = R"(# This makes the key "fruit" into a table.
 fruit.apple.smooth = true
 
 # So then you can add to the table "fruit" like so:
-fruit.orange = 2)"sv);
-	static constexpr auto iarna_spec_extend_dotted_object_2 = S(R"(# VALID BUT DISCOURAGED
+fruit.orange = 2)"sv;
+	static constexpr auto iarna_spec_extend_dotted_object_2 = R"(# VALID BUT DISCOURAGED
 
 apple.type = "fruit"
 orange.type = "fruit"
@@ -348,8 +348,8 @@ apple.skin = "thin"
 orange.skin = "thick"
 
 apple.color = "red"
-orange.color = "orange")"sv);
-	static constexpr auto iarna_spec_extend_dotted_object_3 = S(R"(# RECOMMENDED
+orange.color = "orange")"sv;
+	static constexpr auto iarna_spec_extend_dotted_object_3 = R"(# RECOMMENDED
 
 apple.type = "fruit"
 apple.skin = "thin"
@@ -357,51 +357,51 @@ apple.color = "red"
 
 orange.type = "fruit"
 orange.skin = "thick"
-orange.color = "orange")"sv);
-	static constexpr auto iarna_spec_float_1 = S(R"(flt1 = +1.0)"sv);
-	static constexpr auto iarna_spec_float_10 = S(R"(sf1 = inf  # positive infinity)"sv);
-	static constexpr auto iarna_spec_float_11 = S(R"(sf2 = +inf # positive infinity)"sv);
-	static constexpr auto iarna_spec_float_12 = S(R"(sf2 = -inf # negative infinity)"sv);
-	static constexpr auto iarna_spec_float_13 = S(R"(sf4 = nan  # actual sNaN/qNaN encoding is implementation specific)"sv);
-	static constexpr auto iarna_spec_float_14 = S(R"(sf5 = +nan # same as `nan`)"sv);
-	static constexpr auto iarna_spec_float_15 = S(R"(sf6 = -nan # valid, actual encoding is implementation specific)"sv);
-	static constexpr auto iarna_spec_float_2 = S(R"(flt2 = 3.1415)"sv);
-	static constexpr auto iarna_spec_float_3 = S(R"(flt3 = -0.01)"sv);
-	static constexpr auto iarna_spec_float_4 = S(R"(flt4 = 5e+22)"sv);
-	static constexpr auto iarna_spec_float_5 = S(R"(flt5 = 1e06)"sv);
-	static constexpr auto iarna_spec_float_6 = S(R"(flt6 = -2E-2)"sv);
-	static constexpr auto iarna_spec_float_7 = S(R"(flt7 = 6.626e-34)"sv);
-	static constexpr auto iarna_spec_float_8 = S(R"(flt8 = 224_617.445_991_228)"sv);
-	static constexpr auto iarna_spec_float_9 = S(R"(flt9 = -0e0)"sv);
-	static constexpr auto iarna_spec_int_1 = S(R"(int1 = +99)"sv);
-	static constexpr auto iarna_spec_int_2 = S(R"(int2 = 42)"sv);
-	static constexpr auto iarna_spec_int_3 = S(R"(int3 = 0)"sv);
-	static constexpr auto iarna_spec_int_3a = S(R"(int3 = +0)"sv);
-	static constexpr auto iarna_spec_int_3b = S(R"(int3 = -0)"sv);
-	static constexpr auto iarna_spec_int_4 = S(R"(int4 = -17)"sv);
-	static constexpr auto iarna_spec_int_5 = S(R"(int5 = 1_000)"sv);
-	static constexpr auto iarna_spec_int_6 = S(R"(int6 = 5_349_221)"sv);
-	static constexpr auto iarna_spec_int_7 = S(R"(int7 = 1_2_3_4_5     # VALID but discouraged)"sv);
-	static constexpr auto iarna_spec_int_bin1 = S(R"(bin1 = 0b11010110)"sv);
-	static constexpr auto iarna_spec_int_hex1 = S(R"(hex1 = 0xDEADBEEF)"sv);
-	static constexpr auto iarna_spec_int_hex2 = S(R"(hex2 = 0xdeadbeef)"sv);
-	static constexpr auto iarna_spec_int_hex3 = S(R"(hex3 = 0xdead_beef)"sv);
-	static constexpr auto iarna_spec_int_max = S(R"(max=9_223_372_036_854_775_807)"sv);
-	static constexpr auto iarna_spec_int_min = S(R"(min=-9_223_372_036_854_775_808)"sv);
-	static constexpr auto iarna_spec_int_oct1 = S(R"(oct1 = 0o01234567)"sv);
-	static constexpr auto iarna_spec_int_oct2 = S(R"(oct2 = 0o755 # useful for Unix file permissions)"sv);
-	static constexpr auto iarna_spec_key_value_pair_1 = S(R"(key = "value")"sv);
-	static constexpr auto iarna_spec_key_value_pair_2 = S(R"(bare_key = "value")"sv);
-	static constexpr auto iarna_spec_key_value_pair_3 = S(R"(bare-key = "value")"sv);
-	static constexpr auto iarna_spec_key_value_pair_4 = S(R"(1234 = "value")"sv);
-	static constexpr auto iarna_spec_key_value_pair_5 = S(R"(1234="value")"sv);
-	static constexpr auto iarna_spec_key_value_pair_6 = S(R"(-=1)"sv);
-	static constexpr auto iarna_spec_key_value_pair_7 = S(R"(_=1)"sv);
-	static constexpr auto iarna_spec_key_value_pair_8 = S(R"(-_-_-_-_-=1)"sv);
-	static constexpr auto iarna_spec_key_value_pair_9 = S(R"(3.14159 = "pi")"sv);
-	static constexpr auto iarna_spec_quoted_basic_keys_1 = S(R"("ʎǝʞ" = "value")"sv);
-	static constexpr auto iarna_spec_quoted_literal_keys_1 = S(R"('quoted "value"' = "value")"sv);
-	static constexpr auto iarna_spec_readme_example = S(R"(# This is a TOML document.
+orange.color = "orange")"sv;
+	static constexpr auto iarna_spec_float_1 = R"(flt1 = +1.0)"sv;
+	static constexpr auto iarna_spec_float_10 = R"(sf1 = inf  # positive infinity)"sv;
+	static constexpr auto iarna_spec_float_11 = R"(sf2 = +inf # positive infinity)"sv;
+	static constexpr auto iarna_spec_float_12 = R"(sf2 = -inf # negative infinity)"sv;
+	static constexpr auto iarna_spec_float_13 = R"(sf4 = nan  # actual sNaN/qNaN encoding is implementation specific)"sv;
+	static constexpr auto iarna_spec_float_14 = R"(sf5 = +nan # same as `nan`)"sv;
+	static constexpr auto iarna_spec_float_15 = R"(sf6 = -nan # valid, actual encoding is implementation specific)"sv;
+	static constexpr auto iarna_spec_float_2 = R"(flt2 = 3.1415)"sv;
+	static constexpr auto iarna_spec_float_3 = R"(flt3 = -0.01)"sv;
+	static constexpr auto iarna_spec_float_4 = R"(flt4 = 5e+22)"sv;
+	static constexpr auto iarna_spec_float_5 = R"(flt5 = 1e06)"sv;
+	static constexpr auto iarna_spec_float_6 = R"(flt6 = -2E-2)"sv;
+	static constexpr auto iarna_spec_float_7 = R"(flt7 = 6.626e-34)"sv;
+	static constexpr auto iarna_spec_float_8 = R"(flt8 = 224_617.445_991_228)"sv;
+	static constexpr auto iarna_spec_float_9 = R"(flt9 = -0e0)"sv;
+	static constexpr auto iarna_spec_int_1 = R"(int1 = +99)"sv;
+	static constexpr auto iarna_spec_int_2 = R"(int2 = 42)"sv;
+	static constexpr auto iarna_spec_int_3 = R"(int3 = 0)"sv;
+	static constexpr auto iarna_spec_int_3a = R"(int3 = +0)"sv;
+	static constexpr auto iarna_spec_int_3b = R"(int3 = -0)"sv;
+	static constexpr auto iarna_spec_int_4 = R"(int4 = -17)"sv;
+	static constexpr auto iarna_spec_int_5 = R"(int5 = 1_000)"sv;
+	static constexpr auto iarna_spec_int_6 = R"(int6 = 5_349_221)"sv;
+	static constexpr auto iarna_spec_int_7 = R"(int7 = 1_2_3_4_5     # VALID but discouraged)"sv;
+	static constexpr auto iarna_spec_int_bin1 = R"(bin1 = 0b11010110)"sv;
+	static constexpr auto iarna_spec_int_hex1 = R"(hex1 = 0xDEADBEEF)"sv;
+	static constexpr auto iarna_spec_int_hex2 = R"(hex2 = 0xdeadbeef)"sv;
+	static constexpr auto iarna_spec_int_hex3 = R"(hex3 = 0xdead_beef)"sv;
+	static constexpr auto iarna_spec_int_max = R"(max=9_223_372_036_854_775_807)"sv;
+	static constexpr auto iarna_spec_int_min = R"(min=-9_223_372_036_854_775_808)"sv;
+	static constexpr auto iarna_spec_int_oct1 = R"(oct1 = 0o01234567)"sv;
+	static constexpr auto iarna_spec_int_oct2 = R"(oct2 = 0o755 # useful for Unix file permissions)"sv;
+	static constexpr auto iarna_spec_key_value_pair_1 = R"(key = "value")"sv;
+	static constexpr auto iarna_spec_key_value_pair_2 = R"(bare_key = "value")"sv;
+	static constexpr auto iarna_spec_key_value_pair_3 = R"(bare-key = "value")"sv;
+	static constexpr auto iarna_spec_key_value_pair_4 = R"(1234 = "value")"sv;
+	static constexpr auto iarna_spec_key_value_pair_5 = R"(1234="value")"sv;
+	static constexpr auto iarna_spec_key_value_pair_6 = R"(-=1)"sv;
+	static constexpr auto iarna_spec_key_value_pair_7 = R"(_=1)"sv;
+	static constexpr auto iarna_spec_key_value_pair_8 = R"(-_-_-_-_-=1)"sv;
+	static constexpr auto iarna_spec_key_value_pair_9 = R"(3.14159 = "pi")"sv;
+	static constexpr auto iarna_spec_quoted_basic_keys_1 = R"("ʎǝʞ" = "value")"sv;
+	static constexpr auto iarna_spec_quoted_literal_keys_1 = R"('quoted "value"' = "value")"sv;
+	static constexpr auto iarna_spec_readme_example = R"(# This is a TOML document.
 
 title = "TOML Example"
 
@@ -433,143 +433,143 @@ data = [ ["gamma", "delta"], [1, 2] ]
 hosts = [
   "alpha",
   "omega"
-])"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_1 = S(R"(str1 = """
+])"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_1 = R"(str1 = """
 Roses are red
-Violets are blue""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_2 = S(R"(str = """
+Violets are blue""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_2 = R"(str = """
 The quick brown \
 
 
   fox jumps over \
-    the lazy dog.""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_3 = S(R"(str = """\
+    the lazy dog.""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_3 = R"(str = """\
       The quick brown \
       fox jumps over \
       the lazy dog.\
-      """)"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_5 = S(R"(ml-escaped-nl = """
+      """)"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_5 = R"(ml-escaped-nl = """
   foo \
   bar \\
   baz \\\
-  quux""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_6 = S(R"(str4 = """Here are two quotation marks: "". Simple enough.""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_7 = S(R"(str5 = """Here are three quotation marks: ""\".""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_8 = S(R"(str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\".""")"sv);
-	static constexpr auto iarna_spec_string_basic_multiline_9 = S(R"(str7 = """"This," she said, "is just a pointless statement."""")"sv);
-	static constexpr auto iarna_spec_string_basic_tab_multiline = S(R"(str = """This is a	tab""")"sv);
-	static constexpr auto iarna_spec_string_basic_tab = S(R"(str = "This is a	tab")"sv);
-	static constexpr auto iarna_spec_string_basic = S(R"(str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF.")"sv);
-	static constexpr auto iarna_spec_string_literal_1 = S(R"(winpath  = 'C:\Users\nodejs\templates')"sv);
-	static constexpr auto iarna_spec_string_literal_2 = S(R"(winpath2 = '\\ServerX\admin$\system32\')"sv);
-	static constexpr auto iarna_spec_string_literal_3 = S(R"(quoted   = 'Tom "Dubs" Preston-Werner')"sv);
-	static constexpr auto iarna_spec_string_literal_4 = S(R"(regex    = '<\i\c*\s*>')"sv);
-	static constexpr auto iarna_spec_string_literal_multiline_1 = S(R"(regex2 = '''I [dw]on't need \d{2} apples''')"sv);
-	static constexpr auto iarna_spec_string_literal_multiline_2 = S(R"(lines  = '''
+  quux""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_6 = R"(str4 = """Here are two quotation marks: "". Simple enough.""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_7 = R"(str5 = """Here are three quotation marks: ""\".""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_8 = R"(str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\".""")"sv;
+	static constexpr auto iarna_spec_string_basic_multiline_9 = R"(str7 = """"This," she said, "is just a pointless statement."""")"sv;
+	static constexpr auto iarna_spec_string_basic_tab_multiline = R"(str = """This is a	tab""")"sv;
+	static constexpr auto iarna_spec_string_basic_tab = R"(str = "This is a	tab")"sv;
+	static constexpr auto iarna_spec_string_basic = R"(str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF.")"sv;
+	static constexpr auto iarna_spec_string_literal_1 = R"(winpath  = 'C:\Users\nodejs\templates')"sv;
+	static constexpr auto iarna_spec_string_literal_2 = R"(winpath2 = '\\ServerX\admin$\system32\')"sv;
+	static constexpr auto iarna_spec_string_literal_3 = R"(quoted   = 'Tom "Dubs" Preston-Werner')"sv;
+	static constexpr auto iarna_spec_string_literal_4 = R"(regex    = '<\i\c*\s*>')"sv;
+	static constexpr auto iarna_spec_string_literal_multiline_1 = R"(regex2 = '''I [dw]on't need \d{2} apples''')"sv;
+	static constexpr auto iarna_spec_string_literal_multiline_2 = R"(lines  = '''
 The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
-''')"sv);
-	static constexpr auto iarna_spec_string_literal_multiline_3 = S(R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""''')"sv);
-	static constexpr auto iarna_spec_string_literal_multiline_4 = S(R"(str = ''''That,' she said, 'is still pointless.'''')"sv);
-	static constexpr auto iarna_spec_table_1 = S(R"([table-1]
+''')"sv;
+	static constexpr auto iarna_spec_string_literal_multiline_3 = R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""''')"sv;
+	static constexpr auto iarna_spec_string_literal_multiline_4 = R"(str = ''''That,' she said, 'is still pointless.'''')"sv;
+	static constexpr auto iarna_spec_table_1 = R"([table-1]
 key1 = "some string"
 key2 = 123
 
 [table-2]
 key1 = "another string"
-key2 = 456)"sv);
-	static constexpr auto iarna_spec_table_2 = S(R"([dog."tater.man"]
-type.name = "pug")"sv);
-	static constexpr auto iarna_spec_table_3 = S(R"([a.b.c])"sv);
-	static constexpr auto iarna_spec_table_4 = S(R"([ d.e.f ]          # same as [d.e.f])"sv);
-	static constexpr auto iarna_spec_table_5 = S(R"([ g .  h  . i ]    # same as [g.h.i])"sv);
-	static constexpr auto iarna_spec_table_6 = S(R"([ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l'])"sv);
-	static constexpr auto iarna_spec_table_7 = S(R"(# [x] you
+key2 = 456)"sv;
+	static constexpr auto iarna_spec_table_2 = R"([dog."tater.man"]
+type.name = "pug")"sv;
+	static constexpr auto iarna_spec_table_3 = R"([a.b.c])"sv;
+	static constexpr auto iarna_spec_table_4 = R"([ d.e.f ]          # same as [d.e.f])"sv;
+	static constexpr auto iarna_spec_table_5 = R"([ g .  h  . i ]    # same as [g.h.i])"sv;
+	static constexpr auto iarna_spec_table_6 = R"([ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l'])"sv;
+	static constexpr auto iarna_spec_table_7 = R"(# [x] you
 # [x.y] don't
 # [x.y.z] need these
 [x.y.z.w] # for this to work
-[x] # defining a super-table afterwards is ok)"sv);
-	static constexpr auto iarna_spec_table_8 = S(R"([fruit]
+[x] # defining a super-table afterwards is ok)"sv;
+	static constexpr auto iarna_spec_table_8 = R"([fruit]
 apple.color = "red"
 apple.taste.sweet = true
 
 [fruit.apple.texture]  # you can add sub-tables
-smooth = true)"sv);
-	static constexpr auto iarna_spec_table_inline_1 = S(R"(name = { first = "Tom", last = "Preston-Werner" })"sv);
-	static constexpr auto iarna_spec_table_inline_2 = S(R"(point = { x = 1, y = 2 })"sv);
-	static constexpr auto iarna_spec_table_inline_3 = S(R"(animal = { type.name = "pug" })"sv);
-	static constexpr auto iarna_spec_table = S(R"([table])"sv);
-	static constexpr auto iarna_spec_time_1 = S(R"(lt1 = 07:32:00)"sv);
+smooth = true)"sv;
+	static constexpr auto iarna_spec_table_inline_1 = R"(name = { first = "Tom", last = "Preston-Werner" })"sv;
+	static constexpr auto iarna_spec_table_inline_2 = R"(point = { x = 1, y = 2 })"sv;
+	static constexpr auto iarna_spec_table_inline_3 = R"(animal = { type.name = "pug" })"sv;
+	static constexpr auto iarna_spec_table = R"([table])"sv;
+	static constexpr auto iarna_spec_time_1 = R"(lt1 = 07:32:00)"sv;
 }
 
 namespace invalid
 {
-	static constexpr auto burntsushi_datetime_malformed_no_leads = S(R"(no-leads = 1987-7-05T17:45:00Z)"sv);
-	static constexpr auto burntsushi_datetime_malformed_no_secs = S(R"(no-secs = 1987-07-05T17:45Z)"sv);
-	static constexpr auto burntsushi_datetime_malformed_no_t = S(R"(no-t = 1987-07-0517:45:00Z)"sv);
-	static constexpr auto burntsushi_datetime_malformed_with_milli = S(R"(with-milli = 1987-07-5T17:45:00.12Z)"sv);
-	static constexpr auto burntsushi_duplicate_key_table = S(R"([fruit]
+	static constexpr auto burntsushi_datetime_malformed_no_leads = R"(no-leads = 1987-7-05T17:45:00Z)"sv;
+	static constexpr auto burntsushi_datetime_malformed_no_secs = R"(no-secs = 1987-07-05T17:45Z)"sv;
+	static constexpr auto burntsushi_datetime_malformed_no_t = R"(no-t = 1987-07-0517:45:00Z)"sv;
+	static constexpr auto burntsushi_datetime_malformed_with_milli = R"(with-milli = 1987-07-5T17:45:00.12Z)"sv;
+	static constexpr auto burntsushi_duplicate_key_table = R"([fruit]
 type = "apple"
 
 [fruit.type]
-apple = "yes")"sv);
-	static constexpr auto burntsushi_duplicate_keys = S(R"(dupe = false
-dupe = true)"sv);
-	static constexpr auto burntsushi_duplicate_tables = S(R"([a]
-[a])"sv);
-	static constexpr auto burntsushi_empty_implicit_table = S(R"([naughty..naughty])"sv);
-	static constexpr auto burntsushi_empty_table = S(R"([])"sv);
-	static constexpr auto burntsushi_float_leading_zero_neg = S(R"(leading-zero = -03.14)"sv);
-	static constexpr auto burntsushi_float_leading_zero_pos = S(R"(leading-zero = +03.14)"sv);
-	static constexpr auto burntsushi_float_leading_zero = S(R"(leading-zero = 03.14)"sv);
-	static constexpr auto burntsushi_float_no_leading_zero = S(R"(answer = .12345
-neganswer = -.12345)"sv);
-	static constexpr auto burntsushi_float_no_trailing_digits = S(R"(answer = 1.
-neganswer = -1.)"sv);
-	static constexpr auto burntsushi_float_underscore_after_point = S(R"(bad = 1._2)"sv);
-	static constexpr auto burntsushi_float_underscore_after = S(R"(bad = 1.2_)"sv);
-	static constexpr auto burntsushi_float_underscore_before_point = S(R"(bad = 1_.2)"sv);
-	static constexpr auto burntsushi_float_underscore_before = S(R"(bad = _1.2)"sv);
-	static constexpr auto burntsushi_inline_table_linebreak = S(R"(simple = { a = 1 
-})"sv);
-	static constexpr auto burntsushi_integer_leading_zero_neg = S(R"(leading-zero = -012)"sv);
-	static constexpr auto burntsushi_integer_leading_zero_pos = S(R"(leading-zero = +012)"sv);
-	static constexpr auto burntsushi_integer_leading_zero = S(R"(leading-zero = 012)"sv);
-	static constexpr auto burntsushi_integer_underscore_after = S(R"(bad = 123_)"sv);
-	static constexpr auto burntsushi_integer_underscore_before = S(R"(bad = _123)"sv);
-	static constexpr auto burntsushi_integer_underscore_double = S(R"(bad = 1__23)"sv);
-	static constexpr auto burntsushi_key_after_array = S(R"([[agencies]] owner = "S Cjelli")"sv);
-	static constexpr auto burntsushi_key_after_table = S(R"([error] this = "should not be here")"sv);
-	static constexpr auto burntsushi_key_empty = S(R"(= 1)"sv);
-	static constexpr auto burntsushi_key_hash = S(R"(a# = 1)"sv);
-	static constexpr auto burntsushi_key_newline = S(R"(a
-= 1)"sv);
-	static constexpr auto burntsushi_key_no_eol = S(R"(a = 1 b = 2)"sv);
-	static constexpr auto burntsushi_key_open_bracket = S(R"([abc = 1)"sv);
-	static constexpr auto burntsushi_key_single_open_bracket = S(R"([)"sv);
-	static constexpr auto burntsushi_key_space = S(R"(a b = 1)"sv);
-	static constexpr auto burntsushi_key_start_bracket = S(R"([a]
+apple = "yes")"sv;
+	static constexpr auto burntsushi_duplicate_keys = R"(dupe = false
+dupe = true)"sv;
+	static constexpr auto burntsushi_duplicate_tables = R"([a]
+[a])"sv;
+	static constexpr auto burntsushi_empty_implicit_table = R"([naughty..naughty])"sv;
+	static constexpr auto burntsushi_empty_table = R"([])"sv;
+	static constexpr auto burntsushi_float_leading_zero_neg = R"(leading-zero = -03.14)"sv;
+	static constexpr auto burntsushi_float_leading_zero_pos = R"(leading-zero = +03.14)"sv;
+	static constexpr auto burntsushi_float_leading_zero = R"(leading-zero = 03.14)"sv;
+	static constexpr auto burntsushi_float_no_leading_zero = R"(answer = .12345
+neganswer = -.12345)"sv;
+	static constexpr auto burntsushi_float_no_trailing_digits = R"(answer = 1.
+neganswer = -1.)"sv;
+	static constexpr auto burntsushi_float_underscore_after_point = R"(bad = 1._2)"sv;
+	static constexpr auto burntsushi_float_underscore_after = R"(bad = 1.2_)"sv;
+	static constexpr auto burntsushi_float_underscore_before_point = R"(bad = 1_.2)"sv;
+	static constexpr auto burntsushi_float_underscore_before = R"(bad = _1.2)"sv;
+	static constexpr auto burntsushi_inline_table_linebreak = R"(simple = { a = 1 
+})"sv;
+	static constexpr auto burntsushi_integer_leading_zero_neg = R"(leading-zero = -012)"sv;
+	static constexpr auto burntsushi_integer_leading_zero_pos = R"(leading-zero = +012)"sv;
+	static constexpr auto burntsushi_integer_leading_zero = R"(leading-zero = 012)"sv;
+	static constexpr auto burntsushi_integer_underscore_after = R"(bad = 123_)"sv;
+	static constexpr auto burntsushi_integer_underscore_before = R"(bad = _123)"sv;
+	static constexpr auto burntsushi_integer_underscore_double = R"(bad = 1__23)"sv;
+	static constexpr auto burntsushi_key_after_array = R"([[agencies]] owner = "S Cjelli")"sv;
+	static constexpr auto burntsushi_key_after_table = R"([error] this = "should not be here")"sv;
+	static constexpr auto burntsushi_key_empty = R"(= 1)"sv;
+	static constexpr auto burntsushi_key_hash = R"(a# = 1)"sv;
+	static constexpr auto burntsushi_key_newline = R"(a
+= 1)"sv;
+	static constexpr auto burntsushi_key_no_eol = R"(a = 1 b = 2)"sv;
+	static constexpr auto burntsushi_key_open_bracket = R"([abc = 1)"sv;
+	static constexpr auto burntsushi_key_single_open_bracket = R"([)"sv;
+	static constexpr auto burntsushi_key_space = R"(a b = 1)"sv;
+	static constexpr auto burntsushi_key_start_bracket = R"([a]
 [xyz = 5
-[b])"sv);
-	static constexpr auto burntsushi_key_two_equals = S(R"(key= = 1)"sv);
-	static constexpr auto burntsushi_llbrace = S(R"([ [table]])"sv);
-	static constexpr auto burntsushi_multi_line_inline_table = S(R"(json_like = {
+[b])"sv;
+	static constexpr auto burntsushi_key_two_equals = R"(key= = 1)"sv;
+	static constexpr auto burntsushi_llbrace = R"([ [table]])"sv;
+	static constexpr auto burntsushi_multi_line_inline_table = R"(json_like = {
           first = "Tom",
           last = "Preston-Werner"
-})"sv);
-	static constexpr auto burntsushi_multi_line_string_no_close = S(R"(invalid = """
-    this will fail)"sv);
-	static constexpr auto burntsushi_rrbrace = S(R"([[table] ])"sv);
-	static constexpr auto burntsushi_string_bad_byte_escape = S(R"(naughty = "\xAg")"sv);
-	static constexpr auto burntsushi_string_bad_codepoint = S(R"(invalid-codepoint = "This string contains a non scalar unicode codepoint \uD801")"sv);
-	static constexpr auto burntsushi_string_bad_escape = S(R"(invalid-escape = "This string has a bad \a escape character.")"sv);
-	static constexpr auto burntsushi_string_bad_slash_escape = S(R"(invalid-escape = "This string has a bad \/ escape character.")"sv);
-	static constexpr auto burntsushi_string_bad_uni_esc = S(R"(str = "val\ue")"sv);
-	static constexpr auto burntsushi_string_byte_escapes = S(R"(answer = "\x33")"sv);
-	static constexpr auto burntsushi_string_no_close = S(R"(no-ending-quote = "One time, at band camp)"sv);
-	static constexpr auto burntsushi_table_array_implicit = S(R"(# This test is a bit tricky. It should fail because the first use of
+})"sv;
+	static constexpr auto burntsushi_multi_line_string_no_close = R"(invalid = """
+    this will fail)"sv;
+	static constexpr auto burntsushi_rrbrace = R"([[table] ])"sv;
+	static constexpr auto burntsushi_string_bad_byte_escape = R"(naughty = "\xAg")"sv;
+	static constexpr auto burntsushi_string_bad_codepoint = R"(invalid-codepoint = "This string contains a non scalar unicode codepoint \uD801")"sv;
+	static constexpr auto burntsushi_string_bad_escape = R"(invalid-escape = "This string has a bad \a escape character.")"sv;
+	static constexpr auto burntsushi_string_bad_slash_escape = R"(invalid-escape = "This string has a bad \/ escape character.")"sv;
+	static constexpr auto burntsushi_string_bad_uni_esc = R"(str = "val\ue")"sv;
+	static constexpr auto burntsushi_string_byte_escapes = R"(answer = "\x33")"sv;
+	static constexpr auto burntsushi_string_no_close = R"(no-ending-quote = "One time, at band camp)"sv;
+	static constexpr auto burntsushi_table_array_implicit = R"(# This test is a bit tricky. It should fail because the first use of
 # `[[albums.songs]]` without first declaring `albums` implies that `albums`
 # must be a table. The alternative would be quite weird. Namely, it wouldn't
 # comply with the TOML spec: "Each double-bracketed sub-table will belong to 
@@ -582,40 +582,40 @@ neganswer = -1.)"sv);
 name = "Glory Days"
 
 [[albums]]
-name = "Born in the USA")"sv);
-	static constexpr auto burntsushi_table_array_malformed_bracket = S(R"([[albums]
-name = "Born to Run")"sv);
-	static constexpr auto burntsushi_table_array_malformed_empty = S(R"([[]]
-name = "Born to Run")"sv);
-	static constexpr auto burntsushi_table_empty = S(R"([])"sv);
-	static constexpr auto burntsushi_table_nested_brackets_close = S(R"([a]b]
-zyx = 42)"sv);
-	static constexpr auto burntsushi_table_nested_brackets_open = S(R"([a[b]
-zyx = 42)"sv);
-	static constexpr auto burntsushi_table_whitespace = S(R"([invalid key])"sv);
-	static constexpr auto burntsushi_table_with_pound = S(R"([key#group]
-answer = 42)"sv);
-	static constexpr auto burntsushi_text_after_array_entries = S(R"(array = [
+name = "Born in the USA")"sv;
+	static constexpr auto burntsushi_table_array_malformed_bracket = R"([[albums]
+name = "Born to Run")"sv;
+	static constexpr auto burntsushi_table_array_malformed_empty = R"([[]]
+name = "Born to Run")"sv;
+	static constexpr auto burntsushi_table_empty = R"([])"sv;
+	static constexpr auto burntsushi_table_nested_brackets_close = R"([a]b]
+zyx = 42)"sv;
+	static constexpr auto burntsushi_table_nested_brackets_open = R"([a[b]
+zyx = 42)"sv;
+	static constexpr auto burntsushi_table_whitespace = R"([invalid key])"sv;
+	static constexpr auto burntsushi_table_with_pound = R"([key#group]
+answer = 42)"sv;
+	static constexpr auto burntsushi_text_after_array_entries = R"(array = [
   "Is there life after an array separator?", No
   "Entry"
-])"sv);
-	static constexpr auto burntsushi_text_after_integer = S(R"(answer = 42 the ultimate answer?)"sv);
-	static constexpr auto burntsushi_text_after_string = S(R"(string = "Is there life after strings?" No.)"sv);
-	static constexpr auto burntsushi_text_after_table = S(R"([error] this shouldn't be here)"sv);
-	static constexpr auto burntsushi_text_before_array_separator = S(R"(array = [
+])"sv;
+	static constexpr auto burntsushi_text_after_integer = R"(answer = 42 the ultimate answer?)"sv;
+	static constexpr auto burntsushi_text_after_string = R"(string = "Is there life after strings?" No.)"sv;
+	static constexpr auto burntsushi_text_after_table = R"([error] this shouldn't be here)"sv;
+	static constexpr auto burntsushi_text_before_array_separator = R"(array = [
   "Is there life before an array separator?" No,
   "Entry"
-])"sv);
-	static constexpr auto burntsushi_text_in_array = S(R"(array = [
+])"sv;
+	static constexpr auto burntsushi_text_in_array = R"(array = [
   "Entry 1",
   I don't belong,
   "Entry 2",
-])"sv);
-	static constexpr auto iarna_array_of_tables_1 = S(R"(# INVALID TOML DOC
+])"sv;
+	static constexpr auto iarna_array_of_tables_1 = R"(# INVALID TOML DOC
 fruit = []
 
-[[fruit]] # Not allowed)"sv);
-	static constexpr auto iarna_array_of_tables_2 = S(R"(# INVALID TOML DOC
+[[fruit]] # Not allowed)"sv;
+	static constexpr auto iarna_array_of_tables_2 = R"(# INVALID TOML DOC
 [[fruit]]
   name = "apple"
 
@@ -624,83 +624,83 @@ fruit = []
 
   # This table conflicts with the previous table
   [fruit.variety]
-    name = "granny smith")"sv);
-	static constexpr auto iarna_bare_key_1 = S(R"(bare!key = 123)"sv);
-	static constexpr auto iarna_bare_key_2 = S(R"(barekey
-   = 123)"sv);
-	static constexpr auto iarna_bare_key_3 = S(R"(barekey =)"sv);
-	static constexpr auto iarna_inline_table_imutable_1 = S(R"([product]
+    name = "granny smith")"sv;
+	static constexpr auto iarna_bare_key_1 = R"(bare!key = 123)"sv;
+	static constexpr auto iarna_bare_key_2 = R"(barekey
+   = 123)"sv;
+	static constexpr auto iarna_bare_key_3 = R"(barekey =)"sv;
+	static constexpr auto iarna_inline_table_imutable_1 = R"([product]
 type = { name = "Nail" }
-type.edible = false  # INVALID)"sv);
-	static constexpr auto iarna_inline_table_imutable_2 = S(R"([product]
+type.edible = false  # INVALID)"sv;
+	static constexpr auto iarna_inline_table_imutable_2 = R"([product]
 type.name = "Nail"
-type = { edible = false }  # INVALID)"sv);
-	static constexpr auto iarna_inline_table_trailing_comma = S(R"(abc = { abc = 123, })"sv);
-	static constexpr auto iarna_int_0_padded = S(R"(int = 0123)"sv);
-	static constexpr auto iarna_int_signed_bin = S(R"(bin = +0b10)"sv);
-	static constexpr auto iarna_int_signed_hex = S(R"(hex = +0xab)"sv);
-	static constexpr auto iarna_int_signed_oct = S(R"(oct = +0o23)"sv);
-	static constexpr auto iarna_key_value_pair_1 = S(R"(key = # INVALID)"sv);
-	static constexpr auto iarna_key_value_pair_2 = S(R"(first = "Tom" last = "Preston-Werner" # INVALID)"sv);
-	static constexpr auto iarna_multiple_dot_key = S(R"(# THE FOLLOWING IS INVALID
+type = { edible = false }  # INVALID)"sv;
+	static constexpr auto iarna_inline_table_trailing_comma = R"(abc = { abc = 123, })"sv;
+	static constexpr auto iarna_int_0_padded = R"(int = 0123)"sv;
+	static constexpr auto iarna_int_signed_bin = R"(bin = +0b10)"sv;
+	static constexpr auto iarna_int_signed_hex = R"(hex = +0xab)"sv;
+	static constexpr auto iarna_int_signed_oct = R"(oct = +0o23)"sv;
+	static constexpr auto iarna_key_value_pair_1 = R"(key = # INVALID)"sv;
+	static constexpr auto iarna_key_value_pair_2 = R"(first = "Tom" last = "Preston-Werner" # INVALID)"sv;
+	static constexpr auto iarna_multiple_dot_key = R"(# THE FOLLOWING IS INVALID
 
 # This defines the value of fruit.apple to be an integer.
 fruit.apple = 1
 
 # But then this treats fruit.apple like it's a table.
 # You can't turn an integer into a table.
-fruit.apple.smooth = true)"sv);
-	static constexpr auto iarna_multiple_key = S(R"(# DO NOT DO THIS
+fruit.apple.smooth = true)"sv;
+	static constexpr auto iarna_multiple_key = R"(# DO NOT DO THIS
 name = "Tom"
-name = "Pradyun")"sv);
-	static constexpr auto iarna_no_key_name = S(R"(= "no key name"  # INVALID)"sv);
-	static constexpr auto iarna_string_basic_multiline_invalid_backslash = S(R"(a = """
+name = "Pradyun")"sv;
+	static constexpr auto iarna_no_key_name = R"(= "no key name"  # INVALID)"sv;
+	static constexpr auto iarna_string_basic_multiline_invalid_backslash = R"(a = """
   foo \ \n
-  bar""")"sv);
-	static constexpr auto iarna_string_basic_multiline_out_of_range_unicode_escape_1 = S(R"(a = """\UFFFFFFFF""")"sv);
-	static constexpr auto iarna_string_basic_multiline_out_of_range_unicode_escape_2 = S(R"(a = """\U00D80000""")"sv);
-	static constexpr auto iarna_string_basic_multiline_quotes = S(R"(str5 = """Here are three quotation marks: """.""")"sv);
-	static constexpr auto iarna_string_basic_multiline_unknown_escape = S(R"(a = """\@""")"sv);
-	static constexpr auto iarna_string_basic_out_of_range_unicode_escape_1 = S(R"(a = "\UFFFFFFFF")"sv);
-	static constexpr auto iarna_string_basic_out_of_range_unicode_escape_2 = S(R"(a = "\U00D80000")"sv);
-	static constexpr auto iarna_string_basic_unknown_escape = S(R"(a = "\@")"sv);
-	static constexpr auto iarna_string_literal_multiline_quotes = S(R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv);
-	static constexpr auto iarna_table_1 = S(R"(# DO NOT DO THIS
+  bar""")"sv;
+	static constexpr auto iarna_string_basic_multiline_out_of_range_unicode_escape_1 = R"(a = """\UFFFFFFFF""")"sv;
+	static constexpr auto iarna_string_basic_multiline_out_of_range_unicode_escape_2 = R"(a = """\U00D80000""")"sv;
+	static constexpr auto iarna_string_basic_multiline_quotes = R"(str5 = """Here are three quotation marks: """.""")"sv;
+	static constexpr auto iarna_string_basic_multiline_unknown_escape = R"(a = """\@""")"sv;
+	static constexpr auto iarna_string_basic_out_of_range_unicode_escape_1 = R"(a = "\UFFFFFFFF")"sv;
+	static constexpr auto iarna_string_basic_out_of_range_unicode_escape_2 = R"(a = "\U00D80000")"sv;
+	static constexpr auto iarna_string_basic_unknown_escape = R"(a = "\@")"sv;
+	static constexpr auto iarna_string_literal_multiline_quotes = R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv;
+	static constexpr auto iarna_table_1 = R"(# DO NOT DO THIS
 
 [fruit]
 apple = "red"
 
 [fruit]
-orange = "orange")"sv);
-	static constexpr auto iarna_table_2 = S(R"(# DO NOT DO THIS EITHER
+orange = "orange")"sv;
+	static constexpr auto iarna_table_2 = R"(# DO NOT DO THIS EITHER
 
 [fruit]
 apple = "red"
 
 [fruit.apple]
-texture = "smooth")"sv);
-	static constexpr auto iarna_table_3 = S(R"([fruit]
+texture = "smooth")"sv;
+	static constexpr auto iarna_table_3 = R"([fruit]
 apple.color = "red"
 apple.taste.sweet = true
 
-[fruit.apple]  # INVALID)"sv);
-	static constexpr auto iarna_table_4 = S(R"([fruit]
+[fruit.apple]  # INVALID)"sv;
+	static constexpr auto iarna_table_4 = R"([fruit]
 apple.color = "red"
 apple.taste.sweet = true
 
-[fruit.apple.taste]  # INVALID)"sv);
-	static constexpr auto iarna_table_invalid_1 = S(R"([fruit.physical]  # subtable, but to which parent element should it belong?
+[fruit.apple.taste]  # INVALID)"sv;
+	static constexpr auto iarna_table_invalid_1 = R"([fruit.physical]  # subtable, but to which parent element should it belong?
   color = "red"
   shape = "round"
 
 [[fruit]]  # parser must throw an error upon discovering that "fruit" is
            # an array rather than a table
-  name = "apple")"sv);
-	static constexpr auto iarna_table_invalid_2 = S(R"(# INVALID TOML DOC
+  name = "apple")"sv;
+	static constexpr auto iarna_table_invalid_2 = R"(# INVALID TOML DOC
 fruit = []
 
-[[fruit]] # Not allowed)"sv);
-	static constexpr auto iarna_table_invalid_3 = S(R"(# INVALID TOML DOC
+[[fruit]] # Not allowed)"sv;
+	static constexpr auto iarna_table_invalid_3 = R"(# INVALID TOML DOC
 [[fruit]]
   name = "apple"
 
@@ -713,8 +713,8 @@ fruit = []
 
   [fruit.physical]
     color = "red"
-    shape = "round")"sv);
-	static constexpr auto iarna_table_invalid_4 = S(R"(# INVALID TOML DOC
+    shape = "round")"sv;
+	static constexpr auto iarna_table_invalid_4 = R"(# INVALID TOML DOC
 [[fruit]]
   name = "apple"
 
@@ -727,7 +727,7 @@ fruit = []
 
   # INVALID: This array of tables conflicts with the previous table
   [[fruit.physical]]
-    color = "green")"sv);
+    color = "green")"sv;
 }
 
 }

@@ -9,7 +9,7 @@ TEST_CASE("parsing - integers (decimal)")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		BOM_PREFIX S(R"(
+		BOM_PREFIX R"(
 			int1 = +99
 			int2 = 42
 			int3 = 0
@@ -17,7 +17,7 @@ TEST_CASE("parsing - integers (decimal)")
 			int5 = 1_000
 			int6 = 5_349_221
 			int7 = 1_2_3_4_5     # VALID but discouraged
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("int1")] == 99);
@@ -31,23 +31,23 @@ TEST_CASE("parsing - integers (decimal)")
 	);
 
 	// "Each underscore must be surrounded by at least one digit on each side."
-	parsing_should_fail(FILE_LINE_ARGS, S("int5 = 1__000"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int5 = _1_000"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int5 = 1_000_"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "int5 = 1__000"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int5 = _1_000"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int5 = 1_000_"sv);
 
 	// "Leading zeroes are not allowed."
-	parsing_should_fail(FILE_LINE_ARGS, S("int1 = +099"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int2 = 042"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int3 = 00"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int4 = -017"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int5 = 01_000"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int6 = 05_349_221"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int7 = 01_2_3_4_5"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "int1 = +099"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int2 = 042"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int3 = 00"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int4 = -017"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int5 = 01_000"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int6 = 05_349_221"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int7 = 01_2_3_4_5"sv);
 
 	// "Integer values -0 and +0 are valid and identical to an unprefixed zero."
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S("zeroes = [-0, +0]"sv),
+		"zeroes = [-0, +0]"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("zeroes")][0] == 0);
@@ -56,20 +56,20 @@ TEST_CASE("parsing - integers (decimal)")
 	);
 
 	// "64 bit (signed long) range expected (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)."
-	parse_expected_value(FILE_LINE_ARGS,         "9223372036854775807"sv, INT64_MAX);
-	parse_expected_value(FILE_LINE_ARGS,        "-9223372036854775808"sv, INT64_MIN);
-	parsing_should_fail(FILE_LINE_ARGS, S("val =  9223372036854775808"sv)); // INT64_MAX + 1
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -9223372036854775809"sv)); // INT64_MIN - 1
+	parse_expected_value(FILE_LINE_ARGS,       "9223372036854775807"sv, INT64_MAX);
+	parse_expected_value(FILE_LINE_ARGS,      "-9223372036854775808"sv, INT64_MIN);
+	parsing_should_fail(FILE_LINE_ARGS, "val =  9223372036854775808"sv); // INT64_MAX + 1
+	parsing_should_fail(FILE_LINE_ARGS, "val = -9223372036854775809"sv); // INT64_MIN - 1
 
 	// signs in weird places
-	parsing_should_fail(FILE_LINE_ARGS, S("val = +-1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -+1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = ++1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = --1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = 1-"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = 1+"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -1+"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = +1-"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "val = +-1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = -+1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = ++1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = --1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1-"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1+"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = -1+"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = +1-"sv);
 
 	// value tests
 	parse_expected_value(FILE_LINE_ARGS,            "0"sv,          0);
@@ -89,7 +89,7 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 			# hexadecimal with prefix `0x`
 			hex1 = 0xDEADBEEF
 			hex2 = 0xdeadbeef
@@ -101,7 +101,7 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 
 			# binary with prefix `0b`
 			bin1 = 0b11010110
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
@@ -114,25 +114,25 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 	);
 
 	// "leading + is not allowed"
-	parsing_should_fail(FILE_LINE_ARGS, S("hex1 = +0xDEADBEEF"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("hex2 = +0xdeadbeef"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("hex3 = +0xdead_beef"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("oct1 = +0o01234567"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("oct2 = +0o7550"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("int6 = +05_349_221"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("bin1 = +0b11010110"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "hex1 = +0xDEADBEEF"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "hex2 = +0xdeadbeef"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "hex3 = +0xdead_beef"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "oct1 = +0o01234567"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "oct2 = +0o7550"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "int6 = +05_349_221"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "bin1 = +0b11010110"sv);
 
 	// "leading zeros are allowed (after the prefix)"
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 			hex1 = 0x000DEADBEEF
 			hex2 = 0x00000deadbeef
 			hex3 = 0x0dead_beef
 			oct1 = 0o0001234567
 			oct2 = 0o000755
 			bin1 = 0b0000011010110
-		)"sv),
+		)"sv,
 		[](table&& tbl)
 		{
 			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
@@ -145,18 +145,18 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 	);
 
 	// "***Non-negative*** integer values may also be expressed in hexadecimal, octal, or binary"
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -0x1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -0o1"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = -0b1"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "val = -0x1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = -0o1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = -0b1"sv);
 
 	// "64 bit (signed long) range expected (−9,223,372,036,854,775,808 to 9,223,372,036,854,775,807)."
 	// (ignoring INT64_MIN because toml doesn't allow these forms to represent negative values)
 	parse_expected_value(FILE_LINE_ARGS,      "0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
 	parse_expected_value(FILE_LINE_ARGS, "0o777777777777777777777"sv, INT64_MAX);
 	parse_expected_value(FILE_LINE_ARGS, "0b111111111111111111111111111111111111111111111111111111111111111"sv, INT64_MAX);
-	parsing_should_fail(FILE_LINE_ARGS, S("val =       0x8000000000000000"sv)); // INT64_MAX + 1
-	parsing_should_fail(FILE_LINE_ARGS, S("val = 0o1000000000000000000000"sv));
-	parsing_should_fail(FILE_LINE_ARGS, S("val = 0b1000000000000000000000000000000000000000000000000000000000000000"sv));
+	parsing_should_fail(FILE_LINE_ARGS, "val =       0x8000000000000000"sv); // INT64_MAX + 1
+	parsing_should_fail(FILE_LINE_ARGS, "val = 0o1000000000000000000000"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 0b1000000000000000000000000000000000000000000000000000000000000000"sv);
 
 	// value tests
     parse_expected_value(FILE_LINE_ARGS,   "0xDEADBEEF"sv, 0xDEADBEEF);

@@ -248,7 +248,7 @@ class TomlTest:
 		return self.__expected
 
 	def __str__(self):
-		return 'static constexpr auto {} = S(R"({})"sv);'.format(
+		return 'static constexpr auto {} = R"({})"sv;'.format(
 			self.__identifier,
 			self.__data,
 		)

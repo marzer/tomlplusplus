@@ -9,7 +9,7 @@ TEST_CASE("parsing - tables")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 [table]
 
 [table-1]
@@ -42,7 +42,7 @@ apple.taste.sweet = true
 [fruit.apple.texture]  # you can add sub-tables
 smooth = true
 
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("table")].as<table>());
@@ -89,7 +89,7 @@ smooth = true
 	);
 
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # DO NOT DO THIS
 
 [fruit]
@@ -97,9 +97,9 @@ apple = "red"
 
 [fruit]
 orange = "orange"
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # DO NOT DO THIS EITHER
 
 [fruit]
@@ -107,32 +107,32 @@ apple = "red"
 
 [fruit.apple]
 texture = "smooth"
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 [fruit]
 apple.color = "red"
 apple.taste.sweet = true
 
 [fruit.apple]
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 [fruit]
 apple.color = "red"
 apple.taste.sweet = true
 
 [fruit.apple.taste]
-)"sv));
+)"sv);
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 # VALID BUT DISCOURAGED
 [fruit.apple]
 [animal]
 [fruit.orange]
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("animal")].as<table>());
@@ -149,12 +149,12 @@ apple.taste.sweet = true
 
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 # RECOMMENDED
 [fruit.apple]
 [fruit.orange]
 [animal]
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("animal")].as<table>());
@@ -168,21 +168,21 @@ apple.taste.sweet = true
 		}
 	);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"([])"sv));
+	parsing_should_fail(FILE_LINE_ARGS, R"([])"sv);
 }
 
 TEST_CASE("parsing - inline tables")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 name = { first = "Tom", last = "Preston-Werner" }
 point = { x = 1, y = 2 }
 animal = { type.name = "pug" }
 
 [product]
 type = { name = "Nail" }
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("name")].as<table>());
@@ -209,27 +209,27 @@ type = { name = "Nail" }
 		}
 	);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 [product]
 type = { name = "Nail" }
 type.edible = false  # INVALID
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 [product]
 type.name = "Nail"
 type = { edible = false }  # INVALID
-)"sv));
+)"sv);
 
 	// "newlines are allowed between the curly braces [if] they are valid within a value."
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 test = { val1 = "foo", val2 = [
 	1, 2,
 	3
 ], val3 = "bar" }
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("test")].as<table>());
@@ -249,12 +249,12 @@ test = { val1 = "foo", val2 = [
 	{
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
-			S(R"(
+			R"(
 name = {
 	first = "Tom",
 	last = "Preston-Werner",
 }
-)"sv),
+)"sv,
 			[](table&& tbl)
 			{
 				REQUIRE(tbl[S("name")].as<table>());
@@ -268,15 +268,15 @@ name = {
 	#else
 	{
 		// "A terminating comma (also called trailing comma) is not permitted after the last key/value pair in an inline table."
-		parsing_should_fail(FILE_LINE_ARGS, S(R"(name = { first = "Tom", last = "Preston-Werner", })"sv));
+		parsing_should_fail(FILE_LINE_ARGS, R"(name = { first = "Tom", last = "Preston-Werner", })"sv);
 
 		// "No newlines are allowed between the curly braces unless they are valid within a value."
-		parsing_should_fail(FILE_LINE_ARGS, S(R"(
+		parsing_should_fail(FILE_LINE_ARGS, R"(
 name = {
 	first = "Tom",
 	last = "Preston-Werner"
 }
-)"sv));
+)"sv);
 
 	}
 	#endif
@@ -287,7 +287,7 @@ TEST_CASE("parsing - arrays-of-tables")
 {
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
-		S(R"(
+		R"(
 points = [ { x = 1, y = 2, z = 3 },
            { x = 7, y = 8, z = 9 },
            { x = 2, y = 4, z = 8 } ]
@@ -323,7 +323,7 @@ color = "gray"
   [[fruit.variety]]
     name = "plantain"
 
-)"sv),
+)"sv,
 		[](table&& tbl)
 		{
 			REQUIRE(tbl[S("points")].as<array>());
@@ -393,7 +393,7 @@ color = "gray"
 		}
 	);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # INVALID TOML DOC
 [fruit.physical]  # subtable, but to which parent element should it belong?
   color = "red"
@@ -402,16 +402,16 @@ color = "gray"
 [[fruit]]  # parser must throw an error upon discovering that "fruit" is
            # an array rather than a table
   name = "apple"
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # INVALID TOML DOC
 fruit = []
 
 [[fruit]] # Not allowed
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # INVALID TOML DOC
 [[fruit]]
   name = "apple"
@@ -422,9 +422,9 @@ fruit = []
   # INVALID: This table conflicts with the previous array of tables
   [fruit.variety]
     name = "granny smith"
-)"sv));
+)"sv);
 
-	parsing_should_fail(FILE_LINE_ARGS, S(R"(
+	parsing_should_fail(FILE_LINE_ARGS, R"(
 # INVALID TOML DOC
 [[fruit]]
   name = "apple"
@@ -436,6 +436,6 @@ fruit = []
   # INVALID: This array of tables conflicts with the previous table
   [[fruit.physical]]
     color = "green"
-)"sv));
+)"sv);
 
 }

@@ -12,8 +12,10 @@
 #include <array>
 #include <ctime>
 #include "utf8_console.h"
-#define TOML_UNRELEASED_FEATURES 1
+
+#define TOML_PARSER 0
 #include <toml++/toml.h>
+
 using namespace std::string_view_literals;
 
 namespace

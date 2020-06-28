@@ -11,8 +11,10 @@
 #include <iostream>
 #include <fstream>
 #include "utf8_console.h"
+
 #define TOML_UNRELEASED_FEATURES 1
 #include <toml++/toml.h>
+
 using namespace std::string_view_literals;
 
 int main(int argc, char** argv)

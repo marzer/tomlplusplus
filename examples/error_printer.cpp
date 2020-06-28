@@ -11,9 +11,11 @@
 */
 #include <iostream>
 #include "utf8_console.h"
+
 #define TOML_EXCEPTIONS 0
 #define TOML_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
+
 using namespace std::string_view_literals;
 using toml::operator""_sz;
 

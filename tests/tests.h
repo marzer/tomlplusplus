@@ -17,11 +17,13 @@
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
+
 #include "catch2.h"
 #include <sstream>
 namespace toml {}
 using namespace Catch::literals;
 using namespace toml;
+
 TOML_POP_WARNINGS
 
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
@@ -41,193 +43,57 @@ TOML_POP_WARNINGS
 	while (false)
 #endif
 
+// function_view - adapted from here: https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
+template <typename Func>
+class function_view;
+template <typename R, typename... P>
+class function_view<R(P...)> final
+{
+	private:
+		using func_type = R(P...);
+		using eraser_func_type = R(void*, P&&...);
+
+		mutable void* ptr_ = {};
+		mutable eraser_func_type* eraser = {};
+
+	public:
+
+		function_view() noexcept = default;
+
+		template <typename T>
+		function_view(T&& x) noexcept
+			: ptr_{ reinterpret_cast<void*>(std::addressof(x)) }
+		{
+			eraser = [](void* ptr, P&&... xs) -> R
+			{
+				return (*reinterpret_cast<std::add_pointer_t<std::remove_reference_t<T>>>(ptr))(std::forward<P>(xs)...);
+			};
+		}
+
+		decltype(auto) operator()(P&&... xs) const
+		{
+			return eraser(ptr_, std::forward<P>(xs)...);
+		}
+
+		[[nodiscard]] operator bool() const noexcept { return !!ptr_; }
+};
+
+using pss_func = function_view<void(toml::table&&)>;
+
+bool parsing_should_succeed(
+	std::string_view test_file,
+	uint32_t test_line,
+	std::string_view toml_str,
+	pss_func&& func = {},
+	std::string_view source_path = {});
+
+bool parsing_should_fail(
+	std::string_view test_file,
+	uint32_t test_line,
+	std::string_view toml_str);
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
-
-template <typename Char, typename Func = std::false_type>
-inline bool parsing_should_succeed(
-	std::string_view test_file,
-	uint32_t test_line,
-	std::basic_string_view<Char> toml_str,
-	Func&& func = {},
-	std::string_view source_path = {})
-{
-	INFO(
-		"["sv << test_file << ", line "sv << test_line << "] "sv
-		<< "parsing_should_succeed(\""sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "\")"sv
-	)
-
-	constexpr auto validate_table = [](table&& tabl, std::string_view path)  -> table&&
-	{
-		INFO("Validating table source information"sv)
-		CHECK(tabl.source().begin != source_position{});
-		CHECK(tabl.source().end != source_position{});
-		if (path.empty())
-			CHECK(tabl.source().path == nullptr);
-		else
-		{
-			REQUIRE(tabl.source().path != nullptr);
-			CHECK(*tabl.source().path == path);
-		}
-		return std::move(tabl);
-	};
-
-	static constexpr auto is_functor = !std::is_same_v<impl::remove_cvref_t<Func>, std::false_type>;
-
-	#if TOML_EXCEPTIONS
-
-	try
-	{
-		{
-			INFO("Parsing string directly"sv)
-			if constexpr (is_functor)
-				std::forward<Func>(func)(validate_table(toml::parse(toml_str, source_path), source_path));
-			else
-				validate_table(toml::parse(toml_str, source_path), source_path);
-		}
-		{
-			INFO("Parsing from a string stream"sv)
-			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
-			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-			if constexpr (is_functor)
-				std::forward<Func>(func)(validate_table(toml::parse(ss, source_path), source_path));
-			else
-				validate_table(toml::parse(ss, source_path), source_path);
-		}
-	}
-	catch (const parse_error& err)
-	{
-		FORCE_FAIL(
-			"Parse error on line "sv << err.source().begin.line
-			<< ", column "sv << err.source().begin.column
-			<< ":\n"sv << err.description()
-		);
-		return false;
-	}
-
-	#else
-
-	{
-		INFO("Parsing string directly"sv)
-		parse_result result = toml::parse(toml_str, source_path);
-		if (result)
-		{
-			if constexpr (is_functor)
-				std::forward<Func>(func)(validate_table(std::move(result), source_path));
-			else
-				validate_table(std::move(result), source_path);
-		}
-		else
-		{
-			FORCE_FAIL(
-				"Parse error on line "sv << result.error().source().begin.line
-				<< ", column "sv << result.error().source().begin.column
-				<< ":\n"sv << result.error().description()
-			);
-		}
-	}
-
-	{
-		INFO("Parsing from a string stream"sv)
-		std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
-		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-		parse_result result = toml::parse(ss, source_path);
-		if (result)
-		{
-			if constexpr (is_functor)
-				std::forward<Func>(func)(validate_table(std::move(result), source_path));
-			else
-				validate_table(std::move(result), source_path);
-		}
-		else
-		{
-			FORCE_FAIL(
-				"Parse error on line "sv << result.error().source().begin.line
-				<< ", column "sv << result.error().source().begin.column
-				<< ":\n"sv << result.error().description()
-			);
-		}
-	}
-
-	#endif
-
-	return true;
-}
-
-template <typename Char>
-inline bool parsing_should_fail(
-	std::string_view test_file,
-	uint32_t test_line,
-	std::basic_string_view<Char> toml_str)
-{
-	INFO(
-		"["sv << test_file << ", line "sv << test_line << "] "sv
-		<< "parsing_should_fail(\""sv << std::string_view(reinterpret_cast<const char*>(toml_str.data()), toml_str.length()) << "\")"sv
-	)
-
-	#if TOML_EXCEPTIONS
-
-	static constexpr auto run_tests = [](auto&& fn)
-	{
-		try
-		{
-			fn();
-		}
-		catch (const parse_error&)
-		{
-			SUCCEED("parse_error thrown OK"sv);
-			return true;
-		}
-		catch (const std::exception& exc)
-		{
-			FORCE_FAIL("Expected parsing failure, saw exception: "sv << exc.what());
-			return false;
-		}
-		catch (...)
-		{
-			FORCE_FAIL("Expected parsing failure, saw unspecified exception"sv);
-			return false;
-		}
-
-		FORCE_FAIL("Expected parsing failure"sv);
-		return false;
-	};
-
-	auto result = run_tests([=]()
-	{
-		[[maybe_unused]] auto res = toml::parse(toml_str);
-	});
-	result = result && run_tests([=]()
-	{
-		std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
-		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-		[[maybe_unused]] auto res = toml::parse(ss);
-	});
-	return result;
-
-	#else
-
-	static constexpr auto run_tests = [](auto&& fn)
-	{
-		if (parse_result result = fn(); !result)
-		{
-			SUCCEED("parse_error generated OK"sv);
-			return true;
-		}
-
-		FORCE_FAIL("Expected parsing failure"sv);
-	};
-
-	return run_tests([=]() { return toml::parse(toml_str); })
-		&& run_tests([=]()
-		{
-			std::basic_stringstream<Char, std::char_traits<Char>, std::allocator<Char>> ss;
-			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-			return toml::parse(ss);
-		});
-
-	#endif
-}
 
 template <typename T>
 inline bool parse_expected_value(
@@ -387,7 +253,8 @@ inline bool parse_expected_value(
 	return true;
 }
 
-// manually instantiate some templates to reduce test compilation time (chosen using ClangBuildAnalyzer)
+// manually instantiate some templates to reduce obj bloat and test compilation time
+
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const int&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const unsigned int&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
