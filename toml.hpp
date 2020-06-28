@@ -5981,7 +5981,7 @@ namespace toml
 		{
 			std::vector<StreamChar> file_data;
 			file_data.resize(static_cast<size_t>(file_size));
-			file.read(file_data.data(), file_size);
+			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
 			return parse(std::basic_string_view<StreamChar>{ file_data.data(), file_data.size() }, std::move(file_path_str));
 		}
 
