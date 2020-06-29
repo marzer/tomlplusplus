@@ -33,6 +33,12 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
+#if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
+	#define TOML_RETURNS_BY_THROWING		[[noreturn]]
+#else
+	#define TOML_RETURNS_BY_THROWING
+#endif
+
 namespace TOML_INTERNAL_NAMESPACE
 {
 	template <uint64_t> struct parse_integer_traits;
@@ -42,8 +48,8 @@ namespace TOML_INTERNAL_NAMESPACE
 		static constexpr auto is_digit = ::toml::impl::is_binary_digit;
 		static constexpr auto is_signed = false;
 		static constexpr auto buffer_length = 63;
-		static constexpr char32_t prefix_codepoint = U'b';
-		static constexpr char prefix = 'b';
+		static constexpr auto prefix_codepoint = U'b';
+		static constexpr auto prefix = "b"sv;
 	};
 	template <> struct parse_integer_traits<8> final
 	{
@@ -51,8 +57,8 @@ namespace TOML_INTERNAL_NAMESPACE
 		static constexpr auto is_digit = ::toml::impl::is_octal_digit;
 		static constexpr auto is_signed = false;
 		static constexpr auto buffer_length = 21; // strlen("777777777777777777777")
-		static constexpr char32_t prefix_codepoint = U'o';
-		static constexpr char prefix = 'o';
+		static constexpr auto prefix_codepoint = U'o';
+		static constexpr auto prefix = "o"sv;
 	};
 	template <> struct parse_integer_traits<10> final
 	{
@@ -67,59 +73,77 @@ namespace TOML_INTERNAL_NAMESPACE
 		static constexpr auto is_digit = ::toml::impl::is_hexadecimal_digit;
 		static constexpr auto is_signed = false;
 		static constexpr auto buffer_length = 16; //strlen("7FFFFFFFFFFFFFFF")
-		static constexpr char32_t prefix_codepoint = U'x';
-		static constexpr char prefix = 'x';
+		static constexpr auto prefix_codepoint = U'x';
+		static constexpr auto prefix = "x"sv;
 	};
 
-	template <typename T>
-	TOML_GNU_ATTR(nonnull)
+
+	[[nodiscard]]
 	TOML_INTERNAL_LINKAGE
-	void concatenate(char*& write_pos, char* buf_end, const T& arg) noexcept
+	std::string_view to_sv(::toml::node_type val) noexcept
+	{
+		using namespace ::toml::impl;
+
+		return node_type_friendly_names[unbox_enum(val)];
+	}
+
+	[[nodiscard]]
+	TOML_INTERNAL_LINKAGE
+	std::string_view to_sv(const std::string& str) noexcept
+	{
+		return std::string_view{ str };
+	}
+
+	[[nodiscard]]
+	TOML_GNU_ATTR(const)
+	TOML_INTERNAL_LINKAGE
+	std::string_view to_sv(bool val) noexcept
+	{
+		using namespace std::string_view_literals;
+
+		return val ? "true"sv : "false"sv;
+	}
+
+	[[nodiscard]]
+	TOML_INTERNAL_LINKAGE
+	std::string_view to_sv(const ::toml::impl::utf8_codepoint& cp) noexcept
 	{
 		using namespace ::toml;
 		using namespace ::toml::impl;
 
-		static_assert(!is_one_of<std::decay_t<T>, const char*, char*>);
+		if TOML_UNLIKELY(cp.value <= U'\x1F')
+			return low_character_escape_table[cp.value];
+		else if TOML_UNLIKELY(cp.value == U'\x7F')
+			return "\\u007F"sv;
+		else
+			return cp.template as_view<char>();
+	}
+
+	template <typename T>
+	TOML_GNU_ATTR(nonnull)
+	TOML_INTERNAL_LINKAGE
+	TOML_NEVER_INLINE
+	void concatenate(char*& write_pos, char *const buf_end, const T& arg) noexcept
+	{
+		using namespace ::toml;
+		using namespace ::toml::impl;
+
+		static_assert(
+			is_one_of<remove_cvref_t<T>, std::string_view, int64_t, uint64_t, double>,
+			"concatenate inputs are limited to std::string_view, int64_t, uint64_t and double to keep "
+			"instantiations to a minimum as an anti-bloat measure (hint: to_sv will probably help)"
+		);
 
 		if (write_pos >= buf_end)
 			return;
-		const auto max_chars = static_cast<size_t>(buf_end - write_pos);
 
 		using arg_t = remove_cvref_t<T>;
-		if constexpr (std::is_same_v<arg_t, std::string_view> || std::is_same_v<arg_t, std::string>)
+		if constexpr (std::is_same_v<arg_t, std::string_view>)
 		{
+			const auto max_chars = static_cast<size_t>(buf_end - write_pos);
 			const auto len = max_chars < arg.length() ? max_chars : arg.length();
 			std::memcpy(write_pos, arg.data(), len);
 			write_pos += len;
-		}
-		else if constexpr (std::is_same_v<arg_t, char>)
-		{
-			*write_pos++ = arg;
-		}
-		else if constexpr (std::is_same_v<arg_t, utf8_codepoint>)
-		{
-			string_view cp_view;
-			if TOML_UNLIKELY(arg.value <= U'\x1F')
-				cp_view = low_character_escape_table[arg.value];
-			else if TOML_UNLIKELY(arg.value == U'\x7F')
-				cp_view = TOML_STRING_PREFIX("\\u007F"sv);
-			else
-				cp_view = arg.template as_view<string_char>();
-
-			if (cp_view.length() <= max_chars)
-				concatenate(write_pos, buf_end, cp_view);
-		}
-		else if constexpr (std::is_same_v<arg_t, bool>)
-		{
-			concatenate(write_pos, buf_end, arg ? "true"sv : "false"sv);
-		}
-		else if constexpr (std::is_same_v<arg_t, node_type>)
-		{
-			concatenate(
-				write_pos,
-				buf_end,
-				impl::node_type_friendly_names[static_cast<std::underlying_type_t<node_type>>(arg)]
-			);
 		}
 		else if constexpr (std::is_floating_point_v<arg_t>)
 		{
@@ -134,7 +158,7 @@ namespace TOML_INTERNAL_NAMESPACE
 				ss.imbue(std::locale::classic());
 				ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
 				ss << arg;
-				concatenate(write_pos, buf_end, std::move(ss).str());
+				concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 			}
 			#endif
 		}
@@ -151,11 +175,51 @@ namespace TOML_INTERNAL_NAMESPACE
 				ss.imbue(std::locale::classic());
 				using cast_type = std::conditional_t<std::is_signed_v<arg_t>, int64_t, uint64_t>;
 				ss << static_cast<cast_type>(arg);
-				concatenate(write_pos, buf_end, std::move(ss).str());
+				concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 			}
 			#endif
 		}
 	}
+
+	struct error_builder final
+	{
+		static constexpr std::size_t buf_size = 512;
+		char buf[buf_size];
+		char* write_pos = buf;
+		char* const max_write_pos = buf + (buf_size - std::size_t{ 1 }); //allow for null terminator
+
+		error_builder(std::string_view scope) noexcept
+		{
+			concatenate(write_pos, max_write_pos, "Error while parsing "sv);
+			concatenate(write_pos, max_write_pos, scope);
+			concatenate(write_pos, max_write_pos, ": "sv);
+		}
+
+		template <typename T>
+		TOML_ALWAYS_INLINE
+		void append(const T& arg) noexcept
+		{
+			concatenate(write_pos, max_write_pos, arg);
+		}
+
+		TOML_RETURNS_BY_THROWING
+		auto finish(const ::toml::source_position& pos, const ::toml::source_path_ptr& source_path) const TOML_MAY_THROW
+		{
+			using namespace ::toml;
+
+			*write_pos = '\0';
+
+			#if TOML_EXCEPTIONS
+				throw parse_error{ buf, pos, source_path };
+			#else
+				return parse_error{
+					std::string(buf, static_cast<size_t>(write_pos - buf)),
+					pos,
+					source_path
+				};
+			#endif
+		}
+	};
 
 	struct parse_scope final
 	{
@@ -193,12 +257,6 @@ namespace TOML_INTERNAL_NAMESPACE
 
 namespace toml::impl
 {
-	#if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
-		#define TOML_RETURNS_BY_THROWING		[[noreturn]]
-	#else
-		#define TOML_RETURNS_BY_THROWING
-	#endif
-
 	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define assert_or_assume(cond)			TOML_ASSUME(cond)
 	#else
@@ -277,6 +335,7 @@ namespace toml::impl
 
 			template <typename... T>
 			TOML_RETURNS_BY_THROWING
+			TOML_NEVER_INLINE
 			void set_error_at(source_position pos, const T&... reason) const TOML_MAY_THROW
 			{
 				static_assert(sizeof...(T) > 0_sz);
@@ -285,23 +344,13 @@ namespace toml::impl
 					return;
 				#endif
 
-				static constexpr auto buf_size = 512_sz;
-				char buf[buf_size];
-				auto write_pos = buf;
-				const auto max_write_pos = buf + (buf_size - 1_sz); //allow for null terminator
-				concatenate(write_pos, max_write_pos, "Error while parsing "sv);
-				concatenate(write_pos, max_write_pos, current_scope);
-				concatenate(write_pos, max_write_pos, ": "sv);
-				(concatenate(write_pos, max_write_pos, reason), ...);
-				*write_pos = '\0';
+				error_builder builder{ current_scope };
+				(builder.append(reason), ...);
+
 				#if TOML_EXCEPTIONS
-					throw parse_error{ buf, pos, reader.source_path() };
+					builder.finish(pos, reader.source_path());
 				#else
-					err.emplace(
-						std::string(buf, static_cast<size_t>(write_pos - buf)),
-						pos,
-						reader.source_path()
-					);
+					err.emplace(builder.finish(pos, reader.source_path()));
 				#endif
 			}
 
@@ -402,7 +451,7 @@ namespace toml::impl
 					if (is_eof())
 						return true; //eof after \r is 'fine'
 					else if (*cp != U'\n')
-						set_error_and_return_default("expected \\n, saw '"sv, *cp, "'"sv);
+						set_error_and_return_default("expected \\n, saw '"sv, to_sv(*cp), "'"sv);
 				}
 				advance_and_return_if_error({}); // skip \n (or other single-character line ending)
 				return true;
@@ -517,9 +566,9 @@ namespace toml::impl
 				return i;
 			}
 
-			template <bool MultiLine>
+			//template <bool MultiLine>
 			[[nodiscard]]
-			string parse_basic_string() TOML_MAY_THROW
+			string parse_basic_string(bool multi_line) TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -530,7 +579,7 @@ namespace toml::impl
 				advance_and_return_if_error_or_eof({});
 
 				// multiline strings ignore a single line ending right at the beginning
-				if constexpr (MultiLine)
+				if (multi_line)
 				{
 					consume_line_break();
 					return_if_error({});
@@ -547,7 +596,7 @@ namespace toml::impl
 						escaped = false;
 
 						// handle 'line ending slashes' in multi-line mode
-						if constexpr (MultiLine)
+						if (multi_line)
 						{
 							if (is_line_break(*cp) || is_whitespace(*cp))
 							{
@@ -577,13 +626,13 @@ namespace toml::impl
 
 							// unicode scalar sequences
 							case U'x':
-								if constexpr (!TOML_LANG_UNRELEASED) // toml/pull/709 (\xHH unicode scalar sequences)
-								{
+								#if TOML_LANG_UNRELEASED // toml/pull/709 (\xHH unicode scalar sequences)
+									[[fallthrough]];
+								#else
 									set_error_and_return_default(
 										"escape sequence '\\x' is not supported in TOML 1.0.0 and earlier"sv
 									);
-								}
-								[[fallthrough]];
+								#endif
 							case U'u': [[fallthrough]];
 							case U'U':
 							{
@@ -599,7 +648,7 @@ namespace toml::impl
 								{
 									set_error_and_return_if_eof({});
 									if (!is_hexadecimal_digit(*cp))
-										set_error_and_return_default("expected hex digit, saw '"sv, *cp, "'"sv);
+										set_error_and_return_default("expected hex digit, saw '"sv, to_sv(*cp), "'"sv);
 									sequence_value += place_value * hex_to_dec(*cp);
 									place_value /= 16u;
 									advance_and_return_if_error({});
@@ -636,7 +685,7 @@ namespace toml::impl
 
 							// ???
 							default:
-								set_error_and_return_default("unknown escape sequence '\\"sv, *cp, "'"sv);
+								set_error_and_return_default("unknown escape sequence '\\"sv, to_sv(*cp), "'"sv);
 						}
 
 						// skip the escaped character
@@ -648,7 +697,7 @@ namespace toml::impl
 						// handle closing delimiters
 						if (*cp == U'"')
 						{
-							if constexpr (MultiLine)
+							if (multi_line)
 							{
 								size_t lookaheads = {};
 								size_t consecutive_delimiters = 1_sz;
@@ -712,16 +761,13 @@ namespace toml::impl
 						}
 
 						// handle line endings in multi-line mode
-						if constexpr (MultiLine)
+						if (multi_line && is_line_break(*cp))
 						{
-							if (is_line_break(*cp))
-							{
-								consume_line_break();
-								return_if_error({});
-								if (!skipping_whitespace)
-									str += TOML_STRING_PREFIX('\n');
-								continue;
-							}
+							consume_line_break();
+							return_if_error({});
+							if (!skipping_whitespace)
+								str += TOML_STRING_PREFIX('\n');
+							continue;
 						}
 
 						// handle control characters
@@ -739,7 +785,7 @@ namespace toml::impl
 								);
 						}
 
-						if constexpr (MultiLine)
+						if (multi_line)
 						{
 							if (!skipping_whitespace || !is_whitespace(*cp))
 							{
@@ -758,9 +804,8 @@ namespace toml::impl
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
 
-			template <bool MultiLine>
 			[[nodiscard]]
-			string parse_literal_string() TOML_MAY_THROW
+			string parse_literal_string(bool multi_line) TOML_MAY_THROW
 			{
 				return_if_error({});
 				assert_not_eof();
@@ -771,7 +816,7 @@ namespace toml::impl
 				advance_and_return_if_error_or_eof({});
 
 				// multiline strings ignore a single line ending right at the beginning
-				if constexpr (MultiLine)
+				if (multi_line)
 				{
 					consume_line_break();
 					return_if_error({});
@@ -786,7 +831,7 @@ namespace toml::impl
 					// handle closing delimiters
 					if (*cp == U'\'')
 					{
-						if constexpr (MultiLine)
+						if (multi_line)
 						{
 							size_t lookaheads = {};
 							size_t consecutive_delimiters = 1_sz;
@@ -839,14 +884,11 @@ namespace toml::impl
 					}
 
 					// handle line endings in multi-line mode
-					if constexpr (MultiLine)
+					if (multi_line && is_line_break(*cp))
 					{
-						if (is_line_break(*cp))
-						{
-							consume_line_break();
-							str += TOML_STRING_PREFIX('\n');
-							continue;
-						}
+						consume_line_break();
+						str += TOML_STRING_PREFIX('\n');
+						continue;
 					}
 
 					// handle control characters
@@ -910,8 +952,8 @@ namespace toml::impl
 					return
 					{
 						first == U'\''
-							? parse_literal_string<true>()
-							: parse_basic_string<true>(),
+							? parse_literal_string(true)
+							: parse_basic_string(true),
 						true
 					};
 				}
@@ -926,8 +968,8 @@ namespace toml::impl
 					return
 					{
 						first == U'\''
-							? parse_literal_string<false>()
-							: parse_basic_string<false>(),
+							? parse_literal_string(false)
+							: parse_basic_string(false),
 						false
 					};
 				}
@@ -966,12 +1008,12 @@ namespace toml::impl
 				auto result = is_match(*cp, U't', U'T');
 				if (!consume_expected_sequence(result ? U"true"sv : U"false"sv))
 					set_error_and_return_default(
-						"expected '"sv, result ? "true"sv : "false"sv, "', saw '"sv, recording_buffer, '\''
+						"expected '"sv, to_sv(result), "', saw '"sv, to_sv(recording_buffer), "'"sv
 					);
 				stop_recording();
 
 				if (cp && !is_value_terminator(*cp))
-					set_error_and_return_default("expected value-terminator, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
 				return result;
 			}
@@ -992,12 +1034,12 @@ namespace toml::impl
 				const bool inf = is_match(*cp, U'i', U'I');
 				if (!consume_expected_sequence(inf ? U"inf"sv : U"nan"sv))
 					set_error_and_return_default(
-						"expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, recording_buffer, '\''
+						"expected '"sv, inf ? "inf"sv : "nan"sv, "', saw '"sv, to_sv(recording_buffer), "'"sv
 					);
 				stop_recording();
 
 				if (cp && !is_value_terminator(*cp))
-					set_error_and_return_default("expected value-terminator, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
 				return inf
 					? sign * std::numeric_limits<double>::infinity()
@@ -1032,14 +1074,14 @@ namespace toml::impl
 					if (*cp == U'_')
 					{
 						if (!prev || !is_decimal_digit(*prev))
-							set_error_and_return_default("underscores may only follow digits."sv);
+							set_error_and_return_default("underscores may only follow digits"sv);
 
 						prev = cp;
 						advance_and_return_if_error_or_eof({});
 						continue;
 					}
 					else if (prev && *prev == U'_' && !is_decimal_digit(*cp))
-						set_error_and_return_default("underscores must be followed by digits."sv);
+						set_error_and_return_default("underscores must be followed by digits"sv);
 					else if (*cp == U'.')
 					{
 						// .1
@@ -1056,18 +1098,18 @@ namespace toml::impl
 						// 1..0
 						// (multiple '.')
 						else if (seen_decimal)
-							set_error_and_return_default("expected decimal digit or exponent, saw , saw '.'"sv);
+							set_error_and_return_default("expected decimal digit or exponent, saw '.'"sv);
 
 						seen_decimal = true;
 					}
 					else if (is_match(*cp, U'e', U'E'))
 					{
 						if (prev && !is_decimal_digit(*prev))
-							set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 						// 1.0ee+10 (multiple 'e')
 						else if (seen_exponent)
-							set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 						seen_decimal = true; // implied
 						seen_exponent = true;
@@ -1076,14 +1118,16 @@ namespace toml::impl
 					{
 						// 1.-0 (sign in mantissa)
 						if (!seen_exponent)
-							set_error_and_return_default("expected decimal digit or '.', saw '"sv, * cp, '\'');
+							set_error_and_return_default("expected decimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
 
 						// 1.0e1-0 (misplaced exponent sign)
 						else if (!is_match(*prev, U'e', U'E'))
-							set_error_and_return_default("expected exponent digit, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
 					}
 					else if (length == sizeof(chars))
-						set_error_and_return_default("exceeds maximum length of "sv, sizeof(chars), " characters."sv);
+						set_error_and_return_default(
+							"exceeds maximum length of "sv, static_cast<uint64_t>(sizeof(chars)), " characters"sv
+						);
 					else if (is_decimal_digit(*cp))
 					{
 						if (!seen_decimal)
@@ -1095,7 +1139,7 @@ namespace toml::impl
 						}
 					}
 					else
-						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
@@ -1108,12 +1152,12 @@ namespace toml::impl
 					if (*prev == U'_')
 					{
 						set_error_and_return_if_eof({});
-						set_error_and_return_default("underscores must be followed by digits."sv);
+						set_error_and_return_default("underscores must be followed by digits"sv);
 					}
 					else if (is_match(*prev, U'e', U'E', U'+', U'-', U'.'))
 					{
 						set_error_and_return_if_eof({});
-						set_error_and_return_default("expected decimal digit, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 					}
 				}
 
@@ -1129,20 +1173,20 @@ namespace toml::impl
 
 						case std::errc::invalid_argument:
 							set_error_and_return_default(
-								"'"sv, std::string_view{ chars, length }, "' could not be interpreted as a value."sv
+								"'"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
 							);
 							break;
 
 						case std::errc::result_out_of_range:
 							set_error_and_return_default(
-								"'"sv, std::string_view{ chars, length }, "' is not representable in 64 bits."sv
+								"'"sv, std::string_view{ chars, length }, "' is not representable in 64 bits"sv
 							);
 							break;
 
 						default: //??
 							set_error_and_return_default(
 								"an unspecified error occurred while trying to interpret '"sv,
-								std::string_view{ chars, length }, "' as a value."sv
+								std::string_view{ chars, length }, "' as a value"sv
 							);
 					}
 				}
@@ -1155,7 +1199,7 @@ namespace toml::impl
 						return result * sign;
 					else
 						set_error_and_return_default(
-							"'"sv, std::string_view{ chars, length }, "' could not be interpreted as a value."sv
+							"'"sv, std::string_view{ chars, length }, "' could not be interpreted as a value"sv
 						);
 				}
 				#endif
@@ -1178,12 +1222,12 @@ namespace toml::impl
 
 				// '0'
 				if (*cp != U'0')
-					set_error_and_return_default(" expected '0', saw '"sv, *cp, '\'');
+					set_error_and_return_default(" expected '0', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// 'x' or 'X'
 				if (!is_match(*cp, U'x', U'X'))
-					set_error_and_return_default("expected 'x' or 'X', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 'x' or 'X', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// <HEX DIGITS> ([.]<HEX DIGITS>)? [pP] [+-]? <DEC DIGITS>
@@ -1216,7 +1260,7 @@ namespace toml::impl
 						continue;
 					}
 					else if (prev && *prev == U'_' && !is_hexadecimal_digit(*cp))
-						set_error_and_return_default("underscores must be followed by digits."sv);
+						set_error_and_return_default("underscores must be followed by digits"sv);
 					else if (*cp == U'.')
 					{
 						// 0x10.0p-.0 (exponent cannot have '.')
@@ -1225,7 +1269,7 @@ namespace toml::impl
 
 						// 0x10.0.p-0 (multiple '.')
 						else if (current_fragment == fragments + 1)
-							set_error_and_return_default("expected hexadecimal digit or exponent, , saw '.'"sv);
+							set_error_and_return_default("expected hexadecimal digit or exponent, saw '.'"sv);
 
 						else
 							current_fragment++;
@@ -1234,11 +1278,11 @@ namespace toml::impl
 					{
 						// 0x10.0pp-0 (multiple 'p')
 						if (current_fragment == fragments + 2)
-							set_error_and_return_default("expected exponent digit or sign, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected exponent digit or sign, saw '"sv, to_sv(*cp), "'"sv);
 
 						// 0x.p-0 (mantissa is just '.')
 						else if (fragments[0].length == 0_sz && fragments[1].length == 0_sz)
-							set_error_and_return_default("expected hexadecimal digit, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected hexadecimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 						else
 							current_fragment = fragments + 2;
@@ -1247,22 +1291,23 @@ namespace toml::impl
 					{
 						// 0x-10.0p-0 (sign in mantissa)
 						if (current_fragment != fragments + 2)
-							set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
 
 						// 0x10.0p0- (misplaced exponent sign)
 						else if (!is_match(*prev, U'p', U'P'))
-							set_error_and_return_default("expected exponent digit, saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
 
 						else
 							exponent_sign = *cp == U'-' ? -1 : 1;
 					}
 					else if (current_fragment < fragments + 2 && !is_hexadecimal_digit(*cp))
-						set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected hexadecimal digit or '.', saw '"sv, to_sv(*cp), "'"sv);
 					else if (current_fragment == fragments + 2 && !is_decimal_digit(*cp))
-						set_error_and_return_default("expected exponent digit or sign, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected exponent digit or sign, saw '"sv, to_sv(*cp), "'"sv);
 					else if (current_fragment->length == sizeof(fragment::chars))
 						set_error_and_return_default(
-							"fragment exceeeds maximum length of "sv, sizeof(fragment::chars), " characters"sv
+							"fragment exceeeds maximum length of "sv,
+							static_cast<uint64_t>(sizeof(fragment::chars)), " characters"sv
 						);
 					else
 						current_fragment->chars[current_fragment->length++] = static_cast<char>(cp->bytes[0]);
@@ -1280,13 +1325,14 @@ namespace toml::impl
 				else if (prev && *prev == U'_')
 				{
 					set_error_and_return_if_eof({});
-					set_error_and_return_default("underscores must be followed by digits."sv);
+					set_error_and_return_default("underscores must be followed by digits"sv);
 				}
 
 				// calculate values for the three fragments
-				static constexpr auto calc_value = [](fragment& f, auto fragment_idx) noexcept
+				for (int fragment_idx = 0; fragment_idx < 3; fragment_idx++)
 				{
-					static constexpr uint32_t base = decltype(fragment_idx)::value == 2 ? 10 : 16;
+					auto& f = fragments[fragment_idx];
+					const uint32_t base = fragment_idx == 2 ? 10 : 16;
 
 					// left-trim zeroes
 					const char* c = f.chars;
@@ -1298,7 +1344,7 @@ namespace toml::impl
 						sig++;
 					}
 					if (!f.length)
-						return;
+						continue;
 
 					// calculate value
 					auto place = 1u;
@@ -1307,11 +1353,11 @@ namespace toml::impl
 					uint32_t val{};
 					while (place)
 					{
-						if constexpr (base == 16)
+						if (base == 16)
 							val += place * hex_to_dec(*c);
 						else
 							val += place * static_cast<uint32_t>(*c - '0');
-						if constexpr (decltype(fragment_idx)::value == 1)
+						if (fragment_idx == 1)
 							sig++;
 						c++;
 						place /= base;
@@ -1319,15 +1365,12 @@ namespace toml::impl
 					f.value = static_cast<double>(val);
 
 					// shift the fractional part
-					if constexpr (decltype(fragment_idx)::value == 1)
+					if (fragment_idx == 1)
 					{
 						while (sig--)
 							f.value /= base;
 					}
-				};
-				calc_value(fragments[0], std::integral_constant<int, 0>{});
-				calc_value(fragments[1], std::integral_constant<int, 1>{});
-				calc_value(fragments[2], std::integral_constant<int, 2>{});
+				}
 
 				return (fragments[0].value + fragments[1].value)
 					* pow(2.0, fragments[2].value * exponent_sign)
@@ -1337,7 +1380,7 @@ namespace toml::impl
 
 				set_error_and_return_default(
 					"hexadecimal floating-point values are not supported "
-					"in TOML 1.0.0 and earlier."sv
+					"in TOML 1.0.0 and earlier"sv
 				);
 
 				#endif // !TOML_LANG_UNRELEASED
@@ -1363,18 +1406,18 @@ namespace toml::impl
 				if constexpr (base == 10)
 				{
 					if (!traits::is_digit(*cp))
-						set_error_and_return_default("expected expected digit or sign, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected expected digit or sign, saw '"sv, to_sv(*cp), "'"sv);
 				}
 				else
 				{
 					// '0'
 					if (*cp != U'0')
-						set_error_and_return_default("expected '0', saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected '0', saw '"sv, to_sv(*cp), "'"sv);
 					advance_and_return_if_error_or_eof({});
 
 					// 'b', 'o', 'x'
 					if (*cp != traits::prefix_codepoint)
-						set_error_and_return_default("expected '"sv, traits::prefix, "', saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected '"sv, traits::prefix, "', saw '"sv, to_sv(*cp), "'"sv);
 					advance_and_return_if_error_or_eof({});
 				}
 
@@ -1394,11 +1437,14 @@ namespace toml::impl
 						continue;
 					}
 					else if (prev && *prev == U'_' && !traits::is_digit(*cp))
-						set_error_and_return_default("underscores must be followed by digits."sv);
+						set_error_and_return_default("underscores must be followed by digits"sv);
 					else if (!traits::is_digit(*cp))
-						set_error_and_return_default("expected digit, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected digit, saw '"sv, to_sv(*cp), "'"sv);
 					else if (length == sizeof(chars))
-						set_error_and_return_default("exceeds maximum length of "sv, sizeof(chars), " characters"sv);
+						set_error_and_return_default(
+							"exceeds maximum length of "sv,
+							static_cast<uint64_t>(sizeof(chars)), " characters"sv
+						);
 					else
 						chars[length++] = static_cast<char>(cp->bytes[0]);
 
@@ -1410,7 +1456,7 @@ namespace toml::impl
 				if (prev && *prev == U'_')
 				{
 					set_error_and_return_if_eof({});
-					set_error_and_return_default("underscores must be followed by digits."sv);
+					set_error_and_return_default("underscores must be followed by digits"sv);
 				}
 
 				// check for leading zeroes
@@ -1472,7 +1518,7 @@ namespace toml::impl
 				// "YYYY"
 				uint32_t digits[4];
 				if (!consume_digit_sequence(digits, 4_sz))
-					set_error_and_return_default("expected 4-digit year, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 4-digit year, saw '"sv, to_sv(*cp), "'"sv);
 				const auto year = digits[3]
 					+ digits[2] * 10u
 					+ digits[1] * 100u
@@ -1482,15 +1528,17 @@ namespace toml::impl
 
 				// '-'
 				if (*cp != U'-')
-					set_error_and_return_default("expected '-', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected '-', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit month, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(*cp), "'"sv);
 				const auto month = digits[1] + digits[0] * 10u;
 				if (month == 0u || month > 12u)
-					set_error_and_return_default("expected month between 1 and 12 (inclusive), saw "sv, month);
+					set_error_and_return_default(
+						"expected month between 1 and 12 (inclusive), saw "sv, static_cast<uint64_t>(month)
+					);
 				const auto max_days_in_month =
 					month == 2u
 					? (is_leap_year ? 29u : 28u)
@@ -1500,20 +1548,21 @@ namespace toml::impl
 
 				// '-'
 				if (*cp != U'-')
-					set_error_and_return_default("expected '-', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected '-', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "DD"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit day, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(*cp), "'"sv);
 				const auto day = digits[1] + digits[0] * 10u;
 				if (day == 0u || day > max_days_in_month)
 					set_error_and_return_default(
-						"expected day between 1 and "sv, max_days_in_month, " (inclusive), saw "sv, day
+						"expected day between 1 and "sv, static_cast<uint64_t>(max_days_in_month),
+						" (inclusive), saw "sv, static_cast<uint64_t>(day)
 					);
 
 				if (!part_of_datetime && !is_eof() && !is_value_terminator(*cp))
-					set_error_and_return_default("expected value-terminator, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
 				return
 				{
@@ -1536,23 +1585,27 @@ namespace toml::impl
 
 				// "HH"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit hour, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
 				const auto hour = digits[1] + digits[0] * 10u;
 				if (hour > 23u)
-					set_error_and_return_default("expected hour between 0 to 59 (inclusive), saw "sv, hour);
+					set_error_and_return_default(
+						"expected hour between 0 to 59 (inclusive), saw "sv, static_cast<uint64_t>(hour)
+					);
 				set_error_and_return_if_eof({});
 
 				// ':'
 				if (*cp != U':')
-					set_error_and_return_default("expected ':', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit minute, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(*cp), "'"sv);
 				const auto minute = digits[1] + digits[0] * 10u;
 				if (minute > 59u)
-					set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, minute);
+					set_error_and_return_default(
+						"expected minute between 0 and 59 (inclusive), saw "sv, static_cast<uint64_t>(minute)
+					);
 				auto time = ::toml::time{
 					static_cast<uint8_t>(hour),
 					static_cast<uint8_t>(minute),
@@ -1569,15 +1622,17 @@ namespace toml::impl
 				else
 					set_error_and_return_if_eof({});
 				if (*cp != U':')
-					set_error_and_return_default("expected ':', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "SS"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit second, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(*cp), "'"sv);
 				const auto second = digits[1] + digits[0] * 10u;
 				if (second > 59u)
-					set_error_and_return_default("expected second between 0 and 59 (inclusive), saw "sv, second);
+					set_error_and_return_default(
+						"expected second between 0 and 59 (inclusive), saw "sv, static_cast<uint64_t>(second)
+					);
 				time.second = static_cast<uint8_t>(second);
 
 
@@ -1587,7 +1642,7 @@ namespace toml::impl
 					|| (part_of_datetime && is_match(*cp, U'+', U'-', U'Z')))
 					return time;
 				if (*cp != U'.')
-					set_error_and_return_default("expected '.', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected '.', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "FFFFFFFFF"
@@ -1595,14 +1650,16 @@ namespace toml::impl
 				if (!digit_count)
 				{
 					set_error_and_return_if_eof({});
-					set_error_and_return_default("expected fractional digits, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected fractional digits, saw '"sv, to_sv(*cp), "'"sv);
 				}
 				else if (!is_eof())
 				{
 					if (digit_count == max_digits && is_decimal_digit(*cp))
-						set_error_and_return_default("fractional component exceeds maximum precision of "sv, max_digits);
+						set_error_and_return_default(
+							"fractional component exceeds maximum precision of "sv, static_cast<uint64_t>(max_digits)
+						);
 					else if (!part_of_datetime && !is_value_terminator(*cp))
-						set_error_and_return_default("expected value-terminator, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 				}
 
 				uint32_t value = 0u;
@@ -1632,7 +1689,7 @@ namespace toml::impl
 
 				// ' ' or 'T'
 				if (!is_match(*cp, U' ', U'T'))
-					set_error_and_return_default("expected space or 'T', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected space or 'T', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "HH:MM:SS.FFFFFFFFF"
@@ -1660,28 +1717,32 @@ namespace toml::impl
 					// "HH"
 					int digits[2];
 					if (!consume_digit_sequence(digits, 2_sz))
-						set_error_and_return_default("expected 2-digit hour, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
 					const auto hour = digits[1] + digits[0] * 10;
 					if (hour > 23)
-						set_error_and_return_default("expected hour between 0 and 23 (inclusive), saw "sv, hour);
+						set_error_and_return_default(
+							"expected hour between 0 and 23 (inclusive), saw "sv, static_cast<int64_t>(hour)
+						);
 					set_error_and_return_if_eof({});
 
 					// ':'
 					if (*cp != U':')
-						set_error_and_return_default("expected ':', saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected ':', saw '"sv, to_sv(*cp), "'"sv);
 					advance_and_return_if_error_or_eof({});
 
 					// "MM"
 					if (!consume_digit_sequence(digits, 2_sz))
-						set_error_and_return_default("expected 2-digit minute, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(*cp), "'"sv);
 					const auto minute = digits[1] + digits[0] * 10;
 					if (minute > 59)
-						set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, hour);
+						set_error_and_return_default(
+							"expected minute between 0 and 59 (inclusive), saw "sv, static_cast<int64_t>(minute)
+						);
 					offset.minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
 				}
 
 				if (!is_eof() && !is_value_terminator(*cp))
-					set_error_and_return_default("expected value-terminator, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
 				return { date, time, offset };
 			}
@@ -1724,39 +1785,55 @@ namespace toml::impl
 					// starting with value types that can be detected
 					// unambiguously from just one character.
 
-					// arrays
-					if (*cp == U'[')
+					switch (cp->value)
 					{
-						val = parse_array();
-						if constexpr (!TOML_LANG_AT_LEAST(1, 0, 0)) // toml/issues/665 (heterogeneous arrays)
+						// arrays
+						case U'[':
 						{
-							if (!val->ref_cast<array>().is_homogeneous())
-								set_error_at(
-									begin_pos,
-									"arrays cannot contain values of different types before TOML 1.0.0"
-								);
+							val = parse_array();
+							if constexpr (!TOML_LANG_AT_LEAST(1, 0, 0)) // toml/issues/665 (heterogeneous arrays)
+							{
+								if (!val->ref_cast<array>().is_homogeneous())
+									set_error_at(
+										begin_pos,
+										"arrays cannot contain values of different types before TOML 1.0.0"sv
+									);
+							}
+							break;
 						}
+
+						// inline tables
+						case U'{':
+							val = parse_inline_table();
+							break;
+
+						// floats beginning with '.'
+						case U'.':
+							val = std::make_unique<value<double>>(parse_float());
+							break;
+
+						// strings
+						case U'"': [[fallthrough]];
+						case U'\'':
+							val = std::make_unique<value<string>>(std::move(parse_string().value));
+							break;
+
+						// bools
+						case U't': [[fallthrough]];
+						case U'f': [[fallthrough]];
+						case U'T': [[fallthrough]];
+						case U'F':
+							val = std::make_unique<value<bool>>(parse_boolean());
+							break;
+
+						// inf/nan
+						case U'i': [[fallthrough]];
+						case U'I': [[fallthrough]];
+						case U'n': [[fallthrough]];
+						case U'N':
+							val = std::make_unique<value<double>>(parse_inf_or_nan());
+							break;
 					}
-
-					// inline tables
-					else if (*cp == U'{')
-						val = parse_inline_table();
-
-					// floats beginning with '.'
-					else if (*cp == U'.')
-						val = std::make_unique<value<double>>(parse_float());
-
-					// strings
-					else if (is_string_delimiter(*cp))
-						val = std::make_unique<value<string>>(std::move(parse_string().value));
-
-					// bools
-					else if (is_match(*cp, U't', U'f', U'T', U'F'))
-						val = std::make_unique<value<bool>>(parse_boolean());
-
-					// inf or nan
-					else if (is_match(*cp, U'i', U'n', U'I', U'N'))
-						val = std::make_unique<value<double>>(parse_inf_or_nan());
 
 					return_if_error({});
 					if (val)
@@ -2241,7 +2318,7 @@ namespace toml::impl
 					// ???
 					else
 						set_error_and_return_default(
-							"expected bare key starting character or string delimiter, saw '"sv, *cp, '\''
+							"expected bare key starting character or string delimiter, saw '"sv, to_sv(*cp), "'"sv
 						);
 						
 					// whitespace following the key segment
@@ -2279,7 +2356,7 @@ namespace toml::impl
 
 				// '='
 				if (*cp != U'=')
-					set_error_and_return_default("expected '=', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected '=', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// skip past any whitespace that followed the '='
@@ -2289,7 +2366,7 @@ namespace toml::impl
 
 				// get the value
 				if (is_value_terminator(*cp))
-					set_error_and_return_default("expected value, saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
 				return { std::move(key), parse_value() };
 			}
 
@@ -2348,12 +2425,12 @@ namespace toml::impl
 
 					// consume the closing ']'
 					if (*cp != U']')
-						set_error_and_return_default("expected ']', saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected ']', saw '"sv, to_sv(*cp), "'"sv);
 					if (is_arr)
 					{
 						advance_and_return_if_error_or_eof({});
 						if (*cp != U']')
-							set_error_and_return_default("expected ']', saw '"sv, *cp, '\'');
+							set_error_and_return_default("expected ']', saw '"sv, to_sv(*cp), "'"sv);
 					}
 					advance_and_return_if_error({});
 					header_end_pos = current_position(1);
@@ -2361,7 +2438,7 @@ namespace toml::impl
 					// handle the rest of the line after the header
 					consume_leading_whitespace();
 					if (!is_eof() && !consume_comment() && !consume_line_break())
-						set_error_and_return_default("expected a comment or whitespace, saw '"sv, *cp, '\'');
+						set_error_and_return_default("expected a comment or whitespace, saw '"sv, to_sv(*cp), "'"sv);
 				}
 				TOML_ASSERT(!key.segments.empty());
 
@@ -2395,11 +2472,13 @@ namespace toml::impl
 					else
 					{
 						if (!is_arr && child->type() == node_type::table)
-							set_error_and_return_default("cannot redefine existing table '"sv, recording_buffer, '\'');
+							set_error_and_return_default(
+								"cannot redefine existing table '"sv, to_sv(recording_buffer), "'"sv
+							);
 						else
 							set_error_and_return_default(
-								"cannot redefine existing "sv, child->type(),
-								" '"sv, recording_buffer,
+								"cannot redefine existing "sv, to_sv(child->type()),
+								" '"sv, to_sv(recording_buffer),
 								"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 							);
 					}
@@ -2465,11 +2544,11 @@ namespace toml::impl
 
 					//if we get here it's a redefinition error.
 					if (!is_arr && matching_node->type() == node_type::table)
-						set_error_and_return_default("cannot redefine existing table '"sv, recording_buffer, '\'');
+						set_error_and_return_default("cannot redefine existing table '"sv, to_sv(recording_buffer), "'"sv);
 					else
 						set_error_and_return_default(
-							"cannot redefine existing "sv, matching_node->type(),
-							" '"sv, recording_buffer,
+							"cannot redefine existing "sv, to_sv(matching_node->type()),
+							" '"sv, to_sv(recording_buffer),
 							"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 						);
 				}
@@ -2501,7 +2580,7 @@ namespace toml::impl
 							child->source_ = kvp.value->source_;
 						}
 						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
-							set_error("cannot redefine existing "sv, child->type(), " as dotted key-value pair"sv);
+							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
 							child->source_.end = kvp.value->source_.end;
 						return_if_error();
@@ -2513,13 +2592,14 @@ namespace toml::impl
 				{
 					if (conflicting_node->type() == kvp.value->type())
 						set_error(
-							"cannot redefine existing "sv, conflicting_node->type(), " '"sv, recording_buffer, '\''
+							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
+							" '"sv, to_sv(recording_buffer), "'"sv
 						);
 					else
 						set_error(
-							"cannot redefine existing "sv, conflicting_node->type(),
-							" '"sv, recording_buffer,
-							"' as "sv, kvp.value->type()
+							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
+							" '"sv, to_sv(recording_buffer),
+							"' as "sv, to_sv(kvp.value->type())
 						);
 				}
 
@@ -2563,16 +2643,16 @@ namespace toml::impl
 						parse_key_value_pair_and_insert(current_table);
 
 						// handle the rest of the line after the kvp
-						// (this is not done in parse_key_value_pair() because that function is also used for inline tables)
+						// (this is not done in parse_key_value_pair() because that is also used for inline tables)
 						consume_leading_whitespace();
 						return_if_error();
 						if (!is_eof() && !consume_comment() && !consume_line_break())
-							set_error("expected a comment or whitespace, saw '"sv, *cp, '\'');
+							set_error("expected a comment or whitespace, saw '"sv, to_sv(*cp), "'"sv);
 					}
 
 
 					else // ??
-						set_error("expected keys, tables, whitespace or comments, saw '"sv, *cp, '\'');
+						set_error("expected keys, tables, whitespace or comments, saw '"sv, to_sv(*cp), "'"sv);
 
 				}
 				while (!is_eof());
@@ -2723,7 +2803,7 @@ namespace toml::impl
 			{
 				if (prev == val)
 				{
-					set_error_and_return_default("expected comma or closing ']', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected comma or closing ']', saw '"sv, to_sv(*cp), "'"sv);
 					continue;
 				}
 				prev = val;
@@ -2803,7 +2883,7 @@ namespace toml::impl
 			else if (is_string_delimiter(*cp) || is_bare_key_character(*cp))
 			{
 				if (prev == kvp)
-					set_error_and_return_default("expected comma or closing '}', saw '"sv, *cp, '\'');
+					set_error_and_return_default("expected comma or closing '}', saw '"sv, to_sv(*cp), "'"sv);
 				else
 				{
 					prev = kvp;
@@ -2813,7 +2893,7 @@ namespace toml::impl
 
 			/// ???
 			else
-				set_error_and_return_default("expected key or closing '}', saw '"sv, *cp, '\'');
+				set_error_and_return_default("expected key or closing '}', saw '"sv, to_sv(*cp), "'"sv);
 		}
 
 		return_if_error({});
@@ -2829,24 +2909,25 @@ namespace toml::impl
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
-	#undef push_parse_scope_2
-	#undef push_parse_scope_1
-	#undef push_parse_scope
-	#undef TOML_RETURNS_BY_THROWING
-	#undef is_eof
-	#undef assert_not_eof
-	#undef return_if_eof
-	#undef is_error
-	#undef return_after_error
-	#undef assert_not_error
-	#undef return_if_error
-	#undef return_if_error_or_eof
-	#undef set_error_and_return
-	#undef set_error_and_return_default
-	#undef set_error_and_return_if_eof
-	#undef advance_and_return_if_error
-	#undef advance_and_return_if_error_or_eof
 }
+
+#undef push_parse_scope_2
+#undef push_parse_scope_1
+#undef push_parse_scope
+#undef TOML_RETURNS_BY_THROWING
+#undef is_eof
+#undef assert_not_eof
+#undef return_if_eof
+#undef is_error
+#undef return_after_error
+#undef assert_not_error
+#undef return_if_error
+#undef return_if_error_or_eof
+#undef set_error_and_return
+#undef set_error_and_return_default
+#undef set_error_and_return_if_eof
+#undef advance_and_return_if_error
+#undef advance_and_return_if_error_or_eof
 
 namespace toml
 {

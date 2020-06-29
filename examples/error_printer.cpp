@@ -81,6 +81,22 @@ namespace
 		R"(val = """ """""")"sv,
 		R"(val = ''' '''''')"sv,
 		"val = '\n'"sv,
+
+		"########## integers"sv,
+		R"(val = -0b0)"sv,
+		R"(val = -0o0)"sv,
+		R"(val = -0x0)"sv,
+		R"(val = +0b0)"sv,
+		R"(val = +0o0)"sv,
+		R"(val = +0x0)"sv,
+		R"(val = 1-)"sv,
+		R"(val = -1+)"sv,
+		R"(val = -+1)"sv,
+		R"(val = 1_0_)"sv,
+		R"(val = 1_0_ )"sv,
+		R"(val = 999999999999999999999999999999999999 )"sv,
+		R"(val = 9223372036854775808 )"sv,
+		R"(val = 01 )"sv
 	};
 }
 

@@ -125,7 +125,7 @@ namespace toml::impl
 	[[nodiscard]]
 	TOML_GNU_ATTR(const)
 	TOML_ALWAYS_INLINE
-	constexpr std::uint_least32_t hex_to_dec(T codepoint) noexcept
+	constexpr std::uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
 		if constexpr (std::is_same_v<remove_cvref_t<T>, std::uint_least32_t>)
 			return codepoint >= 0x41u // >= 'A'

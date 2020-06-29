@@ -26,7 +26,7 @@ namespace toml::impl
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
-	toml::string default_formatter_make_key_segment(const toml::string& str) noexcept
+	string default_formatter_make_key_segment(const string& str) noexcept
 	{
 		if (str.empty())
 			return TOML_STRING_PREFIX("''"s);
@@ -34,26 +34,29 @@ namespace toml::impl
 		{
 			bool requiresQuotes = false;
 			{
-				impl::utf8_decoder decoder;
+				utf8_decoder decoder;
 				for (size_t i = 0; i < str.length() && !requiresQuotes; i++)
 				{
 					decoder(static_cast<uint8_t>(str[i]));
 					if (decoder.error())
 						requiresQuotes = true;
 					else if (decoder.has_code_point())
-						requiresQuotes = !impl::is_bare_key_character(decoder.codepoint);
+						requiresQuotes = !is_bare_key_character(decoder.codepoint);
 				}
 			}
 
 			if (requiresQuotes)
 			{
-				toml::string s;
+				string s;
 				s.reserve(str.length() + 2_sz);
 				s += TOML_STRING_PREFIX('"');
 				for (auto c : str)
 				{
 					if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
-						s.append(low_character_escape_table[c]);
+					{
+						const auto& sv = low_character_escape_table[c];
+						s.append(reinterpret_cast<const string_char*>(sv.data()), sv.length());
+					}
 					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
 						s.append(TOML_STRING_PREFIX("\\u007F"sv));
 					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))

@@ -118,7 +118,7 @@ if build_tests or build_examples
 			add_project_arguments([ '-ftime-trace' ], language : 'cpp')
 		endif
 		if get_option('SMALL_BINARIES')
-			add_project_arguments([ '-Oz', '-fmerge-all-constants' ], language : 'cpp')
+			add_project_arguments([ '-Oz', '-fmerge-all-constants', '-Wl,--build-id' ], language : 'cpp')
 		endif
 	endif
 
