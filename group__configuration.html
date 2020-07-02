@@ -83,10 +83,6 @@ C++</span></a>
             </dt>
             <dd>Sets whether the library is entirely inline.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>
-            </dt>
-            <dd>Sets whether the library is entirely inline.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gad443ebc67d9e196f296f2038b2ad5e46">TOML_API</a></span>
             </dt>
             <dd>An annotation to add to public symbols.</dd>
@@ -138,19 +134,6 @@ C++</span></a>
         </section>
         <section>
           <h2>Define documentation</h2>
-          <section class="m-doc-details" id="ga997dc4b397795ca35126850cac05ec8e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>
-            </h3>
-            <p>Sets whether the library is entirely inline.</p>
-<p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <code>TOML_IMPLEMENTATION</code> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
-<span class="cp">#define TOML_ALL_INLINE 0</span>
-<span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span><span class="cp"></span>
-
-<span class="c1">// some_code_file.cpp</span>
-<span class="cp">#define TOML_IMPLEMENTATION </span>
-<span class="cp">#include</span> <span class="cpf">"global_header_that_includes_toml++.h"</span><span class="cp"></span></pre></aside>
-          </div></section>
           <section class="m-doc-details" id="ga997dc4b397795ca35126850cac05ec8e"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>

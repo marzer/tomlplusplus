@@ -17,9 +17,14 @@ header
 	z-index: 100;
 }
 
-article, article > header, article section
+article, article > header, article div > section
 {
-	margin-bottom: 3em;
+	margin-bottom: 5rem;
+}
+
+article div > section > section
+{
+	margin-bottom: 1.25rem;
 }
 
 pre, code, .tpp-enable-if > a
