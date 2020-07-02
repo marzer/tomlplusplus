@@ -44,7 +44,11 @@ ALIASES = \
 	"ecpp=@endcode" \
 	"out=@code{.shell-session}" \
 	"eout=@endcode" \
+	"bash=@code{.sh}" \
+	"ebash=@endcode" \
 	"detail=@details" \
+	"gh{1}=<a href=\"https://github.com/\1\">\1</a>"\
+	"gh2{2}=<a href=\"https://github.com/\1\">\2</a>"\
 	"m_div{1}=@xmlonly<mcss:div xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \
 	"m_enddiv=@xmlonly</mcss:div>@endxmlonly" \
 	"m_span{1}=@xmlonly<mcss:span xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \
@@ -132,6 +136,7 @@ WARN_LOGFILE           = ./doc/doxygen_warnings.log
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 INPUT                  = ../include
+INPUT                  += ../docs
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.h \
                          *.dox

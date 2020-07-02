@@ -11,6 +11,7 @@ import subprocess
 import traceback
 import shutil
 import fnmatch
+import requests
 
 
 
@@ -24,11 +25,25 @@ def get_script_folder():
 
 
 
-def read_all_text_from_file(path):
-	print("Reading {}".format(path))
-	with open(path, 'r', encoding='utf-8') as file:
-		text = file.read()
-	return text
+def read_all_text_from_file(path, fallback_url=None):
+	try:
+		print("Reading {}".format(path))
+		with open(path, 'r', encoding='utf-8') as f:
+			text = f.read()
+		return text
+	except:
+		if fallback_url is not None:
+			print("Couldn't read file locally, downloading from {}...".format(fallback_url))
+			response = requests.get(
+				fallback_url,
+				timeout=1
+			)
+			text = response.text
+			with open(path, 'w', encoding='utf-8', newline='\n') as f:
+				print(text, end='', file=f)
+			return text
+		else:
+			raise
 
 
 

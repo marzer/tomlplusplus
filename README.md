@@ -8,6 +8,16 @@
 [![Mentioned in Awesome C++](docs/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 ====
 
+# toml++ homepage
+
+<p align="center">
+	<strong>✨ This README is fine, but the <a href="https://marzer.github.io/tomlplusplus/">toml++ homepage</a> is better. ✨</strong>
+</p>
+
+<br>
+
+# Library features
+
  - Header-only
  - Supports the latest [TOML] release ([v1.0.0-rc.1]), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
@@ -22,7 +32,7 @@
 
 # Basic usage
 
-> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets instead, visit the project homepage at **[marzer.github.io/tomlplusplus](https://marzer.github.io/tomlplusplus/)**_
+> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets instead, visit the project [homepage]_
 
 Given a [TOML] file `configuration.toml` containing the following:
 ```toml
@@ -94,7 +104,7 @@ welcome a pull request with a smile and open arms!
 
 ### Conan
 `toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need
-to add `tomlplusplus/1.2.3` to your _conanfile_ to include this in your project. The default options are set for the
+to add `tomlplusplus/1.3.3` to your _conanfile_ to include this in your project. The default options are set for the
 single-header flavour, however specifying the option `"multiple_headers": True` is available.
 
 <br>

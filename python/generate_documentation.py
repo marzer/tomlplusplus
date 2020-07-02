@@ -15,7 +15,7 @@ import random
 import concurrent.futures as futures
 import html
 import bs4 as soup
-
+import json
 
 
 inline_namespaces = [
@@ -61,6 +61,7 @@ type_names = [
 	'string_view',
 	'string',
 	'byte',
+	'optional',
 	#------ toml++ types
 	'table',
 	'array',
@@ -99,6 +100,12 @@ class HTMLDocument(object):
 			self.__doc = soup.BeautifulSoup(f, 'html5lib', from_encoding='utf-8')
 		self.head = self.__doc.head
 		self.body = self.__doc.body
+		self.table_of_contents = None
+		toc_candidates = self.body.main.article.div.div.div('div', class_='m-block m-default', recursive=False)
+		for div in toc_candidates:
+			if div.h3 and div.h3.string == 'Contents':
+				self.table_of_contents = div
+				break
 
 	def flush(self):
 		with open(self.__path, 'w', encoding='utf-8', newline='\n') as f:
@@ -124,14 +131,15 @@ class HTMLDocument(object):
 				parent.insert(index, tag)
 				
 		return tag
-		
 
-	def find_all_from_sections(self, name=None, select=None, section=None, **kwargs):
+	def find_all_from_sections(self, name=None, select=None, section=None, include_toc=False, **kwargs):
 		tags = []
 		sectionArgs = { }
 		if (section is not None):
 			sectionArgs['id'] = section
 		sections = self.body.main.article.div.div.div('section', recursive=False, **sectionArgs)
+		if include_toc and self.table_of_contents is not None:
+			sections = [self.table_of_contents, *sections]
 		for sect in sections:
 			matches = sect(name, **kwargs) if name is not None else [ sect ]
 			if (select is not None):
@@ -141,6 +149,7 @@ class HTMLDocument(object):
 				matches = newMatches
 			tags += matches
 		return tags
+
 
 
 
@@ -254,29 +263,72 @@ class RegexReplacer(object):
 
 # allows the injection of custom tags using square-bracketed proxies.
 class CustomTagsFix(object): 
-	__expression = re.compile(r"\[\s*(span|div|code|pre)(.*?)\s*\](.*?)\[\s*/\s*\1\s*\]", re.I)
-	__allowedNames = ['dd', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']
-	
+	__double_tags = re.compile(r"\[\s*(span|div|code|pre|h1|h2|h3|h4|h5|h6)(.*?)\s*\](.*?)\[\s*/\s*\1\s*\]", re.I)
+	__single_tags = re.compile(r"\[\s*(/?(?:span|div|code|pre|emoji|br|li|ul|ol))(\s.*?)?\s*\]", re.I)
+	__allowed_parents = ['dd', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li']
+	__emojis = None
+	__emoji_uri = re.compile(r".+unicode/([0-9a-fA-F]+)[.]png.*", re.I)
+
 	@classmethod
-	def __substitute(cls, m):
+	def __double_tags_substitute(cls, m):
 		return '<{}{}>{}</{}>'.format(
 			m.group(1),
 			html.unescape(m.group(2)),
 			m.group(3),
 			m.group(1)
 		)
+
+	@classmethod
+	def __single_tags_substitute(cls, m):
+		if (str(m.group(1)).lower() == 'emoji'):
+			emoji = str(m.group(2)).strip().lower()
+			if emoji == '':
+				return ''
+			if cls.__emojis is None:
+				cls.__emojis = json.loads(utils.read_all_text_from_file('emojis.json', 'https://api.github.com/emojis'))
+				if '__processed' not in cls.__emojis:
+					emojis = {}
+					for key, uri in cls.__emojis.items():
+						m2 = cls.__emoji_uri.fullmatch(uri)
+						if m2:
+							emojis[key] = [ str(m2.group(1)).upper(), uri ]
+					aliases = [('sundae', 'ice_cream')]
+					for alias, key in aliases:
+						emojis[alias] = emojis[key]
+					emojis['__processed'] = True
+					with open('emojis.json', 'w', encoding='utf-8', newline='\n') as f:
+						f.write(json.dumps(emojis, sort_keys=True, indent=4))
+					cls.__emojis = emojis
+			if emoji not in cls.__emojis:
+				return ''
+			return '&#x{}'.format(cls.__emojis[emoji][0])
+			
+		else:
+			return '<{}{}>'.format(
+				m.group(1),
+				(' ' + str(m.group(2)).strip()) if m.group(2) else ''
+			)
 		
 	def __call__(self, file, doc):
 		changed = False
-		for name in self.__allowedNames:
-			tags = doc.find_all_from_sections(name)
+		for name in self.__allowed_parents:
+			tags = doc.find_all_from_sections(name, include_toc=True)
 			for tag in tags:
 				if (len(tag.contents) == 0 or html_find_parent(tag, 'a', doc.body) is not None):
 					continue
-				replacer = RegexReplacer(self.__expression, self.__substitute, str(tag))
+
+				replacer = RegexReplacer(self.__double_tags, self.__double_tags_substitute, str(tag))
 				if (replacer):
 					changed = True
 					html_replace_tag(tag, str(replacer))
+					continue
+
+				replacer = RegexReplacer(self.__single_tags, self.__single_tags_substitute, str(tag))
+				if (replacer):
+					changed = True
+					html_replace_tag(tag, str(replacer))
+					continue
+
 		return changed
 
 

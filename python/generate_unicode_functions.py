@@ -11,7 +11,6 @@ import os.path as path
 import utils
 import re
 import math
-import requests
 import bisect
 
 
@@ -1140,21 +1139,10 @@ def write_to_files(codepoints, header_file, test_file):
 def main():
 
 	# get unicode character database
-	codepoint_list = ''
-	codepoint_file_path = path.join(utils.get_script_folder(), 'UnicodeData.txt')
-	if (not path.exists(codepoint_file_path)):
-		print("Couldn't find unicode database file, will download")
-		response = requests.get(
-			'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt',
-			timeout=1
-		)
-		codepoint_list = response.text
-		with open(codepoint_file_path, 'w', encoding='utf-8', newline='\n') as codepoint_file:
-			print(codepoint_list, end='', file=codepoint_file)
-	else:
-		print("Reading unicode database file into memory")
-		with open(codepoint_file_path, 'r', encoding='utf-8') as codepoint_file:
-			codepoint_list = codepoint_file.read()
+	codepoint_list = utils.read_all_text_from_file(
+		path.join(utils.get_script_folder(), 'UnicodeData.txt'),
+		'https://www.unicode.org/Public/UCD/latest/ucd/UnicodeData.txt'
+	)
 
 	# parse the database file into codepoints
 	re_codepoint = re.compile(r'^([0-9a-fA-F]+);(.+?);([a-zA-Z]+);')

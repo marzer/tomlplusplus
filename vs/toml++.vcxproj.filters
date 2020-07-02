@@ -100,16 +100,16 @@
       <Filter>python</Filter>
     </None>
     <None Include="..\docs\Doxyfile">
-      <Filter>doc</Filter>
+      <Filter>docs</Filter>
     </None>
     <None Include="..\docs\Doxyfile-mcss">
-      <Filter>doc</Filter>
+      <Filter>docs</Filter>
     </None>
     <None Include="..\docs\tomlplusplus.css">
-      <Filter>doc</Filter>
+      <Filter>docs</Filter>
     </None>
     <None Include="..\docs\tomlplusplus.js">
-      <Filter>doc</Filter>
+      <Filter>docs</Filter>
     </None>
     <None Include="..\CONTRIBUTING.md" />
     <None Include="..\meson.build" />
@@ -120,6 +120,11 @@
     <None Include="..\python\generate_conformance_tests.py">
       <Filter>python</Filter>
     </None>
+    <None Include="..\docs\main_page.dox">
+      <Filter>docs</Filter>
+    </None>
+    <None Include="..\.gitattributes" />
+    <None Include="..\.gitignore" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -128,7 +133,7 @@
     <Filter Include="python">
       <UniqueIdentifier>{5ba46476-31a3-484e-aee7-f840dd2202b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="doc">
+    <Filter Include="docs">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
