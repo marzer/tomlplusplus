@@ -46,7 +46,7 @@ C++</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a class="github" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github tpp-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -313,7 +313,7 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"bar"</span><span class="p">,</span> <span class="mf">2.0</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a href="https://en.cppreference.com/w/cpp/utility/initializer_list">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d63ea8e51917b4dd9a35ae3e2ebd87e"><div>
             <h3>
@@ -991,17 +991,17 @@ C++</span></a>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <a href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+        <a class="tpp-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 •
 
-<a href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+<a class="tpp-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
 <br/><br/>Documentation
 generated
 using
-<a href="https://mcss.mosra.cz/">m.css</a>
+<a class="tpp-external" href="https://mcss.mosra.cz/" target="_blank">m.css</a>
       </div>
     </div>
   </div>
