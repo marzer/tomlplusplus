@@ -163,7 +163,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr operator char32_t& () noexcept
 		{
@@ -171,7 +171,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr operator const char32_t& () const noexcept
 		{
@@ -179,7 +179,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr const char32_t& operator* () const noexcept
 		{

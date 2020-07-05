@@ -961,7 +961,7 @@ def emit_function(name, header_file, test_file, codepoints, test_func, descripti
 	header = lambda txt: print(txt, file=header_file)
 	header("	//# " + ("\n\t//# ".join(description.split('\n'))))
 	header('	[[nodiscard]]')
-	header('	TOML_GNU_ATTR(const)')
+	header('	TOML_ATTR(const)')
 	header('	constexpr bool {}(char32_t cp) noexcept'.format(name))
 	header('	{')
 	header(indent_with_tabs(str(root_chunk), 2))

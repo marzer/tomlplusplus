@@ -112,7 +112,7 @@
 
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
@@ -191,10 +191,13 @@
 	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wpadded\"")
 	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wshadow\"")
+	#define TOML_DISABLE_SUGGEST_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+											_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
 											_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
 											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+											TOML_DISABLE_SUGGEST_WARNINGS										\
 											TOML_DISABLE_SWITCH_WARNINGS										\
 											TOML_DISABLE_INIT_WARNINGS											\
 											TOML_DISABLE_PADDING_WARNINGS										\
@@ -202,7 +205,7 @@
 											TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
 		#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
 	#endif
@@ -299,6 +302,9 @@
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_DISABLE_SHADOW_WARNINGS
 #endif
+#ifndef TOML_DISABLE_SUGGEST_WARNINGS
+	#define TOML_DISABLE_SUGGEST_WARNINGS
+#endif
 #ifndef TOML_DISABLE_ALL_WARNINGS
 	#define TOML_DISABLE_ALL_WARNINGS
 #endif
@@ -306,8 +312,8 @@
 	#define TOML_POP_WARNINGS
 #endif
 
-#ifndef TOML_GNU_ATTR
-	#define TOML_GNU_ATTR(...)
+#ifndef TOML_ATTR
+	#define TOML_ATTR(...)
 #endif
 
 #ifndef TOML_INTERFACE
@@ -491,7 +497,7 @@ namespace toml
 	using ptrdiff_t = std::ptrdiff_t;
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 	{
@@ -657,7 +663,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
 	{
@@ -1289,7 +1295,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_ALWAYS_INLINE
 	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
@@ -1308,7 +1314,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_ALWAYS_INLINE
 	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{
@@ -2390,7 +2396,7 @@ TOML_DISABLE_VTABLE_WARNINGS
 namespace toml::impl
 {
 	template <bool IsConst>
-	class array_iterator final
+	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
 			friend class ::toml::array;
@@ -2548,8 +2554,9 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	TOML_ALWAYS_INLINE
-	auto make_node(T&& val) noexcept
+	auto* make_node(T&& val) noexcept
 	{
 		using type = unwrapped<remove_cvref_t<T>>;
 		if constexpr (is_one_of<type, array, table>)
@@ -2572,8 +2579,9 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	TOML_ALWAYS_INLINE
-	auto make_node(inserter<T>&& val) noexcept
+	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
 	}
@@ -3490,7 +3498,7 @@ namespace toml
 namespace toml::impl
 {
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_hexadecimal_digit(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -3501,7 +3509,7 @@ namespace toml::impl
 #if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_letter(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -3840,7 +3848,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_number(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -3988,7 +3996,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_combining_mark(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -4205,7 +4213,7 @@ namespace toml::impl
 {
 	template <typename... T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
 	{
 		static_assert((std::is_same_v<char32_t, T> && ...));
@@ -4213,7 +4221,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
@@ -4221,7 +4229,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -4237,7 +4245,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
 		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
@@ -4245,7 +4253,7 @@ namespace toml::impl
 
 	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
@@ -4254,7 +4262,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -4268,14 +4276,14 @@ namespace toml::impl
 
 	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_unicode_line_break(codepoint);
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
@@ -4283,7 +4291,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_letter(char32_t codepoint) noexcept
 	{
@@ -4292,7 +4300,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
@@ -4300,7 +4308,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_octal_digit(char32_t codepoint) noexcept
 	{
@@ -4308,7 +4316,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_decimal_digit(char32_t codepoint) noexcept
 	{
@@ -4317,7 +4325,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr std::uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
@@ -4331,7 +4339,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint)
@@ -4348,7 +4356,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break(codepoint)
@@ -4363,7 +4371,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_control_character(char32_t codepoint) noexcept
 	{
@@ -4371,7 +4379,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
 	{
@@ -4381,7 +4389,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
 	{
@@ -4465,7 +4473,7 @@ namespace toml
 	};
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
@@ -4473,7 +4481,7 @@ namespace toml
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
@@ -5156,20 +5164,20 @@ namespace toml
 		public:
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, source_region&& src) noexcept
 				: std::runtime_error{ desc },
 				source_{ std::move(src) }
 			{}
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, const source_region& src) noexcept
 				: parse_error{ desc, source_region{ src } }
 			{}
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept
 				: parse_error{ desc, source_region{ position, position, path } }
 			{}
@@ -5366,7 +5374,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr operator char32_t& () noexcept
 		{
@@ -5374,7 +5382,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr operator const char32_t& () const noexcept
 		{
@@ -5382,7 +5390,7 @@ namespace toml::impl
 		}
 
 		[[nodiscard]]
-		TOML_GNU_ATTR(pure)
+		TOML_ATTR(pure)
 		TOML_ALWAYS_INLINE
 		constexpr const char32_t& operator* () const noexcept
 		{
@@ -5986,10 +5994,9 @@ namespace toml
 			TOML_PARSE_FILE_ERROR("Could not determine file size", source_position{});
 		file.seekg(0, std::ios::beg);
 
-		// if the file size is the sweet spot, read the whole thing into memory and parse from there
-		constexpr auto small_file_threshold = 1024 * 32; //32 kilobytes
-		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 8; // 64 megabytes on 64-bit
-		if (file_size >= small_file_threshold && file_size <= large_file_threshold)
+		// read the whole file into memory first if the file isn't too large
+		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit
+		if (file_size <= large_file_threshold)
 		{
 			std::vector<StreamChar> file_data;
 			file_data.resize(static_cast<size_t>(file_size));
@@ -6065,6 +6072,9 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 //------------------------------------------  ↓ toml_node.hpp  ---------------------------------------------------------
 #if 1
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
+
 namespace toml
 {
 	TOML_EXTERNAL_LINKAGE
@@ -6084,44 +6094,53 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE bool node::is_string() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_integer() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_floating_point() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_number() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_boolean() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_date() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_time() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_date_time() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_array_of_tables() const noexcept { return false; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
 
-	TOML_EXTERNAL_LINKAGE table* node::as_table() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE array* node::as_array() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<string>* node::as_string() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<int64_t>* node::as_integer() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<double>* node::as_floating_point() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<bool>* node::as_boolean() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<date>* node::as_date() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<time>* node::as_time() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<date_time>* node::as_date_time() noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) bool node::is_string()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_integer()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_floating_point()	const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_number()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_boolean()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_date()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_time()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_date_time()		const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_array_of_tables()	const noexcept { return false; }
 
-	TOML_EXTERNAL_LINKAGE const table* node::as_table() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const array* node::as_array() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<string>* node::as_string() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<int64_t>* node::as_integer() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<double>* node::as_floating_point() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<bool>* node::as_boolean() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<date>* node::as_date() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<time>* node::as_time() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<date_time>* node::as_date_time() const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) table* node::as_table()						noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) array* node::as_array()						noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<string>* node::as_string()			noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<int64_t>* node::as_integer()			noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<double>* node::as_floating_point()	noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<bool>* node::as_boolean()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<date>* node::as_date()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<time>* node::as_time()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<date_time>* node::as_date_time()		noexcept { return nullptr; }
 
-	TOML_EXTERNAL_LINKAGE const source_region& node::source() const noexcept { return source_; }
+	TOML_MEMBER_ATTR(const) const table* node::as_table()					const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const array* node::as_array()					const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<string>* node::as_string()			const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<int64_t>* node::as_integer()		const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<double>* node::as_floating_point()	const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<bool>* node::as_boolean()			const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<date>* node::as_date()				const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<time>* node::as_time()				const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<date_time>* node::as_date_time()	const noexcept { return nullptr; }
+
+	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
+
+	#undef TOML_MEMBER_ATTR
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
 #endif
 //------------------------------------------  ↑ toml_node.hpp  ---------------------------------------------------------
 
 //------------------------------------------------------------------  ↓ toml_array.hpp  --------------------------------
 #if 1
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
 
 namespace toml
 {
@@ -6155,37 +6174,40 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE node_type array::type() const noexcept { return node_type::array; }
-	TOML_EXTERNAL_LINKAGE bool array::is_table() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool array::is_array() const noexcept { return true; }
-	TOML_EXTERNAL_LINKAGE bool array::is_value() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE array* array::as_array() noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE const array* array::as_array() const noexcept { return this; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
 
-	TOML_EXTERNAL_LINKAGE node& array::operator[] (size_t index) noexcept { return *values[index]; }
-	TOML_EXTERNAL_LINKAGE const node& array::operator[] (size_t index) const noexcept { return *values[index]; }
+	TOML_MEMBER_ATTR(const) node_type array::type()			const noexcept	{ return node_type::array; }
+	TOML_MEMBER_ATTR(const) bool array::is_table()			const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) bool array::is_array()			const noexcept	{ return true; }
+	TOML_MEMBER_ATTR(const) bool array::is_value()			const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) const array* array::as_array()	const noexcept	{ return this; }
+	TOML_MEMBER_ATTR(const) array* array::as_array()		noexcept		{ return this; }
 
-	TOML_EXTERNAL_LINKAGE node& array::front() noexcept { return *values.front(); }
-	TOML_EXTERNAL_LINKAGE const node& array::front() const noexcept { return *values.front(); }
-	TOML_EXTERNAL_LINKAGE node& array::back() noexcept { return *values.back(); }
-	TOML_EXTERNAL_LINKAGE const node& array::back() const noexcept { return *values.back(); }
+	TOML_MEMBER_ATTR(pure) const node& array::operator[] (size_t index)	const noexcept	{ return *values[index]; }
+	TOML_MEMBER_ATTR(pure) node& array::operator[] (size_t index)		noexcept		{ return *values[index]; }
 
-	TOML_EXTERNAL_LINKAGE array::iterator array::begin() noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::begin() const noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::cbegin() const noexcept { return { values.cbegin() }; }
+	TOML_MEMBER_ATTR(pure) const node& array::front()				const noexcept	{ return *values.front(); }
+	TOML_MEMBER_ATTR(pure) const node& array::back()				const noexcept	{ return *values.back(); }
+	TOML_MEMBER_ATTR(pure) node& array::front()						noexcept		{ return *values.front(); }
+	TOML_MEMBER_ATTR(pure) node& array::back()						noexcept		{ return *values.back(); }
 
-	TOML_EXTERNAL_LINKAGE array::iterator array::end() noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::end() const noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::cend() const noexcept { return { values.cend() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::begin()		const noexcept	{ return { values.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::end()		const noexcept	{ return { values.end() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cbegin()	const noexcept	{ return { values.cbegin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cend()		const noexcept	{ return { values.cend() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::begin()			noexcept		{ return { values.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::end()				noexcept		{ return { values.end() }; }
 
-	TOML_EXTERNAL_LINKAGE bool array::empty() const noexcept { return values.empty(); }
-	TOML_EXTERNAL_LINKAGE size_t array::size() const noexcept { return values.size(); }
-	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity) { values.reserve(new_capacity); }
-	TOML_EXTERNAL_LINKAGE void array::clear() noexcept { values.clear(); }
+	TOML_MEMBER_ATTR(pure) size_t array::size()						const noexcept	{ return values.size(); }
+	TOML_MEMBER_ATTR(pure) size_t array::capacity()					const noexcept	{ return values.capacity(); }
+	TOML_MEMBER_ATTR(pure) bool array::empty()						const noexcept	{ return values.empty(); }
+	TOML_MEMBER_ATTR(const) size_t array::max_size()				const noexcept	{ return values.max_size(); }
 
-	TOML_EXTERNAL_LINKAGE size_t array::max_size() const noexcept { return values.max_size(); }
-	TOML_EXTERNAL_LINKAGE size_t array::capacity() const noexcept { return values.capacity(); }
-	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit() { values.shrink_to_fit(); }
+	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity)	{ values.reserve(new_capacity); }
+	TOML_EXTERNAL_LINKAGE void array::clear() noexcept				{ values.clear(); }
+	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit()				{ values.shrink_to_fit(); }
+
+	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
 	void array::truncate(size_t new_size)
@@ -6213,12 +6235,14 @@ namespace toml
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	TOML_ATTR(pure)
 	node* array::get(size_t index) noexcept
 	{
 		return index < values.size() ? values[index].get() : nullptr;
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	TOML_ATTR(pure)
 	const node* array::get(size_t index) const noexcept
 	{
 		return index < values.size() ? values[index].get() : nullptr;
@@ -6336,11 +6360,16 @@ namespace toml
 	}
 }
 
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
+
 #endif
 //------------------------------------------------------------------  ↑ toml_array.hpp  --------------------------------
 
 //-------------------------------------------------------------------------------------------  ↓ toml_table.hpp  -------
 #if 1
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
 
 namespace toml
 {
@@ -6375,14 +6404,30 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE node_type table::type() const noexcept { return node_type::table; }
-	TOML_EXTERNAL_LINKAGE bool table::is_table() const noexcept { return true; }
-	TOML_EXTERNAL_LINKAGE bool table::is_array() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool table::is_value() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE table* table::as_table() noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE const table* table::as_table() const noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE bool table::is_inline() const noexcept { return inline_; }
-	TOML_EXTERNAL_LINKAGE void table::is_inline(bool val) noexcept { inline_ = val; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
+
+	TOML_MEMBER_ATTR(const) node_type table::type()				const noexcept	{ return node_type::table; }
+	TOML_MEMBER_ATTR(const) bool table::is_table()				const noexcept	{ return true; }
+	TOML_MEMBER_ATTR(const) bool table::is_array()				const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) bool table::is_value()				const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) const table* table::as_table()		const noexcept	{ return this; }
+	TOML_MEMBER_ATTR(const) table* table::as_table()			noexcept		{ return this; }
+
+	TOML_MEMBER_ATTR(pure) bool table::is_inline()				const noexcept	{ return inline_; }
+	TOML_EXTERNAL_LINKAGE void table::is_inline(bool val)		noexcept		{ inline_ = val; }
+
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin()	const noexcept	{ return { values.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::end()	const noexcept	{ return { values.end() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin()	const noexcept	{ return { values.cbegin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend()	const noexcept	{ return { values.cend() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::begin()		noexcept		{ return { values.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::end()			noexcept		{ return { values.end() }; }
+
+	TOML_MEMBER_ATTR(pure) bool table::empty()					const noexcept	{ return values.empty(); }
+	TOML_MEMBER_ATTR(pure) size_t table::size()					const noexcept	{ return values.size(); }
+	TOML_EXTERNAL_LINKAGE void table::clear()					noexcept		{ values.clear(); }
+
+	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (string_view key) noexcept
@@ -6394,18 +6439,6 @@ namespace toml
 	{
 		return { this->get(key) };
 	}
-
-	TOML_EXTERNAL_LINKAGE table::iterator table::begin() noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin() const noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin() const noexcept { return { values.cbegin() }; }
-
-	TOML_EXTERNAL_LINKAGE table::iterator table::end() noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::end() const noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend() const noexcept { return { values.cend() }; }
-
-	TOML_EXTERNAL_LINKAGE bool table::empty() const noexcept { return values.empty(); }
-	TOML_EXTERNAL_LINKAGE size_t table::size() const noexcept { return values.size(); }
-	TOML_EXTERNAL_LINKAGE void table::clear() noexcept { values.clear(); }
 
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::erase(iterator pos) noexcept
@@ -6503,6 +6536,8 @@ namespace toml
 		return !(lhs == rhs);
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
 #endif
 //-------------------------------------------------------------------------------------------  ↑ toml_table.hpp  -------
@@ -6846,7 +6881,7 @@ namespace TOML_INTERNAL_NAMESPACE
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(bool val) noexcept
 	{
@@ -6871,7 +6906,7 @@ namespace TOML_INTERNAL_NAMESPACE
 	}
 
 	template <typename T>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_INTERNAL_LINKAGE
 	TOML_NEVER_INLINE
 	void concatenate(char*& write_pos, char *const buf_end, const T& arg) noexcept
@@ -9855,13 +9890,15 @@ namespace toml
 #if TOML_UNDEF_MACROS
 	#undef TOML_INT_CHARCONV
 	#undef TOML_FLOAT_CHARCONV
-	#undef TOML_GNU_ATTR
+	#undef TOML_ATTR
 	#undef TOML_PUSH_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_VTABLE_WARNINGS
 	#undef TOML_DISABLE_PADDING_WARNINGS
 	#undef TOML_DISABLE_FLOAT_WARNINGS
+	#undef TOML_DISABLE_SHADOW_WARNINGS
+	#undef TOML_DISABLE_SUGGEST_WARNINGS
 	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_POP_WARNINGS
 	#undef TOML_ALWAYS_INLINE

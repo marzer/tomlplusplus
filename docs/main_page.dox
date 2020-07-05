@@ -37,20 +37,19 @@
 /// #include <fstream> //required for parse_file()
 /// #include <toml++/toml.h>
 /// 
-/// int main()
+/// int main(int argc, char** argv)
 /// {
 /// 	toml::table tbl;
 /// 	try
 /// 	{
-/// 		tbl = toml::parse_file("configuration.toml");
+/// 		tbl = toml::parse_file(argv[1]);
+///			std::cout << tbl << std::endl;
 /// 	}
 /// 	catch (const toml::parse_error& err)
 /// 	{
-/// 		std::cerr << "Parsing failed:\n" << err << "\n";
+/// 		std::cerr << "Parsing failed:\n" << err << std::endl;
 /// 		return 1;
 /// 	}
-/// 
-/// 	do_stuff_with_your_config(tbl);
 /// 
 /// 	return 0;
 /// }
@@ -76,6 +75,8 @@
 /// \subsection mainpage-example-parsing-strings Parsing strings and iostreams
 /// 
 /// Call toml::parse() and work with the toml::table you get back, or handle any toml::parse_error that gets thrown:
+/// 
+/// \godbolt{NsR-xf}
 /// 
 /// \cpp
 /// #include <iostream>
@@ -125,7 +126,7 @@
 /// 
 /// ... twice
 /// \eout
-/// 
+///
 /// \see
 /// 	- toml::parse_file()  
 /// 	- toml::table  
@@ -199,6 +200,9 @@
 /// A TOML document is a tree of values, arrays and tables, represented as the toml::value, toml::array
 /// and toml::table, respectively. All three inherit from toml::node, and can be easily accessed via
 /// the toml::node_view:
+/// 
+/// \godbolt{ieG52U}
+/// 
 /// \cpp
 /// #include <iostream>
 /// #include <toml++/toml.h>
@@ -300,6 +304,9 @@
 /// All toml++ data types have overloaded `operator<<` for ostreams, so 'serializing' a set of TOML data to actual
 /// TOML is done just by printing it to an ostream. Converting it to JSON is done in the same way,
 /// but via a toml::json_formatter.
+/// 
+/// \godbolt{MMNoW4}
+/// 
 /// \cpp
 /// #include <iostream>
 /// #include <toml++/toml.h>

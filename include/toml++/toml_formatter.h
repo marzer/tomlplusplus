@@ -20,7 +20,7 @@ namespace toml
 	};
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
@@ -28,7 +28,7 @@ namespace toml
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{

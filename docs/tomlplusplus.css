@@ -8,6 +8,11 @@ body
 	margin-top: 3rem;
 }
 
+a
+{
+	text-decoration: none !important; 
+}
+
 header
 {
 	position: fixed;
@@ -136,8 +141,9 @@ pre.m-code + pre.m-console span
 }
 
 /* int and float literals */
-.m-code .mi,
-.m-code .mf
+pre.m-code .mi,
+pre.m-code .mf,
+pre.m-code .mh
 {
 	color: rgb(181,206,168);
 }
@@ -247,4 +253,30 @@ main > article > .m-container.m-container-inflatable > .m-row > div.m-col-l-10.m
 	margin-right: -1rem;
 	margin-top: -1.75rem;
 	max-width: calc(100% + 2rem);
+}
+
+/* "Try this code on Compiler Explorer" */
+.godbolt
+{
+	font-family: 'Source Sans Pro', sans-serif;
+}
+p.godbolt
+{
+	text-align: center;
+	padding: 0.0rem;
+	text-indent: 0.0rem;
+	opacity: 0.5;
+}
+p.godbolt:hover
+{
+	opacity: 1.0;
+}
+a.godbolt
+{
+	padding: 0.5rem;
+	display: inline-block;
+}
+pre > p.godbolt
+{
+  float: right;
 }

@@ -49,7 +49,7 @@ namespace toml
 	using ptrdiff_t = std::ptrdiff_t;
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
 	{
@@ -299,7 +299,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
 	{

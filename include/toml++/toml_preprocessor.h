@@ -72,7 +72,7 @@
 
 	#define TOML_ASSUME(cond)				__builtin_assume(cond)
 	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
@@ -151,10 +151,13 @@
 	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wpadded\"")
 	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wshadow\"")
+	#define TOML_DISABLE_SUGGEST_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+											_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
 											_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
 											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+											TOML_DISABLE_SUGGEST_WARNINGS										\
 											TOML_DISABLE_SWITCH_WARNINGS										\
 											TOML_DISABLE_INIT_WARNINGS											\
 											TOML_DISABLE_PADDING_WARNINGS										\
@@ -162,7 +165,7 @@
 											TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
 
-	#define TOML_GNU_ATTR(...)				__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
 		#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
 	#endif
@@ -259,6 +262,9 @@
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_DISABLE_SHADOW_WARNINGS
 #endif
+#ifndef TOML_DISABLE_SUGGEST_WARNINGS
+	#define TOML_DISABLE_SUGGEST_WARNINGS
+#endif
 #ifndef TOML_DISABLE_ALL_WARNINGS
 	#define TOML_DISABLE_ALL_WARNINGS
 #endif
@@ -266,8 +272,8 @@
 	#define TOML_POP_WARNINGS
 #endif
 
-#ifndef TOML_GNU_ATTR
-	#define TOML_GNU_ATTR(...)
+#ifndef TOML_ATTR
+	#define TOML_ATTR(...)
 #endif
 
 #ifndef TOML_INTERFACE

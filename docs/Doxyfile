@@ -39,25 +39,26 @@ MULTILINE_CPP_IS_BRIEF = NO
 INHERIT_DOCS           = YES
 SEPARATE_MEMBER_PAGES  = NO
 TAB_SIZE               = 4
-ALIASES = \
-	"cpp=@code{.cpp}" \
-	"ecpp=@endcode" \
-	"out=@code{.shell-session}" \
-	"eout=@endcode" \
-	"bash=@code{.sh}" \
-	"ebash=@endcode" \
-	"detail=@details" \
-	"gh{1}=<a href=\"https://github.com/\1\">\1</a>"\
-	"gh2{2}=<a href=\"https://github.com/\1\">\2</a>"\
-	"m_div{1}=@xmlonly<mcss:div xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \
-	"m_enddiv=@xmlonly</mcss:div>@endxmlonly" \
-	"m_span{1}=@xmlonly<mcss:span xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly" \
-	"m_endspan=@xmlonly</mcss:span>@endxmlonly" \
-	"m_class{1}=@xmlonly<mcss:class xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\" />@endxmlonly" \
-	"m_footernavigation=@xmlonly<mcss:footernavigation xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" />@endxmlonly" \
-	"m_examplenavigation{2}=@xmlonly<mcss:examplenavigation xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:page=\"\1\" mcss:prefix=\"\2\" />@endxmlonly" \
-	"m_keywords{1}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keywords=\"\1\" />@endxmlonly" \
-	"m_keyword{3}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keyword=\"\1\" mcss:title=\"\2\" mcss:suffix-length=\"\3\" />@endxmlonly" \
+ALIASES =												\
+	"cpp=@code{.cpp}"									\
+	"ecpp=@endcode"										\
+	"out=@code{.shell-session}"							\
+	"eout=@endcode"										\
+	"bash=@code{.sh}"									\
+	"ebash=@endcode"									\
+	"detail=@details"									\
+	"gh{1}=<a href=\"https://github.com/\1\"  target=\"_blank\">\1</a>"	\
+	"gh2{2}=<a href=\"https://github.com/\1\" target=\"_blank\">\2</a>"	\
+	"godbolt{1}=<a href=\"https://godbolt.org/z/\1\" target=\"_blank\">Try this code on Compiler Explorer</a>"		\
+	"m_div{1}=@xmlonly<mcss:div xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly"			\
+	"m_enddiv=@xmlonly</mcss:div>@endxmlonly"																		\
+	"m_span{1}=@xmlonly<mcss:span xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\">@endxmlonly"		\
+	"m_endspan=@xmlonly</mcss:span>@endxmlonly"																		\
+	"m_class{1}=@xmlonly<mcss:class xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:class=\"\1\" />@endxmlonly"	\
+	"m_footernavigation=@xmlonly<mcss:footernavigation xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" />@endxmlonly"	\
+	"m_examplenavigation{2}=@xmlonly<mcss:examplenavigation xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:page=\"\1\" mcss:prefix=\"\2\" />@endxmlonly"			\
+	"m_keywords{1}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keywords=\"\1\" />@endxmlonly"											\
+	"m_keyword{3}=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:keyword=\"\1\" mcss:title=\"\2\" mcss:suffix-length=\"\3\" />@endxmlonly"	\
 	"m_enum_values_as_keywords=@xmlonly<mcss:search xmlns:mcss=\"http://mcss.mosra.cz/doxygen/\" mcss:enum-values-as-keywords=\"true\" />@endxmlonly"
 TCL_SUBST              =
 OPTIMIZE_OUTPUT_FOR_C  = NO
@@ -316,7 +317,7 @@ PREDEFINED             = TOML_DOXYGEN=1 \
 						 TOML_API= \
 						 TOML_ABI_NAMESPACE_START(x)= \
 						 TOML_ABI_NAMESPACE_END= \
-						 TOML_GNU_ATTR(...)=	\
+						 TOML_ATTR(...)=	\
 						 TOML_PUSH_WARNINGS= \ 
 						 TOML_DISABLE_SWITCH_WARNINGS= \
 						 TOML_DISABLE_INIT_WARNINGS= \
@@ -324,6 +325,7 @@ PREDEFINED             = TOML_DOXYGEN=1 \
 						 TOML_DISABLE_PADDING_WARNINGS= \
 						 TOML_DISABLE_FLOAT_WARNINGS= \
 						 TOML_DISABLE_SHADOW_WARNINGS= \
+						 TOML_DISABLE_SUGGEST_WARNINGS= \
 						 TOML_DISABLE_ALL_WARNINGS= \
 						 TOML_POP_WARNINGS= \
 						 TOML_ASYMMETRICAL_EQUALITY_OPS(...)=	\

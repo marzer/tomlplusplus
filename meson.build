@@ -84,6 +84,9 @@ if build_tests or build_examples
 					'-Wunused-parameter',
 					'-Wvariadic-macros',
 					'-Wwrite-strings',
+					'-Wmissing-noreturn',
+					'-Wsuggest-attribute=const',
+					'-Wsuggest-attribute=pure'
 				],
 				language : 'cpp'
 			)

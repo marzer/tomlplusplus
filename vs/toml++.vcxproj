@@ -83,7 +83,6 @@
     <ClInclude Include="..\include\toml++\toml_instantiations.hpp" />
     <ClInclude Include="..\include\toml++\toml_version.h" />
     <ClInclude Include="..\tests\settings.h" />
-    <ClInclude Include="..\toml.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

@@ -60,7 +60,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_ALWAYS_INLINE
 	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
@@ -79,7 +79,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_ALWAYS_INLINE
 	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{

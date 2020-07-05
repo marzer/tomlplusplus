@@ -13,6 +13,9 @@
 
 #include "toml_node.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
+
 namespace toml
 {
 	TOML_EXTERNAL_LINKAGE
@@ -32,35 +35,41 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE bool node::is_string() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_integer() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_floating_point() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_number() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_boolean() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_date() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_time() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_date_time() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool node::is_array_of_tables() const noexcept { return false; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
 
-	TOML_EXTERNAL_LINKAGE table* node::as_table() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE array* node::as_array() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<string>* node::as_string() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<int64_t>* node::as_integer() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<double>* node::as_floating_point() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<bool>* node::as_boolean() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<date>* node::as_date() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<time>* node::as_time() noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE value<date_time>* node::as_date_time() noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) bool node::is_string()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_integer()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_floating_point()	const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_number()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_boolean()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_date()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_time()			const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_date_time()		const noexcept { return false; }
+	TOML_MEMBER_ATTR(const) bool node::is_array_of_tables()	const noexcept { return false; }
+	
+	TOML_MEMBER_ATTR(const) table* node::as_table()						noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) array* node::as_array()						noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<string>* node::as_string()			noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<int64_t>* node::as_integer()			noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<double>* node::as_floating_point()	noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<bool>* node::as_boolean()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<date>* node::as_date()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<time>* node::as_time()				noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<date_time>* node::as_date_time()		noexcept { return nullptr; }
+	
+	TOML_MEMBER_ATTR(const) const table* node::as_table()					const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const array* node::as_array()					const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<string>* node::as_string()			const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<int64_t>* node::as_integer()		const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<double>* node::as_floating_point()	const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<bool>* node::as_boolean()			const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<date>* node::as_date()				const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<time>* node::as_time()				const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<date_time>* node::as_date_time()	const noexcept { return nullptr; }
 
-	TOML_EXTERNAL_LINKAGE const table* node::as_table() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const array* node::as_array() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<string>* node::as_string() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<int64_t>* node::as_integer() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<double>* node::as_floating_point() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<bool>* node::as_boolean() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<date>* node::as_date() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<time>* node::as_time() const noexcept { return nullptr; }
-	TOML_EXTERNAL_LINKAGE const value<date_time>* node::as_date_time() const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
-	TOML_EXTERNAL_LINKAGE const source_region& node::source() const noexcept { return source_; }
+	#undef TOML_MEMBER_ATTR
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

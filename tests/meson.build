@@ -1,5 +1,8 @@
 test_sources = [
-	'conformance.cpp',
+	'conformance_burntsushi_invalid.cpp',
+	'conformance_burntsushi_valid.cpp',
+	'conformance_iarna_invalid.cpp',
+	'conformance_iarna_valid.cpp',
 	'impl_toml.cpp',
 	'impl_catch2.cpp',
 	'tests.cpp',

@@ -11,7 +11,7 @@ namespace toml::impl
 {
 	template <typename... T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
 	{
 		static_assert((std::is_same_v<char32_t, T> && ...));
@@ -19,7 +19,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
@@ -27,7 +27,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -43,7 +43,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
 		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
@@ -51,7 +51,7 @@ namespace toml::impl
 
 	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
@@ -60,7 +60,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -74,14 +74,14 @@ namespace toml::impl
 
 	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_unicode_line_break(codepoint);
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
@@ -89,7 +89,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_letter(char32_t codepoint) noexcept
 	{
@@ -98,7 +98,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
@@ -106,7 +106,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_octal_digit(char32_t codepoint) noexcept
 	{
@@ -114,7 +114,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_decimal_digit(char32_t codepoint) noexcept
 	{
@@ -123,7 +123,7 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr std::uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
@@ -137,7 +137,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint)
@@ -154,7 +154,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break(codepoint)
@@ -169,7 +169,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_control_character(char32_t codepoint) noexcept
 	{
@@ -177,7 +177,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
 	{
@@ -187,7 +187,7 @@ namespace toml::impl
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
 	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
 	{

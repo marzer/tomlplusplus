@@ -14,6 +14,9 @@
 #include "toml_table.h"
 #include "toml_node_view.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
+
 namespace toml
 {
 	TOML_EXTERNAL_LINKAGE
@@ -47,14 +50,30 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE node_type table::type() const noexcept { return node_type::table; }
-	TOML_EXTERNAL_LINKAGE bool table::is_table() const noexcept { return true; }
-	TOML_EXTERNAL_LINKAGE bool table::is_array() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool table::is_value() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE table* table::as_table() noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE const table* table::as_table() const noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE bool table::is_inline() const noexcept { return inline_; }
-	TOML_EXTERNAL_LINKAGE void table::is_inline(bool val) noexcept { inline_ = val; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
+
+	TOML_MEMBER_ATTR(const) node_type table::type()				const noexcept	{ return node_type::table; }
+	TOML_MEMBER_ATTR(const) bool table::is_table()				const noexcept	{ return true; }
+	TOML_MEMBER_ATTR(const) bool table::is_array()				const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) bool table::is_value()				const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) const table* table::as_table()		const noexcept	{ return this; }
+	TOML_MEMBER_ATTR(const) table* table::as_table()			noexcept		{ return this; }
+
+	TOML_MEMBER_ATTR(pure) bool table::is_inline()				const noexcept	{ return inline_; }
+	TOML_EXTERNAL_LINKAGE void table::is_inline(bool val)		noexcept		{ inline_ = val; }
+
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin()	const noexcept	{ return { values.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::end()	const noexcept	{ return { values.end() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin()	const noexcept	{ return { values.cbegin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend()	const noexcept	{ return { values.cend() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::begin()		noexcept		{ return { values.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::end()			noexcept		{ return { values.end() }; }
+
+	TOML_MEMBER_ATTR(pure) bool table::empty()					const noexcept	{ return values.empty(); }
+	TOML_MEMBER_ATTR(pure) size_t table::size()					const noexcept	{ return values.size(); }
+	TOML_EXTERNAL_LINKAGE void table::clear()					noexcept		{ values.clear(); }
+
+	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (string_view key) noexcept
@@ -66,18 +85,6 @@ namespace toml
 	{
 		return { this->get(key) };
 	}
-
-	TOML_EXTERNAL_LINKAGE table::iterator table::begin() noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin() const noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin() const noexcept { return { values.cbegin() }; }
-
-	TOML_EXTERNAL_LINKAGE table::iterator table::end() noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::end() const noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend() const noexcept { return { values.cend() }; }
-
-	TOML_EXTERNAL_LINKAGE bool table::empty() const noexcept { return values.empty(); }
-	TOML_EXTERNAL_LINKAGE size_t table::size() const noexcept { return values.size(); }
-	TOML_EXTERNAL_LINKAGE void table::clear() noexcept { values.clear(); }
 
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::erase(iterator pos) noexcept
@@ -175,3 +182,5 @@ namespace toml
 		return !(lhs == rhs);
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

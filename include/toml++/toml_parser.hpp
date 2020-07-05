@@ -95,7 +95,7 @@ namespace TOML_INTERNAL_NAMESPACE
 	}
 
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(bool val) noexcept
 	{
@@ -120,7 +120,7 @@ namespace TOML_INTERNAL_NAMESPACE
 	}
 
 	template <typename T>
-	TOML_GNU_ATTR(nonnull)
+	TOML_ATTR(nonnull)
 	TOML_INTERNAL_LINKAGE
 	TOML_NEVER_INLINE
 	void concatenate(char*& write_pos, char *const buf_end, const T& arg) noexcept

@@ -12,7 +12,10 @@
 //# }}
 
 #include "toml_array.h"
- 
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SUGGEST_WARNINGS
+
 namespace toml
 {
 	TOML_EXTERNAL_LINKAGE
@@ -45,37 +48,40 @@ namespace toml
 		return *this;
 	}
 
-	TOML_EXTERNAL_LINKAGE node_type array::type() const noexcept { return node_type::array; }
-	TOML_EXTERNAL_LINKAGE bool array::is_table() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE bool array::is_array() const noexcept { return true; }
-	TOML_EXTERNAL_LINKAGE bool array::is_value() const noexcept { return false; }
-	TOML_EXTERNAL_LINKAGE array* array::as_array() noexcept { return this; }
-	TOML_EXTERNAL_LINKAGE const array* array::as_array() const noexcept { return this; }
+	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
 
-	TOML_EXTERNAL_LINKAGE node& array::operator[] (size_t index) noexcept { return *values[index]; }
-	TOML_EXTERNAL_LINKAGE const node& array::operator[] (size_t index) const noexcept { return *values[index]; }
+	TOML_MEMBER_ATTR(const) node_type array::type()			const noexcept	{ return node_type::array; }
+	TOML_MEMBER_ATTR(const) bool array::is_table()			const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) bool array::is_array()			const noexcept	{ return true; }
+	TOML_MEMBER_ATTR(const) bool array::is_value()			const noexcept	{ return false; }
+	TOML_MEMBER_ATTR(const) const array* array::as_array()	const noexcept	{ return this; }
+	TOML_MEMBER_ATTR(const) array* array::as_array()		noexcept		{ return this; }
 
-	TOML_EXTERNAL_LINKAGE node& array::front() noexcept { return *values.front(); }
-	TOML_EXTERNAL_LINKAGE const node& array::front() const noexcept { return *values.front(); }
-	TOML_EXTERNAL_LINKAGE node& array::back() noexcept { return *values.back(); }
-	TOML_EXTERNAL_LINKAGE const node& array::back() const noexcept { return *values.back(); }
+	TOML_MEMBER_ATTR(pure) const node& array::operator[] (size_t index)	const noexcept	{ return *values[index]; }
+	TOML_MEMBER_ATTR(pure) node& array::operator[] (size_t index)		noexcept		{ return *values[index]; }
 
-	TOML_EXTERNAL_LINKAGE array::iterator array::begin() noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::begin() const noexcept { return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::cbegin() const noexcept { return { values.cbegin() }; }
+	TOML_MEMBER_ATTR(pure) const node& array::front()				const noexcept	{ return *values.front(); }
+	TOML_MEMBER_ATTR(pure) const node& array::back()				const noexcept	{ return *values.back(); }
+	TOML_MEMBER_ATTR(pure) node& array::front()						noexcept		{ return *values.front(); }
+	TOML_MEMBER_ATTR(pure) node& array::back()						noexcept		{ return *values.back(); }
 
-	TOML_EXTERNAL_LINKAGE array::iterator array::end() noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::end() const noexcept { return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE array::const_iterator array::cend() const noexcept { return { values.cend() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::begin()		const noexcept	{ return { values.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::end()		const noexcept	{ return { values.end() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cbegin()	const noexcept	{ return { values.cbegin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cend()		const noexcept	{ return { values.cend() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::begin()			noexcept		{ return { values.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::end()				noexcept		{ return { values.end() }; }
 
-	TOML_EXTERNAL_LINKAGE bool array::empty() const noexcept { return values.empty(); }
-	TOML_EXTERNAL_LINKAGE size_t array::size() const noexcept { return values.size(); }
-	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity) { values.reserve(new_capacity); }
-	TOML_EXTERNAL_LINKAGE void array::clear() noexcept { values.clear(); }
+	TOML_MEMBER_ATTR(pure) size_t array::size()						const noexcept	{ return values.size(); }
+	TOML_MEMBER_ATTR(pure) size_t array::capacity()					const noexcept	{ return values.capacity(); }
+	TOML_MEMBER_ATTR(pure) bool array::empty()						const noexcept	{ return values.empty(); }
+	TOML_MEMBER_ATTR(const) size_t array::max_size()				const noexcept	{ return values.max_size(); }
 
-	TOML_EXTERNAL_LINKAGE size_t array::max_size() const noexcept { return values.max_size(); }
-	TOML_EXTERNAL_LINKAGE size_t array::capacity() const noexcept { return values.capacity(); }
-	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit() { values.shrink_to_fit(); }
+	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity)	{ values.reserve(new_capacity); }
+	TOML_EXTERNAL_LINKAGE void array::clear() noexcept				{ values.clear(); }
+	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit()				{ values.shrink_to_fit(); }
+
+	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
 	void array::truncate(size_t new_size)
@@ -103,12 +109,14 @@ namespace toml
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	TOML_ATTR(pure)
 	node* array::get(size_t index) noexcept
 	{
 		return index < values.size() ? values[index].get() : nullptr;
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	TOML_ATTR(pure)
 	const node* array::get(size_t index) const noexcept
 	{
 		return index < values.size() ? values[index].get() : nullptr;
@@ -225,3 +233,5 @@ namespace toml
 		return *this;
 	}
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

@@ -12,7 +12,7 @@ TOML_DISABLE_VTABLE_WARNINGS
 namespace toml::impl
 {
 	template <bool IsConst>
-	class array_iterator final
+	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
 			friend class ::toml::array;
@@ -170,8 +170,9 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	TOML_ALWAYS_INLINE
-	auto make_node(T&& val) noexcept
+	auto* make_node(T&& val) noexcept
 	{
 		using type = unwrapped<remove_cvref_t<T>>;
 		if constexpr (is_one_of<type, array, table>)
@@ -194,8 +195,9 @@ namespace toml::impl
 
 	template <typename T>
 	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	TOML_ALWAYS_INLINE
-	auto make_node(inserter<T>&& val) noexcept
+	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
 	}

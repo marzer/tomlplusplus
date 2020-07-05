@@ -13,7 +13,7 @@ namespace toml::impl
 	//# Returns true if a codepoint matches any of:
 	//# 	0 - 9, A - F, a - f
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_hexadecimal_digit(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -26,7 +26,7 @@ namespace toml::impl
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_letter(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -383,7 +383,7 @@ namespace toml::impl
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Nd, Nl
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_number(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;
@@ -541,7 +541,7 @@ namespace toml::impl
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Mn, Mc
 	[[nodiscard]]
-	TOML_GNU_ATTR(const)
+	TOML_ATTR(const)
 	constexpr bool is_unicode_combining_mark(char32_t cp) noexcept
 	{
 		using ui64 = std::uint_least64_t;

@@ -41,6 +41,8 @@ type_names = [
 	'iterator',
 	'const_iterator',
 	'void',
+	'char',
+	'wchar_t',
 	'int',
 	'long',
 	'short',
@@ -63,6 +65,7 @@ type_names = [
 	'byte',
 	'optional',
 	#------ toml++ types
+    'node',
 	'table',
 	'array',
 	'value',
@@ -225,6 +228,20 @@ def html_string_descendants(starting_tag, filter = None):
 		else:
 			results = results + html_string_descendants(tag, filter)
 	return results
+
+
+
+def html_append_class(tag, classes):
+	appended = False
+	if 'class' not in tag.attrs:
+		tag['class'] = []
+	if not utils.is_collection(classes):
+		classes = (classes,)
+	for class_ in classes:
+		if class_ not in tag['class']:
+			tag['class'].append(class_)
+			appended = True
+	return appended
 
 
 
@@ -922,6 +939,40 @@ class EnableIfFix(object):
 
 
 
+# makes sure links to certain external sources are correctly marked as such.
+class ExternalLinksFix(object):
+
+	__href = re.compile(r'^\s*(?:https?|s?ftp|mailto)[:]', re.I)
+	__godbolt = re.compile(r'^\s*https[:]//godbolt.org/z/.+?$', re.I)
+
+	def __call__(self, file, doc):
+		changed = False
+		for anchor in doc.body('a', recursive=True):
+			if self.__href.search(anchor['href']):
+				if 'target' not in anchor.attrs or anchor['target'] != '_blank':
+					anchor['target'] = '_blank'
+					changed = True
+				changed = html_append_class(anchor, 'tpp-external') or changed
+
+				# do magic with godbolt.org links
+				if self.__godbolt.fullmatch(anchor['href']):
+					changed = html_append_class(anchor, 'godbolt') or changed
+					if anchor.parent.name == 'p' and len(anchor.parent.contents) == 1:
+						changed = html_append_class(anchor.parent, ('m-note', 'm-success', 'godbolt')) or changed
+						if anchor.parent.next_sibling is not None and anchor.parent.next_sibling.name == 'pre':
+							code_block = anchor.parent.next_sibling
+							code_block.insert(0, anchor.parent.extract())
+
+
+
+		return changed
+
+
+
+#=======================================================================================================================
+
+
+
 _threadError = False
 
 
@@ -1008,6 +1059,7 @@ def main():
 		, InlineNamespaceFix3()
 		, ExtDocLinksFix()
 		, EnableIfFix()
+		, ExternalLinksFix()
 	]
 	files = [path.split(f) for f in utils.get_all_files(html_dir, any=('*.html', '*.htm'))]
 	if files:

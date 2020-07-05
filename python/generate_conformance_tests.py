@@ -15,8 +15,13 @@ import math
 import dateutil.parser # pip install python-dateutil
 from datetime import datetime, date, time
 
+
+
 def sanitize(s):
-	return re.sub(r'[ _:;\/-]+', '_', s, 0, re.I | re.M)
+	s = re.sub(r'[ _:;\/-]+', '_', s, 0, re.I | re.M)
+	if s in ('bool', 'float', 'int', 'double', 'auto'):
+		s = s + '_'
+	return s
 
 
 
@@ -207,10 +212,9 @@ def python_to_tomlpp(node):
 
 class TomlTest:
 
-	def __init__(self, file_path, group, name, is_valid_case):
+	def __init__(self, file_path, name, is_valid_case):
 		self.__name = name
-		self.__group = group
-		self.__identifier = sanitize(group + '_' + name)
+		self.__identifier = sanitize(name)
 		self.__data = utils.read_all_text_from_file(file_path).strip()
 		self.condition = ''
 		if is_valid_case:
@@ -235,9 +239,6 @@ class TomlTest:
 	def name(self):
 		return self.__name
 
-	def group(self):
-		return self.__group
-
 	def identifier(self):
 		return self.__identifier
 
@@ -255,78 +256,32 @@ class TomlTest:
 
 
 
-def load_tests(source_folder, group, is_valid_set, ignore_list):
+def load_tests(source_folder, is_valid_set, ignore_list):
 	tests = []
 	files = [(fp, path.splitext(path.split(fp)[1])[0]) for fp in utils.get_all_files(source_folder, all="*.toml")]
 	for file_path,name in files:
 		if ignore_list and name in ignore_list:
 			continue
-		tests.append(TomlTest(file_path, group, name, is_valid_set))
+		tests.append(TomlTest(file_path, name, is_valid_set))
 	return tests
 
 
 
-def set_condition(tests, condition, group, names):
+def set_condition(tests, condition, names):
 	for test in tests:
-		if test.group() == group and test.name() in names:
+		if test.name() in names:
 			test.condition = condition
 
 
 
-def main():
-	extern_root = path.join(utils.get_script_folder(), '..', 'extern')
-
-	tests = { 'valid': list(), 'invalid': list() }
-
-
-	tests['invalid'] += load_tests(path.join(extern_root, 'toml-test', 'tests', 'invalid'), 'burntsushi', False, (
-		# false negatives after TOML 0.4.0
-		'array-mixed-types-arrays-and-ints',
-		'array-mixed-types-ints-and-floats',
-		'array-mixed-types-strings-and-ints'
-	))
-	set_condition(tests['invalid'], '!TOML_LANG_UNRELEASED', 'burntsushi', (
-		'datetime-malformed-no-secs',
-		'inline-table-linebreak',
-		'multi-line-inline-table',
-		'string-byte-escapes'
-	))
-
-	tests['invalid'] += load_tests(path.join(extern_root, 'toml-spec-tests', 'errors'), 'iarna', False, (
-		# I test these explicitly in the other test files (they get broken by I/O)
-		'comment-control-1',
-		'comment-control-2',
-		'comment-control-3',
-		'comment-control-4',
-		'string-basic-control-1',
-		'string-basic-control-2',
-		'string-basic-control-3',
-		'string-basic-control-4',
-		'string-basic-multiline-control-1',
-		'string-basic-multiline-control-2',
-		'string-basic-multiline-control-3',
-		'string-basic-multiline-control-4',
-		'string-literal-control-1',
-		'string-literal-control-2',
-		'string-literal-control-3',
-		'string-literal-control-4',
-		'string-literal-multiline-control-1',
-		'string-literal-multiline-control-2',
-		'string-literal-multiline-control-3',
-		'string-literal-multiline-control-4'
-	))
-	set_condition(tests['invalid'], '!TOML_LANG_UNRELEASED', 'iarna', (
-		'inline-table-trailing-comma',
-	))
-
-	tests['valid'] += load_tests(path.join(extern_root, 'toml-test', 'tests', 'valid'), 'burntsushi', True, (
+def load_valid_inputs(tests, extern_root):
+	tests['valid']['burntsushi'] = load_tests(path.join(extern_root, 'toml-test', 'tests', 'valid'), True, (
 		# newline/escape handling tests. these get broken by I/O (I test them separately)
 		'string-escapes',
 		# bugged: https://github.com/BurntSushi/toml-test/issues/58
 		'datetime'
 	))
-
-	tests['valid'] += load_tests(path.join(extern_root, 'toml-spec-tests', 'values'), 'iarna', True, (
+	tests['valid']['iarna'] = load_tests(path.join(extern_root, 'toml-spec-tests', 'values'), True, (
 		# these are stress-tests for 'large' datasets. I test these separately. Having them inline in C++ code is insane.
 		'qa-array-inline-1000',
 		'qa-array-inline-nested-1000',
@@ -359,12 +314,57 @@ def main():
 		'spec-string-basic-multiline-4',
 	))
 
-	conditions = set()
-	for test_type, test_cases in tests.items():
-		for test in test_cases:
-			conditions.add(test.condition)
 
-	test_file_path = path.join(utils.get_script_folder(), '..', 'tests', 'conformance.cpp')
+
+def load_invalid_inputs(tests, extern_root):
+	tests['invalid']['burntsushi'] = load_tests(path.join(extern_root, 'toml-test', 'tests', 'invalid'), False, (
+		# false negatives after TOML 0.4.0
+		'array-mixed-types-arrays-and-ints',
+		'array-mixed-types-ints-and-floats',
+		'array-mixed-types-strings-and-ints'
+	))
+	set_condition(tests['invalid']['burntsushi'], '!TOML_LANG_UNRELEASED', (
+		'datetime-malformed-no-secs',
+		'inline-table-linebreak',
+		'multi-line-inline-table',
+		'string-byte-escapes'
+	))
+
+	tests['invalid']['iarna'] = load_tests(path.join(extern_root, 'toml-spec-tests', 'errors'), False, (
+		# I test these explicitly in the other test files (they get broken by I/O)
+		'comment-control-1',
+		'comment-control-2',
+		'comment-control-3',
+		'comment-control-4',
+		'string-basic-control-1',
+		'string-basic-control-2',
+		'string-basic-control-3',
+		'string-basic-control-4',
+		'string-basic-multiline-control-1',
+		'string-basic-multiline-control-2',
+		'string-basic-multiline-control-3',
+		'string-basic-multiline-control-4',
+		'string-literal-control-1',
+		'string-literal-control-2',
+		'string-literal-control-3',
+		'string-literal-control-4',
+		'string-literal-multiline-control-1',
+		'string-literal-multiline-control-2',
+		'string-literal-multiline-control-3',
+		'string-literal-multiline-control-4'
+	))
+	set_condition(tests['invalid']['iarna'], '!TOML_LANG_UNRELEASED', (
+		'inline-table-trailing-comma',
+	))
+
+
+def write_test_file(name, test_cases):
+
+	conditions = set()
+	for test in test_cases:
+		conditions.add(test.condition)
+
+	test_file_path = path.join(utils.get_script_folder(), '..', 'tests', 'conformance_{}.cpp'.format(sanitize(name.strip())))
 	print("Writing to {}".format(test_file_path))
 	with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
 		write = lambda txt: print(txt, file=test_file)
@@ -385,55 +385,53 @@ def main():
 		write('TOML_PUSH_WARNINGS')
 		write('TOML_DISABLE_ALL_WARNINGS // unused variable spam')
 		write('')
-		write('namespace {')
-		write('')
-		for test_type, test_cases in tests.items():
-			write('namespace {}'.format(test_type))
-			write('{')
-			for test in test_cases:
-				write('\t{}'.format(test))
-			write('}')
-			write('')
+		write('namespace')
+		write('{')
+		for test in test_cases:
+			write('\t{}'.format(test))
 		write('}')
 		write('')
 		write('TOML_POP_WARNINGS')
 		write('')
 
 		# tests
-		write('TEST_CASE("conformance")')
+		write('TEST_CASE("conformance - {}")'.format(name))
 		write('{')
-		for test_type, test_cases in tests.items():
-			write('\t'+utils.make_divider(test_type + ' inputs', 20, line_length=116))
-			write('\t#if 1')
-			write('\t{')
-			for condition in conditions:
-				if condition != '':
-					write('')
-					write('\t\t#if {}'.format(condition));
-				for test in test_cases:
-					if test.condition != condition:
-						continue
-					expected = test.expected()
-					if isinstance(expected, bool):
-						if expected:
-							write('\t\tparsing_should_succeed(FILE_LINE_ARGS, {}::{});'.format(test_type, test.identifier()))
-						else:
-							write('\t\tparsing_should_fail(FILE_LINE_ARGS, {}::{});'.format(test_type, test.identifier()))
+		for condition in conditions:
+			if condition != '':
+				write('')
+				write('\t#if {}'.format(condition));
+			for test in test_cases:
+				if test.condition != condition:
+					continue
+				expected = test.expected()
+				if isinstance(expected, bool):
+					if expected:
+						write('\tparsing_should_succeed(FILE_LINE_ARGS, {});'.format(test.identifier()))
 					else:
-						write('')
-						write('\t\tparsing_should_succeed(FILE_LINE_ARGS, {}::{}, [](toml::table&& tbl)'.format(test_type, test.identifier()))
-						write('\t\t{')
-						write('\t\t\tauto expected = {};'.format(expected.render('\t\t\t')))
-						write('\t\t\tREQUIRE(tbl == expected);')
-						write('\t\t});')
-				if condition != '':
-					write('\t\t#endif // {}'.format(condition));
-			write('\t}')
-			write('\t#endif')
-			write('')
+						write('\tparsing_should_fail(FILE_LINE_ARGS, {});'.format(test.identifier()))
+				else:
+					write('\tparsing_should_succeed(FILE_LINE_ARGS, {}, [](toml::table&& tbl)'.format(test.identifier()))
+					write('\t{')
+					write('\t\tauto expected = {};'.format(expected.render('\t\t')))
+					write('\t\tREQUIRE(tbl == expected);')
+					write('\t});')
+					write('')
+			if condition != '':
+				write('\t#endif // {}'.format(condition));
 		write('}')
 		write('')
 
+
+def main():
+	extern_root = path.join(utils.get_script_folder(), '..', 'extern')
+
+	tests = { 'valid': dict(), 'invalid': dict() }
+	load_valid_inputs(tests, extern_root)
+	load_invalid_inputs(tests, extern_root)
+	for test_type, test_groups in tests.items():
+		for test_group, test_cases in test_groups.items():
+			write_test_file('{}/{}'.format(test_group, test_type), test_cases )
 
 
 if __name__ == '__main__':

@@ -522,10 +522,9 @@ namespace toml
 			TOML_PARSE_FILE_ERROR("Could not determine file size", source_position{});
 		file.seekg(0, std::ios::beg);
 
-		// if the file size is the sweet spot, read the whole thing into memory and parse from there
-		constexpr auto small_file_threshold = 1024 * 32; //32 kilobytes
-		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 8; // 64 megabytes on 64-bit
-		if (file_size >= small_file_threshold && file_size <= large_file_threshold)
+		// read the whole file into memory first if the file isn't too large
+		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit
+		if (file_size <= large_file_threshold)
 		{
 			std::vector<StreamChar> file_data;
 			file_data.resize(static_cast<size_t>(file_size));

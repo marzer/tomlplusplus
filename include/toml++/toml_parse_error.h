@@ -91,20 +91,20 @@ namespace toml
 		public:
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, source_region&& src) noexcept
 				: std::runtime_error{ desc },
 				source_{ std::move(src) }
 			{}
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, const source_region& src) noexcept
 				: parse_error{ desc, source_region{ src } }
 			{}
 
 			TOML_NODISCARD_CTOR
-			TOML_GNU_ATTR(nonnull)
+			TOML_ATTR(nonnull)
 			parse_error(const char* desc, const source_position& position, const source_path_ptr& path = {}) noexcept 
 				: parse_error{ desc, source_region{ position, position, path } }
 			{}

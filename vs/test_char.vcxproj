@@ -61,7 +61,10 @@
     <LocalDebuggerWorkingDirectory>..\tests\</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\tests\conformance.cpp" />
+    <ClCompile Include="..\tests\conformance_burntsushi_invalid.cpp" />
+    <ClCompile Include="..\tests\conformance_burntsushi_valid.cpp" />
+    <ClCompile Include="..\tests\conformance_iarna_invalid.cpp" />
+    <ClCompile Include="..\tests\conformance_iarna_valid.cpp" />
     <ClCompile Include="..\tests\impl_catch2.cpp">
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
     </ClCompile>
