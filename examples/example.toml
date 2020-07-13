@@ -34,8 +34,15 @@ odt1 = 1979-05-27T07:32:00Z
 odt2 = 1979-05-27T00:32:00-07:00
 odt3 = 1979-05-27T00:32:00.999999-07:00
 
-# unicode
-kosme = "κόσμε"
+# strings
+str1 = """
+This is a
+multi-line
+string.
+"""
+str2 = "This is also\na multi-line\nstring."
+str3 = 'C:\highway\to\the\danger\zone'
+kosme = "κόσμε" # unicode!
 
 arr = [ 'this', 'is', 'a', 'long', 'array', 'with', 16, 'elements.', 'it', 'should', 'be', 'printed', 'as', 'a', 'multiline', 'array.']
 

@@ -186,10 +186,19 @@ namespace toml::impl
 		else
 		{
 			static_assert(
+				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+				"Instantiating values from wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+			);
+			static_assert(
 				is_value_or_promotable<type>,
 				"Value initializers must be (or be promotable to) one of the TOML value types"
 			);
-			return new value{ std::forward<T>(val) };
+			#if TOML_WINDOWS_COMPAT
+			if constexpr (is_wide_string<T>)
+				return new value{ narrow(std::forward<T>(val)) };
+			else
+			#endif
+				return new value{ std::forward<T>(val) };
 		}
 	}
 
@@ -656,7 +665,6 @@ namespace toml
 			/// \returns Iterator to the first node immediately following the last removed node.
 			iterator erase(const_iterator first, const_iterator last) noexcept;
 
-
 			/// \brief	Resizes the array.
 			/// 
 			/// \detail \cpp
@@ -943,6 +951,7 @@ namespace toml
 				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
 			}
 
+			/// \brief	Prints the array out to a stream as formatted TOML.
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 	};

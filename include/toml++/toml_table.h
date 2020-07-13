@@ -145,23 +145,45 @@ namespace toml::impl
 		string key;
 		std::unique_ptr<node> value;
 
-		template <typename T>
-		table_init_pair(string&& k, T && v) noexcept
+		template <typename V>
+		table_init_pair(string&& k, V&& v) noexcept
 			: key{ std::move(k) },
-			value{ make_node(std::forward<T>(v)) }
+			value{ make_node(std::forward<V>(v)) }
 		{}
 
-		template <typename T>
-		table_init_pair(string_view k, T&& v) noexcept
+		template <typename V>
+		table_init_pair(string_view k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<T>(v)) }
+			value{ make_node(std::forward<V>(v)) }
 		{}
 
-		template <typename T>
-		table_init_pair(const string_char* k, T&& v) noexcept
+		template <typename V>
+		table_init_pair(const string_char* k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<T>(v)) }
+			value{ make_node(std::forward<V>(v)) }
 		{}
+
+		#if TOML_WINDOWS_COMPAT
+
+		template <typename V>
+		table_init_pair(std::wstring&& k, V&& v) noexcept
+			: key{ narrow(k) },
+			value{ make_node(std::forward<V>(v)) }
+		{}
+
+		template <typename V>
+		table_init_pair(std::wstring_view k, V&& v) noexcept
+			: key{ narrow(k) },
+			value{ make_node(std::forward<V>(v)) }
+		{}
+
+		template <typename V>
+		table_init_pair(const wchar_t* k, V&& v) noexcept
+			: key{ narrow(std::wstring_view{ k }) },
+			value{ make_node(std::forward<V>(v)) }
+		{}
+
+		#endif
 	};
 }
 
@@ -319,7 +341,51 @@ namespace toml
 			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair (const overload).
+			/// 
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if one existed, or an empty node view.
+			/// 
+			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+			/// 		 <strong>This is not an error.</strong>
+			/// 
+			/// \see toml::node_view
 			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept;
+
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets a node_view for the selected key-value pair.
+			///
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if one existed, or an empty node view.
+			///
+			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+			/// 		 <strong>This is not an error.</strong>
+			/// 
+			/// \see toml::node_view
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node_view<node> operator[] (std::wstring_view key) noexcept;
+
+			/// \brief	Gets a node_view for the selected key-value pair (const overload).
+			/// 
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if one existed, or an empty node view.
+			/// 
+			/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+			/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+			/// 		 <strong>This is not an error.</strong>
+			/// 
+			/// \see toml::node_view
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node_view<const node> operator[] (std::wstring_view key) const noexcept;
+
+			#endif // TOML_WINDOWS_COMPAT
 
 			/// \brief	Returns an iterator to the first key-value pair.
 			[[nodiscard]] iterator begin() noexcept;
@@ -378,16 +444,29 @@ namespace toml
 			/// 		- A boolean indicating if the insertion was successful.
 			template <typename K, typename V, typename = std::enable_if_t<
 				std::is_convertible_v<K&&, string_view>
+				|| impl::is_wide_string<K>
 			>>
 			std::pair<iterator, bool> insert(K&& key, V&& val) noexcept
 			{
-				auto ipos = values.lower_bound(key);
-				if (ipos == values.end() || ipos->first != key)
+				static_assert(
+					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
+
+				#if TOML_WINDOWS_COMPAT
+				if constexpr (impl::is_wide_string<K>)
+					return insert(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+				else
+				#endif
 				{
-					ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
-					return { ipos, true };
+					auto ipos = values.lower_bound(key);
+					if (ipos == values.end() || ipos->first != key)
+					{
+						ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+						return { ipos, true };
+					}
+					return { ipos, false };
 				}
-				return { ipos, false };
 			}
 
 			/// \brief	Inserts a series of key-value pairs into the table.
@@ -422,7 +501,8 @@ namespace toml
 			/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 			/// 		 table will not be replaced.
 			template <typename Iter, typename = std::enable_if_t<
-				!std::is_convertible_v<Iter&&, string_view>
+				!std::is_convertible_v<Iter, string_view>
+				&& !impl::is_wide_string<Iter>
 			>>
 			void insert(Iter first, Iter last) noexcept
 			{
@@ -475,16 +555,28 @@ namespace toml
 			template <typename K, typename V>
 			std::pair<iterator, bool> insert_or_assign(K&& key, V&& val) noexcept
 			{
-				auto ipos = values.lower_bound(key);
-				if (ipos == values.end() || ipos->first != key)
-				{
-					ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
-					return { ipos, true };
-				}
+				static_assert(
+					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
+
+				#if TOML_WINDOWS_COMPAT
+				if constexpr (impl::is_wide_string<K>)
+					return insert_or_assign(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
 				else
+				#endif
 				{
-					(*ipos).second.reset(impl::make_node(std::forward<V>(val)));
-					return { ipos, false };
+					auto ipos = values.lower_bound(key);
+					if (ipos == values.end() || ipos->first != key)
+					{
+						ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+						return { ipos, true };
+					}
+					else
+					{
+						(*ipos).second.reset(impl::make_node(std::forward<V>(val)));
+						return { ipos, false };
+					}
 				}
 			}
 
@@ -529,23 +621,36 @@ namespace toml
 			template <typename U, typename K, typename... V>
 			std::pair<iterator, bool> emplace(K&& key, V&&... args) noexcept
 			{
-				using type = impl::unwrapped<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				auto ipos = values.lower_bound(key);
-				if (ipos == values.end() || ipos->first != key)
+				#if TOML_WINDOWS_COMPAT
+				if constexpr (impl::is_wide_string<K>)
+					return emplace<U>(impl::narrow(std::forward<K>(key)), std::forward<V>(args)...);
+				else
+				#endif
 				{
-					ipos = values.emplace_hint(
-						ipos,
-						std::forward<K>(key),
-						new impl::node_of<type>{ std::forward<V>(args)... }
+
+					using type = impl::unwrapped<U>;
+					static_assert(
+						impl::is_value_or_node<type>,
+						"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
 					);
-					return { ipos, true };
+
+					auto ipos = values.lower_bound(key);
+					if (ipos == values.end() || ipos->first != key)
+					{
+						ipos = values.emplace_hint(
+							ipos,
+							std::forward<K>(key),
+							new impl::node_of<type>{ std::forward<V>(args)... }
+						);
+						return { ipos, true };
+					}
+					return { ipos, false };
 				}
-				return { ipos, false };
 			}
 
 			/// \brief	Removes the specified key-value pair from the table.
@@ -653,20 +758,40 @@ namespace toml
 			/// \returns True if any values with matching keys were found and erased.
 			bool erase(string_view key) noexcept;
 
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Removes the value with the given key from the table.
+			/// 
+			/// \param 	key		Key to erase.
+			/// 
+			/// \returns True if any values with matching keys were found and erased.
+			/// 
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			bool erase(std::wstring_view key) noexcept;
+
+			#endif
+
 		private:
 
 			template <typename Map, typename Key>
 			[[nodiscard]] static auto do_get(Map& vals, const Key& key) noexcept
+				-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
 			{
-				using return_type = std::conditional_t<
-					std::is_const_v<Map>,
-					const node*,
-					node*
-				>;
+				static_assert(
+					!impl::is_wide_string<Key> || TOML_WINDOWS_COMPAT,
+					"Retrieval using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
 
-				if (auto it = vals.find(key); it != vals.end())
-					return return_type{ it->second.get() };
-				return return_type{};
+				#if TOML_WINDOWS_COMPAT
+				if constexpr (impl::is_wide_string<Key>)
+					return do_get(vals, impl::narrow(key));
+				else
+				#endif
+				{
+					if (auto it = vals.find(key); it != vals.end())
+						return { it->second.get() };
+					return {};
+				}
 			}
 
 			template <typename T, typename Map, typename Key>
@@ -680,11 +805,7 @@ namespace toml
 			[[nodiscard]] TOML_ALWAYS_INLINE
 			static bool do_contains(Map& vals, const Key& key) noexcept
 			{
-				#if TOML_CPP >= 20
-					return vals.contains(key);
-				#else
-					return do_get(vals, key) != nullptr;
-				#endif
+				return do_get(vals, key) != nullptr;
 			}
 
 		public:
@@ -723,8 +844,67 @@ namespace toml
 			/// \returns	A pointer to the node at the specified key, or nullptr.
 			[[nodiscard]] const node* get(string_view key) const noexcept;
 
+			/// \brief	Gets an iterator to the node at a specific key.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	An iterator to the node at the specified key, or end().
 			[[nodiscard]] iterator find(string_view key) noexcept;
+
+			/// \brief	Gets an iterator to the node at a specific key (const overload)
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A const iterator to the node at the specified key, or cend().
 			[[nodiscard]] const_iterator find(string_view key) const noexcept;
+
+			/// \brief	Returns true if the table contains a node at the given key.
+			[[nodiscard]] bool contains(string_view key) const noexcept;
+
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets the node at a specific key.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key, or nullptr.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node* get(std::wstring_view key) noexcept;
+
+			/// \brief	Gets the node at a specific key (const overload).
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key, or nullptr.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] const node* get(std::wstring_view key) const noexcept;
+
+			/// \brief	Gets an iterator to the node at a specific key.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	An iterator to the node at the specified key, or end().
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] iterator find(std::wstring_view key) noexcept;
+
+			/// \brief	Gets an iterator to the node at a specific key (const overload).
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A const iterator to the node at the specified key, or cend().
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] const_iterator find(std::wstring_view key) const noexcept;
+
+			/// \brief	Returns true if the table contains a node at the given key.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] bool contains(std::wstring_view key) const noexcept;
+
+			#endif // TOML_WINDOWS_COMPAT
 
 			/// \brief	Gets the node at a specific key if it is a particular type.
 			///
@@ -764,8 +944,37 @@ namespace toml
 				return do_get_as<T>(values, key);
 			}
 
-			/// \brief	Returns true if the table contains a node at the given key.
-			[[nodiscard]] bool contains(string_view key) const noexcept;
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets the node at a specific key if it is a particular type.
+			///
+			/// \tparam	T	The node's type.
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			template <typename T>
+			[[nodiscard]] impl::node_of<T>* get_as(std::wstring_view key) noexcept
+			{
+				return get_as<T>(impl::narrow(key));
+			}
+
+			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
+			///
+			/// \tparam	T	The node's type.
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			template <typename T>
+			[[nodiscard]] const impl::node_of<T>* get_as(std::wstring_view key) const noexcept
+			{
+				return get_as<T>(impl::narrow(key));
+			}
+
+			#endif // TOML_WINDOWS_COMPAT
 
 			/// \brief	Equality operator.
 			///
@@ -783,6 +992,7 @@ namespace toml
 			/// \returns	True if the tables did not contain the same keys and values.
 			friend bool operator != (const table& lhs, const table& rhs) noexcept;
 
+			/// \brief	Prints the table out to a stream as formatted TOML.
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};

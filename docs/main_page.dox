@@ -227,10 +227,10 @@
 /// 	
 /// 	// different ways of directly querying data
 /// 	std::optional<std::string_view> str1 = tbl["str"].value<std::string_view>();
-/// 	std::optional<std::string> str2 = tbl["str"].value<std::string>();
-/// 	std::string_view str3 = tbl["str"].value_or("");
-/// 	std::string str4 = tbl["str"].value_or(std::string{});
-/// 	std::string& str5 = tbl["str"].ref<std::string>(); // ~~dangerous~~, but fast
+/// 	std::optional<std::string>      str2 = tbl["str"].value<std::string>();
+/// 	std::string_view                str3 = tbl["str"].value_or("");
+/// 	std::string                     str4 = tbl["str"].value_or(std::string{});
+/// 	std::string&                    str5 = tbl["str"].ref<std::string>(); // ~~dangerous~~, but fast
 /// 	
 /// 	std::cout << *str1 << "\n";
 /// 	std::cout << *str2 << "\n";
@@ -443,7 +443,7 @@
 ///
 /// \subsection mainpage-adding-lib-conan Conan
 /// Add `tomlplusplus/1.3.3` to your conanfile. This adds the single-header version by default, but you can specify the
-/// regular version using `multiple_headers": True`.
+/// regular version using `"multiple_headers": True`.
 /// 
 //////////////////////////////////
 ///

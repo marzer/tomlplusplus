@@ -172,6 +172,7 @@ namespace toml
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
 
+			/// \brief	Prints the value out to a stream as formatted TOML.
 			template <typename Char, typename U>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<U>& rhs);
 
@@ -366,36 +367,6 @@ namespace toml
 		value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
 	#endif
 
-	/// \brief	Prints the value out to a stream.
-	template <typename Char, typename T>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
-	{
-		// this is the same behaviour as default_formatter, but it's so simple that there's
-		// no need to spin up a new instance of it just for individual values.
-
-		if constexpr (std::is_same_v<T, string>)
-		{
-			impl::print_to_stream('"', lhs);
-			impl::print_to_stream_with_escapes(rhs.val_, lhs);
-			impl::print_to_stream('"', lhs);
-		}
-		else
-			impl::print_to_stream(rhs.val_, lhs);
-				
-		return lhs;
-	}
-
-	#if !TOML_ALL_INLINE
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::string>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
-	#endif
-
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 
@@ -403,7 +374,13 @@ namespace toml
 	inline optional<T> node::value() const noexcept
 	{
 		static_assert(
-			impl::is_value<T> || std::is_same_v<T, string_view>,
+			!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+		);
+		static_assert(
+			impl::is_value<T>
+			|| std::is_same_v<T, string_view>
+			|| (TOML_WINDOWS_COMPAT && std::is_same_v<T, std::wstring>),
 			"Value type must be one of the TOML value types (or string_view)"
 		);
 
@@ -418,6 +395,12 @@ namespace toml
 			{
 				if constexpr (std::is_same_v<T, string> || std::is_same_v<T, string_view>)
 					return { T{ ref_cast<string>().get() } };
+				
+				#if TOML_WINDOWS_COMPAT
+				else if constexpr (std::is_same_v<T, std::wstring>)
+					return { impl::widen(ref_cast<string>().get()) };
+				#endif
+
 				else
 					return {};
 			}
@@ -486,20 +469,35 @@ namespace toml
 	inline auto node::value_or(T&& default_value) const noexcept
 	{
 		static_assert(
+			!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+		);
+		static_assert(
 			impl::is_value_or_promotable<impl::remove_cvref_t<T>>,
 			"Default value type must be (or be promotable to) one of the TOML value types"
 		);
 
-		using value_type = impl::promoted<impl::remove_cvref_t<T>>;
-		using return_type = std::conditional_t<
-			std::is_same_v<value_type, string>,
-			std::conditional_t<std::is_same_v<impl::remove_cvref_t<T>, string>, string, string_view>,
-			value_type
-		>;
+		#if TOML_WINDOWS_COMPAT
+		if constexpr (impl::is_wide_string<T>)
+		{
+			if (this->type() == node_type::string)
+				return impl::widen(ref_cast<string>().get());
+			return std::wstring{ std::forward<T>(default_value) };
+		}
+		else
+		#endif
+		{
+			using value_type = impl::promoted<impl::remove_cvref_t<T>>;
+			using return_type = std::conditional_t<
+				std::is_same_v<value_type, string>,
+				std::conditional_t<std::is_same_v<impl::remove_cvref_t<T>, string>, string, string_view>,
+				value_type
+			>;
 
-		if (auto val = this->value<return_type>())
-			return *val;
-		return return_type{ std::forward<T>(default_value) };
+			if (auto val = this->value<return_type>())
+				return *val;
+			return return_type{ std::forward<T>(default_value) };
+		}
 	}
 }
 

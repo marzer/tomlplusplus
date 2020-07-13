@@ -37,7 +37,7 @@ namespace toml
 				base::print_newline(true);
 				base::print_indent();
 
-				base::print_quoted_string(k);
+				base::print_quoted_string(k, false);
 				impl::print_to_stream(" : "sv, base::stream());
 
 				const auto type = v.type();

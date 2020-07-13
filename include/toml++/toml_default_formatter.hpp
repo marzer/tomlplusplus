@@ -206,3 +206,91 @@ namespace toml
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
+
+// implementations of windows wide string nonsense
+#if TOML_WINDOWS_COMPAT
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+#include <Windows.h> // fuckkkk :(
+TOML_POP_WARNINGS
+
+namespace toml::impl
+{
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	std::string narrow_char(std::wstring_view str) noexcept
+	{
+		if (str.empty())
+			return {};
+
+		std::string s;
+		const auto len = WideCharToMultiByte(
+			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
+		);
+		if (len)
+		{
+			s.resize(static_cast<size_t>(len));
+			WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
+		}
+		return s;
+	}
+
+	#ifdef __cpp_lib_char8_t
+
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	std::u8string narrow_char8(std::wstring_view str) noexcept
+	{
+		if (str.empty())
+			return {};
+
+		std::u8string s;
+		const auto len = WideCharToMultiByte(
+			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
+		);
+		if (len)
+		{
+			s.resize(static_cast<size_t>(len));
+			WideCharToMultiByte(
+				65001, 0, str.data(), static_cast<int>(str.length()), reinterpret_cast<char*>(s.data()), len, nullptr, nullptr
+			);
+		}
+		return s;
+	}
+
+	#endif // __cpp_lib_char8_t
+
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	std::wstring widen(std::string_view str) noexcept
+	{
+		if (str.empty())
+			return {};
+
+		std::wstring s;
+		const auto len = MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
+		if (len)
+		{
+			s.resize(static_cast<size_t>(len));
+			MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
+		}
+		return s;
+	}
+
+	#ifdef __cpp_lib_char8_t
+
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	std::wstring widen(std::u8string_view str) noexcept
+	{
+		if (str.empty())
+			return {};
+
+		return widen(std::string_view{ reinterpret_cast<const char*>(str.data()), str.length() });
+	}
+
+	#endif // __cpp_lib_char8_t
+}
+
+#endif // TOML_WINDOWS_COMPAT

@@ -22,7 +22,7 @@ TOML_DISABLE_ALL_WARNINGS
 #include <vector>
 #include <map>
 #include <iosfwd>
-#ifndef TOML_OPTIONAL_TYPE
+#if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#include <optional>
 #endif
 
@@ -39,6 +39,10 @@ TOML_POP_WARNINGS
 #endif
 
 ////////// FORWARD DECLARATIONS & TYPEDEFS
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SHADOW_WARNINGS
 
 /// \brief	The root namespace for all toml++ functions and types.
 namespace toml
@@ -78,9 +82,30 @@ namespace toml
 
 	#endif
 
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_PADDING_WARNINGS
-	TOML_DISABLE_SHADOW_WARNINGS // false positive on gcc
+	#if TOML_WINDOWS_COMPAT
+	namespace impl
+	{
+		[[nodiscard]] TOML_API std::string narrow_char(std::wstring_view) noexcept;
+		#ifdef __cpp_lib_char8_t
+		[[nodiscard]] TOML_API std::u8string narrow_char8(std::wstring_view) noexcept;
+		#endif
+		template <typename Char = string_char>
+		[[nodiscard]] auto narrow(std::wstring_view str) noexcept
+		{
+			#ifdef __cpp_lib_char8_t
+			if constexpr (std::is_same_v<Char, char8_t>)
+				return narrow_char8(str);
+			else
+			#endif
+				return narrow_char(str);
+		}
+
+		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
+		#ifdef __cpp_lib_char8_t
+		[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
+		#endif
+	}
+	#endif
 
 	#if !TOML_DOXYGEN
 
@@ -97,15 +122,11 @@ namespace toml
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
 
-	#ifdef TOML_OPTIONAL_TYPE
-		TOML_ABI_NAMESPACE_START(custopt)
-	#else
-		TOML_ABI_NAMESPACE_START(stdopt)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
 
 	struct date_time; 
 
-	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
+	TOML_ABI_NAMESPACE_END // TOML_HAS_CUSTOM_OPTIONAL_TYPE
 
 	#endif // !TOML_DOXYGEN
 
@@ -124,9 +145,7 @@ namespace toml
 		date_time  ///< The node is a toml::value<date_time>.
 	};
 
-	TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS
-
-	#ifdef TOML_OPTIONAL_TYPE
+	#if TOML_HAS_CUSTOM_OPTIONAL_TYPE
 
 	template <typename T>
 	using optional = TOML_OPTIONAL_TYPE<T>;
@@ -157,11 +176,7 @@ namespace toml
 	/// \brief	A pointer to a shared string resource containing a source path.
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
-	#if TOML_LARGE_FILES
-		TOML_ABI_NAMESPACE_START(lf)
-	#else
-		TOML_ABI_NAMESPACE_START(sf)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
 
 	/// \brief	A source document line-and-column pair.
 	/// 
@@ -276,6 +291,23 @@ namespace toml
  		/// 
  		/// \remarks This will be `nullptr` if no path was provided to toml::parse().
 		source_path_ptr path;
+
+		#if TOML_WINDOWS_COMPAT
+
+		/// \brief	The path to the corresponding source document as a wide-string.
+		///
+		/// \remarks This will return an empty optional if no path was provided to toml::parse().
+		/// 
+		/// \attention This function is only available when #TOML_WINDOWS_COMPAT is enabled.
+		[[nodiscard]]
+		optional<std::wstring> wide_path() const noexcept
+		{
+			if (!path || path->empty())
+				return {};
+			return { impl::widen(*path) };
+		}
+
+		#endif
 	};
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
@@ -347,6 +379,15 @@ namespace toml::impl
 		|| std::is_same_v<T, date_time>;
 
 	template <typename T>
+	inline constexpr bool is_wide_string = is_one_of<
+		std::decay_t<T>,
+		const wchar_t*,
+		wchar_t*,
+		std::wstring_view,
+		std::wstring
+	>;
+
+	template <typename T>
 	inline constexpr bool is_value_or_promotable =
 		is_value<T>
 		|| std::is_same_v<std::decay_t<T>, string_char*>
@@ -358,6 +399,9 @@ namespace toml::impl
 		|| std::is_same_v<T, uint16_t>
 		|| std::is_same_v<T, uint8_t>
 		|| std::is_same_v<T, float>
+		#if TOML_WINDOWS_COMPAT
+		|| is_wide_string<T>
+		#endif
 		#ifdef TOML_SMALL_FLOAT_TYPE
 		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
 		#endif
@@ -399,6 +443,18 @@ namespace toml::impl
 	template <size_t N> struct value_promoter<string_char(&&)[N]> { using type = string; };
 	template <> struct value_promoter<string_char*> { using type = string; };
 	template <> struct value_promoter<string_view> { using type = string; };
+	#if TOML_WINDOWS_COMPAT
+		template <size_t N> struct value_promoter<const wchar_t[N]> { using type = string; };
+		template <size_t N> struct value_promoter<const wchar_t(&)[N]> { using type = string; };
+		template <size_t N> struct value_promoter<const wchar_t(&&)[N]> { using type = string; };
+		template <> struct value_promoter<const wchar_t*> { using type = string; };
+		template <size_t N> struct value_promoter<wchar_t[N]> { using type = string; };
+		template <size_t N> struct value_promoter<wchar_t(&)[N]> { using type = string; };
+		template <size_t N> struct value_promoter<wchar_t(&&)[N]> { using type = string; };
+		template <> struct value_promoter<wchar_t*> { using type = string; };
+		template <> struct value_promoter<std::wstring_view> { using type = string; };
+		template <> struct value_promoter<std::wstring> { using type = string; };
+	#endif
 	template <> struct value_promoter<int32_t> { using type = int64_t; };
 	template <> struct value_promoter<int16_t> { using type = int64_t; };
 	template <> struct value_promoter<int8_t> { using type = int64_t; };
@@ -592,3 +648,5 @@ namespace toml
 	};
 	template <typename T> inserter(T&&) -> inserter<T>;
 }
+
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS

@@ -135,11 +135,7 @@ namespace toml::impl
 			}
 	};
 
-	#if TOML_LARGE_FILES
-		TOML_ABI_NAMESPACE_START(impl_lf)
-	#else
-		TOML_ABI_NAMESPACE_START(impl_sf)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, impl_lf, impl_sf)
 
 	struct utf8_codepoint final
 	{
@@ -369,13 +365,10 @@ namespace toml::impl
 
 	template <typename Char>
 	utf8_reader(std::basic_string_view<Char>, std::string_view) -> utf8_reader<std::basic_string_view<Char>>;
-
-	template <typename Char>
-	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
-
 	template <typename Char>
 	utf8_reader(std::basic_string_view<Char>, std::string&&) -> utf8_reader<std::basic_string_view<Char>>;
-
+	template <typename Char>
+	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
 	template <typename Char>
 	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
 

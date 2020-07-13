@@ -88,7 +88,11 @@ namespace toml
 					}
 
 					if (requiresQuotes)
-						base::print_quoted_string(str);
+					{
+						impl::print_to_stream('"', base::stream());
+						impl::print_to_stream_with_escapes(str, base::stream());
+						impl::print_to_stream('"', base::stream());
+					}
 					else
 						impl::print_to_stream(str, base::stream());
 				}
@@ -320,12 +324,16 @@ namespace toml
 
 		public:
 
+			/// \brief	The default flags for a default_formatter.
+			static constexpr format_flags default_flags
+				= format_flags::allow_literal_strings | format_flags::allow_multi_line_strings;
+
 			/// \brief	Constructs a default formatter and binds it to a TOML object.
 			///
 			/// \param 	source	The source TOML object.
 			/// \param 	flags 	Format option flags.
 			TOML_NODISCARD_CTOR
-			explicit default_formatter(const toml::node& source, format_flags flags = {}) noexcept
+			explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
 				: base{ source, flags }
 			{}
 
@@ -377,12 +385,27 @@ namespace toml
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
+	template <typename Char, typename T>
+	TOML_EXTERNAL_LINKAGE
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
+	{
+		return lhs << default_formatter<Char>{ rhs };
+	}
+
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::string>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
 	#endif
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+

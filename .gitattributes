@@ -2,6 +2,7 @@
 *.c                  text        encoding=UTF-8      eol=lf
 *.cpp                text        encoding=UTF-8      eol=lf
 *.cxx                text        encoding=UTF-8      eol=lf
+*.dox                text        encoding=UTF-8      eol=lf
 *.h                  text        encoding=UTF-8      eol=lf
 *.hpp                text        encoding=UTF-8      eol=lf
 *.hxx                text        encoding=UTF-8      eol=lf

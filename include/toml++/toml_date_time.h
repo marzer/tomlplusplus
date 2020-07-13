@@ -300,11 +300,7 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
-	#ifdef TOML_OPTIONAL_TYPE
-		TOML_ABI_NAMESPACE_START(custopt)
-	#else
-		TOML_ABI_NAMESPACE_START(stdopt)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
 
 	/// \brief	A date-time.
 	struct date_time
@@ -407,7 +403,7 @@ namespace toml
 		}
 	};
 
-	TOML_ABI_NAMESPACE_END // TOML_OPTIONAL_TYPE
+	TOML_ABI_NAMESPACE_END // TOML_HAS_CUSTOM_OPTIONAL_TYPE
 
 	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
 	/// \detail \cpp

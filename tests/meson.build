@@ -21,6 +21,7 @@ test_sources = [
 	'manipulating_values.cpp',
 	'unicode.cpp',
 	'unicode_generated.cpp',
+	'windows_compat.cpp'
 ]
 
 compiler_supports_char8_strings = compiler.compiles('''

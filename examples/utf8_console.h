@@ -29,7 +29,7 @@
 	#define NOMETAFILE //        - typedef METAFILEPICT
 	#define NOMINMAX //          - Macros min(a,b) and max(a,b)
 	#define NOMSG //             - typedef MSG and associated routines
-	#define NONLS //             - All NLS defines and routines
+	//#define NONLS //             - All NLS defines and routines
 	#define NOOPENFILE //        - OpenFile(), OemToAnsi, AnsiToOem, and OF_*
 	#define NOPROFILER //        - Profiler interface.
 	#define NORASTEROPS //       - Binary and Tertiary raster ops

@@ -145,6 +145,57 @@ namespace toml
 		return do_contains(values, key);
 	}
 
+	#if TOML_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> table::operator[] (std::wstring_view key) noexcept
+	{
+		return { this->get(key) };
+	}
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> table::operator[] (std::wstring_view key) const noexcept
+	{
+		return { this->get(key) };
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::erase(std::wstring_view key) noexcept
+	{
+		return erase(impl::narrow(key));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node* table::get(std::wstring_view key) noexcept
+	{
+		return get(impl::narrow(key));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	const node* table::get(std::wstring_view key) const noexcept
+	{
+		return get(impl::narrow(key));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::iterator table::find(std::wstring_view key) noexcept
+	{
+		return find(impl::narrow(key));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::const_iterator table::find(std::wstring_view key) const noexcept
+	{
+		return find(impl::narrow(key));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::contains(std::wstring_view key) const noexcept
+	{
+		return contains(impl::narrow(key));
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
+
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator == (const table& lhs, const table& rhs) noexcept

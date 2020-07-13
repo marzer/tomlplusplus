@@ -257,12 +257,6 @@ namespace TOML_INTERNAL_NAMESPACE
 
 namespace toml::impl
 {
-	#if defined(NDEBUG) || !defined(_DEBUG)
-		#define assert_or_assume(cond)			TOML_ASSUME(cond)
-	#else
-		#define assert_or_assume(cond)			TOML_ASSERT(cond)
-	#endif
-
 	// Q: "what the fuck is this? MACROS????"
 	// A: The parser needs to work in exceptionless mode (returning error objects directly)
 	//    and exception mode (reporting parse failures by throwing). Two totally different control flows.
@@ -270,6 +264,12 @@ namespace toml::impl
 	//    as though I was only targeting one mode and not want yeet myself into the sun.
 	//    They're all #undef'd at the bottom of the parser's implementation so they should be harmless outside
 	//    of toml++.
+
+	#if defined(NDEBUG) || !defined(_DEBUG)
+		#define assert_or_assume(cond)			TOML_ASSUME(cond)
+	#else
+		#define assert_or_assume(cond)			TOML_ASSERT(cond)
+	#endif
 
 	#define is_eof()							!cp
 	#define assert_not_eof()					assert_or_assume(cp)
@@ -302,11 +302,7 @@ namespace toml::impl
 			set_error_and_return_if_eof(__VA_ARGS__);	\
 		} while (false)
 
-	#if TOML_EXCEPTIONS
-		TOML_ABI_NAMESPACE_START(impl_ex)
-	#else
-		TOML_ABI_NAMESPACE_START(impl_noex)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, impl_ex, impl_noex)
 
 	class parser final
 	{
@@ -2909,33 +2905,30 @@ namespace toml::impl
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
+	#undef push_parse_scope_2
+	#undef push_parse_scope_1
+	#undef push_parse_scope
+	#undef TOML_RETURNS_BY_THROWING
+	#undef is_eof
+	#undef assert_not_eof
+	#undef return_if_eof
+	#undef is_error
+	#undef return_after_error
+	#undef assert_not_error
+	#undef return_if_error
+	#undef return_if_error_or_eof
+	#undef set_error_and_return
+	#undef set_error_and_return_default
+	#undef set_error_and_return_if_eof
+	#undef advance_and_return_if_error
+	#undef advance_and_return_if_error_or_eof
+	#undef assert_or_assume
 }
 
-#undef push_parse_scope_2
-#undef push_parse_scope_1
-#undef push_parse_scope
-#undef TOML_RETURNS_BY_THROWING
-#undef is_eof
-#undef assert_not_eof
-#undef return_if_eof
-#undef is_error
-#undef return_after_error
-#undef assert_not_error
-#undef return_if_error
-#undef return_if_error_or_eof
-#undef set_error_and_return
-#undef set_error_and_return_default
-#undef set_error_and_return_if_eof
-#undef advance_and_return_if_error
-#undef advance_and_return_if_error_or_eof
 
 namespace toml
 {
-	#if TOML_EXCEPTIONS
-		TOML_ABI_NAMESPACE_START(parse_ex)
-	#else
-		TOML_ABI_NAMESPACE_START(parse_noex)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, parse_ex, parse_noex)
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
@@ -2950,6 +2943,17 @@ namespace toml
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
+
+	#if TOML_WINDOWS_COMPAT
+
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	{
+		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow<char>(source_path) });
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
 
 	#ifdef __cpp_lib_char8_t
 
@@ -2967,17 +2971,24 @@ namespace toml
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
+	#if TOML_WINDOWS_COMPAT
+
+	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	{
+		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow<char>(source_path) });
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
+
 	#endif // __cpp_lib_char8_t
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	inline namespace literals
 	{
-		#if TOML_EXCEPTIONS
-			TOML_ABI_NAMESPACE_START(lit_ex)
-		#else
-			TOML_ABI_NAMESPACE_START(lit_noex)
-		#endif
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
 
 		TOML_API
 		TOML_EXTERNAL_LINKAGE

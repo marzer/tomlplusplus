@@ -104,13 +104,16 @@ namespace toml
 
 		public:
 
+			/// \brief	The default flags for a json_formatter.
+			static constexpr format_flags default_flags = format_flags::quote_dates_and_times;
+
 			/// \brief	Constructs a JSON formatter and binds it to a TOML object.
 			///
 			/// \param 	source	The source TOML object.
 			/// \param 	flags 	Format option flags.
 			TOML_NODISCARD_CTOR
-				explicit json_formatter(const toml::node& source, format_flags flags = {}) noexcept
-				: base{ source, flags | format_flags::quote_dates_and_times }
+				explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
+				: base{ source, flags }
 			{}
 
 			template <typename T, typename U>

@@ -92,6 +92,7 @@
     </ClCompile>
     <ClCompile Include="..\tests\unicode.cpp" />
     <ClCompile Include="..\tests\unicode_generated.cpp" />
+    <ClCompile Include="..\tests\windows_compat.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />

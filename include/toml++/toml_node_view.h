@@ -48,7 +48,7 @@ namespace toml
 	/// std::cout << tbl["products"][0]["keywords"] << std::endl;
 	/// std::cout << "has product[2]: "sv << !!tbl["products"][2] << std::endl;
 	/// std::cout << "product[2]: "sv << tbl["products"][2] << std::endl;
-		/// \ecpp
+	/// \ecpp
 	/// 
 	/// \out
 	/// "my hardware store"
@@ -89,7 +89,10 @@ namespace toml
 			/// \brief	Returns true if the view references a node.
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			/// \brief	Returns the node that's being referenced by the view.
-			[[nodiscard]] viewed_type* get() const noexcept { return node_; }
+			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
+
+			[[nodiscard, deprecated("use node_view::node() instead (the name is better)")]]
+			viewed_type* get() const noexcept { return node_; }
 
 			/// \brief	Returns the type identifier for the viewed node.
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
@@ -296,13 +299,25 @@ namespace toml
 			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const U& rhs) noexcept
 			{
-				const auto val = lhs.as<impl::promoted<U>>();
-				return val && *val == rhs;
+				static_assert(
+					!impl::is_wide_string<U> || TOML_WINDOWS_COMPAT,
+					"Comparison with wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
+
+				#if TOML_WINDOWS_COMPAT
+				if constexpr (impl::is_wide_string<U>)
+					return lhs == impl::narrow(rhs);
+				else
+				#endif
+				{
+					const auto val = lhs.as<impl::promoted<U>>();
+					return val && *val == rhs;
+				}
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(
-					const node_view&,
-					const U&,
-					template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+				const node_view&,
+				const U&,
+				template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
 			)
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
@@ -335,6 +350,25 @@ namespace toml
 					return { tbl->get(key) };
 				return { nullptr };
 			}
+
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Returns a view of the selected subnode.
+			///
+			/// \param 	key	The key of the node to retrieve
+			///
+			/// \returns	A view of the selected node if this node represented a table and it contained a
+			/// 			value at the given key, or an empty view.
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node_view operator[] (std::wstring_view key) const noexcept
+			{
+				if (auto tbl = this->as_table())
+					return { tbl->get(key) };
+				return { nullptr };
+			}
+
+			#endif // TOML_WINDOWS_COMPAT
 
 			/// \brief	Returns a view of the selected subnode.
 			///

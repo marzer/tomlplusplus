@@ -68,7 +68,7 @@ namespace toml::impl
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
 	}
 
-	#if defined(__cpp_lib_char8_t)
+	#ifdef __cpp_lib_char8_t
 
 	template <typename Char>
 	TOML_ALWAYS_INLINE

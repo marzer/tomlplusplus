@@ -26,6 +26,10 @@
 	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
 
+#if (defined(_WIN32) && !TOML_WINDOWS_COMPAT) || (!defined(_WIN32) && TOML_WINDOWS_COMPAT)
+	#error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#endif
+
 namespace toml
 {
 	using std::declval;

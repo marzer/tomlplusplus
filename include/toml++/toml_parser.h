@@ -86,7 +86,7 @@ namespace toml
 			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
 			/// \brief	Returns true if parsing failed.
 			[[nodiscard]] bool failed() const noexcept { return is_err; }
-			/// \brief	Returns true if parsing succeeeded.
+			/// \brief	Returns true if parsing succeeded.
 			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
 
 			/// \brief	Returns the internal toml::table.
@@ -208,10 +208,51 @@ namespace toml
 			}
 
 			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
+			///
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
+			/// 			or an empty node view.
+			///
+			/// \see toml::node_view
 			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept
 			{
 				return is_err ? node_view<const node>{} : get()[key];
 			}
+
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table.
+			///
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
+			/// 			or an empty node view.
+			///
+			/// \see toml::node_view
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node_view<node> operator[] (std::wstring_view key) noexcept
+			{
+				return is_err ? node_view<node>{} : get()[key];
+			}
+
+			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
+			///
+			/// \param 	key The key used for the lookup.
+			///
+			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
+			/// 			or an empty node view.
+			///
+			/// \see toml::node_view
+			///
+			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] node_view<const node> operator[] (std::wstring_view key) const noexcept
+			{
+				return is_err ? node_view<const node>{} : get()[key];
+			}
+
+			#endif // TOML_WINDOWS_COMPAT
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
@@ -265,14 +306,9 @@ namespace toml
 	#endif
 }
 
-
 namespace toml::impl
 {
-	#if TOML_EXCEPTIONS
-		TOML_ABI_NAMESPACE_START(impl_ex)
-	#else
-		TOML_ABI_NAMESPACE_START(impl_noex)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, impl_ex, impl_noex)
 
 	[[nodiscard]] TOML_API
 	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
@@ -280,14 +316,21 @@ namespace toml::impl
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 }
 
+#if TOML_EXCEPTIONS
+	#define TOML_THROW_PARSE_ERROR(msg, path)												\
+		throw parse_error{																	\
+			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+		}
+#else
+	#define TOML_THROW_PARSE_ERROR(msg, path)												\
+		return parse_result{ parse_error{													\
+			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+		}}
+#endif
 
 namespace toml
 {
-	#if TOML_EXCEPTIONS
-		TOML_ABI_NAMESPACE_START(parse_ex)
-	#else
-		TOML_ABI_NAMESPACE_START(parse_noex)
-	#endif
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, parse_ex, parse_noex)
 
 	/// \brief	Parses a TOML document from a string view.
 	///
@@ -326,12 +369,43 @@ namespace toml
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
+
+	#if TOML_WINDOWS_COMPAT
+
+	/// \brief	Parses a TOML document from a string view.
+	/// 
+	/// \detail \cpp
+	/// auto tbl = toml::parse("a = 3"sv, L"foo.toml");
+	/// std::cout << tbl["a"] << std::endl;
+	/// 
+	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
+	/// 
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
+	///
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// 
+	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	[[nodiscard]]
+	TOML_API
+	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
+
+	#endif // TOML_WINDOWS_COMPAT
 
 	#ifdef __cpp_lib_char8_t
 
@@ -374,6 +448,8 @@ namespace toml
 	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
@@ -382,6 +458,36 @@ namespace toml
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
+
+	#if TOML_WINDOWS_COMPAT
+
+	/// \brief	Parses a TOML document from a char8_t string view.
+	/// 
+	/// \detail \cpp
+	/// auto tbl = toml::parse(u8"a = 3"sv, L"foo.toml");
+	/// std::cout << tbl["a"] << std::endl;
+	/// 
+	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
+	/// 
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
+	///
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// 
+	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled and your compiler
+	/// 		   supports char8_t-based strings.
+	[[nodiscard]]
+	TOML_API
+	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
+
+	#endif // TOML_WINDOWS_COMPAT
 
 	#endif // __cpp_lib_char8_t
 
@@ -439,6 +545,8 @@ namespace toml
 	/// \tparam	Char			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
@@ -454,6 +562,43 @@ namespace toml
 
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
+
+	#if TOML_WINDOWS_COMPAT
+
+	/// \brief	Parses a TOML document from a stream.
+	///
+	/// \detail \cpp
+	/// std::stringstream ss;
+	/// ss << "a = 3"sv;
+	/// 
+	/// auto tbl = toml::parse(ss);
+	/// std::cout << tbl["a"] << std::endl;
+	/// 
+	/// \ecpp
+	/// 
+	/// \out
+	/// 3
+	/// \eout
+	/// 
+	/// \tparam	Char			The stream's underlying character type. Must be 1 byte in size.
+	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
+	/// \param 	source_path		The path used to initialize each node's `source().path`.
+	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
+	/// 						then this parameter can safely be left blank.
+	///
+	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
+	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	///
+	///  \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	template <typename Char>
+	[[nodiscard]]
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse(std::basic_istream<Char>& doc, std::wstring_view source_path) TOML_MAY_THROW
+	{
+		return parse(doc, impl::narrow<char>(source_path));
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
 
 
 	// Q: "why are the parse_file functions templated??"
@@ -474,7 +619,7 @@ namespace toml
 	/// }
 	/// \ecpp
 	/// 
-	/// \tparam	Char			The path's character type. Must be 1 byte in size.
+	/// \tparam	Char			The path's character type.
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
@@ -487,25 +632,32 @@ namespace toml
 	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
 	{
 		static_assert(
-			sizeof(Char) == 1,
-			"The path's character type must be 1 byte in size."
+			!std::is_same_v<Char, wchar_t> || TOML_WINDOWS_COMPAT,
+			"Wide-character file paths are only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
-		static_assert(
-			sizeof(StreamChar) == 1,
-			"The stream's character type must be 1 byte in size."
-		);
-
-		#if TOML_EXCEPTIONS
-			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
-				throw parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }
+		#if TOML_WINDOWS_COMPAT
+			static_assert(
+				sizeof(Char) == 1 || std::is_same_v<Char, wchar_t>,
+				"The file path's underlying character type must be wchar_t or be 1 byte in size."
+			);
 		#else
-			#define TOML_PARSE_FILE_ERROR(msg, pos)															\
-				return parse_result{																		\
-					parse_error{ msg, pos, std::make_shared<const std::string>(std::move(file_path_str)) }	\
-				}
+			static_assert(
+				sizeof(Char) == 1,
+				"The file path's underlying character type must be 1 byte in size."
+			);
 		#endif
+		static_assert(
+			std::is_same_v<StreamChar, char>,
+			"StreamChar must be 'char' (it is as an instantiation-delaying hack and is not user-configurable)."
+		);
 
-		auto file_path_str = std::string(reinterpret_cast<const char*>(file_path.data()), file_path.length());
+		std::string file_path_str;
+		#if TOML_WINDOWS_COMPAT
+		if constexpr (std::is_same_v<Char, wchar_t>)
+			file_path_str = impl::narrow<char>(file_path);
+		else
+		#endif
+			file_path_str = std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() };
 
 		// open file with a custom-sized stack buffer
 		using ifstream = std::basic_ifstream<StreamChar>;
@@ -514,12 +666,12 @@ namespace toml
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
 		if (!file.is_open())
-			TOML_PARSE_FILE_ERROR("File could not be opened for reading", source_position{});
+			TOML_THROW_PARSE_ERROR("File could not be opened for reading", file_path_str);
 
 		// get size
 		const auto file_size = file.tellg();
 		if (file_size == -1)
-			TOML_PARSE_FILE_ERROR("Could not determine file size", source_position{});
+			TOML_THROW_PARSE_ERROR("Could not determine file size", file_path_str);
 		file.seekg(0, std::ios::beg);
 
 		// read the whole file into memory first if the file isn't too large
@@ -535,8 +687,6 @@ namespace toml
 		// otherwise parse it using the streams
 		else
 			return parse(file, std::move(file_path_str));
-
-		#undef TOML_PARSE_FILE_ERROR
 	}
 
 	#if !TOML_ALL_INLINE
@@ -545,6 +695,9 @@ namespace toml
 		extern template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
 		#ifdef __cpp_lib_char8_t
 			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
+		#endif
+		#if TOML_WINDOWS_COMPAT
+			extern template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
 		#endif
 	#endif
 
@@ -584,13 +737,9 @@ namespace toml
 	///
 	inline namespace literals
 	{
-		#if TOML_EXCEPTIONS
-			TOML_ABI_NAMESPACE_START(lit_ex)
-		#else
-			TOML_ABI_NAMESPACE_START(lit_noex)
-		#endif
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
 
-		/// \brief	Parses TOML data from a string.
+		/// \brief	Parses TOML data from a string literal.
 		/// 
 		/// \detail \cpp
 		/// using namespace toml::literals;
@@ -604,7 +753,7 @@ namespace toml
 		/// 3
 		/// \eout
 		/// 
-		/// \param 	str	The string data.
+		/// \param 	str	The string data. Must be valid UTF-8.
 		/// \param 	len	The string length.
 		///
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
@@ -615,7 +764,7 @@ namespace toml
 
 		#ifdef __cpp_lib_char8_t
 
-		/// \brief	Parses TOML data from a string.
+		/// \brief	Parses TOML data from a utf8 string literal.
 		/// 
 		/// \detail \cpp
 		/// using namespace toml::literals;
@@ -629,7 +778,7 @@ namespace toml
 		/// 3
 		/// \eout
 		/// 
-		/// \param 	str	The string data.
+		/// \param 	str	The string data. Must be valid UTF-8.
 		/// \param 	len	The string length.
 		///
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
@@ -644,6 +793,9 @@ namespace toml
 
 		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
+
 }
+
+#undef TOML_THROW_PARSE_ERROR
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS

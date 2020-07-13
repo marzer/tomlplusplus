@@ -24,6 +24,7 @@ TOML_POP_WARNINGS
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"
 
+// template instantiations
 namespace toml
 {
 	// value<>
@@ -77,26 +78,32 @@ namespace toml
 		template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	}
-
-	// parser machinery
-	#if TOML_PARSER
-
-		// parse error ostream
-		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
-
-		// parse() and parse_file()
-		#if TOML_EXCEPTIONS
-			TOML_ABI_NAMESPACE_START(parse_ex)
-		#else
-			TOML_ABI_NAMESPACE_START(parse_noex)
-		#endif
-		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
-		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
-		template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
-		#ifdef __cpp_lib_char8_t
-			template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
-		#endif
-		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	#endif // TOML_PARSER
 }
+
+
+// parser instantiations
+#if TOML_PARSER
+
+#include "toml_parser.h"
+
+namespace toml
+{
+	// parse error ostream
+	template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
+
+	// parse() and parse_file()
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, parse_ex, parse_noex)
+
+	template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+	template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
+	template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
+	#ifdef __cpp_lib_char8_t
+		template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
+	#endif
+	#if TOML_WINDOWS_COMPAT
+		template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
+	#endif
+
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+}
+#endif // TOML_PARSER

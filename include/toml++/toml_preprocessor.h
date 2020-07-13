@@ -48,10 +48,28 @@
 	#define TOML_PARSER 1
 #endif
 
+#if (defined(_WIN32) || defined(DOXYGEN)) && !defined(TOML_WINDOWS_COMPAT)
+	#define TOML_WINDOWS_COMPAT 1
+#endif
+#if !(defined(_WIN32) || defined(DOXYGEN)) || !defined(TOML_WINDOWS_COMPAT)
+	#undef TOML_WINDOWS_COMPAT
+	#define TOML_WINDOWS_COMPAT 0
+#endif
+
+#ifdef TOML_OPTIONAL_TYPE
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
+#else
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
 ////////// COMPILER & ENVIRONMENT
 
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
+#endif
+#ifdef DOXYGEN
+	#undef	TOML_DOXYGEN
+	#define TOML_DOXYGEN 1
 #endif
 #ifndef TOML_DOXYGEN
 	#define TOML_DOXYGEN 0
@@ -192,7 +210,6 @@
 #ifndef TOML_CPP_VERSION
 	#define TOML_CPP_VERSION __cplusplus
 #endif
-
 #if TOML_CPP_VERSION < 201103L
 	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
@@ -206,12 +223,14 @@
 #elif TOML_CPP_VERSION >= 201703L
 	#define TOML_CPP 17
 #endif
+#undef TOML_CPP_VERSION
 
 #ifndef TOML_COMPILER_EXCEPTIONS
 	#define TOML_COMPILER_EXCEPTIONS 1
 #endif
 #if TOML_COMPILER_EXCEPTIONS
-	#ifndef TOML_EXCEPTIONS
+	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
+		#undef TOML_EXCEPTIONS
 		#define TOML_EXCEPTIONS 1
 	#endif
 #else
@@ -381,13 +400,21 @@
 #define TOML_LANG_UNRELEASED														\
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
+#define TOML_CONCAT_1(x, y) x##y
+#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
+
+#define TOML_EVAL_BOOL_1(T, F)	T
+#define TOML_EVAL_BOOL_0(T, F)	F
+
 #if TOML_DOXYGEN || defined(__INTELLISENSE__)
 	#define TOML_ABI_NAMESPACES					0
+	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)
 	#define TOML_ABI_NAMESPACE_START(name)
 	#define TOML_ABI_NAMESPACE_END
 #else
 	#define TOML_ABI_NAMESPACES					1
-	#define TOML_ABI_NAMESPACE_START(name)		inline namespace abi_##name {
+	#define TOML_ABI_NAMESPACE_START(name)		inline namespace TOML_CONCAT(abi_, name) {
+	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
 	#define TOML_ABI_NAMESPACE_END				}
 #endif
 
@@ -404,8 +431,7 @@ TOML_DISABLE_ALL_WARNINGS
 TOML_POP_WARNINGS
 
 #if TOML_CHAR_8_STRINGS
-	#define TOML_STRING_PREFIX_1(S) u8##S
-	#define TOML_STRING_PREFIX(S) TOML_STRING_PREFIX_1(S)
+	#define TOML_STRING_PREFIX(S) TOML_CONCAT(u8, S)
 #else
 	#define TOML_STRING_PREFIX(S) S
 #endif
@@ -424,7 +450,7 @@ TOML_POP_WARNINGS
 /// \def TOML_ALL_INLINE
 /// \brief Sets whether the library is entirely inline.
 /// \detail Defaults to `1`.
-/// \remark Disabling this means that you must define `TOML_IMPLEMENTATION` in
+/// \remark Disabling this means that you must define #TOML_IMPLEMENTATION in
 ///	<strong><em>exactly one</em></strong> translation unit in your project:
 /// \cpp
 /// // global_header_that_includes_toml++.h
@@ -510,6 +536,20 @@ TOML_POP_WARNINGS
 ///		[numbered version](https://github.com/toml-lang/toml/releases).
 /// \detail Defaults to `0`.
 /// \see [TOML Language Support](https://github.com/marzer/tomlplusplus/blob/master/README.md#toml-language-support)
+
+
+/// \def TOML_WINDOWS_COMPAT
+/// \brief Enables the use of wide strings (wchar_t, std::wstring) in various places throughout the library
+/// 	   when building for Windows.
+/// \detail Defaults to `1` when building for Windows, `0` otherwise. Has no effect when building for anything other
+/// 		than Windows.
+/// \attention This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values;
+/// 		   that will still be std::string or std::u8string according to whatever #TOML_CHAR_8_STRINGS is set to.
+/// 		   This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at
+/// 		   various interface boundaries.
+/// 		   <br><br>
+/// 		   If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings,
+/// 		   you can safely set this to `0`.
 
 
 /// @}

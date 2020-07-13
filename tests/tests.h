@@ -168,16 +168,16 @@ inline bool parse_expected_value(
 				auto nv = tbl[S("val"sv)];
 				REQUIRE(nv);
 				REQUIRE(nv.as<value_type>());
-				REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+				REQUIRE(nv.node()->type() == impl::node_type_of<T>);
 
 				// check the raw value
-				REQUIRE(nv.get()->value<value_type>() == expected);
-				REQUIRE(nv.get()->value_or(T{}) == expected);
+				REQUIRE(nv.node()->value<value_type>() == expected);
+				REQUIRE(nv.node()->value_or(T{}) == expected);
 				REQUIRE(nv.as<value_type>()->get() == expected);
 				REQUIRE(nv.value<value_type>() == expected);
 				REQUIRE(nv.value_or(T{}) == expected);
 				REQUIRE(nv.ref<value_type>() == expected);
-				REQUIRE(nv.get()->ref<value_type>() == expected);
+				REQUIRE(nv.node()->ref<value_type>() == expected);
 
 				// check the table relops
 				REQUIRE(tbl == table{ { { S("val"sv), expected } } });
@@ -196,8 +196,8 @@ inline bool parse_expected_value(
 				REQUIRE(!(expected != nv));
 
 				// make sure source info is correct
-				REQUIRE(nv.get()->source().begin == begin);
-				REQUIRE(nv.get()->source().end == end);
+				REQUIRE(nv.node()->source().begin == begin);
+				REQUIRE(nv.node()->source().end == end);
 
 				// steal the val for round-trip tests
 				if (!stolen_value)
@@ -235,7 +235,7 @@ inline bool parse_expected_value(
 					auto nv = tbl[S("val"sv)];
 					REQUIRE(nv);
 					REQUIRE(nv.as<value_type>());
-					REQUIRE(nv.get()->type() == impl::node_type_of<T>);
+					REQUIRE(nv.node()->type() == impl::node_type_of<T>);
 
 					if (value_ok && nv.ref<value_type>() != expected)
 					{
