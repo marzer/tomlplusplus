@@ -130,6 +130,10 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga337ec177a5d46e3b6d8fa4f23edf98e2">TOML_UNRELEASED_FEATURES</a></span>
             </dt>
             <dd>Enables support for unreleased TOML language features not yet part of a <a class="tpp-external" href="https://github.com/toml-lang/toml/releases" target="_blank">numbered version</a>.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
+            </dt>
+            <dd>Enables the use of wide strings (wchar_t, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a>) in various places throughout the library when building for Windows.</dd>
           </dl>
         </section>
         <section>
@@ -139,7 +143,7 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga997dc4b397795ca35126850cac05ec8e">TOML_ALL_INLINE</a></span>
             </h3>
             <p>Sets whether the library is entirely inline.</p>
-<p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <code>TOML_IMPLEMENTATION</code> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
+<p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <a class="m-doc" href="group__configuration.html#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_<wbr/>IMPLEMENTATION</a> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
 <span class="cp">#define TOML_ALL_INLINE 0</span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span><span class="cp"></span>
 
@@ -230,6 +234,13 @@ C++</span></a>
             </h3>
             <p>Enables support for unreleased TOML language features not yet part of a <a class="tpp-external" href="https://github.com/toml-lang/toml/releases" target="_blank">numbered version</a>.</p>
 <p>Defaults to <code>0</code>.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="tpp-external" href="https://github.com/marzer/tomlplusplus/blob/master/README.md#toml-language-support" target="_blank">TOML Language Support</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga0785b375499ea976c627d775f8fc747b"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
+            </h3>
+            <p>Enables the use of wide strings (wchar_t, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a>) in various places throughout the library when building for Windows.</p>
+<p>Defaults to <code>1</code> when building for Windows, <code>0</code> otherwise. Has no effect when building for anything other than Windows.</p><aside class="m-note m-warning"><h4>Attention</h4><p>This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values; that will still be <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a> or <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::u8string</a> according to whatever <a class="m-doc" href="group__configuration.html#gab7db106da27ae46e214f77807b0d16a0">TOML_<wbr/>CHAR_<wbr/>8_<wbr/>STRINGS</a> is set to. This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at various interface boundaries.<br/><br/>If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings, you can safely set this to <code>0</code>.</p></aside>
           </div></section>
         </section>
       </div>

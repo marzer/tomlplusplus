@@ -147,6 +147,10 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#aa710f85c588a1b00c3192d1553de4eef">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes all key-value pairs from the table.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2449e053ad373e82d2500226bf084cb9">contains</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the table contains a node at the given key.</dd>
             <dt id="ace2b078b9e963016488ba738dde73e7f">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ace2b078b9e963016488ba738dde73e7f">contains</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -183,9 +187,37 @@ C++</span></a>
             </dt>
             <dd>Removes the specified key-value pair from the table.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a53151a06151fbd78887e027e95c3f788">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes the value with the given key from the table.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad91ed36ee1b3cec423d49d36f3ed366e">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes the value with the given key from the table.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab55a7ed5c436a045c69a1f1adcb07b5c">find</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets an iterator to the node at a specific key (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5b6b0b84c1d2fe24b7b370f989cbd98e">find</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets an iterator to the node at a specific key.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a55dbdc04a6122b64ac97c38e30ea8621">find</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets an iterator to the node at a specific key (const overload)</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7c40f6fdf64c9d25f8e8a0cc4861eb17">find</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets an iterator to the node at a specific key.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a615c9124ee853eb6a7544c0ab3b9911f">get</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets the node at a specific key (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa67b393855cbd706ce89d5a09f062002">get</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets the node at a specific key.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0ffe1b19d726d04340eb392724550d0f">get</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -194,6 +226,16 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a43cc2771385f9b400e9d2c9b56458049">get</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the node at a specific key.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9ff42105973c4fd6cd6758f0f623223b">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; const impl::node_of&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets the node at a specific key if it is a particular type (const overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adfca1fd609253fec4dd287b6990f3748">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; impl::node_of&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets the node at a specific key if it is a particular type.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8db429a783088184c4b75cc50a9b4be1">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; const impl::node_of&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
@@ -205,13 +247,13 @@ C++</span></a>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;Iter &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;</div>
+              <div class="m-doc-template">template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter, string_view&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter">...</a><span>!std::is_convertible_v&lt;Iter, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter</span></span>&gt;			&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
               Iter last) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a series of key-value pairs into the table.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;</div>
+              <div class="m-doc-template">template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view&gt;				|| impl::is_wide_string&lt;K">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>&gt;				|| impl::is_wide_string&lt;K</span></span>&gt;			&gt;&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
               V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -246,8 +288,16 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5c5fd0e11db828ab264eccc96dfdd619">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
-            <dt id="abc3ded5ef91cf5968b71430b87eda9d8">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abc3ded5ef91cf5968b71430b87eda9d8">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a404ae83ed52c7b8ce294d3d4925c8a16">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair (const overload).</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a06fd3d9032b031b0363818939cd5cf38">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abc3ded5ef91cf5968b71430b87eda9d8">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair (const overload).</dd>
             <dt>
@@ -272,6 +322,12 @@ C++</span></a>
               const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
+            <dt id="ab34ff6b624f5f39fa8002f3d6e539eca">
+              <div class="m-doc-template">template&lt;typename Char&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab34ff6b624f5f39fa8002f3d6e539eca">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;,
+              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;</span>
+            </dt>
+            <dd>Prints the table out to a stream as formatted TOML.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
@@ -314,6 +370,13 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
 <span class="p">}};</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2449e053ad373e82d2500226bf084cb9"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2449e053ad373e82d2500226bf084cb9">contains</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns true if the table contains a node at the given key.</p>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d63ea8e51917b4dd9a35ae3e2ebd87e"><div>
             <h3>
@@ -485,6 +548,30 @@ C++</span></a>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">{ a = 1, c = 3 }</span></pre>
           </div></section>
+          <section class="m-doc-details" id="a53151a06151fbd78887e027e95c3f788"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a53151a06151fbd78887e027e95c3f788">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Removes the value with the given key from the table.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>Key to erase.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if any values with matching keys were found and erased.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="ad91ed36ee1b3cec423d49d36f3ed366e"><div>
             <h3>
               <span class="m-doc-wrap-bumper">bool toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad91ed36ee1b3cec423d49d36f3ed366e">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) <span class="m-label m-success">noexcept</span></span></span>
@@ -520,6 +607,148 @@ C++</span></a>
 <span class="go">true</span>
 <span class="go">false</span>
 <span class="go">{ a = 1, c = 3 }</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ab55a7ed5c436a045c69a1f1adcb07b5c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab55a7ed5c436a045c69a1f1adcb07b5c">find</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets an iterator to the node at a specific key (const overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A const iterator to the node at the specified key, or <a class="m-doc" href="classtoml_1_1table.html#a311451209f990931ea25828c6091714f">cend()</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a5b6b0b84c1d2fe24b7b370f989cbd98e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5b6b0b84c1d2fe24b7b370f989cbd98e">find</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets an iterator to the node at a specific key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>An iterator to the node at the specified key, or <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a55dbdc04a6122b64ac97c38e30ea8621"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#a5a6ce59c3fe438ac94eadaa8a2b17957">const_<wbr/>iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a55dbdc04a6122b64ac97c38e30ea8621">find</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets an iterator to the node at a specific key (const overload)</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A const iterator to the node at the specified key, or <a class="m-doc" href="classtoml_1_1table.html#a311451209f990931ea25828c6091714f">cend()</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a7c40f6fdf64c9d25f8e8a0cc4861eb17"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7c40f6fdf64c9d25f8e8a0cc4861eb17">find</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets an iterator to the node at a specific key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>An iterator to the node at the specified key, or <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a615c9124ee853eb6a7544c0ab3b9911f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node.html">node</a>* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a615c9124ee853eb6a7544c0ab3b9911f">get</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the node at a specific key (const overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A pointer to the node at the specified key, or nullptr.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="aa67b393855cbd706ce89d5a09f062002"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node.html">node</a>* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa67b393855cbd706ce89d5a09f062002">get</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the node at a specific key.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A pointer to the node at the specified key, or nullptr.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a0ffe1b19d726d04340eb392724550d0f"><div>
             <h3>
@@ -578,6 +807,78 @@ C++</span></a>
 <span class="go">node ["b"] exists: true</span>
 <span class="go">node ["c"] exists: false</span>
 <span class="go">node ["a"] was an integer</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a9ff42105973c4fd6cd6758f0f623223b"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">const impl::node_of&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9ff42105973c4fd6cd6758f0f623223b">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the node at a specific key if it is a particular type (const overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>The node's type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A pointer to the node at the specified key if it was of the given type, or nullptr.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="adfca1fd609253fec4dd287b6990f3748"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">impl::node_of&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adfca1fd609253fec4dd287b6990f3748">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets the node at a specific key if it is a particular type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">T</td>
+                  <td>The node's type.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>key</td>
+                  <td>The node's key.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A pointer to the node at the specified key if it was of the given type, or nullptr.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8db429a783088184c4b75cc50a9b4be1"><div>
             <h3>
@@ -657,7 +958,7 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="acefff2dfe1efb072c9062b8f60146cd9"><div>
             <h3>
-              <div class="m-doc-template"> template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter &amp;&amp; , string_view">...</a><span>!std::is_convertible_v&lt;Iter &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;
+              <div class="m-doc-template"> template&lt;typename Iter, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="!std::is_convertible_v&lt;Iter, string_view&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter">...</a><span>!std::is_convertible_v&lt;Iter, <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter</span></span>&gt;			&gt;&gt;
               </div>
               <span class="m-doc-wrap-bumper">void toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
               Iter last) <span class="m-label m-success">noexcept</span></span></span>
@@ -704,7 +1005,7 @@ C++</span></a>
           </div></section>
           <section class="m-doc-details" id="a4c48213240ef24e952033f92e8189578"><div>
             <h3>
-              <div class="m-doc-template"> template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a></span></span>&gt;			&gt;&gt;
+              <div class="m-doc-template"> template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , string_view&gt;				|| impl::is_wide_string&lt;K">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , <a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a>&gt;				|| impl::is_wide_string&lt;K</span></span>&gt;			&gt;&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
               V&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
@@ -865,6 +1166,78 @@ C++</span></a>
 
 <span class="go">is inline? true</span>
 <span class="go">{ a = 1, b = 2, c = 3, d = { e = 4 } }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>A table being 'inline' is only relevent during printing; it has no effect on the general functionality of the table object.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a404ae83ed52c7b8ce294d3d4925c8a16"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a404ae83ed52c7b8ce294d3d4925c8a16">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair (const overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key used for the lookup.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A view of the value at the given key if one existed, or an empty node view.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a06fd3d9032b031b0363818939cd5cf38"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a06fd3d9032b031b0363818939cd5cf38">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key used for the lookup.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A view of the value at the given key if one existed, or an empty node view.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="abc3ded5ef91cf5968b71430b87eda9d8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abc3ded5ef91cf5968b71430b87eda9d8">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a496653fce75ee70bbe451bb5f2377265">string_<wbr/>view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair (const overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key used for the lookup.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A view of the value at the given key if one existed, or an empty node view.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a325319aea41ff6788bc62e9cde35d9e1"><div>
             <h3>

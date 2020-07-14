@@ -102,7 +102,7 @@ C++</span></a>
 <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">].</span><span class="n">as_array</span><span class="p">()</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="s">"heavy"</span><span class="p">);</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s">"keywords"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
 <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"has product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span> <span class="err">*/</span></pre><pre class="m-console"><span class="go">"my hardware store"</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"product[2]: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"products"</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">"my hardware store"</span>
 <span class="go">"Hammer"</span>
 <span class="go">[ "hammer", "construction", "build" ]</span>
 <span class="go">"build"</span>
@@ -166,10 +166,6 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac4a86de4c56860d393978fdc25086f6d">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the viewed node as a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;time&gt;, if it is one.</dd>
-            <dt id="a57f3f0b4d954fe3ece11f1bcd9fb0112">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a57f3f0b4d954fe3ece11f1bcd9fb0112">get</a>(</span><span class="m-doc-wrap">) const -&gt; viewed_type* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the node that's being referenced by the view.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a69ba92e100fea813435c28c57bfe6020">is</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
@@ -223,8 +219,16 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4c7663c741b5f384f6970b949944e5a6">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is a <a class="m-doc tpp-injected" href="classtoml_1_1value.html">toml::value</a>&lt;&gt;.</dd>
+            <dt id="aa9e5d07adbc735bf5bdd98ebc6f3c651">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa9e5d07adbc735bf5bdd98ebc6f3c651">node</a>(</span><span class="m-doc-wrap">) const -&gt; viewed_type* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the node that's being referenced by the view.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae16fc4d9cb739f7f3aec1d2c7e50af07">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a view of the selected subnode.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad3fe91ca11f306da7e3858b268d975ae">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
             <dt>
@@ -242,7 +246,7 @@ C++</span></a>
             <dd>Returns the type identifier for the viewed node.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename U&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2dea85f19c985a938abc11a3bc495ffd">value</a>(</span><span class="m-doc-wrap">) const -&gt; optional&lt;U&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2dea85f19c985a938abc11a3bc495ffd">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;U&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the raw value contained by the referenced node.</dd>
             <dt>
@@ -380,6 +384,33 @@ C++</span></a>
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ad3fe91ca11f306da7e3858b268d975ae"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename T&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad3fe91ca11f306da7e3858b268d975ae">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a view of the selected subnode.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">key</td>
+                  <td>The key of the node to retrieve</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A view of the selected node if this node represented a table and it contained a value at the given key, or an empty view.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a9c2048a53d78573cd5a3b62121c24f3b"><div>
             <h3>
               <div class="m-doc-template">
@@ -447,7 +478,7 @@ C++</span></a>
                 template&lt;typename T&gt;
                 template&lt;typename U&gt;
               </div>
-              <span class="m-doc-wrap-bumper">optional&lt;U&gt; toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2dea85f19c985a938abc11a3bc495ffd">value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;U&gt; toml::<wbr/>node_view&lt;T&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2dea85f19c985a938abc11a3bc495ffd">value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the raw value contained by the referenced node.</p>
             <table class="m-table m-fullwidth m-flat">

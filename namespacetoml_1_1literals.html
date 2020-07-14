@@ -93,12 +93,12 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
-            <dd>Parses TOML data from a string.</dd>
+            <dd>Parses TOML data from a string literal.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const char8_t* str,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
-            <dd>Parses TOML data from a string.</dd>
+            <dd>Parses TOML data from a utf8 string literal.</dd>
           </dl>
         </section>
         <section>
@@ -108,7 +108,7 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/>literals::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len)</span></span>
             </h3>
-            <p>Parses TOML data from a string.</p>
+            <p>Parses TOML data from a string literal.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -116,7 +116,7 @@ C++</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">str</td>
-                  <td>The string data.</td>
+                  <td>The string data. Must be valid UTF-8.</td>
                 </tr>
                 <tr>
                   <td>len</td>
@@ -140,7 +140,7 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/>literals::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const char8_t* str,
               <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len)</span></span>
             </h3>
-            <p>Parses TOML data from a string.</p>
+            <p>Parses TOML data from a utf8 string literal.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -148,7 +148,7 @@ C++</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">str</td>
-                  <td>The string data.</td>
+                  <td>The string data. Must be valid UTF-8.</td>
                 </tr>
                 <tr>
                   <td>len</td>
