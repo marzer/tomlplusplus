@@ -147,12 +147,14 @@ namespace toml
 			[[nodiscard]]
 			auto as() const noexcept
 			{
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<impl::unwrapped<U>>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Template type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return node_ ? node_->template as<U>() : nullptr;
+				return node_ ? node_->template as<type>() : nullptr;
 			}
 
 			/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
@@ -174,6 +176,15 @@ namespace toml
 			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
+			template <typename U>
+			[[nodiscard]]
+			optional<U> value_exact() const noexcept
+			{
+				if (node_)
+					return node_->template value_exact<U>();
+				return {};
+			}
+
 			TOML_PUSH_WARNINGS
 			TOML_DISABLE_INIT_WARNINGS
 
@@ -185,7 +196,8 @@ namespace toml
 			/// 
 			/// \see node::value()
 			template <typename U>
-			[[nodiscard]] optional<U> value() const noexcept
+			[[nodiscard]]
+			optional<U> value() const noexcept
 			{
 				if (node_)
 					return node_->template value<U>();
@@ -205,12 +217,45 @@ namespace toml
 			/// 
 			/// \see node::value_or()
 			template <typename U>
-			[[nodiscard]] auto value_or(U&& default_value) const noexcept
+			[[nodiscard]]
+			auto value_or(U&& default_value) const noexcept
 			{
-				using return_type = decltype(node_->value_or(std::forward<U>(default_value)));
-				if (node_)
-					return node_->value_or(std::forward<U>(default_value));
-				return return_type{ std::forward<U>(default_value) };
+				using namespace ::toml::impl;
+
+				static_assert(
+					!is_wide_string<U> || TOML_WINDOWS_COMPAT,
+					"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
+
+				if constexpr (is_wide_string<U>)
+				{
+					#if TOML_WINDOWS_COMPAT
+
+					if (node_)
+						return node_->value_or(std::forward<U>(default_value));
+					return std::wstring{ std::forward<U>(default_value) };
+
+					#else
+
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+
+					#endif
+				}
+				else
+				{
+					using value_type = std::conditional_t<
+						std::is_pointer_v<std::decay_t<U>>,
+						std::add_pointer_t<std::add_const_t<std::remove_pointer_t<std::decay_t<U>>>>,
+						std::decay_t<U>
+					>;
+
+					if (node_)
+						return node_->value_or(std::forward<U>(default_value));
+					if constexpr (std::is_pointer_v<value_type>)
+						return value_type{ default_value };
+					else
+						return std::forward<U>(default_value);
+				}
 			}
 
 			/// \brief	Invokes a visitor on the viewed node based on its concrete type.
@@ -252,10 +297,11 @@ namespace toml
 			template <typename U>
 			[[nodiscard]] decltype(auto) ref() const noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Template type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					node_
@@ -296,7 +342,10 @@ namespace toml
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
-			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+			template <typename U, typename = std::enable_if_t<
+				impl::is_native<U>
+				|| impl::is_losslessly_convertible_to_native<U>
+			>>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const U& rhs) noexcept
 			{
 				static_assert(
@@ -304,20 +353,27 @@ namespace toml
 					"Comparison with wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<U>)
-					return lhs == impl::narrow(rhs);
-				else
-				#endif
 				{
-					const auto val = lhs.as<impl::promoted<U>>();
+					#if TOML_WINDOWS_COMPAT
+					return lhs == impl::narrow(rhs);
+					#else
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+					#endif
+				}
+				else
+				{
+					const auto val = lhs.as<impl::native_type_of<U>>();
 					return val && *val == rhs;
 				}
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(
 				const node_view&,
 				const U&,
-				template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+				template <typename U, typename = std::enable_if_t<
+					impl::is_native<U>
+					|| impl::is_losslessly_convertible_to_native<U>
+				>>
 			)
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.

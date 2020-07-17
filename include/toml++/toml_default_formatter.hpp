@@ -12,6 +12,10 @@
 //# }}
 
 #include "toml_default_formatter.h"
+TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+#include <cmath>
+TOML_POP_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS

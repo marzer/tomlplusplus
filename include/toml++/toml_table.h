@@ -453,11 +453,15 @@ namespace toml
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return insert(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					#else
+					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					auto ipos = values.lower_bound(key);
 					if (ipos == values.end() || ipos->first != key)
@@ -560,11 +564,15 @@ namespace toml
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return insert_or_assign(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					#else
+					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					auto ipos = values.lower_bound(key);
 					if (ipos == values.end() || ipos->first != key)
@@ -626,17 +634,22 @@ namespace toml
 					"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return emplace<U>(impl::narrow(std::forward<K>(key)), std::forward<V>(args)...);
+					#else
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 
-					using type = impl::unwrapped<U>;
+					using type = impl::unwrap_node<U>;
 					static_assert(
-						impl::is_value_or_node<type>,
-						"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+						impl::is_native<type> || impl::is_one_of<type, table, array>,
+						"The emplacement type argument of table::emplace() must be one of the following:"
+						TOML_UNWRAPPED_NODE_TYPE_LIST
 					);
 
 					auto ipos = values.lower_bound(key);
@@ -645,7 +658,7 @@ namespace toml
 						ipos = values.emplace_hint(
 							ipos,
 							std::forward<K>(key),
-							new impl::node_of<type>{ std::forward<V>(args)... }
+							new impl::wrap_node<type>{ std::forward<V>(args)... }
 						);
 						return { ipos, true };
 					}
@@ -782,11 +795,15 @@ namespace toml
 					"Retrieval using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<Key>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return do_get(vals, impl::narrow(key));
+					#else
+					static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					if (auto it = vals.find(key); it != vals.end())
 						return { it->second.get() };
@@ -927,7 +944,7 @@ namespace toml
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(string_view key) noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
@@ -939,7 +956,7 @@ namespace toml
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(string_view key) const noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
@@ -955,7 +972,7 @@ namespace toml
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(std::wstring_view key) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(std::wstring_view key) noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}
@@ -969,7 +986,7 @@ namespace toml
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(std::wstring_view key) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(std::wstring_view key) const noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}

@@ -1023,8 +1023,8 @@ namespace toml::impl
 				push_parse_scope("floating-point"sv);
 
 				start_recording(true);
-				const int sign = *cp == U'-' ? -1 : 1;
-				if (is_match(*cp, U'+', U'-'))
+				const bool negative = *cp == U'-';
+				if (negative || *cp == U'+')
 					advance_and_return_if_error_or_eof({});
 
 				const bool inf = is_match(*cp, U'i', U'I');
@@ -1037,9 +1037,14 @@ namespace toml::impl
 				if (cp && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
-				return inf
-					? sign * std::numeric_limits<double>::infinity()
-					: std::numeric_limits<double>::quiet_NaN();
+				// control for implementations that don't properly implement std::numeric_limits<double>::quiet_NaN()
+				// and/or std::numeric_limits<double>::infinity() (e.g. due to -ffast-math and friends)
+				constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t qnan    = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+				double rval;
+				std::memcpy(&rval, inf ? (negative ? &neg_inf : &pos_inf) : &qnan, sizeof(double));
+				return rval;
 			}
 
 			TOML_PUSH_WARNINGS

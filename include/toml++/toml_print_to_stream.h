@@ -34,8 +34,7 @@ namespace toml::impl
 	//    - Strings in C++. Honestly.
 
 	template <typename Char1, typename Char2>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(std::basic_string_view<Char1> str, std::basic_ostream<Char2>& stream)
+	inline void print_to_stream(std::basic_string_view<Char1> str, std::basic_ostream<Char2>& stream)
 	{
 		static_assert(sizeof(Char1) == 1);
 		static_assert(sizeof(Char2) == 1);
@@ -43,8 +42,7 @@ namespace toml::impl
 	}
 
 	template <typename Char1, typename Char2>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const std::basic_string<Char1>& str, std::basic_ostream<Char2>& stream)
+	inline void print_to_stream(const std::basic_string<Char1>& str, std::basic_ostream<Char2>& stream)
 	{
 		static_assert(sizeof(Char1) == 1);
 		static_assert(sizeof(Char2) == 1);
@@ -52,8 +50,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(char character, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(char character, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.put(static_cast<Char>(character));
@@ -61,8 +58,7 @@ namespace toml::impl
 
 	template <typename Char>
 	TOML_ATTR(nonnull)
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
@@ -71,8 +67,7 @@ namespace toml::impl
 	#ifdef __cpp_lib_char8_t
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.put(static_cast<Char>(character));
@@ -80,8 +75,7 @@ namespace toml::impl
 
 	template <typename Char>
 	TOML_ATTR(nonnull)
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
@@ -128,13 +122,12 @@ namespace toml::impl
 		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(Type)											\
-		template <typename Char>											\
-		TOML_ALWAYS_INLINE													\
-		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
-		{																	\
-			static_assert(sizeof(Char) == 1);								\
-			print_integer_to_stream(val, stream);							\
+	#define TOML_P2S_OVERLOAD(Type)												\
+		template <typename Char>												\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
+		{																		\
+			static_assert(sizeof(Char) == 1);									\
+			print_integer_to_stream(val, stream);								\
 		}
 
 	TOML_P2S_OVERLOAD(int8_t)
@@ -157,19 +150,21 @@ namespace toml::impl
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		switch (std::fpclassify(val))
+		switch (impl::fpclassify(val))
 		{
-			case FP_INFINITE:
-				if (val < T{})
-					print_to_stream('-', stream);
+			case fp_class::neg_inf:
+				print_to_stream("-inf"sv, stream);
+				break;
+
+			case fp_class::pos_inf:
 				print_to_stream("inf"sv, stream);
-				return;
+				break;
 
-			case FP_NAN:
+			case fp_class::nan:
 				print_to_stream("nan"sv, stream);
-				return;
+				break;
 
-			default:
+			case fp_class::ok:
 			{
 				static constexpr auto needs_decimal_point = [](auto&& s) noexcept
 				{
@@ -204,32 +199,32 @@ namespace toml::impl
 						print_to_stream(".0"sv, stream);
 				}
 				#endif
+
+				break;
 			}
+
+			TOML_NO_DEFAULT_CASE;
 		}
 	}
 
 	#if !TOML_ALL_INLINE
-		extern template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	#endif
 
 	#define TOML_P2S_OVERLOAD(Type)											\
 		template <typename Char>											\
-		TOML_ALWAYS_INLINE													\
-		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
 		{																	\
 			static_assert(sizeof(Char) == 1);								\
 			print_floating_point_to_stream(val, stream);					\
 		}
 
-	TOML_P2S_OVERLOAD(float)
 	TOML_P2S_OVERLOAD(double)
 
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(bool val, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(bool val, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);

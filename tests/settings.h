@@ -7,14 +7,6 @@
 
 // toml++ config
 #define TOML_UNDEF_MACROS 0
-#ifdef TEST_BUILD_ID
-	#if (TEST_BUILD_ID % 3 == 0) && !defined(TOML_ALL_INLINE)
-		#define TOML_ALL_INLINE 1
-	#endif
-	#if (TEST_BUILD_ID % 2 == 0) && !defined(USE_SINGLE_HEADER)
-		#define USE_SINGLE_HEADER 1
-	#endif
-#endif
 #ifndef TOML_ALL_INLINE
 	#define TOML_ALL_INLINE 0
 #endif
@@ -38,6 +30,7 @@
 #define CATCH_CONFIG_CONSOLE_WIDTH 120
 #define CATCH_CONFIG_CPP11_TO_STRING
 #define CATCH_CONFIG_DISABLE_MATCHERS
+#define CATCH_CONFIG_NO_NOMINMAX
 
 //windows.h config (included transitively by catch2 on windows)
 #ifdef _WIN32
@@ -63,7 +56,7 @@
 	#define NOMENUS //           - MF_*
 	#define NOMEMMGR //          - GMEM_*, LMEM_*, GHND, LHND, associated routines
 	#define NOMETAFILE //        - typedef METAFILEPICT
-	#define NOMINMAX //          - Macros min(a,b) and max(a,b)
+	//#define NOMINMAX //          - Macros min(a,b) and max(a,b)
 	#define NOMSG //             - typedef MSG and associated routines
 	//#define NONLS //             - All NLS defines and routines
 	#define NOOPENFILE //        - OpenFile(), OemToAnsi, AnsiToOem, and OF_*

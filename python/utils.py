@@ -79,6 +79,22 @@ def is_collection(val):
 
 
 
+def is_pow2(v):
+	return v & (v-1) == 0
+	
+	
+	
+def next_power_of_2(n):
+	if n == 0:
+		return 1
+	if n & (n - 1) == 0:
+		return n
+	while n & (n - 1) > 0:
+		n &= (n - 1)
+	return n << 1
+
+
+
 def get_all_files(dir, all=None, any=None):
 	files = [f for f in [path.join(dir, f) for f in os.listdir(dir)] if path.isfile(f)]
 	if (files and all is not None):

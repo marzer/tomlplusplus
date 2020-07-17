@@ -65,7 +65,7 @@ type_names = [
 	'byte',
 	'optional',
 	#------ toml++ types
-    'node',
+	'node',
 	'table',
 	'array',
 	'value',
@@ -152,7 +152,6 @@ class HTMLDocument(object):
 				matches = newMatches
 			tags += matches
 		return tags
-
 
 
 
@@ -861,13 +860,10 @@ class ExtDocLinksFix(object):
 	def __call__(self, file, doc):
 		changed = False
 		root = doc.body.main.article.div.div
-		
 		tags = tags = html_shallow_search(root, self.__allowedNames, lambda t: html_find_parent(t, 'a', root) is None)
-
 		strings = []
 		for tag in tags:
-			strings = strings + html_string_descendants(tag, lambda t: html_find_parent(t, 'a', tag) is None)
-		
+			strings = strings + html_string_descendants(tag, lambda t: html_find_parent(t, 'a', tag) is None)	
 		for expr, uri in self.__expressions:
 			for string in strings:
 				if string.parent is None:
@@ -880,7 +876,6 @@ class ExtDocLinksFix(object):
 					if (begins_with_ws and new_tag.string is not None and not new_tag.string[:1].isspace()):
 						new_tag.insert_before(' ')
 					changed = True
-			
 		return changed
 
 
@@ -1006,11 +1001,6 @@ def postprocess_file(dir, file, fixes):
 		_threadError = True
 
 	return changed
-
-
-
-
-
 
 
 

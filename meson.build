@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '1.3.4',
+	version : '1.4.0',
 	license : 'MIT',
 	default_options : [
 		'cpp_std=c++17',
@@ -104,7 +104,6 @@ if build_tests or build_examples
 		endif
 		add_project_arguments([
 				'-ferror-limit=5',
-				'-fchar8_t',			
 				'-Wno-unused-command-line-argument',
 
 				# flags from here down are disabling stupidly pedantic warnings that only appear with -Weverything
@@ -113,7 +112,7 @@ if build_tests or build_examples
 				'-Wno-documentation',
 				'-Wno-documentation-unknown-command',
 				'-Wno-switch-enum',
-				'-Wno-covered-switch-default'		
+				'-Wno-covered-switch-default'
 			],
 			language : 'cpp'
 		)

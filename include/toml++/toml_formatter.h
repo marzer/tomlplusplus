@@ -29,16 +29,18 @@ namespace toml
 	};
 
 	[[nodiscard]]
-	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
+	TOML_ATTR(const)
+	TOML_ATTR(flatten)
 	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
 
 	[[nodiscard]]
-	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
+	TOML_ATTR(const)
+	TOML_ATTR(flatten)
 	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );

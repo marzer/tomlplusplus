@@ -70,8 +70,4 @@ TEST_CASE("windows compat")
 	REQUIRE(!tbl.contains(L"foo"));
 }
 
-static_assert(std::is_same_v<std::wstring, decltype(std::declval<toml::node>().value_or(L""s))>);
-static_assert(std::is_same_v<std::wstring, decltype(std::declval<toml::node>().value_or(L""sv))>);
-static_assert(std::is_same_v<std::wstring, decltype(std::declval<toml::node>().value_or(L""))>);
-
 #endif // TOML_WINDOWS_COMPAT

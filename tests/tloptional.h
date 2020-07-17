@@ -4,19 +4,19 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "settings.h"
 
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Weverything"
 #endif
 
-#if __has_include(<Catch2/single_include/catch2/catch.hpp>)
-	#include <Catch2/single_include/catch2/catch.hpp>
+#if __has_include(<tloptional/include/tl/optional.hpp>)
+	#include <tloptional/include/tl/optional.hpp>
 #else
-	#error Catch2 is missing! You probably need to fetch submodules ("git submodule update --init extern/Catch2")
+	#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
 #endif
 
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
+

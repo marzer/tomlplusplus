@@ -35,9 +35,9 @@ def python_value_to_tomlpp(val):
 		return 'true' if val else 'false'
 	elif isinstance(val, float):
 		if math.isinf(val):
-			return ('-' if val < 0.0 else '') + 'std::numeric_limits<double>::infinity()'
+			return 'make_infinity({})'.format('' if val >= 0.0 else '-1')
 		elif math.isnan(val):
-			return 'std::numeric_limits<double>::quiet_NaN()'
+			return 'make_nan()'
 		else:
 			return str(val)
 	elif isinstance(val, int):

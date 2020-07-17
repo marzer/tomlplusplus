@@ -48,9 +48,3 @@ TEST_CASE("values - printing")
 	CHECK(print_value(10000000000) == "10000000000");
 	CHECK(print_value(100000000000000) == "100000000000000");
 }
-
-static_assert(std::is_same_v<string,		decltype(std::declval<node>().value_or(S(""s)))>);
-static_assert(std::is_same_v<string_view,	decltype(std::declval<node>().value_or(S(""sv)))>);
-static_assert(std::is_same_v<string_view,	decltype(std::declval<node>().value_or(S("")))>);
-
-

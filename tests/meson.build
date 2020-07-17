@@ -24,94 +24,183 @@ test_sources = [
 	'windows_compat.cpp'
 ]
 
-compiler_supports_char8_strings = compiler.compiles('''
+compiler_supports_cpp20 = compiler.links('''
+	#include <version>
+	#include <string>
+	#include <iostream>
+
+	int main()
+	{
+		std::string s = "kek";
+		std::cout << s << std::endl;
+		return 0;
+	}
+	''',
+	name : 'supports C++20',
+	args : [ '-std=c++2a' ]
+)
+
+compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
+	#include <version>
 	#include <string_view>
 	#include <string>
+	#include <type_traits>
 	using namespace std::string_view_literals;
+
+	#ifndef __cpp_lib_char8_t
+		#error oh noes
+	#endif
+
+	static_assert(!std::is_same_v<char, char8_t>);
+	static_assert(!std::is_same_v<std::string, std::u8string>);
+
 	std::u8string func()
 	{
 		return std::u8string{ u8"this is a test."sv };
 	}
+
+	int main()
+	{
+		return 0;
+	}
 	''',
-	name : 'char8 string check',
-	args : [ '-std=c++2a' ]
+	name : 'supports char8_t',
+	args : [ '-std=c++2a', '-fchar8_t' ]
 )
 
-character_types = ['char', 'char8']
+compiler_supports_float16 = compiler.links('''
+	int main()
+	{
+		static_assert(sizeof(_Float16) = 2);
+		_Float16 f = static_cast<_Float16>(1);
+		return 0;
+	}
+	''',
+	name : 'supports float16',
+	args : [ '-mfp16-format=ieee' ]
+)
+
+compiler_supports_fast_math = compiler.links('''
+	#include <cmath>
+	#include <iostream>
+	int main()
+	{
+		std::cout << std::exp2(2.0) << std::pow(2.0, 3.0) << std::endl;
+		return 0;
+	}
+	''',
+	name : 'supports fast-math',
+	args : [ '-ffast-math', '-ffp-contract=fast' ]
+)
+
+fast_math_modes = [ false, true ]
+char8_modes = [ false, true ]
 exception_modes = [ true, false ]
-unreleased_feature_modes = [ true, false ]
-tloptional_modes = [ true, false ]
+strict_modes = [ false, true ]
+cpp20_modes = [ false, true ]
 executables = []
 counter = 0
-foreach character_type : character_types
-	if character_type == 'char8' and not compiler_supports_char8_strings
-		continue
-	endif
-	foreach exceptions : exception_modes
-		foreach unreleased_features : unreleased_feature_modes
-			foreach tloptional : tloptional_modes
-
-				if tloptional and not (character_type =='char' and unreleased_features and exceptions)
+foreach cpp20 : cpp20_modes
+	foreach strict : strict_modes
+		if cpp20 and not compiler_supports_cpp20
+			continue
+		endif
+		foreach char8 : char8_modes
+			if char8 and (not cpp20 or not compiler_supports_char8 or strict)
+				continue
+			endif
+			foreach fast_math : fast_math_modes
+				if fast_math and not compiler_supports_fast_math
 					continue
 				endif
+				foreach exceptions : exception_modes
 
-				name = character_type
-				overrides = []
-				args = []
+						name = ''
+						overrides = []
+						args = []
 
-				if character_type =='char8'
-					overrides += 'cpp_std=none'
-					args += '-DTOML_CHAR_8_STRINGS=1'
-					args += '-std=c++2a'
-				endif
+						if compiler_supports_float16
+							args += '-mfp16-format=ieee'
+						endif
 
-				if unreleased_features
-					args += '-DTOML_UNRELEASED_FEATURES=1'
-				else
-					name = name + '_strict'
-					args += '-DTOML_UNRELEASED_FEATURES=0'
-				endif
+						if cpp20
+							name = 'cpp20'
+							overrides += 'cpp_std=none'
+							args += '-std=c++2a'
 
-				if not exceptions
-					name = name + '_noexcept'
-					overrides += 'cpp_eh=none'
-				endif
+							if compiler_supports_char8
+								args += '-fchar8_t'
+							endif
+						else
+							name = 'cpp17'
+						endif
 
-				if tloptional
-					name = name + '_tlopt'
-					args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
-				endif
+						if strict
+							name = name + '_strict'
+							args += '-DTOML_UNRELEASED_FEATURES=0'
+						else
+							args += '-DTOML_UNRELEASED_FEATURES=1'
+						endif
 
-				args += '-DTEST_BUILD_ID=@0@'.format(counter)
+						if char8
+							name = name + '_char8'
+							args += '-DTOML_CHAR_8_STRINGS=1'
+						endif
 
-				if compiler.get_id() == 'gcc'
-					args += '-Wno-padded'
-					args += '-Wno-float-equal'
-				endif
 
-				if compiler.get_id() == 'clang'
-					args += '-Wno-padded'
-					args += '-Wno-float-equal'
-					args += '-Wno-double-promotion'
-				endif
+						if not exceptions
+							name = name + '_noexcept'
+							overrides += 'cpp_eh=none'
+						endif
 
-				executables += [[
-					name,
-					executable(
-						name,
-						test_sources,
-						include_directories : inc,
-						cpp_args : args,
-						override_options : overrides
-					)
-				]]
+						if fast_math
+							name = name + '_fastmath'
+							if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+								args += '-ffast-math'
+								args += '-ffp-contract=fast'
+							endif
+						endif
 
-				counter = counter + 1
+						if counter % 6 == 3
+							args += '-DTOML_ALL_INLINE=1'
+						endif
+						if counter % 2 == 1
+							args += '-DUSE_SINGLE_HEADER=1'
+						endif
+						if counter % 4 == 2 and exceptions
+							args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
+							name = name + '_tlopt'
+						endif
 
-			endforeach # tloptional_modes
-		endforeach # unreleased_feature_modes
-	endforeach # exception_modes
-endforeach # character_type
+						if compiler.get_id() == 'gcc'
+							args += '-Wno-padded'
+							args += '-Wno-float-equal'
+						endif
+
+						if compiler.get_id() == 'clang'
+							args += '-Wno-padded'
+							args += '-Wno-float-equal'
+							args += '-Wno-double-promotion'
+						endif
+
+						executables += [[
+							name,
+							executable(
+								name,
+								test_sources,
+								include_directories : inc,
+								cpp_args : args,
+								override_options : overrides
+							)
+						]]
+
+						counter = counter + 1
+
+				endforeach # exceptions
+			endforeach # fast_math
+		endforeach # char8
+	endforeach # strict
+endforeach # cpp20
 
 locales = [
 	'C',
@@ -125,8 +214,8 @@ locales = [
 	'de_DE.utf8'
 ]
 
-foreach locale : locales
-	foreach executable : executables
-		test(locale + '_' + executable[0], executable[1], env : ['LC_ALL=' + locale])
+foreach executable : executables
+	foreach locale : locales
+		test(executable[0] + ' (' + locale + ')', executable[1], env : ['LC_ALL=' + locale])
 	endforeach
 endforeach

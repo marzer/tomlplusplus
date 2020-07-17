@@ -96,8 +96,11 @@
     <Natvis Include="toml++.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\tests\catch2.h" />
+    <ClInclude Include="..\tests\evil_macros.h" />
     <ClInclude Include="..\tests\settings.h" />
     <ClInclude Include="..\tests\tests.h" />
+    <ClInclude Include="..\tests\tloptional.h" />
     <ClInclude Include="..\tests\unicode.h" />
   </ItemGroup>
   <ItemGroup>

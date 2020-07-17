@@ -200,12 +200,12 @@ TEST_CASE("parsing - inf and nan")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("sf1")] == std::numeric_limits<double>::infinity());
-			CHECK(tbl[S("sf2")] == std::numeric_limits<double>::infinity());
-			CHECK(tbl[S("sf3")] == -std::numeric_limits<double>::infinity());
-			CHECK(std::isnan(tbl[S("sf4")].as<double>()->get()));
-			CHECK(std::isnan(tbl[S("sf5")].as<double>()->get()));
-			CHECK(std::isnan(tbl[S("sf6")].as<double>()->get()));
+			CHECK(impl::fpclassify(**tbl[S("sf1")].as<double>()) == impl::fp_class::pos_inf);
+			CHECK(impl::fpclassify(**tbl[S("sf2")].as<double>()) == impl::fp_class::pos_inf);
+			CHECK(impl::fpclassify(**tbl[S("sf3")].as<double>()) == impl::fp_class::neg_inf);
+			CHECK(impl::fpclassify(**tbl[S("sf4")].as<double>()) == impl::fp_class::nan);
+			CHECK(impl::fpclassify(**tbl[S("sf5")].as<double>()) == impl::fp_class::nan);
+			CHECK(impl::fpclassify(**tbl[S("sf6")].as<double>()) == impl::fp_class::nan);
 		}
 	);
 

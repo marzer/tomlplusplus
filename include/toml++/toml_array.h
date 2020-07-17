@@ -174,7 +174,7 @@ namespace toml::impl
 	TOML_ALWAYS_INLINE
 	auto* make_node(T&& val) noexcept
 	{
-		using type = unwrapped<remove_cvref_t<T>>;
+		using type = unwrap_node<remove_cvref_t<T>>;
 		if constexpr (is_one_of<type, array, table>)
 		{
 			static_assert(
@@ -190,14 +190,18 @@ namespace toml::impl
 				"Instantiating values from wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 			);
 			static_assert(
-				is_value_or_promotable<type>,
+				is_native<type> || is_losslessly_convertible_to_native<type>,
 				"Value initializers must be (or be promotable to) one of the TOML value types"
 			);
-			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
+			{
+				#if TOML_WINDOWS_COMPAT
 				return new value{ narrow(std::forward<T>(val)) };
+				#else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				#endif
+			}
 			else
-			#endif
 				return new value{ std::forward<T>(val) };
 		}
 	}
@@ -613,13 +617,14 @@ namespace toml
 			template <typename U, typename... V>
 			iterator emplace(const_iterator pos, V&&... args) noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Emplacement type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return { values.emplace(pos.raw_, new impl::node_of<type>{ std::forward<V>(args)...} ) };
+				return { values.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<V>(args)...} ) };
 			}
 
 			/// \brief	Removes the specified node from the array.
@@ -774,13 +779,14 @@ namespace toml
 			template <typename U, typename... V>
 			decltype(auto) emplace_back(V&&... args) noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Emplacement type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				auto nde = new impl::node_of<type>{ std::forward<V>(args)... };
+				auto nde = new impl::wrap_node<type>{ std::forward<V>(args)... };
 				values.emplace_back(nde);
 				return *nde;
 			}
@@ -837,7 +843,7 @@ namespace toml
 			///
 			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(size_t index) noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -851,7 +857,7 @@ namespace toml
 			///
 			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(size_t index) const noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -879,9 +885,9 @@ namespace toml
 			template <typename T>
 			[[nodiscard]] static bool container_equality(const array& lhs, const T& rhs) noexcept
 			{
-				using elem_t = std::remove_const_t<typename T::value_type>;
+				using element_type = std::remove_const_t<typename T::value_type>;
 				static_assert(
-					impl::is_value_or_promotable<elem_t>,
+					impl::is_native<element_type> || impl::is_losslessly_convertible_to_native<element_type>,
 					"Container element type must be (or be promotable to) one of the TOML value types"
 				);
 
@@ -893,7 +899,7 @@ namespace toml
 				size_t i{};
 				for (auto& list_elem : rhs)
 				{
-					const auto elem = lhs.get_as<impl::promoted<elem_t>>(i++);
+					const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
 					if (!elem || *elem != list_elem)
 						return false;
 				}

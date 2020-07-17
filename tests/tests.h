@@ -2,12 +2,10 @@
 #include "settings.h"
 
 #if USE_TARTANLLAMA_OPTIONAL
-	#if __has_include(<tloptional/include/tl/optional.hpp>)
-		#include <tloptional/include/tl/optional.hpp>
-	#else
-		#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
-	#endif
+	#include "tloptional.h"
 #endif
+
+#include "evil_macros.h"
 
 #if USE_SINGLE_HEADER
 	#include "../toml.hpp"
@@ -42,6 +40,27 @@ TOML_POP_WARNINGS
 	}							\
 	while (false)
 #endif
+
+[[nodiscard]]
+TOML_ATTR(const)
+inline double make_infinity(int sign = 1) noexcept
+{
+	constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
+	constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
+	double val;
+	std::memcpy(&val, sign >= 0 ? &pos_inf : &neg_inf, sizeof(double));
+	return val;
+}
+
+[[nodiscard]]
+TOML_ATTR(const)
+inline double make_nan() noexcept
+{
+	constexpr uint64_t qnan = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+	double val;
+	std::memcpy(&val, &qnan, sizeof(double));
+	return val;
+}
 
 // function_view - adapted from here: https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
 template <typename Func>
@@ -112,7 +131,7 @@ inline bool parse_expected_value(
 
 	static constexpr auto is_val = [](char32_t codepoint)
 	{
-		if constexpr (std::is_same_v<string, impl::promoted<T>>)
+		if constexpr (impl::node_type_of<T> == node_type::string)
 			return codepoint == U'"' || codepoint == U'\'';
 		else
 			return !impl::is_whitespace(codepoint);
@@ -152,7 +171,7 @@ inline bool parse_expected_value(
 		end.column++;
 	}
 
-	using value_type = impl::promoted<impl::remove_cvref_t<T>>;
+	using value_type = impl::native_type_of<impl::remove_cvref_t<T>>;
 	value<value_type> val_parsed;
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking initial parse"sv)

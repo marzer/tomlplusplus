@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v1.3.4
+// toml++ v1.4.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -416,8 +416,8 @@
 #endif
 
 #define TOML_LIB_MAJOR		1
-#define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		4
+#define TOML_LIB_MINOR		4
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -493,6 +493,9 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 #include <cstdint>
 #include <cstring>		//memcpy, memset
+#include <cfloat>
+#include <climits>
+#include <limits>
 #include <memory>
 #include <string_view>
 #include <string>
@@ -514,6 +517,15 @@ TOML_POP_WARNINGS
 #else
 	#define TOML_LAUNDER(x)	x
 #endif
+
+static_assert(CHAR_BIT == 8);
+static_assert(FLT_RADIX == 2);
+static_assert('A' == 65);
+static_assert(sizeof(double) == 8);
+static_assert(std::numeric_limits<double>::is_iec559);
+static_assert(std::numeric_limits<double>::digits == 53);
+static_assert(std::numeric_limits<double>::digits10 == 15);
+static_assert(std::numeric_limits<double>::max_digits10 == 17);
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -723,6 +735,27 @@ namespace toml::impl
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
 
+	// Q: "why not use the built-in fpclassify?"
+	// A: Because it gets broken by -ffast-math and friends
+
+	enum class fp_class : unsigned { ok, neg_inf, pos_inf, nan };
+
+	[[nodiscard]]
+	inline fp_class fpclassify(const double& val) noexcept
+	{
+		constexpr uint64_t sign     = 0b1000000000000000000000000000000000000000000000000000000000000000ull;
+		constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
+		constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
+
+		uint64_t val_bits;
+		memcpy(&val_bits, &val, sizeof(val));
+		if ((val_bits & exponent) != exponent)
+			return fp_class::ok;
+		if ((val_bits & mantissa))
+			return fp_class::nan;
+		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
+	}
+
 	// Q: "why not use std::find??"
 	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
@@ -753,15 +786,214 @@ namespace toml::impl
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
+	// general value traits
+	// (as they relate to their equivalent native TOML type)
+
 	template <typename T>
-	inline constexpr bool is_value =
-		std::is_same_v<T, string>
-		|| std::is_same_v<T, int64_t>
-		|| std::is_same_v<T, double>
-		|| std::is_same_v<T, bool>
-		|| std::is_same_v<T, date>
-		|| std::is_same_v<T, time>
-		|| std::is_same_v<T, date_time>;
+	struct value_traits
+	{
+		using native_type = void;
+		static constexpr bool is_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = false;
+		static constexpr bool can_represent_native = false;
+		static constexpr bool can_partially_represent_native = false;
+		static constexpr auto node_type = ::toml::node_type::none;
+	};
+	template <typename T> struct value_traits<T&>				: value_traits<T> {};
+	template <typename T> struct value_traits<T&&>				: value_traits<T> {};
+	template <typename T> struct value_traits<T*const>			: value_traits<T*>{};
+	template <typename T> struct value_traits<T*volatile>		: value_traits<T*>{};
+	template <typename T> struct value_traits<T*const volatile>	: value_traits<T*>{};
+
+	// integer value traits
+
+	template <typename T>
+	struct unsigned_integer_value_traits
+	{
+		using native_type = int64_t;
+		static constexpr bool is_native = false;
+		static constexpr bool is_signed = false;
+		static constexpr auto min = (std::numeric_limits<T>::min)();
+		static constexpr auto max = (std::numeric_limits<T>::max)();
+		static constexpr bool is_losslessly_convertible_to_native
+			= (std::numeric_limits<T>::max)() <= 9223372036854775807ULL;
+		static constexpr bool can_represent_native = false;
+		static constexpr bool can_partially_represent_native = true;
+		static constexpr auto node_type = ::toml::node_type::integer;
+	};
+	template <typename T>
+	struct signed_integer_value_traits
+	{
+		using native_type = int64_t;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_signed = true;
+		static constexpr auto min = (std::numeric_limits<T>::min)();
+		static constexpr auto max = (std::numeric_limits<T>::max)();
+		static constexpr bool is_losslessly_convertible_to_native
+			 = (std::numeric_limits<T>::min)() >= (-9223372036854775807LL - 1LL)
+			&& (std::numeric_limits<T>::max)() <= 9223372036854775807LL;
+		static constexpr bool can_represent_native
+			 = (std::numeric_limits<T>::min)() <= (-9223372036854775807LL - 1LL)
+			&& (std::numeric_limits<T>::max)() >= 9223372036854775807LL;
+		static constexpr bool can_partially_represent_native = true;
+		static constexpr auto node_type = ::toml::node_type::integer;
+	};
+
+	template <typename T, bool U = std::is_unsigned_v<T>>
+	struct integer_value_traits : signed_integer_value_traits<T> {};
+	template <typename T>
+	struct integer_value_traits<T, true> : unsigned_integer_value_traits<T> {};
+
+	template <> struct value_traits<char>				: integer_value_traits<char> {};
+	template <> struct value_traits<signed char>		: integer_value_traits<signed char> {};
+	template <> struct value_traits<unsigned char>		: integer_value_traits<unsigned char> {};
+	template <> struct value_traits<signed short>		: integer_value_traits<signed short> {};
+	template <> struct value_traits<unsigned short>		: integer_value_traits<unsigned short> {};
+	template <> struct value_traits<signed int>			: integer_value_traits<signed int> {};
+	template <> struct value_traits<unsigned int>		: integer_value_traits<unsigned int> {};
+	template <> struct value_traits<signed long>		: integer_value_traits<signed long> {};
+	template <> struct value_traits<unsigned long>		: integer_value_traits<unsigned long> {};
+	template <> struct value_traits<signed long long>	: integer_value_traits<signed long long> {};
+	template <> struct value_traits<unsigned long long>	: integer_value_traits<unsigned long long> {};
+	#ifdef __SIZEOF_INT128__
+	template <typename T>
+	struct big_integer_value_traits
+	{
+		using native_type = int64_t;
+		static constexpr bool is_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = false;
+		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not properly specializing <type_traits>
+		static constexpr bool can_represent_native = is_signed;
+		static constexpr bool can_partially_represent_native = true;
+		static constexpr auto node_type = ::toml::node_type::integer;
+	};
+	template <>
+	struct value_traits<__int128_t> : big_integer_value_traits<__int128_t>
+	{
+		static constexpr auto max = static_cast<__int128_t>(( __uint128_t{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1);
+		static constexpr auto min = -max - __int128_t{ 1 };
+	};
+	template <>
+	struct value_traits<__uint128_t> : big_integer_value_traits<__uint128_t>
+	{
+		static constexpr auto min = __uint128_t{};
+		static constexpr auto max = (2u * static_cast<__uint128_t>(value_traits<__int128_t>::max)) + 1u;
+	};
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	template <> struct value_traits<TOML_SMALL_INT_TYPE> : signed_integer_value_traits<TOML_SMALL_INT_TYPE> {};
+	#endif
+	static_assert(value_traits<int64_t>::is_native);
+	static_assert(value_traits<int64_t>::is_losslessly_convertible_to_native);
+	static_assert(value_traits<int64_t>::can_represent_native);
+	static_assert(value_traits<int64_t>::can_partially_represent_native);
+
+	// float value traits
+
+	template <typename T>
+	struct float_value_traits
+	{
+		using native_type = double;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_signed = true;
+		static constexpr bool is_losslessly_convertible_to_native
+			= std::numeric_limits<T>::is_iec559
+			&& std::numeric_limits<T>::digits <= 53
+			&& std::numeric_limits<T>::digits10 <= 15
+			&& std::numeric_limits<T>::max_digits10 <= 17;
+		static constexpr bool can_represent_native
+			= std::numeric_limits<T>::is_iec559
+			&& std::numeric_limits<T>::digits >= 53
+			&& std::numeric_limits<T>::digits10 >= 15
+			&& std::numeric_limits<T>::max_digits10 >= 17;
+		static constexpr bool can_partially_represent_native //32-bit float values
+			= std::numeric_limits<T>::is_iec559
+			&& std::numeric_limits<T>::digits >= 24
+			&& std::numeric_limits<T>::digits10 >= 6
+			&& std::numeric_limits<T>::max_digits10 >= 9;
+		static constexpr auto node_type = ::toml::node_type::floating_point;
+	};
+	template <> struct value_traits<float>					: float_value_traits<float> {};
+	template <> struct value_traits<double>					: float_value_traits<double> {};
+	template <> struct value_traits<long double>			: float_value_traits<long double> {};
+	#if defined(FLT16_MANT_DIG) && defined(FLT16_DIG) && defined(FLT16_DECIMAL_DIG)
+	template <> struct value_traits<_Float16>				: float_value_traits<_Float16> {};
+	#endif
+	//template <> struct value_traits<__float80>				: float_value_traits<__float80> {};
+	#ifdef __SIZEOF_FLOAT128__
+	template <> struct value_traits<__float128>				: float_value_traits<__float128> {};
+	#endif
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	template <> struct value_traits<TOML_SMALL_FLOAT_TYPE>	: float_value_traits<TOML_SMALL_FLOAT_TYPE> {};
+	#endif
+	static_assert(value_traits<double>::is_native);
+	static_assert(value_traits<double>::is_losslessly_convertible_to_native);
+	static_assert(value_traits<double>::can_represent_native);
+	static_assert(value_traits<double>::can_partially_represent_native);
+
+	// string value traits
+
+	template <typename T>
+	struct string_value_traits
+	{
+		using native_type = ::toml::string;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_losslessly_convertible_to_native = true;
+		static constexpr bool can_represent_native
+			= !std::is_array_v<T>
+			&& (!std::is_pointer_v<T> || std::is_const_v<std::remove_pointer_t<T>>);
+		static constexpr bool can_partially_represent_native = can_represent_native;
+		static constexpr auto node_type = ::toml::node_type::string;
+	};
+	template <>         struct value_traits<std::string>		: string_value_traits<std::string> {};
+	template <>         struct value_traits<std::string_view>	: string_value_traits<std::string_view> {};
+	template <>         struct value_traits<const char*>		: string_value_traits<const char *> {};
+	template <size_t N> struct value_traits<const char[N]>		: string_value_traits<const char[N]> {};
+	template <>         struct value_traits<char*>				: string_value_traits<char*> {};
+	template <size_t N> struct value_traits<char[N]>			: string_value_traits<char[N]> {};
+	#ifdef __cpp_lib_char8_t
+	template <>         struct value_traits<std::u8string>		: string_value_traits<std::u8string> {};
+	template <>         struct value_traits<std::u8string_view>	: string_value_traits<std::u8string_view> {};
+	template <>         struct value_traits<const char8_t*>		: string_value_traits<const char8_t*> {};
+	template <size_t N> struct value_traits<const char8_t[N]>	: string_value_traits<const char8_t[N]> {};
+	template <>         struct value_traits<char8_t*>			: string_value_traits<char8_t*> {};
+	template <size_t N> struct value_traits<char8_t[N]>			: string_value_traits<char8_t[N]> {};
+	#endif
+	#if TOML_WINDOWS_COMPAT
+	template <typename T>
+	struct wstring_value_traits
+	{
+		using native_type = ::toml::string;
+		static constexpr bool is_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = true; //narrow
+		static constexpr bool can_represent_native = std::is_same_v<T, std::wstring>; //widen
+		static constexpr bool can_partially_represent_native = can_represent_native;
+		static constexpr auto node_type = ::toml::node_type::string;
+	};
+	template <>         struct value_traits<std::wstring>		: wstring_value_traits<std::wstring> {};
+	template <>         struct value_traits<std::wstring_view>	: wstring_value_traits<std::wstring_view> {};
+	template <>         struct value_traits<const wchar_t*>		: wstring_value_traits<const wchar_t*> {};
+	template <size_t N> struct value_traits<const wchar_t[N]>	: wstring_value_traits<const wchar_t[N]> {};
+	template <>         struct value_traits<wchar_t*>			: wstring_value_traits<wchar_t*> {};
+	template <size_t N> struct value_traits<wchar_t[N]>			: wstring_value_traits<wchar_t[N]> {};
+	#endif
+
+	// other native value traits
+
+	template <typename T, ::toml::node_type NodeType>
+	struct native_value_traits
+	{
+		using native_type = T;
+		static constexpr bool is_native = true;
+		static constexpr bool is_losslessly_convertible_to_native = true;
+		static constexpr bool can_represent_native = true;
+		static constexpr bool can_partially_represent_native = true;
+		static constexpr auto node_type = NodeType;
+	};
+	template <> struct value_traits<bool>		: native_value_traits<bool,		 node_type::boolean> {};
+	template <> struct value_traits<date>		: native_value_traits<date,		 node_type::date> {};
+	template <> struct value_traits<time>		: native_value_traits<time,		 node_type::time> {};
+	template <> struct value_traits<date_time>	: native_value_traits<date_time, node_type::date_time> {};
 
 	template <typename T>
 	inline constexpr bool is_wide_string = is_one_of<
@@ -772,102 +1004,39 @@ namespace toml::impl
 		std::wstring
 	>;
 
-	template <typename T>
-	inline constexpr bool is_value_or_promotable =
-		is_value<T>
-		|| std::is_same_v<std::decay_t<T>, string_char*>
-		|| std::is_same_v<T, string_view>
-		|| std::is_same_v<T, int32_t>
-		|| std::is_same_v<T, int16_t>
-		|| std::is_same_v<T, int8_t>
-		|| std::is_same_v<T, uint32_t>
-		|| std::is_same_v<T, uint16_t>
-		|| std::is_same_v<T, uint8_t>
-		|| std::is_same_v<T, float>
-		#if TOML_WINDOWS_COMPAT
-		|| is_wide_string<T>
-		#endif
-		#ifdef TOML_SMALL_FLOAT_TYPE
-		|| std::is_same_v<T, TOML_SMALL_FLOAT_TYPE>
-		#endif
-		#ifdef TOML_SMALL_INT_TYPE
-		|| std::is_same_v<T, TOML_SMALL_INT_TYPE>
-		#endif
-	;
+	// native value category queries
 
 	template <typename T>
-	inline constexpr bool is_value_or_node =
-		is_value<T>
-		|| std::is_same_v<T, array>
-		|| std::is_same_v<T, table>;
-
-	template <typename T> struct node_wrapper { using type = T; };
-	template <> struct node_wrapper<string> { using type = value<string>; };
-	template <> struct node_wrapper<int64_t> { using type = value<int64_t>; };
-	template <> struct node_wrapper<double> { using type = value<double>; };
-	template <> struct node_wrapper<bool> { using type = value<bool>; };
-	template <> struct node_wrapper<date> { using type = value<date>; };
-	template <> struct node_wrapper<time> { using type = value<time>; };
-	template <> struct node_wrapper<date_time> { using type = value<date_time>; };
-
+	using native_type_of = typename value_traits<T>::native_type;
 	template <typename T>
-	using node_of = typename impl::node_wrapper<T>::type;
-
-	template <typename T> struct node_unwrapper { using type = T; };
-	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
-
-	template <typename T> using unwrapped = typename impl::node_unwrapper<T>::type;
-
-	template <typename T> struct value_promoter { using type = T; };
-	template <size_t N> struct value_promoter<const string_char[N]> { using type = string; };
-	template <size_t N> struct value_promoter<const string_char(&)[N]> { using type = string; };
-	template <size_t N> struct value_promoter<const string_char(&&)[N]> { using type = string; };
-	template <> struct value_promoter<const string_char*> { using type = string; };
-	template <size_t N> struct value_promoter<string_char[N]> { using type = string; };
-	template <size_t N> struct value_promoter<string_char(&)[N]> { using type = string; };
-	template <size_t N> struct value_promoter<string_char(&&)[N]> { using type = string; };
-	template <> struct value_promoter<string_char*> { using type = string; };
-	template <> struct value_promoter<string_view> { using type = string; };
-	#if TOML_WINDOWS_COMPAT
-		template <size_t N> struct value_promoter<const wchar_t[N]> { using type = string; };
-		template <size_t N> struct value_promoter<const wchar_t(&)[N]> { using type = string; };
-		template <size_t N> struct value_promoter<const wchar_t(&&)[N]> { using type = string; };
-		template <> struct value_promoter<const wchar_t*> { using type = string; };
-		template <size_t N> struct value_promoter<wchar_t[N]> { using type = string; };
-		template <size_t N> struct value_promoter<wchar_t(&)[N]> { using type = string; };
-		template <size_t N> struct value_promoter<wchar_t(&&)[N]> { using type = string; };
-		template <> struct value_promoter<wchar_t*> { using type = string; };
-		template <> struct value_promoter<std::wstring_view> { using type = string; };
-		template <> struct value_promoter<std::wstring> { using type = string; };
-	#endif
-	template <> struct value_promoter<int32_t> { using type = int64_t; };
-	template <> struct value_promoter<int16_t> { using type = int64_t; };
-	template <> struct value_promoter<int8_t> { using type = int64_t; };
-	template <> struct value_promoter<uint32_t> { using type = int64_t; };
-	template <> struct value_promoter<uint16_t> { using type = int64_t; };
-	template <> struct value_promoter<uint8_t> { using type = int64_t; };
-	template <> struct value_promoter<float> { using type = double; };
-	#ifdef TOML_SMALL_FLOAT_TYPE
-		template <> struct value_promoter<TOML_SMALL_FLOAT_TYPE> { using type = double; };
-	#endif
-	#ifdef TOML_SMALL_INT_TYPE
-		template <> struct value_promoter<TOML_SMALL_INT_TYPE> { using type = int64_t; };
-	#endif
-	template <typename T> using promoted = typename impl::value_promoter<T>::type;
-
-	template <typename T> struct node_type_of_;
-	template <> struct node_type_of_<table> { static constexpr auto value = node_type::table; };
-	template <> struct node_type_of_<array> { static constexpr auto value = node_type::array; };
-	template <> struct node_type_of_<string> { static constexpr auto value = node_type::string; };
-	template <> struct node_type_of_<int64_t> { static constexpr auto value = node_type::integer; };
-	template <> struct node_type_of_<double> { static constexpr auto value = node_type::floating_point; };
-	template <> struct node_type_of_<bool> { static constexpr auto value = node_type::boolean; };
-	template <> struct node_type_of_<date> { static constexpr auto value = node_type::date; };
-	template <> struct node_type_of_<time> { static constexpr auto value = node_type::time; };
-	template <> struct node_type_of_<date_time> { static constexpr auto value = node_type::date_time; };
-
+	inline constexpr bool is_native = value_traits<T>::is_native;
 	template <typename T>
-	inline constexpr auto node_type_of = node_type_of_<promoted<typename node_unwrapper<remove_cvref_t<T>>::type>>::value;
+	inline constexpr bool can_represent_native = value_traits<T>::can_represent_native;
+	template <typename T>
+	inline constexpr bool can_partially_represent_native = value_traits<T>::can_partially_represent_native;
+	template <typename T>
+	inline constexpr bool is_losslessly_convertible_to_native = value_traits<T>::is_losslessly_convertible_to_native;
+	template <typename T, typename... U>
+	inline constexpr bool is_natively_one_of = is_one_of<native_type_of<T>, U...>;
+
+	template <typename T> struct node_wrapper				{ using type = T; };
+	template <>           struct node_wrapper<string>		{ using type = value<string>; };
+	template <>           struct node_wrapper<int64_t>		{ using type = value<int64_t>; };
+	template <>           struct node_wrapper<double>		{ using type = value<double>; };
+	template <>           struct node_wrapper<bool>			{ using type = value<bool>; };
+	template <>           struct node_wrapper<date>			{ using type = value<date>; };
+	template <>           struct node_wrapper<time>			{ using type = value<time>; };
+	template <>           struct node_wrapper<date_time>	{ using type = value<date_time>; };
+	template <typename T> using wrap_node = typename node_wrapper<T>::type;
+
+	template <typename T> struct node_unwrapper				{ using type = T; };
+	template <typename T> struct node_unwrapper<value<T>>	{ using type = T; };
+	template <typename T> using unwrap_node = typename node_unwrapper<T>::type;
+
+	template <typename T> struct node_type_getter			{ static constexpr auto value = value_traits<T>::node_type; };
+	template <>           struct node_type_getter<table>	{ static constexpr auto value = node_type::table; };
+	template <>           struct node_type_getter<array>	{ static constexpr auto value = node_type::array; };
+	template <typename T> inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
 
 	inline constexpr std::string_view low_character_escape_table[] =
 	{
@@ -919,26 +1088,28 @@ namespace toml::impl
 		"date-time"sv
 	};
 
-	#define TOML_P2S_DECL(Linkage, Type)								\
+	#define TOML_P2S_DECL(Type)											\
 		template <typename Char>										\
-		Linkage void print_to_stream(Type, std::basic_ostream<Char>&)
+		inline void print_to_stream(Type, std::basic_ostream<Char>&)
 
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int8_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int16_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int32_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, int64_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint8_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint16_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint32_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, uint64_t);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, float);
-	TOML_P2S_DECL(TOML_ALWAYS_INLINE, double);
-	TOML_P2S_DECL(inline, const date&);
-	TOML_P2S_DECL(inline, const time&);
-	TOML_P2S_DECL(inline, time_offset);
-	TOML_P2S_DECL(inline, const date_time&);
+	TOML_P2S_DECL(int8_t);
+	TOML_P2S_DECL(int16_t);
+	TOML_P2S_DECL(int32_t);
+	TOML_P2S_DECL(int64_t);
+	TOML_P2S_DECL(uint8_t);
+	TOML_P2S_DECL(uint16_t);
+	TOML_P2S_DECL(uint32_t);
+	TOML_P2S_DECL(uint64_t);
+	TOML_P2S_DECL(float);
+	TOML_P2S_DECL(const date&);
+	TOML_P2S_DECL(const time&);
+	TOML_P2S_DECL(time_offset);
+	TOML_P2S_DECL(const date_time&);
 
 	#undef TOML_P2S_DECL
+
+	template <typename T>
+	inline constexpr bool dependent_false = false;
 }
 
 namespace toml
@@ -948,21 +1119,21 @@ namespace toml
 	template <typename T>
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<string>>;
+	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<string>>;
 	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<int64_t>>;
+	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<int64_t>>;
 	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<double>>;
+	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<double>>;
 	template <typename T>
 	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
 	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<bool>>;
+	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<bool>>;
 	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date>>;
+	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date>>;
 	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<time>>;
+	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<time>>;
 	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<impl::node_of<impl::remove_cvref_t<T>>, value<date_time>>;
+	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	template <typename Char>
 	TOML_EXTERNAL_LINKAGE
@@ -1344,8 +1515,7 @@ namespace toml::impl
 	//    - Strings in C++. Honestly.
 
 	template <typename Char1, typename Char2>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(std::basic_string_view<Char1> str, std::basic_ostream<Char2>& stream)
+	inline void print_to_stream(std::basic_string_view<Char1> str, std::basic_ostream<Char2>& stream)
 	{
 		static_assert(sizeof(Char1) == 1);
 		static_assert(sizeof(Char2) == 1);
@@ -1353,8 +1523,7 @@ namespace toml::impl
 	}
 
 	template <typename Char1, typename Char2>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const std::basic_string<Char1>& str, std::basic_ostream<Char2>& stream)
+	inline void print_to_stream(const std::basic_string<Char1>& str, std::basic_ostream<Char2>& stream)
 	{
 		static_assert(sizeof(Char1) == 1);
 		static_assert(sizeof(Char2) == 1);
@@ -1362,8 +1531,7 @@ namespace toml::impl
 	}
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(char character, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(char character, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.put(static_cast<Char>(character));
@@ -1371,8 +1539,7 @@ namespace toml::impl
 
 	template <typename Char>
 	TOML_ATTR(nonnull)
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(const char* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
@@ -1381,8 +1548,7 @@ namespace toml::impl
 	#ifdef __cpp_lib_char8_t
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.put(static_cast<Char>(character));
@@ -1390,8 +1556,7 @@ namespace toml::impl
 
 	template <typename Char>
 	TOML_ATTR(nonnull)
-	TOML_ALWAYS_INLINE
-	void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(const char8_t* str, size_t len, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
@@ -1438,13 +1603,12 @@ namespace toml::impl
 		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(Type)											\
-		template <typename Char>											\
-		TOML_ALWAYS_INLINE													\
-		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
-		{																	\
-			static_assert(sizeof(Char) == 1);								\
-			print_integer_to_stream(val, stream);							\
+	#define TOML_P2S_OVERLOAD(Type)												\
+		template <typename Char>												\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
+		{																		\
+			static_assert(sizeof(Char) == 1);									\
+			print_integer_to_stream(val, stream);								\
 		}
 
 	TOML_P2S_OVERLOAD(int8_t)
@@ -1467,19 +1631,21 @@ namespace toml::impl
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
-		switch (std::fpclassify(val))
+		switch (impl::fpclassify(val))
 		{
-			case FP_INFINITE:
-				if (val < T{})
-					print_to_stream('-', stream);
+			case fp_class::neg_inf:
+				print_to_stream("-inf"sv, stream);
+				break;
+
+			case fp_class::pos_inf:
 				print_to_stream("inf"sv, stream);
-				return;
+				break;
 
-			case FP_NAN:
+			case fp_class::nan:
 				print_to_stream("nan"sv, stream);
-				return;
+				break;
 
-			default:
+			case fp_class::ok:
 			{
 				static constexpr auto needs_decimal_point = [](auto&& s) noexcept
 				{
@@ -1514,32 +1680,32 @@ namespace toml::impl
 						print_to_stream(".0"sv, stream);
 				}
 				#endif
+
+				break;
 			}
+
+			TOML_NO_DEFAULT_CASE;
 		}
 	}
 
 	#if !TOML_ALL_INLINE
-		extern template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	#endif
 
 	#define TOML_P2S_OVERLOAD(Type)											\
 		template <typename Char>											\
-		TOML_ALWAYS_INLINE													\
-		void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
 		{																	\
 			static_assert(sizeof(Char) == 1);								\
 			print_floating_point_to_stream(val, stream);					\
 		}
 
-	TOML_P2S_OVERLOAD(float)
 	TOML_P2S_OVERLOAD(double)
 
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename Char>
-	TOML_ALWAYS_INLINE
-	void print_to_stream(bool val, std::basic_ostream<Char>& stream)
+	inline void print_to_stream(bool val, std::basic_ostream<Char>& stream)
 	{
 		static_assert(sizeof(Char) == 1);
 		print_to_stream(val ? "true"sv : "false"sv, stream);
@@ -1719,6 +1885,40 @@ namespace toml
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
 
+#if TOML_CHAR_8_STRINGS
+	#define TOML_NATIVE_STRING_TYPE_NAME "std::u8string"
+#else
+	#define TOML_NATIVE_STRING_TYPE_NAME "std::string"
+#endif
+
+#define TOML_NATIVE_VALUE_TYPE_LIST							\
+	"\n| - " TOML_NATIVE_STRING_TYPE_NAME					\
+	"\n| - int64_t"											\
+	"\n| - double"											\
+	"\n| - bool"											\
+	"\n| - toml::date"										\
+	"\n| - toml::time"										\
+	"\n| - toml::date_time"
+
+#define TOML_NODE_TYPE_LIST									\
+	"\n| - toml::table"										\
+	"\n| - toml::array"										\
+	"\n| - toml::value<" TOML_NATIVE_STRING_TYPE_NAME ">"	\
+	"\n| - toml::value<int64_t>"							\
+	"\n| - toml::value<double>"								\
+	"\n| - toml::value<bool>"								\
+	"\n| - toml::value<toml::date>"							\
+	"\n| - toml::value<toml::time>"							\
+	"\n| - toml::value<toml::date_time>"
+
+#define TOML_UNWRAPPED_NODE_TYPE_LIST						\
+	"\n|"													\
+	"\n| A native TOML value type"							\
+	TOML_NATIVE_VALUE_TYPE_LIST								\
+	"\n|"													\
+	"\n| A TOML node type"									\
+	TOML_NODE_TYPE_LIST
+
 namespace toml
 {
 	class TOML_INTERFACE TOML_API node
@@ -1733,24 +1933,27 @@ namespace toml
 			node& operator= (node&& rhs) noexcept;
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>& ref_cast() & noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			impl::wrap_node<T>& ref_cast() & noexcept
 			{
-				return *reinterpret_cast<impl::node_of<T>*>(this);
+				return *reinterpret_cast<impl::wrap_node<T>*>(this);
 			}
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>&& ref_cast() && noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			impl::wrap_node<T>&& ref_cast() && noexcept
 			{
-				return std::move(*reinterpret_cast<impl::node_of<T>*>(this));
+				return std::move(*reinterpret_cast<impl::wrap_node<T>*>(this));
 			}
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const impl::node_of<T>& ref_cast() const & noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			const impl::wrap_node<T>& ref_cast() const & noexcept
 			{
-				return *reinterpret_cast<const impl::node_of<T>*>(this);
+				return *reinterpret_cast<const impl::wrap_node<T>*>(this);
 			}
 
 			template <typename N, typename T>
@@ -1779,13 +1982,14 @@ namespace toml
 			[[nodiscard]] virtual bool is_array_of_tables() const noexcept;
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
 			bool is() const noexcept
 			{
-				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::is() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -1818,20 +2022,35 @@ namespace toml
 			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
 			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
 
-			template <typename T>
-			[[nodiscard]] optional<T> value() const noexcept;
+		private:
 
 			template <typename T>
-			[[nodiscard]] auto value_or(T&& default_value) const noexcept;
+			[[nodiscard]]
+			decltype(auto) get_value_exact() const noexcept;
+
+		public:
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>* as() noexcept
+			[[nodiscard]]
+			optional<T> value_exact() const noexcept;
+
+			template <typename T>
+			[[nodiscard]]
+			optional<T> value() const noexcept;
+
+			template <typename T>
+			[[nodiscard]]
+			auto value_or(T&& default_value) const noexcept;
+
+			template <typename T>
+			[[nodiscard]]
+			impl::wrap_node<T>* as() noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::as() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -1846,13 +2065,14 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const impl::node_of<T>* as() const noexcept
+			[[nodiscard]]
+			const impl::wrap_node<T>* as() const noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::as() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -2016,18 +2236,20 @@ namespace toml
 			}
 
 			template <typename T, typename N>
-			[[nodiscard]] static decltype(auto) do_ref(N&& n) noexcept
+			[[nodiscard]]
+			static decltype(auto) do_ref(N&& n) noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::ref() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					n.template is<T>()
 					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
 				);
-				if constexpr (impl::is_value<type>)
+				if constexpr (impl::is_native<type>)
 					return std::forward<N>(n).template ref_cast<type>().get();
 				else
 					return std::forward<N>(n).template ref_cast<type>();
@@ -2054,19 +2276,22 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]] impl::unwrapped<T>& ref() & noexcept
+			[[nodiscard]]
+			impl::unwrap_node<T>& ref() & noexcept
 			{
 				return do_ref<T>(*this);
 			}
 
 			template <typename T>
-			[[nodiscard]] impl::unwrapped<T>&& ref() && noexcept
+			[[nodiscard]]
+			impl::unwrap_node<T>&& ref() && noexcept
 			{
 				return do_ref<T>(std::move(*this));
 			}
 
 			template <typename T>
-			[[nodiscard]] const impl::unwrapped<T>& ref() const& noexcept
+			[[nodiscard]]
+			const impl::unwrap_node<T>& ref() const& noexcept
 			{
 				return do_ref<T>(*this);
 			}
@@ -2094,15 +2319,17 @@ namespace toml
 	class TOML_API value final : public node
 	{
 		static_assert(
-			impl::is_value<T>,
-			"Template type parameter must be one of the TOML value types"
+			impl::is_native<T>,
+			"A toml::value<> must model one of the native TOML value types:"
+			TOML_NATIVE_VALUE_TYPE_LIST
 		);
 
 		private:
 			friend class TOML_PARSER_TYPENAME;
 
 			template <typename U, typename V>
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			static auto as_value([[maybe_unused]] V* ptr) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
@@ -2198,21 +2425,40 @@ namespace toml
 				return *this;
 			}
 
-			[[nodiscard]] friend bool operator == (const value& lhs, value_arg rhs) noexcept
+			[[nodiscard]]
+			friend bool operator == (const value& lhs, value_arg rhs) noexcept
 			{
 				if constexpr (std::is_same_v<value_type, double>)
 				{
+					using namespace ::toml::impl;
 					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
 					{
-						return ((static_cast<uint64_t>(l) << 32) | static_cast<uint64_t>(r));
+						return (static_cast<uint64_t>(unbox_enum(l)) << 32)
+							| static_cast<uint64_t>(unbox_enum(r));
 					};
 
-					switch (pack(std::fpclassify(lhs.val_), std::fpclassify(rhs)))
+					switch (pack(impl::fpclassify(lhs.val_), impl::fpclassify(rhs)))
 					{
-						case pack(FP_INFINITE, FP_INFINITE): return (lhs.val_ < 0.0) == (rhs < 0.0);
-						case pack(FP_NAN, FP_NAN): return true;
-						default: return lhs.val_ == rhs;
+						case pack(fp_class::pos_inf, fp_class::neg_inf):	[[fallthrough]];
+						case pack(fp_class::pos_inf, fp_class::nan):		[[fallthrough]];
+						case pack(fp_class::neg_inf, fp_class::pos_inf):	[[fallthrough]];
+						case pack(fp_class::neg_inf, fp_class::nan):		[[fallthrough]];
+						case pack(fp_class::nan, fp_class::pos_inf):		[[fallthrough]];
+						case pack(fp_class::nan, fp_class::neg_inf):
+							return false;
+
+						case pack(fp_class::pos_inf, fp_class::pos_inf):	[[fallthrough]];
+						case pack(fp_class::neg_inf, fp_class::neg_inf):	[[fallthrough]];
+						case pack(fp_class::nan, fp_class::nan):
+							return true;
+
+						case pack(fp_class::ok, fp_class::ok):
+							return lhs.val_ == rhs;
+
+						TOML_NO_DEFAULT_CASE;
 					}
+
+					TOML_UNREACHABLE;
 				}
 				else
 					return lhs.val_ == rhs;
@@ -2229,7 +2475,8 @@ namespace toml
 			[[nodiscard]] friend bool operator >= (value_arg lhs, const value& rhs) noexcept { return lhs >= rhs.val_; }
 
 			template <typename U>
-			[[nodiscard]] friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
 					return lhs == rhs.val_; //calls asymmetrical value-equality operator defined above
@@ -2238,13 +2485,15 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
 			{
 				return !(lhs == rhs);
 			}
 
 			template <typename U>
-			[[nodiscard]] friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
 					return lhs.val_ < rhs.val_;
@@ -2253,7 +2502,8 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
 					return lhs.val_ <= rhs.val_;
@@ -2262,7 +2512,8 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
 					return lhs.val_ > rhs.val_;
@@ -2271,7 +2522,8 @@ namespace toml
 			}
 
 			template <typename U>
-			[[nodiscard]] friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
 			{
 				if constexpr (std::is_same_v<T, U>)
 					return lhs.val_ >= rhs.val_;
@@ -2293,128 +2545,264 @@ namespace toml
 		TOML_POP_WARNINGS
 	#endif
 
-	template <size_t N> value(const string_char(&)[N]) -> value<string>;
-	template <size_t N> value(const string_char(&&)[N]) -> value<string>;
-	value(const string_char*) -> value<string>;
-	template <size_t N> value(string_char(&)[N]) -> value<string>;
-	template <size_t N> value(string_char(&&)[N]) -> value<string>;
-	value(string_char*) -> value<string>;
-	value(string_view) -> value<string>;
-	value(string) -> value<string>;
-	value(bool) -> value<bool>;
-	value(float) -> value<double>;
-	value(double) -> value<double>;
-	value(int8_t) -> value<int64_t>;
-	value(int16_t) -> value<int64_t>;
-	value(int32_t) -> value<int64_t>;
-	value(int64_t) -> value<int64_t>;
-	value(uint8_t) -> value<int64_t>;
-	value(uint16_t) -> value<int64_t>;
-	value(uint32_t) -> value<int64_t>;
-	value(date) -> value<date>;
-	value(time) -> value<time>;
-	value(date_time) -> value<date_time>;
-	#ifdef TOML_SMALL_FLOAT_TYPE
-		value(TOML_SMALL_FLOAT_TYPE) -> value<double>;
-	#endif
-	#ifdef TOML_SMALL_INT_TYPE
-		value(TOML_SMALL_INT_TYPE) -> value<int64_t>;
-	#endif
+	template <typename T>
+	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
+	TOML_DISABLE_SWITCH_WARNINGS
+
+	template <typename T>
+	[[nodiscard]]
+	inline decltype(auto) node::get_value_exact() const noexcept
+	{
+		using namespace ::toml::impl;
+
+		static_assert(node_type_of<T> != node_type::none);
+		static_assert(node_type_of<T> != node_type::table);
+		static_assert(node_type_of<T> != node_type::array);
+		static_assert(is_native<T> || can_represent_native<T>);
+		TOML_ASSERT(this->type() == node_type_of<T>);
+
+		if constexpr (node_type_of<T> == node_type::string)
+		{
+			const auto& str = *ref_cast<string>();
+			if constexpr (std::is_same_v<T, string>)
+				return str;
+			else if constexpr (std::is_same_v<T, string_view>)
+				return T{ str };
+			else if constexpr (std::is_same_v<T, const string_char*>)
+				return str.c_str();
+
+			else if constexpr (std::is_same_v<T, std::wstring>)
+			{
+				#if TOML_WINDOWS_COMPAT
+				return widen(str);
+				#else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				#endif
+			}
+
+			// char8_t -> char (safe)
+			else if constexpr (is_one_of<T, std::string, std::string_view>)
+				return T(reinterpret_cast<const char*>(str.c_str()), str.length());
+			else if constexpr (std::is_same_v<T, const char*>)
+				return reinterpret_cast<const char*>(str.c_str());
+
+			#ifdef __cpp_lib_char8_t
+			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
+			else if constexpr (is_one_of<T, std::u8string, std::u8string_view>)
+				return T(reinterpret_cast<const char8_t*>(str.c_str()), str.length());
+			else if constexpr (std::is_same_v<T, const char8_t*>)
+				return reinterpret_cast<const char8_t*>(str.c_str());
+			else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+			#endif
+		}
+		else
+			return static_cast<T>(*ref_cast<native_type_of<T>>());
+	}
+
+	template <typename T>
+	inline optional<T> node::value_exact() const noexcept
+	{
+		using namespace ::toml::impl;
+
+		static_assert(
+			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			"Retrieving values as wide-character strings with node::value_exact() is only "
+			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+		);
+		static_assert(
+			is_native<T> || can_represent_native<T>,
+			"The return type of node::value_exact() must be one of the following:"
+			"\n|"
+			"\n| A native TOML value type"
+			TOML_NATIVE_VALUE_TYPE_LIST
+			"\n|"
+			"\n| A non-view type capable of losslessly representing a native TOML value type"
+			#if TOML_CHAR_8_STRINGS
+			"\n| - std::string"
+			#elif defined __cpp_lib_char8_t
+			"\n| - std::u8string"
+			#endif
+			#if TOML_WINDOWS_COMPAT
+			"\n| - std::wstring"
+			#endif
+			"\n| - any signed integer type >= 64 bits"
+			"\n| - any floating-point type >= 64 bits of precision"
+			"\n|"
+			"\n| An immutable view type not requiring additional temporary storage"
+			"\n| - std::string_view"
+			"\n| - const char*"
+			#ifdef __cpp_lib_char8_t
+			"\n| - std::u8string_view"
+			"\n| - const char8_t*"
+			#endif
+		);
+
+		if (type() == node_type_of<T>)
+			return { this->get_value_exact<T>() };
+		else
+			return {};
+	}
 
 	template <typename T>
 	inline optional<T> node::value() const noexcept
 	{
+		using namespace ::toml::impl;
+
 		static_assert(
-			!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
-			"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			"Retrieving values as wide-character strings with node::value() is only "
+			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
 		static_assert(
-			impl::is_value<T>
-			|| std::is_same_v<T, string_view>
-			|| (TOML_WINDOWS_COMPAT && std::is_same_v<T, std::wstring>),
-			"Value type must be one of the TOML value types (or string_view)"
+			is_native<T> || can_represent_native<T> || can_partially_represent_native<T>,
+			"The return type of node::value() must be one of the following:"
+			"\n|"
+			"\n| A native TOML value type"
+			TOML_NATIVE_VALUE_TYPE_LIST
+			"\n|"
+			"\n| A non-view type capable of losslessly representing a native TOML value type"
+			#if TOML_CHAR_8_STRINGS
+			"\n| - std::string"
+			#elif defined __cpp_lib_char8_t
+			"\n| - std::u8string"
+			#endif
+			#if TOML_WINDOWS_COMPAT
+			"\n| - std::wstring"
+			#endif
+			"\n| - any signed integer type >= 64 bits"
+			"\n| - any floating-point type >= 64 bits of precision"
+			"\n|"
+			"\n| A non-view type capable of (reasonably) representing a native TOML value type"
+			"\n| - any other integer type"
+			"\n| - any floating-point type >= 32 bits of precision"
+			"\n|"
+			"\n| An immutable view type not requiring additional temporary storage"
+			"\n| - std::string_view"
+			"\n| - const char*"
+			#ifdef __cpp_lib_char8_t
+			"\n| - std::u8string_view"
+			"\n| - const char8_t*"
+			#endif
 		);
 
-		switch (type())
+		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
+		// semantics to be mindful of so the exact retrieval is enough.
+		if constexpr (is_natively_one_of<T, string, time, date, date_time>)
 		{
-			case node_type::none:	[[fallthrough]];
-			case node_type::table:	[[fallthrough]];
-			case node_type::array:
+			if (type() == node_type_of<T>)
+				return { this->get_value_exact<T>() };
+			else
 				return {};
-
-			case node_type::string:
-			{
-				if constexpr (std::is_same_v<T, string> || std::is_same_v<T, string_view>)
-					return { T{ ref_cast<string>().get() } };
-
-				#if TOML_WINDOWS_COMPAT
-				else if constexpr (std::is_same_v<T, std::wstring>)
-					return { impl::widen(ref_cast<string>().get()) };
-				#endif
-
-				else
-					return {};
-			}
-
-			case node_type::integer:
-			{
-				if constexpr (std::is_same_v<T, int64_t>)
-					return ref_cast<int64_t>().get();
-				else if constexpr (std::is_same_v<T, double>)
-					return static_cast<double>(ref_cast<int64_t>().get());
-				else
-					return {};
-			}
-
-			case node_type::floating_point:
-			{
-				if constexpr (std::is_same_v<T, double>)
-					return ref_cast<double>().get();
-				else if constexpr (std::is_same_v<T, int64_t>)
-					return static_cast<int64_t>(ref_cast<double>().get());
-				else
-					return {};
-			}
-
-			case node_type::boolean:
-			{
-				if constexpr (std::is_same_v<T, bool>)
-					return ref_cast<bool>().get();
-				else
-					return {};
-			}
-
-			case node_type::date:
-			{
-				if constexpr (std::is_same_v<T, date>)
-					return ref_cast<date>().get();
-				else
-					return {};
-			}
-
-			case node_type::time:
-			{
-				if constexpr (std::is_same_v<T, time>)
-					return ref_cast<time>().get();
-				else
-					return {};
-			}
-
-			case node_type::date_time:
-			{
-				if constexpr (std::is_same_v<T, date_time>)
-					return ref_cast<date_time>().get();
-				else
-					return {};
-			}
-
-			TOML_NO_DEFAULT_CASE;
 		}
 
-		TOML_UNREACHABLE;
+		// everything else requires a bit of logicking.
+		else
+		{
+			switch (type())
+			{
+				// int -> *
+				case node_type::integer:
+				{
+					// int -> int
+					if constexpr (is_natively_one_of<T, int64_t>)
+					{
+						if constexpr (is_native<T> || can_represent_native<T>)
+							return static_cast<T>(*ref_cast<int64_t>());
+						else
+						{
+							using traits = value_traits<T>;
+							const int64_t val = *ref_cast<int64_t>();
+							if constexpr (!traits::is_signed)
+							{
+								if constexpr ((sizeof(T) * CHAR_BIT) <= 53) // 53 bits < int64_max < 54 bits
+								{
+									using common_t = decltype(int64_t{} + T{});
+									if (val < int64_t{} || static_cast<common_t>(val) > static_cast<common_t>(traits::max))
+										return {};
+								}
+								else
+								{
+									if (val < int64_t{})
+										return {};
+								}
+							}
+							else
+							{
+								if (val < traits::min || val > traits::max)
+									return {};
+							}
+							return { static_cast<T>(val) };
+						}
+					}
+
+					// int -> float
+					else if constexpr (is_natively_one_of<T, double>)
+					{
+						const int64_t val = *ref_cast<int64_t>();
+						if constexpr (std::numeric_limits<T>::digits < 64)
+						{
+							constexpr auto largest_whole_float = (int64_t{ 1 } << std::numeric_limits<T>::digits);
+							if (val < -largest_whole_float || val > largest_whole_float)
+								return {};
+						}
+						return static_cast<T>(val);
+					}
+
+					// int -> bool
+					else if constexpr (is_natively_one_of<T, bool>)
+						return static_cast<bool>(*ref_cast<int64_t>());
+
+					// int -> anything else
+					else
+						return {};
+				}
+
+				// float -> *
+				case node_type::floating_point:
+				{
+					// float -> float
+					if constexpr (is_natively_one_of<T, double>)
+					{
+						if constexpr (is_native<T> || can_represent_native<T>)
+							return { static_cast<T>(*ref_cast<double>()) };
+						else
+						{
+							const double val = *ref_cast<double>();
+							if (val < (std::numeric_limits<T>::lowest)() || val > (std::numeric_limits<T>::max)())
+								return {};
+							return { static_cast<T>(val) };
+						}
+					}
+
+					// float -> anything else
+					else
+						return {};
+				}
+
+				// bool -> *
+				case node_type::boolean:
+				{
+					// bool -> bool
+					if constexpr (is_natively_one_of<T, bool>)
+						return { *ref_cast<bool>() };
+
+					// bool -> int
+					else if constexpr (is_natively_one_of<T, int64_t>)
+						return { static_cast<T>(*ref_cast<bool>()) };
+
+					// bool -> anything else
+					else
+						return {};
+				}
+			}
+
+			// non-values, or 'exact' types covered above
+			return {};
+		}
 	}
 
 	TOML_POP_WARNINGS
@@ -2422,35 +2810,94 @@ namespace toml
 	template <typename T>
 	inline auto node::value_or(T&& default_value) const noexcept
 	{
+		using namespace ::toml::impl;
+
 		static_assert(
-			!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
-			"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
-		);
-		static_assert(
-			impl::is_value_or_promotable<impl::remove_cvref_t<T>>,
-			"Default value type must be (or be promotable to) one of the TOML value types"
+			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			"Retrieving values as wide-character strings with node::value_or() is only "
+			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
 
-		#if TOML_WINDOWS_COMPAT
-		if constexpr (impl::is_wide_string<T>)
+		if constexpr (is_wide_string<T>)
 		{
-			if (this->type() == node_type::string)
-				return impl::widen(ref_cast<string>().get());
+			#if TOML_WINDOWS_COMPAT
+
+			if (type() == node_type::string)
+				return widen(*ref_cast<string>());
 			return std::wstring{ std::forward<T>(default_value) };
+
+			#else
+
+			static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+
+			#endif
 		}
 		else
-		#endif
 		{
-			using value_type = impl::promoted<impl::remove_cvref_t<T>>;
-			using return_type = std::conditional_t<
-				std::is_same_v<value_type, string>,
-				std::conditional_t<std::is_same_v<impl::remove_cvref_t<T>, string>, string, string_view>,
-				value_type
+			using value_type = std::conditional_t<
+				std::is_pointer_v<std::decay_t<T>>,
+				std::add_pointer_t<std::add_const_t<std::remove_pointer_t<std::decay_t<T>>>>,
+				std::decay_t<T>
 			>;
+			using traits = value_traits<value_type>;
 
-			if (auto val = this->value<return_type>())
-				return *val;
-			return return_type{ std::forward<T>(default_value) };
+			static_assert(
+				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
+				"The default return value type of node::value_or() must be one of the following:"
+				"\n|"
+				"\n| A native TOML value type"
+				TOML_NATIVE_VALUE_TYPE_LIST
+				"\n| "
+				"\n| A non-view type capable of losslessly representing a native TOML value type"
+				#if TOML_CHAR_8_STRINGS
+				"\n| - std::string"
+				#elif defined __cpp_lib_char8_t
+				"\n| - std::u8string"
+				#endif
+				#if TOML_WINDOWS_COMPAT
+				"\n| - std::wstring"
+				#endif
+				"\n| - any signed integer type >= 64 bits"
+				"\n| - any floating-point type >= 64 bits of precision"
+				"\n|"
+				"\n| A non-view type capable of (reasonably) representing a native TOML value type"
+				"\n| - any other integer type"
+				"\n| - any floating-point type >= 32 bits of precision"
+				"\n|"
+				"\n| A compatible view type"
+				"\n| - std::string_view"
+				"\n| - const char*"
+				"\n| - const char[]        (deduced as const char*)"
+				"\n| - char*               (deduced as const char*)"
+				#ifdef __cpp_lib_char8_t
+				"\n| - std::u8string_view"
+				"\n| - const char8_t*"
+				"\n| - const char8_t[]     (deduced as const char8_t*)"
+				"\n| - char8_t*            (deduced as const char8_t*)"
+				#endif
+				#if TOML_WINDOWS_COMPAT
+				"\n| - std::wstring_view   (promoted to std::wstring)"
+				"\n| - const wchar_t*      (promoted to std::wstring)"
+				"\n| - const wchar_t[]     (promoted to std::wstring)"
+				"\n| - wchar_t*            (promoted to std::wstring)"
+				#endif
+			);
+
+			if constexpr (traits::is_native)
+			{
+				if (type() == node_type_of<value_type>)
+					return *ref_cast<typename traits::native_type>();
+				return std::forward<T>(default_value);
+			}
+			else
+			{
+				if (auto val = this->value<value_type>())
+					return *val;
+				if constexpr (std::is_pointer_v<value_type>)
+					return value_type{ default_value };
+				else
+					return std::forward<T>(default_value);
+			}
 		}
 	}
 }
@@ -2631,7 +3078,7 @@ namespace toml::impl
 	TOML_ALWAYS_INLINE
 	auto* make_node(T&& val) noexcept
 	{
-		using type = unwrapped<remove_cvref_t<T>>;
+		using type = unwrap_node<remove_cvref_t<T>>;
 		if constexpr (is_one_of<type, array, table>)
 		{
 			static_assert(
@@ -2647,14 +3094,18 @@ namespace toml::impl
 				"Instantiating values from wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 			);
 			static_assert(
-				is_value_or_promotable<type>,
+				is_native<type> || is_losslessly_convertible_to_native<type>,
 				"Value initializers must be (or be promotable to) one of the TOML value types"
 			);
-			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
+			{
+				#if TOML_WINDOWS_COMPAT
 				return new value{ narrow(std::forward<T>(val)) };
+				#else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				#endif
+			}
 			else
-			#endif
 				return new value{ std::forward<T>(val) };
 		}
 	}
@@ -2849,13 +3300,14 @@ namespace toml
 			template <typename U, typename... V>
 			iterator emplace(const_iterator pos, V&&... args) noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Emplacement type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return { values.emplace(pos.raw_, new impl::node_of<type>{ std::forward<V>(args)...} ) };
+				return { values.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<V>(args)...} ) };
 			}
 
 			iterator erase(const_iterator pos) noexcept;
@@ -2885,13 +3337,14 @@ namespace toml
 			template <typename U, typename... V>
 			decltype(auto) emplace_back(V&&... args) noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Emplacement type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				auto nde = new impl::node_of<type>{ std::forward<V>(args)... };
+				auto nde = new impl::wrap_node<type>{ std::forward<V>(args)... };
 				values.emplace_back(nde);
 				return *nde;
 			}
@@ -2901,7 +3354,7 @@ namespace toml
 			[[nodiscard]] const node* get(size_t index) const noexcept;
 
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(size_t index) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(size_t index) noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -2909,7 +3362,7 @@ namespace toml
 			}
 
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(size_t index) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(size_t index) const noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -2924,9 +3377,9 @@ namespace toml
 			template <typename T>
 			[[nodiscard]] static bool container_equality(const array& lhs, const T& rhs) noexcept
 			{
-				using elem_t = std::remove_const_t<typename T::value_type>;
+				using element_type = std::remove_const_t<typename T::value_type>;
 				static_assert(
-					impl::is_value_or_promotable<elem_t>,
+					impl::is_native<element_type> || impl::is_losslessly_convertible_to_native<element_type>,
 					"Container element type must be (or be promotable to) one of the TOML value types"
 				);
 
@@ -2938,7 +3391,7 @@ namespace toml
 				size_t i{};
 				for (auto& list_elem : rhs)
 				{
-					const auto elem = lhs.get_as<impl::promoted<elem_t>>(i++);
+					const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
 					if (!elem || *elem != list_elem)
 						return false;
 				}
@@ -3245,11 +3698,15 @@ namespace toml
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return insert(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					#else
+					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					auto ipos = values.lower_bound(key);
 					if (ipos == values.end() || ipos->first != key)
@@ -3286,11 +3743,15 @@ namespace toml
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return insert_or_assign(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					#else
+					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					auto ipos = values.lower_bound(key);
 					if (ipos == values.end() || ipos->first != key)
@@ -3314,17 +3775,22 @@ namespace toml
 					"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<K>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return emplace<U>(impl::narrow(std::forward<K>(key)), std::forward<V>(args)...);
+					#else
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 
-					using type = impl::unwrapped<U>;
+					using type = impl::unwrap_node<U>;
 					static_assert(
-						impl::is_value_or_node<type>,
-						"Emplacement type parameter must be one of the basic value types, a toml::table, or a toml::array"
+						impl::is_native<type> || impl::is_one_of<type, table, array>,
+						"The emplacement type argument of table::emplace() must be one of the following:"
+						TOML_UNWRAPPED_NODE_TYPE_LIST
 					);
 
 					auto ipos = values.lower_bound(key);
@@ -3333,7 +3799,7 @@ namespace toml
 						ipos = values.emplace_hint(
 							ipos,
 							std::forward<K>(key),
-							new impl::node_of<type>{ std::forward<V>(args)... }
+							new impl::wrap_node<type>{ std::forward<V>(args)... }
 						);
 						return { ipos, true };
 					}
@@ -3363,11 +3829,15 @@ namespace toml
 					"Retrieval using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<Key>)
+				{
+					#if TOML_WINDOWS_COMPAT
 					return do_get(vals, impl::narrow(key));
+					#else
+					static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
+					#endif
+				}
 				else
-				#endif
 				{
 					if (auto it = vals.find(key); it != vals.end())
 						return { it->second.get() };
@@ -3408,13 +3878,13 @@ namespace toml
 			#endif // TOML_WINDOWS_COMPAT
 
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(string_view key) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(string_view key) noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
 
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(string_view key) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(string_view key) const noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
@@ -3422,13 +3892,13 @@ namespace toml
 			#if TOML_WINDOWS_COMPAT
 
 			template <typename T>
-			[[nodiscard]] impl::node_of<T>* get_as(std::wstring_view key) noexcept
+			[[nodiscard]] impl::wrap_node<T>* get_as(std::wstring_view key) noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}
 
 			template <typename T>
-			[[nodiscard]] const impl::node_of<T>* get_as(std::wstring_view key) const noexcept
+			[[nodiscard]] const impl::wrap_node<T>* get_as(std::wstring_view key) const noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}
@@ -3515,12 +3985,14 @@ namespace toml
 			[[nodiscard]]
 			auto as() const noexcept
 			{
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<impl::unwrapped<U>>,
-					"Template type parameter must be one of the basic value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Template type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return node_ ? node_->template as<U>() : nullptr;
+				return node_ ? node_->template as<type>() : nullptr;
 			}
 
 			[[nodiscard]] auto as_table() const noexcept { return as<table>(); }
@@ -3533,11 +4005,21 @@ namespace toml
 			[[nodiscard]] auto as_time() const noexcept { return as<time>(); }
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
+			template <typename U>
+			[[nodiscard]]
+			optional<U> value_exact() const noexcept
+			{
+				if (node_)
+					return node_->template value_exact<U>();
+				return {};
+			}
+
 			TOML_PUSH_WARNINGS
 			TOML_DISABLE_INIT_WARNINGS
 
 			template <typename U>
-			[[nodiscard]] optional<U> value() const noexcept
+			[[nodiscard]]
+			optional<U> value() const noexcept
 			{
 				if (node_)
 					return node_->template value<U>();
@@ -3547,12 +4029,45 @@ namespace toml
 			TOML_POP_WARNINGS
 
 			template <typename U>
-			[[nodiscard]] auto value_or(U&& default_value) const noexcept
+			[[nodiscard]]
+			auto value_or(U&& default_value) const noexcept
 			{
-				using return_type = decltype(node_->value_or(std::forward<U>(default_value)));
-				if (node_)
-					return node_->value_or(std::forward<U>(default_value));
-				return return_type{ std::forward<U>(default_value) };
+				using namespace ::toml::impl;
+
+				static_assert(
+					!is_wide_string<U> || TOML_WINDOWS_COMPAT,
+					"Retrieving values as wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				);
+
+				if constexpr (is_wide_string<U>)
+				{
+					#if TOML_WINDOWS_COMPAT
+
+					if (node_)
+						return node_->value_or(std::forward<U>(default_value));
+					return std::wstring{ std::forward<U>(default_value) };
+
+					#else
+
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+
+					#endif
+				}
+				else
+				{
+					using value_type = std::conditional_t<
+						std::is_pointer_v<std::decay_t<U>>,
+						std::add_pointer_t<std::add_const_t<std::remove_pointer_t<std::decay_t<U>>>>,
+						std::decay_t<U>
+					>;
+
+					if (node_)
+						return node_->value_or(std::forward<U>(default_value));
+					if constexpr (std::is_pointer_v<value_type>)
+						return value_type{ default_value };
+					else
+						return std::forward<U>(default_value);
+				}
 			}
 
 			template <typename Func>
@@ -3569,10 +4084,11 @@ namespace toml
 			template <typename U>
 			[[nodiscard]] decltype(auto) ref() const noexcept
 			{
-				using type = impl::unwrapped<U>;
+				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"Template type parameter must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					node_
@@ -3608,7 +4124,10 @@ namespace toml
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<U>&, template <typename U>)
 
-			template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+			template <typename U, typename = std::enable_if_t<
+				impl::is_native<U>
+				|| impl::is_losslessly_convertible_to_native<U>
+			>>
 			[[nodiscard]] friend bool operator == (const node_view& lhs, const U& rhs) noexcept
 			{
 				static_assert(
@@ -3616,20 +4135,27 @@ namespace toml
 					"Comparison with wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				#if TOML_WINDOWS_COMPAT
 				if constexpr (impl::is_wide_string<U>)
-					return lhs == impl::narrow(rhs);
-				else
-				#endif
 				{
-					const auto val = lhs.as<impl::promoted<U>>();
+					#if TOML_WINDOWS_COMPAT
+					return lhs == impl::narrow(rhs);
+					#else
+					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+					#endif
+				}
+				else
+				{
+					const auto val = lhs.as<impl::native_type_of<U>>();
 					return val && *val == rhs;
 				}
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(
 				const node_view&,
 				const U&,
-				template <typename U, typename = std::enable_if_t<impl::is_value_or_promotable<U>>>
+				template <typename U, typename = std::enable_if_t<
+					impl::is_native<U>
+					|| impl::is_losslessly_convertible_to_native<U>
+				>>
 			)
 
 			template <typename U>
@@ -4690,16 +5216,18 @@ namespace toml
 	};
 
 	[[nodiscard]]
-	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
+	TOML_ATTR(const)
+	TOML_ATTR(flatten)
 	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
 	}
 
 	[[nodiscard]]
-	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
+	TOML_ATTR(const)
+	TOML_ATTR(flatten)
 	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
@@ -6944,6 +7472,11 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 #if 1
 
 TOML_PUSH_WARNINGS
+TOML_DISABLE_ALL_WARNINGS
+#include <cmath>
+TOML_POP_WARNINGS
+
+TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_FLOAT_WARNINGS
 
@@ -8295,8 +8828,8 @@ namespace toml::impl
 				push_parse_scope("floating-point"sv);
 
 				start_recording(true);
-				const int sign = *cp == U'-' ? -1 : 1;
-				if (is_match(*cp, U'+', U'-'))
+				const bool negative = *cp == U'-';
+				if (negative || *cp == U'+')
 					advance_and_return_if_error_or_eof({});
 
 				const bool inf = is_match(*cp, U'i', U'I');
@@ -8309,9 +8842,14 @@ namespace toml::impl
 				if (cp && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
-				return inf
-					? sign * std::numeric_limits<double>::infinity()
-					: std::numeric_limits<double>::quiet_NaN();
+				// control for implementations that don't properly implement std::numeric_limits<double>::quiet_NaN()
+				// and/or std::numeric_limits<double>::infinity() (e.g. due to -ffast-math and friends)
+				constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t qnan    = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+				double rval;
+				std::memcpy(&rval, inf ? (negative ? &neg_inf : &pos_inf) : &qnan, sizeof(double));
+				return rval;
 			}
 
 			TOML_PUSH_WARNINGS
@@ -10349,7 +10887,6 @@ namespace toml
 	// print_to_stream() machinery
 	namespace impl
 	{
-		template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	}
 }
@@ -10441,6 +10978,10 @@ namespace toml
 	#undef TOML_EVAL_BOOL_1
 	#undef TOML_EVAL_BOOL_0
 	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	#undef TOML_UNWRAPPED_NODE_TYPE_LIST
+	#undef TOML_NATIVE_VALUE_TYPE_LIST
+	#undef TOML_NATIVE_STRING_TYPE_NAME
+	#undef TOML_NODE_TYPE_LIST
 #endif
 
 

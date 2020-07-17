@@ -9,6 +9,41 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_VTABLE_WARNINGS
 
+#if TOML_CHAR_8_STRINGS
+	#define TOML_NATIVE_STRING_TYPE_NAME "std::u8string"
+#else
+	#define TOML_NATIVE_STRING_TYPE_NAME "std::string"
+#endif
+
+#define TOML_NATIVE_VALUE_TYPE_LIST							\
+	"\n| - " TOML_NATIVE_STRING_TYPE_NAME					\
+	"\n| - int64_t"											\
+	"\n| - double"											\
+	"\n| - bool"											\
+	"\n| - toml::date"										\
+	"\n| - toml::time"										\
+	"\n| - toml::date_time"
+
+
+#define TOML_NODE_TYPE_LIST									\
+	"\n| - toml::table"										\
+	"\n| - toml::array"										\
+	"\n| - toml::value<" TOML_NATIVE_STRING_TYPE_NAME ">"	\
+	"\n| - toml::value<int64_t>"							\
+	"\n| - toml::value<double>"								\
+	"\n| - toml::value<bool>"								\
+	"\n| - toml::value<toml::date>"							\
+	"\n| - toml::value<toml::time>"							\
+	"\n| - toml::value<toml::date_time>"
+
+#define TOML_UNWRAPPED_NODE_TYPE_LIST						\
+	"\n|"													\
+	"\n| A native TOML value type"							\
+	TOML_NATIVE_VALUE_TYPE_LIST								\
+	"\n|"													\
+	"\n| A TOML node type"									\
+	TOML_NODE_TYPE_LIST
+
 namespace toml
 {
 	/// \brief	A TOML node.
@@ -27,24 +62,27 @@ namespace toml
 			node& operator= (node&& rhs) noexcept;
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>& ref_cast() & noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			impl::wrap_node<T>& ref_cast() & noexcept
 			{
-				return *reinterpret_cast<impl::node_of<T>*>(this);
+				return *reinterpret_cast<impl::wrap_node<T>*>(this);
 			}
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>&& ref_cast() && noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			impl::wrap_node<T>&& ref_cast() && noexcept
 			{
-				return std::move(*reinterpret_cast<impl::node_of<T>*>(this));
+				return std::move(*reinterpret_cast<impl::wrap_node<T>*>(this));
 			}
 
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const impl::node_of<T>& ref_cast() const & noexcept
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
+			const impl::wrap_node<T>& ref_cast() const & noexcept
 			{
-				return *reinterpret_cast<const impl::node_of<T>*>(this);
+				return *reinterpret_cast<const impl::wrap_node<T>*>(this);
 			}
 
 			template <typename N, typename T>
@@ -93,13 +131,14 @@ namespace toml
 			///
 			/// \returns	Returns true if this node is an instance of the specified type.
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
 			bool is() const noexcept
 			{
-				using type = impl::unwrapped<impl::remove_cvref_t<T>>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::is() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -141,6 +180,19 @@ namespace toml
 			[[nodiscard]] virtual const toml::value<date>* as_date() const noexcept;
 			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
 			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
+
+
+		private:
+
+			template <typename T>
+			[[nodiscard]]
+			decltype(auto) get_value_exact() const noexcept;
+
+		public:
+
+			template <typename T>
+			[[nodiscard]]
+			optional<T> value_exact() const noexcept;
 
 			/// \brief	Gets the raw value contained by this node.
 			/// 
@@ -189,7 +241,8 @@ namespace toml
 			///
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it), or an empty optional.
 			template <typename T>
-			[[nodiscard]] optional<T> value() const noexcept;
+			[[nodiscard]]
+			optional<T> value() const noexcept;
 
 			/// \brief	Gets the raw value contained by this node, or a default.
 			///
@@ -202,7 +255,8 @@ namespace toml
 			/// 
 			/// \see node::value()
 			template <typename T>
-			[[nodiscard]] auto value_or(T&& default_value) const noexcept;
+			[[nodiscard]]
+			auto value_or(T&& default_value) const noexcept;
 
 			/// \brief	Gets a pointer to the node as a more specific node type.
 			///
@@ -226,13 +280,14 @@ namespace toml
 			///
 			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			impl::node_of<T>* as() noexcept
+			[[nodiscard]]
+			impl::wrap_node<T>* as() noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::as() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -248,13 +303,14 @@ namespace toml
 
 			/// \brief	Gets a pointer to the node as a more specific node type (const overload).
 			template <typename T>
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			const impl::node_of<T>* as() const noexcept
+			[[nodiscard]]
+			const impl::wrap_node<T>* as() const noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::as() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -424,18 +480,20 @@ namespace toml
 
 
 			template <typename T, typename N>
-			[[nodiscard]] static decltype(auto) do_ref(N&& n) noexcept
+			[[nodiscard]]
+			static decltype(auto) do_ref(N&& n) noexcept
 			{
-				using type = impl::unwrapped<T>;
+				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_value_or_node<type>,
-					"Template type parameter must be one of the TOML value types, a toml::table, or a toml::array"
+					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					"The template type argument of node::ref() must be one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					n.template is<T>()
 					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
 				);
-				if constexpr (impl::is_value<type>)
+				if constexpr (impl::is_native<type>)
 					return std::forward<N>(n).template ref_cast<type>().get();
 				else
 					return std::forward<N>(n).template ref_cast<type>();
@@ -511,21 +569,24 @@ namespace toml
 			///
 			/// \returns	A reference to the underlying data.
 			template <typename T>
-			[[nodiscard]] impl::unwrapped<T>& ref() & noexcept
+			[[nodiscard]]
+			impl::unwrap_node<T>& ref() & noexcept
 			{
 				return do_ref<T>(*this);
 			}
 
 			/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
 			template <typename T>
-			[[nodiscard]] impl::unwrapped<T>&& ref() && noexcept
+			[[nodiscard]]
+			impl::unwrap_node<T>&& ref() && noexcept
 			{
 				return do_ref<T>(std::move(*this));
 			}
 
 			/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
 			template <typename T>
-			[[nodiscard]] const impl::unwrapped<T>& ref() const& noexcept
+			[[nodiscard]]
+			const impl::unwrap_node<T>& ref() const& noexcept
 			{
 				return do_ref<T>(*this);
 			}

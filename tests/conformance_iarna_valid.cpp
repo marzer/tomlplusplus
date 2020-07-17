@@ -744,7 +744,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_10, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf1)"sv), std::numeric_limits<double>::infinity() },
+			{ S(R"(sf1)"sv), make_infinity() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -752,7 +752,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_11, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf2)"sv), std::numeric_limits<double>::infinity() },
+			{ S(R"(sf2)"sv), make_infinity() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -760,7 +760,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_12, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf2)"sv), -std::numeric_limits<double>::infinity() },
+			{ S(R"(sf2)"sv), make_infinity(-1) },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -768,7 +768,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_13, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf4)"sv), std::numeric_limits<double>::quiet_NaN() },
+			{ S(R"(sf4)"sv), make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -776,7 +776,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_14, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf5)"sv), std::numeric_limits<double>::quiet_NaN() },
+			{ S(R"(sf5)"sv), make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -784,7 +784,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_15, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf6)"sv), std::numeric_limits<double>::quiet_NaN() },
+			{ S(R"(sf6)"sv), make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});

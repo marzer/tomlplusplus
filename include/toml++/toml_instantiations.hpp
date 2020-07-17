@@ -75,7 +75,6 @@ namespace toml
 	// print_to_stream() machinery
 	namespace impl
 	{
-		template TOML_API void print_floating_point_to_stream(float, std::ostream&, bool);
 		template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	}
 }
