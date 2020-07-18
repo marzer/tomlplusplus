@@ -39,6 +39,31 @@ namespace toml
 	using std::declval;
 	using std::is_same_v;
 
+	#define CHECK_NODE_TYPE_MAPPING(T, expected)							\
+		static_assert(impl::node_type_of<T> == expected);					\
+		static_assert(impl::node_type_of<T&> == expected);					\
+		static_assert(impl::node_type_of<T&&> == expected);					\
+		static_assert(impl::node_type_of<const T> == expected);				\
+		static_assert(impl::node_type_of<const T&> == expected);			\
+		static_assert(impl::node_type_of<const T&&> == expected);			\
+		static_assert(impl::node_type_of<volatile T> == expected);			\
+		static_assert(impl::node_type_of<volatile T&> == expected);			\
+		static_assert(impl::node_type_of<volatile T&&> == expected);		\
+		static_assert(impl::node_type_of<const volatile T> == expected);	\
+		static_assert(impl::node_type_of<const volatile T&> == expected);	\
+		static_assert(impl::node_type_of<const volatile T&&> == expected)
+
+	CHECK_NODE_TYPE_MAPPING(int64_t,			node_type::integer);
+	CHECK_NODE_TYPE_MAPPING(double,				node_type::floating_point);
+	CHECK_NODE_TYPE_MAPPING(std::string,		node_type::string);
+	CHECK_NODE_TYPE_MAPPING(bool,				node_type::boolean);
+	CHECK_NODE_TYPE_MAPPING(toml::date,			node_type::date);
+	CHECK_NODE_TYPE_MAPPING(toml::time,			node_type::time);
+	CHECK_NODE_TYPE_MAPPING(toml::date_time,	node_type::date_time);
+	CHECK_NODE_TYPE_MAPPING(toml::array,		node_type::array);
+	CHECK_NODE_TYPE_MAPPING(toml::table,		node_type::table);
+
+
 	#define CHECK_CAN_REPRESENT_NATIVE(T, expected) \
 		static_assert((impl::value_traits<T>::is_native || impl::value_traits<T>::can_represent_native) == expected)
 

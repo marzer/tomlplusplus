@@ -7,8 +7,10 @@
 #pragma once
 #include "toml_utf8_generated.h"
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <typename... T>
 	[[nodiscard]]
 	TOML_ATTR(const)
@@ -20,7 +22,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		return codepoint == U'\t' || codepoint == U' ';
@@ -52,7 +53,6 @@ namespace toml::impl
 	template <bool IncludeCarriageReturn = true>
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
 		constexpr auto low_range_end = IncludeCarriageReturn ? U'\r' : U'\f';
@@ -82,7 +82,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
 		return codepoint == U'"' || codepoint == U'\'';
@@ -90,7 +89,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_ascii_letter(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'a' && codepoint <= U'z')
@@ -99,7 +97,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
 		return codepoint == U'0' || codepoint == U'1';
@@ -107,7 +104,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_octal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'7');
@@ -115,7 +111,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_decimal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'9');
@@ -124,7 +119,6 @@ namespace toml::impl
 	template <typename T>
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr std::uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
 		if constexpr (std::is_same_v<remove_cvref_t<T>, std::uint_least32_t>)
@@ -170,7 +164,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u001F' || codepoint == U'\u007F';
@@ -178,7 +171,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u0008'
@@ -188,7 +180,6 @@ namespace toml::impl
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
 	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
 	{
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
@@ -217,19 +208,19 @@ namespace toml::impl
 			12,36,12,12,12,12,12,12,12,12,12,12
 		};
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
 		constexpr bool error() const noexcept
 		{
 			return state == uint_least32_t{ 12u };
 		}
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
 		constexpr bool has_code_point() const noexcept
 		{
 			return state == uint_least32_t{};
 		}
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
 		constexpr bool needs_more_input() const noexcept
 		{
 			return state > uint_least32_t{} && state != uint_least32_t{ 12u };
@@ -250,5 +241,6 @@ namespace toml::impl
 			state = state_table[state + uint_least32_t{ 256u } + type];
 		}
 	};
-}
 
+	TOML_IMPL_NAMESPACE_END
+}

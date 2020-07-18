@@ -23,9 +23,9 @@ Violets are blue"""
 )"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("str")] == S("I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."sv));
-			CHECK(tbl[S("str1")] == S("Roses are red\nViolets are blue"sv));
-			CHECK(tbl[S("str2")] == S("\nRoses are red\nViolets are blue"sv));
+			CHECK(tbl["str"] == "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF."sv);
+			CHECK(tbl["str1"] == "Roses are red\nViolets are blue"sv);
+			CHECK(tbl["str2"] == "\nRoses are red\nViolets are blue"sv);
 		}
 	);
 
@@ -58,14 +58,14 @@ str7 = """"This," she said, "is just a pointless statement.""""
 )"sv,
 		[](table&& tbl)
 		{
-			static constexpr auto quick_brown_fox = S("The quick brown fox jumps over the lazy dog."sv);
-			CHECK(tbl[S("str1")] == quick_brown_fox);
-			CHECK(tbl[S("str2")] == quick_brown_fox);
-			CHECK(tbl[S("str3")] == quick_brown_fox);
-			CHECK(tbl[S("str4")] == S(R"(Here are two quotation marks: "". Simple enough.)"sv));
-			CHECK(tbl[S("str5")] == S(R"(Here are three quotation marks: """.)"sv));
-			CHECK(tbl[S("str6")] == S(R"(Here are fifteen quotation marks: """"""""""""""".)"sv));
-			CHECK(tbl[S("str7")] == S(R"("This," she said, "is just a pointless statement.")"sv));
+			static constexpr auto quick_brown_fox = "The quick brown fox jumps over the lazy dog."sv;
+			CHECK(tbl["str1"] == quick_brown_fox);
+			CHECK(tbl["str2"] == quick_brown_fox);
+			CHECK(tbl["str3"] == quick_brown_fox);
+			CHECK(tbl["str4"] == R"(Here are two quotation marks: "". Simple enough.)"sv);
+			CHECK(tbl["str5"] == R"(Here are three quotation marks: """.)"sv);
+			CHECK(tbl["str6"] == R"(Here are fifteen quotation marks: """"""""""""""".)"sv);
+			CHECK(tbl["str7"] == R"("This," she said, "is just a pointless statement.")"sv);
 		}
 	);
 
@@ -96,22 +96,22 @@ trimmed in raw strings.
 )"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("winpath")] == S(R"(C:\Users\nodejs\templates)"sv));
-			CHECK(tbl[S("winpath2")] == S(R"(\\ServerX\admin$\system32\)"sv));
-			CHECK(tbl[S("quoted")] == S(R"(Tom "Dubs" Preston-Werner)"sv));
-			CHECK(tbl[S("regex")] == S(R"(<\i\c*\s*>)"sv));
-			CHECK(tbl[S("regex2")] == S(R"(I [dw]on't need \d{2} apples)"sv));
-			CHECK(tbl[S("lines")] == S(R"(The first newline is
+			CHECK(tbl["winpath"] == R"(C:\Users\nodejs\templates)"sv);
+			CHECK(tbl["winpath2"] == R"(\\ServerX\admin$\system32\)"sv);
+			CHECK(tbl["quoted"] == R"(Tom "Dubs" Preston-Werner)"sv);
+			CHECK(tbl["regex"] == R"(<\i\c*\s*>)"sv);
+			CHECK(tbl["regex2"] == R"(I [dw]on't need \d{2} apples)"sv);
+			CHECK(tbl["lines"] == R"(The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
-)"sv));
-			CHECK(tbl[S("lines2")] == S(R"(
+)"sv);
+			CHECK(tbl["lines2"] == R"(
 The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
-)"sv));
+)"sv);
 		}
 	);
 
@@ -128,9 +128,9 @@ str = ''''That's still pointless', she said.'''
 )"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("quot15")] == S(R"(Here are fifteen quotation marks: """"""""""""""")"sv));
-			CHECK(tbl[S("apos15")] == S(R"(Here are fifteen apostrophes: ''''''''''''''')"sv));
-			CHECK(tbl[S("str")] == S(R"('That's still pointless', she said.)"sv));
+			CHECK(tbl["quot15"] == R"(Here are fifteen quotation marks: """"""""""""""")"sv);
+			CHECK(tbl["apos15"] == R"(Here are fifteen apostrophes: ''''''''''''''')"sv);
+			CHECK(tbl["str"] == R"('That's still pointless', she said.)"sv);
 		}
 	);
 
@@ -140,42 +140,42 @@ str = ''''That's still pointless', she said.'''
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("The quick brown fox jumps over the lazy dog")"sv,
-		 S("The quick brown fox jumps over the lazy dog"sv));
+		   "The quick brown fox jumps over the lazy dog"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"('The quick brown fox jumps over the lazy dog')"sv,
-		 S("The quick brown fox jumps over the lazy dog"sv));
+		   "The quick brown fox jumps over the lazy dog"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 	  R"("""The quick brown fox jumps over the lazy dog""")"sv,
-		 S("The quick brown fox jumps over the lazy dog"sv));
+		   "The quick brown fox jumps over the lazy dog"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 	  R"('''The quick brown fox jumps over the lazy dog''')"sv,
-		 S("The quick brown fox jumps over the lazy dog"sv));
+		   "The quick brown fox jumps over the lazy dog"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #")"sv,
-	   S(R"(Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #)"sv));
+		 R"(Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #)"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"(" Âñδ ωλèñ \"'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # \"")"sv,
-	   S(R"( Âñδ ωλèñ "'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # ")"sv));
+		 R"( Âñδ ωλèñ "'ƨ ářè ïñ ƭλè ƨƭřïñϱ, áℓôñϱ ωïƭλ # ")"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?")"sv,
-	   S(R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv));
+		 R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv);
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("\"\u03B1\u03B2\u03B3\"")"sv,
-	     S("\"\u03B1\u03B2\u03B3\""sv));
+		   "\"\u03B1\u03B2\u03B3\""sv);
 
 	// toml/pull/709 (\xHH unicode scalars)
 	#if TOML_LANG_UNRELEASED
 		parse_expected_value(
 			FILE_LINE_ARGS,
 			R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,
-			 S("\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv));
+			 "\u0000\u0010\u0020\u0030\u0040\u0050\u0060\u0070\u0080\u0090\u0011\u00FF\u00EE"sv);
 	#else
 		parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
 	#endif
@@ -198,22 +198,22 @@ str = ''''That's still pointless', she said.'''
 	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x1")"sv);
 
 	// ML string examples from https://github.com/toml-lang/toml/issues/725
-	parse_expected_value(FILE_LINE_ARGS,  R"( """ """          )"sv,	S(R"( )"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( """ """"         )"sv,	S(R"( ")"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( """ """""        )"sv,	S(R"( "")"sv));
+	parse_expected_value(FILE_LINE_ARGS, R"( """ """          )"sv, R"( )"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( """ """"         )"sv, R"( ")"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( """ """""        )"sv, R"( "")"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(v= """ """"""       )"sv);
-	parse_expected_value(FILE_LINE_ARGS,  R"( ''' '''          )"sv,	S(R"( )"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( ''' ''''         )"sv,	S(R"( ')"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( ''' '''''        )"sv,	S(R"( '')"sv));
+	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''          )"sv, R"( )"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( ''' ''''         )"sv, R"( ')"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( ''' '''''        )"sv, R"( '')"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(v= ''' ''''''       )"sv);
-	parse_expected_value(FILE_LINE_ARGS,  R"( """"""           )"sv,	S(R"()"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( """" """         )"sv,	S(R"(" )"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( """"" """        )"sv,	S(R"("" )"sv));
+	parse_expected_value(FILE_LINE_ARGS, R"( """"""           )"sv, R"()"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( """" """         )"sv, R"(" )"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( """"" """        )"sv, R"("" )"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(v= """""" """       )"sv);
-	parse_expected_value(FILE_LINE_ARGS,  R"( ''''''           )"sv,	S(R"()"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( '''' '''         )"sv,	S(R"(' )"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( ''''' '''        )"sv,	S(R"('' )"sv));
+	parse_expected_value(FILE_LINE_ARGS, R"( ''''''           )"sv, R"()"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( '''' '''         )"sv, R"(' )"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( ''''' '''        )"sv, R"('' )"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(v= '''''' '''       )"sv);
-	parse_expected_value(FILE_LINE_ARGS,  R"( """""\""""""     )"sv,	S(R"(""""")"sv));
-	parse_expected_value(FILE_LINE_ARGS,  R"( """""\"""\"""""" )"sv,	S(R"("""""""")"sv));
+	parse_expected_value(FILE_LINE_ARGS, R"( """""\""""""     )"sv, R"(""""")"sv);
+	parse_expected_value(FILE_LINE_ARGS, R"( """""\"""\"""""" )"sv, R"("""""""")"sv);
 }

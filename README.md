@@ -118,7 +118,6 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
 | `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                                        |
-| `TOML_CHAR_8_STRINGS`      |     boolean    | `0`                               | Uses C++20 [char8_t]-based strings as the toml string data type. **_Experimental!_**                                 |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                                       |
 | `TOML_EXCEPTIONS`          |     boolean    | per your compiler's settings      | Sets whether the library uses exceptions.                                                                            |
 | `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_ALL_INLINE` is `1`.          |
@@ -187,6 +186,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@okureta](https://github.com/okureta)** - Reported a bug
 - **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
+- **[@Reedbeta](https://github.com/Reedbeta)** - Added additional Visual Studio debugger native visualizers
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson

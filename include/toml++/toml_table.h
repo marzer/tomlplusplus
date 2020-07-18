@@ -7,17 +7,19 @@
 #include "toml_array.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_VTABLE_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <bool IsConst>
 	struct table_proxy_pair final
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const string& first;
+		const std::string& first;
 		value_type& second;
 	};
 
@@ -132,33 +134,38 @@ namespace toml::impl
 				return lhs.raw_ != rhs.raw_;
 			}
 
+			TOML_PUSH_WARNINGS
+			TOML_DISABLE_ALL_WARNINGS
+
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			[[nodiscard]]
 			operator table_iterator<true>() const noexcept
 			{
 				return table_iterator<true>{ raw_ };
 			}
+
+			TOML_POP_WARNINGS
 	};
 
 	struct table_init_pair final
 	{
-		string key;
+		std::string key;
 		std::unique_ptr<node> value;
 
 		template <typename V>
-		table_init_pair(string&& k, V&& v) noexcept
+		table_init_pair(std::string&& k, V&& v) noexcept
 			: key{ std::move(k) },
 			value{ make_node(std::forward<V>(v)) }
 		{}
 
 		template <typename V>
-		table_init_pair(string_view k, V&& v) noexcept
+		table_init_pair(std::string_view k, V&& v) noexcept
 			: key{ k },
 			value{ make_node(std::forward<V>(v)) }
 		{}
 
 		template <typename V>
-		table_init_pair(const string_char* k, V&& v) noexcept
+		table_init_pair(const char* k, V&& v) noexcept
 			: key{ k },
 			value{ make_node(std::forward<V>(v)) }
 		{}
@@ -185,10 +192,14 @@ namespace toml::impl
 
 		#endif
 	};
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
 	template <typename Char>
@@ -338,7 +349,7 @@ namespace toml
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept;
+			[[nodiscard]] node_view<node> operator[] (std::string_view key) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair (const overload).
 			/// 
@@ -351,7 +362,7 @@ namespace toml
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept;
+			[[nodiscard]] node_view<const node> operator[] (std::string_view key) const noexcept;
 
 			#if TOML_WINDOWS_COMPAT
 
@@ -434,7 +445,7 @@ namespace toml
 			/// { a = 1, b = 2, c = 3, d = 42 }
 			/// \eout
 			/// 
-			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam K		std::string (or a type convertible to it).
 			/// \tparam V		One of the TOML value types (or a type promotable to one).
 			/// \param 	key		The key at which to insert the new value.
 			/// \param 	val		The new value to insert.
@@ -443,7 +454,7 @@ namespace toml
 			/// 		- An iterator to the insertion position (or the position of the value that prevented insertion)  
 			/// 		- A boolean indicating if the insertion was successful.
 			template <typename K, typename V, typename = std::enable_if_t<
-				std::is_convertible_v<K&&, string_view>
+				std::is_convertible_v<K&&, std::string_view>
 				|| impl::is_wide_string<K>
 			>>
 			std::pair<iterator, bool> insert(K&& key, V&& val) noexcept
@@ -483,7 +494,7 @@ namespace toml
 			///	}};
 			/// std::cout << tbl << std::endl;
 			/// 
-			/// auto kvps = std::array<std::pair<toml::string, int>>{{
+			/// auto kvps = std::array<std::pair<std::string, int>>{{
 			///		{ "d", 42 },
 			///		{ "a", 43 }
 			///	}};
@@ -505,7 +516,7 @@ namespace toml
 			/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 			/// 		 table will not be replaced.
 			template <typename Iter, typename = std::enable_if_t<
-				!std::is_convertible_v<Iter, string_view>
+				!std::is_convertible_v<Iter, std::string_view>
 				&& !impl::is_wide_string<Iter>
 			>>
 			void insert(Iter first, Iter last) noexcept
@@ -548,7 +559,7 @@ namespace toml
 			/// { a = 42, b = 2, c = 3, d = 42 }
 			/// \eout
 			/// 
-			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam K		std::string (or a type convertible to it).
 			/// \tparam V		One of the TOML value types (or a type promotable to one).
 			/// \param 	key		The key at which to insert or assign the value.
 			/// \param 	val		The value to insert/assign.
@@ -616,7 +627,7 @@ namespace toml
 			/// \eout
 			/// 
 			/// \tparam	U		One of the TOML node or value types.
-			/// \tparam K		toml::string (or a type convertible to it).
+			/// \tparam K		std::string (or a type convertible to it).
 			/// \tparam V		Value constructor argument types.
 			/// \param 	key		The key at which to emplace the new value.
 			/// \param 	args	Arguments to forward to the value's constructor.
@@ -647,7 +658,7 @@ namespace toml
 
 					using type = impl::unwrap_node<U>;
 					static_assert(
-						impl::is_native<type> || impl::is_one_of<type, table, array>,
+						(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 						"The emplacement type argument of table::emplace() must be one of the following:"
 						TOML_UNWRAPPED_NODE_TYPE_LIST
 					);
@@ -769,7 +780,7 @@ namespace toml
 			/// \param 	key		Key to erase.
 			/// 
 			/// \returns True if any values with matching keys were found and erased.
-			bool erase(string_view key) noexcept;
+			bool erase(std::string_view key) noexcept;
 
 			#if TOML_WINDOWS_COMPAT
 
@@ -787,7 +798,8 @@ namespace toml
 		private:
 
 			template <typename Map, typename Key>
-			[[nodiscard]] static auto do_get(Map& vals, const Key& key) noexcept
+			[[nodiscard]]
+			static auto do_get(Map& vals, const Key& key) noexcept
 				-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
 			{
 				static_assert(
@@ -812,14 +824,16 @@ namespace toml
 			}
 
 			template <typename T, typename Map, typename Key>
-			[[nodiscard]] static auto do_get_as(Map& vals, const Key& key) noexcept
+			[[nodiscard]]
+			static auto do_get_as(Map& vals, const Key& key) noexcept
 			{
 				const auto node = do_get(vals, key);
 				return node ? node->template as<T>() : nullptr;
 			}
 
 			template <typename Map, typename Key>
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			static bool do_contains(Map& vals, const Key& key) noexcept
 			{
 				return do_get(vals, key) != nullptr;
@@ -852,31 +866,31 @@ namespace toml
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			[[nodiscard]] node* get(string_view key) noexcept;
+			[[nodiscard]] node* get(std::string_view key) noexcept;
 
 			/// \brief	Gets the node at a specific key (const overload).
 			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			[[nodiscard]] const node* get(string_view key) const noexcept;
+			[[nodiscard]] const node* get(std::string_view key) const noexcept;
 
 			/// \brief	Gets an iterator to the node at a specific key.
 			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	An iterator to the node at the specified key, or end().
-			[[nodiscard]] iterator find(string_view key) noexcept;
+			[[nodiscard]] iterator find(std::string_view key) noexcept;
 
 			/// \brief	Gets an iterator to the node at a specific key (const overload)
 			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A const iterator to the node at the specified key, or cend().
-			[[nodiscard]] const_iterator find(string_view key) const noexcept;
+			[[nodiscard]] const_iterator find(std::string_view key) const noexcept;
 
 			/// \brief	Returns true if the table contains a node at the given key.
-			[[nodiscard]] bool contains(string_view key) const noexcept;
+			[[nodiscard]] bool contains(std::string_view key) const noexcept;
 
 			#if TOML_WINDOWS_COMPAT
 
@@ -944,7 +958,8 @@ namespace toml
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] impl::wrap_node<T>* get_as(string_view key) noexcept
+			[[nodiscard]]
+			impl::wrap_node<T>* get_as(std::string_view key) noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
@@ -956,7 +971,8 @@ namespace toml
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const impl::wrap_node<T>* get_as(string_view key) const noexcept
+			[[nodiscard]]
+			const impl::wrap_node<T>* get_as(std::string_view key) const noexcept
 			{
 				return do_get_as<T>(values, key);
 			}
@@ -972,7 +988,8 @@ namespace toml
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename T>
-			[[nodiscard]] impl::wrap_node<T>* get_as(std::wstring_view key) noexcept
+			[[nodiscard]]
+			impl::wrap_node<T>* get_as(std::wstring_view key) noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}
@@ -986,7 +1003,8 @@ namespace toml
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename T>
-			[[nodiscard]] const impl::wrap_node<T>* get_as(std::wstring_view key) const noexcept
+			[[nodiscard]]
+			const impl::wrap_node<T>* get_as(std::wstring_view key) const noexcept
 			{
 				return get_as<T>(impl::narrow(key));
 			}
@@ -1013,6 +1031,8 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_VTABLE_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

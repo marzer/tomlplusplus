@@ -19,6 +19,8 @@ TOML_DISABLE_SUGGEST_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	TOML_EXTERNAL_LINKAGE
 	table::table(impl::table_init_pair* pairs, size_t count) noexcept
 	{
@@ -76,12 +78,12 @@ namespace toml
 	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
-	node_view<node> table::operator[] (string_view key) noexcept
+	node_view<node> table::operator[] (std::string_view key) noexcept
 	{
 		return { this->get(key) };
 	}
 	TOML_EXTERNAL_LINKAGE
-	node_view<const node> table::operator[] (string_view key) const noexcept
+	node_view<const node> table::operator[] (std::string_view key) const noexcept
 	{
 		return { this->get(key) };
 	}
@@ -105,7 +107,7 @@ namespace toml
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::erase(string_view key) noexcept
+	bool table::erase(std::string_view key) noexcept
 	{
 		if (auto it = values.find(key); it != values.end())
 		{
@@ -116,31 +118,31 @@ namespace toml
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node* table::get(string_view key) noexcept
+	node* table::get(std::string_view key) noexcept
 	{
 		return do_get(values, key);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	const node* table::get(string_view key) const noexcept
+	const node* table::get(std::string_view key) const noexcept
 	{
 		return do_get(values, key);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table::iterator table::find(string_view key) noexcept
+	table::iterator table::find(std::string_view key) noexcept
 	{
 		return { values.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table::const_iterator table::find(string_view key) const noexcept
+	table::const_iterator table::find(std::string_view key) const noexcept
 	{
 		return { values.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::contains(string_view key) const noexcept
+	bool table::contains(std::string_view key) const noexcept
 	{
 		return do_contains(values, key);
 	}
@@ -232,6 +234,8 @@ namespace toml
 	{
 		return !(lhs == rhs);
 	}
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

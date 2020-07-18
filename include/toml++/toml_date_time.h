@@ -11,6 +11,8 @@ TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	/// \brief	A local date.
 	struct TOML_TRIVIAL_ABI date
 	{
@@ -89,8 +91,7 @@ namespace toml
 	/// 1987-03-16
 	/// \eout
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -131,7 +132,8 @@ namespace toml
 
 	private:
 
-		[[nodiscard]] TOML_ALWAYS_INLINE
+		[[nodiscard]]
+		TOML_ALWAYS_INLINE
 		static constexpr uint64_t pack(time t) noexcept
 		{
 			return static_cast<uint64_t>(t.hour) << 48
@@ -182,8 +184,7 @@ namespace toml
 	/// 10:20:34.5
 	/// \eout
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -289,8 +290,7 @@ namespace toml
 	/// -02:30
 	/// \eout
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time_offset& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const time_offset& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -418,8 +418,7 @@ namespace toml
 	/// 1987-03-16T10:20:34Z
 	/// \eout
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date_time& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const date_time& rhs)
 	{
 		impl::print_to_stream(rhs, lhs);
 		return lhs;
@@ -428,6 +427,8 @@ namespace toml
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
 	#endif
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS

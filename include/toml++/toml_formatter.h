@@ -12,6 +12,8 @@ TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
 	{
@@ -45,10 +47,14 @@ namespace toml
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <typename Char = char>
 	class TOML_API formatter
 	{
@@ -65,7 +71,7 @@ namespace toml::impl
 			[[nodiscard]] std::basic_ostream<Char>& stream() const noexcept { return *stream_; }
 
 			static constexpr size_t indent_columns = 4;
-			static constexpr toml::string_view indent_string = TOML_STRING_PREFIX("    "sv);
+			static constexpr std::string_view indent_string = "    "sv;
 			[[nodiscard]] int8_t indent() const noexcept { return indent_; }
 			void indent(int8_t level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
@@ -124,7 +130,7 @@ namespace toml::impl
 				}
 			}
 
-			void print_quoted_string(toml::string_view str, bool allow_multi_line = true)
+			void print_quoted_string(std::string_view str, bool allow_multi_line = true)
 			{
 				auto literals = literal_strings_allowed();
 				if (str.empty())
@@ -185,7 +191,7 @@ namespace toml::impl
 			template <typename T>
 			void print(const value<T>& val)
 			{
-				if constexpr (std::is_same_v<T, string>)
+				if constexpr (std::is_same_v<T, std::string>)
 				{
 					print_quoted_string(val.get());
 				}
@@ -220,7 +226,7 @@ namespace toml::impl
 				TOML_ASSUME(type > node_type::array);
 				switch (type)
 				{
-					case node_type::string:			print(*reinterpret_cast<const value<string>*>(&val_node)); break;
+					case node_type::string:			print(*reinterpret_cast<const value<std::string>*>(&val_node)); break;
 					case node_type::integer:		print(*reinterpret_cast<const value<int64_t>*>(&val_node)); break;
 					case node_type::floating_point:	print(*reinterpret_cast<const value<double>*>(&val_node)); break;
 					case node_type::boolean:		print(*reinterpret_cast<const value<bool>*>(&val_node)); break;
@@ -240,6 +246,8 @@ namespace toml::impl
 	#if !TOML_ALL_INLINE
 		extern template class TOML_API formatter<char>;
 	#endif
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

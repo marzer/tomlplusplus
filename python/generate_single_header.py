@@ -8,51 +8,61 @@ import sys
 import os.path as path
 import utils
 import re
-
-
+from io import StringIO
 
 class Preprocessor:
 
-	def __init__(self):
-		pass
+	__re_strip_blocks = re.compile(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]*?\n', re.I | re.S)
+	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)"', re.I | re.M)
 
-	def preprocess(self, match):
+	def __preprocess(self, match):
 
 		raw_incl = match if isinstance(match, str) else match.group(1)
 		incl = raw_incl.strip().lower()
-		if incl in self.processed_includes:
+		if incl in self.__processed_includes:
 			return ''
 
-		self.processed_includes.append(incl)
+		self.__processed_includes.append(incl)
 		text = utils.read_all_text_from_file(path.join(utils.get_script_folder(), '..', 'include', 'toml++', incl)).strip() + '\n'
-		text = re.sub('\r\n', '\n', text, 0, re.I | re.M) # convert windows newlines
-		text = re.sub(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]*?\n', '', text, 0, re.I | re.S) # strip {{ }} blocks
-		self.current_level += 1
-		text = re.sub(r'^\s*#\s*include\s+"(.+?)"', lambda m : self.preprocess(m), text, 0, re.I | re.M)
-		self.current_level -= 1
+		text = text.replace('\r\n', '\n') # convert windows newlines
+		text = self.__re_strip_blocks.sub('', text, 0) # strip {{ }} blocks
+		self.__current_level += 1
+		text = self.__re_includes.sub(lambda m : self.__preprocess(m), text, 0)
+		self.__current_level -= 1
 
-		if (self.current_level == 1):
+		if (self.__current_level == 1):
 			header_text = '↓ ' + raw_incl
-			lpad = 28 + ((25 * (self.header_indent % 4)) - int((len(header_text) + 4) / 2))
-			self.header_indent += 1
+			lpad = 28 + ((25 * (self.__header_indent % 4)) - int((len(header_text) + 4) / 2))
+			self.__header_indent += 1
 			text = '{}\n#if 1\n\n{}\n\n#endif\n{}\n'.format(
 				utils.make_divider(header_text, lpad), text, utils.make_divider('↑ ' + raw_incl, lpad)
 			)
 
 		return '\n\n' + text + '\n\n' # will get merged later
 
-	def __call__(self, file):
-		self.processed_includes = []
-		self.header_indent = 0
-		self.current_level = 0
-		return self.preprocess(file)
+	def __init__(self, file):
+		self.__processed_includes = []
+		self.__header_indent = 0
+		self.__current_level = 0
+		self.__string = self.__preprocess(file)
+
+	def __str__(self):
+		return self.__string
+
+
+
+def increment_dict_value(dict, key, delta = 1):
+	if key in dict:
+		dict[key] = dict[key] + delta
+	else:
+		dict[key] = delta
 
 
 
 def main():
 
 	# preprocess header(s)
-	source_text = Preprocessor()('toml.h')
+	source_text = str(Preprocessor('toml.h'))
 	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M) # 'pragma once'
 	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M) # clang-format directives
 	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M) # spdx
@@ -107,52 +117,73 @@ def main():
 	# build the preamble (license etc)
 	preamble = []
 	preamble.append('''
-toml++ v{major}.{minor}.{patch}
-https://github.com/marzer/tomlplusplus
-SPDX-License-Identifier: MIT'''.format(**library_version))
+// toml++ v{major}.{minor}.{patch}
+// https://github.com/marzer/tomlplusplus
+// SPDX-License-Identifier: MIT'''.format(**library_version))
 	preamble.append('''
--         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
-
-If you wish to submit a contribution to toml++, hooray and thanks! Before you crack on, please be aware that this
-file was assembled from a number of smaller files by a python script, and code contributions should not be made
-against it directly. You should instead make your changes in the relevant source file(s). The file names of the files
-that contributed to this header can be found at the beginnings and ends of the corresponding sections of this file.''')
+// -         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
+//
+// If you wish to submit a contribution to toml++, hooray and thanks! Before you crack on, please be aware that this
+// file was assembled from a number of smaller files by a python script, and code contributions should not be made
+// against it directly. You should instead make your changes in the relevant source file(s). The file names of the files
+// that contributed to this header can be found at the beginnings and ends of the corresponding sections of this file.''')
 	preamble.append('''
-TOML language specifications:
-Latest:      https://github.com/toml-lang/toml/blob/master/README.md
-v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
-v0.5.0:      https://toml.io/en/v0.5.0''')
+// TOML language specifications:
+// Latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
+// v0.5.0:      https://toml.io/en/v0.5.0''')
 	preamble.append(utils.read_all_text_from_file(path.join(utils.get_script_folder(), '..', 'LICENSE')))
 
-	# write the output file
-	output_file_path = path.join(utils.get_script_folder(), '..', 'toml.hpp')
-	print("Writing to {}".format(output_file_path))
-	with open(output_file_path,'w', encoding='utf-8', newline='\n') as output_file:
+	# write the output
+	with StringIO(newline='\n') as output:
+
+		# build in a string buffer
+		write = lambda txt, end='\n': print(txt, file=output, end=end)
 		if (len(preamble) > 0):
-			print(utils.make_divider(), file=output_file)
+			write(utils.make_divider())
 		for pre in preamble:
-			print('//', file=output_file)
+			write('//')
 			for line in pre.strip().splitlines():
-				print('//', file=output_file, end = '')
-				if (len(line) > 0):
-					print(' ', file=output_file, end = '')
-					print(line, file=output_file)
-				else:
-					print('\n', file=output_file, end = '')
-			print('//', file=output_file)
-			print(utils.make_divider(), file=output_file)
-		print('''// clang-format off
-#ifndef INCLUDE_TOMLPLUSPLUS_H
-#define INCLUDE_TOMLPLUSPLUS_H
+				if len(line) == 0:
+					write('//')
+					continue
+				if not line.startswith('//'):
+					write('// ', end = '')
+				write(line)
+			write('//')
+			write(utils.make_divider())
+		write('// clang-format off')
+		write('#ifndef INCLUDE_TOMLPLUSPLUS_H')
+		write('#define TOML_LIB_SINGLE_HEADER 1')
+		write('')
+		write(source_text)
+		write('')
+		write('#endif // INCLUDE_TOMLPLUSPLUS_H')
+		write('// clang-format on')
 
-#define	TOML_LIB_SINGLE_HEADER 1
-''', file=output_file)
-		print(source_text, file=output_file)
-		print('''
-#endif // INCLUDE_TOMLPLUSPLUS_H
-// clang-format on''', file=output_file)
+		output_str = output.getvalue().strip()
 
+		# analyze the output to find any potentially missing #undefs
+		#re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
+		#re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
+		#defines = dict()
+		#for output_line in output_str.splitlines():
+		#	m = re_define.match(output_line)
+		#	if m:
+		#		increment_dict_value(defines, m.group(1))
+		#	else:
+		#		m = re_undef.match(output_line)
+		#		if m:
+		#			increment_dict_value(defines, m.group(1), -1)
+		#for define, num in defines.items():
+		#	if num > 0:
+		#		print(f"  {define} {num}")
 
+		# write the output file
+		output_file_path = path.join(utils.get_script_folder(), '..', 'toml.hpp')
+		print("Writing to {}".format(output_file_path))
+		with open(output_file_path,'w', encoding='utf-8', newline='\n') as output_file:
+			print(output_str, file=output_file)
 
 
 if __name__ == '__main__':

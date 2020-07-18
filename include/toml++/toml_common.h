@@ -31,10 +31,6 @@ TOML_DISABLE_ALL_WARNINGS
 
 TOML_POP_WARNINGS
 
-#if TOML_CHAR_8_STRINGS && !defined(__cpp_lib_char8_t)
-	#error toml++ requires implementation support to use char8_t strings, but yours does not provide it.
-#endif
-
 #ifdef __cpp_lib_launder
 	#define TOML_LAUNDER(x)	std::launder(x)
 #else
@@ -59,8 +55,27 @@ TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_SHADOW_WARNINGS
 
 /// \brief	The root namespace for all toml++ functions and types.
+namespace toml { TOML_ABI_NAMESPACE_VERSION TOML_ABI_NAMESPACE_END }
+
+#if TOML_WINDOWS_COMPAT
 namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
+	[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
+	[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
+	#ifdef __cpp_lib_char8_t
+	[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
+	#endif
+
+	TOML_IMPL_NAMESPACE_END
+}
+#endif // TOML_WINDOWS_COMPAT
+
+namespace toml
+{
+	TOML_ABI_NAMESPACE_VERSION
+
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
 	using size_t = std::size_t;
@@ -74,52 +89,10 @@ namespace toml
 		return static_cast<size_t>(n);
 	}
 
-	#if TOML_CHAR_8_STRINGS
-
-	using string_char = char8_t;
-	using string = std::u8string;
-	using string_view = std::u8string_view;
-
-	#else
-
-	/// \brief	The base character type for keys and string values.
-	/// \remarks This will be an alias for char8_t if #TOML_CHAR_8_STRINGS is enabled.
+	// legacy typedefs
 	using string_char = char;
-
-	/// \brief	The string type for keys and string values.
-	/// \remarks This will be an alias for std::u8string if #TOML_CHAR_8_STRINGS is enabled.
 	using string = std::string;
-
-	/// \brief	The string type for keys and string values.
-	/// \remarks This will be an alias for std::u8string_view if #TOML_CHAR_8_STRINGS is enabled.
 	using string_view = std::string_view;
-
-	#endif
-
-	#if TOML_WINDOWS_COMPAT
-	namespace impl
-	{
-		[[nodiscard]] TOML_API std::string narrow_char(std::wstring_view) noexcept;
-		#ifdef __cpp_lib_char8_t
-		[[nodiscard]] TOML_API std::u8string narrow_char8(std::wstring_view) noexcept;
-		#endif
-		template <typename Char = string_char>
-		[[nodiscard]] auto narrow(std::wstring_view str) noexcept
-		{
-			#ifdef __cpp_lib_char8_t
-			if constexpr (std::is_same_v<Char, char8_t>)
-				return narrow_char8(str);
-			else
-			#endif
-				return narrow_char(str);
-		}
-
-		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
-		#ifdef __cpp_lib_char8_t
-		[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
-		#endif
-	}
-	#endif
 
 	#if !TOML_DOXYGEN
 
@@ -150,7 +123,7 @@ namespace toml
 		none, ///< Not-a-node.
 		table, ///< The node is a toml::table.
 		array,  ///< The node is a toml::array.
-		string,  ///< The node is a toml::value<toml::string>.
+		string,  ///< The node is a toml::value<std::string>.
 		integer,  ///< The node is a toml::value<int64_t>.
 		floating_point,  ///< The node is a toml::value<double>.
 		boolean,  ///< The node is a toml::value<bool>.
@@ -175,22 +148,18 @@ namespace toml
 
 	#endif
 
-	#if TOML_LARGE_FILES
-
-	using source_index = uint32_t;
-
-	#else
-
-	/// \brief	The integer type used to tally line numbers and columns.
-	/// \remarks This will be an alias for uint32_t if #TOML_LARGE_FILES is enabled.
-	using source_index = uint16_t;
-
-	#endif
-
 	/// \brief	A pointer to a shared string resource containing a source path.
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
+
+	#if TOML_LARGE_FILES
+	using source_index = uint32_t;
+	#else
+	/// \brief	The integer type used to tally line numbers and columns.
+	/// \remarks This will be an alias for uint32_t if #TOML_LARGE_FILES is enabled.
+	using source_index = uint16_t;
+	#endif
 
 	/// \brief	A source document line-and-column pair.
 	/// 
@@ -325,12 +294,17 @@ namespace toml
 	};
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
-}
 
-namespace toml::impl
+	TOML_ABI_NAMESPACE_END // version
+
+} // toml
+
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <typename T>
-	using string_map = std::map<string, T, std::less<>>; //heterogeneous lookup
+	using string_map = std::map<std::string, T, std::less<>>; // heterogeneous lookup
 
 	template <typename T>
 	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
@@ -342,6 +316,9 @@ namespace toml::impl
 
 	template <typename T, typename... U>
 	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
+
+	template <typename T>
+	inline constexpr bool is_cvref = std::is_reference_v<T> || std::is_const_v<T> || std::is_volatile_v<T>;
 
 	template <typename T>
 	[[nodiscard]]
@@ -389,11 +366,11 @@ namespace toml::impl
 
 	#if TOML_ABI_NAMESPACES
 		#if TOML_EXCEPTIONS
-			TOML_ABI_NAMESPACE_START(impl_ex)
-			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_ex::parser
+			TOML_ABI_NAMESPACE_START(ex)
+			#define TOML_PARSER_TYPENAME ::toml::impl::ex::parser
 		#else
-			TOML_ABI_NAMESPACE_START(impl_noex)
-			#define TOML_PARSER_TYPENAME ::toml::impl::abi_impl_noex::parser
+			TOML_ABI_NAMESPACE_START(noex)
+			#define TOML_PARSER_TYPENAME ::toml::impl::noex::parser
 		#endif
 	#else
 		#define TOML_PARSER_TYPENAME ::toml::impl::parser
@@ -461,7 +438,6 @@ namespace toml::impl
 	template <typename T>
 	struct integer_value_traits<T, true> : unsigned_integer_value_traits<T> {};
 
-	template <> struct value_traits<char>				: integer_value_traits<char> {};
 	template <> struct value_traits<signed char>		: integer_value_traits<signed char> {};
 	template <> struct value_traits<unsigned char>		: integer_value_traits<unsigned char> {};
 	template <> struct value_traits<signed short>		: integer_value_traits<signed short> {};
@@ -479,7 +455,7 @@ namespace toml::impl
 		using native_type = int64_t;
 		static constexpr bool is_native = false;
 		static constexpr bool is_losslessly_convertible_to_native = false;
-		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not properly specializing <type_traits>
+		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not specializing std::is_signed<T>
 		static constexpr bool can_represent_native = is_signed;
 		static constexpr bool can_partially_represent_native = true;
 		static constexpr auto node_type = ::toml::node_type::integer;
@@ -487,7 +463,9 @@ namespace toml::impl
 	template <>
 	struct value_traits<__int128_t> : big_integer_value_traits<__int128_t>
 	{
-		static constexpr auto max = static_cast<__int128_t>(( __uint128_t{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1);
+		static constexpr auto max = static_cast<__int128_t>(
+			( __uint128_t{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1
+		);
 		static constexpr auto min = -max - __int128_t{ 1 };
 	};
 	template <>
@@ -551,11 +529,11 @@ namespace toml::impl
 	static_assert(value_traits<double>::can_partially_represent_native);
 
 	// string value traits
-	
+
 	template <typename T>
 	struct string_value_traits
 	{
-		using native_type = ::toml::string;
+		using native_type = std::string;
 		static constexpr bool is_native = std::is_same_v<T, native_type>;
 		static constexpr bool is_losslessly_convertible_to_native = true;
 		static constexpr bool can_represent_native
@@ -582,7 +560,7 @@ namespace toml::impl
 	template <typename T>
 	struct wstring_value_traits
 	{
-		using native_type = ::toml::string;
+		using native_type = std::string;
 		static constexpr bool is_native = false;
 		static constexpr bool is_losslessly_convertible_to_native = true; //narrow
 		static constexpr bool can_represent_native = std::is_same_v<T, std::wstring>; //widen
@@ -613,7 +591,7 @@ namespace toml::impl
 	template <> struct value_traits<date>		: native_value_traits<date,		 node_type::date> {};
 	template <> struct value_traits<time>		: native_value_traits<time,		 node_type::time> {};
 	template <> struct value_traits<date_time>	: native_value_traits<date_time, node_type::date_time> {};
-	
+
 	template <typename T>
 	inline constexpr bool is_wide_string = is_one_of<
 		std::decay_t<T>,
@@ -639,7 +617,7 @@ namespace toml::impl
 	inline constexpr bool is_natively_one_of = is_one_of<native_type_of<T>, U...>;
 
 	template <typename T> struct node_wrapper				{ using type = T; };
-	template <>           struct node_wrapper<string>		{ using type = value<string>; };
+	template <>           struct node_wrapper<std::string>	{ using type = value<std::string>; };
 	template <>           struct node_wrapper<int64_t>		{ using type = value<int64_t>; };
 	template <>           struct node_wrapper<double>		{ using type = value<double>; };
 	template <>           struct node_wrapper<bool>			{ using type = value<bool>; };
@@ -652,11 +630,12 @@ namespace toml::impl
 	template <typename T> struct node_unwrapper<value<T>>	{ using type = T; };
 	template <typename T> using unwrap_node = typename node_unwrapper<T>::type;
 
-	template <typename T> struct node_type_getter			{ static constexpr auto value = value_traits<T>::node_type; };
-	template <>           struct node_type_getter<table>	{ static constexpr auto value = node_type::table; };
-	template <>           struct node_type_getter<array>	{ static constexpr auto value = node_type::array; };
-	template <typename T> inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
-		
+	template <typename T> struct node_type_getter		{ static constexpr auto value = value_traits<T>::node_type; };
+	template <>           struct node_type_getter<table>{ static constexpr auto value = node_type::table; };
+	template <>           struct node_type_getter<array>{ static constexpr auto value = node_type::array; };
+	template <typename T>
+	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
+	
 	inline constexpr std::string_view low_character_escape_table[] =
 	{
 		"\\u0000"sv,
@@ -729,19 +708,23 @@ namespace toml::impl
 
 	template <typename T>
 	inline constexpr bool dependent_false = false;
-}
+
+	TOML_IMPL_NAMESPACE_END
+} // impl
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	/// \brief	Metafunction for determining if a type is a toml::table.
 	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
 	/// \brief	Metafunction for determining if a type is a toml::array.
 	template <typename T>
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
-	/// \brief	Metafunction for determining if a type is a toml::string or toml::value<toml::string>.
+	/// \brief	Metafunction for determining if a type is a std::string or toml::value<std::string>.
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<string>>;
+	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<std::string>>;
 	/// \brief	Metafunction for determining if a type is an int64_t or toml::value<int64_t>.
 	template <typename T>
 	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<int64_t>>;
@@ -780,8 +763,7 @@ namespace toml
 	/// Element [3] is: boolean
 	/// \eout
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
 		using underlying_t = std::underlying_type_t<node_type>;
 		const auto str = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
@@ -822,6 +804,8 @@ namespace toml
 		T&& value;
 	};
 	template <typename T> inserter(T&&) -> inserter<T>;
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS

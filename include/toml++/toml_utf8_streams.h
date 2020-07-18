@@ -15,16 +15,19 @@
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <typename T>
 	class utf8_byte_stream;
 
 	inline constexpr auto utf8_byte_order_mark = "\xEF\xBB\xBF"sv;
 
 	template <typename Char>
-	class utf8_byte_stream<std::basic_string_view<Char>> final
+	class TOML_API utf8_byte_stream<std::basic_string_view<Char>> final
 	{
 		static_assert(sizeof(Char) == 1_sz);
 
@@ -54,19 +57,22 @@ namespace toml::impl
 					position += 3_sz;
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			constexpr bool eof() const noexcept
 			{
 				return position >= source.length();
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			constexpr bool peek_eof() const noexcept
 			{
 				return eof();
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			constexpr bool error() const noexcept
 			{
 				return false;
@@ -82,7 +88,7 @@ namespace toml::impl
 	};
 
 	template <typename Char>
-	class utf8_byte_stream<std::basic_istream<Char>> final
+	class TOML_API utf8_byte_stream<std::basic_istream<Char>> final
 	{
 		static_assert(sizeof(Char) == 1_sz);
 
@@ -106,20 +112,23 @@ namespace toml::impl
 				source->seekg(initial_pos, std::ios::beg);
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			bool eof() const noexcept
 			{
 				return source->eof();
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			bool peek_eof() const
 			{
 				using stream_traits = typename std::remove_pointer_t<decltype(source)>::traits_type;
 				return eof() || source->peek() == stream_traits::eof();
 			}
 
-			[[nodiscard]] TOML_ALWAYS_INLINE
+			[[nodiscard]]
+			TOML_ALWAYS_INLINE
 			bool error() const noexcept
 			{
 				return !(*source);
@@ -135,70 +144,40 @@ namespace toml::impl
 			}
 	};
 
-	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, impl_lf, impl_sf)
+	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
 
 	struct utf8_codepoint final
 	{
 		char32_t value;
-		string_char bytes[4];
+		char bytes[4];
 		source_position position;
 
-		template <typename Char = string_char>
 		[[nodiscard]]
-		TOML_ALWAYS_INLINE
-		std::basic_string_view<Char> as_view() const noexcept
+		std::string_view as_view() const noexcept
 		{
-			static_assert(
-				sizeof(Char) == 1,
-				"The string view's underlying character type must be 1 byte in size."
-			);
-
 			return bytes[3]
-				? std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes), 4_sz }
-				: std::basic_string_view<Char>{ reinterpret_cast<const Char*>(bytes) };
+				? std::string_view{ bytes, 4_sz }
+				: std::string_view{ bytes };
 		}
 
-		[[nodiscard]]
-		TOML_ATTR(pure)
-		TOML_ALWAYS_INLINE
-		constexpr operator char32_t& () noexcept
-		{
-			return value;
-		}
-
-		[[nodiscard]]
-		TOML_ATTR(pure)
-		TOML_ALWAYS_INLINE
-		constexpr operator const char32_t& () const noexcept
-		{
-			return value;
-		}
-
-		[[nodiscard]]
-		TOML_ATTR(pure)
-		TOML_ALWAYS_INLINE
-		constexpr const char32_t& operator* () const noexcept
-		{
-			return value;
-		}
+		[[nodiscard]] TOML_ATTR(pure) constexpr operator char32_t& () noexcept { return value; }
+		[[nodiscard]] TOML_ATTR(pure) constexpr operator const char32_t& () const noexcept { return value; }
+		[[nodiscard]] TOML_ATTR(pure) constexpr const char32_t& operator* () const noexcept { return value; }
 	};
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+
 	#if TOML_EXCEPTIONS
 		#define TOML_ERROR_CHECK	(void)0
 		#define TOML_ERROR			throw parse_error
-		TOML_ABI_NAMESPACE_START(impl_ex)
 	#else
 		#define TOML_ERROR_CHECK	if (err) return nullptr
 		#define TOML_ERROR			err.emplace
-		TOML_ABI_NAMESPACE_START(impl_noex)
 	#endif
-
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_VTABLE_WARNINGS
 
 	struct TOML_INTERFACE utf8_reader_interface
 	{
@@ -222,7 +201,7 @@ namespace toml::impl
 	};
 
 	template <typename T>
-	class TOML_EMPTY_BASES utf8_reader final
+	class TOML_EMPTY_BASES TOML_API utf8_reader final
 		: public utf8_reader_interface
 	{
 		private:
@@ -325,7 +304,7 @@ namespace toml::impl
 					TOML_ERROR_CHECK;
 
 					auto& current = codepoints[cp_idx % 2_sz];
-					current.bytes[current_byte_count++] = static_cast<string_char>(next_byte);
+					current.bytes[current_byte_count++] = static_cast<char>(next_byte);
 					if (decoder.has_code_point())
 					{
 						//store codepoint
@@ -372,12 +351,7 @@ namespace toml::impl
 	template <typename Char>
 	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
 
-	#if !TOML_EXCEPTIONS
-		#undef TOML_ERROR_CHECK
-		#define TOML_ERROR_CHECK	if (reader.error()) return nullptr
-	#endif
-
-	class TOML_EMPTY_BASES utf8_buffered_reader final
+	class TOML_EMPTY_BASES TOML_API utf8_buffered_reader final
 		: public utf8_reader_interface
 	{
 		public:
@@ -397,91 +371,19 @@ namespace toml::impl
 			size_t negative_offset = {};
 
 		public:
-
-			explicit utf8_buffered_reader(utf8_reader_interface& reader_) noexcept
-				: reader{ reader_ }
-			{}
-
-			[[nodiscard]]
-			const source_path_ptr& source_path() const noexcept override
-			{
-				return reader.source_path();
-			}
-
-			[[nodiscard]]
-			const utf8_codepoint* read_next() override
-			{
-				TOML_ERROR_CHECK;
-
-				if (negative_offset)
-				{
-					negative_offset--;
-
-					// an entry negative offset of 1 just means "replay the current head"
-					if (!negative_offset) 
-						return head;
-
-					// otherwise step back into the history buffer
-					else
-						return history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size);
-				}
-				else
-				{
-					// first character read from stream
-					if TOML_UNLIKELY(!history.count && !head)
-						head = reader.read_next();
-
-					// subsequent characters and not eof
-					else if (head)
-					{
-						if TOML_UNLIKELY(history.count < history_buffer_size)
-							history.buffer[history.count++] = *head;
-						else
-							history.buffer[(history.first++ + history_buffer_size) % history_buffer_size] = *head;
-
-						head = reader.read_next();
-					}
-
-					return head;
-				}
-			}
-
-			[[nodiscard]]
-			const utf8_codepoint* step_back(size_t count) noexcept
-			{
-				TOML_ERROR_CHECK;
-				TOML_ASSERT(history.count);
-				TOML_ASSERT(negative_offset + count <= history.count);
-
-				negative_offset += count;
-
-				return negative_offset
-					? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
-					: head;
-			}
-
-			[[nodiscard]]
-			bool peek_eof() const override
-			{
-				return reader.peek_eof();
-			}
-
+			explicit utf8_buffered_reader(utf8_reader_interface& reader_) noexcept;
+			const source_path_ptr& source_path() const noexcept override;
+			const utf8_codepoint* read_next() override;
+			const utf8_codepoint* step_back(size_t count) noexcept;
+			bool peek_eof() const override;
 			#if !TOML_EXCEPTIONS
-
-			[[nodiscard]]
-			optional<parse_error>&& error() noexcept override
-			{
-				return reader.error();
-			}
-
+			optional<parse_error>&& error() noexcept override;
 			#endif
 	};
 
-
-	#undef TOML_ERROR_CHECK
-	#undef TOML_ERROR
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-	TOML_POP_WARNINGS
+
+	TOML_IMPL_NAMESPACE_END
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS

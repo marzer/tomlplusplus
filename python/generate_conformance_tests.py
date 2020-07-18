@@ -30,7 +30,7 @@ def python_value_to_tomlpp(val):
 		if re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
 			return str(float(val))
 		else:
-			return 'S(R"({})"sv)'.format(val)
+			return 'R"({})"sv'.format(val)
 	elif isinstance(val, bool):
 		return 'true' if val else 'false'
 	elif isinstance(val, float):

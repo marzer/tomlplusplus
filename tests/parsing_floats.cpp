@@ -5,7 +5,7 @@
 
 #include "tests.h"
 
-TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_ARITHMETIC_WARNINGS
 
 TEST_CASE("parsing - floats")
 {
@@ -29,14 +29,14 @@ TEST_CASE("parsing - floats")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("flt1")] == 1.0);
-			CHECK(tbl[S("flt2")] == 3.1415);
-			CHECK(tbl[S("flt3")] == -0.01);
-			CHECK(tbl[S("flt4")].as<double>()->get() == 5e+22_a);
-			CHECK(tbl[S("flt5")].as<double>()->get() == 1e6_a);
-			CHECK(tbl[S("flt6")] == -2E-2);
-			CHECK(tbl[S("flt7")].as<double>()->get() == 6.626e-34_a);
-			CHECK(tbl[S("flt8")].as<double>()->get() == 224617.445991228_a);
+			CHECK(tbl["flt1"] == 1.0);
+			CHECK(tbl["flt2"] == 3.1415);
+			CHECK(tbl["flt3"] == -0.01);
+			CHECK(tbl["flt4"].as<double>()->get() == 5e+22_a);
+			CHECK(tbl["flt5"].as<double>()->get() == 1e6_a);
+			CHECK(tbl["flt6"] == -2E-2);
+			CHECK(tbl["flt7"].as<double>()->get() == 6.626e-34_a);
+			CHECK(tbl["flt8"].as<double>()->get() == 224617.445991228_a);
 		}
 	);
 
@@ -51,8 +51,8 @@ TEST_CASE("parsing - floats")
 		R"(zeroes = [-0.0, +0.0])"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("zeroes")][0] == -0.0);
-			CHECK(tbl[S("zeroes")][1] == +0.0);
+			CHECK(tbl["zeroes"][0] == -0.0);
+			CHECK(tbl["zeroes"][1] == +0.0);
 		}
 	);
 
@@ -200,12 +200,12 @@ TEST_CASE("parsing - inf and nan")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(impl::fpclassify(**tbl[S("sf1")].as<double>()) == impl::fp_class::pos_inf);
-			CHECK(impl::fpclassify(**tbl[S("sf2")].as<double>()) == impl::fp_class::pos_inf);
-			CHECK(impl::fpclassify(**tbl[S("sf3")].as<double>()) == impl::fp_class::neg_inf);
-			CHECK(impl::fpclassify(**tbl[S("sf4")].as<double>()) == impl::fp_class::nan);
-			CHECK(impl::fpclassify(**tbl[S("sf5")].as<double>()) == impl::fp_class::nan);
-			CHECK(impl::fpclassify(**tbl[S("sf6")].as<double>()) == impl::fp_class::nan);
+			CHECK(impl::fpclassify(**tbl["sf1"].as<double>()) == impl::fp_class::pos_inf);
+			CHECK(impl::fpclassify(**tbl["sf2"].as<double>()) == impl::fp_class::pos_inf);
+			CHECK(impl::fpclassify(**tbl["sf3"].as<double>()) == impl::fp_class::neg_inf);
+			CHECK(impl::fpclassify(**tbl["sf4"].as<double>()) == impl::fp_class::nan);
+			CHECK(impl::fpclassify(**tbl["sf5"].as<double>()) == impl::fp_class::nan);
+			CHECK(impl::fpclassify(**tbl["sf6"].as<double>()) == impl::fp_class::nan);
 		}
 	);
 

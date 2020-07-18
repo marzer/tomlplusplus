@@ -19,8 +19,10 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 TOML_POP_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
 	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
@@ -142,8 +144,7 @@ namespace toml::impl
 	#undef TOML_P2S_OVERLOAD
 
 	template <typename T, typename Char>
-	TOML_EXTERNAL_LINKAGE
-	void print_floating_point_to_stream(T val, std::basic_ostream<Char>& stream, bool hexfloat = false)
+	inline void print_floating_point_to_stream(T val, std::basic_ostream<Char>& stream, bool hexfloat = false)
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -330,7 +331,7 @@ namespace toml::impl
 	}
 
 	TOML_PUSH_WARNINGS
-	TOML_DISABLE_ALL_WARNINGS
+	TOML_DISABLE_ARITHMETIC_WARNINGS
 
 	template <typename T, typename Char>
 	void print_to_stream_with_escapes(T && str, std::basic_ostream<Char>& stream)
@@ -338,25 +339,28 @@ namespace toml::impl
 		static_assert(sizeof(Char) == 1);
 		for (auto c : str)
 		{
-			if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
+			if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
 				print_to_stream(low_character_escape_table[c], stream);
-			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
-				print_to_stream(TOML_STRING_PREFIX("\\u007F"sv), stream);
-			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))
-				print_to_stream(TOML_STRING_PREFIX("\\\""sv), stream);
-			else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\\'))
-				print_to_stream(TOML_STRING_PREFIX("\\\\"sv), stream);
+			else if TOML_UNLIKELY(c == '\x7F')
+				print_to_stream("\\u007F"sv, stream);
+			else if TOML_UNLIKELY(c == '"')
+				print_to_stream("\\\""sv, stream);
+			else if TOML_UNLIKELY(c == '\\')
+				print_to_stream("\\\\"sv, stream);
 			else
 				print_to_stream(c, stream);
 		}
 	}
 
 	TOML_POP_WARNINGS
-}
 
+	TOML_IMPL_NAMESPACE_END
+}
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	/// \brief	Prints a source_position to a stream.
 	///
 	/// \detail \cpp
@@ -378,8 +382,7 @@ namespace toml
 	///
 	/// \returns	The input stream.
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_position& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_position& rhs)
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -413,8 +416,7 @@ namespace toml
 	///
 	/// \returns	The input stream.
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_region& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_region& rhs)
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -434,4 +436,6 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
 	#endif
+
+	TOML_ABI_NAMESPACE_END // version
 }

@@ -68,16 +68,36 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	args : [ '-std=c++2a', '-fchar8_t' ]
 )
 
+compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
+
+	consteval int kek() noexcept
+	{
+		return 42;
+	}
+
+	int main()
+	{
+		return kek();
+	}
+	''',
+	name : 'supports consteval',
+	args : [ '-std=c++2a' ]
+)
+
+compiler_supports_float16_args = []
+if compiler.get_id() == 'gcc'
+	compiler_supports_float16_args += '-mfp16-format=ieee'
+endif
 compiler_supports_float16 = compiler.links('''
 	int main()
 	{
-		static_assert(sizeof(_Float16) = 2);
+		static_assert(sizeof(_Float16) == 2);
 		_Float16 f = static_cast<_Float16>(1);
 		return 0;
 	}
 	''',
 	name : 'supports float16',
-	args : [ '-mfp16-format=ieee' ]
+	args : compiler_supports_float16_args
 )
 
 compiler_supports_fast_math = compiler.links('''
@@ -94,7 +114,6 @@ compiler_supports_fast_math = compiler.links('''
 )
 
 fast_math_modes = [ false, true ]
-char8_modes = [ false, true ]
 exception_modes = [ true, false ]
 strict_modes = [ false, true ]
 cpp20_modes = [ false, true ]
@@ -105,100 +124,91 @@ foreach cpp20 : cpp20_modes
 		if cpp20 and not compiler_supports_cpp20
 			continue
 		endif
-		foreach char8 : char8_modes
-			if char8 and (not cpp20 or not compiler_supports_char8 or strict)
+		foreach fast_math : fast_math_modes
+			if fast_math and not compiler_supports_fast_math
 				continue
 			endif
-			foreach fast_math : fast_math_modes
-				if fast_math and not compiler_supports_fast_math
-					continue
-				endif
-				foreach exceptions : exception_modes
+			foreach exceptions : exception_modes
 
-						name = ''
-						overrides = []
-						args = []
+					name = ''
+					overrides = []
+					args = []
 
-						if compiler_supports_float16
+					if compiler_supports_float16
+						if compiler.get_id() == 'gcc'
 							args += '-mfp16-format=ieee'
 						endif
+					endif
 
-						if cpp20
-							name = 'cpp20'
-							overrides += 'cpp_std=none'
-							args += '-std=c++2a'
+					if cpp20
+						name = 'cpp20'
+						overrides += 'cpp_std=none'
+						args += '-std=c++2a'
 
-							if compiler_supports_char8
-								args += '-fchar8_t'
-							endif
-						else
-							name = 'cpp17'
+						if compiler_supports_char8
+							args += '-fchar8_t'
 						endif
+					else
+						name = 'cpp17'
+					endif
 
-						if strict
-							name = name + '_strict'
-							args += '-DTOML_UNRELEASED_FEATURES=0'
-						else
-							args += '-DTOML_UNRELEASED_FEATURES=1'
-						endif
+					if strict
+						name = name + '_strict'
+						args += '-DTOML_UNRELEASED_FEATURES=0'
+					else
+						args += '-DTOML_UNRELEASED_FEATURES=1'
+					endif
 
-						if char8
-							name = name + '_char8'
-							args += '-DTOML_CHAR_8_STRINGS=1'
-						endif
+					if not exceptions
+						name = name + '_noexcept'
+						overrides += 'cpp_eh=none'
+					endif
 
+					if fast_math
+						name = name + '_fastmath'
+						if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+							args += '-ffast-math'
+							args += '-ffp-contract=fast'
+						endif
+					endif
 
-						if not exceptions
-							name = name + '_noexcept'
-							overrides += 'cpp_eh=none'
-						endif
+					if counter % 6 == 3
+						args += '-DTOML_ALL_INLINE=1'
+					endif
+					if counter % 2 == 1
+						args += '-DUSE_SINGLE_HEADER=1'
+					endif
+					if counter % 4 == 2 and exceptions
+						args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
+						name = name + '_tlopt'
+					endif
 
-						if fast_math
-							name = name + '_fastmath'
-							if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
-								args += '-ffast-math'
-								args += '-ffp-contract=fast'
-							endif
-						endif
+					if compiler.get_id() == 'gcc'
+						args += '-Wno-padded'
+						args += '-Wno-float-equal'
+					endif
 
-						if counter % 6 == 3
-							args += '-DTOML_ALL_INLINE=1'
-						endif
-						if counter % 2 == 1
-							args += '-DUSE_SINGLE_HEADER=1'
-						endif
-						if counter % 4 == 2 and exceptions
-							args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
-							name = name + '_tlopt'
-						endif
+					if compiler.get_id() == 'clang'
+						args += '-Wno-padded'
+						args += '-Wno-float-equal'
+						args += '-Wno-double-promotion'
+					endif
 
-						if compiler.get_id() == 'gcc'
-							args += '-Wno-padded'
-							args += '-Wno-float-equal'
-						endif
-
-						if compiler.get_id() == 'clang'
-							args += '-Wno-padded'
-							args += '-Wno-float-equal'
-							args += '-Wno-double-promotion'
-						endif
-
-						executables += [[
+					executables += [[
+						name,
+						executable(
 							name,
-							executable(
-								name,
-								test_sources,
-								include_directories : inc,
-								cpp_args : args,
-								override_options : overrides
-							)
-						]]
+							test_sources,
+							include_directories : inc,
+							cpp_args : args,
+							override_options : overrides
+						)
+					]]
 
-						counter = counter + 1
+					counter = counter + 1
 
-				endforeach # exceptions
-			endforeach # fast_math
-		endforeach # char8
+			endforeach # exceptions
+		endforeach # fast_math
 	endforeach # strict
 endforeach # cpp20
 

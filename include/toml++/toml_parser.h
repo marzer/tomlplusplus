@@ -18,9 +18,11 @@ TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
-	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_VERSION
 
-	TOML_ABI_NAMESPACE_START(parse_noex)
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+
+	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 
 	/// \brief	The result of a parsing operation.
 	///
@@ -90,38 +92,44 @@ namespace toml
 			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
 
 			/// \brief	Returns the internal toml::table.
-			[[nodiscard]] table& get() & noexcept
+			[[nodiscard]]
+			table& get() & noexcept
 			{
 				TOML_ASSERT(!is_err);
 				return *TOML_LAUNDER(reinterpret_cast<table*>(&storage));
 			}
 			/// \brief	Returns the internal toml::table (rvalue overload).
-			[[nodiscard]] table&& get() && noexcept
+			[[nodiscard]]
+			table&& get() && noexcept
 			{
 				TOML_ASSERT(!is_err);
 				return std::move(*TOML_LAUNDER(reinterpret_cast<table*>(&storage)));
 			}
 			/// \brief	Returns the internal toml::table (const lvalue overload).
-			[[nodiscard]] const table& get() const& noexcept
+			[[nodiscard]]
+			const table& get() const& noexcept
 			{
 				TOML_ASSERT(!is_err);
 				return *TOML_LAUNDER(reinterpret_cast<const table*>(&storage));
 			}
 
 			/// \brief	Returns the internal toml::parse_error.
-			[[nodiscard]] parse_error& error() & noexcept
+			[[nodiscard]]
+			parse_error& error() & noexcept
 			{
 				TOML_ASSERT(is_err);
 				return *TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage));
 			}
 			/// \brief	Returns the internal toml::parse_error (rvalue overload).
-			[[nodiscard]] parse_error&& error() && noexcept
+			[[nodiscard]]
+			parse_error&& error() && noexcept
 			{
 				TOML_ASSERT(is_err);
 				return std::move(*TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage)));
 			}
 			/// \brief	Returns the internal toml::parse_error (const lvalue overload).
-			[[nodiscard]] const parse_error& error() const& noexcept
+			[[nodiscard]]
+			const parse_error& error() const& noexcept
 			{
 				TOML_ASSERT(is_err);
 				return *TOML_LAUNDER(reinterpret_cast<const parse_error*>(&storage));
@@ -202,7 +210,8 @@ namespace toml
 			/// 			or an empty node view.
 			///
 			/// \see toml::node_view
-			[[nodiscard]] node_view<node> operator[] (string_view key) noexcept
+			[[nodiscard]]
+			node_view<node> operator[] (string_view key) noexcept
 			{
 				return is_err ? node_view<node>{} : get()[key];
 			}
@@ -215,7 +224,8 @@ namespace toml
 			/// 			or an empty node view.
 			///
 			/// \see toml::node_view
-			[[nodiscard]] node_view<const node> operator[] (string_view key) const noexcept
+			[[nodiscard]]
+			node_view<const node> operator[] (string_view key) const noexcept
 			{
 				return is_err ? node_view<const node>{} : get()[key];
 			}
@@ -232,7 +242,8 @@ namespace toml
 			/// \see toml::node_view
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			[[nodiscard]] node_view<node> operator[] (std::wstring_view key) noexcept
+			[[nodiscard]]
+			node_view<node> operator[] (std::wstring_view key) noexcept
 			{
 				return is_err ? node_view<node>{} : get()[key];
 			}
@@ -247,7 +258,8 @@ namespace toml
 			/// \see toml::node_view
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			[[nodiscard]] node_view<const node> operator[] (std::wstring_view key) const noexcept
+			[[nodiscard]]
+			node_view<const node> operator[] (std::wstring_view key) const noexcept
 			{
 				return is_err ? node_view<const node>{} : get()[key];
 			}
@@ -256,64 +268,75 @@ namespace toml
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] table_iterator begin() noexcept
+			[[nodiscard]]
+			table_iterator begin() noexcept
 			{
 				return is_err ? table_iterator{} : get().begin();
 			}
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] const_table_iterator begin() const noexcept
+			[[nodiscard]]
+			const_table_iterator begin() const noexcept
 			{
 				return is_err ? const_table_iterator{} : get().begin();
 			}
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] const_table_iterator cbegin() const noexcept
+			[[nodiscard]]
+			const_table_iterator cbegin() const noexcept
 			{
 				return is_err ? const_table_iterator{} : get().cbegin();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] table_iterator end() noexcept
+			[[nodiscard]]
+			table_iterator end() noexcept
 			{
 				return is_err ? table_iterator{} : get().end();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] const_table_iterator end() const noexcept
+			[[nodiscard]]
+			const_table_iterator end() const noexcept
 			{
 				return is_err ? const_table_iterator{} : get().end();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
 			/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
-			[[nodiscard]] const_table_iterator cend() const noexcept
+			[[nodiscard]]
+			const_table_iterator cend() const noexcept
 			{
 				return is_err ? const_table_iterator{} : get().cend();
 			}
 	};
-
-	TOML_ABI_NAMESPACE_END
 
 	#else
 
 	using parse_result = table;
 
 	#endif
-}
-
-namespace toml::impl
-{
-	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, impl_ex, impl_noex)
-
-	[[nodiscard]] TOML_API
-	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+
+	TOML_ABI_NAMESPACE_END // version
+}
+
+namespace toml
+{
+	TOML_IMPL_NAMESPACE_START
+
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+	
+	[[nodiscard]] TOML_API parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
+	
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 #if TOML_EXCEPTIONS
@@ -330,7 +353,9 @@ namespace toml::impl
 
 namespace toml
 {
-	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, parse_ex, parse_noex)
+	TOML_ABI_NAMESPACE_VERSION
+
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	/// \brief	Parses a TOML document from a string view.
 	///
@@ -516,8 +541,7 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
+	inline parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -552,8 +576,7 @@ namespace toml
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	template <typename Char>
 	[[nodiscard]]
-	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
+	inline parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		static_assert(
 			sizeof(Char) == 1,
@@ -592,14 +615,12 @@ namespace toml
 	///  \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	template <typename Char>
 	[[nodiscard]]
-	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::basic_istream<Char>& doc, std::wstring_view source_path) TOML_MAY_THROW
+	inline parse_result parse(std::basic_istream<Char>& doc, std::wstring_view source_path) TOML_MAY_THROW
 	{
-		return parse(doc, impl::narrow<char>(source_path));
+		return parse(doc, impl::narrow(source_path));
 	}
 
 	#endif // TOML_WINDOWS_COMPAT
-
 
 	// Q: "why are the parse_file functions templated??"
 	// A: I don't want to force users to drag in <fstream> if they're not going to do
@@ -628,8 +649,7 @@ namespace toml
 	/// \attention You must `#include <fstream>` to use this function (toml++ does not transitively include it for you).
 	template <typename Char, typename StreamChar = char>
 	[[nodiscard]]
-	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
+	inline parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
 	{
 		static_assert(
 			!std::is_same_v<Char, wchar_t> || TOML_WINDOWS_COMPAT,
@@ -654,7 +674,7 @@ namespace toml
 		std::string file_path_str;
 		#if TOML_WINDOWS_COMPAT
 		if constexpr (std::is_same_v<Char, wchar_t>)
-			file_path_str = impl::narrow<char>(file_path);
+			file_path_str = impl::narrow(file_path);
 		else
 		#endif
 			file_path_str = std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() };
@@ -715,8 +735,6 @@ namespace toml
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
 	/// \brief	Convenience literal operators for working with toml++.
 	/// 
 	/// \detail This namespace exists so you can safely hoist the UDL operators into another scope
@@ -737,8 +755,6 @@ namespace toml
 	///
 	inline namespace literals
 	{
-		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
-
 		/// \brief	Parses TOML data from a string literal.
 		/// 
 		/// \detail \cpp
@@ -791,9 +807,11 @@ namespace toml
 
 		#endif // __cpp_lib_char8_t
 
-		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
 
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 #undef TOML_THROW_PARSE_ERROR

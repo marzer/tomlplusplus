@@ -185,7 +185,7 @@ template bool parse_expected_value(std::string_view, uint32_t, std::string_view,
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
-template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&);
+template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const std::string_view&);
 
 namespace std
 {

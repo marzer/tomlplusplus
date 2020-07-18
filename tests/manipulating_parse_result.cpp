@@ -27,9 +27,9 @@ TEST_CASE("parse_result - good parse")
 	REQUIRE(!static_cast<const table&>(result).empty());
 	
 	auto& tbl = static_cast<table&>(result);
-	CHECK(tbl[S("key"sv)]);
-	CHECK(result[S("key"sv)]);
-	CHECK(&result[S("key"sv)].ref<bool>() == &tbl[S("key"sv)].ref<bool>());
+	CHECK(tbl["key"sv]);
+	CHECK(result["key"sv]);
+	CHECK(&result["key"sv].ref<bool>() == &tbl["key"sv].ref<bool>());
 	CHECK(result.begin() == tbl.begin());
 	CHECK(result.end() == tbl.end());
 	CHECK(result.begin() != tbl.end());
@@ -45,9 +45,9 @@ TEST_CASE("parse_result - good parse")
 	CHECK(cresult.cbegin() == ctbl.cbegin());
 	CHECK(cresult.cend() == ctbl.cend());
 	CHECK(cresult.cbegin() != ctbl.cend());
-	CHECK(ctbl[S("key"sv)]);
-	CHECK(cresult[S("key"sv)]);
-	CHECK(&cresult[S("key"sv)].ref<bool>() == &ctbl[S("key"sv)].ref<bool>());
+	CHECK(ctbl["key"sv]);
+	CHECK(cresult["key"sv]);
+	CHECK(&cresult["key"sv].ref<bool>() == &ctbl["key"sv].ref<bool>());
 
 	size_t tbl_iterations{};
 	for (auto&& [k, v] : tbl)
@@ -83,14 +83,14 @@ TEST_CASE("parse_result - bad parse")
 	REQUIRE(result.failed());
 	REQUIRE(!result);
 
-	CHECK(!result[S("key"sv)]);
+	CHECK(!result["key"sv]);
 	CHECK(result.begin() == decltype(result.begin()){});
 	CHECK(result.end() == decltype(result.end()){});
 	CHECK(result.cbegin() == decltype(result.cbegin()){});
 	CHECK(result.cend() == decltype(result.cend()){});
 
 	auto& cresult = static_cast<const parse_result&>(result);
-	CHECK(!result[S("key"sv)]);
+	CHECK(!result["key"sv]);
 	CHECK(cresult.begin() == decltype(cresult.begin()){});
 	CHECK(cresult.end() == decltype(cresult.end()){});
 	CHECK(cresult.cbegin() == decltype(cresult.cbegin()){});

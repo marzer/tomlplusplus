@@ -25,7 +25,6 @@ using namespace toml;
 TOML_POP_WARNINGS
 
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
-#define S(str)			TOML_STRING_PREFIX(str)
 #define BOM_PREFIX "\xEF\xBB\xBF"
 
 #if TOML_EXCEPTIONS
@@ -112,7 +111,7 @@ bool parsing_should_fail(
 	std::string_view toml_str);
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_ARITHMETIC_WARNINGS
 
 template <typename T>
 inline bool parse_expected_value(
@@ -184,9 +183,14 @@ inline bool parse_expected_value(
 			[&](table&& tbl)
 			{
 				REQUIRE(tbl.size() == 1);
-				auto nv = tbl[S("val"sv)];
+				auto nv = tbl["val"sv];
 				REQUIRE(nv);
+				REQUIRE(nv.is<value_type>());
 				REQUIRE(nv.as<value_type>());
+				REQUIRE(nv.type() == impl::node_type_of<T>);
+				REQUIRE(nv.node());
+				REQUIRE(nv.node()->is<value_type>());
+				REQUIRE(nv.node()->as<value_type>());
 				REQUIRE(nv.node()->type() == impl::node_type_of<T>);
 
 				// check the raw value
@@ -199,8 +203,8 @@ inline bool parse_expected_value(
 				REQUIRE(nv.node()->ref<value_type>() == expected);
 
 				// check the table relops
-				REQUIRE(tbl == table{ { { S("val"sv), expected } } });
-				REQUIRE(!(tbl != table{ { { S("val"sv), expected } } }));
+				REQUIRE(tbl == table{ { { "val"sv, expected } } });
+				REQUIRE(!(tbl != table{ { { "val"sv, expected } } }));
 
 				// check the value relops
 				REQUIRE(*nv.as<value_type>() == expected);
@@ -237,7 +241,7 @@ inline bool parse_expected_value(
 		{
 			std::string str;
 			{
-				auto tbl = table{ { { S("val"sv), *val_parsed } } };
+				auto tbl = table{ { { "val"sv, *val_parsed } } };
 				std::ostringstream ss;
 				ss << tbl;
 				str = std::move(ss).str();
@@ -251,7 +255,7 @@ inline bool parse_expected_value(
 				[&](table&& tbl)
 				{
 					REQUIRE(tbl.size() == 1);
-					auto nv = tbl[S("val"sv)];
+					auto nv = tbl["val"sv];
 					REQUIRE(nv);
 					REQUIRE(nv.as<value_type>());
 					REQUIRE(nv.node()->type() == impl::node_type_of<T>);
@@ -279,7 +283,7 @@ extern template bool parse_expected_value(std::string_view, uint32_t, std::strin
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const bool&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
-extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const toml::string_view&);
+extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const std::string_view&);
 namespace std
 {
 	extern template class unique_ptr<const Catch::IExceptionTranslator>;
@@ -297,4 +301,4 @@ namespace Catch
 	}
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS

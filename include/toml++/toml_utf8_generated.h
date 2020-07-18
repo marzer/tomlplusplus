@@ -8,8 +8,10 @@
 #pragma once
 #include "toml_preprocessor.h"
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	//# Returns true if a codepoint matches any of:
 	//# 	0 - 9, A - F, a - f
 	[[nodiscard]]
@@ -753,4 +755,6 @@ namespace toml::impl
 	}
 
 #endif // TOML_LANG_UNRELEASED
+
+	TOML_IMPL_NAMESPACE_END
 } // toml::impl

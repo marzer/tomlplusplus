@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-	<Type Name="::toml::date">
+	<Type Name="::toml::v2::date">
 		<DisplayString>{(int)year}-{(int)month}-{(int)day}</DisplayString>
 		<Expand>
 			<Item Name="year" ExcludeView="simple">year</Item>
@@ -10,7 +10,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="::toml::time">
+	<Type Name="::toml::v2::time">
 		<DisplayString>{(int)hour}:{(int)minute}:{second + (nanosecond / 1000000000.0)}</DisplayString>
 		<Expand>
 			<Item Name="hour" ExcludeView="simple">hour</Item>
@@ -20,7 +20,7 @@
 		</Expand>
 	</Type>
 	
-	<Type Name="::toml::time_offset">
+	<Type Name="::toml::v2::time_offset">
 		<DisplayString Condition="hours &gt;= 0 &amp;&amp; minutes &gt;= 0">{(int)hours}:{(int)minutes}</DisplayString>
 		<DisplayString Condition="hours &lt; 0 &amp;&amp; minutes &gt;= 0">-{-((int)hours)}:{(int)minutes}</DisplayString>
 		<DisplayString Condition="hours &lt; 0 &amp;&amp; minutes &lt; 0">-{-((int)hours)}:{-((int)minutes)}</DisplayString>
@@ -31,14 +31,14 @@
 		</Expand>
 	</Type>
 
-	<Type Name="::toml::value&lt;*&gt;">
+	<Type Name="::toml::v2::value&lt;*&gt;">
 		<DisplayString>{{ {val_} }}</DisplayString>
 		<Expand>
 			<Item Name="val_" ExcludeView="simple">val_</Item>
 		</Expand>
 	</Type>
 
-	<Type Name="::toml::source_position">
+	<Type Name="::toml::v2::source_position">
 		<DisplayString>line {line}, column {column}</DisplayString>
 		<Expand>
 			<Item Name="line" ExcludeView="simple">line</Item>
@@ -46,7 +46,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="::toml::impl::utf8_codepoint">
+	<Type Name="::toml::v2::impl::utf8_codepoint">
 		<DisplayString>{&amp;bytes,s8} ({position})</DisplayString>
 	</Type>
 

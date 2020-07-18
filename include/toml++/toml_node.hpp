@@ -18,6 +18,8 @@ TOML_DISABLE_SUGGEST_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept
 		: source_{ std::move(other.source_) }
@@ -49,7 +51,7 @@ namespace toml
 	
 	TOML_MEMBER_ATTR(const) table* node::as_table()						noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) array* node::as_array()						noexcept { return nullptr; }
-	TOML_MEMBER_ATTR(const) value<string>* node::as_string()			noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) value<std::string>* node::as_string()		noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) value<int64_t>* node::as_integer()			noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) value<double>* node::as_floating_point()	noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) value<bool>* node::as_boolean()				noexcept { return nullptr; }
@@ -59,7 +61,7 @@ namespace toml
 	
 	TOML_MEMBER_ATTR(const) const table* node::as_table()					const noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) const array* node::as_array()					const noexcept { return nullptr; }
-	TOML_MEMBER_ATTR(const) const value<string>* node::as_string()			const noexcept { return nullptr; }
+	TOML_MEMBER_ATTR(const) const value<std::string>* node::as_string()		const noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) const value<int64_t>* node::as_integer()		const noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) const value<double>* node::as_floating_point()	const noexcept { return nullptr; }
 	TOML_MEMBER_ATTR(const) const value<bool>* node::as_boolean()			const noexcept { return nullptr; }
@@ -70,6 +72,8 @@ namespace toml
 	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
 	#undef TOML_MEMBER_ATTR
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

@@ -270,7 +270,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(integers)"sv), toml::array{
+				R"(integers)"sv, toml::array{
 					1,
 					2,
 					3,
@@ -284,10 +284,10 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(colors)"sv), toml::array{
-					S(R"(red)"sv),
-					S(R"(yellow)"sv),
-					S(R"(green)"sv),
+				R"(colors)"sv, toml::array{
+					R"(red)"sv,
+					R"(yellow)"sv,
+					R"(green)"sv,
 				}
 			},
 		}};
@@ -298,7 +298,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(nested_array_of_int)"sv), toml::array{
+				R"(nested_array_of_int)"sv, toml::array{
 					toml::array{
 						1,
 						2,
@@ -318,11 +318,11 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(string_array)"sv), toml::array{
-					S(R"(all)"sv),
-					S(R"(strings)"sv),
-					S(R"(are the same)"sv),
-					S(R"(type)"sv),
+				R"(string_array)"sv, toml::array{
+					R"(all)"sv,
+					R"(strings)"sv,
+					R"(are the same)"sv,
+					R"(type)"sv,
 				}
 			},
 		}};
@@ -333,15 +333,15 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(nested_mixed_array)"sv), toml::array{
+				R"(nested_mixed_array)"sv, toml::array{
 					toml::array{
 						1,
 						2,
 					},
 					toml::array{
-						S(R"(a)"sv),
-						S(R"(b)"sv),
-						S(R"(c)"sv),
+						R"(a)"sv,
+						R"(b)"sv,
+						R"(c)"sv,
 					},
 				}
 			},
@@ -353,7 +353,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(integers2)"sv), toml::array{
+				R"(integers2)"sv, toml::array{
 					1,
 					2,
 					3,
@@ -367,7 +367,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(integers3)"sv), toml::array{
+				R"(integers3)"sv, toml::array{
 					1,
 					2,
 				}
@@ -380,7 +380,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(numbers)"sv), toml::array{
+				R"(numbers)"sv, toml::array{
 					0.1,
 					0.2,
 					0.5,
@@ -397,12 +397,12 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(contributors)"sv), toml::array{
-					S(R"(Foo Bar <foo@example.com>)"sv),
+				R"(contributors)"sv, toml::array{
+					R"(Foo Bar <foo@example.com>)"sv,
 					toml::table{{
-						{ S(R"(name)"sv), S(R"(Baz Qux)"sv) },
-						{ S(R"(email)"sv), S(R"(bazqux@example.com)"sv) },
-						{ S(R"(url)"sv), S(R"(https://example.com/bazqux)"sv) },
+						{ R"(name)"sv, R"(Baz Qux)"sv },
+						{ R"(email)"sv, R"(bazqux@example.com)"sv },
+						{ R"(url)"sv, R"(https://example.com/bazqux)"sv },
 					}},
 				}
 			},
@@ -414,16 +414,16 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(products)"sv), toml::array{
+				R"(products)"sv, toml::array{
 					toml::table{{
-						{ S(R"(name)"sv), S(R"(Hammer)"sv) },
-						{ S(R"(sku)"sv), 738594937 },
+						{ R"(name)"sv, R"(Hammer)"sv },
+						{ R"(sku)"sv, 738594937 },
 					}},
 					toml::table{},
 					toml::table{{
-						{ S(R"(name)"sv), S(R"(Nail)"sv) },
-						{ S(R"(sku)"sv), 284758393 },
-						{ S(R"(color)"sv), S(R"(gray)"sv) },
+						{ R"(name)"sv, R"(Nail)"sv },
+						{ R"(sku)"sv, 284758393 },
+						{ R"(color)"sv, R"(gray)"sv },
 					}},
 				}
 			},
@@ -435,32 +435,32 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(fruit)"sv), toml::array{
+				R"(fruit)"sv, toml::array{
 					toml::table{{
-						{ S(R"(name)"sv), S(R"(apple)"sv) },
+						{ R"(name)"sv, R"(apple)"sv },
 						{ 
-							S(R"(physical)"sv), toml::table{{
-								{ S(R"(color)"sv), S(R"(red)"sv) },
-								{ S(R"(shape)"sv), S(R"(round)"sv) },
+							R"(physical)"sv, toml::table{{
+								{ R"(color)"sv, R"(red)"sv },
+								{ R"(shape)"sv, R"(round)"sv },
 							}}
 						},
 						{ 
-							S(R"(variety)"sv), toml::array{
+							R"(variety)"sv, toml::array{
 								toml::table{{
-									{ S(R"(name)"sv), S(R"(red delicious)"sv) },
+									{ R"(name)"sv, R"(red delicious)"sv },
 								}},
 								toml::table{{
-									{ S(R"(name)"sv), S(R"(granny smith)"sv) },
+									{ R"(name)"sv, R"(granny smith)"sv },
 								}},
 							}
 						},
 					}},
 					toml::table{{
-						{ S(R"(name)"sv), S(R"(banana)"sv) },
+						{ R"(name)"sv, R"(banana)"sv },
 						{ 
-							S(R"(variety)"sv), toml::array{
+							R"(variety)"sv, toml::array{
 								toml::table{{
-									{ S(R"(name)"sv), S(R"(plantain)"sv) },
+									{ R"(name)"sv, R"(plantain)"sv },
 								}},
 							}
 						},
@@ -475,21 +475,21 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(points)"sv), toml::array{
+				R"(points)"sv, toml::array{
 					toml::table{{
-						{ S(R"(x)"sv), 1 },
-						{ S(R"(y)"sv), 2 },
-						{ S(R"(z)"sv), 3 },
+						{ R"(x)"sv, 1 },
+						{ R"(y)"sv, 2 },
+						{ R"(z)"sv, 3 },
 					}},
 					toml::table{{
-						{ S(R"(x)"sv), 7 },
-						{ S(R"(y)"sv), 8 },
-						{ S(R"(z)"sv), 9 },
+						{ R"(x)"sv, 7 },
+						{ R"(y)"sv, 8 },
+						{ R"(z)"sv, 9 },
 					}},
 					toml::table{{
-						{ S(R"(x)"sv), 2 },
-						{ S(R"(y)"sv), 4 },
-						{ S(R"(z)"sv), 8 },
+						{ R"(x)"sv, 2 },
+						{ R"(y)"sv, 4 },
+						{ R"(z)"sv, 8 },
 					}},
 				}
 			},
@@ -500,7 +500,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_boolean_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(bool1)"sv), true },
+			{ R"(bool1)"sv, true },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -508,7 +508,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_boolean_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(bool1)"sv), false },
+			{ R"(bool1)"sv, false },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -516,8 +516,8 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_case_sensitive, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(abc)"sv), 123 },
-			{ S(R"(ABC)"sv), 456 },
+			{ R"(abc)"sv, 123 },
+			{ R"(ABC)"sv, 456 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -526,7 +526,7 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(abc)"sv), toml::array{
+				R"(abc)"sv, toml::array{
 					123,
 					456,
 				}
@@ -538,7 +538,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_comment_mid_string, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(another)"sv), S(R"(# This is not a comment)"sv) },
+			{ R"(another)"sv, R"(# This is not a comment)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -546,7 +546,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_comment_tab, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(key)"sv), S(R"(value)"sv) },
+			{ R"(key)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -554,7 +554,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_comment, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(key)"sv), S(R"(value)"sv) },
+			{ R"(key)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -562,7 +562,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_local_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(ld1)"sv), toml::date{ 1979, 5, 27 } },
+			{ R"(ld1)"sv, toml::date{ 1979, 5, 27 } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -570,7 +570,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(odt1)"sv), toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { 0, 0 } } },
+			{ R"(odt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { 0, 0 } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -578,7 +578,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(odt2)"sv), toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 0u }, { -7, 0 } } },
+			{ R"(odt2)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 0u }, { -7, 0 } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -586,7 +586,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(odt3)"sv), toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, { -7, 0 } } },
+			{ R"(odt3)"sv, toml::date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, { -7, 0 } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -594,7 +594,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(odt4)"sv), toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { 0, 0 } } },
+			{ R"(odt4)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { 0, 0 } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -602,7 +602,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_5, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(odt5)"sv), toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 123000000u }, { 0, 0 } } },
+			{ R"(odt5)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 123000000u }, { 0, 0 } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -610,7 +610,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_date_time_local_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(ldt1)"sv), toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u } } },
+			{ R"(ldt1)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u } } },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -618,16 +618,16 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_dotted_keys_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(name)"sv), S(R"(Orange)"sv) },
+			{ R"(name)"sv, R"(Orange)"sv },
 			{ 
-				S(R"(physical)"sv), toml::table{{
-					{ S(R"(color)"sv), S(R"(orange)"sv) },
-					{ S(R"(shape)"sv), S(R"(round)"sv) },
+				R"(physical)"sv, toml::table{{
+					{ R"(color)"sv, R"(orange)"sv },
+					{ R"(shape)"sv, R"(round)"sv },
 				}}
 			},
 			{ 
-				S(R"(site)"sv), toml::table{{
-					{ S(R"(google.com)"sv), true },
+				R"(site)"sv, toml::table{{
+					{ R"(google.com)"sv, true },
 				}}
 			},
 		}};
@@ -638,8 +638,8 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(a)"sv), toml::table{{
-					{ S(R"(b)"sv), 23 },
+				R"(a)"sv, toml::table{{
+					{ R"(b)"sv, 23 },
 				}}
 			},
 		}};
@@ -650,8 +650,8 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(a)"sv), toml::table{{
-					{ S(R"(b)"sv), 23 },
+				R"(a)"sv, toml::table{{
+					{ R"(b)"sv, 23 },
 				}}
 			},
 		}};
@@ -661,7 +661,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_empty_key_name_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"()"sv), S(R"(blank)"sv) },
+			{ R"()"sv, R"(blank)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -669,7 +669,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_empty_key_name_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"()"sv), S(R"(blank)"sv) },
+			{ R"()"sv, R"(blank)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -678,13 +678,13 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(fruit)"sv), toml::table{{
+				R"(fruit)"sv, toml::table{{
 					{ 
-						S(R"(apple)"sv), toml::table{{
-							{ S(R"(smooth)"sv), true },
+						R"(apple)"sv, toml::table{{
+							{ R"(smooth)"sv, true },
 						}}
 					},
-					{ S(R"(orange)"sv), 2 },
+					{ R"(orange)"sv, 2 },
 				}}
 			},
 		}};
@@ -695,17 +695,17 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(apple)"sv), toml::table{{
-					{ S(R"(type)"sv), S(R"(fruit)"sv) },
-					{ S(R"(skin)"sv), S(R"(thin)"sv) },
-					{ S(R"(color)"sv), S(R"(red)"sv) },
+				R"(apple)"sv, toml::table{{
+					{ R"(type)"sv, R"(fruit)"sv },
+					{ R"(skin)"sv, R"(thin)"sv },
+					{ R"(color)"sv, R"(red)"sv },
 				}}
 			},
 			{ 
-				S(R"(orange)"sv), toml::table{{
-					{ S(R"(type)"sv), S(R"(fruit)"sv) },
-					{ S(R"(skin)"sv), S(R"(thick)"sv) },
-					{ S(R"(color)"sv), S(R"(orange)"sv) },
+				R"(orange)"sv, toml::table{{
+					{ R"(type)"sv, R"(fruit)"sv },
+					{ R"(skin)"sv, R"(thick)"sv },
+					{ R"(color)"sv, R"(orange)"sv },
 				}}
 			},
 		}};
@@ -716,17 +716,17 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(apple)"sv), toml::table{{
-					{ S(R"(type)"sv), S(R"(fruit)"sv) },
-					{ S(R"(skin)"sv), S(R"(thin)"sv) },
-					{ S(R"(color)"sv), S(R"(red)"sv) },
+				R"(apple)"sv, toml::table{{
+					{ R"(type)"sv, R"(fruit)"sv },
+					{ R"(skin)"sv, R"(thin)"sv },
+					{ R"(color)"sv, R"(red)"sv },
 				}}
 			},
 			{ 
-				S(R"(orange)"sv), toml::table{{
-					{ S(R"(type)"sv), S(R"(fruit)"sv) },
-					{ S(R"(skin)"sv), S(R"(thick)"sv) },
-					{ S(R"(color)"sv), S(R"(orange)"sv) },
+				R"(orange)"sv, toml::table{{
+					{ R"(type)"sv, R"(fruit)"sv },
+					{ R"(skin)"sv, R"(thick)"sv },
+					{ R"(color)"sv, R"(orange)"sv },
 				}}
 			},
 		}};
@@ -736,7 +736,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt1)"sv), 1.0 },
+			{ R"(flt1)"sv, 1.0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -744,7 +744,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_10, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf1)"sv), make_infinity() },
+			{ R"(sf1)"sv, make_infinity() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -752,7 +752,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_11, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf2)"sv), make_infinity() },
+			{ R"(sf2)"sv, make_infinity() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -760,7 +760,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_12, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf2)"sv), make_infinity(-1) },
+			{ R"(sf2)"sv, make_infinity(-1) },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -768,7 +768,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_13, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf4)"sv), make_nan() },
+			{ R"(sf4)"sv, make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -776,7 +776,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_14, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf5)"sv), make_nan() },
+			{ R"(sf5)"sv, make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -784,7 +784,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_15, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(sf6)"sv), make_nan() },
+			{ R"(sf6)"sv, make_nan() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -792,7 +792,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt2)"sv), 3.1415 },
+			{ R"(flt2)"sv, 3.1415 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -800,7 +800,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt3)"sv), -0.01 },
+			{ R"(flt3)"sv, -0.01 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -808,7 +808,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt4)"sv), 5e+22 },
+			{ R"(flt4)"sv, 5e+22 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -816,7 +816,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_5, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt5)"sv), 1000000.0 },
+			{ R"(flt5)"sv, 1000000.0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -824,7 +824,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_6, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt6)"sv), -0.02 },
+			{ R"(flt6)"sv, -0.02 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -832,7 +832,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_7, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt7)"sv), 6.626e-34 },
+			{ R"(flt7)"sv, 6.626e-34 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -840,7 +840,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_8, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt8)"sv), 224617.445991228 },
+			{ R"(flt8)"sv, 224617.445991228 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -848,7 +848,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_float_9, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(flt9)"sv), -0.0 },
+			{ R"(flt9)"sv, -0.0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -856,7 +856,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int1)"sv), 99 },
+			{ R"(int1)"sv, 99 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -864,7 +864,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int2)"sv), 42 },
+			{ R"(int2)"sv, 42 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -872,7 +872,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int3)"sv), 0 },
+			{ R"(int3)"sv, 0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -880,7 +880,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_3a, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int3)"sv), 0 },
+			{ R"(int3)"sv, 0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -888,7 +888,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_3b, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int3)"sv), 0 },
+			{ R"(int3)"sv, 0 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -896,7 +896,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int4)"sv), -17 },
+			{ R"(int4)"sv, -17 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -904,7 +904,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_5, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int5)"sv), 1000 },
+			{ R"(int5)"sv, 1000 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -912,7 +912,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_6, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int6)"sv), 5349221 },
+			{ R"(int6)"sv, 5349221 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -920,7 +920,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_7, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(int7)"sv), 12345 },
+			{ R"(int7)"sv, 12345 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -928,7 +928,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_bin1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(bin1)"sv), 214 },
+			{ R"(bin1)"sv, 214 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -936,7 +936,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_hex1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(hex1)"sv), 3735928559 },
+			{ R"(hex1)"sv, 3735928559 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -944,7 +944,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_hex2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(hex2)"sv), 3735928559 },
+			{ R"(hex2)"sv, 3735928559 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -952,7 +952,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_hex3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(hex3)"sv), 3735928559 },
+			{ R"(hex3)"sv, 3735928559 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -960,7 +960,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_max, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(max)"sv), INT64_MAX },
+			{ R"(max)"sv, INT64_MAX },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -968,7 +968,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_min, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(min)"sv), INT64_MIN },
+			{ R"(min)"sv, INT64_MIN },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -976,7 +976,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_oct1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(oct1)"sv), 342391 },
+			{ R"(oct1)"sv, 342391 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -984,7 +984,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_oct2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(oct2)"sv), 493 },
+			{ R"(oct2)"sv, 493 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -992,7 +992,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(key)"sv), S(R"(value)"sv) },
+			{ R"(key)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1000,7 +1000,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(bare_key)"sv), S(R"(value)"sv) },
+			{ R"(bare_key)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1008,7 +1008,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(bare-key)"sv), S(R"(value)"sv) },
+			{ R"(bare-key)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1016,7 +1016,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(1234)"sv), S(R"(value)"sv) },
+			{ R"(1234)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1024,7 +1024,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_5, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(1234)"sv), S(R"(value)"sv) },
+			{ R"(1234)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1032,7 +1032,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_6, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(-)"sv), 1 },
+			{ R"(-)"sv, 1 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1040,7 +1040,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_7, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(_)"sv), 1 },
+			{ R"(_)"sv, 1 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1048,7 +1048,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_key_value_pair_8, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(-_-_-_-_-)"sv), 1 },
+			{ R"(-_-_-_-_-)"sv, 1 },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1057,8 +1057,8 @@ TEST_CASE("conformance - iarna/valid")
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(3)"sv), toml::table{{
-					{ S(R"(14159)"sv), S(R"(pi)"sv) },
+				R"(3)"sv, toml::table{{
+					{ R"(14159)"sv, R"(pi)"sv },
 				}}
 			},
 		}};
@@ -1068,7 +1068,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_quoted_basic_keys_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(ʎǝʞ)"sv), S(R"(value)"sv) },
+			{ R"(ʎǝʞ)"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1076,7 +1076,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_quoted_literal_keys_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(quoted "value")"sv), S(R"(value)"sv) },
+			{ R"(quoted "value")"sv, R"(value)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1084,50 +1084,50 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_readme_example, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(title)"sv), S(R"(TOML Example)"sv) },
+			{ R"(title)"sv, R"(TOML Example)"sv },
 			{ 
-				S(R"(owner)"sv), toml::table{{
-					{ S(R"(name)"sv), S(R"(Tom Preston-Werner)"sv) },
-					{ S(R"(dob)"sv), toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { -8, 0 } } },
+				R"(owner)"sv, toml::table{{
+					{ R"(name)"sv, R"(Tom Preston-Werner)"sv },
+					{ R"(dob)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 0, 0u }, { -8, 0 } } },
 				}}
 			},
 			{ 
-				S(R"(database)"sv), toml::table{{
-					{ S(R"(server)"sv), S(R"(192.168.1.1)"sv) },
+				R"(database)"sv, toml::table{{
+					{ R"(server)"sv, R"(192.168.1.1)"sv },
 					{ 
-						S(R"(ports)"sv), toml::array{
+						R"(ports)"sv, toml::array{
 							8001,
 							8001,
 							8002,
 						}
 					},
-					{ S(R"(connection_max)"sv), 5000 },
-					{ S(R"(enabled)"sv), true },
+					{ R"(connection_max)"sv, 5000 },
+					{ R"(enabled)"sv, true },
 				}}
 			},
 			{ 
-				S(R"(servers)"sv), toml::table{{
+				R"(servers)"sv, toml::table{{
 					{ 
-						S(R"(alpha)"sv), toml::table{{
-							{ S(R"(ip)"sv), S(R"(10.0.0.1)"sv) },
-							{ S(R"(dc)"sv), S(R"(eqdc10)"sv) },
+						R"(alpha)"sv, toml::table{{
+							{ R"(ip)"sv, R"(10.0.0.1)"sv },
+							{ R"(dc)"sv, R"(eqdc10)"sv },
 						}}
 					},
 					{ 
-						S(R"(beta)"sv), toml::table{{
-							{ S(R"(ip)"sv), S(R"(10.0.0.2)"sv) },
-							{ S(R"(dc)"sv), S(R"(eqdc10)"sv) },
+						R"(beta)"sv, toml::table{{
+							{ R"(ip)"sv, R"(10.0.0.2)"sv },
+							{ R"(dc)"sv, R"(eqdc10)"sv },
 						}}
 					},
 				}}
 			},
 			{ 
-				S(R"(clients)"sv), toml::table{{
+				R"(clients)"sv, toml::table{{
 					{ 
-						S(R"(data)"sv), toml::array{
+						R"(data)"sv, toml::array{
 							toml::array{
-								S(R"(gamma)"sv),
-								S(R"(delta)"sv),
+								R"(gamma)"sv,
+								R"(delta)"sv,
 							},
 							toml::array{
 								1,
@@ -1136,9 +1136,9 @@ TEST_CASE("conformance - iarna/valid")
 						}
 					},
 					{ 
-						S(R"(hosts)"sv), toml::array{
-							S(R"(alpha)"sv),
-							S(R"(omega)"sv),
+						R"(hosts)"sv, toml::array{
+							R"(alpha)"sv,
+							R"(omega)"sv,
 						}
 					},
 				}}
@@ -1150,8 +1150,8 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str1)"sv), S(R"(Roses are red
-Violets are blue)"sv) },
+			{ R"(str1)"sv, R"(Roses are red
+Violets are blue)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1159,7 +1159,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"(The quick brown fox jumps over the lazy dog.)"sv) },
+			{ R"(str)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1167,7 +1167,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"(The quick brown fox jumps over the lazy dog.)"sv) },
+			{ R"(str)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1175,8 +1175,8 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_5, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(ml-escaped-nl)"sv), S(R"(  foo bar \
-  baz \quux)"sv) },
+			{ R"(ml-escaped-nl)"sv, R"(  foo bar \
+  baz \quux)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1184,7 +1184,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_6, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str4)"sv), S(R"(Here are two quotation marks: "". Simple enough.)"sv) },
+			{ R"(str4)"sv, R"(Here are two quotation marks: "". Simple enough.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1192,7 +1192,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_7, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str5)"sv), S(R"(Here are three quotation marks: """.)"sv) },
+			{ R"(str5)"sv, R"(Here are three quotation marks: """.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1200,7 +1200,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_8, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str6)"sv), S(R"(Here are fifteen quotation marks: """"""""""""""".)"sv) },
+			{ R"(str6)"sv, R"(Here are fifteen quotation marks: """"""""""""""".)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1208,7 +1208,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_9, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str7)"sv), S(R"("This," she said, "is just a pointless statement.")"sv) },
+			{ R"(str7)"sv, R"("This," she said, "is just a pointless statement.")"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1216,7 +1216,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_tab_multiline, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"(This is a	tab)"sv) },
+			{ R"(str)"sv, R"(This is a	tab)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1224,7 +1224,7 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_tab, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"(This is a	tab)"sv) },
+			{ R"(str)"sv, R"(This is a	tab)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1232,8 +1232,8 @@ Violets are blue)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"(I'm a string. "You can quote me". Name	José
-Location	SF.)"sv) },
+			{ R"(str)"sv, R"(I'm a string. "You can quote me". Name	José
+Location	SF.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1241,7 +1241,7 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(winpath)"sv), S(R"(C:\Users\nodejs\templates)"sv) },
+			{ R"(winpath)"sv, R"(C:\Users\nodejs\templates)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1249,7 +1249,7 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(winpath2)"sv), S(R"(\\ServerX\admin$\system32\)"sv) },
+			{ R"(winpath2)"sv, R"(\\ServerX\admin$\system32\)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1257,7 +1257,7 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(quoted)"sv), S(R"(Tom "Dubs" Preston-Werner)"sv) },
+			{ R"(quoted)"sv, R"(Tom "Dubs" Preston-Werner)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1265,7 +1265,7 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(regex)"sv), S(R"(<\i\c*\s*>)"sv) },
+			{ R"(regex)"sv, R"(<\i\c*\s*>)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1273,7 +1273,7 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_multiline_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(regex2)"sv), S(R"(I [dw]on't need \d{2} apples)"sv) },
+			{ R"(regex2)"sv, R"(I [dw]on't need \d{2} apples)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1281,11 +1281,11 @@ Location	SF.)"sv) },
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_multiline_2, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(lines)"sv), S(R"(The first newline is
+			{ R"(lines)"sv, R"(The first newline is
 trimmed in raw strings.
    All other whitespace
    is preserved.
-)"sv) },
+)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1293,7 +1293,7 @@ trimmed in raw strings.
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_multiline_3, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(quot15)"sv), S(R"(Here are fifteen quotation marks: """"""""""""""")"sv) },
+			{ R"(quot15)"sv, R"(Here are fifteen quotation marks: """"""""""""""")"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1301,7 +1301,7 @@ trimmed in raw strings.
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_multiline_4, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(str)"sv), S(R"('That,' she said, 'is still pointless.')"sv) },
+			{ R"(str)"sv, R"('That,' she said, 'is still pointless.')"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1310,15 +1310,15 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(table-1)"sv), toml::table{{
-					{ S(R"(key1)"sv), S(R"(some string)"sv) },
-					{ S(R"(key2)"sv), 123 },
+				R"(table-1)"sv, toml::table{{
+					{ R"(key1)"sv, R"(some string)"sv },
+					{ R"(key2)"sv, 123 },
 				}}
 			},
 			{ 
-				S(R"(table-2)"sv), toml::table{{
-					{ S(R"(key1)"sv), S(R"(another string)"sv) },
-					{ S(R"(key2)"sv), 456 },
+				R"(table-2)"sv, toml::table{{
+					{ R"(key1)"sv, R"(another string)"sv },
+					{ R"(key2)"sv, 456 },
 				}}
 			},
 		}};
@@ -1329,12 +1329,12 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(dog)"sv), toml::table{{
+				R"(dog)"sv, toml::table{{
 					{ 
-						S(R"(tater.man)"sv), toml::table{{
+						R"(tater.man)"sv, toml::table{{
 							{ 
-								S(R"(type)"sv), toml::table{{
-									{ S(R"(name)"sv), S(R"(pug)"sv) },
+								R"(type)"sv, toml::table{{
+									{ R"(name)"sv, R"(pug)"sv },
 								}}
 							},
 						}}
@@ -1349,10 +1349,10 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(a)"sv), toml::table{{
+				R"(a)"sv, toml::table{{
 					{ 
-						S(R"(b)"sv), toml::table{{
-							{ S(R"(c)"sv), toml::table{} },
+						R"(b)"sv, toml::table{{
+							{ R"(c)"sv, toml::table{} },
 						}}
 					},
 				}}
@@ -1365,10 +1365,10 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(d)"sv), toml::table{{
+				R"(d)"sv, toml::table{{
 					{ 
-						S(R"(e)"sv), toml::table{{
-							{ S(R"(f)"sv), toml::table{} },
+						R"(e)"sv, toml::table{{
+							{ R"(f)"sv, toml::table{} },
 						}}
 					},
 				}}
@@ -1381,10 +1381,10 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(g)"sv), toml::table{{
+				R"(g)"sv, toml::table{{
 					{ 
-						S(R"(h)"sv), toml::table{{
-							{ S(R"(i)"sv), toml::table{} },
+						R"(h)"sv, toml::table{{
+							{ R"(i)"sv, toml::table{} },
 						}}
 					},
 				}}
@@ -1397,10 +1397,10 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(j)"sv), toml::table{{
+				R"(j)"sv, toml::table{{
 					{ 
-						S(R"(ʞ)"sv), toml::table{{
-							{ S(R"(l)"sv), toml::table{} },
+						R"(ʞ)"sv, toml::table{{
+							{ R"(l)"sv, toml::table{} },
 						}}
 					},
 				}}
@@ -1413,12 +1413,12 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(x)"sv), toml::table{{
+				R"(x)"sv, toml::table{{
 					{ 
-						S(R"(y)"sv), toml::table{{
+						R"(y)"sv, toml::table{{
 							{ 
-								S(R"(z)"sv), toml::table{{
-									{ S(R"(w)"sv), toml::table{} },
+								R"(z)"sv, toml::table{{
+									{ R"(w)"sv, toml::table{} },
 								}}
 							},
 						}}
@@ -1433,18 +1433,18 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(fruit)"sv), toml::table{{
+				R"(fruit)"sv, toml::table{{
 					{ 
-						S(R"(apple)"sv), toml::table{{
-							{ S(R"(color)"sv), S(R"(red)"sv) },
+						R"(apple)"sv, toml::table{{
+							{ R"(color)"sv, R"(red)"sv },
 							{ 
-								S(R"(taste)"sv), toml::table{{
-									{ S(R"(sweet)"sv), true },
+								R"(taste)"sv, toml::table{{
+									{ R"(sweet)"sv, true },
 								}}
 							},
 							{ 
-								S(R"(texture)"sv), toml::table{{
-									{ S(R"(smooth)"sv), true },
+								R"(texture)"sv, toml::table{{
+									{ R"(smooth)"sv, true },
 								}}
 							},
 						}}
@@ -1459,9 +1459,9 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(name)"sv), toml::table{{
-					{ S(R"(first)"sv), S(R"(Tom)"sv) },
-					{ S(R"(last)"sv), S(R"(Preston-Werner)"sv) },
+				R"(name)"sv, toml::table{{
+					{ R"(first)"sv, R"(Tom)"sv },
+					{ R"(last)"sv, R"(Preston-Werner)"sv },
 				}}
 			},
 		}};
@@ -1472,9 +1472,9 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(point)"sv), toml::table{{
-					{ S(R"(x)"sv), 1 },
-					{ S(R"(y)"sv), 2 },
+				R"(point)"sv, toml::table{{
+					{ R"(x)"sv, 1 },
+					{ R"(y)"sv, 2 },
 				}}
 			},
 		}};
@@ -1485,10 +1485,10 @@ trimmed in raw strings.
 	{
 		auto expected = toml::table{{
 			{ 
-				S(R"(animal)"sv), toml::table{{
+				R"(animal)"sv, toml::table{{
 					{ 
-						S(R"(type)"sv), toml::table{{
-							{ S(R"(name)"sv), S(R"(pug)"sv) },
+						R"(type)"sv, toml::table{{
+							{ R"(name)"sv, R"(pug)"sv },
 						}}
 					},
 				}}
@@ -1500,7 +1500,7 @@ trimmed in raw strings.
 	parsing_should_succeed(FILE_LINE_ARGS, spec_table, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(table)"sv), toml::table{} },
+			{ R"(table)"sv, toml::table{} },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1508,7 +1508,7 @@ trimmed in raw strings.
 	parsing_should_succeed(FILE_LINE_ARGS, spec_time_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
-			{ S(R"(lt1)"sv), toml::time{ 7, 32, 0, 0 } },
+			{ R"(lt1)"sv, toml::time{ 7, 32, 0, 0 } },
 		}};
 		REQUIRE(tbl == expected);
 	});

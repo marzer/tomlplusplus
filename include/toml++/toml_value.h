@@ -8,29 +8,129 @@
 #include "toml_print_to_stream.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 
 namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
+	template <typename T, typename...>
+	struct native_value_maker
+	{
+		template <typename... Args>
+		[[nodiscard]]
+		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+		{
+			return T(std::forward<Args>(args)...);
+		}
+	};
+
+	template <typename T>
+	struct native_value_maker<T, T>
+	{
+		template <typename U>
+		[[nodiscard]]
+		TOML_ALWAYS_INLINE
+		static U&& make(U&& val) noexcept
+		{
+			return std::forward<U>(val);
+		}
+	};
+
+	#if defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+
+	struct string_maker
+	{
+		template <typename T>
+		[[nodiscard]]
+		static std::string make(T&& arg) noexcept
+		{
+			#ifdef __cpp_lib_char8_t
+			if constexpr (is_one_of<std::decay_t<T>, char8_t*, const char8_t*>)
+				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg)));
+			else if constexpr (is_one_of<remove_cvref_t<T>, std::u8string, std::u8string_view>)
+				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg.data())), arg.length());
+			#endif // __cpp_lib_char8_t
+
+			#if TOML_WINDOWS_COMPAT
+			if constexpr (is_wide_string<T>)
+				return narrow(std::forward<T>(arg));
+			#endif // TOML_WINDOWS_COMPAT
+		}
+	};
+	#ifdef __cpp_lib_char8_t
+	template <>	struct native_value_maker<std::string, char8_t*>			: string_maker {};
+	template <>	struct native_value_maker<std::string, const char8_t*>		: string_maker {};
+	template <>	struct native_value_maker<std::string, std::u8string>		: string_maker {};
+	template <>	struct native_value_maker<std::string, std::u8string_view>	: string_maker {};
+	#endif // __cpp_lib_char8_t
+	#if TOML_WINDOWS_COMPAT
+	template <>	struct native_value_maker<std::string, wchar_t*>			: string_maker {};
+	template <>	struct native_value_maker<std::string, const wchar_t*>		: string_maker {};
+	template <>	struct native_value_maker<std::string, std::wstring>		: string_maker {};
+	template <>	struct native_value_maker<std::string, std::wstring_view>	: string_maker {};
+	#endif // TOML_WINDOWS_COMPAT
+
+	#endif // defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(const)
+	inline optional<T> node_integer_cast(int64_t val) noexcept
+	{
+		static_assert(node_type_of<T> == node_type::integer);
+		static_assert(!is_cvref<T>);
+
+		using traits = value_traits<T>;
+		if constexpr (!traits::is_signed)
+		{
+			if constexpr ((sizeof(T) * CHAR_BIT) <= 53) // 53 bits < int64_max < 54 bits
+			{
+				using common_t = decltype(int64_t{} + T{});
+				if (val < int64_t{} || static_cast<common_t>(val) > static_cast<common_t>(traits::max))
+					return {};
+			}
+			else
+			{
+				if (val < int64_t{})
+					return {};
+			}
+		}
+		else
+		{
+			if (val < traits::min || val > traits::max)
+				return {};
+		}
+		return { static_cast<T>(val) };
+	}
+
+	TOML_IMPL_NAMESPACE_END
+}
+
+namespace toml
+{
+	TOML_ABI_NAMESPACE_VERSION
+
 	template <typename Char, typename T>
 	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const value<T>&);
 
 	/// \brief	A TOML value.
 	/// 		
-	/// \tparam	T	The value's data type. Can be one of:
-	/// 			- toml::string
-	/// 			- toml::date
-	/// 			- toml::time
-	/// 			- toml::date_time
-	/// 			- int64_t
-	/// 			- double
-	/// 			- bool
-	template <typename T>
+	/// \tparam	ValueType	The value's native TOML data type. Can be one of:
+	/// 						- std::string
+	/// 						- toml::date
+	/// 						- toml::time
+	/// 						- toml::date_time
+	/// 						- int64_t
+	/// 						- double
+	/// 						- bool
+	template <typename ValueType>
 	class TOML_API value final : public node
 	{
 		static_assert(
-			impl::is_native<T>,
+			impl::is_native<ValueType> && !impl::is_cvref<ValueType>,
 			"A toml::value<> must model one of the native TOML value types:"
 			TOML_NATIVE_VALUE_TYPE_LIST
 		);
@@ -38,23 +138,24 @@ namespace toml
 		private:
 			friend class TOML_PARSER_TYPENAME;
 
-			template <typename U, typename V>
+			template <typename T, typename U>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
-			static auto as_value([[maybe_unused]] V* ptr) noexcept
+			TOML_ATTR(const)
+			static auto as_value([[maybe_unused]] U* ptr) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return ptr;
 				else
 					return nullptr;
 			}
 
-			T val_;
+			ValueType val_;
 
 		public:
 
 			/// \brief	The value's underlying data type.
-			using value_type = T;
+			using value_type = ValueType;
 
 			/// \brief	A type alias for 'value arguments'.
 			/// \details This differs according to the value's type argument:
@@ -62,19 +163,22 @@ namespace toml
 			/// 		 - strings: `string_view`
 			/// 		 - everything else: `const value_type&`
 			using value_arg = std::conditional_t<
-				std::is_same_v<T, string>,
-				string_view,
-				std::conditional_t<impl::is_one_of<T, double, int64_t, bool>, T, const T&>
+				std::is_same_v<value_type, std::string>,
+				std::string_view,
+				std::conditional_t<impl::is_one_of<value_type, double, int64_t, bool>, value_type, const value_type&>
 			>;
 
 			/// \brief	Constructs a toml value.
 			///
-			/// \tparam	U	Constructor argument types.
+			/// \tparam	Args	Constructor argument types.
 			/// \param 	args	Arguments to forward to the internal value's constructor.
-			template <typename... U>
+			template <typename... Args>
 			TOML_NODISCARD_CTOR
-			explicit value(U&&... args) noexcept(std::is_nothrow_constructible_v<T, U&&...>)
-				: val_{ std::forward<U>(args)... }
+			explicit value(Args&&... args)
+				noexcept(noexcept(value_type(
+					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...)
+				)))
+				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
 			{}
 
 			/// \brief	Move constructor.
@@ -105,7 +209,7 @@ namespace toml
 			/// 			- node_type::date
 			/// 			- node_type::time
 			/// 			- node_type::date_time
-			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<T>; }
+			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<value_type>; }
 
 			/// \brief	Always returns `false` for value nodes.
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
@@ -114,17 +218,17 @@ namespace toml
 			/// \brief	Always returns `true` for value nodes.
 			[[nodiscard]] bool is_value() const noexcept override { return true; }
 
-			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<T, string>; }
-			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<T, int64_t>; }
-			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<T, double>; }
-			[[nodiscard]] bool is_number() const noexcept override { return impl::is_one_of<T, int64_t, double>; }
-			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<T, bool>; }
-			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<T, date>; }
-			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<T, time>; }
-			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<T, date_time>; }
+			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<value_type, std::string>; }
+			[[nodiscard]] bool is_integer() const noexcept override { return std::is_same_v<value_type, int64_t>; }
+			[[nodiscard]] bool is_floating_point() const noexcept override { return std::is_same_v<value_type, double>; }
+			[[nodiscard]] bool is_number() const noexcept override { return impl::is_one_of<value_type, int64_t, double>; }
+			[[nodiscard]] bool is_boolean() const noexcept override { return std::is_same_v<value_type, bool>; }
+			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<value_type, date>; }
+			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<value_type, time>; }
+			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<value_type, date_time>; }
 
 			/// \brief	Returns a pointer to the value if the data type is a string.
-			[[nodiscard]] value<string>* as_string() noexcept override { return as_value<string>(this); }
+			[[nodiscard]] value<std::string>* as_string() noexcept override { return as_value<std::string>(this); }
 			/// \brief	Returns a pointer to the value if the data type is an integer.
 			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
 			/// \brief	Returns a pointer to the value if the data type is a floating-point.
@@ -139,7 +243,7 @@ namespace toml
 			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
 
 			/// \brief	Returns a const pointer to the value if the data type is a string.
-			[[nodiscard]] const value<string>* as_string() const noexcept override { return as_value<string>(this); }
+			[[nodiscard]] const value<std::string>* as_string() const noexcept override { return as_value<std::string>(this); }
 			/// \brief	Returns a const pointer to the value if the data type is an integer.
 			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
 			/// \brief	Returns a const pointer to the value if the data type is a floating-point.
@@ -154,42 +258,42 @@ namespace toml
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
 			/// \brief	Returns a reference to the underlying value.
-			[[nodiscard]] T& get() & noexcept { return val_; }
+			[[nodiscard]] value_type& get() & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] T&& get() && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& get() && noexcept { return std::move(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
-			[[nodiscard]] const T& get() const & noexcept { return val_; }
+			[[nodiscard]] const value_type& get() const & noexcept { return val_; }
 
 			/// \brief	Returns a reference to the underlying value.
-			[[nodiscard]] T& operator* () & noexcept { return val_; }
+			[[nodiscard]] value_type& operator* () & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] T&& operator* () && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& operator* () && noexcept { return std::move(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
-			[[nodiscard]] const T& operator* () const& noexcept { return val_; }
+			[[nodiscard]] const value_type& operator* () const& noexcept { return val_; }
 
 			/// \brief	Returns a reference to the underlying value.
-			[[nodiscard]] explicit operator T& () & noexcept { return val_; }
+			[[nodiscard]] explicit operator value_type& () & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] explicit operator T&& () && noexcept { return std::move(val_); }
+			[[nodiscard]] explicit operator value_type && () && noexcept { return std::move(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
-			[[nodiscard]] explicit operator const T& () const& noexcept { return val_; }
+			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
 			/// \brief	Prints the value out to a stream as formatted TOML.
-			template <typename Char, typename U>
-			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<U>& rhs);
+			template <typename Char, typename T>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs);
 
 			/// \brief	Value-assignment operator.
 			value& operator= (value_arg rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, string>)
+				if constexpr (std::is_same_v<value_type, std::string>)
 					val_.assign(rhs);
 				else
 					val_ = rhs;
 				return *this;
 			}
 
-			template <typename U = T, typename = std::enable_if_t<std::is_same_v<U, string>>>
-			value& operator= (string&& rhs) noexcept
+			template <typename T = value_type, typename = std::enable_if_t<std::is_same_v<T, std::string>>>
+			value& operator= (std::string&& rhs) noexcept
 			{
 				val_ = std::move(rhs);
 				return *this;
@@ -261,11 +365,11 @@ namespace toml
 			/// \param 	rhs	The RHS value.
 			///
 			/// \returns	True if the values were of the same type and contained the same value.
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator == (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator == (const value& lhs, const value<T>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return lhs == rhs.val_; //calls asymmetrical value-equality operator defined above
 				else
 					return false;
@@ -277,9 +381,9 @@ namespace toml
 			/// \param 	rhs	The RHS value.
 			///
 			/// \returns	True if the values were not of the same type, or did not contain the same value.
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator != (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator != (const value& lhs, const value<T>& rhs) noexcept
 			{
 				return !(lhs == rhs);
 			}
@@ -291,14 +395,14 @@ namespace toml
 			///
 			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() < rhs.get()` <br>
 			/// 			<strong><em>Different value types:</em></strong> `lhs.type() < rhs.type()`
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator < (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator < (const value& lhs, const value<T>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return lhs.val_ < rhs.val_;
 				else
-					return impl::node_type_of<T> < impl::node_type_of<U>;
+					return impl::node_type_of<value_type> < impl::node_type_of<T>;
 			}
 
 			/// \brief	Less-than-or-equal-to operator.
@@ -308,14 +412,14 @@ namespace toml
 			///
 			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() <= rhs.get()` <br>
 			/// 			<strong><em>Different value types:</em></strong> `lhs.type() <= rhs.type()`
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator <= (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator <= (const value& lhs, const value<T>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return lhs.val_ <= rhs.val_;
 				else
-					return impl::node_type_of<T> <= impl::node_type_of<U>;
+					return impl::node_type_of<value_type> <= impl::node_type_of<T>;
 			}
 
 			/// \brief	Greater-than operator.
@@ -325,14 +429,14 @@ namespace toml
 			///
 			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() > rhs.get()` <br>
 			/// 			<strong><em>Different value types:</em></strong> `lhs.type() > rhs.type()`
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator > (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator > (const value& lhs, const value<T>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return lhs.val_ > rhs.val_;
 				else
-					return impl::node_type_of<T> > impl::node_type_of<U>;
+					return impl::node_type_of<value_type> > impl::node_type_of<T>;
 			}
 
 			/// \brief	Greater-than-or-equal-to operator.
@@ -342,28 +446,25 @@ namespace toml
 			///
 			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() >= rhs.get()` <br>
 			/// 			<strong><em>Different value types:</em></strong> `lhs.type() >= rhs.type()`
-			template <typename U>
+			template <typename T>
 			[[nodiscard]]
-			friend bool operator >= (const value& lhs, const value<U>& rhs) noexcept
+			friend bool operator >= (const value& lhs, const value<T>& rhs) noexcept
 			{
-				if constexpr (std::is_same_v<T, U>)
+				if constexpr (std::is_same_v<value_type, T>)
 					return lhs.val_ >= rhs.val_;
 				else
-					return impl::node_type_of<T> >= impl::node_type_of<U>;
+					return impl::node_type_of<value_type> >= impl::node_type_of<T>;
 			}
 	};
 
 	#if !TOML_ALL_INLINE
-		TOML_PUSH_WARNINGS
-		TOML_DISABLE_VTABLE_WARNINGS
-		extern template class TOML_API value<string>;
+		extern template class TOML_API value<std::string>;
 		extern template class TOML_API value<int64_t>;
 		extern template class TOML_API value<double>;
 		extern template class TOML_API value<bool>;
 		extern template class TOML_API value<date>;
 		extern template class TOML_API value<time>;
 		extern template class TOML_API value<date_time>;
-		TOML_POP_WARNINGS
 	#endif
 	
 	template <typename T>
@@ -383,16 +484,17 @@ namespace toml
 		static_assert(node_type_of<T> != node_type::table);
 		static_assert(node_type_of<T> != node_type::array);
 		static_assert(is_native<T> || can_represent_native<T>);
+		static_assert(!is_cvref<T>);
 		TOML_ASSERT(this->type() == node_type_of<T>);
 
 		if constexpr (node_type_of<T> == node_type::string)
 		{
-			const auto& str = *ref_cast<string>();
-			if constexpr (std::is_same_v<T, string>)
+			const auto& str = *ref_cast<std::string>();
+			if constexpr (std::is_same_v<T, std::string>)
 				return str;
-			else if constexpr (std::is_same_v<T, string_view>)
+			else if constexpr (std::is_same_v<T, std::string_view>)
 				return T{ str };
-			else if constexpr (std::is_same_v<T, const string_char*>)
+			else if constexpr (std::is_same_v<T, const char*>)
 				return str.c_str();
 
 			else if constexpr (std::is_same_v<T, std::wstring>)
@@ -404,13 +506,8 @@ namespace toml
 				#endif
 			}
 
-			// char8_t -> char (safe)
-			else if constexpr (is_one_of<T, std::string, std::string_view>)
-				return T(reinterpret_cast<const char*>(str.c_str()), str.length());
-			else if constexpr (std::is_same_v<T, const char*>)
-				return reinterpret_cast<const char*>(str.c_str());
-
 			#ifdef __cpp_lib_char8_t
+
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
 			else if constexpr (is_one_of<T, std::u8string, std::u8string_view>)
 				return T(reinterpret_cast<const char8_t*>(str.c_str()), str.length());
@@ -418,12 +515,12 @@ namespace toml
 				return reinterpret_cast<const char8_t*>(str.c_str());
 			else
 				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+
 			#endif
 		}
 		else
 			return static_cast<T>(*ref_cast<native_type_of<T>>());
 	}
-
 
 	template <typename T>
 	inline optional<T> node::value_exact() const noexcept
@@ -436,18 +533,14 @@ namespace toml
 			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
 		static_assert(
-			is_native<T> || can_represent_native<T>,
+			(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
 			"The return type of node::value_exact() must be one of the following:"
 			"\n|"
 			"\n| A native TOML value type"
 			TOML_NATIVE_VALUE_TYPE_LIST
 			"\n|"
 			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			#if TOML_CHAR_8_STRINGS
 			"\n| - std::string"
-			#elif defined __cpp_lib_char8_t
-			"\n| - std::u8string"
-			#endif
 			#if TOML_WINDOWS_COMPAT
 			"\n| - std::wstring"
 			#endif
@@ -480,18 +573,14 @@ namespace toml
 			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
 		static_assert(
-			is_native<T> || can_represent_native<T> || can_partially_represent_native<T>,
+			(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
 			"The return type of node::value() must be one of the following:"
 			"\n|"
 			"\n| A native TOML value type"
 			TOML_NATIVE_VALUE_TYPE_LIST
 			"\n|"
 			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			#if TOML_CHAR_8_STRINGS
 			"\n| - std::string"
-			#elif defined __cpp_lib_char8_t
-			"\n| - std::u8string"
-			#endif
 			#if TOML_WINDOWS_COMPAT
 			"\n| - std::wstring"
 			#endif
@@ -513,7 +602,7 @@ namespace toml
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
 		// semantics to be mindful of so the exact retrieval is enough.
-		if constexpr (is_natively_one_of<T, string, time, date, date_time>)
+		if constexpr (is_natively_one_of<T, std::string, time, date, date_time>)
 		{
 			if (type() == node_type_of<T>)
 				return { this->get_value_exact<T>() };
@@ -535,30 +624,7 @@ namespace toml
 						if constexpr (is_native<T> || can_represent_native<T>)
 							return static_cast<T>(*ref_cast<int64_t>());
 						else
-						{
-							using traits = value_traits<T>;
-							const int64_t val = *ref_cast<int64_t>();
-							if constexpr (!traits::is_signed)
-							{
-								if constexpr ((sizeof(T) * CHAR_BIT) <= 53) // 53 bits < int64_max < 54 bits
-								{
-									using common_t = decltype(int64_t{} + T{});
-									if (val < int64_t{} || static_cast<common_t>(val) > static_cast<common_t>(traits::max))
-										return {};
-								}
-								else
-								{
-									if (val < int64_t{})
-										return {};
-								}
-							}
-							else
-							{
-								if (val < traits::min || val > traits::max)
-									return {};
-							}
-							return { static_cast<T>(val) };
-						}
+							return node_integer_cast<T>(*ref_cast<int64_t>());
 					}
 
 					// int -> float
@@ -600,6 +666,16 @@ namespace toml
 						}
 					}
 
+					// float -> int
+					else if constexpr (is_natively_one_of<T, int64_t>)
+					{
+						const double val = *ref_cast<double>();
+						if (static_cast<double>(static_cast<int64_t>(val)) == val)
+							return node_integer_cast<T>(static_cast<int64_t>(val));
+						else
+							return {};
+					}
+
 					// float -> anything else
 					else
 						return {};
@@ -627,8 +703,6 @@ namespace toml
 		}
 	}
 
-	TOML_POP_WARNINGS
-
 	template <typename T>
 	inline auto node::value_or(T&& default_value) const noexcept
 	{
@@ -646,7 +720,7 @@ namespace toml
 			#if TOML_WINDOWS_COMPAT
 
 			if (type() == node_type::string)
-				return widen(*ref_cast<string>());
+				return widen(*ref_cast<std::string>());
 			return std::wstring{ std::forward<T>(default_value) };
 
 			#else
@@ -672,11 +746,7 @@ namespace toml
 				TOML_NATIVE_VALUE_TYPE_LIST
 				"\n| "
 				"\n| A non-view type capable of losslessly representing a native TOML value type"
-				#if TOML_CHAR_8_STRINGS
 				"\n| - std::string"
-				#elif defined __cpp_lib_char8_t
-				"\n| - std::u8string"
-				#endif
 				#if TOML_WINDOWS_COMPAT
 				"\n| - std::wstring"
 				#endif
@@ -723,6 +793,58 @@ namespace toml
 			}
 		}
 	}
+
+	#if !TOML_ALL_INLINE
+
+	#define TOML_EXTERN(name, T)	\
+		extern template TOML_API optional<T>		node::name<T>() const noexcept
+	TOML_EXTERN(value_exact, std::string_view);
+	TOML_EXTERN(value_exact, std::string);
+	TOML_EXTERN(value_exact, const char*);
+	TOML_EXTERN(value_exact, int64_t);
+	TOML_EXTERN(value_exact, double);
+	TOML_EXTERN(value_exact, date);
+	TOML_EXTERN(value_exact, time);
+	TOML_EXTERN(value_exact, date_time);
+	TOML_EXTERN(value_exact, bool);
+	TOML_EXTERN(value, std::string_view);
+	TOML_EXTERN(value, std::string);
+	TOML_EXTERN(value, const char*);
+	TOML_EXTERN(value, signed char);
+	TOML_EXTERN(value, signed short);
+	TOML_EXTERN(value, signed int);
+	TOML_EXTERN(value, signed long);
+	TOML_EXTERN(value, signed long long);
+	TOML_EXTERN(value, unsigned char);
+	TOML_EXTERN(value, unsigned short);
+	TOML_EXTERN(value, unsigned int);
+	TOML_EXTERN(value, unsigned long);
+	TOML_EXTERN(value, unsigned long long);
+	TOML_EXTERN(value, double);
+	TOML_EXTERN(value, float);
+	TOML_EXTERN(value, date);
+	TOML_EXTERN(value, time);
+	TOML_EXTERN(value, date_time);
+	TOML_EXTERN(value, bool);
+	#ifdef __cpp_lib_char8_t
+	TOML_EXTERN(value_exact, std::u8string_view);
+	TOML_EXTERN(value_exact, std::u8string);
+	TOML_EXTERN(value_exact, const char8_t*);
+	TOML_EXTERN(value, std::u8string_view);
+	TOML_EXTERN(value, std::u8string);
+	TOML_EXTERN(value, const char8_t*);
+	#endif
+	#if TOML_WINDOWS_COMPAT
+	TOML_EXTERN(value_exact, std::wstring);
+	TOML_EXTERN(value, std::wstring);
+	#endif
+	#undef TOML_EXTERN
+
+	#endif // !TOML_ALL_INLINE
+
+	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_FLOAT_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

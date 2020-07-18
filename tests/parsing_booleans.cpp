@@ -15,8 +15,8 @@ TEST_CASE("parsing - booleans")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("bool1")] == true);
-			CHECK(tbl[S("bool2")] == false);
+			CHECK(tbl["bool1"] == true);
+			CHECK(tbl["bool2"] == false);
 		}
 	);
 

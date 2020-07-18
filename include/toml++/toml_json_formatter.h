@@ -12,6 +12,8 @@ TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	template <typename T, typename U>
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&);
 	template <typename T, typename U>
@@ -132,8 +134,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON.
 	template <typename T, typename U>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.print();
@@ -143,8 +144,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
 	template <typename T, typename U>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
@@ -153,6 +153,8 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
 	#endif
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

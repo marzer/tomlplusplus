@@ -18,6 +18,8 @@ TOML_DISABLE_SUGGEST_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
@@ -232,6 +234,30 @@ namespace toml
 
 		return *this;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type type) const noexcept
+	{
+		if (values.empty())
+			return false;
+
+		if (type == node_type::none)
+			type = values[0]->type();
+
+		for (const auto& val : values)
+			if (val->type() != type)
+				return false;
+
+		return true;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_array_of_tables() const noexcept
+	{
+		return is_homogeneous(node_type::table);
+	}
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS

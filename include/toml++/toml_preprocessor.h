@@ -28,10 +28,6 @@
 	#define TOML_API
 #endif
 
-#ifndef TOML_CHAR_8_STRINGS
-	#define TOML_CHAR_8_STRINGS 0
-#endif
-
 #ifndef TOML_UNRELEASED_FEATURES
 	#define TOML_UNRELEASED_FEATURES 0
 #endif
@@ -62,6 +58,14 @@
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
 #endif
 
+#ifdef TOML_CHAR_8_STRINGS
+	#if TOML_CHAR_8_STRINGS
+		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
+all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
+is no longer necessary.
+	#endif
+#endif
+
 ////////// COMPILER & ENVIRONMENT
 
 #ifndef __cplusplus
@@ -76,21 +80,22 @@
 #endif
 #ifdef __clang__
 
-	#define TOML_PUSH_WARNINGS				_Pragma("clang diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("clang diagnostic ignored \"-Wswitch\"")
-	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
-	#define TOML_DISABLE_VTABLE_WARNINGS	_Pragma("clang diagnostic ignored \"-Weverything\"") \
-											_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
-	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("clang diagnostic ignored \"-Wpadded\"")
-	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
-											_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"")
-	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("clang diagnostic ignored \"-Wshadow\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("clang diagnostic ignored \"-Weverything\"")
-	#define TOML_POP_WARNINGS				_Pragma("clang diagnostic pop")
+	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push")
+	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"")
+	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
+	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("clang diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
+												_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
+												_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"")
+	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("clang diagnostic ignored \"-Wshadow\"")
+	#define TOML_DISABLE_MISC_WARNINGS			_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
+												_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"")
+	#define TOML_DISABLE_ALL_WARNINGS			_Pragma("clang diagnostic ignored \"-Weverything\"")
+	#define TOML_POP_WARNINGS					_Pragma("clang diagnostic pop")
 
-	#define TOML_ASSUME(cond)				__builtin_assume(cond)
-	#define TOML_UNREACHABLE				__builtin_unreachable()
-	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
+	#define TOML_ASSUME(cond)					__builtin_assume(cond)
+	#define TOML_UNREACHABLE					__builtin_unreachable()
+	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
@@ -159,29 +164,32 @@
 
 #elif defined(__GNUC__)
 
-	#define TOML_PUSH_WARNINGS				_Pragma("GCC diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
-											_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-											_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")
-	#define TOML_DISABLE_INIT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-											_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-											_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
-	#define TOML_DISABLE_PADDING_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wpadded\"")
-	#define TOML_DISABLE_FLOAT_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")
-	#define TOML_DISABLE_SHADOW_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wshadow\"")
-	#define TOML_DISABLE_SUGGEST_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-											_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
-	#define TOML_DISABLE_ALL_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
-											_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
-											_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
-											_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
-											TOML_DISABLE_SUGGEST_WARNINGS										\
-											TOML_DISABLE_SWITCH_WARNINGS										\
-											TOML_DISABLE_INIT_WARNINGS											\
-											TOML_DISABLE_PADDING_WARNINGS										\
-											TOML_DISABLE_FLOAT_WARNINGS											\
-											TOML_DISABLE_SHADOW_WARNINGS
-	#define TOML_POP_WARNINGS				_Pragma("GCC diagnostic pop")
+	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push")
+	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")
+	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
+												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
+												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
+	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
+												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
+	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"")
+	#define TOML_DISABLE_SUGGEST_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
+	#define TOML_DISABLE_MISC_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+	#define TOML_DISABLE_ALL_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wall\"")							\
+												_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
+												TOML_DISABLE_SWITCH_WARNINGS										\
+												TOML_DISABLE_INIT_WARNINGS											\
+												TOML_DISABLE_PADDING_WARNINGS										\
+												TOML_DISABLE_ARITHMETIC_WARNINGS									\
+												TOML_DISABLE_SHADOW_WARNINGS										\
+												TOML_DISABLE_SUGGEST_WARNINGS										\
+												TOML_DISABLE_MISC_WARNINGS
+	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
 
 	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
@@ -269,14 +277,14 @@
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
-#ifndef TOML_DISABLE_VTABLE_WARNINGS
-	#define TOML_DISABLE_VTABLE_WARNINGS
+#ifndef TOML_DISABLE_MISC_WARNINGS
+	#define TOML_DISABLE_MISC_WARNINGS
 #endif
 #ifndef TOML_DISABLE_PADDING_WARNINGS
 	#define TOML_DISABLE_PADDING_WARNINGS
 #endif
-#ifndef TOML_DISABLE_FLOAT_WARNINGS
-	#define TOML_DISABLE_FLOAT_WARNINGS
+#ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS
 #endif
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_DISABLE_SHADOW_WARNINGS
@@ -365,16 +373,6 @@
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
-#if TOML_ALL_INLINE
-	#define TOML_EXTERNAL_LINKAGE	inline
-	#define TOML_INTERNAL_LINKAGE	inline
-	#define TOML_INTERNAL_NAMESPACE toml::impl
-#else
-	#define TOML_EXTERNAL_LINKAGE
-	#define TOML_INTERNAL_LINKAGE	static
-	#define TOML_INTERNAL_NAMESPACE
-#endif
-
 #include "toml_version.h"
 //# {{
 #define	TOML_LIB_SINGLE_HEADER 0
@@ -406,16 +404,33 @@
 #define TOML_EVAL_BOOL_1(T, F)	T
 #define TOML_EVAL_BOOL_0(T, F)	F
 
-#if TOML_DOXYGEN || defined(__INTELLISENSE__)
+#if TOML_DOXYGEN // || defined(__INTELLISENSE__)
 	#define TOML_ABI_NAMESPACES					0
-	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)
 	#define TOML_ABI_NAMESPACE_START(name)
+	#define TOML_ABI_NAMESPACE_VERSION
+	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)
 	#define TOML_ABI_NAMESPACE_END
 #else
 	#define TOML_ABI_NAMESPACES					1
-	#define TOML_ABI_NAMESPACE_START(name)		inline namespace TOML_CONCAT(abi_, name) {
+	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name {
+	#define TOML_ABI_NAMESPACE_VERSION			TOML_ABI_NAMESPACE_START(TOML_CONCAT(v, TOML_LIB_MAJOR))
 	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
 	#define TOML_ABI_NAMESPACE_END				}
+#endif
+
+#define TOML_IMPL_NAMESPACE_START			TOML_ABI_NAMESPACE_VERSION namespace impl {
+#define TOML_IMPL_NAMESPACE_END				} TOML_ABI_NAMESPACE_END
+
+#if TOML_ALL_INLINE
+	#define TOML_EXTERNAL_LINKAGE			inline
+	#define TOML_INTERNAL_LINKAGE			inline
+	#define TOML_ANONYMOUS_NAMESPACE			toml { TOML_ABI_NAMESPACE_VERSION namespace impl
+	#define TOML_ANONYMOUS_NAMESPACE_END		} TOML_ABI_NAMESPACE_END
+#else
+	#define TOML_EXTERNAL_LINKAGE
+	#define TOML_INTERNAL_LINKAGE			static
+	#define TOML_ANONYMOUS_NAMESPACE
+	#define TOML_ANONYMOUS_NAMESPACE_END
 #endif
 
 TOML_PUSH_WARNINGS
@@ -429,12 +444,6 @@ TOML_DISABLE_ALL_WARNINGS
 	#endif
 #endif
 TOML_POP_WARNINGS
-
-#if TOML_CHAR_8_STRINGS
-	#define TOML_STRING_PREFIX(S) TOML_CONCAT(u8, S)
-#else
-	#define TOML_STRING_PREFIX(S) S
-#endif
 
 //# {{
 #if TOML_DOXYGEN
@@ -474,11 +483,6 @@ TOML_POP_WARNINGS
 /// \def TOML_ASSERT(expr)
 /// \brief Sets the assert function used by the library.
 /// \detail Defaults to the standard C `assert()`.
-
-
-/// \def TOML_CHAR_8_STRINGS
-/// \brief Uses C++20 char8_t-based strings as the toml string data type.
-/// \detail Defaults to `0`.
 
 
 #define TOML_CONFIG_HEADER
@@ -543,10 +547,9 @@ TOML_POP_WARNINGS
 /// 	   when building for Windows.
 /// \detail Defaults to `1` when building for Windows, `0` otherwise. Has no effect when building for anything other
 /// 		than Windows.
-/// \attention This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values;
-/// 		   that will still be std::string or std::u8string according to whatever #TOML_CHAR_8_STRINGS is set to.
-/// 		   This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at
-/// 		   various interface boundaries.
+/// \attention This <strong>does not</strong> change the underlying string type used to represent TOML keys and string
+/// 		   values; that will still be std::string. This setting simply enables some narrow &lt;=&gt; wide string
+/// 		   conversions when necessary at various interface boundaries.
 /// 		   <br><br>
 /// 		   If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings,
 /// 		   you can safely set this to `0`.

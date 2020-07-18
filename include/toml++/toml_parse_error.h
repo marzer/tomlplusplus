@@ -19,15 +19,15 @@ TOML_POP_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
-TOML_DISABLE_VTABLE_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 
 namespace toml
 {
-	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
+	TOML_ABI_NAMESPACE_VERSION
+
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
-
-	TOML_ABI_NAMESPACE_START(noex)
 
 	/// \brief	An error generated when parsing fails.
 	/// 
@@ -76,8 +76,6 @@ namespace toml
 
 	#else
 
-	TOML_ABI_NAMESPACE_START(ex)
-
 	class parse_error final
 		: public std::runtime_error
 	{
@@ -121,7 +119,6 @@ namespace toml
 	#endif
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
 	/// \brief	Prints a parse_error to a stream.
 	///
@@ -148,8 +145,7 @@ namespace toml
 	///
 	/// \returns	The input stream.
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const parse_error& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const parse_error& rhs)
 	{
 		lhs << rhs.description();
 		lhs << "\n\t(error occurred at "sv;
@@ -161,6 +157,8 @@ namespace toml
 	#if !TOML_ALL_INLINE
 		extern template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 	#endif
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS

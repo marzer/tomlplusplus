@@ -2,40 +2,6 @@ version: 2
 
 jobs:
 
-    debug_clang9_dox:
-        docker:
-            - image: marzer/misc_cpp17_dev:latest
-        steps:
-            - checkout
-            - run:
-                name: Initializing locales
-                command: |
-                    sudo apt-get update && sudo apt-get install -y locales
-                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
-            - run:
-                name: Checking toml.hpp
-                command: |
-                    cd python && python3 ci_single_header_check.py
-            - run:
-                name: Pulling submodules
-                command: |
-                    git submodule update --init extern/Catch2
-                    git submodule update --init extern/tloptional
-            - run:
-                name: Building and testing with clang 9
-                command: |
-                    CXX=clang++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled -DBUILD_EXAMPLES=disabled
-                    cd build && ninja -v -j 4 && ninja test
-            - run:
-                name: Generating documentation
-                command: |
-                    git submodule update --init extern/mcss
-                    cd python && python3 generate_documentation.py
-            - persist_to_workspace:
-                root: docs
-                paths: html
-
-
     debug_clang9:
         docker:
             - image: marzer/misc_cpp17_dev:latest
@@ -60,7 +26,6 @@ jobs:
                 command: |
                     CXX=clang++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled -DBUILD_EXAMPLES=disabled
                     cd build && ninja -v -j 4 && ninja test
-
 
     release_clang9:
         docker:
@@ -87,7 +52,6 @@ jobs:
                     CXX=clang++-9 meson build --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DBUILD_EXAMPLES=disabled
                     cd build && ninja -v -j 4 && ninja test
 
-
     debug_gcc9:
         docker:
             - image: marzer/misc_cpp17_dev:latest
@@ -108,7 +72,6 @@ jobs:
                 command: |
                     CXX=g++-9 meson build --buildtype=debug -DGENERATE_CMAKE_CONFIG=disabled -DBUILD_EXAMPLES=disabled
                     cd build && ninja -v -j 4 && ninja test
-
 
     release_gcc9:
         docker:
@@ -131,6 +94,22 @@ jobs:
                     CXX=g++-9 meson build --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DBUILD_EXAMPLES=disabled
                     cd build && ninja -v -j 4 && ninja test
 
+    generate_dox:
+        docker:
+            - image: marzer/misc_cpp17_dev:latest
+        steps:
+            - checkout
+            - run:
+                name: Pulling submodules
+                command: |
+                    git submodule update --init extern/mcss
+            - run:
+                name: Generating documentation
+                command: |
+                    cd python && python3 generate_documentation.py
+            - persist_to_workspace:
+                root: docs
+                paths: html
 
     deploy_dox:
         docker:
@@ -156,25 +135,23 @@ jobs:
                 name: Deploy docs to gh-pages branch
                 command: gh-pages --dotfiles --message "[skip ci] Updates" --dist docs/html
 
-
 workflows:
     version: 2
     build:
         jobs:
-            - debug_clang9_dox:
-                filters:
-                    branches:
-                        only: master
-            - debug_clang9:
-                filters:
-                    branches:
-                        ignore: master
+            - debug_clang9
             - release_clang9
             - debug_gcc9
             - release_gcc9
-            - deploy_dox:
+            - generate_dox:
                 requires:
-                    - debug_clang9_dox
+                    - debug_clang9
                     - release_clang9
                     - debug_gcc9
                     - release_gcc9
+                filters:
+                    branches:
+                        only: master
+            - deploy_dox:
+                requires:
+                    - generate_dox

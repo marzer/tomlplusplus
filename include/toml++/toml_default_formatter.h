@@ -13,20 +13,21 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
-	[[nodiscard]] TOML_API
-	toml::string default_formatter_make_key_segment(const toml::string& str) noexcept;
+	TOML_IMPL_NAMESPACE_START
 
-	[[nodiscard]] TOML_API
-	size_t default_formatter_inline_columns(const node& node) noexcept;
+	[[nodiscard]] TOML_API std::string default_formatter_make_key_segment(const std::string&) noexcept;
+	[[nodiscard]] TOML_API size_t default_formatter_inline_columns(const node&) noexcept;
+	[[nodiscard]] TOML_API bool default_formatter_forces_multiline(const node&, size_t = 0) noexcept;
 
-	[[nodiscard]] TOML_API
-	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias = 0) noexcept;
+	TOML_IMPL_NAMESPACE_END
 }
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	template <typename T, typename U>
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
 	template <typename T, typename U>
@@ -66,9 +67,9 @@ namespace toml
 	{
 		private:
 			using base = impl::formatter<Char>;
-			std::vector<toml::string> key_path;
+			std::vector<std::string> key_path;
 
-			void print_key_segment(const toml::string& str)
+			void print_key_segment(const std::string& str)
 			{
 				if (str.empty())
 					impl::print_to_stream("''"sv, base::stream());
@@ -353,8 +354,7 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
 	template <typename T, typename U>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>& rhs)
 	{
 		rhs.attach(lhs);
 		rhs.key_path.clear();
@@ -365,29 +365,25 @@ namespace toml
 
 	/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
 	template <typename T, typename U>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
+	inline std::basic_ostream<T>& operator << (std::basic_ostream<T>& lhs, default_formatter<U>&& rhs)
 	{
 		return lhs << rhs; //as lvalue
 	}
 
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
 	{
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const array& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const array& rhs)
 	{
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
 	template <typename Char, typename T>
-	TOML_EXTERNAL_LINKAGE
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs)
 	{
 		return lhs << default_formatter<Char>{ rhs };
 	}
@@ -397,7 +393,7 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::string>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
@@ -405,6 +401,8 @@ namespace toml
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
 	#endif
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

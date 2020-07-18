@@ -79,7 +79,7 @@
     <ClInclude Include="..\include\toml++\toml_json_formatter.hpp">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\tests\settings.h">
+    <ClInclude Include="..\include\toml++\toml_utf8_streams.hpp">
       <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -124,6 +124,9 @@
     </None>
     <None Include="..\.gitattributes" />
     <None Include="..\.gitignore" />
+    <None Include="..\python\generate_windows_test_targets.py">
+      <Filter>python</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -135,5 +138,8 @@
     <Filter Include="docs">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="toml++.natvis" />
   </ItemGroup>
 </Project>

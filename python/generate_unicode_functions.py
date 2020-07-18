@@ -1113,8 +1113,10 @@ def write_to_files(codepoints, header_file, test_file):
 	header('#pragma once')
 	header('#include "toml_preprocessor.h"')
 	header('')
-	header('namespace toml::impl')
+	header('namespace toml')
 	header('{')
+	header('	TOML_IMPL_NAMESPACE_START')
+	header('')
 
 	test('#include "tests.h"')
 	test('#include "unicode.h"')
@@ -1133,6 +1135,8 @@ def write_to_files(codepoints, header_file, test_file):
 	emit_category_function('is_unicode_combining_mark', header_file, test_file, codepoints, ('Mn', 'Mc'), unicode_exclusions)
 	both('#endif // TOML_LANG_UNRELEASED')
 
+	header('')
+	header('	TOML_IMPL_NAMESPACE_END')
 	header('} // toml::impl')
 
 

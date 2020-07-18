@@ -16,8 +16,8 @@ TEST_CASE("parsing - comments")
 		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 2);
-			CHECK(tbl[S("key")] == S("value"sv));
-			CHECK(tbl[S("another")] == S("# This is not a comment"sv));
+			CHECK(tbl["key"] == "value"sv);
+			CHECK(tbl["another"] == "# This is not a comment"sv);
 		}
 	);
 

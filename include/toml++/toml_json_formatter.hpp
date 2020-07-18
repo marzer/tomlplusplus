@@ -18,9 +18,10 @@ TOML_DISABLE_SWITCH_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	void json_formatter<Char>::print(const toml::table& tbl)
+	inline void json_formatter<Char>::print(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -58,6 +59,8 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS

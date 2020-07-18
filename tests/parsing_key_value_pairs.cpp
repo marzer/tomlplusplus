@@ -19,11 +19,11 @@ TEST_CASE("parsing - key-value pairs")
 		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 5);
-			CHECK(tbl[S("key")] == S("value"sv));
-			CHECK(tbl[S("bare_key")] == S("value"sv));
-			CHECK(tbl[S("bare-key")] == S("value"sv));
-			CHECK(tbl[S("1234")] == S("value"sv));
-			CHECK(tbl[S("")] == S("blank"sv));
+			CHECK(tbl["key"] == "value"sv);
+			CHECK(tbl["bare_key"] == "value"sv);
+			CHECK(tbl["bare-key"] == "value"sv);
+			CHECK(tbl["1234"] == "value"sv);
+			CHECK(tbl[""] == "blank"sv);
 		}
 	);
 
@@ -41,12 +41,12 @@ TEST_CASE("parsing - key-value pairs")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("127.0.0.1")] == S("value"sv));
-			CHECK(tbl[S("character encoding")] == S("value"sv));
-			CHECK(tbl[S("ʎǝʞ")] == S("value"sv));
-			CHECK(tbl[S("key2")] == S("value"sv));
-			CHECK(tbl[S("quoted \"value\"")] == S("value"sv));
-			CHECK(tbl[S("")] == S("blank"sv));
+			CHECK(tbl["127.0.0.1"] == "value"sv);
+			CHECK(tbl["character encoding"] == "value"sv);
+			CHECK(tbl["ʎǝʞ"] == "value"sv);
+			CHECK(tbl["key2"] == "value"sv);
+			CHECK(tbl["quoted \"value\""] == "value"sv);
+			CHECK(tbl[""] == "blank"sv);
 		}
 	);
 
@@ -73,11 +73,11 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		[](table&& tbl)
 		{
 			CHECK(tbl.size() == 4);
-			CHECK(tbl[S("name")] == S("Orange"sv));
-			CHECK(tbl[S("physical")][S("color")] == S("orange"sv));
-			CHECK(tbl[S("physical")][S("shape")] == S("round"sv));
-			CHECK(tbl[S("site")][S("google.com")] == true);
-			CHECK(tbl[S("3")][S("14159")] == S("pi"sv));
+			CHECK(tbl["name"] == "Orange"sv);
+			CHECK(tbl["physical"]["color"] == "orange"sv);
+			CHECK(tbl["physical"]["shape"] == "round"sv);
+			CHECK(tbl["site"]["google.com"] == true);
+			CHECK(tbl["3"]["14159"] == "pi"sv);
 		}
 	);
 
@@ -90,8 +90,8 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("fruit")][S("apple")][S("smooth")] == true);
-			CHECK(tbl[S("fruit")][S("orange")] == 2);
+			CHECK(tbl["fruit"]["apple"]["smooth"] == true);
+			CHECK(tbl["fruit"]["orange"] == 2);
 		}
 	);
 
@@ -117,12 +117,12 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("apple")][S("type")] == S("fruit"sv));
-			CHECK(tbl[S("apple")][S("skin")] == S("thin"sv));
-			CHECK(tbl[S("apple")][S("color")] == S("red"sv));
-			CHECK(tbl[S("orange")][S("type")] == S("fruit"sv));
-			CHECK(tbl[S("orange")][S("skin")] == S("thick"sv));
-			CHECK(tbl[S("orange")][S("color")] == S("orange"sv));
+			CHECK(tbl["apple"]["type"] == "fruit"sv);
+			CHECK(tbl["apple"]["skin"] == "thin"sv);
+			CHECK(tbl["apple"]["color"] == "red"sv);
+			CHECK(tbl["orange"]["type"] == "fruit"sv);
+			CHECK(tbl["orange"]["skin"] == "thick"sv);
+			CHECK(tbl["orange"]["color"] == "orange"sv);
 		}
 	);
 
@@ -141,12 +141,12 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("apple")][S("type")] == S("fruit"sv));
-			CHECK(tbl[S("apple")][S("skin")] == S("thin"sv));
-			CHECK(tbl[S("apple")][S("color")] == S("red"sv));
-			CHECK(tbl[S("orange")][S("type")] == S("fruit"sv));
-			CHECK(tbl[S("orange")][S("skin")] == S("thick"sv));
-			CHECK(tbl[S("orange")][S("color")] == S("orange"sv));
+			CHECK(tbl["apple"]["type"] == "fruit"sv);
+			CHECK(tbl["apple"]["skin"] == "thin"sv);
+			CHECK(tbl["apple"]["color"] == "red"sv);
+			CHECK(tbl["orange"]["type"] == "fruit"sv);
+			CHECK(tbl["orange"]["skin"] == "thick"sv);
+			CHECK(tbl["orange"]["color"] == "orange"sv);
 		}
 	);
 
@@ -161,8 +161,8 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 			[](table&& tbl)
 			{
 				CHECK(tbl.size() == 2);
-				CHECK(tbl[S("key+1")] == 0);
-				CHECK(tbl[S("ʎǝʞ2")] == 0);
+				CHECK(tbl["key+1"] == 0);
+				CHECK(tbl["ʎǝʞ2"] == 0);
 			}
 		);
 	#else
@@ -245,8 +245,8 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 		b = "to do"
 	)"sv, [](table&& tbl)
 	{
-		CHECK(tbl[S("a")] == S(" to do "sv));
-		CHECK(tbl[S("b")] == S("to do"sv));
+		CHECK(tbl["a"] == " to do "sv);
+		CHECK(tbl["b"] == "to do"sv);
 	});
 
 	// values must be quoted, syntax error
@@ -285,8 +285,8 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 		b = """"quoted""""
 	)"sv, [](table&& tbl)
 	{
-		CHECK(tbl[S("a")] == S("\"quoted\""sv));
-		CHECK(tbl[S("b")] == S("\"quoted\""sv));
+		CHECK(tbl["a"] == "\"quoted\""sv);
+		CHECK(tbl["b"] == "\"quoted\""sv);
 	});
 
 	// quote correction is not applied, fail syntax error

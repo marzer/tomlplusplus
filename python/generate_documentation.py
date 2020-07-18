@@ -73,7 +73,6 @@ type_names = [
 	'time',
 	'date_time',
 	'time_offset',
-	'string_char',
 	'parse_result',
 	'parse_error',
 	'json_formatter',

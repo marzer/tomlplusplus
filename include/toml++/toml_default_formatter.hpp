@@ -19,21 +19,20 @@ TOML_POP_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_FLOAT_WARNINGS
+TOML_DISABLE_ARITHMETIC_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
-	inline constexpr size_t default_formatter_line_wrap = 120_sz;
+	TOML_IMPL_NAMESPACE_START
 
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_ALL_WARNINGS
+	inline constexpr size_t default_formatter_line_wrap = 120_sz;
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
-	string default_formatter_make_key_segment(const string& str) noexcept
+	std::string default_formatter_make_key_segment(const std::string& str) noexcept
 	{
 		if (str.empty())
-			return TOML_STRING_PREFIX("''"s);
+			return "''"s;
 		else
 		{
 			bool requiresQuotes = false;
@@ -51,32 +50,30 @@ namespace toml::impl
 
 			if (requiresQuotes)
 			{
-				string s;
+				std::string s;
 				s.reserve(str.length() + 2_sz);
-				s += TOML_STRING_PREFIX('"');
+				s += '"';
 				for (auto c : str)
 				{
-					if TOML_UNLIKELY(c >= TOML_STRING_PREFIX('\x00') && c <= TOML_STRING_PREFIX('\x1F'))
+					if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
 					{
 						const auto& sv = low_character_escape_table[c];
-						s.append(reinterpret_cast<const string_char*>(sv.data()), sv.length());
+						s.append(reinterpret_cast<const char*>(sv.data()), sv.length());
 					}
-					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('\x7F'))
-						s.append(TOML_STRING_PREFIX("\\u007F"sv));
-					else if TOML_UNLIKELY(c == TOML_STRING_PREFIX('"'))
-						s.append(TOML_STRING_PREFIX("\\\""sv));
+					else if TOML_UNLIKELY(c == '\x7F')
+						s.append("\\u007F"sv);
+					else if TOML_UNLIKELY(c == '"')
+						s.append("\\\""sv);
 					else
 						s += c;
 				}
-				s += TOML_STRING_PREFIX('"');
+				s += '"';
 				return s;
 			}
 			else
 				return str;
 		}
 	}
-
-	TOML_POP_WARNINGS
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
@@ -116,7 +113,7 @@ namespace toml::impl
 
 			case node_type::string:
 			{
-				auto& n = *reinterpret_cast<const value<string>*>(&node);
+				auto& n = *reinterpret_cast<const value<std::string>*>(&node);
 				return n.get().length() + 2_sz; // + ""
 			}
 
@@ -168,13 +165,16 @@ namespace toml::impl
 	{
 		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
 	}
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	template <typename Char>
-	TOML_EXTERNAL_LINKAGE
-	void default_formatter<Char>::print_inline(const toml::table& tbl)
+	inline void default_formatter<Char>::print_inline(const toml::table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream("{}"sv, base::stream());
@@ -207,9 +207,9 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
-}
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_FLOAT_WARNINGS
+	TOML_ABI_NAMESPACE_END // version
+}
 
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
@@ -219,11 +219,13 @@ TOML_DISABLE_ALL_WARNINGS
 #include <Windows.h> // fuckkkk :(
 TOML_POP_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
-	std::string narrow_char(std::wstring_view str) noexcept
+	std::string narrow(std::wstring_view str) noexcept
 	{
 		if (str.empty())
 			return {};
@@ -239,31 +241,6 @@ namespace toml::impl
 		}
 		return s;
 	}
-
-	#ifdef __cpp_lib_char8_t
-
-	TOML_API
-	TOML_EXTERNAL_LINKAGE
-	std::u8string narrow_char8(std::wstring_view str) noexcept
-	{
-		if (str.empty())
-			return {};
-
-		std::u8string s;
-		const auto len = WideCharToMultiByte(
-			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
-		);
-		if (len)
-		{
-			s.resize(static_cast<size_t>(len));
-			WideCharToMultiByte(
-				65001, 0, str.data(), static_cast<int>(str.length()), reinterpret_cast<char*>(s.data()), len, nullptr, nullptr
-			);
-		}
-		return s;
-	}
-
-	#endif // __cpp_lib_char8_t
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
@@ -295,6 +272,10 @@ namespace toml::impl
 	}
 
 	#endif // __cpp_lib_char8_t
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 #endif // TOML_WINDOWS_COMPAT
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS

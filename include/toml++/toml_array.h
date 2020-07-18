@@ -7,10 +7,12 @@
 #include "toml_value.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_VTABLE_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 
-namespace toml::impl
+namespace toml
 {
+	TOML_IMPL_NAMESPACE_START
+
 	template <bool IsConst>
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
@@ -20,7 +22,7 @@ namespace toml::impl
 			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
 			using raw_const_iterator = std::vector<std::unique_ptr<node>>::const_iterator;
 			using raw_iterator = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
-				
+			
 			mutable raw_iterator raw_;
 
 			array_iterator(raw_mutable_iterator raw) noexcept
@@ -160,12 +162,17 @@ namespace toml::impl
 				return *(raw_ + idx)->get();
 			}
 
+			TOML_PUSH_WARNINGS
+			TOML_DISABLE_ALL_WARNINGS
+
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			[[nodiscard]]
 			operator array_iterator<true>() const noexcept
 			{
 				return array_iterator<true>{ raw_ };
 			}
+
+			TOML_POP_WARNINGS
 	};
 
 	template <typename T>
@@ -187,7 +194,8 @@ namespace toml::impl
 		{
 			static_assert(
 				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-				"Instantiating values from wide-character strings is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
+				"Instantiating values from wide-character strings is only "
+				"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 			);
 			static_assert(
 				is_native<type> || is_losslessly_convertible_to_native<type>,
@@ -214,10 +222,14 @@ namespace toml::impl
 	{
 		return make_node(std::move(val.value));
 	}
+
+	TOML_IMPL_NAMESPACE_END
 }
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
 	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
 	template <typename Char>
@@ -367,6 +379,33 @@ namespace toml
 			///
 			/// \detail \cpp
 			/// auto arr = toml::array{ 1, 2, 3 };
+			/// std::cout << "homogenous: "sv << arr.is_homogeneous(toml::node_type::none) << std::endl;
+			/// std::cout << "all floats: "sv << arr.is_homogeneous(toml::node_type::floating_point) << std::endl;
+			/// std::cout << "all arrays: "sv << arr.is_homogeneous(toml::node_type::array) << std::endl;
+			/// std::cout << "all integers: "sv << arr.is_homogeneous(toml::node_type::integer) << std::endl;
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// homogeneous: true
+			/// all doubles: false
+			/// all arrays: false
+			/// all integers: true
+			/// \eout
+			/// 
+			/// \param	type	A TOML node type. <br>
+			/// 				<strong><em>`toml::node_type::none`: </em></strong> "is every node the same type?"
+			/// 				<strong><em>Anything else:</em></strong> "is every node one of these?" <br>
+			///
+			/// \returns	True if the array was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` for empty arrays.
+			[[nodiscard]] bool is_homogeneous(node_type type) const noexcept;
+
+			/// \brief	Checks if the array contains nodes of only one type.
+			///
+			/// \detail \cpp
+			/// auto arr = toml::array{ 1, 2, 3 };
 			/// std::cout << "homogenous: "sv << arr.is_homogeneous() << std::endl;
 			/// std::cout << "all doubles: "sv << arr.is_homogeneous<double>() << std::endl;
 			/// std::cout << "all arrays: "sv << arr.is_homogeneous<toml::array>() << std::endl;
@@ -382,40 +421,32 @@ namespace toml
 			/// \eout
 			/// 
 			/// \tparam	T	A TOML node type. <br>
-			/// 			<strong><em>Explicitly specified:</em></strong> "is every node a T?" <br>
 			/// 			<strong><em>Left as `void`:</em></strong> "is every node the same type?"
+			/// 			<strong><em>Explicitly specified:</em></strong> "is every node a T?" <br>
 			///
 			/// \returns	True if the array was homogeneous.
 			/// 
 			/// \remarks	Always returns `false` for empty arrays.
 			template <typename T = void>
-			[[nodiscard]] bool is_homogeneous() const noexcept
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
 			{
-				if (values.empty())
-					return false;
-
-				if constexpr (std::is_same_v<T, void>)
-				{
-					const auto type = values[0]->type();
-					for (size_t i = 1; i < values.size(); i++)
-						if (values[i]->type() != type)
-							return false;
-				}
+				using type = impl::unwrap_node<T>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of array::is_homogeneous() must be void or one of the following:"
+					TOML_UNWRAPPED_NODE_TYPE_LIST
+				);
+				
+				if constexpr (std::is_void_v<type>)
+					return is_homogeneous(node_type::none);
 				else
-				{
-					for (auto& v : values)
-						if (!v->is<T>())
-							return false;
-				}
-				return true;
+					return is_homogeneous(impl::node_type_of<type>);
 			}
 
 			/// \brief	Returns true if this array contains only tables.
-			[[nodiscard]] TOML_ALWAYS_INLINE
-			bool is_array_of_tables() const noexcept override
-			{
-				return is_homogeneous<toml::table>();
-			}
+			[[nodiscard]] bool is_array_of_tables() const noexcept override;
 
 			/// \brief	Gets a reference to the node at a specific index.
 			[[nodiscard]] node& operator[] (size_t index) noexcept;
@@ -619,7 +650,7 @@ namespace toml
 			{
 				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"Emplacement type parameter must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
@@ -781,7 +812,7 @@ namespace toml
 			{
 				using type = impl::unwrap_node<U>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"Emplacement type parameter must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
@@ -843,7 +874,8 @@ namespace toml
 			///
 			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] impl::wrap_node<T>* get_as(size_t index) noexcept
+			[[nodiscard]]
+			impl::wrap_node<T>* get_as(size_t index) noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -857,7 +889,8 @@ namespace toml
 			///
 			/// \returns	A pointer to the selected node if it existed and was of the specified type, or nullptr.
 			template <typename T>
-			[[nodiscard]] const impl::wrap_node<T>* get_as(size_t index) const noexcept
+			[[nodiscard]]
+			const impl::wrap_node<T>* get_as(size_t index) const noexcept
 			{
 				if (auto val = get(index))
 					return val->as<T>();
@@ -883,7 +916,8 @@ namespace toml
 		private:
 
 			template <typename T>
-			[[nodiscard]] static bool container_equality(const array& lhs, const T& rhs) noexcept
+			[[nodiscard]]
+			static bool container_equality(const array& lhs, const T& rhs) noexcept
 			{
 				using element_type = std::remove_const_t<typename T::value_type>;
 				static_assert(
@@ -915,7 +949,8 @@ namespace toml
 
 			/// \brief	Initializer list equality operator.
 			template <typename T>
-			[[nodiscard]] friend bool operator == (const array& lhs, const std::initializer_list<T>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator == (const array& lhs, const std::initializer_list<T>& rhs) noexcept
 			{
 				return container_equality(lhs, rhs);
 			}
@@ -923,7 +958,8 @@ namespace toml
 
 			/// \brief	Vector equality operator.
 			template <typename T>
-			[[nodiscard]] friend bool operator == (const array& lhs, const std::vector<T>& rhs) noexcept
+			[[nodiscard]]
+			friend bool operator == (const array& lhs, const std::vector<T>& rhs) noexcept
 			{
 				return container_equality(lhs, rhs);
 			}
@@ -952,7 +988,7 @@ namespace toml
 			array& flatten() &;
 
 			/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
-			array&& flatten()&&
+			array&& flatten() &&
 			{
 				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
 			}
@@ -961,6 +997,8 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 	};
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
+TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS

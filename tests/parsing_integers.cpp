@@ -20,13 +20,13 @@ TEST_CASE("parsing - integers (decimal)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("int1")] == 99);
-			CHECK(tbl[S("int2")] == 42);
-			CHECK(tbl[S("int3")] == 0);
-			CHECK(tbl[S("int4")] == -17);
-			CHECK(tbl[S("int5")] == 1000);
-			CHECK(tbl[S("int6")] == 5349221);
-			CHECK(tbl[S("int7")] == 12345);
+			CHECK(tbl["int1"] == 99);
+			CHECK(tbl["int2"] == 42);
+			CHECK(tbl["int3"] == 0);
+			CHECK(tbl["int4"] == -17);
+			CHECK(tbl["int5"] == 1000);
+			CHECK(tbl["int6"] == 5349221);
+			CHECK(tbl["int7"] == 12345);
 		}
 	);
 
@@ -50,8 +50,8 @@ TEST_CASE("parsing - integers (decimal)")
 		"zeroes = [-0, +0]"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("zeroes")][0] == 0);
-			CHECK(tbl[S("zeroes")][1] == 0);
+			CHECK(tbl["zeroes"][0] == 0);
+			CHECK(tbl["zeroes"][1] == 0);
 		}
 	);
 
@@ -104,12 +104,12 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
-			CHECK(tbl[S("hex2")] == 0xDEADBEEF);
-			CHECK(tbl[S("hex3")] == 0xDEADBEEF);
-			CHECK(tbl[S("oct1")] == 01234567);
-			CHECK(tbl[S("oct2")] == 0755);
-			CHECK(tbl[S("bin1")] == 0b11010110);
+			CHECK(tbl["hex1"] == 0xDEADBEEF);
+			CHECK(tbl["hex2"] == 0xDEADBEEF);
+			CHECK(tbl["hex3"] == 0xDEADBEEF);
+			CHECK(tbl["oct1"] == 01234567);
+			CHECK(tbl["oct2"] == 0755);
+			CHECK(tbl["bin1"] == 0b11010110);
 		}
 	);
 
@@ -135,12 +135,12 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 		)"sv,
 		[](table&& tbl)
 		{
-			CHECK(tbl[S("hex1")] == 0xDEADBEEF);
-			CHECK(tbl[S("hex2")] == 0xDEADBEEF);
-			CHECK(tbl[S("hex3")] == 0xDEADBEEF);
-			CHECK(tbl[S("oct1")] == 01234567);
-			CHECK(tbl[S("oct2")] == 0755);
-			CHECK(tbl[S("bin1")] == 0b11010110);
+			CHECK(tbl["hex1"] == 0xDEADBEEF);
+			CHECK(tbl["hex2"] == 0xDEADBEEF);
+			CHECK(tbl["hex3"] == 0xDEADBEEF);
+			CHECK(tbl["oct1"] == 01234567);
+			CHECK(tbl["oct2"] == 0755);
+			CHECK(tbl["bin1"] == 0b11010110);
 		}
 	);
 

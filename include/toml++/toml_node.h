@@ -7,16 +7,10 @@
 #include "toml_common.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_VTABLE_WARNINGS
-
-#if TOML_CHAR_8_STRINGS
-	#define TOML_NATIVE_STRING_TYPE_NAME "std::u8string"
-#else
-	#define TOML_NATIVE_STRING_TYPE_NAME "std::string"
-#endif
+TOML_DISABLE_MISC_WARNINGS
 
 #define TOML_NATIVE_VALUE_TYPE_LIST							\
-	"\n| - " TOML_NATIVE_STRING_TYPE_NAME					\
+	"\n| - std::string"										\
 	"\n| - int64_t"											\
 	"\n| - double"											\
 	"\n| - bool"											\
@@ -28,7 +22,7 @@ TOML_DISABLE_VTABLE_WARNINGS
 #define TOML_NODE_TYPE_LIST									\
 	"\n| - toml::table"										\
 	"\n| - toml::array"										\
-	"\n| - toml::value<" TOML_NATIVE_STRING_TYPE_NAME ">"	\
+	"\n| - toml::value<std::string>"						\
 	"\n| - toml::value<int64_t>"							\
 	"\n| - toml::value<double>"								\
 	"\n| - toml::value<bool>"								\
@@ -46,6 +40,8 @@ TOML_DISABLE_VTABLE_WARNINGS
 
 namespace toml
 {
+	TOML_ABI_NAMESPACE_VERSION
+
 	/// \brief	A TOML node.
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
@@ -136,14 +132,14 @@ namespace toml
 			{
 				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"The template type argument of node::is() must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
 				else if constexpr (std::is_same_v<type, array>) return is_array();
-				else if constexpr (std::is_same_v<type, string>) return is_string();
+				else if constexpr (std::is_same_v<type, std::string>) return is_string();
 				else if constexpr (std::is_same_v<type, int64_t>) return is_integer();
 				else if constexpr (std::is_same_v<type, double>) return is_floating_point();
 				else if constexpr (std::is_same_v<type, bool>) return is_boolean();
@@ -157,7 +153,7 @@ namespace toml
 			/// \brief	Returns a pointer to the node as a toml::array, if it is one.
 			[[nodiscard]] virtual array* as_array() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<string>, if it is one.
-			[[nodiscard]] virtual toml::value<string>* as_string() noexcept;
+			[[nodiscard]] virtual toml::value<std::string>* as_string() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<int64_t>, if it is one.
 			[[nodiscard]] virtual toml::value<int64_t>* as_integer() noexcept;
 			/// \brief	Returns a pointer to the node as a toml::value<double>, if it is one.
@@ -173,7 +169,7 @@ namespace toml
 
 			[[nodiscard]] virtual const table* as_table() const noexcept;
 			[[nodiscard]] virtual const array* as_array() const noexcept;
-			[[nodiscard]] virtual const toml::value<string>* as_string() const noexcept;
+			[[nodiscard]] virtual const toml::value<std::string>* as_string() const noexcept;
 			[[nodiscard]] virtual const toml::value<int64_t>* as_integer() const noexcept;
 			[[nodiscard]] virtual const toml::value<double>* as_floating_point() const noexcept;
 			[[nodiscard]] virtual const toml::value<bool>* as_boolean() const noexcept;
@@ -190,70 +186,170 @@ namespace toml
 
 		public:
 
+			/// \brief	Gets the value contained by this node.
+			/// 
+			/// \detail This function has 'exact' retrieval semantics; the only return value types allowed are the
+			/// 		TOML native value types, or types that can losslessly represent a native value type (e.g.
+			/// 		std::wstring on Windows).
+			/// 
+			/// \tparam	T	One of the native TOML value types, or a type capable of losslessly representing one.
+			/// 
+			/// \returns	The underlying value if the node was a value of the
+			/// 			matching type (or losslessly convertible to it), or an empty optional.
+			/// 
+			/// \see node::value()
 			template <typename T>
 			[[nodiscard]]
 			optional<T> value_exact() const noexcept;
 
-			/// \brief	Gets the raw value contained by this node.
+			/// \brief	Gets the value contained by this node.
 			/// 
-			/// \detail The optional returned by this function will only contain a value if the node was an instance of
-			/// 		toml::value with the same value type as the template argument. Additionally, some type are allowed to
-			/// 		convert to each other, for instance asking for an integer when the value exists as a double,
-			/// 		or requesting a string value as a string_view: \cpp
+			/// \detail This function has 'permissive' retrieval semantics; some value types are allowed
+			/// 		to convert to others (e.g. retrieving a boolean as an integer), and the specified return value
+			/// 		type can be any type where a reasonable conversion from a native TOML value exists
+			/// 		(e.g. std::wstring on Windows). If the source value cannot be represented by
+			/// 		the destination type, an empty optional is returned.
+			/// 
+			/// \cpp
 			/// auto tbl = toml::parse(R"(
-			///		int_val = 10
-			///		float_val = 25.6
-			///		string_val = "kek"
+			/// 	int	= -10
+			/// 	flt	= 25.0
+			/// 	pi	= 3.14159
+			/// 	bool = false
+			/// 	huge = 9223372036854775807
+			/// 	str	= "foo"
 			/// )"sv);
 			/// 
-			/// if (auto val = tbl.get("int_val"sv)->value<int64_t>())
-			///		std::cout << "'int_val' as int64_t: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("int_val"sv)->value<double>())
-			///		std::cout << "'int_val' as double: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("float_val"sv)->value<int64_t>())
-			///		std::cout << "'float_val' as int64_t: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("float_val"sv)->value<double>())
-			///		std::cout << "'float_val' as double: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("string_val"sv)->value<std::string>())
-			///		std::cout << "'string_val' as std::string: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("string_val"sv)->value<std::string_view>())
-			///		std::cout << "'string_val' as std::string_view: "sv << *val << std::endl;
-			///		
-			/// if (auto val = tbl.get("string_val"sv)->value<int64_t>())
-			///		std::cout << "this line won't be printed because string_val wasn't an int."sv << std::endl;
+			/// const auto print_value_with_typename =
+			///		[&](std::string_view key, std::string_view type_name, auto* dummy)
+			///		{
+			///			std::cout << "'" << key << "' as " << type_name << ": ";
+			///			using type = std::remove_pointer_t<decltype(dummy)>;
+			///			if (std::optional<type> val = tbl.get(key)->value<type>())
+			///				std::cout << *val << "\n";
+			///			else
+			///				std::cout << "No conversion path or out-of-range\n";
+			///		};
+			/// 
+			/// #define print_value(key, T)	print_value_with_typename(key, #T, (T*)nullptr)
+			/// 
+			/// print_value("int", bool);
+			/// print_value("int", int);
+			/// print_value("int", unsigned int);
+			/// print_value("int", long long);
+			/// print_value("int", float);
+			/// print_value("int", double);
+			/// std::cout << "\n";
+			/// 
+			/// print_value("flt", bool);
+			/// print_value("flt", int);
+			/// print_value("flt", unsigned int);
+			/// print_value("flt", long long);
+			/// print_value("flt", float);
+			/// print_value("flt", double);
+			/// std::cout << "\n";
+			/// 
+			/// print_value("pi", bool);
+			/// print_value("pi", int);
+			/// print_value("pi", unsigned int);
+			/// print_value("pi", long long);
+			/// print_value("pi", float);
+			/// print_value("pi", double);
+			/// std::cout << "\n";
+			/// 
+			/// print_value("bool", bool);
+			/// print_value("bool", int);
+			/// print_value("bool", unsigned int);
+			/// print_value("bool", long long);
+			/// print_value("bool", float);
+			/// print_value("bool", double);
+			/// std::cout << "\n";
+			/// 
+			/// print_value("huge", bool);
+			/// print_value("huge", int);
+			/// print_value("huge", unsigned int);
+			/// print_value("huge", long long);
+			/// print_value("huge", float);
+			/// print_value("huge", double);
+			/// std::cout << "\n";
+			/// 
+			/// print_value("str", std::string);
+			/// print_value("str", std::string_view);
+			/// print_value("str", const char*);
+			/// std::cout << "\n";
 			/// \ecpp
 			/// 
 			/// \out
-			/// 'int_val' as int64_t: 10
-			/// 'int_val' as double: 10
-			/// 'float_val' as int64_t: 25
-			/// 'float_val' as double: 25.6
-			/// 'string_val' as std::string: kek
-			/// 'string_val' as std::string_view: kek
+			/// 'int' as bool: true
+			/// 'int' as int: -10
+			/// 'int' as unsigned int: No conversion path or out-of-range
+			/// 'int' as long long: -10
+			/// 'int' as float: -10
+			/// 'int' as double: -10
+			/// 
+			/// 'flt' as bool: No conversion path or out-of-range
+			/// 'flt' as int: 25
+			/// 'flt' as unsigned int: 25
+			/// 'flt' as long long: 25
+			/// 'flt' as float: 25
+			/// 'flt' as double: 25
+			/// 
+			/// 'pi' as bool: No conversion path or out-of-range
+			/// 'pi' as int: No conversion path or out-of-range
+			/// 'pi' as unsigned int: No conversion path or out-of-range
+			/// 'pi' as long long: No conversion path or out-of-range
+			/// 'pi' as float: 3.14159
+			/// 'pi' as double: 3.14159
+			/// 
+			/// 'bool' as bool: false
+			/// 'bool' as int: 0
+			/// 'bool' as unsigned int: 0
+			/// 'bool' as long long: 0
+			/// 'bool' as float: No conversion path or out-of-range
+			/// 'bool' as double: No conversion path or out-of-range
+			/// 
+			/// 'huge' as bool: true
+			/// 'huge' as int: No conversion path or out-of-range
+			/// 'huge' as unsigned int: No conversion path or out-of-range
+			/// 'huge' as long long: 9223372036854775807
+			/// 'huge' as float: No conversion path or out-of-range
+			/// 'huge' as double: No conversion path or out-of-range
+			/// 
+			/// 'str' as std::string: foo
+			/// 'str' as std::string_view: foo
+			/// 'str' as const char*: foo
 			/// \eout
 			///
-			/// \tparam	T	One of the TOML value types. Can also be a string_view.
+			/// \tparam	T	One of the native TOML value types, or a type capable of converting to one.
 			///
-			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it), or an empty optional.
+			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
+			/// 			and within the range of the output type, or an empty optional.
+			/// 
+			/// \attention If you want strict value retrieval semantics that do not allow for any type conversions,
+			/// 		   use node::value_exact() instead.
+			/// 
+			/// \see node::value_exact()
 			template <typename T>
 			[[nodiscard]]
 			optional<T> value() const noexcept;
 
 			/// \brief	Gets the raw value contained by this node, or a default.
 			///
-			/// \tparam	T				Default value type. Must be (or be promotable to) one of the TOML value types.
+			/// \tparam	T				Default value type. Must be one of the native TOML value types,
+			/// 						or convertible to it.
 			/// \param 	default_value	The default value to return if the node wasn't a value, wasn't the
 			/// 						correct type, or no conversion was possible.
 			///
-			/// \returns	The node's underlying value, or the default if the node wasn't a value, wasn't the
-			/// 			correct type, or no conversion was possible.
+			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
+			/// 			and within the range of the output type, or the provided default.
 			/// 
-			/// \see node::value()
+			/// \attention This function has the same permissive retrieval semantics as node::value(). If you want strict
+			/// 		   value retrieval semantics that do not allow for any type conversions, use node::value_exact()
+			/// 		   instead.
+			/// 
+			/// \see
+			/// 	- node::value()
+			///		- node::value_exact()
 			template <typename T>
 			[[nodiscard]]
 			auto value_or(T&& default_value) const noexcept;
@@ -285,14 +381,14 @@ namespace toml
 			{
 				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"The template type argument of node::as() must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
 				else if constexpr (std::is_same_v<type, array>) return as_array();
-				else if constexpr (std::is_same_v<type, string>) return as_string();
+				else if constexpr (std::is_same_v<type, std::string>) return as_string();
 				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
 				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
 				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
@@ -308,14 +404,14 @@ namespace toml
 			{
 				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"The template type argument of node::as() must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
 				else if constexpr (std::is_same_v<type, array>) return as_array();
-				else if constexpr (std::is_same_v<type, string>) return as_string();
+				else if constexpr (std::is_same_v<type, std::string>) return as_string();
 				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
 				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
 				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
@@ -336,7 +432,7 @@ namespace toml
 			static constexpr bool can_visit_any =
 				can_visit<Func, N, table>
 				|| can_visit<Func, N, array>
-				|| can_visit<Func, N, string>
+				|| can_visit<Func, N, std::string>
 				|| can_visit<Func, N, int64_t>
 				|| can_visit<Func, N, double>
 				|| can_visit<Func, N, bool>
@@ -348,7 +444,7 @@ namespace toml
 			static constexpr bool can_visit_all =
 				can_visit<Func, N, table>
 				&& can_visit<Func, N, array>
-				&& can_visit<Func, N, string>
+				&& can_visit<Func, N, std::string>
 				&& can_visit<Func, N, int64_t>
 				&& can_visit<Func, N, double>
 				&& can_visit<Func, N, bool>
@@ -365,7 +461,7 @@ namespace toml
 			static constexpr bool visit_is_nothrow =
 				visit_is_nothrow_one<Func, N, table>
 				&& visit_is_nothrow_one<Func, N, array>
-				&& visit_is_nothrow_one<Func, N, string>
+				&& visit_is_nothrow_one<Func, N, std::string>
 				&& visit_is_nothrow_one<Func, N, int64_t>
 				&& visit_is_nothrow_one<Func, N, double>
 				&& visit_is_nothrow_one<Func, N, bool>
@@ -413,8 +509,8 @@ namespace toml
 						break;
 
 					case node_type::string:
-						if constexpr (can_visit<Func&&, N&&, string>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<string>());
+						if constexpr (can_visit<Func&&, N&&, std::string>)
+							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<std::string>());
 						break;
 
 					case node_type::integer:
@@ -458,7 +554,7 @@ namespace toml
 					using return_type = 
 						nonvoid<typename visit_return_type<Func&&, N&&, table>::type,
 						nonvoid<typename visit_return_type<Func&&, N&&, array>::type,
-						nonvoid<typename visit_return_type<Func&&, N&&, string>::type,
+						nonvoid<typename visit_return_type<Func&&, N&&, std::string>::type,
 						nonvoid<typename visit_return_type<Func&&, N&&, int64_t>::type,
 						nonvoid<typename visit_return_type<Func&&, N&&, double>::type,
 						nonvoid<typename visit_return_type<Func&&, N&&, bool>::type,
@@ -485,7 +581,7 @@ namespace toml
 			{
 				using type = impl::unwrap_node<T>;
 				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 					"The template type argument of node::ref() must be one of the following:"
 					TOML_UNWRAPPED_NODE_TYPE_LIST
 				);
@@ -511,7 +607,7 @@ namespace toml
 			/// node.visit([](auto&& n)
 			/// {
 			///		if constexpr (toml::is_string<decltype(n)>)
-			///			do_something_with_a_string(*n)); //n is a toml::value<toml::string>
+			///			do_something_with_a_string(*n)); //n is a toml::value<std::string>
 			///		else if constexpr (toml::is_integer<decltype(n)>)
 			///			do_something_with_an_int(*n); //n is a toml::value<int64_t>
 			///		else
@@ -530,21 +626,24 @@ namespace toml
 			/// 
 			/// \see https://en.wikipedia.org/wiki/Visitor_pattern
 			template <typename Func>
-			decltype(auto) visit(Func&& visitor) & noexcept(visit_is_nothrow<Func&&, node&>)
+			decltype(auto) visit(Func&& visitor) &
+				noexcept(visit_is_nothrow<Func&&, node&>)
 			{
 				return do_visit(*this, std::forward<Func>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
 			template <typename Func>
-			decltype(auto) visit(Func&& visitor) && noexcept(visit_is_nothrow<Func&&, node&&>)
+			decltype(auto) visit(Func&& visitor) &&
+				noexcept(visit_is_nothrow<Func&&, node&&>)
 			{
 				return do_visit(std::move(*this), std::forward<Func>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (const lvalue overload).
 			template <typename Func>
-			decltype(auto) visit(Func&& visitor) const& noexcept(visit_is_nothrow<Func&&, const node&>)
+			decltype(auto) visit(Func&& visitor) const&
+				noexcept(visit_is_nothrow<Func&&, const node&>)
 			{
 				return do_visit(*this, std::forward<Func>(visitor));
 			}
@@ -591,6 +690,8 @@ namespace toml
 				return do_ref<T>(*this);
 			}
 	};
+
+	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS //TOML_DISABLE_VTABLE_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS
