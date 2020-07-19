@@ -311,8 +311,8 @@ namespace toml
 		toml::time time;
 		/// \brief	The timezone offset component.
 		///
-		/// \remarks The date_time is said to be 'local' if the time_offset is empty.
-		optional<toml::time_offset> time_offset;
+		/// \remarks The date_time is said to be 'local' if the offset is empty.
+		optional<toml::time_offset> offset;
 
 		/// \brief	Default-constructs a zero date-time.
 		TOML_NODISCARD_CTOR
@@ -335,19 +335,19 @@ namespace toml
 		///
 		/// \param 	d	  	The date component.
 		/// \param 	t	  	The time component.
-		/// \param 	offset	The timezone offset.
+		/// \param 	off	The timezone offset.
 		TOML_NODISCARD_CTOR
-			constexpr date_time(toml::date d, toml::time t, toml::time_offset offset) noexcept
+			constexpr date_time(toml::date d, toml::time t, toml::time_offset off) noexcept
 			: date{ d },
 			time{ t },
-			time_offset{ offset }
+			offset{ off }
 		{}
 
 		/// \brief	Returns true if this date_time does not contain timezone offset information.
 		[[nodiscard]]
 		constexpr bool is_local() const noexcept
 		{
-			return !time_offset.has_value();
+			return !offset.has_value();
 		}
 
 		/// \brief	Equality operator.
@@ -356,7 +356,7 @@ namespace toml
 		{
 			return lhs.date == rhs.date
 				&& lhs.time == rhs.time
-				&& lhs.time_offset == rhs.time_offset;
+				&& lhs.offset == rhs.offset;
 		}
 
 		/// \brief	Inequality operator.
@@ -374,7 +374,7 @@ namespace toml
 				return lhs.date < rhs.date;
 			if (lhs.time != rhs.time)
 				return lhs.time < rhs.time;
-			return lhs.time_offset < rhs.time_offset;
+			return lhs.offset < rhs.offset;
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
@@ -385,7 +385,7 @@ namespace toml
 				return lhs.date < rhs.date;
 			if (lhs.time != rhs.time)
 				return lhs.time < rhs.time;
-			return lhs.time_offset <= rhs.time_offset;
+			return lhs.offset <= rhs.offset;
 		}
 
 		/// \brief	Greater-than operator.

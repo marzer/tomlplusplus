@@ -326,8 +326,8 @@ namespace toml
 		print_to_stream(val.date, stream);
 		print_to_stream('T', stream);
 		print_to_stream(val.time, stream);
-		if (val.time_offset)
-			print_to_stream(*val.time_offset, stream);
+		if (val.offset)
+			print_to_stream(*val.offset, stream);
 	}
 
 	TOML_PUSH_WARNINGS

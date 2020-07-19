@@ -1388,7 +1388,7 @@ namespace toml
 	{
 		toml::date date;
 		toml::time time;
-		optional<toml::time_offset> time_offset;
+		optional<toml::time_offset> offset;
 
 		TOML_NODISCARD_CTOR
 		constexpr date_time() noexcept
@@ -1403,16 +1403,16 @@ namespace toml
 		{}
 
 		TOML_NODISCARD_CTOR
-			constexpr date_time(toml::date d, toml::time t, toml::time_offset offset) noexcept
+			constexpr date_time(toml::date d, toml::time t, toml::time_offset off) noexcept
 			: date{ d },
 			time{ t },
-			time_offset{ offset }
+			offset{ off }
 		{}
 
 		[[nodiscard]]
 		constexpr bool is_local() const noexcept
 		{
-			return !time_offset.has_value();
+			return !offset.has_value();
 		}
 
 		[[nodiscard]]
@@ -1420,7 +1420,7 @@ namespace toml
 		{
 			return lhs.date == rhs.date
 				&& lhs.time == rhs.time
-				&& lhs.time_offset == rhs.time_offset;
+				&& lhs.offset == rhs.offset;
 		}
 
 		[[nodiscard]]
@@ -1436,7 +1436,7 @@ namespace toml
 				return lhs.date < rhs.date;
 			if (lhs.time != rhs.time)
 				return lhs.time < rhs.time;
-			return lhs.time_offset < rhs.time_offset;
+			return lhs.offset < rhs.offset;
 		}
 
 		[[nodiscard]]
@@ -1446,7 +1446,7 @@ namespace toml
 				return lhs.date < rhs.date;
 			if (lhs.time != rhs.time)
 				return lhs.time < rhs.time;
-			return lhs.time_offset <= rhs.time_offset;
+			return lhs.offset <= rhs.offset;
 		}
 
 		[[nodiscard]]
@@ -1807,8 +1807,8 @@ namespace toml
 		print_to_stream(val.date, stream);
 		print_to_stream('T', stream);
 		print_to_stream(val.time, stream);
-		if (val.time_offset)
-			print_to_stream(*val.time_offset, stream);
+		if (val.offset)
+			print_to_stream(*val.offset, stream);
 	}
 
 	TOML_PUSH_WARNINGS
