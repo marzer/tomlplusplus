@@ -8,6 +8,14 @@ body
 	margin-top: 3rem;
 }
 
+@media screen and (min-width: 768px) and (max-width: 991px)
+{
+	body
+	{
+		margin-top: 6rem;
+	}
+}
+
 a
 {
 	text-decoration: none !important; 
@@ -20,6 +28,11 @@ header
 	right: 0;
 	top: 0;
 	z-index: 100;
+}
+
+header, header *
+{
+	white-space: nowrap;
 }
 
 article, article > header, article div > section
@@ -65,13 +78,10 @@ pre a.tpp-injected
 .tpp-enable-if > a
 {
 	white-space: nowrap;
-	font-size: 0.8rem;
+	font-size: 0.7rem;
 	font-weight: bold;
 	background-color: #858585;
 	color: #050505;
-	padding-bottom: 0px;
-	margin: 0px 1px;
-	margin-bottom: 2px;
 }
 
 .tpp-enable-if > a:hover
@@ -135,7 +145,7 @@ pre.m-code + pre.m-console span
 }
 
 /* comments */
-.m-code .c1
+pre.m-code .c1
 {
 	color: rgb(87,166,74);
 }
@@ -149,25 +159,31 @@ pre.m-code .mh
 }
 
 /* keywords */
-.m-code .k
+pre.m-code .k
 {
 	color: rgb(86,156,214);
 }
+pre.m-code .kt,
+pre.m-code .k,
+pre.m-code .nc
+{
+	font-weight: normal;
+}
 
 /* identifier names */
-.m-code .n
+pre.m-code .n
 {
 	color: rgb(220,220,220);
 }
 
 /* punctuators (brackets etc) */
-.m-code .p
+pre.m-code .p
 {
 	color: rgb(120,120,120);
 }
 
 /* preprocessor directives */
-.m-code .cp
+pre.m-code .cp
 {
 	color: rgb(120,120,120);
 }
@@ -209,7 +225,6 @@ pre.m-code .mh
 	margin-right: -0.9rem;
 	margin-top: -0.5rem;
 }
-
 @media screen and (min-width: 992px)
 {
 	.gh-badges
@@ -253,6 +268,27 @@ main > article > .m-container.m-container-inflatable > .m-row > div.m-col-l-10.m
 	margin-right: -1rem;
 	margin-top: -1.75rem;
 	max-width: calc(100% + 2rem);
+}
+
+/* include <blah.h> */
+.m-doc-details div h3
+{
+	overflow: auto;
+}
+h1 .m-doc-include,
+h3 .m-doc-include
+{
+	float: right;
+}
+h1 .m-doc-include *,
+h3 .m-doc-include *
+{
+	opacity: 1.0 !important;
+}
+h1 .m-doc-include .cp,
+h3 .m-doc-include .cp
+{
+	color: #747474;
 }
 
 /* "Try this code on Compiler Explorer" */

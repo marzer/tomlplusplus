@@ -91,10 +91,6 @@ C++</span></a>
             </dt>
             <dd>Sets the assert function used by the library.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gab7db106da27ae46e214f77807b0d16a0">TOML_CHAR_8_STRINGS</a></span>
-            </dt>
-            <dd>Uses C++20 <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings as the toml string data type.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
             </dt>
             <dd>An additional header to include before any other toml++ header files.</dd>
@@ -165,13 +161,6 @@ C++</span></a>
             <p>Sets the assert function used by the library.</p>
 <p>Defaults to the standard C <code>assert()</code>.</p>
           </div></section>
-          <section class="m-doc-details" id="gab7db106da27ae46e214f77807b0d16a0"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gab7db106da27ae46e214f77807b0d16a0">TOML_CHAR_8_STRINGS</a></span>
-            </h3>
-            <p>Uses C++20 <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/language/types" target="_blank">char8_t</a>-based strings as the toml string data type.</p>
-<p>Defaults to <code>0</code>.</p>
-          </div></section>
           <section class="m-doc-details" id="ga09204feb4a3ff5534623c2bd052dcec0"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
@@ -240,7 +229,7 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
             </h3>
             <p>Enables the use of wide strings (wchar_t, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a>) in various places throughout the library when building for Windows.</p>
-<p>Defaults to <code>1</code> when building for Windows, <code>0</code> otherwise. Has no effect when building for anything other than Windows.</p><aside class="m-note m-warning"><h4>Attention</h4><p>This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values; that will still be <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a> or <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::u8string</a> according to whatever <a class="m-doc" href="group__configuration.html#gab7db106da27ae46e214f77807b0d16a0">TOML_<wbr/>CHAR_<wbr/>8_<wbr/>STRINGS</a> is set to. This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at various interface boundaries.<br/><br/>If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings, you can safely set this to <code>0</code>.</p></aside>
+<p>Defaults to <code>1</code> when building for Windows, <code>0</code> otherwise. Has no effect when building for anything other than Windows.</p><aside class="m-note m-warning"><h4>Attention</h4><p>This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values; that will still be <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>. This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at various interface boundaries.<br/><br/>If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings, you can safely set this to <code>0</code>.</p></aside>
           </div></section>
         </section>
       </div>
