@@ -50,4 +50,47 @@
 		<DisplayString>{&amp;bytes,s8} ({position})</DisplayString>
 	</Type>
 
+	<Type Name="::toml::table">
+		<DisplayString>{values}</DisplayString>
+		<Expand>
+			<!-- Modified from std::map visualizer in VS 2019 stl.natvis -->
+			<TreeItems>
+				<Size>values._Mypair._Myval2._Myval2._Mysize</Size>
+				<HeadPointer>values._Mypair._Myval2._Myval2._Myhead-&gt;_Parent</HeadPointer>
+				<LeftPointer>_Left</LeftPointer>
+				<RightPointer>_Right</RightPointer>
+				<ValueNode Condition="_Isnil == 0" Name="[{_Myval.first}]">*_Myval.second</ValueNode>
+			</TreeItems>
+		</Expand>
+	</Type>
+
+	<Type Name="::toml::array">
+		<DisplayString>{values}</DisplayString>
+		<Expand>
+			<!-- Modified from std::vector visualizer in VS 2019 stl.natvis -->
+			<IndexListItems>
+				<Size>values._Mypair._Myval2._Mylast - values._Mypair._Myval2._Myfirst</Size>
+				<ValueNode>*values._Mypair._Myval2._Myfirst[$i]</ValueNode>
+			</IndexListItems>
+		</Expand>
+	</Type>
+
+	<Type Name="::toml::abi_parse_noex::parse_result">
+		<DisplayString Condition="!is_err">{*reinterpret_cast&lt;::toml::table*&gt;(&amp;storage)}</DisplayString>
+		<DisplayString Condition="is_err">{*reinterpret_cast&lt;::toml::abi_sf::abi_noex::parse_error*&gt;(&amp;storage)}</DisplayString>
+		<Expand>
+			<Item Name="[table]" Condition="!is_err">*reinterpret_cast&lt;::toml::table*&gt;(&amp;storage)</Item>
+			<Item Name="[error]" Condition="is_err">*reinterpret_cast&lt;::toml::abi_sf::abi_noex::parse_error*&gt;(&amp;storage)</Item>
+			<Item Name="is_err" ExcludeView="simple">is_err</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="::toml::abi_sf::abi_noex::parse_error">
+		<DisplayString>line {source_.begin.line}: {description_,sb}</DisplayString>
+	</Type>
+
+	<Type Name="::toml::abi_lf::abi_noex::parse_error">
+		<DisplayString>line {source_.begin.line}: {description_,sb}</DisplayString>
+	</Type>
+
 </AutoVisualizer>
