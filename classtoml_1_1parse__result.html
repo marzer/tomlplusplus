@@ -122,8 +122,8 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a43df64e02443b2abfd9d2c86c5e4c30a">operator const parse_error&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (const lvalue overload).</dd>
-            <dt id="a93ef6267aa6b9a13e2f1d1be848c3ca1">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a93ef6267aa6b9a13e2f1d1be848c3ca1">operator const table&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a9d059289edaf6c7fb71916b21a2f9c9f">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9d059289edaf6c7fb71916b21a2f9c9f">operator const toml::table&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
             <dt id="abc8a693cb538441b5974eff38c716669">
@@ -134,12 +134,12 @@ C++</span></a>
               <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f70aa665d84aaf5f936dd27f6c95c4a">operator parse_error&amp;&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> (rvalue overload).</dd>
-            <dt id="a578430a196122c65d91d2b7ac5f3cbe0">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a578430a196122c65d91d2b7ac5f3cbe0">operator table&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a5e14e22d4d68b27c11711a3319dc6bf9">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5e14e22d4d68b27c11711a3319dc6bf9">operator toml::table&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
-            <dt id="a9f6b1433ba5ac328570a4cf714011fa6">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f6b1433ba5ac328570a4cf714011fa6">operator table&amp;&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a8dca1600886954b38b99a4a4f9cb77c4">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8dca1600886954b38b99a4a4f9cb77c4">operator toml::table&amp;&amp;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (rvalue overload).</dd>
           </dl>
@@ -187,18 +187,6 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9097bc552007537f840602ceca00e99b">failed</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if parsing failed.</dd>
-            <dt id="ac22384b78ac889904cb1be27dd248e87">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac22384b78ac889904cb1be27dd248e87">get</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (rvalue overload).</dd>
-            <dt id="a37c056ff3d68bf10caf1188ca49123fd">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a37c056ff3d68bf10caf1188ca49123fd">get</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
-            <dt id="a279d481270fd22b8ea1520c04f9307ae">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a279d481270fd22b8ea1520c04f9307ae">get</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
             <dt id="aa4c2c770a8d214f9d508582233ff1d84">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa4c2c770a8d214f9d508582233ff1d84">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -223,6 +211,18 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab5bfcd6ed385016395029bd69ad78a3c">succeeded</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if parsing succeeeded.</dd>
+            <dt id="a77b470b66dd401a0a929006dd788b882">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a77b470b66dd401a0a929006dd788b882">table</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (rvalue overload).</dd>
+            <dt id="a47d2ead20ae9d1681210c63319a6a162">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a47d2ead20ae9d1681210c63319a6a162">table</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dt id="a993f5d59c4b10f87138f8abb8a16d51d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a993f5d59c4b10f87138f8abb8a16d51d">table</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the internal <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> (const lvalue overload).</dd>
           </dl>
         </section>
         <section>
