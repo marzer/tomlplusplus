@@ -659,8 +659,8 @@ namespace toml
 					using type = impl::unwrap_node<U>;
 					static_assert(
 						(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-						"The emplacement type argument of table::emplace() must be one of the following:"
-						TOML_UNWRAPPED_NODE_TYPE_LIST
+						"The emplacement type argument of table::emplace() must be one of:"
+						TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 					);
 
 					auto ipos = values.lower_bound(key);

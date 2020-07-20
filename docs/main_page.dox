@@ -120,11 +120,14 @@
 /// 
 /// \out
 /// [library]
-/// authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
+/// authors = [ 'Mark Gillard <mark.gillard@outlook.com.au>' ]
 /// cpp = 17
-/// name = "toml++"
+/// name = 'toml++'
 /// 
-/// ... twice
+/// [library]
+/// authors = [ 'Mark Gillard <mark.gillard@outlook.com.au>' ]
+/// cpp = 17
+/// name = 'toml++'
 /// \eout
 ///
 /// \see
@@ -155,7 +158,7 @@
 /// 		return 1;
 /// 	}
 /// 	
-/// 	do_stuff_with_your_config(result); //toml::parse_result is convertible to toml::table
+/// 	do_stuff_with_your_config(std::move(result).table()); // 'steal' the table from the result
 /// 	return 0;
 /// }
 /// \ecpp
@@ -201,7 +204,7 @@
 /// and toml::table, respectively. All three inherit from toml::node, and can be easily accessed via
 /// the toml::node_view:
 /// 
-/// \godbolt{ieG52U}
+/// \godbolt{7z6GGW}
 /// 
 /// \cpp
 /// #include <iostream>
@@ -228,15 +231,13 @@
 /// 	// different ways of directly querying data
 /// 	std::optional<std::string_view> str1 = tbl["str"].value<std::string_view>();
 /// 	std::optional<std::string>      str2 = tbl["str"].value<std::string>();
-/// 	std::string_view                str3 = tbl["str"].value_or("");
-/// 	std::string                     str4 = tbl["str"].value_or(std::string{});
-/// 	std::string&                    str5 = tbl["str"].ref<std::string>(); // ~~dangerous~~, but fast
+/// 	std::string_view                str3 = tbl["str"].value_or(""sv);
+/// 	std::string&                    str4 = tbl["str"].ref<std::string>(); // ~~dangerous~~
 /// 	
 /// 	std::cout << *str1 << "\n";
 /// 	std::cout << *str2 << "\n";
 /// 	std::cout << str3 << "\n";
 /// 	std::cout << str4 << "\n";
-/// 	std::cout << str5 << "\n";
 /// 	
 /// 	// get a toml::node_view of the element 'numbers' using operator[]
 /// 	auto numbers = tbl["numbers"];
@@ -281,14 +282,13 @@
 /// hello world
 /// hello world
 /// hello world
-/// hello world
-/// table has 'numbers': true
+/// table has 'numbers': 1
 /// numbers is an: array
-/// numbers: [1, 2, 3, "four", 5.0]
-/// numbers: [2, 3, 4, "five", 6.0, 7, [8, 9]]
-/// cats: ["tiger", "lion", "puma"]
-/// fish[1]: "trout"
-/// dinosaurs:
+/// numbers: [ 1, 2, 3, 'four', 5.0 ]
+/// numbers: [ 2, 3, 4, 'five', 6.0, 7, [ 8, 9 ] ]
+/// cats: [ 'tiger', 'lion', 'puma' ]
+/// fish[1]: 'trout'
+/// dinosaurs: 
 /// \eout
 /// 
 /// \see
@@ -340,31 +340,31 @@
 /// \out
 /// ###### TOML ######
 /// 
-/// cpp = [17, 20, "and beyond"]
-/// lib = "toml++"
-/// repo = "https://github.com/marzer/tomlplusplus/"
-/// toml = ["1.0.0-rc.1", "and beyond"]
+/// cpp = [ 17, 20, 'and beyond' ]
+/// lib = 'toml++'
+/// repo = 'https://github.com/marzer/tomlplusplus/'
+/// toml = [ '1.0.0-rc.1', 'and beyond' ]
 /// 
 /// [author]
-/// github = "https://github.com/marzer"
-/// name = "Mark Gillard"
-/// twitter = "https://twitter.com/marzer8789"
+/// github = 'https://github.com/marzer'
+/// name = 'Mark Gillard'
+/// twitter = 'https://twitter.com/marzer8789'
 /// 
 /// ###### JSON ######
 /// 
 /// {
 ///     "author" : {
-///         "github" : "https://github.com/marzer",
-///         "name" : "Mark Gillard",
+///         "github" : "https://github.com/marzer", 
+///         "name" : "Mark Gillard", 
 ///         "twitter" : "https://twitter.com/marzer8789"
-///     },
+///     }, 
 ///     "cpp" : [
 ///         17,
 ///         20,
 ///         "and beyond"
-///     ],
-///     "lib" : "toml++",
-///     "repo" : "https://github.com/marzer/tomlplusplus/",
+///     ], 
+///     "lib" : "toml++", 
+///     "repo" : "https://github.com/marzer/tomlplusplus/", 
 ///     "toml" : [
 ///         "1.0.0-rc.1",
 ///         "and beyond"
@@ -442,7 +442,7 @@
 //////////////////////////////////
 ///
 /// \subsection mainpage-adding-lib-conan Conan
-/// Add `tomlplusplus/1.3.3` to your conanfile. This adds the single-header version by default, but you can specify the
+/// Add `tomlplusplus/2.0.0` to your conanfile. This adds the single-header version by default, but you can specify the
 /// regular version using `"multiple_headers": True`.
 /// 
 //////////////////////////////////
@@ -474,7 +474,7 @@
 /// 
 /// \section mainpage-configuration Library configuration options
 /// The library exposes a number of configuration options in the form of compiler `#defines`. Things like
-/// changing the `optional<T>` type, using `char8_t` strings, disabling header-only mode, et cetera. The full list of
+/// changing the `optional<T>` type, disabling header-only mode, et cetera. The full list of
 /// configurables can be found on the \ref configuration page.
 /// 
 /// \see \ref configuration

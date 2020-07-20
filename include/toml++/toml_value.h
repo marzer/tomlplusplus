@@ -132,7 +132,7 @@ namespace toml
 		static_assert(
 			impl::is_native<ValueType> && !impl::is_cvref<ValueType>,
 			"A toml::value<> must model one of the native TOML value types:"
-			TOML_NATIVE_VALUE_TYPE_LIST
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
 		);
 
 		private:
@@ -532,34 +532,40 @@ namespace toml
 			"Retrieving values as wide-character strings with node::value_exact() is only "
 			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
+
 		static_assert(
 			(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value_exact() must be one of the following:"
-			"\n|"
-			"\n| A native TOML value type"
-			TOML_NATIVE_VALUE_TYPE_LIST
-			"\n|"
-			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			"\n| - std::string"
+			"The return type of node::value_exact() must be one of:"
+			TOML_SA_LIST_NEW "A native TOML value type"
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+			TOML_SA_LIST_BEG "std::string"
 			#if TOML_WINDOWS_COMPAT
-			"\n| - std::wstring"
+			TOML_SA_LIST_SEP "std::wstring"
 			#endif
-			"\n| - any signed integer type >= 64 bits"
-			"\n| - any floating-point type >= 64 bits of precision"
-			"\n|"
-			"\n| An immutable view type not requiring additional temporary storage"
-			"\n| - std::string_view"
-			"\n| - const char*"
+			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
+			TOML_SA_LIST_BEG "std::string_view"
+			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
-			"\n| - std::u8string_view"
-			"\n| - const char8_t*"
+			TOML_SA_LIST_SEP "std::u8string_view"
+			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
+			TOML_SA_LIST_END
 		);
 
-		if (type() == node_type_of<T>)
-			return { this->get_value_exact<T>() };
-		else
-			return {};
+		// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
+		if constexpr ((is_native<T> || can_represent_native<T>) && !is_cvref<T>)
+		{
+			if (type() == node_type_of<T>)
+				return { this->get_value_exact<T>() };
+			else
+				return {};
+		}
 	}
 
 	template <typename T>
@@ -574,30 +580,32 @@ namespace toml
 		);
 		static_assert(
 			(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value() must be one of the following:"
-			"\n|"
-			"\n| A native TOML value type"
-			TOML_NATIVE_VALUE_TYPE_LIST
-			"\n|"
-			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			"\n| - std::string"
+			"The return type of node::value() must be one of:"
+			TOML_SA_LIST_NEW "A native TOML value type"
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+			TOML_SA_LIST_BEG "std::string"
 			#if TOML_WINDOWS_COMPAT
-			"\n| - std::wstring"
+			TOML_SA_LIST_SEP "std::wstring"
 			#endif
-			"\n| - any signed integer type >= 64 bits"
-			"\n| - any floating-point type >= 64 bits of precision"
-			"\n|"
-			"\n| A non-view type capable of (reasonably) representing a native TOML value type"
-			"\n| - any other integer type"
-			"\n| - any floating-point type >= 32 bits of precision"
-			"\n|"
-			"\n| An immutable view type not requiring additional temporary storage"
-			"\n| - std::string_view"
-			"\n| - const char*"
+			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
+			TOML_SA_LIST_BEG "any other integer type"
+			TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
+			TOML_SA_LIST_BEG "std::string_view"
+			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
-			"\n| - std::u8string_view"
-			"\n| - const char8_t*"
+			TOML_SA_LIST_SEP "std::u8string_view"
+			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
+			TOML_SA_LIST_END
 		);
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
@@ -740,56 +748,65 @@ namespace toml
 
 			static_assert(
 				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
-				"The default return value type of node::value_or() must be one of the following:"
-				"\n|"
-				"\n| A native TOML value type"
-				TOML_NATIVE_VALUE_TYPE_LIST
-				"\n| "
-				"\n| A non-view type capable of losslessly representing a native TOML value type"
-				"\n| - std::string"
+				"The default return value type of node::value_or() must be one of:"
+				TOML_SA_LIST_NEW "A native TOML value type"
+				TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+				TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+				TOML_SA_LIST_BEG "std::string"
 				#if TOML_WINDOWS_COMPAT
-				"\n| - std::wstring"
+				TOML_SA_LIST_SEP "std::wstring"
 				#endif
-				"\n| - any signed integer type >= 64 bits"
-				"\n| - any floating-point type >= 64 bits of precision"
-				"\n|"
-				"\n| A non-view type capable of (reasonably) representing a native TOML value type"
-				"\n| - any other integer type"
-				"\n| - any floating-point type >= 32 bits of precision"
-				"\n|"
-				"\n| A compatible view type"
-				"\n| - std::string_view"
-				"\n| - const char*"
-				"\n| - const char[]        (deduced as const char*)"
-				"\n| - char*               (deduced as const char*)"
+				TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+				TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
+				TOML_SA_LIST_BEG "any other integer type"
+				TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A compatible view type"
+				TOML_SA_LIST_BEG "std::string_view"
+				TOML_SA_LIST_SEP "const char*"
+				TOML_SA_LIST_SEP "const char[]" TOML_SA_LIST_CAP("        (returned as const char*)")
+				TOML_SA_LIST_SEP "char*" TOML_SA_LIST_CAP("               (returned as const char*)")
+				TOML_SA_LIST_SEP "char[]" TOML_SA_LIST_CAP("              (returned as const char*)")
 				#ifdef __cpp_lib_char8_t
-				"\n| - std::u8string_view"
-				"\n| - const char8_t*"
-				"\n| - const char8_t[]     (deduced as const char8_t*)"
-				"\n| - char8_t*            (deduced as const char8_t*)"
+				TOML_SA_LIST_SEP "std::u8string_view"
+				TOML_SA_LIST_SEP "const char8_t*"
+				TOML_SA_LIST_SEP "const char8_t[]" TOML_SA_LIST_CAP("     (returned as const char8_t*)")
+				TOML_SA_LIST_SEP "char8_t*" TOML_SA_LIST_CAP("            (returned as const char8_t*)")
+				TOML_SA_LIST_SEP "char8_t[]" TOML_SA_LIST_CAP("           (returned as const char8_t*)")
 				#endif
 				#if TOML_WINDOWS_COMPAT
-				"\n| - std::wstring_view   (promoted to std::wstring)"
-				"\n| - const wchar_t*      (promoted to std::wstring)"
-				"\n| - const wchar_t[]     (promoted to std::wstring)"
-				"\n| - wchar_t*            (promoted to std::wstring)"
+				TOML_SA_LIST_SEP "std::wstring_view" TOML_SA_LIST_CAP("   (returned as std::wstring)")
+				TOML_SA_LIST_SEP "const wchar_t*" TOML_SA_LIST_CAP("      (returned as std::wstring)")
+				TOML_SA_LIST_SEP "const wchar_t[]" TOML_SA_LIST_CAP("     (returned as std::wstring)")
+				TOML_SA_LIST_SEP "wchar_t*" TOML_SA_LIST_CAP("            (returned as std::wstring)")
+				TOML_SA_LIST_SEP "wchar_t[]" TOML_SA_LIST_CAP("           (returned as std::wstring)")
 				#endif
+				TOML_SA_LIST_END
 			);
 
-			if constexpr (traits::is_native)
+			// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
+			if constexpr (traits::is_native || traits::can_represent_native || traits::can_partially_represent_native)
 			{
-				if (type() == node_type_of<value_type>)
-					return *ref_cast<typename traits::native_type>();
-				return std::forward<T>(default_value);
-			}
-			else
-			{
-				if (auto val = this->value<value_type>())
-					return *val;
-				if constexpr (std::is_pointer_v<value_type>)
-					return value_type{ default_value };
-				else
+				if constexpr (traits::is_native)
+				{
+					if (type() == node_type_of<value_type>)
+						return *ref_cast<typename traits::native_type>();
 					return std::forward<T>(default_value);
+				}
+				else
+				{
+					if (auto val = this->value<value_type>())
+						return *val;
+					if constexpr (std::is_pointer_v<value_type>)
+						return value_type{ default_value };
+					else
+						return std::forward<T>(default_value);
+				}
 			}
 		}
 	}

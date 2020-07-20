@@ -136,6 +136,8 @@ is no longer necessary.
 		#define TOML_FLOAT_CHARCONV 0
 	#endif
 
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
+
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
@@ -431,6 +433,10 @@ is no longer necessary.
 	#define TOML_INTERNAL_LINKAGE			static
 	#define TOML_ANONYMOUS_NAMESPACE
 	#define TOML_ANONYMOUS_NAMESPACE_END
+#endif
+
+#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
 #endif
 
 TOML_PUSH_WARNINGS

@@ -435,8 +435,8 @@ namespace toml
 				static_assert(
 					std::is_void_v<type>
 					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
-					"The template type argument of array::is_homogeneous() must be void or one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of array::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 				
 				if constexpr (std::is_void_v<type>)
@@ -651,8 +651,8 @@ namespace toml
 				using type = impl::unwrap_node<U>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"Emplacement type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"Emplacement type parameter must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 				return { values.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<V>(args)...} ) };
@@ -813,8 +813,8 @@ namespace toml
 				using type = impl::unwrap_node<U>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"Emplacement type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"Emplacement type parameter must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 				auto nde = new impl::wrap_node<type>{ std::forward<V>(args)... };

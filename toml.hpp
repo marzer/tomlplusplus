@@ -174,6 +174,8 @@ is no longer necessary.
 		#define TOML_FLOAT_CHARCONV 0
 	#endif
 
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
+
 #elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
 
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
@@ -472,6 +474,10 @@ is no longer necessary.
 	#define TOML_INTERNAL_LINKAGE			static
 	#define TOML_ANONYMOUS_NAMESPACE
 	#define TOML_ANONYMOUS_NAMESPACE_END
+#endif
+
+#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
 #endif
 
 TOML_PUSH_WARNINGS
@@ -1890,33 +1896,56 @@ namespace toml
 TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-#define TOML_NATIVE_VALUE_TYPE_LIST							\
-	"\n| - std::string"										\
-	"\n| - int64_t"											\
-	"\n| - double"											\
-	"\n| - bool"											\
-	"\n| - toml::date"										\
-	"\n| - toml::time"										\
-	"\n| - toml::date_time"
+#if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
-#define TOML_NODE_TYPE_LIST									\
-	"\n| - toml::table"										\
-	"\n| - toml::array"										\
-	"\n| - toml::value<std::string>"						\
-	"\n| - toml::value<int64_t>"							\
-	"\n| - toml::value<double>"								\
-	"\n| - toml::value<bool>"								\
-	"\n| - toml::value<toml::date>"							\
-	"\n| - toml::value<toml::time>"							\
-	"\n| - toml::value<toml::date_time>"
+#define TOML_SA_NEWLINE		" "
+#define TOML_SA_LIST_SEP	", "
+#define TOML_SA_LIST_BEG	" ("
+#define TOML_SA_LIST_END	")"
+#define TOML_SA_LIST_NEW	" "
+#define TOML_SA_LIST_NXT	", "
+#define TOML_SA_LIST_CAP(...)
 
-#define TOML_UNWRAPPED_NODE_TYPE_LIST						\
-	"\n|"													\
-	"\n| A native TOML value type"							\
-	TOML_NATIVE_VALUE_TYPE_LIST								\
-	"\n|"													\
-	"\n| A TOML node type"									\
-	TOML_NODE_TYPE_LIST
+#else
+
+#define TOML_SA_NEWLINE			"\n| "
+#define TOML_SA_LIST_SEP		TOML_SA_NEWLINE "  - "
+#define TOML_SA_LIST_BEG		TOML_SA_LIST_SEP
+#define TOML_SA_LIST_END
+#define TOML_SA_LIST_NEW		TOML_SA_NEWLINE TOML_SA_NEWLINE
+#define TOML_SA_LIST_NXT		TOML_SA_LIST_NEW
+#define TOML_SA_LIST_CAP(val)	val
+
+#endif
+
+#define TOML_SA_NATIVE_VALUE_TYPE_LIST							\
+	TOML_SA_LIST_BEG	"std::string"							\
+	TOML_SA_LIST_SEP	"int64_t"								\
+	TOML_SA_LIST_SEP	"double"								\
+	TOML_SA_LIST_SEP	"bool"									\
+	TOML_SA_LIST_SEP	"toml::date"							\
+	TOML_SA_LIST_SEP	"toml::time"							\
+	TOML_SA_LIST_SEP	"toml::date_time"						\
+	TOML_SA_LIST_END
+
+#define TOML_SA_NODE_TYPE_LIST									\
+	TOML_SA_LIST_BEG	"toml::table"							\
+	TOML_SA_LIST_SEP	"toml::array"							\
+	TOML_SA_LIST_SEP	"toml::value<std::string>"				\
+	TOML_SA_LIST_SEP	"toml::value<int64_t>"					\
+	TOML_SA_LIST_SEP	"toml::value<double>"					\
+	TOML_SA_LIST_SEP	"toml::value<bool>"						\
+	TOML_SA_LIST_SEP	"toml::value<toml::date>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::time>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::date_time>"			\
+	TOML_SA_LIST_END
+
+#define TOML_SA_UNWRAPPED_NODE_TYPE_LIST						\
+	TOML_SA_LIST_NEW	"A native TOML value type"				\
+	TOML_SA_NATIVE_VALUE_TYPE_LIST								\
+																\
+	TOML_SA_LIST_NXT	"A TOML node type"						\
+	TOML_SA_NODE_TYPE_LIST
 
 namespace toml
 {
@@ -1989,8 +2018,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::is() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::is() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -2050,8 +2079,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -2072,8 +2101,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -2155,7 +2184,8 @@ namespace toml
 			{
 				static_assert(
 					can_visit_any<Func&&, N&&>,
-					"Visitors must be invocable for at least one of the toml::node specializations"
+					"TOML node visitors must be invocable for at least one of the toml::node specializations:"
+					TOML_SA_NODE_TYPE_LIST
 				);
 
 				switch (n.type())
@@ -2243,8 +2273,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::ref() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::ref() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					n.template is<T>()
@@ -2427,7 +2457,7 @@ namespace toml
 		static_assert(
 			impl::is_native<ValueType> && !impl::is_cvref<ValueType>,
 			"A toml::value<> must model one of the native TOML value types:"
-			TOML_NATIVE_VALUE_TYPE_LIST
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
 		);
 
 		private:
@@ -2720,34 +2750,40 @@ namespace toml
 			"Retrieving values as wide-character strings with node::value_exact() is only "
 			"supported on Windows with TOML_WINDOWS_COMPAT enabled."
 		);
+
 		static_assert(
 			(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value_exact() must be one of the following:"
-			"\n|"
-			"\n| A native TOML value type"
-			TOML_NATIVE_VALUE_TYPE_LIST
-			"\n|"
-			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			"\n| - std::string"
+			"The return type of node::value_exact() must be one of:"
+			TOML_SA_LIST_NEW "A native TOML value type"
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+			TOML_SA_LIST_BEG "std::string"
 			#if TOML_WINDOWS_COMPAT
-			"\n| - std::wstring"
+			TOML_SA_LIST_SEP "std::wstring"
 			#endif
-			"\n| - any signed integer type >= 64 bits"
-			"\n| - any floating-point type >= 64 bits of precision"
-			"\n|"
-			"\n| An immutable view type not requiring additional temporary storage"
-			"\n| - std::string_view"
-			"\n| - const char*"
+			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
+			TOML_SA_LIST_BEG "std::string_view"
+			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
-			"\n| - std::u8string_view"
-			"\n| - const char8_t*"
+			TOML_SA_LIST_SEP "std::u8string_view"
+			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
+			TOML_SA_LIST_END
 		);
 
-		if (type() == node_type_of<T>)
-			return { this->get_value_exact<T>() };
-		else
-			return {};
+		// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
+		if constexpr ((is_native<T> || can_represent_native<T>) && !is_cvref<T>)
+		{
+			if (type() == node_type_of<T>)
+				return { this->get_value_exact<T>() };
+			else
+				return {};
+		}
 	}
 
 	template <typename T>
@@ -2762,30 +2798,32 @@ namespace toml
 		);
 		static_assert(
 			(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value() must be one of the following:"
-			"\n|"
-			"\n| A native TOML value type"
-			TOML_NATIVE_VALUE_TYPE_LIST
-			"\n|"
-			"\n| A non-view type capable of losslessly representing a native TOML value type"
-			"\n| - std::string"
+			"The return type of node::value() must be one of:"
+			TOML_SA_LIST_NEW "A native TOML value type"
+			TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+			TOML_SA_LIST_BEG "std::string"
 			#if TOML_WINDOWS_COMPAT
-			"\n| - std::wstring"
+			TOML_SA_LIST_SEP "std::wstring"
 			#endif
-			"\n| - any signed integer type >= 64 bits"
-			"\n| - any floating-point type >= 64 bits of precision"
-			"\n|"
-			"\n| A non-view type capable of (reasonably) representing a native TOML value type"
-			"\n| - any other integer type"
-			"\n| - any floating-point type >= 32 bits of precision"
-			"\n|"
-			"\n| An immutable view type not requiring additional temporary storage"
-			"\n| - std::string_view"
-			"\n| - const char*"
+			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
+			TOML_SA_LIST_BEG "any other integer type"
+			TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+			TOML_SA_LIST_END
+
+			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
+			TOML_SA_LIST_BEG "std::string_view"
+			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
-			"\n| - std::u8string_view"
-			"\n| - const char8_t*"
+			TOML_SA_LIST_SEP "std::u8string_view"
+			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
+			TOML_SA_LIST_END
 		);
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
@@ -2927,56 +2965,65 @@ namespace toml
 
 			static_assert(
 				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
-				"The default return value type of node::value_or() must be one of the following:"
-				"\n|"
-				"\n| A native TOML value type"
-				TOML_NATIVE_VALUE_TYPE_LIST
-				"\n| "
-				"\n| A non-view type capable of losslessly representing a native TOML value type"
-				"\n| - std::string"
+				"The default return value type of node::value_or() must be one of:"
+				TOML_SA_LIST_NEW "A native TOML value type"
+				TOML_SA_NATIVE_VALUE_TYPE_LIST
+
+				TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
+				TOML_SA_LIST_BEG "std::string"
 				#if TOML_WINDOWS_COMPAT
-				"\n| - std::wstring"
+				TOML_SA_LIST_SEP "std::wstring"
 				#endif
-				"\n| - any signed integer type >= 64 bits"
-				"\n| - any floating-point type >= 64 bits of precision"
-				"\n|"
-				"\n| A non-view type capable of (reasonably) representing a native TOML value type"
-				"\n| - any other integer type"
-				"\n| - any floating-point type >= 32 bits of precision"
-				"\n|"
-				"\n| A compatible view type"
-				"\n| - std::string_view"
-				"\n| - const char*"
-				"\n| - const char[]        (deduced as const char*)"
-				"\n| - char*               (deduced as const char*)"
+				TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
+				TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
+				TOML_SA_LIST_BEG "any other integer type"
+				TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A compatible view type"
+				TOML_SA_LIST_BEG "std::string_view"
+				TOML_SA_LIST_SEP "const char*"
+				TOML_SA_LIST_SEP "const char[]" TOML_SA_LIST_CAP("        (returned as const char*)")
+				TOML_SA_LIST_SEP "char*" TOML_SA_LIST_CAP("               (returned as const char*)")
+				TOML_SA_LIST_SEP "char[]" TOML_SA_LIST_CAP("              (returned as const char*)")
 				#ifdef __cpp_lib_char8_t
-				"\n| - std::u8string_view"
-				"\n| - const char8_t*"
-				"\n| - const char8_t[]     (deduced as const char8_t*)"
-				"\n| - char8_t*            (deduced as const char8_t*)"
+				TOML_SA_LIST_SEP "std::u8string_view"
+				TOML_SA_LIST_SEP "const char8_t*"
+				TOML_SA_LIST_SEP "const char8_t[]" TOML_SA_LIST_CAP("     (returned as const char8_t*)")
+				TOML_SA_LIST_SEP "char8_t*" TOML_SA_LIST_CAP("            (returned as const char8_t*)")
+				TOML_SA_LIST_SEP "char8_t[]" TOML_SA_LIST_CAP("           (returned as const char8_t*)")
 				#endif
 				#if TOML_WINDOWS_COMPAT
-				"\n| - std::wstring_view   (promoted to std::wstring)"
-				"\n| - const wchar_t*      (promoted to std::wstring)"
-				"\n| - const wchar_t[]     (promoted to std::wstring)"
-				"\n| - wchar_t*            (promoted to std::wstring)"
+				TOML_SA_LIST_SEP "std::wstring_view" TOML_SA_LIST_CAP("   (returned as std::wstring)")
+				TOML_SA_LIST_SEP "const wchar_t*" TOML_SA_LIST_CAP("      (returned as std::wstring)")
+				TOML_SA_LIST_SEP "const wchar_t[]" TOML_SA_LIST_CAP("     (returned as std::wstring)")
+				TOML_SA_LIST_SEP "wchar_t*" TOML_SA_LIST_CAP("            (returned as std::wstring)")
+				TOML_SA_LIST_SEP "wchar_t[]" TOML_SA_LIST_CAP("           (returned as std::wstring)")
 				#endif
+				TOML_SA_LIST_END
 			);
 
-			if constexpr (traits::is_native)
+			// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
+			if constexpr (traits::is_native || traits::can_represent_native || traits::can_partially_represent_native)
 			{
-				if (type() == node_type_of<value_type>)
-					return *ref_cast<typename traits::native_type>();
-				return std::forward<T>(default_value);
-			}
-			else
-			{
-				if (auto val = this->value<value_type>())
-					return *val;
-				if constexpr (std::is_pointer_v<value_type>)
-					return value_type{ default_value };
-				else
+				if constexpr (traits::is_native)
+				{
+					if (type() == node_type_of<value_type>)
+						return *ref_cast<typename traits::native_type>();
 					return std::forward<T>(default_value);
+				}
+				else
+				{
+					if (auto val = this->value<value_type>())
+						return *val;
+					if constexpr (std::is_pointer_v<value_type>)
+						return value_type{ default_value };
+					else
+						return std::forward<T>(default_value);
+				}
 			}
 		}
 	}
@@ -3335,8 +3382,8 @@ namespace toml
 				static_assert(
 					std::is_void_v<type>
 					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
-					"The template type argument of array::is_homogeneous() must be void or one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of array::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 				if constexpr (std::is_void_v<type>)
@@ -3439,8 +3486,8 @@ namespace toml
 				using type = impl::unwrap_node<U>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"Emplacement type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"Emplacement type parameter must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 				return { values.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<V>(args)...} ) };
@@ -3476,8 +3523,8 @@ namespace toml
 				using type = impl::unwrap_node<U>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"Emplacement type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"Emplacement type parameter must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 				auto nde = new impl::wrap_node<type>{ std::forward<V>(args)... };
@@ -3943,8 +3990,8 @@ namespace toml
 					using type = impl::unwrap_node<U>;
 					static_assert(
 						(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-						"The emplacement type argument of table::emplace() must be one of the following:"
-						TOML_UNWRAPPED_NODE_TYPE_LIST
+						"The emplacement type argument of table::emplace() must be one of:"
+						TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 					);
 
 					auto ipos = values.lower_bound(key);
@@ -4122,7 +4169,7 @@ namespace toml
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
 
-			[[nodiscard, deprecated("use node_view::node() instead (the name is better)")]]
+			[[nodiscard, deprecated("use node_view::node() instead")]]
 			viewed_type* get() const noexcept { return node_; }
 
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
@@ -4150,14 +4197,7 @@ namespace toml
 			[[nodiscard]]
 			auto as() const noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
-					"Template type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
-				);
-
-				return node_ ? node_->template as<type>() : nullptr;
+				return node_ ? node_->template as<T>() : nullptr;
 			}
 
 			[[nodiscard]] auto as_table() const noexcept { return as<table>(); }
@@ -4251,17 +4291,11 @@ namespace toml
 			[[nodiscard]]
 			decltype(auto) ref() const noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
-					"Template type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
-				);
 				TOML_ASSERT(
 					node_
 					&& "toml::node_view::ref() called on a node_view that did not reference a node"
 				);
-				return node_->template ref<type>();
+				return node_->template ref<impl::unwrap_node<T>>();
 			}
 
 			[[nodiscard]]
@@ -6677,8 +6711,8 @@ namespace toml
 	{
 		private:
 			std::aligned_storage_t<
-				(sizeof(table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(table)),
-				(alignof(table) < alignof(parse_error) ? alignof(parse_error) : alignof(table))
+				(sizeof(toml::table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(toml::table)),
+				(alignof(toml::table) < alignof(parse_error) ? alignof(parse_error) : alignof(toml::table))
 			> storage;
 			bool is_err;
 			void destroy() noexcept
@@ -6686,7 +6720,7 @@ namespace toml
 				if (is_err)
 					TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage))->~parse_error();
 				else
-					TOML_LAUNDER(reinterpret_cast<table*>(&storage))->~table();
+					TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage))->~table();
 			}
 
 		public:
@@ -6696,25 +6730,32 @@ namespace toml
 			[[nodiscard]] bool succeeded() const noexcept { return !is_err; }
 			[[nodiscard]] bool failed() const noexcept { return is_err; }
 			[[nodiscard]] explicit operator bool() const noexcept { return !is_err; }
+
 			[[nodiscard]]
-			table& get() & noexcept
+			toml::table& table() & noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *TOML_LAUNDER(reinterpret_cast<table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage));
 			}
 			[[nodiscard]]
-			table&& get() && noexcept
+			toml::table&& table() && noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return std::move(*TOML_LAUNDER(reinterpret_cast<table*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage)));
 			}
 			[[nodiscard]]
-			const table& get() const& noexcept
+			const toml::table& table() const& noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *TOML_LAUNDER(reinterpret_cast<const table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const toml::table*>(&storage));
 			}
 
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			toml::table& get() & noexcept { return table(); }
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			toml::table&& get() && noexcept { return std::move(table()); }
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			const toml::table& get() const& noexcept { return table(); }
 			[[nodiscard]]
 			parse_error& error() & noexcept
 			{
@@ -6734,18 +6775,18 @@ namespace toml
 				return *TOML_LAUNDER(reinterpret_cast<const parse_error*>(&storage));
 			}
 
-			[[nodiscard]] operator table& () noexcept { return get(); }
-			[[nodiscard]] operator table&& () noexcept { return std::move(get()); }
-			[[nodiscard]] operator const table& () const noexcept { return get(); }
+			[[nodiscard]] operator toml::table& () noexcept { return table(); }
+			[[nodiscard]] operator toml::table&& () noexcept { return std::move(table()); }
+			[[nodiscard]] operator const toml::table& () const noexcept { return table(); }
 			[[nodiscard]] explicit operator parse_error& () noexcept { return error(); }
 			[[nodiscard]] explicit operator parse_error && () noexcept { return std::move(error()); }
 			[[nodiscard]] explicit operator const parse_error& () const noexcept { return error(); }
 
 			TOML_NODISCARD_CTOR
-			explicit parse_result(table&& tbl) noexcept
+			explicit parse_result(toml::table&& tbl) noexcept
 				: is_err{ false }
 			{
-				::new (&storage) table{ std::move(tbl) };
+				::new (&storage) toml::table{ std::move(tbl) };
 			}
 
 			TOML_NODISCARD_CTOR
@@ -6762,7 +6803,7 @@ namespace toml
 				if (is_err)
 					::new (&storage) parse_error{ std::move(res).error() };
 				else
-					::new (&storage) table{ std::move(res).get() };
+					::new (&storage) toml::table{ std::move(res).table() };
 			}
 
 			parse_result& operator=(parse_result&& rhs) noexcept
@@ -6774,14 +6815,14 @@ namespace toml
 					if (is_err)
 						::new (&storage) parse_error{ std::move(rhs).error() };
 					else
-						::new (&storage) table{ std::move(rhs).get() };
+						::new (&storage) toml::table{ std::move(rhs).table() };
 				}
 				else
 				{
 					if (is_err)
 						error() = std::move(rhs).error();
 					else
-						get() = std::move(rhs).get();
+						table() = std::move(rhs).table();
 				}
 				return *this;
 			}
@@ -6794,13 +6835,13 @@ namespace toml
 			[[nodiscard]]
 			node_view<node> operator[] (string_view key) noexcept
 			{
-				return is_err ? node_view<node>{} : get()[key];
+				return is_err ? node_view<node>{} : table()[key];
 			}
 
 			[[nodiscard]]
 			node_view<const node> operator[] (string_view key) const noexcept
 			{
-				return is_err ? node_view<const node>{} : get()[key];
+				return is_err ? node_view<const node>{} : table()[key];
 			}
 
 			#if TOML_WINDOWS_COMPAT
@@ -6808,13 +6849,13 @@ namespace toml
 			[[nodiscard]]
 			node_view<node> operator[] (std::wstring_view key) noexcept
 			{
-				return is_err ? node_view<node>{} : get()[key];
+				return is_err ? node_view<node>{} : table()[key];
 			}
 
 			[[nodiscard]]
 			node_view<const node> operator[] (std::wstring_view key) const noexcept
 			{
-				return is_err ? node_view<const node>{} : get()[key];
+				return is_err ? node_view<const node>{} : table()[key];
 			}
 
 			#endif // TOML_WINDOWS_COMPAT
@@ -6822,37 +6863,37 @@ namespace toml
 			[[nodiscard]]
 			table_iterator begin() noexcept
 			{
-				return is_err ? table_iterator{} : get().begin();
+				return is_err ? table_iterator{} : table().begin();
 			}
 
 			[[nodiscard]]
 			const_table_iterator begin() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().begin();
+				return is_err ? const_table_iterator{} : table().begin();
 			}
 
 			[[nodiscard]]
 			const_table_iterator cbegin() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().cbegin();
+				return is_err ? const_table_iterator{} : table().cbegin();
 			}
 
 			[[nodiscard]]
 			table_iterator end() noexcept
 			{
-				return is_err ? table_iterator{} : get().end();
+				return is_err ? table_iterator{} : table().end();
 			}
 
 			[[nodiscard]]
 			const_table_iterator end() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().end();
+				return is_err ? const_table_iterator{} : table().end();
 			}
 
 			[[nodiscard]]
 			const_table_iterator cend() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().cend();
+				return is_err ? const_table_iterator{} : table().cend();
 			}
 	};
 
@@ -11320,11 +11361,19 @@ namespace toml
 	#undef TOML_EVAL_BOOL_1
 	#undef TOML_EVAL_BOOL_0
 	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
-	#undef TOML_UNWRAPPED_NODE_TYPE_LIST
-	#undef TOML_NATIVE_VALUE_TYPE_LIST
-	#undef TOML_NODE_TYPE_LIST
 	#undef TOML_IMPL_NAMESPACE_START
 	#undef TOML_IMPL_NAMESPACE_END
+	#undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#undef TOML_SA_NEWLINE
+	#undef TOML_SA_LIST_SEP
+	#undef TOML_SA_LIST_BEG
+	#undef TOML_SA_LIST_END
+	#undef TOML_SA_LIST_NEW
+	#undef TOML_SA_LIST_NXT
+	#undef TOML_SA_LIST_CAP
+	#undef TOML_SA_NATIVE_VALUE_TYPE_LIST
+	#undef TOML_SA_NODE_TYPE_LIST
+	#undef TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 #endif
 
 

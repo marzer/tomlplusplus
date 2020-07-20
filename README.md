@@ -104,7 +104,7 @@ welcome a pull request with a smile and open arms!
 
 ### Conan
 `toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need
-to add `tomlplusplus/1.3.3` to your _conanfile_ to include this in your project. The default options are set for the
+to add `tomlplusplus/2.0.0` to your _conanfile_ to include this in your project. The default options are set for the
 single-header flavour, however specifying the option `"multiple_headers": True` is available.
 
 <br>

@@ -63,8 +63,8 @@ namespace toml
 	{
 		private:
 			std::aligned_storage_t<
-				(sizeof(table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(table)),
-				(alignof(table) < alignof(parse_error) ? alignof(parse_error) : alignof(table))
+				(sizeof(toml::table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(toml::table)),
+				(alignof(toml::table) < alignof(parse_error) ? alignof(parse_error) : alignof(toml::table))
 			> storage;
 			bool is_err;
 
@@ -73,7 +73,7 @@ namespace toml
 				if (is_err)
 					TOML_LAUNDER(reinterpret_cast<parse_error*>(&storage))->~parse_error();
 				else
-					TOML_LAUNDER(reinterpret_cast<table*>(&storage))->~table();
+					TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage))->~table();
 			}
 
 		public:
@@ -93,25 +93,32 @@ namespace toml
 
 			/// \brief	Returns the internal toml::table.
 			[[nodiscard]]
-			table& get() & noexcept
+			toml::table& table() & noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *TOML_LAUNDER(reinterpret_cast<table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage));
 			}
 			/// \brief	Returns the internal toml::table (rvalue overload).
 			[[nodiscard]]
-			table&& get() && noexcept
+			toml::table&& table() && noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return std::move(*TOML_LAUNDER(reinterpret_cast<table*>(&storage)));
+				return std::move(*TOML_LAUNDER(reinterpret_cast<toml::table*>(&storage)));
 			}
 			/// \brief	Returns the internal toml::table (const lvalue overload).
 			[[nodiscard]]
-			const table& get() const& noexcept
+			const toml::table& table() const& noexcept
 			{
 				TOML_ASSERT(!is_err);
-				return *TOML_LAUNDER(reinterpret_cast<const table*>(&storage));
+				return *TOML_LAUNDER(reinterpret_cast<const toml::table*>(&storage));
 			}
+
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			toml::table& get() & noexcept { return table(); }
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			toml::table&& get() && noexcept { return std::move(table()); }
+			[[nodiscard, deprecated("use parse_result::table() instead")]]
+			const toml::table& get() const& noexcept { return table(); }
 
 			/// \brief	Returns the internal toml::parse_error.
 			[[nodiscard]]
@@ -136,11 +143,11 @@ namespace toml
 			}
 
 			/// \brief	Returns the internal toml::table.
-			[[nodiscard]] operator table& () noexcept { return get(); }
+			[[nodiscard]] operator toml::table& () noexcept { return table(); }
 			/// \brief	Returns the internal toml::table (rvalue overload).
-			[[nodiscard]] operator table&& () noexcept { return std::move(get()); }
+			[[nodiscard]] operator toml::table&& () noexcept { return std::move(table()); }
 			/// \brief	Returns the internal toml::table (const lvalue overload).
-			[[nodiscard]] operator const table& () const noexcept { return get(); }
+			[[nodiscard]] operator const toml::table& () const noexcept { return table(); }
 
 			/// \brief	Returns the internal toml::parse_error.
 			[[nodiscard]] explicit operator parse_error& () noexcept { return error(); }
@@ -150,10 +157,10 @@ namespace toml
 			[[nodiscard]] explicit operator const parse_error& () const noexcept { return error(); }
 
 			TOML_NODISCARD_CTOR
-			explicit parse_result(table&& tbl) noexcept
+			explicit parse_result(toml::table&& tbl) noexcept
 				: is_err{ false }
 			{
-				::new (&storage) table{ std::move(tbl) };
+				::new (&storage) toml::table{ std::move(tbl) };
 			}
 
 			TOML_NODISCARD_CTOR
@@ -171,7 +178,7 @@ namespace toml
 				if (is_err)
 					::new (&storage) parse_error{ std::move(res).error() };
 				else
-					::new (&storage) table{ std::move(res).get() };
+					::new (&storage) toml::table{ std::move(res).table() };
 			}
 
 			/// \brief	Move-assignment operator.
@@ -184,14 +191,14 @@ namespace toml
 					if (is_err)
 						::new (&storage) parse_error{ std::move(rhs).error() };
 					else
-						::new (&storage) table{ std::move(rhs).get() };
+						::new (&storage) toml::table{ std::move(rhs).table() };
 				}
 				else
 				{
 					if (is_err)
 						error() = std::move(rhs).error();
 					else
-						get() = std::move(rhs).get();
+						table() = std::move(rhs).table();
 				}
 				return *this;
 			}
@@ -213,7 +220,7 @@ namespace toml
 			[[nodiscard]]
 			node_view<node> operator[] (string_view key) noexcept
 			{
-				return is_err ? node_view<node>{} : get()[key];
+				return is_err ? node_view<node>{} : table()[key];
 			}
 
 			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
@@ -227,7 +234,7 @@ namespace toml
 			[[nodiscard]]
 			node_view<const node> operator[] (string_view key) const noexcept
 			{
-				return is_err ? node_view<const node>{} : get()[key];
+				return is_err ? node_view<const node>{} : table()[key];
 			}
 
 			#if TOML_WINDOWS_COMPAT
@@ -245,7 +252,7 @@ namespace toml
 			[[nodiscard]]
 			node_view<node> operator[] (std::wstring_view key) noexcept
 			{
-				return is_err ? node_view<node>{} : get()[key];
+				return is_err ? node_view<node>{} : table()[key];
 			}
 
 			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
@@ -261,7 +268,7 @@ namespace toml
 			[[nodiscard]]
 			node_view<const node> operator[] (std::wstring_view key) const noexcept
 			{
-				return is_err ? node_view<const node>{} : get()[key];
+				return is_err ? node_view<const node>{} : table()[key];
 			}
 
 			#endif // TOML_WINDOWS_COMPAT
@@ -271,7 +278,7 @@ namespace toml
 			[[nodiscard]]
 			table_iterator begin() noexcept
 			{
-				return is_err ? table_iterator{} : get().begin();
+				return is_err ? table_iterator{} : table().begin();
 			}
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
@@ -279,7 +286,7 @@ namespace toml
 			[[nodiscard]]
 			const_table_iterator begin() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().begin();
+				return is_err ? const_table_iterator{} : table().begin();
 			}
 
 			/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
@@ -287,7 +294,7 @@ namespace toml
 			[[nodiscard]]
 			const_table_iterator cbegin() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().cbegin();
+				return is_err ? const_table_iterator{} : table().cbegin();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
@@ -295,7 +302,7 @@ namespace toml
 			[[nodiscard]]
 			table_iterator end() noexcept
 			{
-				return is_err ? table_iterator{} : get().end();
+				return is_err ? table_iterator{} : table().end();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
@@ -303,7 +310,7 @@ namespace toml
 			[[nodiscard]]
 			const_table_iterator end() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().end();
+				return is_err ? const_table_iterator{} : table().end();
 			}
 
 			/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
@@ -311,7 +318,7 @@ namespace toml
 			[[nodiscard]]
 			const_table_iterator cend() const noexcept
 			{
-				return is_err ? const_table_iterator{} : get().cend();
+				return is_err ? const_table_iterator{} : table().cend();
 			}
 	};
 

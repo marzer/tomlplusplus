@@ -93,7 +93,7 @@ namespace toml
 			/// \brief	Returns the node that's being referenced by the view.
 			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
 
-			[[nodiscard, deprecated("use node_view::node() instead (the name is better)")]]
+			[[nodiscard, deprecated("use node_view::node() instead")]]
 			viewed_type* get() const noexcept { return node_; }
 
 			/// \brief	Returns the type identifier for the viewed node.
@@ -149,14 +149,7 @@ namespace toml
 			[[nodiscard]]
 			auto as() const noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
-					"Template type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
-				);
-
-				return node_ ? node_->template as<type>() : nullptr;
+				return node_ ? node_->template as<T>() : nullptr;
 			}
 
 			/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
@@ -332,17 +325,11 @@ namespace toml
 			[[nodiscard]]
 			decltype(auto) ref() const noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					impl::is_native<type> || impl::is_one_of<type, table, array>,
-					"Template type parameter must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
-				);
 				TOML_ASSERT(
 					node_
 					&& "toml::node_view::ref() called on a node_view that did not reference a node"
 				);
-				return node_->template ref<type>();
+				return node_->template ref<impl::unwrap_node<T>>();
 			}
 
 			/// \brief	Returns true if the viewed node is a table with the same contents as RHS.

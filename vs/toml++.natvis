@@ -3,16 +3,16 @@
 
 	<Type Name="toml::v2::date">
 		<Intrinsic Name="y" Expression="(int)year" />
-		<Intrinsic Name="mo" Expression="(int)month" />
+		<Intrinsic Name="m" Expression="(int)month" />
 		<Intrinsic Name="d" Expression="(int)day" />
-		<DisplayString Condition="y() &lt; 10 &amp;&amp; mo() &lt; 10 &amp;&amp; d() &lt; 10">0{y()}-0{mo()}-0{d()}</DisplayString>
-		<DisplayString Condition="y() &lt; 10 &amp;&amp; mo() &lt; 10">0{y()}-0{mo()}-{d()}</DisplayString>
-		<DisplayString Condition="y() &lt; 10 &amp;&amp; d() &lt; 10">0{y()}-{mo()}-0{d()}</DisplayString>
-		<DisplayString Condition="mo() &lt; 10 &amp;&amp; d() &lt; 10">{y()}-0{mo()}-0{d()}</DisplayString>
-		<DisplayString Condition="y() &lt; 10">0{y()}-{mo()}-{d()}</DisplayString>
-		<DisplayString Condition="mo() &lt; 10">{y()}-0{mo()}-{d()}</DisplayString>
-		<DisplayString Condition="d() &lt; 10">{y()}-{mo()}-0{d()}</DisplayString>
-		<DisplayString>{y()}-{mo()}-{d()}</DisplayString>
+		<DisplayString Condition="y() &lt; 10 &amp;&amp; m() &lt; 10 &amp;&amp; d() &lt; 10">0{y()}-0{m()}-0{d()}</DisplayString>
+		<DisplayString Condition="y() &lt; 10 &amp;&amp; m() &lt; 10">0{y()}-0{m()}-{d()}</DisplayString>
+		<DisplayString Condition="y() &lt; 10 &amp;&amp; d() &lt; 10">0{y()}-{m()}-0{d()}</DisplayString>
+		<DisplayString Condition="m() &lt; 10 &amp;&amp; d() &lt; 10">{y()}-0{m()}-0{d()}</DisplayString>
+		<DisplayString Condition="y() &lt; 10">0{y()}-{m()}-{d()}</DisplayString>
+		<DisplayString Condition="m() &lt; 10">{y()}-0{m()}-{d()}</DisplayString>
+		<DisplayString Condition="d() &lt; 10">{y()}-{m()}-0{d()}</DisplayString>
+		<DisplayString>{y()}-{m()}-{d()}</DisplayString>
 		<Expand>
 			<Item Name="year" ExcludeView="simple">year</Item>
 			<Item Name="month" ExcludeView="simple">month</Item>
@@ -42,17 +42,17 @@
 
 	<Type Name="toml::v2::time_offset">
 		<Intrinsic Name="absmin" Expression="((int)minutes ^ ((int)minutes >> 31)) - ((int)minutes >> 31)" />
-		<Intrinsic Name="ho" Expression="absmin() / 60u" />
-		<Intrinsic Name="mo" Expression="absmin() % 60u" />
+		<Intrinsic Name="h" Expression="absmin() / 60u" />
+		<Intrinsic Name="m" Expression="absmin() % 60u" />
 		<DisplayString Condition="minutes == 0">Z</DisplayString>
-		<DisplayString Condition="minutes &lt; 0 &amp;&amp; ho() &lt; 10 &amp;&amp; mo() &lt; 10">-0{ho()}:0{mo()}</DisplayString>
-		<DisplayString Condition="minutes &lt; 0 &amp;&amp; ho() &lt; 10">-0{ho()}:{mo()}</DisplayString>
-		<DisplayString Condition="minutes &lt; 0 &amp;&amp; mo() &lt; 10">-{ho()}:0{mo()}</DisplayString>
-		<DisplayString Condition="minutes &lt; 0">-{ho()}:{mo()}</DisplayString>
-		<DisplayString Condition="ho() &lt; 10 &amp;&amp; mo() &lt; 10">0{ho()}:0{mo()}</DisplayString>
-		<DisplayString Condition="ho() &lt; 10">0{ho()}:{mo()}</DisplayString>
-		<DisplayString Condition="mo() &lt; 10">{ho()}:0{mo()}</DisplayString>
-		<DisplayString>{ho()}:{mo()}</DisplayString>
+		<DisplayString Condition="minutes &lt; 0 &amp;&amp; h() &lt; 10 &amp;&amp; m() &lt; 10">-0{h()}:0{m()}</DisplayString>
+		<DisplayString Condition="minutes &lt; 0 &amp;&amp; h() &lt; 10">-0{h()}:{m()}</DisplayString>
+		<DisplayString Condition="minutes &lt; 0 &amp;&amp; m() &lt; 10">-{h()}:0{m()}</DisplayString>
+		<DisplayString Condition="minutes &lt; 0">-{h()}:{m()}</DisplayString>
+		<DisplayString Condition="h() &lt; 10 &amp;&amp; m() &lt; 10">0{h()}:0{m()}</DisplayString>
+		<DisplayString Condition="h() &lt; 10">0{h()}:{m()}</DisplayString>
+		<DisplayString Condition="m() &lt; 10">{h()}:0{m()}</DisplayString>
+		<DisplayString>{h()}:{m()}</DisplayString>
 		<Expand>
 			<Item Name="minutes" ExcludeView="simple">minutes</Item>
 		</Expand>

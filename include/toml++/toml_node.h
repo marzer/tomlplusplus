@@ -9,34 +9,56 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-#define TOML_NATIVE_VALUE_TYPE_LIST							\
-	"\n| - std::string"										\
-	"\n| - int64_t"											\
-	"\n| - double"											\
-	"\n| - bool"											\
-	"\n| - toml::date"										\
-	"\n| - toml::time"										\
-	"\n| - toml::date_time"
+#if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
+#define TOML_SA_NEWLINE		" "
+#define TOML_SA_LIST_SEP	", "
+#define TOML_SA_LIST_BEG	" ("
+#define TOML_SA_LIST_END	")"
+#define TOML_SA_LIST_NEW	" "
+#define TOML_SA_LIST_NXT	", "
+#define TOML_SA_LIST_CAP(...)
 
-#define TOML_NODE_TYPE_LIST									\
-	"\n| - toml::table"										\
-	"\n| - toml::array"										\
-	"\n| - toml::value<std::string>"						\
-	"\n| - toml::value<int64_t>"							\
-	"\n| - toml::value<double>"								\
-	"\n| - toml::value<bool>"								\
-	"\n| - toml::value<toml::date>"							\
-	"\n| - toml::value<toml::time>"							\
-	"\n| - toml::value<toml::date_time>"
+#else
 
-#define TOML_UNWRAPPED_NODE_TYPE_LIST						\
-	"\n|"													\
-	"\n| A native TOML value type"							\
-	TOML_NATIVE_VALUE_TYPE_LIST								\
-	"\n|"													\
-	"\n| A TOML node type"									\
-	TOML_NODE_TYPE_LIST
+#define TOML_SA_NEWLINE			"\n| "
+#define TOML_SA_LIST_SEP		TOML_SA_NEWLINE "  - "
+#define TOML_SA_LIST_BEG		TOML_SA_LIST_SEP
+#define TOML_SA_LIST_END
+#define TOML_SA_LIST_NEW		TOML_SA_NEWLINE TOML_SA_NEWLINE
+#define TOML_SA_LIST_NXT		TOML_SA_LIST_NEW
+#define TOML_SA_LIST_CAP(val)	val
+
+#endif
+
+#define TOML_SA_NATIVE_VALUE_TYPE_LIST							\
+	TOML_SA_LIST_BEG	"std::string"							\
+	TOML_SA_LIST_SEP	"int64_t"								\
+	TOML_SA_LIST_SEP	"double"								\
+	TOML_SA_LIST_SEP	"bool"									\
+	TOML_SA_LIST_SEP	"toml::date"							\
+	TOML_SA_LIST_SEP	"toml::time"							\
+	TOML_SA_LIST_SEP	"toml::date_time"						\
+	TOML_SA_LIST_END
+
+#define TOML_SA_NODE_TYPE_LIST									\
+	TOML_SA_LIST_BEG	"toml::table"							\
+	TOML_SA_LIST_SEP	"toml::array"							\
+	TOML_SA_LIST_SEP	"toml::value<std::string>"				\
+	TOML_SA_LIST_SEP	"toml::value<int64_t>"					\
+	TOML_SA_LIST_SEP	"toml::value<double>"					\
+	TOML_SA_LIST_SEP	"toml::value<bool>"						\
+	TOML_SA_LIST_SEP	"toml::value<toml::date>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::time>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::date_time>"			\
+	TOML_SA_LIST_END
+
+#define TOML_SA_UNWRAPPED_NODE_TYPE_LIST						\
+	TOML_SA_LIST_NEW	"A native TOML value type"				\
+	TOML_SA_NATIVE_VALUE_TYPE_LIST								\
+																\
+	TOML_SA_LIST_NXT	"A TOML node type"						\
+	TOML_SA_NODE_TYPE_LIST
 
 namespace toml
 {
@@ -133,8 +155,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::is() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::is() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return is_table();
@@ -382,8 +404,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -405,8 +427,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
 					 if constexpr (std::is_same_v<type, table>) return as_table();
@@ -493,7 +515,8 @@ namespace toml
 			{
 				static_assert(
 					can_visit_any<Func&&, N&&>,
-					"Visitors must be invocable for at least one of the toml::node specializations"
+					"TOML node visitors must be invocable for at least one of the toml::node specializations:"
+					TOML_SA_NODE_TYPE_LIST
 				);
 
 				switch (n.type())
@@ -582,8 +605,8 @@ namespace toml
 				using type = impl::unwrap_node<T>;
 				static_assert(
 					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::ref() must be one of the following:"
-					TOML_UNWRAPPED_NODE_TYPE_LIST
+					"The template type argument of node::ref() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 				TOML_ASSERT(
 					n.template is<T>()

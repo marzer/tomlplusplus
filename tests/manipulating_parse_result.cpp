@@ -17,10 +17,10 @@ TEST_CASE("parse_result - good parse")
 	REQUIRE(!result.failed());
 	REQUIRE(result);
 
-	REQUIRE(!result.get().empty());
-	REQUIRE(result.get().size() == 1);
-	REQUIRE(!std::move(result).get().empty());
-	REQUIRE(!static_cast<const parse_result&>(result).get().empty());
+	REQUIRE(!result.table().empty());
+	REQUIRE(result.table().size() == 1);
+	REQUIRE(!std::move(result).table().empty());
+	REQUIRE(!static_cast<const parse_result&>(result).table().empty());
 
 	REQUIRE(!static_cast<table&>(result).empty());
 	REQUIRE(!static_cast<table&&>(result).empty());
