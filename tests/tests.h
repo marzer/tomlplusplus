@@ -1,3 +1,8 @@
+// This file is a part of toml++ and is subject to the the terms of the MIT license.
+// Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
+// See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+// SPDX-License-Identifier: MIT
+
 #pragma once
 #include "settings.h"
 
@@ -55,7 +60,7 @@ inline double make_infinity(int sign = 1) noexcept
 TOML_ATTR(const)
 inline double make_nan() noexcept
 {
-	constexpr uint64_t qnan = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+	constexpr uint64_t qnan = 0b1111111111111000000000000000000000000000000000000000000000000001ull;
 	double val;
 	std::memcpy(&val, &qnan, sizeof(double));
 	return val;

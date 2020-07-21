@@ -115,15 +115,15 @@ compiler_supports_fast_math = compiler.links('''
 
 fast_math_modes = [ false, true ]
 exception_modes = [ true, false ]
-strict_modes = [ false, true ]
+unreleased_feature_modes = [ false, true ]
 cpp20_modes = [ false, true ]
 executables = []
 counter = 0
 foreach cpp20 : cpp20_modes
-	foreach strict : strict_modes
-		if cpp20 and not compiler_supports_cpp20
-			continue
-		endif
+	if cpp20 and not compiler_supports_cpp20
+		continue
+	endif
+	foreach unrel : unreleased_feature_modes
 		foreach fast_math : fast_math_modes
 			if fast_math and not compiler_supports_fast_math
 				continue
@@ -133,12 +133,6 @@ foreach cpp20 : cpp20_modes
 					name = ''
 					overrides = []
 					args = []
-
-					if compiler_supports_float16
-						if compiler.get_id() == 'gcc'
-							args += '-mfp16-format=ieee'
-						endif
-					endif
 
 					if cpp20
 						name = 'cpp20'
@@ -150,13 +144,6 @@ foreach cpp20 : cpp20_modes
 						endif
 					else
 						name = 'cpp17'
-					endif
-
-					if strict
-						name = name + '_strict'
-						args += '-DTOML_UNRELEASED_FEATURES=0'
-					else
-						args += '-DTOML_UNRELEASED_FEATURES=1'
 					endif
 
 					if not exceptions
@@ -172,6 +159,13 @@ foreach cpp20 : cpp20_modes
 						endif
 					endif
 
+					if unrel
+						name = name + '_unrel'
+						args += '-DTOML_UNRELEASED_FEATURES=1'
+					else
+						args += '-DTOML_UNRELEASED_FEATURES=0'
+					endif
+
 					if counter % 6 == 3
 						args += '-DTOML_ALL_INLINE=1'
 					endif
@@ -182,16 +176,11 @@ foreach cpp20 : cpp20_modes
 						args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
 						name = name + '_tlopt'
 					endif
-
-					if compiler.get_id() == 'gcc'
-						args += '-Wno-padded'
-						args += '-Wno-float-equal'
-					endif
-
-					if compiler.get_id() == 'clang'
-						args += '-Wno-padded'
-						args += '-Wno-float-equal'
-						args += '-Wno-double-promotion'
+					
+					if compiler_supports_float16
+						if compiler.get_id() == 'gcc'
+							args += '-mfp16-format=ieee'
+						endif
 					endif
 
 					executables += [[

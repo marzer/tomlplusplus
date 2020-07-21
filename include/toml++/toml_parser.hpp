@@ -1044,7 +1044,7 @@ namespace toml
 				// and/or std::numeric_limits<double>::infinity() (e.g. due to -ffast-math and friends)
 				constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
 				constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
-				constexpr uint64_t qnan    = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t qnan    = 0b1111111111111000000000000000000000000000000000000000000000000001ull;
 				double rval;
 				std::memcpy(&rval, inf ? (negative ? &neg_inf : &pos_inf) : &qnan, sizeof(double));
 				return rval;

@@ -184,7 +184,7 @@ namespace toml
 						&& !arr->template get_as<table>(0_sz)->is_inline();
 				};
 
-				//values, arrays, and inline tables/table arrays
+				// values, arrays, and inline tables/table arrays
 				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
@@ -206,7 +206,7 @@ namespace toml
 					}
 				}
 
-				//non-inline tables
+				// non-inline tables
 				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
@@ -214,8 +214,8 @@ namespace toml
 						continue;
 					auto& child_tbl = *reinterpret_cast<const table*>(&v);
 
-					//we can skip indenting and emitting the headers for tables that only contain other tables
-					//(so we don't over-nest)
+					// we can skip indenting and emitting the headers for tables that only contain other tables
+					// (so we don't over-nest)
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
@@ -248,19 +248,21 @@ namespace toml
 					if (child_value_count == 0_sz && (child_table_count > 0_sz || child_table_array_count > 0_sz))
 						skip_self = true;
 
-					if (!skip_self)
-						base::increase_indent();
 					key_path.push_back(impl::default_formatter_make_key_segment(k));
 
 					if (!skip_self)
 					{
-						base::print_newline();
-						base::print_newline(true);
+						if (!base::naked_newline())
+						{
+							base::print_newline();
+							base::print_newline(true);
+						}
+						base::increase_indent();
 						base::print_indent();
 						impl::print_to_stream("["sv, base::stream());
 						print_key_path();
 						impl::print_to_stream("]"sv, base::stream());
-						base::print_newline(true);
+						base::print_newline();
 					}
 
 					print(child_tbl);
@@ -270,7 +272,7 @@ namespace toml
 						base::decrease_indent();
 				}
 
-				//table arrays
+				// table arrays
 				for (auto&& [k, v] : tbl)
 				{
 					if (!is_non_inline_array_of_tables(v))
@@ -310,6 +312,7 @@ namespace toml
 						{
 							base::decrease_indent(); // so root kvps and tables have the same indent
 							print(tbl);
+							base::print_newline();
 						}
 						break;
 					}

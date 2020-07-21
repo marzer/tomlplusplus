@@ -5538,6 +5538,12 @@ namespace toml
 				return (flags_ & format_flags::allow_multi_line_strings) != format_flags::none;
 			}
 
+			[[nodiscard]]
+			bool naked_newline() const noexcept
+			{
+				return naked_newline_;
+			}
+
 			void clear_naked_newline() noexcept
 			{
 				naked_newline_ = false;
@@ -5846,7 +5852,7 @@ namespace toml
 						&& !arr->template get_as<table>(0_sz)->is_inline();
 				};
 
-				//values, arrays, and inline tables/table arrays
+				// values, arrays, and inline tables/table arrays
 				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
@@ -5868,7 +5874,7 @@ namespace toml
 					}
 				}
 
-				//non-inline tables
+				// non-inline tables
 				for (auto&& [k, v] : tbl)
 				{
 					const auto type = v.type();
@@ -5876,8 +5882,8 @@ namespace toml
 						continue;
 					auto& child_tbl = *reinterpret_cast<const table*>(&v);
 
-					//we can skip indenting and emitting the headers for tables that only contain other tables
-					//(so we don't over-nest)
+					// we can skip indenting and emitting the headers for tables that only contain other tables
+					// (so we don't over-nest)
 					size_t child_value_count{}; //includes inline tables and non-table arrays
 					size_t child_table_count{};
 					size_t child_table_array_count{};
@@ -5910,19 +5916,21 @@ namespace toml
 					if (child_value_count == 0_sz && (child_table_count > 0_sz || child_table_array_count > 0_sz))
 						skip_self = true;
 
-					if (!skip_self)
-						base::increase_indent();
 					key_path.push_back(impl::default_formatter_make_key_segment(k));
 
 					if (!skip_self)
 					{
-						base::print_newline();
-						base::print_newline(true);
+						if (!base::naked_newline())
+						{
+							base::print_newline();
+							base::print_newline(true);
+						}
+						base::increase_indent();
 						base::print_indent();
 						impl::print_to_stream("["sv, base::stream());
 						print_key_path();
 						impl::print_to_stream("]"sv, base::stream());
-						base::print_newline(true);
+						base::print_newline();
 					}
 
 					print(child_tbl);
@@ -5932,7 +5940,7 @@ namespace toml
 						base::decrease_indent();
 				}
 
-				//table arrays
+				// table arrays
 				for (auto&& [k, v] : tbl)
 				{
 					if (!is_non_inline_array_of_tables(v))
@@ -5972,6 +5980,7 @@ namespace toml
 						{
 							base::decrease_indent(); // so root kvps and tables have the same indent
 							print(tbl);
+							base::print_newline();
 						}
 						break;
 					}
@@ -6127,9 +6136,17 @@ namespace toml
 			{
 				switch (auto source_type = base::source().type())
 				{
-					case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-					default: base::print_value(base::source(), source_type);
+					case node_type::table:
+						print(*reinterpret_cast<const table*>(&base::source()));
+						base::print_newline();
+						break;
+
+					case node_type::array:
+						print(*reinterpret_cast<const array*>(&base::source()));
+						break;
+
+					default:
+						base::print_value(base::source(), source_type);
 				}
 			}
 
@@ -9160,7 +9177,7 @@ namespace toml
 				// and/or std::numeric_limits<double>::infinity() (e.g. due to -ffast-math and friends)
 				constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
 				constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
-				constexpr uint64_t qnan    = 0b0111111111111000000000000000000000000000000000000000000000000000ull;
+				constexpr uint64_t qnan    = 0b1111111111111000000000000000000000000000000000000000000000000001ull;
 				double rval;
 				std::memcpy(&rval, inf ? (negative ? &neg_inf : &pos_inf) : &qnan, sizeof(double));
 				return rval;

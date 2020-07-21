@@ -271,3 +271,48 @@ TEST_CASE("tables - insertion and erasure")
 
 	#endif // TOML_WINDOWS_COMPAT
 }
+
+TEST_CASE("tables - printing")
+{
+	static constexpr auto to_string = [](std::string_view some_toml)
+	{
+		auto val = toml::parse(some_toml);
+		std::stringstream ss;
+		ss << val;
+		return ss.str();
+	};
+
+	{
+		static constexpr auto some_toml = R"(val1 = 1
+val2 = 2
+val3 = 3
+)"sv; //new line at end!
+
+		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		static constexpr auto some_toml = R"([a_table]
+a = 1
+b = 2
+c = 3
+)"sv; //new line at end!
+
+		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		static constexpr auto some_toml = R"(val1 = 1
+val2 = 2
+val3 = 3
+
+[a_table]
+a = 1
+b = 2
+c = 3
+)"sv; //new line at end!
+
+		CHECK(to_string(some_toml) == some_toml);
+	}
+}
+

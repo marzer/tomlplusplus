@@ -95,6 +95,12 @@ namespace toml
 				return (flags_ & format_flags::allow_multi_line_strings) != format_flags::none;
 			}
 
+			[[nodiscard]]
+			bool naked_newline() const noexcept
+			{
+				return naked_newline_;
+			}
+
 			void clear_naked_newline() noexcept
 			{
 				naked_newline_ = false;

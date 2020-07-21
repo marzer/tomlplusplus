@@ -98,9 +98,17 @@ namespace toml
 			{
 				switch (auto source_type = base::source().type())
 				{
-					case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-					default: base::print_value(base::source(), source_type);
+					case node_type::table:
+						print(*reinterpret_cast<const table*>(&base::source()));
+						base::print_newline();
+						break;
+
+					case node_type::array:
+						print(*reinterpret_cast<const array*>(&base::source()));
+						break;
+
+					default:
+						base::print_value(base::source(), source_type);
 				}
 			}
 
