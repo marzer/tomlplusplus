@@ -173,7 +173,8 @@ is no longer necessary.
 	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
-	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")

@@ -211,7 +211,8 @@ is no longer necessary.
 	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
-	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")
+	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
@@ -1894,6 +1895,7 @@ namespace toml
 #if 1
 
 TOML_PUSH_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
 #if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
@@ -2334,7 +2336,7 @@ namespace toml
 	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 
 #endif
 //------------------  ↑ toml_node.h  -----------------------------------------------------------------------------------
@@ -7229,6 +7231,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
@@ -7473,7 +7476,7 @@ namespace toml
 	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #endif
 //------------------------------------------------------------------  ↑ toml_array.hpp  --------------------------------
@@ -7483,6 +7486,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml
 {
@@ -7705,7 +7709,7 @@ namespace toml
 	TOML_ABI_NAMESPACE_END // version
 }
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #endif
 //-------------------------------------------------------------------------------------------  ↑ toml_table.hpp  -------
@@ -7721,6 +7725,8 @@ TOML_POP_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_MISC_WARNINGS
 
 namespace toml
 {
@@ -7979,7 +7985,8 @@ namespace toml
 
 #endif // TOML_WINDOWS_COMPAT
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS,
+				  // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 
 #endif
 //----------  ↑ toml_default_formatter.hpp  ----------------------------------------------------------------------------
