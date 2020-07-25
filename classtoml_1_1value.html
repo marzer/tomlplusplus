@@ -62,7 +62,7 @@ C++</span></a>
       <div class="m-col-l-10 m-push-l-1">
         <h1>
           <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>value <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>value <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
         </h1>
         <p>A TOML value.</p>
         <table class="m-table m-fullwidth m-flat">
@@ -82,6 +82,7 @@ C++</span></a>
             <li>
               Reference
               <ul>
+                <li><a href="#base-classes">Base classes</a></li>
                 <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
@@ -90,6 +91,15 @@ C++</span></a>
             </li>
           </ul>
         </div>
+        <section id="base-classes">
+          <h2><a href="#base-classes">Base classes</a></h2>
+          <dl class="m-doc">
+            <dt>
+              class <a class="m-doc" href="classtoml_1_1node.html">node</a>
+            </dt>
+            <dd>A TOML node.</dd>
+          </dl>
+        </section>
         <section id="pub-types">
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
@@ -204,10 +214,42 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a64d6b4223bcf8c124802bb8f97e0e40e">is_array</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Always returns <code>false</code> for value nodes.</dd>
+            <dt id="aa6218b2cf228431ab8933251cdd2827e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa6218b2cf228431ab8933251cdd2827e">is_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a boolean value.</dd>
+            <dt id="a8efb92838ded8eee056a295b12f861b2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8efb92838ded8eee056a295b12f861b2">is_date</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a local <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a> value.</dd>
+            <dt id="a0de55ce6d6abe26d1a94d4e2021bd331">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0de55ce6d6abe26d1a94d4e2021bd331">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
+            <dt id="adf9e031d41969de6d8b55f59da72cfa3">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#adf9e031d41969de6d8b55f59da72cfa3">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is an floating-point value.</dd>
+            <dt id="a48ff507b26ed64224f1866502b8eaf28">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a48ff507b26ed64224f1866502b8eaf28">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is an integer value.</dd>
+            <dt id="a4a81fff689d825a1717b1b439d130800">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a81fff689d825a1717b1b439d130800">is_number</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is an integer or floating-point value.</dd>
+            <dt id="aaec50db69c9e38159d6844394fe94dd5">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aaec50db69c9e38159d6844394fe94dd5">is_string</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a string value.</dd>
             <dt id="a043bd619a674718f1404f554eaef41e3">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a043bd619a674718f1404f554eaef41e3">is_table</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Always returns <code>false</code> for value nodes.</dd>
+            <dt id="afa64172102844454bffe7ad2e757aace">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afa64172102844454bffe7ad2e757aace">is_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if this node is a local <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
             <dt id="a9679039a2bda46d148a8b3ff842d8702">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9679039a2bda46d148a8b3ff842d8702">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
