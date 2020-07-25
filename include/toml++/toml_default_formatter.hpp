@@ -23,10 +23,8 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	inline constexpr size_t default_formatter_line_wrap = 120_sz;
 
 	TOML_API
@@ -167,14 +165,11 @@ namespace toml
 	{
 		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	template <typename Char>
 	inline void default_formatter<Char>::print_inline(const toml::table& tbl)
 	{
@@ -209,9 +204,8 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
@@ -221,10 +215,8 @@ TOML_DISABLE_ALL_WARNINGS
 #include <Windows.h> // fuckkkk :(
 TOML_POP_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str) noexcept
@@ -274,12 +266,10 @@ namespace toml
 	}
 
 	#endif // __cpp_lib_char8_t
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 #endif // TOML_WINDOWS_COMPAT
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS,
 				  // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
-

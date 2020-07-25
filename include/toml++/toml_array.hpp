@@ -17,10 +17,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
@@ -257,9 +255,8 @@ namespace toml
 	{
 		return is_homogeneous(node_type::table);
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 

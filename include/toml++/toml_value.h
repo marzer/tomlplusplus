@@ -12,10 +12,8 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename T, typename...>
 	struct native_value_maker
 	{
@@ -105,17 +103,11 @@ namespace toml
 		}
 		return { static_cast<T>(val) };
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename Char, typename T>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const value<T>&);
-
 	/// \brief	A TOML value.
 	/// 		
 	/// \tparam	ValueType	The value's native TOML data type. Can be one of:
@@ -305,7 +297,7 @@ namespace toml
 			{
 				if constexpr (std::is_same_v<value_type, double>)
 				{
-					using namespace ::toml::impl;
+					using namespace impl;
 					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
 					{
 						return (static_cast<uint64_t>(unbox_enum(l)) << 32)
@@ -456,8 +448,12 @@ namespace toml
 					return impl::node_type_of<value_type> >= impl::node_type_of<T>;
 			}
 	};
+	template <typename T>
+	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
-	#if !TOML_ALL_INLINE
+	#ifndef DOXYGEN
+
+	#if !TOML_HEADER_ONLY
 		extern template class TOML_API value<std::string>;
 		extern template class TOML_API value<int64_t>;
 		extern template class TOML_API value<double>;
@@ -467,9 +463,6 @@ namespace toml
 		extern template class TOML_API value<date_time>;
 	#endif
 	
-	template <typename T>
-	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
-
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 	TOML_DISABLE_SWITCH_WARNINGS
@@ -478,7 +471,7 @@ namespace toml
 	[[nodiscard]]
 	inline decltype(auto) node::get_value_exact() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(node_type_of<T> != node_type::none);
 		static_assert(node_type_of<T> != node_type::table);
@@ -525,7 +518,7 @@ namespace toml
 	template <typename T>
 	inline optional<T> node::value_exact() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -571,7 +564,7 @@ namespace toml
 	template <typename T>
 	inline optional<T> node::value() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -714,7 +707,7 @@ namespace toml
 	template <typename T>
 	inline auto node::value_or(T&& default_value) const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -811,7 +804,7 @@ namespace toml
 		}
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !TOML_HEADER_ONLY
 
 	#define TOML_EXTERN(name, T)	\
 		extern template TOML_API optional<T>		node::name<T>() const noexcept
@@ -857,11 +850,12 @@ namespace toml
 	#endif
 	#undef TOML_EXTERN
 
-	#endif // !TOML_ALL_INLINE
+	#endif // !TOML_HEADER_ONLY
 
 	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
 
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !DOXYGEN
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

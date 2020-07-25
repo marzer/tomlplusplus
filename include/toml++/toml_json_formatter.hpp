@@ -16,10 +16,8 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	template <typename Char>
 	inline void json_formatter<Char>::print(const toml::table& tbl)
 	{
@@ -59,8 +57,7 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS

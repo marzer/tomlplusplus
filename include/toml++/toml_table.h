@@ -10,10 +10,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <bool IsConst>
 	struct table_proxy_pair final
 	{
@@ -192,19 +190,11 @@ namespace toml
 
 		#endif
 	};
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
-	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
-	template <typename Char>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
-
 	/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
 	using table_iterator = impl::table_iterator<false>;
 
@@ -1031,8 +1021,7 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

@@ -725,6 +725,10 @@ class SyntaxHighlightingFix(object):
 # adds links to external sources where appropriate
 class ExtDocLinksFix(object): 
 	__types = [
+		(r'static_cast','https://en.cppreference.com/w/cpp/language/static_cast'),
+		(r'const_cast','https://en.cppreference.com/w/cpp/language/const_cast'),
+		(r'dynamic_cast','https://en.cppreference.com/w/cpp/language/dynamic_cast'),
+		(r'reinterpret_cast','https://en.cppreference.com/w/cpp/language/reinterpret_cast'),
 		(r'(?:std::)?size_t', 'https://en.cppreference.com/w/cpp/types/size_t'),
 		(r'(?:std::)?u?int(?:8|16|32|64)(fast|least)?_ts?', 'https://en.cppreference.com/w/cpp/types/integer'),
 		(r'std::pairs?', 'https://en.cppreference.com/w/cpp/utility/pair'),
@@ -800,6 +804,7 @@ class ExtDocLinksFix(object):
 		(r'std::countr_zero', 'https://en.cppreference.com/w/cpp/numeric/countr_zero'),
 		(r'std::countl_one', 'https://en.cppreference.com/w/cpp/numeric/countl_one'),
 		(r'std::countr_one', 'https://en.cppreference.com/w/cpp/numeric/countr_one'),
+		(r'std::popcount', 'https://en.cppreference.com/w/cpp/numeric/popcount'),
 		(r'std::has_single_bit', 'https://en.cppreference.com/w/cpp/numeric/has_single_bit'),
 		(r'std::min', 'https://en.cppreference.com/w/cpp/algorithm/min'),
 		(r'std::max', 'https://en.cppreference.com/w/cpp/algorithm/max'),
@@ -818,6 +823,8 @@ class ExtDocLinksFix(object):
 			r'(?:__INTELLISENSE__|_MSC_FULL_VER|_MSC_VER|_MSVC_LANG|_WIN32|_WIN64)',
 			'https://docs.microsoft.com/en-us/cpp/preprocessor/predefined-macros?view=vs-2019'
 		),
+		(r'IUnknowns?', 'https://docs.microsoft.com/en-us/windows/win32/api/unknwn/nn-unknwn-iunknown'),
+		(r'(?:IUnknown::)?QueryInterface?', 'https://docs.microsoft.com/en-us/windows/win32/api/unknwn/nf-unknwn-iunknown-queryinterface(q)'),
 		(r'(?:Legacy)?InputIterators?', 'https://en.cppreference.com/w/cpp/named_req/InputIterator'),
 		(r'(?:Legacy)?OutputIterators?', 'https://en.cppreference.com/w/cpp/named_req/OutputIterator'),
 		(r'(?:Legacy)?ForwardIterators?', 'https://en.cppreference.com/w/cpp/named_req/ForwardIterator'),

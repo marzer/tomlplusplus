@@ -24,7 +24,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
 	#include <sstream>
 #endif
-#if !TOML_ALL_INLINE
+#if !TOML_HEADER_ONLY
 	using namespace std::string_view_literals;
 #endif
 TOML_POP_WARNINGS
@@ -39,7 +39,7 @@ TOML_DISABLE_PADDING_WARNINGS
 	#define TOML_RETURNS_BY_THROWING
 #endif
 
-namespace TOML_ANONYMOUS_NAMESPACE
+TOML_ANON_NAMESPACE_START
 {
 	template <uint64_t> struct parse_integer_traits;
 	template <> struct parse_integer_traits<2> final
@@ -76,7 +76,6 @@ namespace TOML_ANONYMOUS_NAMESPACE
 		static constexpr auto prefix_codepoint = U'x';
 		static constexpr auto prefix = "x"sv;
 	};
-
 
 	[[nodiscard]]
 	TOML_INTERNAL_LINKAGE
@@ -253,13 +252,11 @@ namespace TOML_ANONYMOUS_NAMESPACE
 		toml::node* value;
 	};
 
-	TOML_ANONYMOUS_NAMESPACE_END
 }
+TOML_ANON_NAMESPACE_END
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// Q: "what the fuck is this? MACROS????"
 	// A: The parser needs to work in exceptionless mode (returning error objects directly)
 	//    and exception mode (reporting parse failures by throwing). Two totally different control flows.
@@ -2941,14 +2938,11 @@ namespace toml
 	#undef advance_and_return_if_error
 	#undef advance_and_return_if_error_or_eof
 	#undef assert_or_assume
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	TOML_API
@@ -3027,8 +3021,7 @@ namespace toml
 	}
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

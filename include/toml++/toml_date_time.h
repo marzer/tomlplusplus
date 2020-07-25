@@ -9,10 +9,8 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	/// \brief	A local date.
 	struct TOML_TRIVIAL_ABI date
 	{
@@ -97,7 +95,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date&);
 	#endif
 
@@ -190,7 +188,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time&);
 	#endif
 
@@ -296,7 +294,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
@@ -424,11 +422,10 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS

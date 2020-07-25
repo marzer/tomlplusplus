@@ -7,8 +7,8 @@
 
 // toml++ config
 #define TOML_UNDEF_MACROS 0
-#ifndef TOML_ALL_INLINE
-	#define TOML_ALL_INLINE 0
+#ifndef TOML_HEADER_ONLY
+	#define TOML_HEADER_ONLY 0
 #endif
 #ifndef USE_SINGLE_HEADER
 	#define USE_SINGLE_HEADER 0
@@ -76,3 +76,21 @@
 	#define NOWINMESSAGES //     - WM_*, EM_*, LB_*, CB_*
 	#define NOWINSTYLES //       - WS_*, CS_*, ES_*, LBS_*, SBS_*, CBS_*
 #endif
+
+// test harness stuff
+#ifndef SHOULD_HAVE_FP16
+	#define SHOULD_HAVE_FP16 0
+#endif
+#ifndef SHOULD_HAVE_FLOAT16
+	#define SHOULD_HAVE_FLOAT16 0
+#endif
+#ifndef SHOULD_HAVE_INT128
+	#define SHOULD_HAVE_INT128 0
+#endif
+#ifndef SHOULD_HAVE_FLOAT128
+	#define SHOULD_HAVE_FLOAT128 0
+#endif
+#ifndef SHOULD_HAVE_EXCEPTIONS
+	#define SHOULD_HAVE_EXCEPTIONS 1
+#endif
+

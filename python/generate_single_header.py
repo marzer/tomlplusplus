@@ -51,14 +51,6 @@ class Preprocessor:
 
 
 
-def increment_dict_value(dict, key, delta = 1):
-	if key in dict:
-		dict[key] = dict[key] + delta
-	else:
-		dict[key] = delta
-
-
-
 def main():
 
 	# preprocess header(s)
@@ -70,6 +62,7 @@ def main():
 	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
 	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
 	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
+
 	# source_text = re.sub(  # blank lines between various preprocessor directives
 	# 	'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#](ifn?(?:def)?|define)',
 	# 	'#\\1\n#\\2',
@@ -164,20 +157,44 @@ def main():
 		output_str = output.getvalue().strip()
 
 		# analyze the output to find any potentially missing #undefs
-		#re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
-		#re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
-		#defines = dict()
-		#for output_line in output_str.splitlines():
-		#	m = re_define.match(output_line)
-		#	if m:
-		#		increment_dict_value(defines, m.group(1))
-		#	else:
-		#		m = re_undef.match(output_line)
-		#		if m:
-		#			increment_dict_value(defines, m.group(1), -1)
-		#for define, num in defines.items():
-		#	if num > 0:
-		#		print(f"  {define} {num}")
+		re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
+		re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
+		defines = dict()
+		for output_line in output_str.splitlines():
+			defined = True
+			m = re_define.match(output_line)
+			if not m:
+				defined = False
+				m = re_undef.match(output_line)
+			if m:
+				defines[m.group(1)] = defined
+		ignore_list = ( # macros that are meant to stay public (user configs etc)
+			'TOML_API',
+			'TOML_UNRELEASED_FEATURES',
+			'TOML_LARGE_FILES',
+			'TOML_PARSER',
+			'TOML_WINDOWS_COMPAT',
+			'TOML_EXCEPTIONS',
+			'TOML_LIB_SINGLE_HEADER',
+			'TOML_LIB_MAJOR',
+			'TOML_LIB_MINOR',
+			'TOML_LIB_PATCH',
+			'TOML_LANG_MAJOR',
+			'TOML_LANG_MINOR',
+			'TOML_LANG_PATCH',
+			'TOML_UNDEF_MACROS',
+			'TOML_HEADER_ONLY',
+			'TOML_ALL_INLINE'
+		)
+		set_defines = []
+		for define, currently_set in defines.items():
+			if currently_set and define not in ignore_list:
+				set_defines.append(define)
+		if len(set_defines) > 0:
+			set_defines.sort()
+			print(f"Potentially missing #undefs:")
+			for define in set_defines:
+				print(f"\t#undef {define}")
 
 		# write the output file
 		output_file_path = path.join(utils.get_script_folder(), '..', 'toml.hpp')

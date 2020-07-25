@@ -11,13 +11,8 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename Char, typename T>
-	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
-
 	/// \brief	A view of a node.
 	/// 
 	/// \detail A node_view is like a std::optional<toml::node> with lots of toml-specific stuff built-in.
@@ -172,7 +167,7 @@ namespace toml
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
 			/// \brief	Gets the value contained by the referenced node.
-			/// 
+			///
 			/// \detail This function has 'exact' retrieval semantics; the only return value types allowed are the
 			/// 		TOML native value types, or types that can losslessly represent a native value type (e.g.
 			/// 		std::wstring on Windows).
@@ -489,7 +484,7 @@ namespace toml
 		return os;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 
 	extern template class TOML_API node_view<node>;
 	extern template class TOML_API node_view<const node>;
@@ -542,9 +537,8 @@ namespace toml
 	#endif
 	#undef TOML_EXTERN
 
-	#endif // !TOML_ALL_INLINE
-
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !TOML_HEADER_ONLY
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS

@@ -59,7 +59,7 @@
 /// \m_class{m-note m-warning}
 /// 
 /// \parblock
-/// <h3>Don't forget [code]#include &lt;fstream&gt;[/code]!</h3>
+/// <h3>Don't forget [code]\#include &lt;fstream&gt;[/code]!</h3>
 /// Not everyone who uses the library is going to work directly from files, so not everybody is forced to pay
 /// the compilation overhead of including `<fstream>`. You need to explicitly include it if you're going to be calling
 /// toml::parse_file().
@@ -383,14 +383,14 @@
 /// a large number of translation units. You can counter this by disabling 'all inline' mode and explicitly controlling
 /// where the library's implementation is compiled.
 /// 
-/// <strong>Step 1: Set \ref TOML_ALL_INLINE to [code]0[/code] before including toml++</strong>
+/// <strong>Step 1: Set \ref TOML_HEADER_ONLY to [code]0[/code] before including toml++</strong>
 /// 
 /// This must be the same everywhere, so either set it as a global `#define` in your build system, or
 /// do it manually before including toml++ in some global header that's used everywhere in your project:
 /// \cpp
 /// // global_header_that_includes_toml++.h
 /// 
-/// #define TOML_ALL_INLINE 0
+/// #define TOML_HEADER_ONLY 0
 /// #include <toml.hpp>
 /// \ecpp
 /// 

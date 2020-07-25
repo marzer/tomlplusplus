@@ -61,10 +61,8 @@ TOML_DISABLE_MISC_WARNINGS
 	TOML_SA_LIST_NXT	"A TOML node type"						\
 	TOML_SA_NODE_TYPE_LIST
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	/// \brief	A TOML node.
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
@@ -203,9 +201,14 @@ namespace toml
 
 		private:
 
+
+			#ifndef DOXYGEN
+
 			template <typename T>
 			[[nodiscard]]
 			decltype(auto) get_value_exact() const noexcept;
+
+			#endif // !DOXYGEN
 
 		public:
 
@@ -714,9 +717,8 @@ namespace toml
 				return do_ref<T>(*this);
 			}
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 

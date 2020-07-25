@@ -31,7 +31,7 @@ TEST_CASE("unicode - is_hexadecimal_digit")
 		REQUIRE(not_in(fn, r));
 }
 
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
 TEST_CASE("unicode - is_unicode_letter")
 {
@@ -711,4 +711,4 @@ TEST_CASE("unicode - is_unicode_combining_mark")
 		REQUIRE(!fn(v));
 }
 
-#endif // TOML_LANG_UNRELEASED
+	#endif // TOML_LANG_UNRELEASED

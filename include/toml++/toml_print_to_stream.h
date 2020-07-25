@@ -19,10 +19,8 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 TOML_POP_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
 	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
@@ -208,7 +206,7 @@ namespace toml
 		}
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	#endif
 
@@ -352,15 +350,12 @@ namespace toml
 		}
 	}
 
-	TOML_POP_WARNINGS
-
-	TOML_IMPL_NAMESPACE_END
+	TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	/// \brief	Prints a source_position to a stream.
 	///
 	/// \detail \cpp
@@ -432,10 +427,9 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END

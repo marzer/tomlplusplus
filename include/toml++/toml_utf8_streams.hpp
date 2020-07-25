@@ -21,9 +21,8 @@
 	#define TOML_ERROR_CHECK	if (reader.error()) return nullptr
 #endif
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	TOML_EXTERNAL_LINKAGE
@@ -96,18 +95,16 @@ namespace toml
 	}
 
 	#if !TOML_EXCEPTIONS
-
 	TOML_EXTERNAL_LINKAGE
 	optional<parse_error>&& utf8_buffered_reader::error() noexcept
 	{
 		return reader.error();
 	}
-
 	#endif
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 #undef TOML_ERROR_CHECK
 #undef TOML_ERROR

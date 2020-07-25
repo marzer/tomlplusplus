@@ -36,7 +36,7 @@ compiler_supports_cpp20 = compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports C++20',
+	name : 'supports c++20',
 	args : [ '-std=c++2a' ]
 )
 
@@ -84,20 +84,113 @@ compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 	args : [ '-std=c++2a' ]
 )
 
-compiler_supports_float16_args = []
+float_16_preprocessor_single_check_template = '''
+	#ifndef @0@
+		#error @0@ wasn't defined!
+	#else
+		#pragma message("@0@: " MAKE_STRING(@0@))
+	#endif
+	#if @0@ != @1@
+		#error @0@ was not @1@!
+	#endif
+
+'''
+float_16_preprocessor_checks = '''
+	#define MAKE_STRING(s)		MAKE_STRING_1(s)
+	#define MAKE_STRING_1(s)	#s
+	''' + float_16_preprocessor_single_check_template.format('__FLT_RADIX__', '2')						\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MANT_DIG__', '11')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_DIG__', '3')							\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_EXP__', '-13')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_10_EXP__', '-4')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_EXP__', '16')						\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_10_EXP__', '4')
+
+compiler_supports_float16_args = [ '-O0' ]
 if compiler.get_id() == 'gcc'
 	compiler_supports_float16_args += '-mfp16-format=ieee'
+	compiler_supports_float16_args += '-fmax-errors=1'
+elif compiler.get_id() == 'clang'
+	compiler_supports_float16_args += '-ferror-limit=1'
 endif
+compiler_supports_fp16 = compiler.links('''
+	@0@
+
+	int main()
+	{
+		static_assert(sizeof(__fp16) == 2);
+		__fp16 f = static_cast<__fp16>(1);
+		const auto f2 = static_cast<float>(f);
+		const auto f3 = static_cast<__fp16>(0.2L);
+		return 0;
+	}
+	'''.format(float_16_preprocessor_checks),
+	name : 'supports __fp16',
+	args : compiler_supports_float16_args
+)
 compiler_supports_float16 = compiler.links('''
+	@0@
+
 	int main()
 	{
 		static_assert(sizeof(_Float16) == 2);
 		_Float16 f = static_cast<_Float16>(1);
+		const auto f2 = static_cast<float>(f);
+		const auto f3 = static_cast<_Float16>(0.2L);
+		return 0;
+	}
+	'''.format(float_16_preprocessor_checks),
+	name : 'supports _Float16',
+	args : compiler_supports_float16_args
+)
+
+compiler_supports_int128 = compiler.links('''
+	#ifndef __SIZEOF_INT128__
+		#error __SIZEOF_INT128__ wasn't defined!
+	#endif
+
+	#include <cstdint>
+
+	int main()
+	{
+		static_assert(__SIZEOF_INT128__ == 16);
+		static_assert(sizeof(__int128_t) == 16);
+		static_assert(sizeof(__uint128_t) == 16);
+		__int128_t i = static_cast<__int128_t>(1);
+		const auto i2 = static_cast<int64_t>(i);
+		const auto i3 = static_cast<int32_t>(i);
 		return 0;
 	}
 	''',
-	name : 'supports float16',
-	args : compiler_supports_float16_args
+	name : 'supports __int128_t',
+	args : [ '-O0' ]
+)
+
+compiler_supports_float128 = compiler.links('''
+	#ifndef __SIZEOF_FLOAT128__
+		#error __SIZEOF_FLOAT128__ wasn't defined!
+	#endif
+	#ifndef __FLT128_MANT_DIG__
+		#error __FLT128_MANT_DIG__ wasn't defined!
+	#endif
+	#ifndef __LDBL_MANT_DIG__
+		#error __LDBL_MANT_DIG__ wasn't defined!
+	#endif
+	#if __FLT128_MANT_DIG__ <= __LDBL_MANT_DIG__
+		#error __FLT128_MANT_DIG__ was <= __LDBL_MANT_DIG__
+	#endif
+	int main()
+	{
+		static_assert(__SIZEOF_FLOAT128__ == 16);
+		static_assert(sizeof(__float128) == 16);
+		__float128 f = static_cast<__float128>(1);
+		const auto f2 = static_cast<long double>(f);
+		const auto f3 = static_cast<double>(f);
+		return 0;
+	}
+	''',
+	name : 'supports __float128',
+	args : [ '-O0' ]
 )
 
 compiler_supports_fast_math = compiler.links('''
@@ -119,6 +212,7 @@ unreleased_feature_modes = [ false, true ]
 cpp20_modes = [ false, true ]
 executables = []
 counter = 0
+
 foreach cpp20 : cpp20_modes
 	if cpp20 and not compiler_supports_cpp20
 		continue
@@ -146,9 +240,12 @@ foreach cpp20 : cpp20_modes
 						name = 'cpp17'
 					endif
 
-					if not exceptions
+					if exceptions
+						args += '-DSHOULD_HAVE_EXCEPTIONS=1'
+					else
 						name = name + '_noexcept'
 						overrides += 'cpp_eh=none'
+						args += '-DSHOULD_HAVE_EXCEPTIONS=0'
 					endif
 
 					if fast_math
@@ -156,6 +253,32 @@ foreach cpp20 : cpp20_modes
 						if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
 							args += '-ffast-math'
 							args += '-ffp-contract=fast'
+						endif
+					endif
+
+					if compiler_supports_float16 or compiler_supports_fp16
+						if compiler.get_id() == 'gcc'
+							args += '-mfp16-format=ieee'
+						endif
+						if compiler_supports_fp16
+							args += '-DSHOULD_HAVE_FP16=1'
+						endif
+						if compiler_supports_float16
+							args += '-DSHOULD_HAVE_FLOAT16=1'
+						endif
+					endif
+
+					if compiler_supports_int128
+						args += '-DSHOULD_HAVE_INT128=1'
+					endif
+			
+					if compiler_supports_float128
+						args += '-DSHOULD_HAVE_FLOAT128=1'
+					endif
+
+					if compiler_supports_float16 or compiler_supports_int128 or compiler_supports_float128
+						if compiler.get_id() == 'gcc'
+							args += '-fext-numeric-literals'
 						endif
 					endif
 
@@ -167,7 +290,7 @@ foreach cpp20 : cpp20_modes
 					endif
 
 					if counter % 6 == 3
-						args += '-DTOML_ALL_INLINE=1'
+						args += '-DTOML_HEADER_ONLY=1'
 					endif
 					if counter % 2 == 1
 						args += '-DUSE_SINGLE_HEADER=1'

@@ -13,26 +13,16 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	[[nodiscard]] TOML_API std::string default_formatter_make_key_segment(const std::string&) noexcept;
 	[[nodiscard]] TOML_API size_t default_formatter_inline_columns(const node&) noexcept;
 	[[nodiscard]] TOML_API bool default_formatter_forces_multiline(const node&, size_t = 0) noexcept;
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
-
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
 	/// 
 	/// \remarks You generally don't need to create an instance of this class explicitly; the stream
@@ -347,7 +337,7 @@ namespace toml
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
 	};
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template class TOML_API default_formatter<char>;
 	#endif
 
@@ -373,6 +363,22 @@ namespace toml
 		return lhs << rhs; //as lvalue
 	}
 
+	#ifndef DOXYGEN
+
+	#if !TOML_HEADER_ONLY
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
+	#endif
+
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
 	{
@@ -391,22 +397,9 @@ namespace toml
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
-	#if !TOML_ALL_INLINE
-		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
-	#endif
-
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !DOXYGEN
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 

@@ -3,82 +3,48 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#pragma once
 // clang-format off
 
-////////// CONFIGURATION
-
-#ifdef TOML_CONFIG_HEADER
-	#include TOML_CONFIG_HEADER
-#endif
-
-#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE) || defined(__INTELLISENSE__)
-	#undef TOML_ALL_INLINE
-	#define TOML_ALL_INLINE 1
-#endif
-
-#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
-	#undef TOML_IMPLEMENTATION
-	#define TOML_IMPLEMENTATION 1
-#else
-	#define TOML_IMPLEMENTATION 0
-#endif
-
-#ifndef TOML_API
-	#define TOML_API
-#endif
-
-#ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 0
-#endif
-
-#ifndef TOML_LARGE_FILES
-	#define TOML_LARGE_FILES 0
-#endif
-
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
-#endif
-
-#ifndef TOML_PARSER
-	#define TOML_PARSER 1
-#endif
-
-#if (defined(_WIN32) || defined(DOXYGEN)) && !defined(TOML_WINDOWS_COMPAT)
-	#define TOML_WINDOWS_COMPAT 1
-#endif
-#if !(defined(_WIN32) || defined(DOXYGEN)) || !defined(TOML_WINDOWS_COMPAT)
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 0
-#endif
-
-#ifdef TOML_OPTIONAL_TYPE
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
-#else
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
-#endif
-
-#ifdef TOML_CHAR_8_STRINGS
-	#if TOML_CHAR_8_STRINGS
-		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
-all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
-is no longer necessary.
-	#endif
-#endif
-
-////////// COMPILER & ENVIRONMENT
-
+#pragma once
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
-#ifdef DOXYGEN
-	#undef	TOML_DOXYGEN
-	#define TOML_DOXYGEN 1
-#endif
-#ifndef TOML_DOXYGEN
-	#define TOML_DOXYGEN 0
+
+//#====================================================================================================================
+//# COMPILER DETECTION
+//#====================================================================================================================
+
+#ifdef __INTELLISENSE__
+	#define TOML_INTELLISENSE		1
+#else
+	#define TOML_INTELLISENSE		0
 #endif
 #ifdef __clang__
+	#define TOML_CLANG				__clang_major__
+#else
+	#define TOML_CLANG				0
+#endif
+#ifdef __INTEL_COMPILER
+	#define TOML_ICC				__INTEL_COMPILER
+#else
+	#define TOML_ICC				0
+#endif
+#if defined(_MSC_VER) && !TOML_CLANG && !TOML_ICC
+	#define TOML_MSVC				_MSC_VER
+#else
+	#define TOML_MSVC				0
+#endif
+#if defined(__GNUC__) && !TOML_CLANG && !TOML_ICC
+	#define TOML_GCC				__GNUC__
+#else
+	#define TOML_GCC				0
+#endif
+
+//#====================================================================================================================
+//# CLANG
+//#====================================================================================================================
+
+#if TOML_CLANG
 
 	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"")
@@ -138,7 +104,13 @@ is no longer necessary.
 
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
 
-#elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
+#endif // clang
+
+//#====================================================================================================================
+//# MSVC
+//#====================================================================================================================
+
+#if TOML_MSVC || (defined(_MSC_VER) && TOML_ICC && defined(__ICL))
 
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
 	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
@@ -164,7 +136,13 @@ is no longer necessary.
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 
-#elif defined(__GNUC__)
+#endif // msvc
+
+//#====================================================================================================================
+//# GCC
+//#====================================================================================================================
+
+#if TOML_GCC
 
 	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
@@ -194,12 +172,12 @@ is no longer necessary.
 												TOML_DISABLE_MISC_WARNINGS
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
 
-	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
-		#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
+		#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#endif
-	#define TOML_NEVER_INLINE				__attribute__((__noinline__))
-	#define TOML_UNREACHABLE				__builtin_unreachable()
+	#define TOML_NEVER_INLINE					__attribute__((__noinline__))
+	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
 	#endif
@@ -208,8 +186,8 @@ is no longer necessary.
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
-	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
-	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
+	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
@@ -217,6 +195,83 @@ is no longer necessary.
 	#endif
 
 #endif
+
+//#====================================================================================================================
+//# USER CONFIGURATION
+//#====================================================================================================================
+
+#ifdef TOML_CONFIG_HEADER
+	#include TOML_CONFIG_HEADER
+#endif
+ 
+#ifdef DOXYGEN
+	#define TOML_HEADER_ONLY 0
+	#define TOML_WINDOWS_COMPAT 1
+#endif
+
+#if defined(TOML_ALL_INLINE) && !defined(TOML_HEADER_ONLY)
+	#define TOML_HEADER_ONLY	TOML_ALL_INLINE
+#endif
+
+#if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
+	#undef TOML_HEADER_ONLY
+	#define TOML_HEADER_ONLY 1
+#endif
+
+#if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
+	#undef TOML_IMPLEMENTATION
+	#define TOML_IMPLEMENTATION 1
+#else
+	#define TOML_IMPLEMENTATION 0
+#endif
+
+#ifndef TOML_API
+	#define TOML_API
+#endif
+
+#ifndef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 0
+#endif
+
+#ifndef TOML_LARGE_FILES
+	#define TOML_LARGE_FILES 0
+#endif
+
+#ifndef TOML_UNDEF_MACROS
+	#define TOML_UNDEF_MACROS 1
+#endif
+
+#ifndef TOML_PARSER
+	#define TOML_PARSER 1
+#endif
+
+#ifndef DOXYGEN
+	#if defined(_WIN32) && !defined(TOML_WINDOWS_COMPAT)
+		#define TOML_WINDOWS_COMPAT 1
+	#endif
+	#if !defined(_WIN32) || !defined(TOML_WINDOWS_COMPAT)
+		#undef TOML_WINDOWS_COMPAT
+		#define TOML_WINDOWS_COMPAT 0
+	#endif
+#endif
+
+#ifdef TOML_OPTIONAL_TYPE
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
+#else
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
+#ifdef TOML_CHAR_8_STRINGS
+	#if TOML_CHAR_8_STRINGS
+		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
+all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
+is no longer necessary.
+	#endif
+#endif
+
+//#====================================================================================================================
+//# ATTRIBUTES, UTILITY MACROS ETC
+//#====================================================================================================================
 
 #ifndef TOML_CPP_VERSION
 	#define TOML_CPP_VERSION __cplusplus
@@ -235,6 +290,12 @@ is no longer necessary.
 	#define TOML_CPP 17
 #endif
 #undef TOML_CPP_VERSION
+
+#ifdef __has_include
+	#define TOML_HAS_INCLUDE(header)		__has_include(header)
+#else
+	#define TOML_HAS_INCLUDE(header)		0
+#endif
 
 #ifndef TOML_COMPILER_EXCEPTIONS
 	#define TOML_COMPILER_EXCEPTIONS 1
@@ -264,7 +325,7 @@ is no longer necessary.
 #ifndef TOML_FLOAT_CHARCONV
 	#define TOML_FLOAT_CHARCONV 1
 #endif
-#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !__has_include(<charconv>)
+#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
 	#undef TOML_INT_CHARCONV
 	#undef TOML_FLOAT_CHARCONV
 	#define TOML_INT_CHARCONV 0
@@ -314,10 +375,6 @@ is no longer necessary.
 	#define TOML_EMPTY_BASES
 #endif
 
-#ifndef TOML_ALWAYS_INLINE
-	#define TOML_ALWAYS_INLINE	inline
-#endif
-
 #ifndef TOML_NEVER_INLINE
 	#define TOML_NEVER_INLINE
 #endif
@@ -338,7 +395,7 @@ is no longer necessary.
 	#define TOML_CONSTEVAL		constexpr
 #endif
 
-#if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
+#if !defined(DOXYGEN) && !TOML_INTELLISENSE
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
@@ -376,6 +433,62 @@ is no longer necessary.
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
+#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
+#endif
+
+#define TOML_CONCAT_1(x, y) x##y
+#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
+
+#define TOML_EVAL_BOOL_1(T, F)	T
+#define TOML_EVAL_BOOL_0(T, F)	F
+
+#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)	\
+		|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
+	#define TOML_ARM 1
+#else
+	#define TOML_ARM 0
+#endif
+ 
+
+
+//#====================================================================================================================
+//# EXTENDED INT AND FLOAT TYPES
+//#====================================================================================================================
+
+#ifdef __FLT16_MANT_DIG__
+	#if __FLT_RADIX__ == 2					\
+			&& __FLT16_MANT_DIG__ == 11		\
+			&& __FLT16_DIG__ == 3			\
+			&& __FLT16_MIN_EXP__ == -13		\
+			&& __FLT16_MIN_10_EXP__ == -4	\
+			&& __FLT16_MAX_EXP__ == 16		\
+			&& __FLT16_MAX_10_EXP__ == 4
+		#if (TOML_ARM && TOML_GCC) || TOML_CLANG
+			#define TOML_FP16 __fp16
+		#endif
+		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
+			#define TOML_FLOAT16 _Float16
+		#endif
+	#endif
+#endif
+
+#if defined(__SIZEOF_FLOAT128__)		\
+	&& defined(__FLT128_MANT_DIG__)		\
+	&& defined(__LDBL_MANT_DIG__)		\
+	&& __FLT128_MANT_DIG__ > __LDBL_MANT_DIG__
+	#define TOML_FLOAT128	__float128
+#endif
+
+#ifdef __SIZEOF_INT128__
+	#define TOML_INT128		__int128_t
+	#define TOML_UINT128	__uint128_t
+#endif
+
+//#====================================================================================================================
+//# VERSIONS AND NAMESPACES
+//#====================================================================================================================
+
 #include "toml_version.h"
 //# {{
 #define	TOML_LIB_SINGLE_HEADER 0
@@ -401,44 +514,49 @@ is no longer necessary.
 #define TOML_LANG_UNRELEASED														\
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
-#define TOML_CONCAT_1(x, y) x##y
-#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
-
-#define TOML_EVAL_BOOL_1(T, F)	T
-#define TOML_EVAL_BOOL_0(T, F)	F
-
-#if TOML_DOXYGEN // || defined(__INTELLISENSE__)
-	#define TOML_ABI_NAMESPACES					0
-	#define TOML_ABI_NAMESPACE_START(name)
-	#define TOML_ABI_NAMESPACE_VERSION
-	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)
-	#define TOML_ABI_NAMESPACE_END
-#else
-	#define TOML_ABI_NAMESPACES					1
+#ifndef TOML_ABI_NAMESPACES
+	#ifdef DOXYGEN
+		#define TOML_ABI_NAMESPACES 0
+	#else
+		#define TOML_ABI_NAMESPACES 1
+	#endif
+#endif
+#if TOML_ABI_NAMESPACES
+	#define TOML_NAMESPACE_START				namespace toml { inline namespace TOML_CONCAT(v, TOML_LIB_MAJOR)
+	#define TOML_NAMESPACE_END					}
+	#define TOML_NAMESPACE						::toml::TOML_CONCAT(v, TOML_LIB_MAJOR)
 	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name {
-	#define TOML_ABI_NAMESPACE_VERSION			TOML_ABI_NAMESPACE_START(TOML_CONCAT(v, TOML_LIB_MAJOR))
 	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
 	#define TOML_ABI_NAMESPACE_END				}
-#endif
-
-#define TOML_IMPL_NAMESPACE_START			TOML_ABI_NAMESPACE_VERSION namespace impl {
-#define TOML_IMPL_NAMESPACE_END				} TOML_ABI_NAMESPACE_END
-
-#if TOML_ALL_INLINE
-	#define TOML_EXTERNAL_LINKAGE			inline
-	#define TOML_INTERNAL_LINKAGE			inline
-	#define TOML_ANONYMOUS_NAMESPACE			toml { TOML_ABI_NAMESPACE_VERSION namespace impl
-	#define TOML_ANONYMOUS_NAMESPACE_END		} TOML_ABI_NAMESPACE_END
 #else
+	#define TOML_NAMESPACE_START				namespace toml
+	#define TOML_NAMESPACE_END
+	#define TOML_NAMESPACE						toml
+	#define TOML_ABI_NAMESPACE_START(...)
+	#define TOML_ABI_NAMESPACE_BOOL(...)
+	#define TOML_ABI_NAMESPACE_END
+#endif
+#define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
+#define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
+#if TOML_HEADER_ONLY
+	#define TOML_ANON_NAMESPACE_START			TOML_IMPL_NAMESPACE_START
+	#define TOML_ANON_NAMESPACE_END				TOML_IMPL_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
+	#define TOML_USING_ANON_NAMESPACE			using namespace TOML_ANON_NAMESPACE
+	#define TOML_EXTERNAL_LINKAGE				inline
+	#define TOML_INTERNAL_LINKAGE				inline
+#else
+	#define TOML_ANON_NAMESPACE_START			namespace
+	#define TOML_ANON_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE
+	#define TOML_USING_ANON_NAMESPACE			(void)0
 	#define TOML_EXTERNAL_LINKAGE
-	#define TOML_INTERNAL_LINKAGE			static
-	#define TOML_ANONYMOUS_NAMESPACE
-	#define TOML_ANONYMOUS_NAMESPACE_END
+	#define TOML_INTERNAL_LINKAGE				static
 #endif
 
-#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
-	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
-#endif
+//#====================================================================================================================
+//# ASSERT
+//#====================================================================================================================
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
@@ -446,14 +564,20 @@ TOML_DISABLE_ALL_WARNINGS
 	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define TOML_ASSERT(expr)	(void)0
 	#else
-		#include <cassert>
+		#ifndef assert
+			#include <cassert>
+		#endif
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
 TOML_POP_WARNINGS
 
+//#====================================================================================================================
+//# DOXYGEN SPAM
+//#====================================================================================================================
+
 //# {{
-#if TOML_DOXYGEN
+#ifdef DOXYGEN
 
 /// \addtogroup		configuration		Library Configuration
 /// \brief Preprocessor macros for configuring library functionality.
@@ -463,14 +587,14 @@ TOML_POP_WARNINGS
 /// @{
 
 
-/// \def TOML_ALL_INLINE
+/// \def TOML_HEADER_ONLY
 /// \brief Sets whether the library is entirely inline.
 /// \detail Defaults to `1`.
 /// \remark Disabling this means that you must define #TOML_IMPLEMENTATION in
 ///	<strong><em>exactly one</em></strong> translation unit in your project:
 /// \cpp
 /// // global_header_that_includes_toml++.h
-/// #define TOML_ALL_INLINE 0
+/// #define TOML_HEADER_ONLY 0
 /// #include <toml.hpp>
 /// 
 /// // some_code_file.cpp
@@ -504,8 +628,8 @@ TOML_POP_WARNINGS
 
 
 /// \def TOML_IMPLEMENTATION
-/// \brief Enables the library's implementation when #TOML_ALL_INLINE is enabled.
-/// \detail Not defined by default. Meaningless when #TOML_ALL_INLINE is disabled.
+/// \brief Enables the library's implementation when #TOML_HEADER_ONLY is enabled.
+/// \detail Not defined by default. Meaningless when #TOML_HEADER_ONLY is disabled.
 
 
 /// \def TOML_LARGE_FILES
@@ -534,7 +658,8 @@ TOML_POP_WARNINGS
 /// \def TOML_SMALL_FLOAT_TYPE
 /// \brief If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.
 /// \detail Not defined by default.
-
+/// \attention If you're building for a platform that has a built-in half precision float (e.g. `_Float16`), you don't
+/// 		   need to use this configuration option to make toml++ aware of it; the library comes with that built-in.
 
 #define TOML_SMALL_INT_TYPE
 /// \def TOML_SMALL_INT_TYPE
@@ -563,7 +688,7 @@ TOML_POP_WARNINGS
 
 
 /// @}
-#endif // TOML_DOXYGEN
+#endif // DOXYGEN
 //# }}
 
 // clang-format on

@@ -8,11 +8,11 @@
 #include <Windows.h>
 #endif
 
-	inline void init_utf8_console() noexcept
-	{
-		#ifdef _WIN32
-		SetConsoleOutputCP(65001); //CP_UTF8
-		#endif
+inline void init_utf8_console() noexcept
+{
+	#ifdef _WIN32
+	SetConsoleOutputCP(65001); //CP_UTF8
+	#endif
 
-		std::cout << std::boolalpha;
-	}
+	std::cout << std::boolalpha;
+}

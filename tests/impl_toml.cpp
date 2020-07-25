@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "settings.h"
-#if !TOML_ALL_INLINE
+#if !TOML_HEADER_ONLY
 	#define TOML_IMPLEMENTATION
 #endif
 
@@ -18,20 +18,29 @@
 	#include "../include/toml++/toml.h"
 #endif
 
+#if defined(TOML_FP16) ^ SHOULD_HAVE_FP16
+	#error TOML_FP16 was not deduced correctly
+#endif
+#if defined(TOML_FLOAT16) ^ SHOULD_HAVE_FLOAT16
+	#error TOML_FLOAT16 was not deduced correctly
+#endif
+#if defined(TOML_FLOAT128) ^ SHOULD_HAVE_FLOAT128
+	#error TOML_FLOAT128 was not deduced correctly
+#endif
+#if defined(TOML_INT128) ^ SHOULD_HAVE_INT128
+	#error TOML_INT128 was not deduced correctly
+#endif
+#if defined(TOML_INT128) ^ defined(TOML_UINT128)
+	#error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
+#endif
+#if TOML_COMPILER_EXCEPTIONS != SHOULD_HAVE_EXCEPTIONS
+	#error TOML_COMPILER_EXCEPTIONS was not deduced correctly
+#endif
 #if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
 	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
-
 #if (defined(_WIN32) && !TOML_WINDOWS_COMPAT) || (!defined(_WIN32) && TOML_WINDOWS_COMPAT)
 	#error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
-#endif
-
-#ifdef __SIZEOF_INT128__
-	#define int128 __int128_t
-	#define uint128 __uint128_t
-#endif
-#if defined(FLT16_MANT_DIG) && defined(FLT16_DIG) && defined(FLT16_DECIMAL_DIG)
-	#define float16 _Float16
 #endif
 
 namespace toml
@@ -81,12 +90,18 @@ namespace toml
 	CHECK_CAN_REPRESENT_NATIVE(uint64_t,				false);
 	CHECK_CAN_REPRESENT_NATIVE(float,					false);
 	CHECK_CAN_REPRESENT_NATIVE(double,					true);
-	#ifdef int128
-	CHECK_CAN_REPRESENT_NATIVE(int128,					true);
-	CHECK_CAN_REPRESENT_NATIVE(uint128,					false);
+	#ifdef TOML_INT128
+	CHECK_CAN_REPRESENT_NATIVE(TOML_INT128,				true);
+	CHECK_CAN_REPRESENT_NATIVE(TOML_UINT128,			false);
 	#endif
-	#ifdef float16
-	CHECK_CAN_REPRESENT_NATIVE(float16,					false);
+	#ifdef TOML_FP16
+	CHECK_CAN_REPRESENT_NATIVE(TOML_FP16, false);
+	#endif
+	#ifdef TOML_FLOAT16
+	CHECK_CAN_REPRESENT_NATIVE(TOML_FLOAT16,			false);
+	#endif
+	#ifdef TOML_FLOAT128
+	CHECK_CAN_REPRESENT_NATIVE(TOML_FLOAT128,			true);
 	#endif
 
 	CHECK_CAN_REPRESENT_NATIVE(char*,					false);
@@ -177,15 +192,27 @@ namespace toml
 	CHECK_VALUE_OR(		int64_t&,						int64_t);
 	CHECK_VALUE_OR(		int64_t&&,						int64_t);
 	CHECK_VALUE_OR(		int64_t const,					int64_t);
-	#ifdef int128
-	CHECK_VALUE_OR(		int128,							int128);
-	CHECK_VALUE_OR(		int128&,						int128);
-	CHECK_VALUE_OR(		int128&&,						int128);
-	CHECK_VALUE_OR(		int128 const,					int128);
-	CHECK_VALUE_OR(		uint128,						uint128);
-	CHECK_VALUE_OR(		uint128&,						uint128);
-	CHECK_VALUE_OR(		uint128&&,						uint128);
-	CHECK_VALUE_OR(		uint128 const,					uint128);
+	#ifdef TOML_INT128
+	CHECK_VALUE_OR(		TOML_INT128,					TOML_INT128);
+	CHECK_VALUE_OR(		TOML_INT128&,					TOML_INT128);
+	CHECK_VALUE_OR(		TOML_INT128&&,					TOML_INT128);
+	CHECK_VALUE_OR(		TOML_INT128 const,				TOML_INT128);
+	CHECK_VALUE_OR(		TOML_UINT128,					TOML_UINT128);
+	CHECK_VALUE_OR(		TOML_UINT128&,					TOML_UINT128);
+	CHECK_VALUE_OR(		TOML_UINT128&&,					TOML_UINT128);
+	CHECK_VALUE_OR(		TOML_UINT128 const,				TOML_UINT128);
+	#endif
+	#ifdef TOML_FP16
+	CHECK_VALUE_OR(		TOML_FP16,						TOML_FP16);
+	CHECK_VALUE_OR(		TOML_FP16&,						TOML_FP16);
+	CHECK_VALUE_OR(		TOML_FP16&&,					TOML_FP16);
+	CHECK_VALUE_OR(		TOML_FP16 const,				TOML_FP16);
+	#endif
+	#ifdef TOML_FLOAT16
+	CHECK_VALUE_OR(		TOML_FLOAT16,					TOML_FLOAT16);
+	CHECK_VALUE_OR(		TOML_FLOAT16&,					TOML_FLOAT16);
+	CHECK_VALUE_OR(		TOML_FLOAT16&&,					TOML_FLOAT16);
+	CHECK_VALUE_OR(		TOML_FLOAT16 const,				TOML_FLOAT16);
 	#endif
 	CHECK_VALUE_OR(		float,							float);
 	CHECK_VALUE_OR(		float&,							float);
@@ -195,6 +222,12 @@ namespace toml
 	CHECK_VALUE_OR(		double&,						double);
 	CHECK_VALUE_OR(		double&&,						double);
 	CHECK_VALUE_OR(		double const,					double);
+	#ifdef TOML_FLOAT128
+	CHECK_VALUE_OR(		TOML_FLOAT128,					TOML_FLOAT128);
+	CHECK_VALUE_OR(		TOML_FLOAT128&,					TOML_FLOAT128);
+	CHECK_VALUE_OR(		TOML_FLOAT128&&,				TOML_FLOAT128);
+	CHECK_VALUE_OR(		TOML_FLOAT128 const,			TOML_FLOAT128);
+	#endif
 	CHECK_VALUE_OR(		char*,							const char*);
 	CHECK_VALUE_OR(		char*&,							const char*);
 	CHECK_VALUE_OR(		char*&&,						const char*);

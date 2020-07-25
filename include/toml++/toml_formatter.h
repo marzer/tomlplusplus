@@ -10,17 +10,15 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
 	{
 		/// \brief None.
 		none,
 
-		/// \brief Sates and times will be emitted as quoted strings.
+		/// \brief Dates and times will be emitted as quoted strings.
 		quote_dates_and_times = 1,
 
 		/// \brief Strings will be emitted as single-quoted literal strings where possible.
@@ -47,14 +45,11 @@ namespace toml
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename Char = char>
 	class TOML_API formatter
 	{
@@ -249,11 +244,11 @@ namespace toml
 			{}
 	};
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template class TOML_API formatter<char>;
 	#endif
 
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS

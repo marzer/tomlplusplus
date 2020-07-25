@@ -115,12 +115,12 @@ won't need to mess with these at all, but if you do, set them before including t
 
 | Option                     |      Type      | Default                           | Description                                                                                                          |
 |----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `TOML_ALL_INLINE`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
+| `TOML_HEADER_ONLY`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
 | `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
 | `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                                        |
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                                       |
 | `TOML_EXCEPTIONS`          |     boolean    | per your compiler's settings      | Sets whether the library uses exceptions.                                                                            |
-| `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_ALL_INLINE` is `1`.          |
+| `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_HEADER_ONLY` is `1`.          |
 | `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                                |
 | `TOML_OPTIONAL_TYPE`       |    type name   | undefined                         | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
 | `TOML_PARSER`              |     boolean    | `1`                               | Disable this to prevent inclusion of the parser-related parts of the library if you don't need them.                 |

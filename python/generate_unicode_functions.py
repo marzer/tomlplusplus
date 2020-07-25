@@ -1113,10 +1113,10 @@ def write_to_files(codepoints, header_file, test_file):
 	header('#pragma once')
 	header('#include "toml_preprocessor.h"')
 	header('')
-	header('namespace toml')
-	header('{')
-	header('	TOML_IMPL_NAMESPACE_START')
+	header('#ifndef DOXYGEN')
 	header('')
+	header('TOML_IMPL_NAMESPACE_START')
+	header('{')
 
 	test('#include "tests.h"')
 	test('#include "unicode.h"')
@@ -1125,7 +1125,7 @@ def write_to_files(codepoints, header_file, test_file):
 
 	emit_character_function('is_hexadecimal_digit', header_file, test_file, codepoints, ('a', 'f'), ('A', 'F'), ('0', '9'))
 
-	both('#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)')
+	both('\t#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)')
 	both('')
 	unicode_exclusions = SparseRange()
 	unicode_exclusions.add(0, 127) # ascii block
@@ -1133,11 +1133,13 @@ def write_to_files(codepoints, header_file, test_file):
 	emit_category_function('is_unicode_letter', header_file, test_file, codepoints, ('Ll', 'Lm', 'Lo', 'Lt', 'Lu'), unicode_exclusions)
 	emit_category_function('is_unicode_number', header_file, test_file, codepoints, ('Nd', 'Nl'), unicode_exclusions)
 	emit_category_function('is_unicode_combining_mark', header_file, test_file, codepoints, ('Mn', 'Mc'), unicode_exclusions)
-	both('#endif // TOML_LANG_UNRELEASED')
+	both('\t#endif // TOML_LANG_UNRELEASED')
 
 	header('')
-	header('	TOML_IMPL_NAMESPACE_END')
-	header('} // toml::impl')
+	header('}')
+	header('TOML_IMPL_NAMESPACE_END')
+	header('')
+	header('#endif // !DOXYGEN')
 
 
 def main():

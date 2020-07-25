@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.0.0
+// toml++ v2.0.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -48,75 +48,37 @@
 //--------------  ↓ toml_preprocessor.h  -------------------------------------------------------------------------------
 #if 1
 
-#ifdef TOML_CONFIG_HEADER
-	#include TOML_CONFIG_HEADER
-#endif
-
-#if !defined(TOML_ALL_INLINE) || (defined(TOML_ALL_INLINE) && TOML_ALL_INLINE) || defined(__INTELLISENSE__)
-	#undef TOML_ALL_INLINE
-	#define TOML_ALL_INLINE 1
-#endif
-
-#if defined(TOML_IMPLEMENTATION) || TOML_ALL_INLINE
-	#undef TOML_IMPLEMENTATION
-	#define TOML_IMPLEMENTATION 1
-#else
-	#define TOML_IMPLEMENTATION 0
-#endif
-
-#ifndef TOML_API
-	#define TOML_API
-#endif
-
-#ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 0
-#endif
-
-#ifndef TOML_LARGE_FILES
-	#define TOML_LARGE_FILES 0
-#endif
-
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
-#endif
-
-#ifndef TOML_PARSER
-	#define TOML_PARSER 1
-#endif
-
-#if (defined(_WIN32) || defined(DOXYGEN)) && !defined(TOML_WINDOWS_COMPAT)
-	#define TOML_WINDOWS_COMPAT 1
-#endif
-#if !(defined(_WIN32) || defined(DOXYGEN)) || !defined(TOML_WINDOWS_COMPAT)
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 0
-#endif
-
-#ifdef TOML_OPTIONAL_TYPE
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
-#else
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
-#endif
-
-#ifdef TOML_CHAR_8_STRINGS
-	#if TOML_CHAR_8_STRINGS
-		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
-all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
-is no longer necessary.
-	#endif
-#endif
-
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
 #endif
-#ifdef DOXYGEN
-	#undef	TOML_DOXYGEN
-	#define TOML_DOXYGEN 1
-#endif
-#ifndef TOML_DOXYGEN
-	#define TOML_DOXYGEN 0
+
+#ifdef __INTELLISENSE__
+	#define TOML_INTELLISENSE		1
+#else
+	#define TOML_INTELLISENSE		0
 #endif
 #ifdef __clang__
+	#define TOML_CLANG				__clang_major__
+#else
+	#define TOML_CLANG				0
+#endif
+#ifdef __INTEL_COMPILER
+	#define TOML_ICC				__INTEL_COMPILER
+#else
+	#define TOML_ICC				0
+#endif
+#if defined(_MSC_VER) && !TOML_CLANG && !TOML_ICC
+	#define TOML_MSVC				_MSC_VER
+#else
+	#define TOML_MSVC				0
+#endif
+#if defined(__GNUC__) && !TOML_CLANG && !TOML_ICC
+	#define TOML_GCC				__GNUC__
+#else
+	#define TOML_GCC				0
+#endif
+
+#if TOML_CLANG
 
 	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"")
@@ -176,7 +138,9 @@ is no longer necessary.
 
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
 
-#elif defined(_MSC_VER) || (defined(__INTEL_COMPILER) && defined(__ICL))
+#endif // clang
+
+#if TOML_MSVC || (defined(_MSC_VER) && TOML_ICC && defined(__ICL))
 
 	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
 	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
@@ -202,7 +166,9 @@ is no longer necessary.
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 
-#elif defined(__GNUC__)
+#endif // msvc
+
+#if TOML_GCC
 
 	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
@@ -232,12 +198,12 @@ is no longer necessary.
 												TOML_DISABLE_MISC_WARNINGS
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
 
-	#define TOML_ATTR(...)					__attribute__((__VA_ARGS__))
+	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
-		#define TOML_ALWAYS_INLINE			__attribute__((__always_inline__)) inline
+		#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
 	#endif
-	#define TOML_NEVER_INLINE				__attribute__((__noinline__))
-	#define TOML_UNREACHABLE				__builtin_unreachable()
+	#define TOML_NEVER_INLINE					__attribute__((__noinline__))
+	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
 	#endif
@@ -246,14 +212,83 @@ is no longer necessary.
 	#else
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
-	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
-	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
+	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
+	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
 
 	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
 	#ifndef TOML_FLOAT_CHARCONV
 		#define TOML_FLOAT_CHARCONV 0
 	#endif
 
+#endif
+
+#ifdef TOML_CONFIG_HEADER
+	#include TOML_CONFIG_HEADER
+#endif
+
+#ifdef DOXYGEN
+	#define TOML_HEADER_ONLY 0
+	#define TOML_WINDOWS_COMPAT 1
+#endif
+
+#if defined(TOML_ALL_INLINE) && !defined(TOML_HEADER_ONLY)
+	#define TOML_HEADER_ONLY	TOML_ALL_INLINE
+#endif
+
+#if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
+	#undef TOML_HEADER_ONLY
+	#define TOML_HEADER_ONLY 1
+#endif
+
+#if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
+	#undef TOML_IMPLEMENTATION
+	#define TOML_IMPLEMENTATION 1
+#else
+	#define TOML_IMPLEMENTATION 0
+#endif
+
+#ifndef TOML_API
+	#define TOML_API
+#endif
+
+#ifndef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 0
+#endif
+
+#ifndef TOML_LARGE_FILES
+	#define TOML_LARGE_FILES 0
+#endif
+
+#ifndef TOML_UNDEF_MACROS
+	#define TOML_UNDEF_MACROS 1
+#endif
+
+#ifndef TOML_PARSER
+	#define TOML_PARSER 1
+#endif
+
+#ifndef DOXYGEN
+	#if defined(_WIN32) && !defined(TOML_WINDOWS_COMPAT)
+		#define TOML_WINDOWS_COMPAT 1
+	#endif
+	#if !defined(_WIN32) || !defined(TOML_WINDOWS_COMPAT)
+		#undef TOML_WINDOWS_COMPAT
+		#define TOML_WINDOWS_COMPAT 0
+	#endif
+#endif
+
+#ifdef TOML_OPTIONAL_TYPE
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
+#else
+	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
+#ifdef TOML_CHAR_8_STRINGS
+	#if TOML_CHAR_8_STRINGS
+		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
+all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
+is no longer necessary.
+	#endif
 #endif
 
 #ifndef TOML_CPP_VERSION
@@ -273,6 +308,12 @@ is no longer necessary.
 	#define TOML_CPP 17
 #endif
 #undef TOML_CPP_VERSION
+
+#ifdef __has_include
+	#define TOML_HAS_INCLUDE(header)		__has_include(header)
+#else
+	#define TOML_HAS_INCLUDE(header)		0
+#endif
 
 #ifndef TOML_COMPILER_EXCEPTIONS
 	#define TOML_COMPILER_EXCEPTIONS 1
@@ -302,7 +343,7 @@ is no longer necessary.
 #ifndef TOML_FLOAT_CHARCONV
 	#define TOML_FLOAT_CHARCONV 1
 #endif
-#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !__has_include(<charconv>)
+#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
 	#undef TOML_INT_CHARCONV
 	#undef TOML_FLOAT_CHARCONV
 	#define TOML_INT_CHARCONV 0
@@ -352,10 +393,6 @@ is no longer necessary.
 	#define TOML_EMPTY_BASES
 #endif
 
-#ifndef TOML_ALWAYS_INLINE
-	#define TOML_ALWAYS_INLINE	inline
-#endif
-
 #ifndef TOML_NEVER_INLINE
 	#define TOML_NEVER_INLINE
 #endif
@@ -376,7 +413,7 @@ is no longer necessary.
 	#define TOML_CONSTEVAL		constexpr
 #endif
 
-#if !TOML_DOXYGEN && !defined(__INTELLISENSE__)
+#if !defined(DOXYGEN) && !TOML_INTELLISENSE
 	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
@@ -414,9 +451,55 @@ is no longer necessary.
 		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 #endif
 
+#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
+#endif
+
+#define TOML_CONCAT_1(x, y) x##y
+#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
+
+#define TOML_EVAL_BOOL_1(T, F)	T
+#define TOML_EVAL_BOOL_0(T, F)	F
+
+#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)	\
+		|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
+	#define TOML_ARM 1
+#else
+	#define TOML_ARM 0
+#endif
+
+#ifdef __FLT16_MANT_DIG__
+	#if __FLT_RADIX__ == 2					\
+			&& __FLT16_MANT_DIG__ == 11		\
+			&& __FLT16_DIG__ == 3			\
+			&& __FLT16_MIN_EXP__ == -13		\
+			&& __FLT16_MIN_10_EXP__ == -4	\
+			&& __FLT16_MAX_EXP__ == 16		\
+			&& __FLT16_MAX_10_EXP__ == 4
+		#if (TOML_ARM && TOML_GCC) || TOML_CLANG
+			#define TOML_FP16 __fp16
+		#endif
+		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
+			#define TOML_FLOAT16 _Float16
+		#endif
+	#endif
+#endif
+
+#if defined(__SIZEOF_FLOAT128__)		\
+	&& defined(__FLT128_MANT_DIG__)		\
+	&& defined(__LDBL_MANT_DIG__)		\
+	&& __FLT128_MANT_DIG__ > __LDBL_MANT_DIG__
+	#define TOML_FLOAT128	__float128
+#endif
+
+#ifdef __SIZEOF_INT128__
+	#define TOML_INT128		__int128_t
+	#define TOML_UINT128	__uint128_t
+#endif
+
 #define TOML_LIB_MAJOR		2
 #define TOML_LIB_MINOR		0
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -442,43 +525,44 @@ is no longer necessary.
 #define TOML_LANG_UNRELEASED														\
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
-#define TOML_CONCAT_1(x, y) x##y
-#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
-
-#define TOML_EVAL_BOOL_1(T, F)	T
-#define TOML_EVAL_BOOL_0(T, F)	F
-
-#if TOML_DOXYGEN // || defined(__INTELLISENSE__)
-	#define TOML_ABI_NAMESPACES					0
-	#define TOML_ABI_NAMESPACE_START(name)
-	#define TOML_ABI_NAMESPACE_VERSION
-	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)
-	#define TOML_ABI_NAMESPACE_END
-#else
-	#define TOML_ABI_NAMESPACES					1
+#ifndef TOML_ABI_NAMESPACES
+	#ifdef DOXYGEN
+		#define TOML_ABI_NAMESPACES 0
+	#else
+		#define TOML_ABI_NAMESPACES 1
+	#endif
+#endif
+#if TOML_ABI_NAMESPACES
+	#define TOML_NAMESPACE_START				namespace toml { inline namespace TOML_CONCAT(v, TOML_LIB_MAJOR)
+	#define TOML_NAMESPACE_END					}
+	#define TOML_NAMESPACE						::toml::TOML_CONCAT(v, TOML_LIB_MAJOR)
 	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name {
-	#define TOML_ABI_NAMESPACE_VERSION			TOML_ABI_NAMESPACE_START(TOML_CONCAT(v, TOML_LIB_MAJOR))
 	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
 	#define TOML_ABI_NAMESPACE_END				}
-#endif
-
-#define TOML_IMPL_NAMESPACE_START			TOML_ABI_NAMESPACE_VERSION namespace impl {
-#define TOML_IMPL_NAMESPACE_END				} TOML_ABI_NAMESPACE_END
-
-#if TOML_ALL_INLINE
-	#define TOML_EXTERNAL_LINKAGE			inline
-	#define TOML_INTERNAL_LINKAGE			inline
-	#define TOML_ANONYMOUS_NAMESPACE			toml { TOML_ABI_NAMESPACE_VERSION namespace impl
-	#define TOML_ANONYMOUS_NAMESPACE_END		} TOML_ABI_NAMESPACE_END
 #else
-	#define TOML_EXTERNAL_LINKAGE
-	#define TOML_INTERNAL_LINKAGE			static
-	#define TOML_ANONYMOUS_NAMESPACE
-	#define TOML_ANONYMOUS_NAMESPACE_END
+	#define TOML_NAMESPACE_START				namespace toml
+	#define TOML_NAMESPACE_END
+	#define TOML_NAMESPACE						toml
+	#define TOML_ABI_NAMESPACE_START(...)
+	#define TOML_ABI_NAMESPACE_BOOL(...)
+	#define TOML_ABI_NAMESPACE_END
 #endif
-
-#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
-	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
+#define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
+#define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
+#if TOML_HEADER_ONLY
+	#define TOML_ANON_NAMESPACE_START			TOML_IMPL_NAMESPACE_START
+	#define TOML_ANON_NAMESPACE_END				TOML_IMPL_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
+	#define TOML_USING_ANON_NAMESPACE			using namespace TOML_ANON_NAMESPACE
+	#define TOML_EXTERNAL_LINKAGE				inline
+	#define TOML_INTERNAL_LINKAGE				inline
+#else
+	#define TOML_ANON_NAMESPACE_START			namespace
+	#define TOML_ANON_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE
+	#define TOML_USING_ANON_NAMESPACE			(void)0
+	#define TOML_EXTERNAL_LINKAGE
+	#define TOML_INTERNAL_LINKAGE				static
 #endif
 
 TOML_PUSH_WARNINGS
@@ -487,7 +571,9 @@ TOML_DISABLE_ALL_WARNINGS
 	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define TOML_ASSERT(expr)	(void)0
 	#else
-		#include <cassert>
+		#ifndef assert
+			#include <cassert>
+		#endif
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
@@ -501,12 +587,9 @@ TOML_POP_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-
-#if __has_include(<version>)
-	#include <version>
-#endif
 #include <cstdint>
-#include <cstring>		//memcpy, memset
+#include <cstddef>
+#include <cstring>
 #include <cfloat>
 #include <climits>
 #include <limits>
@@ -519,7 +602,9 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#include <optional>
 #endif
-
+#if TOML_HAS_INCLUDE(<version>)
+	#include <version>
+#endif
 TOML_POP_WARNINGS
 
 #ifdef __cpp_lib_launder
@@ -528,80 +613,186 @@ TOML_POP_WARNINGS
 	#define TOML_LAUNDER(x)	x
 #endif
 
-static_assert(CHAR_BIT == 8);
-static_assert(FLT_RADIX == 2);
-static_assert('A' == 65);
-static_assert(sizeof(double) == 8);
-static_assert(std::numeric_limits<double>::is_iec559);
-static_assert(std::numeric_limits<double>::digits == 53);
-static_assert(std::numeric_limits<double>::digits10 == 15);
-static_assert(std::numeric_limits<double>::max_digits10 == 17);
+#ifndef DOXYGEN
+#ifndef TOML_DISABLE_ENVIRONMENT_CHECKS
+#define TOML_ENV_MESSAGE																							\
+	"If you're seeing this error it's because you're building toml++ for an environment that doesn't conform to "	\
+	"one of the 'ground truths' assumed by the library. Essentially this just means that I don't have the "			\
+	"resources to test on more esoteric platforms, but I wish I did! You can try disabling the checks by defining "	\
+	"TOML_DISABLE_ENVIRONMENT_CHECKS, but your mileage may vary. Please consider filing an issue at "				\
+	"https://github.com/marzer/tomlplusplus/issues to help me improve support for your target environment. Thanks!"
+
+static_assert(CHAR_BIT == 8, TOML_ENV_MESSAGE);
+static_assert(FLT_RADIX == 2, TOML_ENV_MESSAGE);
+static_assert('A' == 65, TOML_ENV_MESSAGE);
+static_assert(sizeof(double) == 8, TOML_ENV_MESSAGE);
+static_assert(std::numeric_limits<double>::is_iec559, TOML_ENV_MESSAGE);
+static_assert(std::numeric_limits<double>::digits == 53, TOML_ENV_MESSAGE);
+static_assert(std::numeric_limits<double>::digits10 == 15, TOML_ENV_MESSAGE);
+
+#undef TOML_ENV_MESSAGE
+#endif // !TOML_DISABLE_ENVIRONMENT_CHECKS
+#endif // !DOXYGEN
+
+#ifndef DOXYGEN // undocumented forward declarations are hidden from doxygen because they fuck it up =/
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
-TOML_DISABLE_SHADOW_WARNINGS
 
-namespace toml { TOML_ABI_NAMESPACE_VERSION TOML_ABI_NAMESPACE_END }
-
-#if TOML_WINDOWS_COMPAT
-namespace toml
+namespace toml // non-abi namespace; this is not an error
 {
-	TOML_IMPL_NAMESPACE_START
-
-	[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
-	[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
-	#ifdef __cpp_lib_char8_t
-	[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
-	#endif
-
-	TOML_IMPL_NAMESPACE_END
-}
-#endif // TOML_WINDOWS_COMPAT
-
-namespace toml
-{
-	TOML_ABI_NAMESPACE_VERSION
-
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
-	using size_t = std::size_t;
-	using ptrdiff_t = std::ptrdiff_t;
-
-	[[nodiscard]]
-	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
-	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
-	{
-		return static_cast<size_t>(n);
-	}
+	using ::std::size_t;
+	using ::std::intptr_t;
+	using ::std::uintptr_t;
+	using ::std::ptrdiff_t;
+	using ::std::nullptr_t;
+	using ::std::int8_t;
+	using ::std::int16_t;
+	using ::std::int32_t;
+	using ::std::int64_t;
+	using ::std::uint8_t;
+	using ::std::uint16_t;
+	using ::std::uint32_t;
+	using ::std::uint64_t;
 
 	// legacy typedefs
 	using string_char = char;
 	using string = std::string;
 	using string_view = std::string_view;
+}
 
-	#if !TOML_DOXYGEN
-
-	// foward declarations are hidden from doxygen
-	// because they fuck it up =/
+TOML_NAMESPACE_START // abi namespace
+{
 	struct date;
 	struct time;
 	struct time_offset;
+
+	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
+	struct date_time;
+	TOML_ABI_NAMESPACE_END
+
 	class node;
 	class array;
 	class table;
+
 	template <typename> class node_view;
 	template <typename> class value;
 	template <typename> class default_formatter;
 	template <typename> class json_formatter;
 
-	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
+	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
+	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
 
-	struct date_time;
+	template <typename Char>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
+	template <typename Char, typename T>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const value<T>&);
+	template <typename Char>
+	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&);
+	template <typename T, typename U>
+	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
+	template <typename Char, typename T>
+	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 
-	TOML_ABI_NAMESPACE_END // TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	namespace impl
+	{
+		template <typename T>
+		using string_map = std::map<std::string, T, std::less<>>; // heterogeneous lookup
 
-	#endif // !TOML_DOXYGEN
+		template <typename T>
+		using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
+
+		//template <typename T, typename... U>
+		//struct is_one_of_ : std::integral_constant<bool, (false || ... || std::is_same_v<T, U>)> {};
+
+		template <typename T, typename... U>
+		inline constexpr bool is_one_of = (false || ... || std::is_same_v<T, U>);
+
+		template <typename T>
+		inline constexpr bool is_cvref = std::is_reference_v<T> || std::is_const_v<T> || std::is_volatile_v<T>;
+
+		template <typename T>
+		inline constexpr bool is_wide_string = is_one_of<
+			std::decay_t<T>,
+			const wchar_t*,
+			wchar_t*,
+			std::wstring_view,
+			std::wstring
+		>;
+
+		template <typename T>
+		inline constexpr bool dependent_false = false;
+
+		#define TOML_P2S_DECL(Type)											\
+			template <typename Char>										\
+			inline void print_to_stream(Type, std::basic_ostream<Char>&)
+		TOML_P2S_DECL(int8_t);
+		TOML_P2S_DECL(int16_t);
+		TOML_P2S_DECL(int32_t);
+		TOML_P2S_DECL(int64_t);
+		TOML_P2S_DECL(uint8_t);
+		TOML_P2S_DECL(uint16_t);
+		TOML_P2S_DECL(uint32_t);
+		TOML_P2S_DECL(uint64_t);
+		TOML_P2S_DECL(float);
+		TOML_P2S_DECL(const date&);
+		TOML_P2S_DECL(const time&);
+		TOML_P2S_DECL(time_offset);
+		TOML_P2S_DECL(const date_time&);
+		#undef TOML_P2S_DECL
+
+		#if TOML_WINDOWS_COMPAT
+		[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
+		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
+		#ifdef __cpp_lib_char8_t
+		[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
+		#endif
+		#endif // TOML_WINDOWS_COMPAT
+
+		#if TOML_ABI_NAMESPACES
+			#if TOML_EXCEPTIONS
+				TOML_ABI_NAMESPACE_START(ex)
+				#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::ex::parser
+			#else
+				TOML_ABI_NAMESPACE_START(noex)
+				#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::noex::parser
+			#endif
+		#else
+			#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::parser
+		#endif
+		class parser;
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	}
+}
+TOML_NAMESPACE_END
+
+TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+
+#endif // !DOXYGEN
+
+namespace toml { }
+
+TOML_NAMESPACE_START // abi namespace
+{
+	inline namespace literals {}
+
+	#if TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	template <typename T>
+	using optional = TOML_OPTIONAL_TYPE<T>;
+	#else
+	template <typename T>
+	using optional = std::optional<T>;
+	#endif
 
 	enum class node_type : uint8_t
 	{
@@ -617,20 +808,414 @@ namespace toml
 		date_time
 	};
 
-	#if TOML_HAS_CUSTOM_OPTIONAL_TYPE
-
-	template <typename T>
-	using optional = TOML_OPTIONAL_TYPE<T>;
-
-	#else
-
-	template <typename T>
-	using optional = std::optional<T>;
-
-	#endif
-
 	using source_path_ptr = std::shared_ptr<const std::string>;
 
+	template <typename T>
+	struct TOML_TRIVIAL_ABI inserter
+	{
+		T&& value;
+	};
+	template <typename T> inserter(T&&) -> inserter<T>;
+}
+TOML_NAMESPACE_END
+
+TOML_IMPL_NAMESPACE_START
+{
+	// general value traits
+	// (as they relate to their equivalent native TOML type)
+	template <typename T>
+	struct value_traits
+	{
+		using native_type = void;
+		static constexpr bool is_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = false;
+		static constexpr bool can_represent_native = false;
+		static constexpr bool can_partially_represent_native = false;
+		static constexpr auto type = node_type::none;
+	};
+	template <typename T> struct value_traits<T&> : value_traits<T> {};
+	template <typename T> struct value_traits<T&&> : value_traits<T> {};
+	template <typename T> struct value_traits<T* const> : value_traits<T*> {};
+	template <typename T> struct value_traits<T* volatile> : value_traits<T*> {};
+	template <typename T> struct value_traits<T* const volatile> : value_traits<T*> {};
+
+	// integer value traits
+	template <typename T>
+	struct integer_value_limits
+	{
+		static constexpr auto min = (std::numeric_limits<T>::min)();
+		static constexpr auto max = (std::numeric_limits<T>::max)();
+	};
+	template <typename T>
+	struct integer_value_traits_base : integer_value_limits<T>
+	{
+		using native_type = int64_t;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not specializing std::is_signed<T>
+		static constexpr auto type = node_type::integer;
+		static constexpr bool can_partially_represent_native = true;
+	};
+	template <typename T>
+	struct unsigned_integer_value_traits : integer_value_traits_base<T>
+	{
+		static constexpr bool is_losslessly_convertible_to_native
+			= integer_value_limits<T>::max <= 9223372036854775807ULL;
+		static constexpr bool can_represent_native = false;
+
+	};
+	template <typename T>
+	struct signed_integer_value_traits : integer_value_traits_base<T>
+	{
+		using native_type = int64_t;
+		static constexpr bool is_losslessly_convertible_to_native
+			 = integer_value_limits<T>::min >= (-9223372036854775807LL - 1LL)
+			&& integer_value_limits<T>::max <= 9223372036854775807LL;
+		static constexpr bool can_represent_native
+			 = integer_value_limits<T>::min <= (-9223372036854775807LL - 1LL)
+			&& integer_value_limits<T>::max >= 9223372036854775807LL;
+	};
+	template <typename T, bool S = integer_value_traits_base<T>::is_signed>
+	struct integer_value_traits : signed_integer_value_traits<T> {};
+	template <typename T>
+	struct integer_value_traits<T, false> : unsigned_integer_value_traits<T> {};
+	template <> struct value_traits<signed char>		: integer_value_traits<signed char> {};
+	template <> struct value_traits<unsigned char>		: integer_value_traits<unsigned char> {};
+	template <> struct value_traits<signed short>		: integer_value_traits<signed short> {};
+	template <> struct value_traits<unsigned short>		: integer_value_traits<unsigned short> {};
+	template <> struct value_traits<signed int>			: integer_value_traits<signed int> {};
+	template <> struct value_traits<unsigned int>		: integer_value_traits<unsigned int> {};
+	template <> struct value_traits<signed long>		: integer_value_traits<signed long> {};
+	template <> struct value_traits<unsigned long>		: integer_value_traits<unsigned long> {};
+	template <> struct value_traits<signed long long>	: integer_value_traits<signed long long> {};
+	template <> struct value_traits<unsigned long long>	: integer_value_traits<unsigned long long> {};
+	#ifdef TOML_INT128
+	template <>
+	struct integer_value_limits<TOML_INT128>
+	{
+		static constexpr TOML_INT128 max = static_cast<TOML_INT128>(
+			(TOML_UINT128{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1
+		);
+		static constexpr TOML_INT128 min = -max - TOML_INT128{ 1 };
+	};
+	template <>
+	struct integer_value_limits<TOML_UINT128>
+	{
+		static constexpr TOML_UINT128 min = TOML_UINT128{};
+		static constexpr TOML_UINT128 max = (2u * static_cast<TOML_UINT128>(integer_value_limits<TOML_INT128>::max)) + 1u;
+	};
+	template <> struct value_traits<TOML_INT128> : integer_value_traits<TOML_INT128> {};
+	template <> struct value_traits<TOML_UINT128> : integer_value_traits<TOML_UINT128> {};
+	#endif
+	#ifdef TOML_SMALL_INT_TYPE
+	template <> struct value_traits<TOML_SMALL_INT_TYPE> : signed_integer_value_traits<TOML_SMALL_INT_TYPE> {};
+	#endif
+	static_assert(value_traits<int64_t>::is_native);
+	static_assert(value_traits<int64_t>::is_signed);
+	static_assert(value_traits<int64_t>::is_losslessly_convertible_to_native);
+	static_assert(value_traits<int64_t>::can_represent_native);
+	static_assert(value_traits<int64_t>::can_partially_represent_native);
+
+	// float value traits
+	template <typename T>
+	struct float_value_limits
+	{
+		static constexpr bool is_iec559 = std::numeric_limits<T>::is_iec559;
+		static constexpr int digits = std::numeric_limits<T>::digits;
+		static constexpr int digits10 = std::numeric_limits<T>::digits10;
+	};
+	template <typename T>
+	struct float_value_traits : float_value_limits<T>
+	{
+		using native_type = double;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_signed = true;
+		static constexpr bool is_losslessly_convertible_to_native
+			= float_value_limits<T>::is_iec559
+			&& float_value_limits<T>::digits <= 53
+			&& float_value_limits<T>::digits10 <= 15;
+		static constexpr bool can_represent_native
+			= float_value_limits<T>::is_iec559
+			&& float_value_limits<T>::digits >= 53 // DBL_MANT_DIG
+			&& float_value_limits<T>::digits10 >= 15; // DBL_DIG
+		static constexpr bool can_partially_represent_native //32-bit float values
+			= float_value_limits<T>::is_iec559
+			&& float_value_limits<T>::digits >= 24
+			&& float_value_limits<T>::digits10 >= 6;
+		static constexpr auto type = node_type::floating_point;
+	};
+	template <> struct value_traits<float> : float_value_traits<float> {};
+	template <> struct value_traits<double> : float_value_traits<double> {};
+	template <> struct value_traits<long double> : float_value_traits<long double> {};
+	template <int mant_dig, int dig>
+	struct extended_float_value_limits
+	{
+		static constexpr bool is_iec559 = true;
+		static constexpr int digits = mant_dig;
+		static constexpr int digits10 = dig;
+	};
+	#ifdef TOML_FP16
+	template <> struct float_value_limits<TOML_FP16> : extended_float_value_limits<__FLT16_MANT_DIG__, __FLT16_DIG__> {};
+	template <> struct value_traits<TOML_FP16> : float_value_traits<TOML_FP16> {};
+	#endif
+	#ifdef TOML_FLOAT16
+	template <> struct float_value_limits<TOML_FLOAT16> : extended_float_value_limits<__FLT16_MANT_DIG__, __FLT16_DIG__> {};
+	template <> struct value_traits<TOML_FLOAT16> : float_value_traits<TOML_FLOAT16> {};
+	#endif
+	#ifdef TOML_FLOAT128
+	template <> struct float_value_limits<TOML_FLOAT128> : extended_float_value_limits<__FLT128_MANT_DIG__, __FLT128_DIG__> {};
+	template <> struct value_traits<TOML_FLOAT128> : float_value_traits<TOML_FLOAT128> {};
+	#endif
+	#ifdef TOML_SMALL_FLOAT_TYPE
+	template <> struct value_traits<TOML_SMALL_FLOAT_TYPE> : float_value_traits<TOML_SMALL_FLOAT_TYPE> {};
+	#endif
+	static_assert(value_traits<double>::is_native);
+	static_assert(value_traits<double>::is_losslessly_convertible_to_native);
+	static_assert(value_traits<double>::can_represent_native);
+	static_assert(value_traits<double>::can_partially_represent_native);
+
+	// string value traits
+	template <typename T>
+	struct string_value_traits
+	{
+		using native_type = std::string;
+		static constexpr bool is_native = std::is_same_v<T, native_type>;
+		static constexpr bool is_losslessly_convertible_to_native = true;
+		static constexpr bool can_represent_native
+			= !std::is_array_v<T>
+			&& (!std::is_pointer_v<T> || std::is_const_v<std::remove_pointer_t<T>>);
+		static constexpr bool can_partially_represent_native = can_represent_native;
+		static constexpr auto type = node_type::string;
+	};
+	template <>         struct value_traits<std::string>		: string_value_traits<std::string> {};
+	template <>         struct value_traits<std::string_view>	: string_value_traits<std::string_view> {};
+	template <>         struct value_traits<const char*>		: string_value_traits<const char *> {};
+	template <size_t N> struct value_traits<const char[N]>		: string_value_traits<const char[N]> {};
+	template <>         struct value_traits<char*>				: string_value_traits<char*> {};
+	template <size_t N> struct value_traits<char[N]>			: string_value_traits<char[N]> {};
+	#ifdef __cpp_lib_char8_t
+	template <>         struct value_traits<std::u8string>		: string_value_traits<std::u8string> {};
+	template <>         struct value_traits<std::u8string_view>	: string_value_traits<std::u8string_view> {};
+	template <>         struct value_traits<const char8_t*>		: string_value_traits<const char8_t*> {};
+	template <size_t N> struct value_traits<const char8_t[N]>	: string_value_traits<const char8_t[N]> {};
+	template <>         struct value_traits<char8_t*>			: string_value_traits<char8_t*> {};
+	template <size_t N> struct value_traits<char8_t[N]>			: string_value_traits<char8_t[N]> {};
+	#endif
+	#if TOML_WINDOWS_COMPAT
+	template <typename T>
+	struct wstring_value_traits
+	{
+		using native_type = std::string;
+		static constexpr bool is_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = true; //narrow
+		static constexpr bool can_represent_native = std::is_same_v<T, std::wstring>; //widen
+		static constexpr bool can_partially_represent_native = can_represent_native;
+		static constexpr auto type = node_type::string;
+	};
+	template <>         struct value_traits<std::wstring>		: wstring_value_traits<std::wstring> {};
+	template <>         struct value_traits<std::wstring_view>	: wstring_value_traits<std::wstring_view> {};
+	template <>         struct value_traits<const wchar_t*>		: wstring_value_traits<const wchar_t*> {};
+	template <size_t N> struct value_traits<const wchar_t[N]>	: wstring_value_traits<const wchar_t[N]> {};
+	template <>         struct value_traits<wchar_t*>			: wstring_value_traits<wchar_t*> {};
+	template <size_t N> struct value_traits<wchar_t[N]>			: wstring_value_traits<wchar_t[N]> {};
+	#endif
+
+	// other native value traits
+	template <typename T, node_type NodeType>
+	struct native_value_traits
+	{
+		using native_type = T;
+		static constexpr bool is_native = true;
+		static constexpr bool is_losslessly_convertible_to_native = true;
+		static constexpr bool can_represent_native = true;
+		static constexpr bool can_partially_represent_native = true;
+		static constexpr auto type = NodeType;
+	};
+	template <> struct value_traits<bool>		: native_value_traits<bool,		 node_type::boolean> {};
+	template <> struct value_traits<date>		: native_value_traits<date,		 node_type::date> {};
+	template <> struct value_traits<time>		: native_value_traits<time,		 node_type::time> {};
+	template <> struct value_traits<date_time>	: native_value_traits<date_time, node_type::date_time> {};
+
+	// native value category queries
+	template <typename T>
+	using native_type_of = typename value_traits<T>::native_type;
+	template <typename T>
+	inline constexpr bool is_native = value_traits<T>::is_native;
+	template <typename T>
+	inline constexpr bool can_represent_native = value_traits<T>::can_represent_native;
+	template <typename T>
+	inline constexpr bool can_partially_represent_native = value_traits<T>::can_partially_represent_native;
+	template <typename T>
+	inline constexpr bool is_losslessly_convertible_to_native = value_traits<T>::is_losslessly_convertible_to_native;
+	template <typename T, typename... U>
+	inline constexpr bool is_natively_one_of = is_one_of<native_type_of<T>, U...>;
+
+	// native <=> node conversions
+	template <typename T> struct node_wrapper { using type = T; };
+	template <>           struct node_wrapper<std::string> { using type = value<std::string>; };
+	template <>           struct node_wrapper<int64_t> { using type = value<int64_t>; };
+	template <>           struct node_wrapper<double> { using type = value<double>; };
+	template <>           struct node_wrapper<bool> { using type = value<bool>; };
+	template <>           struct node_wrapper<date> { using type = value<date>; };
+	template <>           struct node_wrapper<time> { using type = value<time>; };
+	template <>           struct node_wrapper<date_time> { using type = value<date_time>; };
+	template <typename T> using wrap_node = typename node_wrapper<T>::type;
+
+	template <typename T> struct node_unwrapper { using type = T; };
+	template <typename T> struct node_unwrapper<value<T>> { using type = T; };
+	template <typename T> using unwrap_node = typename node_unwrapper<T>::type;
+
+	template <typename T> struct node_type_getter { static constexpr auto value = value_traits<T>::type; };
+	template <>           struct node_type_getter<table> { static constexpr auto value = node_type::table; };
+	template <>           struct node_type_getter<array> { static constexpr auto value = node_type::array; };
+	template <typename T>
+	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
+}
+TOML_IMPL_NAMESPACE_END
+
+TOML_NAMESPACE_START
+{
+	template <typename T>
+	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
+
+	template <typename T>
+	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
+
+	template <typename T>
+	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<std::string>>;
+
+	template <typename T>
+	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<int64_t>>;
+
+	template <typename T>
+	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<double>>;
+
+	template <typename T>
+	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
+
+	template <typename T>
+	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<bool>>;
+
+	template <typename T>
+	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date>>;
+
+	template <typename T>
+	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<time>>;
+
+	template <typename T>
+	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
+}
+TOML_NAMESPACE_END
+
+TOML_IMPL_NAMESPACE_START
+{
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(const)
+	TOML_ALWAYS_INLINE
+	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
+	{
+		return static_cast<std::underlying_type_t<T>>(val);
+	}
+
+	// Q: "why not use the built-in fpclassify?"
+	// A: Because it gets broken by -ffast-math and friends
+	enum class fp_class : unsigned { ok, neg_inf, pos_inf, nan };
+	[[nodiscard]]
+	TOML_ATTR(pure)
+	inline fp_class fpclassify(const double& val) noexcept
+	{
+		constexpr uint64_t sign     = 0b1000000000000000000000000000000000000000000000000000000000000000ull;
+		constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
+		constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
+
+		uint64_t val_bits;
+		memcpy(&val_bits, &val, sizeof(val));
+		if ((val_bits & exponent) != exponent)
+			return fp_class::ok;
+		if ((val_bits & mantissa))
+			return fp_class::nan;
+		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
+	}
+
+	// Q: "why not use std::find??"
+	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
+	//    I don't want to impose such a heavy compile-time burden on users.
+	template <typename T>
+	[[nodiscard]]
+	inline const T* find(const std::vector<T>& haystack, const T& needle) noexcept
+	{
+		for (size_t i = 0, e = haystack.size(); i < e; i++)
+			if (haystack[i] == needle)
+				return haystack.data() + i;
+		return nullptr;
+	}
+
+	inline constexpr std::string_view low_character_escape_table[] =
+	{
+		"\\u0000"sv,
+		"\\u0001"sv,
+		"\\u0002"sv,
+		"\\u0003"sv,
+		"\\u0004"sv,
+		"\\u0005"sv,
+		"\\u0006"sv,
+		"\\u0007"sv,
+		"\\b"sv,
+		"\\t"sv,
+		"\\n"sv,
+		"\\u000B"sv,
+		"\\f"sv,
+		"\\r"sv,
+		"\\u000E"sv,
+		"\\u000F"sv,
+		"\\u0010"sv,
+		"\\u0011"sv,
+		"\\u0012"sv,
+		"\\u0013"sv,
+		"\\u0014"sv,
+		"\\u0015"sv,
+		"\\u0016"sv,
+		"\\u0017"sv,
+		"\\u0018"sv,
+		"\\u0019"sv,
+		"\\u001A"sv,
+		"\\u001B"sv,
+		"\\u001C"sv,
+		"\\u001D"sv,
+		"\\u001E"sv,
+		"\\u001F"sv,
+	};
+
+	inline constexpr std::string_view node_type_friendly_names[] =
+	{
+		"none"sv,
+		"table"sv,
+		"array"sv,
+		"string"sv,
+		"integer"sv,
+		"floating-point"sv,
+		"boolean"sv,
+		"date"sv,
+		"time"sv,
+		"date-time"sv
+	};
+}
+TOML_IMPL_NAMESPACE_END
+
+TOML_NAMESPACE_START
+{
+	[[nodiscard]]
+	TOML_ATTR(const)
+	TOML_ALWAYS_INLINE
+	TOML_CONSTEVAL size_t operator"" _sz(unsigned long long n) noexcept
+	{
+		return static_cast<size_t>(n);
+	}
+}
+TOML_NAMESPACE_END
+
+TOML_NAMESPACE_START
+{
 	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
 
 	#if TOML_LARGE_FILES
@@ -699,447 +1284,11 @@ namespace toml
 	};
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
+}
+TOML_NAMESPACE_END
 
-	TOML_ABI_NAMESPACE_END // version
-
-} // toml
-
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
-	template <typename T>
-	using string_map = std::map<std::string, T, std::less<>>; // heterogeneous lookup
-
-	template <typename T>
-	using remove_cvref_t = std::remove_cv_t<std::remove_reference_t<T>>;
-
-	template <typename T, typename... U>
-	struct is_one_of_ : std::integral_constant<bool,
-		(false || ... || std::is_same_v<T, U>)
-	> {};
-
-	template <typename T, typename... U>
-	inline constexpr bool is_one_of = is_one_of_<T, U...>::value;
-
-	template <typename T>
-	inline constexpr bool is_cvref = std::is_reference_v<T> || std::is_const_v<T> || std::is_volatile_v<T>;
-
-	template <typename T>
-	[[nodiscard]]
-	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
-	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
-	{
-		return static_cast<std::underlying_type_t<T>>(val);
-	}
-
-	// Q: "why not use the built-in fpclassify?"
-	// A: Because it gets broken by -ffast-math and friends
-
-	enum class fp_class : unsigned { ok, neg_inf, pos_inf, nan };
-
-	[[nodiscard]]
-	inline fp_class fpclassify(const double& val) noexcept
-	{
-		constexpr uint64_t sign     = 0b1000000000000000000000000000000000000000000000000000000000000000ull;
-		constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
-		constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
-
-		uint64_t val_bits;
-		memcpy(&val_bits, &val, sizeof(val));
-		if ((val_bits & exponent) != exponent)
-			return fp_class::ok;
-		if ((val_bits & mantissa))
-			return fp_class::nan;
-		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
-	}
-
-	// Q: "why not use std::find??"
-	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
-	//    I don't want to impose such a heavy compile-time burden on users.
-
-	template <typename T>
-	[[nodiscard]]
-	inline const T* find(const std::vector<T>& haystack, const T& needle) noexcept
-	{
-		for (size_t i = 0, e = haystack.size(); i < e; i++)
-			if (haystack[i] == needle)
-				return haystack.data() + i;
-		return nullptr;
-	}
-
-	#if TOML_ABI_NAMESPACES
-		#if TOML_EXCEPTIONS
-			TOML_ABI_NAMESPACE_START(ex)
-			#define TOML_PARSER_TYPENAME ::toml::impl::ex::parser
-		#else
-			TOML_ABI_NAMESPACE_START(noex)
-			#define TOML_PARSER_TYPENAME ::toml::impl::noex::parser
-		#endif
-	#else
-		#define TOML_PARSER_TYPENAME ::toml::impl::parser
-	#endif
-
-	class parser;
-
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	// general value traits
-	// (as they relate to their equivalent native TOML type)
-
-	template <typename T>
-	struct value_traits
-	{
-		using native_type = void;
-		static constexpr bool is_native = false;
-		static constexpr bool is_losslessly_convertible_to_native = false;
-		static constexpr bool can_represent_native = false;
-		static constexpr bool can_partially_represent_native = false;
-		static constexpr auto node_type = ::toml::node_type::none;
-	};
-	template <typename T> struct value_traits<T&>				: value_traits<T> {};
-	template <typename T> struct value_traits<T&&>				: value_traits<T> {};
-	template <typename T> struct value_traits<T*const>			: value_traits<T*>{};
-	template <typename T> struct value_traits<T*volatile>		: value_traits<T*>{};
-	template <typename T> struct value_traits<T*const volatile>	: value_traits<T*>{};
-
-	// integer value traits
-
-	template <typename T>
-	struct unsigned_integer_value_traits
-	{
-		using native_type = int64_t;
-		static constexpr bool is_native = false;
-		static constexpr bool is_signed = false;
-		static constexpr auto min = (std::numeric_limits<T>::min)();
-		static constexpr auto max = (std::numeric_limits<T>::max)();
-		static constexpr bool is_losslessly_convertible_to_native
-			= (std::numeric_limits<T>::max)() <= 9223372036854775807ULL;
-		static constexpr bool can_represent_native = false;
-		static constexpr bool can_partially_represent_native = true;
-		static constexpr auto node_type = ::toml::node_type::integer;
-	};
-	template <typename T>
-	struct signed_integer_value_traits
-	{
-		using native_type = int64_t;
-		static constexpr bool is_native = std::is_same_v<T, native_type>;
-		static constexpr bool is_signed = true;
-		static constexpr auto min = (std::numeric_limits<T>::min)();
-		static constexpr auto max = (std::numeric_limits<T>::max)();
-		static constexpr bool is_losslessly_convertible_to_native
-			 = (std::numeric_limits<T>::min)() >= (-9223372036854775807LL - 1LL)
-			&& (std::numeric_limits<T>::max)() <= 9223372036854775807LL;
-		static constexpr bool can_represent_native
-			 = (std::numeric_limits<T>::min)() <= (-9223372036854775807LL - 1LL)
-			&& (std::numeric_limits<T>::max)() >= 9223372036854775807LL;
-		static constexpr bool can_partially_represent_native = true;
-		static constexpr auto node_type = ::toml::node_type::integer;
-	};
-
-	template <typename T, bool U = std::is_unsigned_v<T>>
-	struct integer_value_traits : signed_integer_value_traits<T> {};
-	template <typename T>
-	struct integer_value_traits<T, true> : unsigned_integer_value_traits<T> {};
-
-	template <> struct value_traits<signed char>		: integer_value_traits<signed char> {};
-	template <> struct value_traits<unsigned char>		: integer_value_traits<unsigned char> {};
-	template <> struct value_traits<signed short>		: integer_value_traits<signed short> {};
-	template <> struct value_traits<unsigned short>		: integer_value_traits<unsigned short> {};
-	template <> struct value_traits<signed int>			: integer_value_traits<signed int> {};
-	template <> struct value_traits<unsigned int>		: integer_value_traits<unsigned int> {};
-	template <> struct value_traits<signed long>		: integer_value_traits<signed long> {};
-	template <> struct value_traits<unsigned long>		: integer_value_traits<unsigned long> {};
-	template <> struct value_traits<signed long long>	: integer_value_traits<signed long long> {};
-	template <> struct value_traits<unsigned long long>	: integer_value_traits<unsigned long long> {};
-	#ifdef __SIZEOF_INT128__
-	template <typename T>
-	struct big_integer_value_traits
-	{
-		using native_type = int64_t;
-		static constexpr bool is_native = false;
-		static constexpr bool is_losslessly_convertible_to_native = false;
-		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not specializing std::is_signed<T>
-		static constexpr bool can_represent_native = is_signed;
-		static constexpr bool can_partially_represent_native = true;
-		static constexpr auto node_type = ::toml::node_type::integer;
-	};
-	template <>
-	struct value_traits<__int128_t> : big_integer_value_traits<__int128_t>
-	{
-		static constexpr auto max = static_cast<__int128_t>(
-			( __uint128_t{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1
-		);
-		static constexpr auto min = -max - __int128_t{ 1 };
-	};
-	template <>
-	struct value_traits<__uint128_t> : big_integer_value_traits<__uint128_t>
-	{
-		static constexpr auto min = __uint128_t{};
-		static constexpr auto max = (2u * static_cast<__uint128_t>(value_traits<__int128_t>::max)) + 1u;
-	};
-	#endif
-	#ifdef TOML_SMALL_INT_TYPE
-	template <> struct value_traits<TOML_SMALL_INT_TYPE> : signed_integer_value_traits<TOML_SMALL_INT_TYPE> {};
-	#endif
-	static_assert(value_traits<int64_t>::is_native);
-	static_assert(value_traits<int64_t>::is_losslessly_convertible_to_native);
-	static_assert(value_traits<int64_t>::can_represent_native);
-	static_assert(value_traits<int64_t>::can_partially_represent_native);
-
-	// float value traits
-
-	template <typename T>
-	struct float_value_traits
-	{
-		using native_type = double;
-		static constexpr bool is_native = std::is_same_v<T, native_type>;
-		static constexpr bool is_signed = true;
-		static constexpr bool is_losslessly_convertible_to_native
-			= std::numeric_limits<T>::is_iec559
-			&& std::numeric_limits<T>::digits <= 53
-			&& std::numeric_limits<T>::digits10 <= 15
-			&& std::numeric_limits<T>::max_digits10 <= 17;
-		static constexpr bool can_represent_native
-			= std::numeric_limits<T>::is_iec559
-			&& std::numeric_limits<T>::digits >= 53
-			&& std::numeric_limits<T>::digits10 >= 15
-			&& std::numeric_limits<T>::max_digits10 >= 17;
-		static constexpr bool can_partially_represent_native //32-bit float values
-			= std::numeric_limits<T>::is_iec559
-			&& std::numeric_limits<T>::digits >= 24
-			&& std::numeric_limits<T>::digits10 >= 6
-			&& std::numeric_limits<T>::max_digits10 >= 9;
-		static constexpr auto node_type = ::toml::node_type::floating_point;
-	};
-	template <> struct value_traits<float>					: float_value_traits<float> {};
-	template <> struct value_traits<double>					: float_value_traits<double> {};
-	template <> struct value_traits<long double>			: float_value_traits<long double> {};
-	#if defined(FLT16_MANT_DIG) && defined(FLT16_DIG) && defined(FLT16_DECIMAL_DIG)
-	template <> struct value_traits<_Float16>				: float_value_traits<_Float16> {};
-	#endif
-	//template <> struct value_traits<__float80>				: float_value_traits<__float80> {};
-	#ifdef __SIZEOF_FLOAT128__
-	template <> struct value_traits<__float128>				: float_value_traits<__float128> {};
-	#endif
-	#ifdef TOML_SMALL_FLOAT_TYPE
-	template <> struct value_traits<TOML_SMALL_FLOAT_TYPE>	: float_value_traits<TOML_SMALL_FLOAT_TYPE> {};
-	#endif
-	static_assert(value_traits<double>::is_native);
-	static_assert(value_traits<double>::is_losslessly_convertible_to_native);
-	static_assert(value_traits<double>::can_represent_native);
-	static_assert(value_traits<double>::can_partially_represent_native);
-
-	// string value traits
-
-	template <typename T>
-	struct string_value_traits
-	{
-		using native_type = std::string;
-		static constexpr bool is_native = std::is_same_v<T, native_type>;
-		static constexpr bool is_losslessly_convertible_to_native = true;
-		static constexpr bool can_represent_native
-			= !std::is_array_v<T>
-			&& (!std::is_pointer_v<T> || std::is_const_v<std::remove_pointer_t<T>>);
-		static constexpr bool can_partially_represent_native = can_represent_native;
-		static constexpr auto node_type = ::toml::node_type::string;
-	};
-	template <>         struct value_traits<std::string>		: string_value_traits<std::string> {};
-	template <>         struct value_traits<std::string_view>	: string_value_traits<std::string_view> {};
-	template <>         struct value_traits<const char*>		: string_value_traits<const char *> {};
-	template <size_t N> struct value_traits<const char[N]>		: string_value_traits<const char[N]> {};
-	template <>         struct value_traits<char*>				: string_value_traits<char*> {};
-	template <size_t N> struct value_traits<char[N]>			: string_value_traits<char[N]> {};
-	#ifdef __cpp_lib_char8_t
-	template <>         struct value_traits<std::u8string>		: string_value_traits<std::u8string> {};
-	template <>         struct value_traits<std::u8string_view>	: string_value_traits<std::u8string_view> {};
-	template <>         struct value_traits<const char8_t*>		: string_value_traits<const char8_t*> {};
-	template <size_t N> struct value_traits<const char8_t[N]>	: string_value_traits<const char8_t[N]> {};
-	template <>         struct value_traits<char8_t*>			: string_value_traits<char8_t*> {};
-	template <size_t N> struct value_traits<char8_t[N]>			: string_value_traits<char8_t[N]> {};
-	#endif
-	#if TOML_WINDOWS_COMPAT
-	template <typename T>
-	struct wstring_value_traits
-	{
-		using native_type = std::string;
-		static constexpr bool is_native = false;
-		static constexpr bool is_losslessly_convertible_to_native = true; //narrow
-		static constexpr bool can_represent_native = std::is_same_v<T, std::wstring>; //widen
-		static constexpr bool can_partially_represent_native = can_represent_native;
-		static constexpr auto node_type = ::toml::node_type::string;
-	};
-	template <>         struct value_traits<std::wstring>		: wstring_value_traits<std::wstring> {};
-	template <>         struct value_traits<std::wstring_view>	: wstring_value_traits<std::wstring_view> {};
-	template <>         struct value_traits<const wchar_t*>		: wstring_value_traits<const wchar_t*> {};
-	template <size_t N> struct value_traits<const wchar_t[N]>	: wstring_value_traits<const wchar_t[N]> {};
-	template <>         struct value_traits<wchar_t*>			: wstring_value_traits<wchar_t*> {};
-	template <size_t N> struct value_traits<wchar_t[N]>			: wstring_value_traits<wchar_t[N]> {};
-	#endif
-
-	// other native value traits
-
-	template <typename T, ::toml::node_type NodeType>
-	struct native_value_traits
-	{
-		using native_type = T;
-		static constexpr bool is_native = true;
-		static constexpr bool is_losslessly_convertible_to_native = true;
-		static constexpr bool can_represent_native = true;
-		static constexpr bool can_partially_represent_native = true;
-		static constexpr auto node_type = NodeType;
-	};
-	template <> struct value_traits<bool>		: native_value_traits<bool,		 node_type::boolean> {};
-	template <> struct value_traits<date>		: native_value_traits<date,		 node_type::date> {};
-	template <> struct value_traits<time>		: native_value_traits<time,		 node_type::time> {};
-	template <> struct value_traits<date_time>	: native_value_traits<date_time, node_type::date_time> {};
-
-	template <typename T>
-	inline constexpr bool is_wide_string = is_one_of<
-		std::decay_t<T>,
-		const wchar_t*,
-		wchar_t*,
-		std::wstring_view,
-		std::wstring
-	>;
-
-	// native value category queries
-
-	template <typename T>
-	using native_type_of = typename value_traits<T>::native_type;
-	template <typename T>
-	inline constexpr bool is_native = value_traits<T>::is_native;
-	template <typename T>
-	inline constexpr bool can_represent_native = value_traits<T>::can_represent_native;
-	template <typename T>
-	inline constexpr bool can_partially_represent_native = value_traits<T>::can_partially_represent_native;
-	template <typename T>
-	inline constexpr bool is_losslessly_convertible_to_native = value_traits<T>::is_losslessly_convertible_to_native;
-	template <typename T, typename... U>
-	inline constexpr bool is_natively_one_of = is_one_of<native_type_of<T>, U...>;
-
-	template <typename T> struct node_wrapper				{ using type = T; };
-	template <>           struct node_wrapper<std::string>	{ using type = value<std::string>; };
-	template <>           struct node_wrapper<int64_t>		{ using type = value<int64_t>; };
-	template <>           struct node_wrapper<double>		{ using type = value<double>; };
-	template <>           struct node_wrapper<bool>			{ using type = value<bool>; };
-	template <>           struct node_wrapper<date>			{ using type = value<date>; };
-	template <>           struct node_wrapper<time>			{ using type = value<time>; };
-	template <>           struct node_wrapper<date_time>	{ using type = value<date_time>; };
-	template <typename T> using wrap_node = typename node_wrapper<T>::type;
-
-	template <typename T> struct node_unwrapper				{ using type = T; };
-	template <typename T> struct node_unwrapper<value<T>>	{ using type = T; };
-	template <typename T> using unwrap_node = typename node_unwrapper<T>::type;
-
-	template <typename T> struct node_type_getter		{ static constexpr auto value = value_traits<T>::node_type; };
-	template <>           struct node_type_getter<table>{ static constexpr auto value = node_type::table; };
-	template <>           struct node_type_getter<array>{ static constexpr auto value = node_type::array; };
-	template <typename T>
-	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
-
-	inline constexpr std::string_view low_character_escape_table[] =
-	{
-		"\\u0000"sv,
-		"\\u0001"sv,
-		"\\u0002"sv,
-		"\\u0003"sv,
-		"\\u0004"sv,
-		"\\u0005"sv,
-		"\\u0006"sv,
-		"\\u0007"sv,
-		"\\b"sv,
-		"\\t"sv,
-		"\\n"sv,
-		"\\u000B"sv,
-		"\\f"sv,
-		"\\r"sv,
-		"\\u000E"sv,
-		"\\u000F"sv,
-		"\\u0010"sv,
-		"\\u0011"sv,
-		"\\u0012"sv,
-		"\\u0013"sv,
-		"\\u0014"sv,
-		"\\u0015"sv,
-		"\\u0016"sv,
-		"\\u0017"sv,
-		"\\u0018"sv,
-		"\\u0019"sv,
-		"\\u001A"sv,
-		"\\u001B"sv,
-		"\\u001C"sv,
-		"\\u001D"sv,
-		"\\u001E"sv,
-		"\\u001F"sv,
-	};
-
-	inline constexpr std::string_view node_type_friendly_names[] =
-	{
-		"none"sv,
-		"table"sv,
-		"array"sv,
-		"string"sv,
-		"integer"sv,
-		"floating-point"sv,
-		"boolean"sv,
-		"date"sv,
-		"time"sv,
-		"date-time"sv
-	};
-
-	#define TOML_P2S_DECL(Type)											\
-		template <typename Char>										\
-		inline void print_to_stream(Type, std::basic_ostream<Char>&)
-
-	TOML_P2S_DECL(int8_t);
-	TOML_P2S_DECL(int16_t);
-	TOML_P2S_DECL(int32_t);
-	TOML_P2S_DECL(int64_t);
-	TOML_P2S_DECL(uint8_t);
-	TOML_P2S_DECL(uint16_t);
-	TOML_P2S_DECL(uint32_t);
-	TOML_P2S_DECL(uint64_t);
-	TOML_P2S_DECL(float);
-	TOML_P2S_DECL(const date&);
-	TOML_P2S_DECL(const time&);
-	TOML_P2S_DECL(time_offset);
-	TOML_P2S_DECL(const date_time&);
-
-	#undef TOML_P2S_DECL
-
-	template <typename T>
-	inline constexpr bool dependent_false = false;
-
-	TOML_IMPL_NAMESPACE_END
-} // impl
-
-namespace toml
-{
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename T>
-	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
-	template <typename T>
-	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
-	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<std::string>>;
-	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<int64_t>>;
-	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<double>>;
-	template <typename T>
-	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
-	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<bool>>;
-	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date>>;
-	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<time>>;
-	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
-
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
@@ -1156,21 +1305,11 @@ namespace toml
 		}
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
 	#endif
-
-	template <typename T>
-	struct TOML_TRIVIAL_ABI inserter
-	{
-		T&& value;
-	};
-	template <typename T> inserter(T&&) -> inserter<T>;
-
-	TOML_ABI_NAMESPACE_END // version
 }
-
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS
+TOML_NAMESPACE_END
 
 #endif
 //------------------------------------------  ↑ toml_common.h  ---------------------------------------------------------
@@ -1181,10 +1320,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_SHADOW_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	struct TOML_TRIVIAL_ABI date
 	{
 		uint16_t year;
@@ -1251,7 +1388,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date&);
 	#endif
 
@@ -1323,7 +1460,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time&);
 	#endif
 
@@ -1385,7 +1522,7 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
@@ -1478,12 +1615,11 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
@@ -1507,10 +1643,8 @@ TOML_DISABLE_ALL_WARNINGS
 #endif
 TOML_POP_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
 	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
 	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
@@ -1696,7 +1830,7 @@ namespace toml
 		}
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 	#endif
 
@@ -1840,15 +1974,12 @@ namespace toml
 		}
 	}
 
-	TOML_POP_WARNINGS
-
-	TOML_IMPL_NAMESPACE_END
+	TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const source_position& rhs)
 	{
@@ -1880,13 +2011,12 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 #endif
 //---------------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ---
@@ -1949,10 +2079,8 @@ TOML_DISABLE_MISC_WARNINGS
 	TOML_SA_LIST_NXT	"A TOML node type"						\
 	TOML_SA_NODE_TYPE_LIST
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	class TOML_INTERFACE TOML_API node
 	{
 		private:
@@ -2056,9 +2184,13 @@ namespace toml
 
 		private:
 
+			#ifndef DOXYGEN
+
 			template <typename T>
 			[[nodiscard]]
 			decltype(auto) get_value_exact() const noexcept;
+
+			#endif // !DOXYGEN
 
 		public:
 
@@ -2332,9 +2464,8 @@ namespace toml
 				return do_ref<T>(*this);
 			}
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 
@@ -2349,10 +2480,8 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename T, typename...>
 	struct native_value_maker
 	{
@@ -2442,17 +2571,11 @@ namespace toml
 		}
 		return { static_cast<T>(val) };
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename Char, typename T>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const value<T>&);
-
 	template <typename ValueType>
 	class TOML_API value final : public node
 	{
@@ -2575,7 +2698,7 @@ namespace toml
 			{
 				if constexpr (std::is_same_v<value_type, double>)
 				{
-					using namespace ::toml::impl;
+					using namespace impl;
 					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
 					{
 						return (static_cast<uint64_t>(unbox_enum(l)) << 32)
@@ -2676,8 +2799,12 @@ namespace toml
 					return impl::node_type_of<value_type> >= impl::node_type_of<T>;
 			}
 	};
+	template <typename T>
+	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
-	#if !TOML_ALL_INLINE
+	#ifndef DOXYGEN
+
+	#if !TOML_HEADER_ONLY
 		extern template class TOML_API value<std::string>;
 		extern template class TOML_API value<int64_t>;
 		extern template class TOML_API value<double>;
@@ -2687,9 +2814,6 @@ namespace toml
 		extern template class TOML_API value<date_time>;
 	#endif
 
-	template <typename T>
-	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
-
 	TOML_PUSH_WARNINGS
 	TOML_DISABLE_INIT_WARNINGS
 	TOML_DISABLE_SWITCH_WARNINGS
@@ -2698,7 +2822,7 @@ namespace toml
 	[[nodiscard]]
 	inline decltype(auto) node::get_value_exact() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(node_type_of<T> != node_type::none);
 		static_assert(node_type_of<T> != node_type::table);
@@ -2745,7 +2869,7 @@ namespace toml
 	template <typename T>
 	inline optional<T> node::value_exact() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -2791,7 +2915,7 @@ namespace toml
 	template <typename T>
 	inline optional<T> node::value() const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -2934,7 +3058,7 @@ namespace toml
 	template <typename T>
 	inline auto node::value_or(T&& default_value) const noexcept
 	{
-		using namespace ::toml::impl;
+		using namespace impl;
 
 		static_assert(
 			!is_wide_string<T> || TOML_WINDOWS_COMPAT,
@@ -3030,7 +3154,7 @@ namespace toml
 		}
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !TOML_HEADER_ONLY
 
 	#define TOML_EXTERN(name, T)	\
 		extern template TOML_API optional<T>		node::name<T>() const noexcept
@@ -3076,12 +3200,13 @@ namespace toml
 	#endif
 	#undef TOML_EXTERN
 
-	#endif // !TOML_ALL_INLINE
+	#endif // !TOML_HEADER_ONLY
 
 	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
 
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !DOXYGEN
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -3094,10 +3219,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARN
 TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <bool IsConst>
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
@@ -3307,19 +3430,11 @@ namespace toml
 	{
 		return make_node(std::move(val.value));
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
-	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
-	template <typename Char>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
-
 	using array_iterator = impl::array_iterator<false>;
 	using const_array_iterator = impl::array_iterator<true>;
 
@@ -3616,9 +3731,8 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS
 
@@ -3632,10 +3746,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <bool IsConst>
 	struct table_proxy_pair final
 	{
@@ -3814,19 +3926,11 @@ namespace toml
 
 		#endif
 	};
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	[[nodiscard]] TOML_API bool operator == (const table& lhs, const table& rhs) noexcept;
-	[[nodiscard]] TOML_API bool operator != (const table& lhs, const table& rhs) noexcept;
-	template <typename Char>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
-
 	using table_iterator = impl::table_iterator<false>;
 	using const_table_iterator = impl::table_iterator<true>;
 
@@ -4121,9 +4225,8 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -4136,13 +4239,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename Char, typename T>
-	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
-
 	template <typename ViewedType>
 	class TOML_API TOML_TRIVIAL_ABI node_view
 	{
@@ -4429,7 +4527,7 @@ namespace toml
 		return os;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 
 	extern template class TOML_API node_view<node>;
 	extern template class TOML_API node_view<const node>;
@@ -4482,10 +4580,9 @@ namespace toml
 	#endif
 	#undef TOML_EXTERN
 
-	#endif // !TOML_ALL_INLINE
-
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !TOML_HEADER_ONLY
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 
@@ -4495,10 +4592,10 @@ TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 //--------------------------------------  ↓ toml_utf8_generated.h  -----------------------------------------------------
 #if 1
 
-namespace toml
-{
-	TOML_IMPL_NAMESPACE_START
+#ifndef DOXYGEN
 
+TOML_IMPL_NAMESPACE_START
+{
 	[[nodiscard]]
 	TOML_ATTR(const)
 	constexpr bool is_hexadecimal_digit(char32_t cp) noexcept
@@ -4508,7 +4605,7 @@ namespace toml
 		return cp >= U'0' && cp <= U'f' && (1ull << (static_cast<ui64>(cp) - 0x30ull)) & 0x7E0000007E03FFull;
 	}
 
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+	#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
 	[[nodiscard]]
 	TOML_ATTR(const)
@@ -5202,10 +5299,12 @@ namespace toml
 		}
 	}
 
-#endif // TOML_LANG_UNRELEASED
+	#endif // TOML_LANG_UNRELEASED
 
-	TOML_IMPL_NAMESPACE_END
-} // toml::impl
+}
+TOML_IMPL_NAMESPACE_END
+
+#endif // !DOXYGEN
 
 #endif
 //--------------------------------------  ↑ toml_utf8_generated.h  -----------------------------------------------------
@@ -5213,10 +5312,10 @@ namespace toml
 //--------------------------------------------------------------------  ↓ toml_utf8.h  ---------------------------------
 #if 1
 
-namespace toml
-{
-	TOML_IMPL_NAMESPACE_START
+#ifndef DOXYGEN
 
+TOML_IMPL_NAMESPACE_START
+{
 	template <typename... T>
 	[[nodiscard]]
 	TOML_ATTR(const)
@@ -5447,9 +5546,10 @@ namespace toml
 			state = state_table[state + uint_least32_t{ 256u } + type];
 		}
 	};
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
+
+#endif // !DOXYGEN
 
 #endif
 //--------------------------------------------------------------------  ↑ toml_utf8.h  ---------------------------------
@@ -5461,10 +5561,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	enum class format_flags : uint8_t
 	{
 		none,
@@ -5493,14 +5591,11 @@ namespace toml
 	{
 		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename Char = char>
 	class TOML_API formatter
 	{
@@ -5694,12 +5789,12 @@ namespace toml
 			{}
 	};
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template class TOML_API formatter<char>;
 	#endif
 
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -5713,26 +5808,16 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	[[nodiscard]] TOML_API std::string default_formatter_make_key_segment(const std::string&) noexcept;
 	[[nodiscard]] TOML_API size_t default_formatter_inline_columns(const node&) noexcept;
 	[[nodiscard]] TOML_API bool default_formatter_forces_multiline(const node&, size_t = 0) noexcept;
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
-
 	template <typename Char = char>
 	class TOML_API default_formatter final : impl::formatter<Char>
 	{
@@ -6012,7 +6097,7 @@ namespace toml
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&&);
 	};
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template class TOML_API default_formatter<char>;
 	#endif
 
@@ -6036,6 +6121,22 @@ namespace toml
 		return lhs << rhs; //as lvalue
 	}
 
+	#ifndef DOXYGEN
+
+	#if !TOML_HEADER_ONLY
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
+		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
+	#endif
+
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const table& rhs)
 	{
@@ -6054,22 +6155,9 @@ namespace toml
 		return lhs << default_formatter<Char>{ rhs };
 	}
 
-	#if !TOML_ALL_INLINE
-		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const table&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const array&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
-		extern template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
-	#endif
-
-	TOML_ABI_NAMESPACE_END // version
+	#endif // !DOXYGEN
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -6083,15 +6171,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&);
-	template <typename T, typename U>
-	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
-
 	template <typename Char = char>
 	class TOML_API json_formatter final : impl::formatter<Char>
 	{
@@ -6167,7 +6248,7 @@ namespace toml
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
 	};
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template class TOML_API json_formatter<char>;
 	#endif
 
@@ -6190,13 +6271,12 @@ namespace toml
 		return lhs << rhs; //as lvalue
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&);
 		extern template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -6219,13 +6299,11 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
-	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 
 	class parse_error final
 	{
@@ -6320,12 +6398,11 @@ namespace toml
 		return lhs;
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 	#endif
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS
 
@@ -6339,10 +6416,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename T>
 	class utf8_byte_stream;
 
@@ -6703,9 +6778,8 @@ namespace toml
 	};
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 
@@ -6718,13 +6792,11 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
-	#if TOML_DOXYGEN || !TOML_EXCEPTIONS
+	#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 
 	class parse_result final
 	{
@@ -6923,22 +6995,18 @@ namespace toml
 	#endif
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	[[nodiscard]] TOML_API parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 #if TOML_EXCEPTIONS
 	#define TOML_THROW_PARSE_ERROR(msg, path)												\
@@ -6952,10 +7020,8 @@ namespace toml
 		}}
 #endif
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	[[nodiscard]]
@@ -7097,7 +7163,7 @@ namespace toml
 			return parse(file, std::move(file_path_str));
 	}
 
-	#if !TOML_ALL_INLINE
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
 		extern template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
 		extern template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
@@ -7140,9 +7206,8 @@ namespace toml
 	}
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 #undef TOML_THROW_PARSE_ERROR
 
@@ -7161,10 +7226,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept
 		: source_{ std::move(other.source_) }
@@ -7217,9 +7280,8 @@ namespace toml
 	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
 	#undef TOML_MEMBER_ATTR
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
@@ -7233,10 +7295,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
@@ -7472,9 +7532,8 @@ namespace toml
 	{
 		return is_homogeneous(node_type::table);
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -7488,10 +7547,8 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_EXTERNAL_LINKAGE
 	table::table(impl::table_init_pair* pairs, size_t count) noexcept
 	{
@@ -7705,9 +7762,8 @@ namespace toml
 	{
 		return !(lhs == rhs);
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -7728,10 +7784,8 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	inline constexpr size_t default_formatter_line_wrap = 120_sz;
 
 	TOML_API
@@ -7872,14 +7926,11 @@ namespace toml
 	{
 		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	template <typename Char>
 	inline void default_formatter<Char>::print_inline(const toml::table& tbl)
 	{
@@ -7914,9 +7965,8 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
@@ -7926,10 +7976,8 @@ TOML_DISABLE_ALL_WARNINGS
 #include <Windows.h> // fuckkkk :(
 TOML_POP_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str) noexcept
@@ -7979,9 +8027,8 @@ namespace toml
 	}
 
 	#endif // __cpp_lib_char8_t
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 #endif // TOML_WINDOWS_COMPAT
 
@@ -7997,10 +8044,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNI
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	template <typename Char>
 	inline void json_formatter<Char>::print(const toml::table& tbl)
 	{
@@ -8040,9 +8085,8 @@ namespace toml
 		}
 		base::clear_naked_newline();
 	}
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
@@ -8059,9 +8103,8 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 	#define TOML_ERROR_CHECK	if (reader.error()) return nullptr
 #endif
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	TOML_EXTERNAL_LINKAGE
@@ -8134,18 +8177,16 @@ namespace toml
 	}
 
 	#if !TOML_EXCEPTIONS
-
 	TOML_EXTERNAL_LINKAGE
 	optional<parse_error>&& utf8_buffered_reader::error() noexcept
 	{
 		return reader.error();
 	}
-
 	#endif
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 #undef TOML_ERROR_CHECK
 #undef TOML_ERROR
@@ -8165,7 +8206,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
 	#include <sstream>
 #endif
-#if !TOML_ALL_INLINE
+#if !TOML_HEADER_ONLY
 	using namespace std::string_view_literals;
 #endif
 TOML_POP_WARNINGS
@@ -8180,7 +8221,7 @@ TOML_DISABLE_PADDING_WARNINGS
 	#define TOML_RETURNS_BY_THROWING
 #endif
 
-namespace TOML_ANONYMOUS_NAMESPACE
+TOML_ANON_NAMESPACE_START
 {
 	template <uint64_t> struct parse_integer_traits;
 	template <> struct parse_integer_traits<2> final
@@ -8393,13 +8434,11 @@ namespace TOML_ANONYMOUS_NAMESPACE
 		toml::node* value;
 	};
 
-	TOML_ANONYMOUS_NAMESPACE_END
 }
+TOML_ANON_NAMESPACE_END
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// Q: "what the fuck is this? MACROS????"
 	// A: The parser needs to work in exceptionless mode (returning error objects directly)
 	//    and exception mode (reporting parse failures by throwing). Two totally different control flows.
@@ -11076,14 +11115,11 @@ namespace toml
 	#undef advance_and_return_if_error
 	#undef advance_and_return_if_error_or_eof
 	#undef assert_or_assume
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
 	TOML_API
@@ -11162,9 +11198,8 @@ namespace toml
 	}
 
 	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
@@ -11173,7 +11208,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 #endif // TOML_PARSER
 
-#if !TOML_ALL_INLINE
+#if !TOML_HEADER_ONLY
 
 //------------  ↓ toml_instantiations.hpp  -----------------------------------------------------------------------------
 #if 1
@@ -11190,24 +11225,19 @@ TOML_POP_WARNINGS
 #endif
 
 // internal implementation namespace
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// formatters
 	template class TOML_API formatter<char>;
 
 	// print to stream machinery
 	template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 // public namespace
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	// value<>
 	template class TOML_API value<std::string>;
 	template class TOML_API value<int64_t>;
@@ -11318,86 +11348,100 @@ namespace toml
 		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	#endif // TOML_PARSER
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 #endif
 //------------  ↑ toml_instantiations.hpp  -----------------------------------------------------------------------------
 
-#endif // !TOML_ALL_INLINE
+#endif // !TOML_HEADER_ONLY
 
 #endif // TOML_IMPLEMENTATION
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_INT_CHARCONV
-	#undef TOML_FLOAT_CHARCONV
+	#undef TOML_ABI_NAMESPACES
+	#undef TOML_ABI_NAMESPACE_BOOL
+	#undef TOML_ABI_NAMESPACE_END
+	#undef TOML_ABI_NAMESPACE_START
+	#undef TOML_ALWAYS_INLINE
+	#undef TOML_ANON_NAMESPACE
+	#undef TOML_ANON_NAMESPACE_END
+	#undef TOML_ANON_NAMESPACE_START
+	#undef TOML_ARM
+	#undef TOML_ASSERT
+	#undef TOML_ASSUME
+	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
 	#undef TOML_ATTR
-	#undef TOML_PUSH_WARNINGS
-	#undef TOML_DISABLE_SWITCH_WARNINGS
+	#undef TOML_CLANG
+	#undef TOML_COMPILER_EXCEPTIONS
+	#undef TOML_CONCAT
+	#undef TOML_CONCAT_1
+	#undef TOML_CONSTEVAL
+	#undef TOML_CPP
+	#undef TOML_DISABLE_ALL_WARNINGS
+	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_MISC_WARNINGS
 	#undef TOML_DISABLE_PADDING_WARNINGS
-	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#undef TOML_DISABLE_SHADOW_WARNINGS
 	#undef TOML_DISABLE_SUGGEST_WARNINGS
-	#undef TOML_DISABLE_ALL_WARNINGS
-	#undef TOML_POP_WARNINGS
-	#undef TOML_ALWAYS_INLINE
-	#undef TOML_NEVER_INLINE
-	#undef TOML_ASSUME
-	#undef TOML_UNREACHABLE
-	#undef TOML_INTERFACE
+	#undef TOML_DISABLE_SWITCH_WARNINGS
 	#undef TOML_EMPTY_BASES
-	#undef TOML_CPP
-	#undef TOML_MAY_THROW
-	#undef TOML_NO_DEFAULT_CASE
-	#undef TOML_CONSTEVAL
-	#undef TOML_LIKELY
-	#undef TOML_UNLIKELY
-	#undef TOML_NODISCARD_CTOR
-	#undef TOML_MAKE_VERSION
+	#undef TOML_EVAL_BOOL_0
+	#undef TOML_EVAL_BOOL_1
+	#undef TOML_EXTERNAL_LINKAGE
+	#undef TOML_FLOAT128
+	#undef TOML_FLOAT16
+	#undef TOML_FLOAT_CHARCONV
+	#undef TOML_FP16
+	#undef TOML_GCC
+	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	#undef TOML_HAS_INCLUDE
+	#undef TOML_ICC
+	#undef TOML_IMPLEMENTATION
+	#undef TOML_IMPL_NAMESPACE_END
+	#undef TOML_IMPL_NAMESPACE_START
+	#undef TOML_INT128
+	#undef TOML_INTELLISENSE
+	#undef TOML_INTERFACE
+	#undef TOML_INTERNAL_LINKAGE
+	#undef TOML_INT_CHARCONV
+	#undef TOML_LANG_AT_LEAST
 	#undef TOML_LANG_EFFECTIVE_VERSION
 	#undef TOML_LANG_HIGHER_THAN
-	#undef TOML_LANG_AT_LEAST
 	#undef TOML_LANG_UNRELEASED
-	#undef TOML_UNDEF_MACROS
-	#undef TOML_RELOPS_REORDERING
-	#undef TOML_ASYMMETRICAL_EQUALITY_OPS
-	#undef TOML_ALL_INLINE
-	#undef TOML_IMPLEMENTATION
-	#undef TOML_EXTERNAL_LINKAGE
-	#undef TOML_INTERNAL_LINKAGE
-	#undef TOML_ANONYMOUS_NAMESPACE
-	#undef TOML_ANONYMOUS_NAMESPACE_END
-	#undef TOML_COMPILER_EXCEPTIONS
-	#undef TOML_TRIVIAL_ABI
-	#undef TOML_ABI_NAMESPACES
-	#undef TOML_ABI_NAMESPACE_START
-	#undef TOML_ABI_NAMESPACE_VERSION
-	#undef TOML_ABI_NAMESPACE_BOOL
-	#undef TOML_ABI_NAMESPACE_END
-	#undef TOML_PARSER_TYPENAME
 	#undef TOML_LAUNDER
-	#undef TOML_CONCAT_1
-	#undef TOML_CONCAT
-	#undef TOML_EVAL_BOOL_1
-	#undef TOML_EVAL_BOOL_0
-	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
-	#undef TOML_IMPL_NAMESPACE_START
-	#undef TOML_IMPL_NAMESPACE_END
-	#undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
-	#undef TOML_SA_NEWLINE
-	#undef TOML_SA_LIST_SEP
+	#undef TOML_LIKELY
+	#undef TOML_MAKE_VERSION
+	#undef TOML_MAY_THROW
+	#undef TOML_MSVC
+	#undef TOML_NAMESPACE
+	#undef TOML_NAMESPACE_END
+	#undef TOML_NAMESPACE_START
+	#undef TOML_NEVER_INLINE
+	#undef TOML_NODISCARD_CTOR
+	#undef TOML_NO_DEFAULT_CASE
+	#undef TOML_PARSER_TYPENAME
+	#undef TOML_POP_WARNINGS
+	#undef TOML_PUSH_WARNINGS
+	#undef TOML_RELOPS_REORDERING
 	#undef TOML_SA_LIST_BEG
+	#undef TOML_SA_LIST_CAP
 	#undef TOML_SA_LIST_END
 	#undef TOML_SA_LIST_NEW
 	#undef TOML_SA_LIST_NXT
-	#undef TOML_SA_LIST_CAP
+	#undef TOML_SA_LIST_SEP
 	#undef TOML_SA_NATIVE_VALUE_TYPE_LIST
+	#undef TOML_SA_NEWLINE
 	#undef TOML_SA_NODE_TYPE_LIST
 	#undef TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+	#undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+	#undef TOML_TRIVIAL_ABI
+	#undef TOML_UINT128
+	#undef TOML_UNLIKELY
+	#undef TOML_UNREACHABLE
+	#undef TOML_USING_ANON_NAMESPACE
 #endif
 
 

@@ -9,10 +9,8 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <bool IsConst>
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
@@ -222,19 +220,11 @@ namespace toml
 	{
 		return make_node(std::move(val.value));
 	}
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
-	[[nodiscard]] TOML_API bool operator == (const array& lhs, const array& rhs) noexcept;
-	[[nodiscard]] TOML_API bool operator != (const array& lhs, const array& rhs) noexcept;
-	template <typename Char>
-	std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
-
 	/// \brief A RandomAccessIterator for iterating over nodes in a toml::array.
 	using array_iterator = impl::array_iterator<false>;
 
@@ -997,8 +987,7 @@ namespace toml
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
 	};
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS

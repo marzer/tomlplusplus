@@ -9,8 +9,8 @@
 #if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
-#if TOML_ALL_INLINE
-	#error This header cannot not be included when TOML_ALL_INLINE is enabled.
+#if TOML_HEADER_ONLY
+	#error This header cannot not be included when TOML_HEADER_ONLY is enabled.
 #endif
 //# }}
 
@@ -28,24 +28,19 @@ TOML_POP_WARNINGS
 #endif
 
 // internal implementation namespace
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	// formatters
 	template class TOML_API formatter<char>;
 
 	// print to stream machinery
 	template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
 
 // public namespace
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	// value<>
 	template class TOML_API value<std::string>;
 	template class TOML_API value<int64_t>;
@@ -156,6 +151,5 @@ namespace toml
 		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 
 	#endif // TOML_PARSER
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END

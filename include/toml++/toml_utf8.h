@@ -6,11 +6,10 @@
 
 #pragma once
 #include "toml_utf8_generated.h"
+#ifndef DOXYGEN
 
-namespace toml
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_IMPL_NAMESPACE_START
-
 	template <typename... T>
 	[[nodiscard]]
 	TOML_ATTR(const)
@@ -241,6 +240,7 @@ namespace toml
 			state = state_table[state + uint_least32_t{ 256u } + type];
 		}
 	};
-
-	TOML_IMPL_NAMESPACE_END
 }
+TOML_IMPL_NAMESPACE_END
+
+#endif // !DOXYGEN

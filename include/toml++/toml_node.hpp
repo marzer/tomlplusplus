@@ -16,10 +16,8 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
 
-namespace toml
+TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_VERSION
-
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept
 		: source_{ std::move(other.source_) }
@@ -72,8 +70,7 @@ namespace toml
 	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
 	#undef TOML_MEMBER_ATTR
-
-	TOML_ABI_NAMESPACE_END // version
 }
+TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
