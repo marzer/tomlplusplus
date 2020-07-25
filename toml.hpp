@@ -43,6 +43,8 @@
 //----------------------------------------------------------------------------------------------------------------------
 // clang-format off
 #ifndef INCLUDE_TOMLPLUSPLUS_H
+#define INCLUDE_TOMLPLUSPLUS_H
+
 #define TOML_LIB_SINGLE_HEADER 1
 
 //--------------  ↓ toml_preprocessor.h  -------------------------------------------------------------------------------

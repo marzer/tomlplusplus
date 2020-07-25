@@ -147,6 +147,8 @@ def main():
 			write(utils.make_divider())
 		write('// clang-format off')
 		write('#ifndef INCLUDE_TOMLPLUSPLUS_H')
+		write('#define INCLUDE_TOMLPLUSPLUS_H')
+		write('')
 		write('#define TOML_LIB_SINGLE_HEADER 1')
 		write('')
 		write(source_text)
