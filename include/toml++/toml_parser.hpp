@@ -2456,7 +2456,7 @@ TOML_IMPL_NAMESPACE_START
 					auto child = parent->get(key.segments[i]);
 					if (!child)
 					{
-						child = parent->values.emplace(
+						child = parent->map.emplace(
 							key.segments[i],
 							new toml::table{}
 						).first->second.get();
@@ -2472,9 +2472,9 @@ TOML_IMPL_NAMESPACE_START
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!child->ref_cast<array>().values.empty());
-						TOML_ASSERT(child->ref_cast<array>().values.back()->is_table());
-						parent = &child->ref_cast<array>().values.back()->ref_cast<table>();
+						TOML_ASSERT(!child->ref_cast<array>().elements.empty());
+						TOML_ASSERT(child->ref_cast<array>().elements.back()->is_table());
+						parent = &child->ref_cast<array>().elements.back()->ref_cast<table>();
 					}
 					else
 					{
@@ -2501,22 +2501,22 @@ TOML_IMPL_NAMESPACE_START
 					// set the starting regions, and return the table element
 					if (is_arr)
 					{
-						auto tab_arr = &parent->values.emplace(
+						auto tab_arr = &parent->map.emplace(
 								key.segments.back(),
 								new toml::array{}
 							).first->second->ref_cast<array>();
 						table_arrays.push_back(tab_arr);
 						tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 						
-						tab_arr->values.emplace_back(new toml::table{});
-						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return &tab_arr->values.back()->ref_cast<table>();
+						tab_arr->elements.emplace_back(new toml::table{});
+						tab_arr->elements.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+						return &tab_arr->elements.back()->ref_cast<table>();
 					}
 
 					//otherwise we're just making a table
 					else
 					{
-						auto tab = &parent->values.emplace(
+						auto tab = &parent->map.emplace(
 								key.segments.back(),
 								new toml::table{})
 							.first->second->ref_cast<table>();
@@ -2534,9 +2534,9 @@ TOML_IMPL_NAMESPACE_START
 					if (is_arr && matching_node->is_array() && find(table_arrays, &matching_node->ref_cast<array>()))
 					{
 						auto tab_arr = &matching_node->ref_cast<array>();
-						tab_arr->values.emplace_back(new toml::table{});
-						tab_arr->values.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return &tab_arr->values.back()->ref_cast<table>();
+						tab_arr->elements.emplace_back(new toml::table{});
+						tab_arr->elements.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+						return &tab_arr->elements.back()->ref_cast<table>();
 					}
 
 					else if (!is_arr
@@ -2582,7 +2582,7 @@ TOML_IMPL_NAMESPACE_START
 						auto child = tab->get(kvp.key.segments[i]);
 						if (!child)
 						{
-							child = tab->values.emplace(
+							child = tab->map.emplace(
 								std::move(kvp.key.segments[i]),
 								new toml::table{}
 							).first->second.get();
@@ -2615,7 +2615,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				return_if_error();
-				tab->values.emplace(
+				tab->map.emplace(
 					std::move(kvp.key.segments.back()),
 					std::unique_ptr<node>{ kvp.value }
 				);
@@ -2689,7 +2689,7 @@ TOML_IMPL_NAMESPACE_START
 						return;
 
 					auto end = nde.source_.end;
-					for (auto& [k, v] : tbl.values)
+					for (auto& [k, v] : tbl.map)
 					{
 						(void)k;
 						update_region_ends(*v);
@@ -2701,7 +2701,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					auto& arr = nde.ref_cast<array>();
 					auto end = nde.source_.end;
-					for (auto& v : arr.values)
+					for (auto& v : arr.elements)
 					{
 						update_region_ends(*v);
 						if (end < v->source_.end)
@@ -2773,7 +2773,7 @@ TOML_IMPL_NAMESPACE_START
 		advance_and_return_if_error_or_eof({});
 
 		auto arr = new array{};
-		auto& vals = arr->values;
+		auto& vals = arr->elements;
 		enum parse_elem : int
 		{
 			none,

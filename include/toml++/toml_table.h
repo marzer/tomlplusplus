@@ -213,7 +213,7 @@ TOML_NAMESPACE_START
 		private:
 			friend class TOML_PARSER_TYPENAME;
 
-			impl::string_map<std::unique_ptr<node>> values;
+			impl::string_map<std::unique_ptr<node>> map;
 			bool inline_ = false;
 
 			table(impl::table_init_pair*, size_t) noexcept;
@@ -237,7 +237,7 @@ TOML_NAMESPACE_START
 			///		{ "bar", 2.0 },
 			///		{ "kek", "three" }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -293,19 +293,21 @@ TOML_NAMESPACE_START
 
 			/// \brief	Sets whether this table is a TOML inline table.
 			///
-			/// \detail \cpp
+			/// \detail \godbolt{an9xdj}
+			/// 
+			/// \cpp
 			/// auto tbl = toml::table{{
 			///		{ "a", 1 },
 			///		{ "b", 2 },
 			///		{ "c", 3 },
 			///		{ "d", toml::table{{ { "e", 4 } }} }
 			///	}};
-			/// std::cout << "is inline? "sv << tbl.is_inline() << std::endl;
-			/// std::cout << tbl << std::endl << std::endl;
+			/// std::cout << "is inline? "sv << tbl.is_inline() << "\n";
+			/// std::cout << tbl << "\n\n";
 			/// 
 			/// tbl.is_inline(!tbl.is_inline());
-			/// std::cout << "is inline? "sv << tbl.is_inline() << std::endl;
-			/// std::cout << tbl << std::endl;
+			/// std::cout << "is inline? "sv << tbl.is_inline() << "\n";
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -314,8 +316,10 @@ TOML_NAMESPACE_START
 			/// a = 1
 			/// b = 2
 			/// c = 3
+			/// 
 			/// [d]
 			/// e = 4
+			/// 
 			/// 
 			/// is inline? true
 			/// { a = 1, b = 2, c = 3, d = { e = 4 } }
@@ -411,63 +415,71 @@ TOML_NAMESPACE_START
 
 			/// \brief	Inserts a new value at a specific key if one did not already exist.
 			///
-			/// \detail \cpp
+			/// \detail \godbolt{bMnW5r}
+			/// 
+			/// \cpp
 			/// auto tbl = toml::table{{
 			///		{ "a", 1 },
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// for (auto k : { "a", "d" })
 			/// {
 			///		auto result = tbl.insert(k, 42);
-			///		std::cout << "inserted with key '"sv << k << "': "sv << result.second << std::endl;
+			///		std::cout << "inserted with key '"sv << k << "': "sv << result.second << "\n";
 			/// }
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
 			/// \out
-			/// { a = 1, b = 2, c = 3 }
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// 
 			/// inserted with key 'a': false
 			/// inserted with key 'd': true
-			/// { a = 1, b = 2, c = 3, d = 42 }
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// d = 42
 			/// \eout
 			/// 
-			/// \tparam K		std::string (or a type convertible to it).
-			/// \tparam V		One of the TOML value types (or a type promotable to one).
-			/// \param 	key		The key at which to insert the new value.
-			/// \param 	val		The new value to insert.
+			/// \tparam KeyType		std::string (or a type convertible to it).
+			/// \tparam ValueType	One of the TOML ndoe or value types (or a type promotable to one).
+			/// \param 	key			The key at which to insert the new value.
+			/// \param 	val			The new value to insert.
 			/// 
 			/// \returns A std::pair containing:
 			/// 		- An iterator to the insertion position (or the position of the value that prevented insertion)  
 			/// 		- A boolean indicating if the insertion was successful.
-			template <typename K, typename V, typename = std::enable_if_t<
-				std::is_convertible_v<K&&, std::string_view>
-				|| impl::is_wide_string<K>
+			template <typename KeyType, typename ValueType, typename = std::enable_if_t<
+				std::is_convertible_v<KeyType&&, std::string_view>
+				|| impl::is_wide_string<KeyType>
 			>>
-			std::pair<iterator, bool> insert(K&& key, V&& val) noexcept
+			std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val) noexcept
 			{
 				static_assert(
-					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_wide_string<K>)
+				if constexpr (impl::is_wide_string<KeyType>)
 				{
 					#if TOML_WINDOWS_COMPAT
-					return insert(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
 					#else
-					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 					#endif
 				}
 				else
 				{
-					auto ipos = values.lower_bound(key);
-					if (ipos == values.end() || ipos->first != key)
+					auto ipos = map.lower_bound(key);
+					if (ipos == map.end() || ipos->first != key)
 					{
-						ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
 						return { ipos, true };
 					}
 					return { ipos, false };
@@ -476,26 +488,34 @@ TOML_NAMESPACE_START
 
 			/// \brief	Inserts a series of key-value pairs into the table.
 			///
-			/// \detail \cpp
+			/// \detail \godbolt{bzYcce}
+			/// 
+			/// \cpp
 			/// auto tbl = toml::table{{
 			///		{ "a", 1 },
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
-			/// auto kvps = std::array<std::pair<std::string, int>>{{
+			/// auto kvps = std::array<std::pair<std::string, int>, 2>{{
 			///		{ "d", 42 },
-			///		{ "a", 43 }
+			///		{ "a", 43 } // won't be inserted, 'a' already exists
 			///	}};
 			///	tbl.insert(kvps.begin(), kvps.end());
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
 			/// \out
-			/// { a = 1, b = 2, c = 3 }
-			/// { a = 1, b = 2, c = 3, d = 42 }	//"a" already existed
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// 
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// d = 42
 			/// \eout
 			/// 
 			/// \tparam Iter	An InputIterator to a collection of key-value pairs.
@@ -524,66 +544,74 @@ TOML_NAMESPACE_START
 
 			/// \brief	Inserts or assigns a value at a specific key.
 			///
-			/// \detail \cpp
+			/// \detail \godbolt{ddK563}
+			/// 
+			/// \cpp
 			/// auto tbl = toml::table{{
 			///		{ "a", 1 },
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// for (auto k : { "a", "d" })
 			/// {
 			///		auto result = tbl.insert_or_assign(k, 42);
 			///		std::cout << "value at key '"sv << k
-			///			<< "' was "sv << (result.second ? "inserted"sv : "assigned"sv) << std::endl;
+			///			<< "' was "sv << (result.second ? "inserted"sv : "assigned"sv) << "\n";
 			/// }
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
 			/// \out
-			/// { a = 1, b = 2, c = 3 }
+			/// a = 1
+			/// b = 2
+			/// c = 3
+			/// 
 			/// value at key 'a' was assigned
 			/// value at key 'd' was inserted
-			/// { a = 42, b = 2, c = 3, d = 42 }
+			/// a = 42
+			/// b = 2
+			/// c = 3
+			/// d = 42
 			/// \eout
 			/// 
-			/// \tparam K		std::string (or a type convertible to it).
-			/// \tparam V		One of the TOML value types (or a type promotable to one).
-			/// \param 	key		The key at which to insert or assign the value.
-			/// \param 	val		The value to insert/assign.
+			/// \tparam KeyType		std::string (or a type convertible to it).
+			/// \tparam ValueType	One of the TOML node or value types (or a type promotable to one).
+			/// \param 	key			The key at which to insert or assign the value.
+			/// \param 	val			The value to insert/assign.
 			/// 
 			/// \returns A std::pair containing:
 			/// 		- An iterator to the value's position
 			/// 		- A boolean containing `true` if the value was inserted, `false` if it was assigned.
-			template <typename K, typename V>
-			std::pair<iterator, bool> insert_or_assign(K&& key, V&& val) noexcept
+			template <typename KeyType, typename ValueType>
+			std::pair<iterator, bool> insert_or_assign(KeyType&& key, ValueType&& val) noexcept
 			{
 				static_assert(
-					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_wide_string<K>)
+				if constexpr (impl::is_wide_string<KeyType>)
 				{
 					#if TOML_WINDOWS_COMPAT
-					return insert_or_assign(impl::narrow(std::forward<K>(key)), std::forward<V>(val));
+					return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
 					#else
-					static_assert(impl::dependent_false<K>, "Evaluated unreachable branch!");
+					static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 					#endif
 				}
 				else
 				{
-					auto ipos = values.lower_bound(key);
-					if (ipos == values.end() || ipos->first != key)
+					auto ipos = map.lower_bound(key);
+					if (ipos == map.end() || ipos->first != key)
 					{
-						ipos = values.emplace_hint(ipos, std::forward<K>(key), impl::make_node(std::forward<V>(val)));
+						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
 						return { ipos, true };
 					}
 					else
 					{
-						(*ipos).second.reset(impl::make_node(std::forward<V>(val)));
+						(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val)));
 						return { ipos, false };
 					}
 				}
@@ -597,15 +625,15 @@ TOML_NAMESPACE_START
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// for (auto k : { "a", "d" })
 			/// {
 			///		// add a string using std::string's substring constructor
 			///		auto result = tbl.emplace<std::string>(k, "this is not a drill"sv, 14, 5);
-			///		std::cout << "emplaced with key '"sv << k << "': "sv << result.second << std::endl;
+			///		std::cout << "emplaced with key '"sv << k << "': "sv << result.second << "\n";
 			/// }
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -616,50 +644,50 @@ TOML_NAMESPACE_START
 			/// { a = 1, b = 2, c = 3, d = "drill" }
 			/// \eout
 			/// 
-			/// \tparam	U		One of the TOML node or value types.
-			/// \tparam K		std::string (or a type convertible to it).
-			/// \tparam V		Value constructor argument types.
-			/// \param 	key		The key at which to emplace the new value.
-			/// \param 	args	Arguments to forward to the value's constructor.
+			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \tparam KeyType		std::string (or a type convertible to it).
+			/// \tparam ValueArgs	Value constructor argument types.
+			/// \param 	key			The key at which to emplace the new value.
+			/// \param 	args		Arguments to forward to the value's constructor.
 			/// 
 			/// \returns A std::pair containing:
 			/// 		- An iterator to the emplacement position (or the position of the value that prevented emplacement)
 			/// 		- A boolean indicating if the emplacement was successful.  
 			/// 
 			/// \remark There is no difference between insert() and emplace() for trivial value types (floats, ints, bools).
-			template <typename U, typename K, typename... V>
-			std::pair<iterator, bool> emplace(K&& key, V&&... args) noexcept
+			template <typename ValueType, typename KeyType, typename... ValueArgs>
+			std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args) noexcept
 			{
 				static_assert(
-					!impl::is_wide_string<K> || TOML_WINDOWS_COMPAT,
+					!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
 					"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_wide_string<K>)
+				if constexpr (impl::is_wide_string<KeyType>)
 				{
 					#if TOML_WINDOWS_COMPAT
-					return emplace<U>(impl::narrow(std::forward<K>(key)), std::forward<V>(args)...);
+					return emplace<ValueType>(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueArgs>(args)...);
 					#else
-					static_assert(impl::dependent_false<U>, "Evaluated unreachable branch!");
+					static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 					#endif
 				}
 				else
 				{
 
-					using type = impl::unwrap_node<U>;
+					using type = impl::unwrap_node<ValueType>;
 					static_assert(
 						(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
 						"The emplacement type argument of table::emplace() must be one of:"
 						TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 					);
 
-					auto ipos = values.lower_bound(key);
-					if (ipos == values.end() || ipos->first != key)
+					auto ipos = map.lower_bound(key);
+					if (ipos == map.end() || ipos->first != key)
 					{
-						ipos = values.emplace_hint(
+						ipos = map.emplace_hint(
 							ipos,
-							std::forward<K>(key),
-							new impl::wrap_node<type>{ std::forward<V>(args)... }
+							std::forward<KeyType>(key),
+							new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... }
 						);
 						return { ipos, true };
 					}
@@ -675,10 +703,10 @@ TOML_NAMESPACE_START
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// tbl.erase(tbl.begin() + 1);
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -700,10 +728,10 @@ TOML_NAMESPACE_START
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// tbl.erase(tbl.cbegin() + 1);
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -726,10 +754,10 @@ TOML_NAMESPACE_START
 			///		{ "c", "karma" },
 			///		{ "d", 2 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// tbl.erase(tbl.cbegin() + 1, tbl.cbegin() + 3);
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -752,11 +780,11 @@ TOML_NAMESPACE_START
 			///		{ "b", 2 },
 			///		{ "c", 3 }
 			///	}};
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl << "\n";
 			/// 
-			/// std::cout << tbl.erase("b") << std::endl;
-			/// std::cout << tbl.erase("not an existing key") << std::endl;
-			/// std::cout << tbl << std::endl;
+			/// std::cout << tbl.erase("b") << "\n";
+			/// std::cout << tbl.erase("not an existing key") << "\n";
+			/// std::cout << tbl << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -838,11 +866,11 @@ TOML_NAMESPACE_START
 			///		{ "a", 42, },
 			///		{ "b", "is the meaning of life, apparently." }
 			///	}};
-			///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << std::endl;
-			///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << std::endl;
-			///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << std::endl;
+			///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << "\n";
+			///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << "\n";
+			///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << "\n";
 			/// if (auto val = arr.get("a"))
-			///		std::cout << R"(node ["a"] was an )"sv << val->type() << std::endl;
+			///		std::cout << R"(node ["a"] was an )"sv << val->type() << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -935,7 +963,7 @@ TOML_NAMESPACE_START
 			///		{ "b", "is the meaning of life, apparently." }
 			///	}};
 			/// if (auto val = arr.get_as<int64_t>("a"))
-			///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << std::endl;
+			///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << "\n";
 			/// 
 			/// \ecpp
 			/// 
@@ -943,60 +971,60 @@ TOML_NAMESPACE_START
 			/// node ["a"] was an integer with value 42
 			/// \eout
 			/// 
-			/// \tparam	T	The node's type.
-			/// \param 	key	The node's key.
+			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-			template <typename T>
+			template <typename ValueType>
 			[[nodiscard]]
-			impl::wrap_node<T>* get_as(std::string_view key) noexcept
+			impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
 			{
-				return do_get_as<T>(values, key);
+				return do_get_as<ValueType>(map, key);
 			}
 
 			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 			///
-			/// \tparam	T	The node's type.
-			/// \param 	key	The node's key.
+			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-			template <typename T>
+			template <typename ValueType>
 			[[nodiscard]]
-			const impl::wrap_node<T>* get_as(std::string_view key) const noexcept
+			const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
 			{
-				return do_get_as<T>(values, key);
+				return do_get_as<ValueType>(map, key);
 			}
 
 			#if TOML_WINDOWS_COMPAT
 
 			/// \brief	Gets the node at a specific key if it is a particular type.
 			///
-			/// \tparam	T	The node's type.
-			/// \param 	key	The node's key.
+			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			template <typename T>
+			template <typename ValueType>
 			[[nodiscard]]
-			impl::wrap_node<T>* get_as(std::wstring_view key) noexcept
+			impl::wrap_node<ValueType>* get_as(std::wstring_view key) noexcept
 			{
-				return get_as<T>(impl::narrow(key));
+				return get_as<ValueType>(impl::narrow(key));
 			}
 
 			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 			///
-			/// \tparam	T	The node's type.
-			/// \param 	key	The node's key.
+			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
 			///
 			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			template <typename T>
+			template <typename ValueType>
 			[[nodiscard]]
-			const impl::wrap_node<T>* get_as(std::wstring_view key) const noexcept
+			const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const noexcept
 			{
-				return get_as<T>(impl::narrow(key));
+				return get_as<ValueType>(impl::narrow(key));
 			}
 
 			#endif // TOML_WINDOWS_COMPAT
@@ -1006,7 +1034,7 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS table.
 			/// \param 	rhs	The RHS table.
 			///
-			/// \returns	True if the tables contained the same keys and values.
+			/// \returns	True if the tables contained the same keys and map.
 			friend bool operator == (const table& lhs, const table& rhs) noexcept;
 
 			/// \brief	Inequality operator.
@@ -1014,7 +1042,7 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS table.
 			/// \param 	rhs	The RHS table.
 			///
-			/// \returns	True if the tables did not contain the same keys and values.
+			/// \returns	True if the tables did not contain the same keys and map.
 			friend bool operator != (const table& lhs, const table& rhs) noexcept;
 
 			/// \brief	Prints the table out to a stream as formatted TOML.

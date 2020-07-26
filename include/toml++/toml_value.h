@@ -84,7 +84,7 @@ TOML_IMPL_NAMESPACE_START
 		using traits = value_traits<T>;
 		if constexpr (!traits::is_signed)
 		{
-			if constexpr ((sizeof(T) * CHAR_BIT) <= 53) // 53 bits < int64_max < 54 bits
+			if constexpr ((sizeof(T) * CHAR_BIT) < 63) // 63 bits == int64_max
 			{
 				using common_t = decltype(int64_t{} + T{});
 				if (val < int64_t{} || static_cast<common_t>(val) > static_cast<common_t>(traits::max))

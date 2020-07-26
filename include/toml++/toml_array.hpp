@@ -22,13 +22,16 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
-		const auto new_size = values.size() + count;
-		const auto inserting_at_end = idx == values.size();
-		values.resize(new_size);
+		TOML_ASSERT(idx <= elements.size());
+		TOML_ASSERT(count >= 1_sz);
+		const auto old_size = elements.size();
+		const auto new_size = old_size + count;
+		const auto inserting_at_end = idx == old_size;
+		elements.resize(new_size);
 		if (!inserting_at_end)
 		{
-			for (size_t r = new_size, e = idx + count, l = e; r-- > e; l--)
-				values[r] = std::move(values[l]);
+			for(size_t left = old_size, right = new_size - 1_sz; left --> idx; right--)
+				elements[right] = std::move(elements[left]);
 		}
 	}
 
@@ -38,14 +41,14 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	array::array(array&& other) noexcept
 		: node{ std::move(other) },
-		values{ std::move(other.values) }
+		elements{ std::move(other.elements) }
 	{}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::operator= (array&& rhs) noexcept
 	{
 		node::operator=(std::move(rhs));
-		values = std::move(rhs.values);
+		elements = std::move(rhs.elements);
 		return *this;
 	}
 
@@ -58,69 +61,69 @@ TOML_NAMESPACE_START
 	TOML_MEMBER_ATTR(const) const array* array::as_array()	const noexcept	{ return this; }
 	TOML_MEMBER_ATTR(const) array* array::as_array()		noexcept		{ return this; }
 
-	TOML_MEMBER_ATTR(pure) const node& array::operator[] (size_t index)	const noexcept	{ return *values[index]; }
-	TOML_MEMBER_ATTR(pure) node& array::operator[] (size_t index)		noexcept		{ return *values[index]; }
+	TOML_MEMBER_ATTR(pure) const node& array::operator[] (size_t index)	const noexcept	{ return *elements[index]; }
+	TOML_MEMBER_ATTR(pure) node& array::operator[] (size_t index)		noexcept		{ return *elements[index]; }
 
-	TOML_MEMBER_ATTR(pure) const node& array::front()				const noexcept	{ return *values.front(); }
-	TOML_MEMBER_ATTR(pure) const node& array::back()				const noexcept	{ return *values.back(); }
-	TOML_MEMBER_ATTR(pure) node& array::front()						noexcept		{ return *values.front(); }
-	TOML_MEMBER_ATTR(pure) node& array::back()						noexcept		{ return *values.back(); }
+	TOML_MEMBER_ATTR(pure) const node& array::front()				const noexcept	{ return *elements.front(); }
+	TOML_MEMBER_ATTR(pure) const node& array::back()				const noexcept	{ return *elements.back(); }
+	TOML_MEMBER_ATTR(pure) node& array::front()						noexcept		{ return *elements.front(); }
+	TOML_MEMBER_ATTR(pure) node& array::back()						noexcept		{ return *elements.back(); }
 
-	TOML_MEMBER_ATTR(pure) array::const_iterator array::begin()		const noexcept	{ return { values.begin() }; }
-	TOML_MEMBER_ATTR(pure) array::const_iterator array::end()		const noexcept	{ return { values.end() }; }
-	TOML_MEMBER_ATTR(pure) array::const_iterator array::cbegin()	const noexcept	{ return { values.cbegin() }; }
-	TOML_MEMBER_ATTR(pure) array::const_iterator array::cend()		const noexcept	{ return { values.cend() }; }
-	TOML_MEMBER_ATTR(pure) array::iterator array::begin()			noexcept		{ return { values.begin() }; }
-	TOML_MEMBER_ATTR(pure) array::iterator array::end()				noexcept		{ return { values.end() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::begin()		const noexcept	{ return { elements.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::end()		const noexcept	{ return { elements.end() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cbegin()	const noexcept	{ return { elements.cbegin() }; }
+	TOML_MEMBER_ATTR(pure) array::const_iterator array::cend()		const noexcept	{ return { elements.cend() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::begin()			noexcept		{ return { elements.begin() }; }
+	TOML_MEMBER_ATTR(pure) array::iterator array::end()				noexcept		{ return { elements.end() }; }
 
-	TOML_MEMBER_ATTR(pure) size_t array::size()						const noexcept	{ return values.size(); }
-	TOML_MEMBER_ATTR(pure) size_t array::capacity()					const noexcept	{ return values.capacity(); }
-	TOML_MEMBER_ATTR(pure) bool array::empty()						const noexcept	{ return values.empty(); }
-	TOML_MEMBER_ATTR(const) size_t array::max_size()				const noexcept	{ return values.max_size(); }
+	TOML_MEMBER_ATTR(pure) size_t array::size()						const noexcept	{ return elements.size(); }
+	TOML_MEMBER_ATTR(pure) size_t array::capacity()					const noexcept	{ return elements.capacity(); }
+	TOML_MEMBER_ATTR(pure) bool array::empty()						const noexcept	{ return elements.empty(); }
+	TOML_MEMBER_ATTR(const) size_t array::max_size()				const noexcept	{ return elements.max_size(); }
 
-	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity)	{ values.reserve(new_capacity); }
-	TOML_EXTERNAL_LINKAGE void array::clear() noexcept				{ values.clear(); }
-	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit()				{ values.shrink_to_fit(); }
+	TOML_EXTERNAL_LINKAGE void array::reserve(size_t new_capacity)	{ elements.reserve(new_capacity); }
+	TOML_EXTERNAL_LINKAGE void array::clear() noexcept				{ elements.clear(); }
+	TOML_EXTERNAL_LINKAGE void array::shrink_to_fit()				{ elements.shrink_to_fit(); }
 
 	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
 	void array::truncate(size_t new_size)
 	{
-		if (new_size < values.size())
-			values.resize(new_size);
+		if (new_size < elements.size())
+			elements.resize(new_size);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator pos) noexcept
 	{
-		return { values.erase(pos.raw_) };
+		return { elements.erase(pos.raw_) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator first, const_iterator last) noexcept
 	{
-		return { values.erase(first.raw_, last.raw_) };
+		return { elements.erase(first.raw_, last.raw_) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void array::pop_back() noexcept
 	{
-		values.pop_back();
+		elements.pop_back();
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	TOML_ATTR(pure)
 	node* array::get(size_t index) noexcept
 	{
-		return index < values.size() ? values[index].get() : nullptr;
+		return index < elements.size() ? elements[index].get() : nullptr;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	TOML_ATTR(pure)
 	const node* array::get(size_t index) const noexcept
 	{
-		return index < values.size() ? values[index].get() : nullptr;
+		return index < elements.size() ? elements[index].get() : nullptr;
 	}
 
 	TOML_API
@@ -129,17 +132,17 @@ TOML_NAMESPACE_START
 	{
 		if (&lhs == &rhs)
 			return true;
-		if (lhs.values.size() != rhs.values.size())
+		if (lhs.elements.size() != rhs.elements.size())
 			return false;
-		for (size_t i = 0, e = lhs.values.size(); i < e; i++)
+		for (size_t i = 0, e = lhs.elements.size(); i < e; i++)
 		{
-			const auto lhs_type = lhs.values[i]->type();
-			const node& rhs_ = *rhs.values[i];
+			const auto lhs_type = lhs.elements[i]->type();
+			const node& rhs_ = *rhs.elements[i];
 			const auto rhs_type = rhs_.type();
 			if (lhs_type != rhs_type)
 				return false;
 
-			const bool equal = lhs.values[i]->visit([&](const auto& lhs_) noexcept
+			const bool equal = lhs.elements[i]->visit([&](const auto& lhs_) noexcept
 			{
 				return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_);
 			});
@@ -160,9 +163,9 @@ TOML_NAMESPACE_START
 	size_t array::total_leaf_count() const noexcept
 	{
 		size_t leaves{};
-		for (size_t i = 0, e = values.size(); i < e; i++)
+		for (size_t i = 0, e = elements.size(); i < e; i++)
 		{
-			auto arr = values[i]->as_array();
+			auto arr = elements[i]->as_array();
 			leaves += arr ? arr->total_leaf_count() : 1_sz;
 		}
 		return leaves;
@@ -173,29 +176,29 @@ TOML_NAMESPACE_START
 	{
 		for (size_t i = 0, e = child.size(); i < e; i++)
 		{
-			auto type = child.values[i]->type();
+			auto type = child.elements[i]->type();
 			if (type == node_type::array)
 			{
-				array& arr = *reinterpret_cast<array*>(child.values[i].get());
+				array& arr = *reinterpret_cast<array*>(child.elements[i].get());
 				if (!arr.empty())
 					flatten_child(std::move(arr), dest_index);
 			}
 			else
-				values[dest_index++] = std::move(child.values[i]);
+				elements[dest_index++] = std::move(child.elements[i]);
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::flatten() &
 	{
-		if (values.empty())
+		if (elements.empty())
 			return *this;
 
 		bool requires_flattening = false;
-		size_t size_after_flattening = values.size();
-		for (size_t i = values.size(); i --> 0_sz;)
+		size_t size_after_flattening = elements.size();
+		for (size_t i = elements.size(); i --> 0_sz;)
 		{
-			auto arr = values[i]->as_array();
+			auto arr = elements[i]->as_array();
 			if (!arr)
 				continue;
 			size_after_flattening--; //discount the array itself
@@ -206,25 +209,25 @@ TOML_NAMESPACE_START
 				size_after_flattening += leaf_count;
 			}
 			else
-				values.erase(values.cbegin() + static_cast<ptrdiff_t>(i));
+				elements.erase(elements.cbegin() + static_cast<ptrdiff_t>(i));
 		}
 
 		if (!requires_flattening)
 			return *this;
 
-		values.reserve(size_after_flattening);
+		elements.reserve(size_after_flattening);
 
 		size_t i = 0;
-		while (i < values.size())
+		while (i < elements.size())
 		{
-			auto arr = values[i]->as_array();
+			auto arr = elements[i]->as_array();
 			if (!arr)
 			{
 				i++;
 				continue;
 			}
 
-			std::unique_ptr<node> arr_storage = std::move(values[i]);
+			std::unique_ptr<node> arr_storage = std::move(elements[i]);
 			const auto leaf_count = arr->total_leaf_count();
 			if (leaf_count > 1_sz)
 				preinsertion_resize(i + 1_sz, leaf_count - 1_sz);
@@ -237,13 +240,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type type) const noexcept
 	{
-		if (values.empty())
+		if (elements.empty())
 			return false;
 
 		if (type == node_type::none)
-			type = values[0]->type();
+			type = elements[0]->type();
 
-		for (const auto& val : values)
+		for (const auto& val : elements)
 			if (val->type() != type)
 				return false;
 

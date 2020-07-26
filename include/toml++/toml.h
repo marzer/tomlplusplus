@@ -3,10 +3,8 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-//# {{
 #ifndef INCLUDE_TOMLPLUSPLUS_H
 #define INCLUDE_TOMLPLUSPLUS_H
-//# }}
 
 //# Note: most of these would be included transitively but
 //# they're listed explicitly here because this file
@@ -135,6 +133,4 @@
 	#undef TOML_USING_ANON_NAMESPACE
 #endif
 
-//# {{
 #endif // INCLUDE_TOMLPLUSPLUS_H
-//# }}

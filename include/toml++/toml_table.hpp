@@ -25,7 +25,7 @@ TOML_NAMESPACE_START
 	{
 		for (size_t i = 0; i < count; i++)
 		{
-			values.insert_or_assign(
+			map.insert_or_assign(
 				std::move(pairs[i].key),
 				std::move(pairs[i].value)
 			);
@@ -38,7 +38,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::table(table&& other) noexcept
 		: node{ std::move(other) },
-		values{ std::move(other.values) },
+		map{ std::move(other.map) },
 		inline_{ other.inline_ }
 	{}
 
@@ -46,7 +46,7 @@ TOML_NAMESPACE_START
 	table& table::operator = (table&& rhs) noexcept
 	{
 		node::operator=(std::move(rhs));
-		values = std::move(rhs.values);
+		map = std::move(rhs.map);
 		inline_ = rhs.inline_;
 		return *this;
 	}
@@ -63,16 +63,16 @@ TOML_NAMESPACE_START
 	TOML_MEMBER_ATTR(pure) bool table::is_inline()				const noexcept	{ return inline_; }
 	TOML_EXTERNAL_LINKAGE void table::is_inline(bool val)		noexcept		{ inline_ = val; }
 
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin()	const noexcept	{ return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::end()	const noexcept	{ return { values.end() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin()	const noexcept	{ return { values.cbegin() }; }
-	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend()	const noexcept	{ return { values.cend() }; }
-	TOML_EXTERNAL_LINKAGE table::iterator table::begin()		noexcept		{ return { values.begin() }; }
-	TOML_EXTERNAL_LINKAGE table::iterator table::end()			noexcept		{ return { values.end() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::begin()	const noexcept	{ return { map.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::end()	const noexcept	{ return { map.end() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cbegin()	const noexcept	{ return { map.cbegin() }; }
+	TOML_EXTERNAL_LINKAGE table::const_iterator table::cend()	const noexcept	{ return { map.cend() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::begin()		noexcept		{ return { map.begin() }; }
+	TOML_EXTERNAL_LINKAGE table::iterator table::end()			noexcept		{ return { map.end() }; }
 
-	TOML_MEMBER_ATTR(pure) bool table::empty()					const noexcept	{ return values.empty(); }
-	TOML_MEMBER_ATTR(pure) size_t table::size()					const noexcept	{ return values.size(); }
-	TOML_EXTERNAL_LINKAGE void table::clear()					noexcept		{ values.clear(); }
+	TOML_MEMBER_ATTR(pure) bool table::empty()					const noexcept	{ return map.empty(); }
+	TOML_MEMBER_ATTR(pure) size_t table::size()					const noexcept	{ return map.size(); }
+	TOML_EXTERNAL_LINKAGE void table::clear()					noexcept		{ map.clear(); }
 
 	#undef TOML_MEMBER_ATTR
 
@@ -90,27 +90,27 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::erase(iterator pos) noexcept
 	{
-		return { values.erase(pos.raw_) };
+		return { map.erase(pos.raw_) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::erase(const_iterator pos) noexcept
 	{
-		return { values.erase(pos.raw_) };
+		return { map.erase(pos.raw_) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::erase(const_iterator first, const_iterator last) noexcept
 	{
-		return { values.erase(first.raw_, last.raw_) };
+		return { map.erase(first.raw_, last.raw_) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::erase(std::string_view key) noexcept
 	{
-		if (auto it = values.find(key); it != values.end())
+		if (auto it = map.find(key); it != map.end())
 		{
-			values.erase(it);
+			map.erase(it);
 			return true;
 		}
 		return false;
@@ -119,31 +119,31 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node* table::get(std::string_view key) noexcept
 	{
-		return do_get(values, key);
+		return do_get(map, key);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	const node* table::get(std::string_view key) const noexcept
 	{
-		return do_get(values, key);
+		return do_get(map, key);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
-		return { values.find(key) };
+		return { map.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
-		return { values.find(key) };
+		return { map.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::contains(std::string_view key) const noexcept
 	{
-		return do_contains(values, key);
+		return do_contains(map, key);
 	}
 
 	#if TOML_WINDOWS_COMPAT
@@ -203,10 +203,10 @@ TOML_NAMESPACE_START
 	{
 		if (&lhs == &rhs)
 			return true;
-		if (lhs.values.size() != rhs.values.size())
+		if (lhs.map.size() != rhs.map.size())
 			return false;
 
-		for (auto l = lhs.values.begin(), r = rhs.values.begin(), e = lhs.values.end(); l != e; l++, r++)
+		for (auto l = lhs.map.begin(), r = rhs.map.begin(), e = lhs.map.end(); l != e; l++, r++)
 		{
 			if (l->first != r->first)
 				return false;

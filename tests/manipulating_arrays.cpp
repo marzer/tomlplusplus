@@ -157,6 +157,8 @@ TEST_CASE("arrays - equality")
 TEST_CASE("arrays - insertion and erasure")
 {
 	array arr;
+
+	// insert(const_iterator pos, ElemType&& val)
 	auto it = arr.insert(arr.cbegin(), 42);
 	CHECK(it == arr.begin());
 	CHECK(arr.size() == 1_sz);
@@ -165,6 +167,7 @@ TEST_CASE("arrays - insertion and erasure")
 	CHECK(*arr.get_as<int64_t>(0_sz) == 42);
 	REQUIRE(arr == array{ 42 });
 
+	// insert(const_iterator pos, size_t count, ElemType&& val)
 	it = arr.insert(arr.cend(), 3, 10.0f);
 	CHECK(it == arr.begin() + 1);
 	CHECK(arr.size() == 4_sz);
@@ -176,6 +179,7 @@ TEST_CASE("arrays - insertion and erasure")
 	CHECK(*arr.get_as<double>(3_sz) == 10.0);
 	REQUIRE(arr == array{ 42, 10.0, 10.0, 10.0 });
 
+	// emplace(const_iterator pos, Args &&... args) noexcept
 	it = arr.emplace<array>(arr.cbegin(), 1, 2, 3);
 	CHECK(it == arr.begin());
 	CHECK(arr.size() == 5_sz);
@@ -183,6 +187,7 @@ TEST_CASE("arrays - insertion and erasure")
 	CHECK(arr.get_as<array>(0_sz)->size() == 3_sz);
 	REQUIRE(arr == array{ array{ 1, 2, 3 }, 42, 10.0, 10.0, 10.0 });
 
+	// push_back(ElemType&& val) noexcept
 	{
 		decltype(auto) val = arr.push_back("test"sv);
 		CHECK(arr.size() == 6_sz);
@@ -193,6 +198,7 @@ TEST_CASE("arrays - insertion and erasure")
 		REQUIRE(arr == array{ array{ 1, 2, 3 }, 42, 10.0, 10.0, 10.0, "test"sv });
 	}
 
+	// decltype(auto) emplace_back(Args&&... args) noexcept
 	{
 		decltype(auto) val = arr.emplace_back<std::string>("test2"sv);
 		CHECK(arr.size() == 7_sz);
@@ -203,12 +209,13 @@ TEST_CASE("arrays - insertion and erasure")
 		REQUIRE(arr == array{ array{ 1, 2, 3 }, 42, 10.0, 10.0, 10.0, "test"sv, "test2"sv });
 	}
 
+	// erase(const_iterator pos) noexcept;
 	it = arr.erase(arr.cbegin());
 	REQUIRE(arr == array{ 42, 10.0, 10.0, 10.0, "test"sv, "test2"sv });
 	CHECK(it == arr.begin());
 	CHECK(arr.size() == 6_sz);
 
-
+	// erase(const_iterator first, const_iterator last) noexcept;
 	it = arr.erase(arr.cbegin() + 2, arr.cbegin() + 4);
 	REQUIRE(arr == array{ 42, 10.0, "test"sv, "test2"sv });
 	CHECK(it == arr.begin() + 2);
@@ -223,8 +230,66 @@ TEST_CASE("arrays - insertion and erasure")
 	CHECK(arr.size() == 0_sz);
 	CHECK(arr.empty());
 
+	// insert(const_iterator pos, Iter first, Iter last)
+	{
+		auto vals = std::vector{ 1.0, 2.0, 3.0 };
+		arr.insert(arr.cbegin(), vals.begin(), vals.end());
+		CHECK(arr.size() == 3_sz);
+		REQUIRE(arr.get_as<double>(0_sz));
+		CHECK(*arr.get_as<double>(0_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(1_sz));
+		CHECK(*arr.get_as<double>(1_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(2_sz));
+		CHECK(*arr.get_as<double>(2_sz) == 3.0);
+
+		arr.insert(arr.cbegin() + 1, vals.begin(), vals.end());
+		CHECK(arr.size() == 6_sz);
+		REQUIRE(arr.get_as<double>(0_sz));
+		CHECK(*arr.get_as<double>(0_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(1_sz));
+		CHECK(*arr.get_as<double>(1_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(2_sz));
+		CHECK(*arr.get_as<double>(2_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(3_sz));
+		CHECK(*arr.get_as<double>(3_sz) == 3.0);
+		REQUIRE(arr.get_as<double>(4_sz));
+		CHECK(*arr.get_as<double>(4_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(5_sz));
+		CHECK(*arr.get_as<double>(5_sz) == 3.0);
+	}
+
+	// iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
+	{
+		arr.clear();
+
+		arr.insert(arr.cbegin(), { 1.0, 2.0, 3.0 });
+		CHECK(arr.size() == 3_sz);
+		REQUIRE(arr.get_as<double>(0_sz));
+		CHECK(*arr.get_as<double>(0_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(1_sz));
+		CHECK(*arr.get_as<double>(1_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(2_sz));
+		CHECK(*arr.get_as<double>(2_sz) == 3.0);
+
+		arr.insert(arr.cbegin() + 1, { 1.0, 2.0, 3.0 });
+		CHECK(arr.size() == 6_sz);
+		REQUIRE(arr.get_as<double>(0_sz));
+		CHECK(*arr.get_as<double>(0_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(1_sz));
+		CHECK(*arr.get_as<double>(1_sz) == 1.0);
+		REQUIRE(arr.get_as<double>(2_sz));
+		CHECK(*arr.get_as<double>(2_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(3_sz));
+		CHECK(*arr.get_as<double>(3_sz) == 3.0);
+		REQUIRE(arr.get_as<double>(4_sz));
+		CHECK(*arr.get_as<double>(4_sz) == 2.0);
+		REQUIRE(arr.get_as<double>(5_sz));
+		CHECK(*arr.get_as<double>(5_sz) == 3.0);
+	}
+
 	#if TOML_WINDOWS_COMPAT
 
+	arr.clear();
 	it = arr.insert(arr.cbegin(), L"test");
 	REQUIRE(*arr.get_as<std::string>(0_sz) == "test"sv);
 	
@@ -257,7 +322,7 @@ TEST_CASE("arrays - flattening")
 	{
 		array arr{
 			array{},
-			array{array{}},
+			array{inserter{array{}}},
 			array{array{},array{array{},array{}},array{}},
 			array{array{array{array{array{array{ 1 }}}}}}
 		};

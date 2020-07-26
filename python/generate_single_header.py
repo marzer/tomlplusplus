@@ -91,6 +91,13 @@ def main():
 		source_text = re.sub(blank_lines_between_returns_pattern, '\\1\n\\2', source_text, 0, re.I | re.M)
 	source_text = source_text.strip() + '\n'
 
+	# change TOML_LIB_SINGLE_HEADER to 1
+	source_text = re.sub(
+		'#\s*define\s+TOML_LIB_SINGLE_HEADER\s+[0-9]+',
+		'#define	TOML_LIB_SINGLE_HEADER 1',
+		source_text, 0, re.I
+	)
+
 	# extract library version
 	library_version = {
 		'major': 0,
@@ -145,16 +152,8 @@ def main():
 				write(line)
 			write('//')
 			write(utils.make_divider())
-		write('// clang-format off')
-		write('#ifndef INCLUDE_TOMLPLUSPLUS_H')
-		write('#define INCLUDE_TOMLPLUSPLUS_H')
-		write('')
-		write('#define TOML_LIB_SINGLE_HEADER 1')
-		write('')
 		write(source_text)
 		write('')
-		write('#endif // INCLUDE_TOMLPLUSPLUS_H')
-		write('// clang-format on')
 
 		output_str = output.getvalue().strip()
 
@@ -171,6 +170,7 @@ def main():
 			if m:
 				defines[m.group(1)] = defined
 		ignore_list = ( # macros that are meant to stay public (user configs etc)
+			'INCLUDE_TOMLPLUSPLUS_H',
 			'TOML_API',
 			'TOML_UNRELEASED_FEATURES',
 			'TOML_LARGE_FILES',

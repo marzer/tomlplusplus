@@ -490,9 +490,8 @@ is no longer necessary.
 //#====================================================================================================================
 
 #include "toml_version.h"
-//# {{
+
 #define	TOML_LIB_SINGLE_HEADER 0
-//# }}
 
 #define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))

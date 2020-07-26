@@ -79,6 +79,7 @@ type_names = [
 	'default_formatter',
 	'format_flags',
 	'inserter',
+	'node_type',
 ]
 all_namespaces = [
 	'std',
