@@ -156,9 +156,9 @@ C++</span></a>
             </dt>
             <dd>Returns true if the table contains a node at the given key.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename U, typename K, typename... V&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V &amp;&amp; ... args) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a04815da57fe75169ceb1c20946faac6b">emplace</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueArgs &amp;&amp; ... args) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Emplaces a new value at a specific key if one did not already exist.</dd>
             <dt id="a554f495f6f2ebc993be1bd0379447051">
@@ -227,23 +227,23 @@ C++</span></a>
             </dt>
             <dd>Gets the node at a specific key.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa21b91ee2ed48b24bf684b762f01c684">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) const -&gt; const impl::wrap_node&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a180f46103dda744bf75eeadb32659b7c">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) const -&gt; const impl::wrap_node&lt;ValueType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type (const overload).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afb960c9b2ea8066f917d22d348758513">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) -&gt; impl::wrap_node&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a933f4a709d7bb5f51a756e571f6166f9">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) -&gt; impl::wrap_node&lt;ValueType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac033655a81353887e38092a4c28ef4ef">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; const impl::wrap_node&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad734dfa38c76cf282235befd30354c90">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const -&gt; const impl::wrap_node&lt;ValueType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type (const overload).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8822592e99d9380831c65884703c55c9">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; impl::wrap_node&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ade6422b39babbf9b3e4b87cd985f0d14">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) -&gt; impl::wrap_node&lt;ValueType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the node at a specific key if it is a particular type.</dd>
             <dt>
@@ -253,15 +253,15 @@ C++</span></a>
             </dt>
             <dd>Inserts a series of key-value pairs into the table.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;K">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;K</span></span>&gt;			&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename KeyType, typename ValueType, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;KeyType &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;KeyType">...</a><span>std::is_convertible_v&lt;KeyType &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;KeyType</span></span>&gt;			&gt;&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa757797646986f2f2cce0fa84221963e">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueType&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a new value at a specific key if one did not already exist.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename K, typename V&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4069bd9b5caf8ba10fffe7dc9bbb3634">insert_or_assign</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename KeyType, typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#acb97b09eb0b36ea708178678f15d0614">insert_or_assign</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueType&amp;&amp; val) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts or assigns a value at a specific key.</dd>
             <dt id="a8d24e995e5cfab4933c82ccd95dd6fa3">
@@ -369,7 +369,7 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"bar"</span><span class="p">,</span> <span class="mf">2.0</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="tpp-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a2449e053ad373e82d2500226bf084cb9"><div>
             <h3>
@@ -378,13 +378,13 @@ C++</span></a>
             <p>Returns true if the table contains a node at the given key.</p>
 <aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a1d63ea8e51917b4dd9a35ae3e2ebd87e"><div>
+          <section class="m-doc-details" id="a04815da57fe75169ceb1c20946faac6b"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename U, typename K, typename... V&gt;
+                template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a04815da57fe75169ceb1c20946faac6b">emplace</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueArgs &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Emplaces a new value at a specific key if one did not already exist.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -393,15 +393,15 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">U</td>
+                  <td style="width: 1%">ValueType</td>
                   <td>One of the TOML node or value types.</td>
                 </tr>
                 <tr>
-                  <td>K</td>
+                  <td>KeyType</td>
                   <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a> (or a type convertible to it).</td>
                 </tr>
                 <tr>
-                  <td>V</td>
+                  <td>ValueArgs</td>
                   <td>Value constructor argument types.</td>
                 </tr>
               </tbody>
@@ -430,18 +430,18 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="c1">// add a string using <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>'s substring constructor</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">emplaced with key 'a': false</span>
 <span class="go">emplaced with key 'd': true</span>
-<span class="go">{ a = 1, b = 2, c = 3, d = "drill" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#a4c48213240ef24e952033f92e8189578">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a1d63ea8e51917b4dd9a35ae3e2ebd87e">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
+<span class="go">{ a = 1, b = 2, c = 3, d = "drill" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#aa757797646986f2f2cce0fa84221963e">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a04815da57fe75169ceb1c20946faac6b">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a020e8f71bec1fbff52260a5a1e0cb12e"><div>
             <h3>
@@ -476,10 +476,10 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="s">"karma"</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"d"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = "bad", c = "karma", d = 2 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = "bad", c = "karma", d = 2 }</span>
 <span class="go">{ a = 1, d = 2 }</span></pre>
           </div></section>
           <section class="m-doc-details" id="a4dafb4ae116d92add973e5f27f880a9d"><div>
@@ -509,10 +509,10 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">{ a = 1, c = 3 }</span></pre>
           </div></section>
           <section class="m-doc-details" id="a1a90984876ccdd03aaa9e0f9801a839f"><div>
@@ -542,10 +542,10 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="n">tbl</span><span class="p">.</span><span class="n">begin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">{ a = 1, c = 3 }</span></pre>
           </div></section>
           <section class="m-doc-details" id="ad9d90151f332b24a0c747fa33ebb81e1"><div>
@@ -575,11 +575,11 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"not an existing key"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">erase</span><span class="p">(</span><span class="s">"not an existing key"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">true</span>
 <span class="go">false</span>
 <span class="go">{ a = 1, c = 3 }</span></pre>
@@ -751,11 +751,11 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">42</span><span class="p">,</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"is the meaning of life, apparently."</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["b"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["c"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"c"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["b"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"b"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["c"] exists: </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"c"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"a"</span><span class="p">))</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">val</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">node ["a"] exists: true</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">val</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">node ["a"] exists: true</span>
 <span class="go">node ["b"] exists: true</span>
 <span class="go">node ["c"] exists: false</span>
 <span class="go">node ["a"] was an integer</span></pre>
@@ -808,12 +808,12 @@ C++</span></a>
             </table>
 <aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa21b91ee2ed48b24bf684b762f01c684"><div>
+          <section class="m-doc-details" id="a180f46103dda744bf75eeadb32659b7c"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename T&gt;
+                template&lt;typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const impl::wrap_node&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa21b91ee2ed48b24bf684b762f01c684">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const impl::wrap_node&lt;ValueType&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a180f46103dda744bf75eeadb32659b7c">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the node at a specific key if it is a particular type (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -822,8 +822,8 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">T</td>
-                  <td>The node's type.</td>
+                  <td style="width: 1%">ValueType</td>
+                  <td>One of the TOML node or value types.</td>
                 </tr>
               </tbody>
               <thead>
@@ -843,12 +843,12 @@ C++</span></a>
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="afb960c9b2ea8066f917d22d348758513"><div>
+          <section class="m-doc-details" id="a933f4a709d7bb5f51a756e571f6166f9"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename T&gt;
+                template&lt;typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">impl::wrap_node&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afb960c9b2ea8066f917d22d348758513">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">impl::wrap_node&lt;ValueType&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a933f4a709d7bb5f51a756e571f6166f9">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the node at a specific key if it is a particular type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -857,8 +857,8 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">T</td>
-                  <td>The node's type.</td>
+                  <td style="width: 1%">ValueType</td>
+                  <td>One of the TOML node or value types.</td>
                 </tr>
               </tbody>
               <thead>
@@ -882,14 +882,14 @@ C++</span></a>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="s">"is the meaning of life, apparently."</span> <span class="p">}</span>
 <span class="p">}};</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">val</span> <span class="o">=</span> <span class="n">arr</span><span class="p">.</span><span class="n">get_as</span><span class="o">&lt;</span><span class="ut"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">(</span><span class="s">"a"</span><span class="p">))</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an integer with value </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">**</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">node ["a"] was an integer with value 42</span></pre>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s">node ["a"] was an integer with value </span><span class="dl">)</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">**</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">node ["a"] was an integer with value 42</span></pre>
           </div></section>
-          <section class="m-doc-details" id="ac033655a81353887e38092a4c28ef4ef"><div>
+          <section class="m-doc-details" id="ad734dfa38c76cf282235befd30354c90"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename T&gt;
+                template&lt;typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">const impl::wrap_node&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac033655a81353887e38092a4c28ef4ef">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const impl::wrap_node&lt;ValueType&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad734dfa38c76cf282235befd30354c90">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the node at a specific key if it is a particular type (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -898,8 +898,8 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">T</td>
-                  <td>The node's type.</td>
+                  <td style="width: 1%">ValueType</td>
+                  <td>One of the TOML node or value types.</td>
                 </tr>
               </tbody>
               <thead>
@@ -920,12 +920,12 @@ C++</span></a>
             </table>
 <aside class="m-note m-warning"><h4>Attention</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a8822592e99d9380831c65884703c55c9"><div>
+          <section class="m-doc-details" id="ade6422b39babbf9b3e4b87cd985f0d14"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename T&gt;
+                template&lt;typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper">impl::wrap_node&lt;T&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8822592e99d9380831c65884703c55c9">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">impl::wrap_node&lt;ValueType&gt;* toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ade6422b39babbf9b3e4b87cd985f0d14">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::wstring_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the node at a specific key if it is a particular type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -934,8 +934,8 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">T</td>
-                  <td>The node's type.</td>
+                  <td style="width: 1%">ValueType</td>
+                  <td>One of the TOML node or value types.</td>
                 </tr>
               </tbody>
               <thead>
@@ -988,27 +988,33 @@ C++</span></a>
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="tpp-external godbolt" href="https://godbolt.org/z/bzYcce" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">1</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">kvps</span> <span class="o">=</span> <span class="ns">std::</span><span class="ut">array</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">pair</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="p">,</span> <span class="ut">int</span><span class="o">&gt;&gt;</span><span class="p">{{</span>
+<span class="k">auto</span> <span class="n">kvps</span> <span class="o">=</span> <span class="ns">std::</span><span class="ut">array</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">pair</span><span class="o">&lt;</span><span class="ns">std::</span><span class="ut">string</span><span class="p">,</span> <span class="ut">int</span><span class="o">&gt;</span><span class="p">,</span> <span class="mi">2</span><span class="o">&gt;</span><span class="p">{{</span>
     <span class="p">{</span> <span class="s">"d"</span><span class="p">,</span> <span class="mi">42</span> <span class="p">},</span>
-    <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">43</span> <span class="p">}</span>
+    <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">43</span> <span class="p">}</span> <span class="c1">// won't be inserted, 'a' already exists</span>
 <span class="p">}};</span>
 <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">kvps</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span> <span class="n">kvps</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
-<span class="go">{ a = 1, b = 2, c = 3, d = 42 } //"a" already existed</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling <code>insert(key, value)</code> for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 1</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+
+<span class="go">a = 1</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+<span class="go">d = 42</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>This function is morally equivalent to calling <code>insert(key, value)</code> for each key-value pair covered by the iterator range, so any values with keys already found in the table will not be replaced.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a4c48213240ef24e952033f92e8189578"><div>
+          <section class="m-doc-details" id="aa757797646986f2f2cce0fa84221963e"><div>
             <h3>
-              <div class="m-doc-template"> template&lt;typename K, typename V, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;K &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;K">...</a><span>std::is_convertible_v&lt;K &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;K</span></span>&gt;			&gt;&gt;
+              <div class="m-doc-template"> template&lt;typename KeyType, typename ValueType, typename = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/enable_if" target="_blank">std::enable_if_t</a>&lt;<span class="tpp-injected tpp-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;" title="std::is_convertible_v&lt;KeyType &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;KeyType">...</a><span>std::is_convertible_v&lt;KeyType &amp;&amp; , std::string_view&gt;				|| impl::is_wide_string&lt;KeyType</span></span>&gt;			&gt;&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4c48213240ef24e952033f92e8189578">insert</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa757797646986f2f2cce0fa84221963e">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a new value at a specific key if one did not already exist.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1017,12 +1023,12 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">K</td>
+                  <td style="width: 1%">KeyType</td>
                   <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a> (or a type convertible to it).</td>
                 </tr>
                 <tr>
-                  <td>V</td>
-                  <td>One of the TOML value types (or a type promotable to one).</td>
+                  <td>ValueType</td>
+                  <td>One of the TOML ndoe or value types (or a type promotable to one).</td>
                 </tr>
               </tbody>
               <thead>
@@ -1045,30 +1051,36 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="tpp-external godbolt" href="https://godbolt.org/z/bMnW5r" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">1</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"inserted with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 1</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+
 <span class="go">inserted with key 'a': false</span>
 <span class="go">inserted with key 'd': true</span>
-<span class="go">{ a = 1, b = 2, c = 3, d = 42 }</span></pre>
+<span class="go">a = 1</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+<span class="go">d = 42</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a4069bd9b5caf8ba10fffe7dc9bbb3634"><div>
+          <section class="m-doc-details" id="acb97b09eb0b36ea708178678f15d0614"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename K, typename V&gt;
+                template&lt;typename KeyType, typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4069bd9b5caf8ba10fffe7dc9bbb3634">insert_or_assign</a>(</span><span class="m-doc-wrap">K&amp;&amp; key,
-              V&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acb97b09eb0b36ea708178678f15d0614">insert_or_assign</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              ValueType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts or assigns a value at a specific key.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1077,12 +1089,12 @@ C++</span></a>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">K</td>
+                  <td style="width: 1%">KeyType</td>
                   <td><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a> (or a type convertible to it).</td>
                 </tr>
                 <tr>
-                  <td>V</td>
-                  <td>One of the TOML value types (or a type promotable to one).</td>
+                  <td>ValueType</td>
+                  <td>One of the TOML node or value types (or a type promotable to one).</td>
                 </tr>
               </tbody>
               <thead>
@@ -1105,23 +1117,29 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="tpp-external godbolt" href="https://godbolt.org/z/ddK563" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">1</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">insert_or_assign</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
     <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"value at key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span>
-        <span class="o">&lt;&lt;</span> <span class="s">"' was "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">?</span> <span class="s">"inserted"</span><span class="nl">sv</span> <span class="p">:</span> <span class="s">"assigned"</span><span class="sa">sv</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+        <span class="o">&lt;&lt;</span> <span class="s">"' was "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">?</span> <span class="s">"inserted"</span><span class="nl">sv</span> <span class="p">:</span> <span class="s">"assigned"</span><span class="sa">sv</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 1</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+
 <span class="go">value at key 'a' was assigned</span>
 <span class="go">value at key 'd' was inserted</span>
-<span class="go">{ a = 42, b = 2, c = 3, d = 42 }</span></pre>
+<span class="go">a = 42</span>
+<span class="go">b = 2</span>
+<span class="go">c = 3</span>
+<span class="go">d = 42</span></pre>
           </div></section>
           <section class="m-doc-details" id="a53be1b93aa90608ed378323df835a2f3"><div>
             <h3>
@@ -1146,23 +1164,25 @@ C++</span></a>
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="tpp-external godbolt" href="https://godbolt.org/z/an9xdj" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span>
     <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="mi">1</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"b"</span><span class="p">,</span> <span class="mi">2</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"c"</span><span class="p">,</span> <span class="mi">3</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"d"</span><span class="p">,</span> <span class="ns">toml::</span><span class="ut">table</span><span class="p">{{</span> <span class="p">{</span> <span class="s">"e"</span><span class="p">,</span> <span class="mi">4</span> <span class="p">}</span> <span class="p">}}</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">(</span><span class="o">!</span><span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">());</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre><pre class="m-console"><span class="go">is inline? false</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"is inline? "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">is_inline</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">is inline? false</span>
 <span class="go">a = 1</span>
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
+
 <span class="go">[d]</span>
 <span class="go">e = 4</span>
+
 
 <span class="go">is inline? true</span>
 <span class="go">{ a = 1, b = 2, c = 3, d = { e = 4 } }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>A table being 'inline' is only relevent during printing; it has no effect on the general functionality of the table object.</p></aside>
@@ -1286,7 +1306,7 @@ C++</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>True if the tables did not contain the same keys and values.</td>
+                  <td>True if the tables did not contain the same keys and map.</td>
                 </tr>
               </tfoot>
             </table>
@@ -1314,7 +1334,7 @@ C++</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>True if the tables contained the same keys and values.</td>
+                  <td>True if the tables contained the same keys and map.</td>
                 </tr>
               </tfoot>
             </table>

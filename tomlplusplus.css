@@ -47,7 +47,7 @@ article div > section > section
 
 pre, code, .tpp-enable-if > a
 {
-	font-family: 'Consolas', 'Source Sans Pro', monospace;
+	font-family: 'Consolas', 'Source Code Pro', monospace, monospace, monospace;
 }
 
 a.tpp-external
