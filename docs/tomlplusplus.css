@@ -317,7 +317,7 @@ pre > p.godbolt
 {
   float: right;
 }
-@media only screen and ((max-width: 575px) or (hover: none) or (pointer: coarse) or (pointer: none))
+@media screen and (max-width: 767px)
 {
 	.godbolt
 	{
