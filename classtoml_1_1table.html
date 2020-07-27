@@ -402,7 +402,7 @@ C++</span></a>
               <tbody>
                 <tr>
                   <td style="width: 1%">ValueType</td>
-                  <td>One of the TOML node or value types.</td>
+                  <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or any native TOML value type.</td>
                 </tr>
                 <tr>
                   <td>KeyType</td>
@@ -429,7 +429,7 @@ C++</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><p>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a> containing:</p><ul><li>An iterator to the emplacement position (or the position of the value that prevented emplacement)</li><li>A boolean indicating if the emplacement was successful.<br/></li></ul></td>
+                  <td><p>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a> containing:<br/></p><ul><li>An iterator to the emplacement position (or the position of the value that prevented emplacement)</li><li>A boolean indicating if the emplacement was successful.<br/></li></ul></td>
                 </tr>
               </tfoot>
             </table>
@@ -1036,7 +1036,7 @@ C++</span></a>
                 </tr>
                 <tr>
                   <td>ValueType</td>
-                  <td>One of the TOML ndoe or value types (or a type promotable to one).</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
                 </tr>
               </tbody>
               <thead>
@@ -1055,7 +1055,8 @@ C++</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><p>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a> containing:</p><ul><li>An iterator to the insertion position (or the position of the value that prevented insertion)<br/></li><li>A boolean indicating if the insertion was successful.</li></ul></td>
+                  <td><p><strong><em>Valid input:</em></strong><br/></p><ul><li>An iterator to the insertion position (or the position of the value that prevented insertion)</li><li>A boolean indicating if the insertion was successful.</li></ul>
+<p><strong><em><code>val</code> is an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong><br/><code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code></p></td>
                 </tr>
               </tfoot>
             </table>
@@ -1080,7 +1081,7 @@ C++</span></a>
 <span class="go">a = 1</span>
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
-<span class="go">d = 42</span></pre>
+<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
           <section class="m-doc-details" id="acb97b09eb0b36ea708178678f15d0614"><div>
             <h3>
@@ -1102,7 +1103,7 @@ C++</span></a>
                 </tr>
                 <tr>
                   <td>ValueType</td>
-                  <td>One of the TOML node or value types (or a type promotable to one).</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
                 </tr>
               </tbody>
               <thead>
@@ -1121,7 +1122,8 @@ C++</span></a>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><p>A <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/utility/pair" target="_blank">std::pair</a> containing:</p><ul><li>An iterator to the value's position</li><li>A boolean containing <code>true</code> if the value was inserted, <code>false</code> if it was assigned.</li></ul></td>
+                  <td><p><strong><em>Valid input:</em></strong><br/></p><ul><li>An iterator to the value's position</li><li><code>true</code> if the value was inserted, <code>false</code> if it was assigned.</li></ul>
+<p><strong><em><code>val</code> is an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong><br/><code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code></p></td>
                 </tr>
               </tfoot>
             </table>
@@ -1147,7 +1149,7 @@ C++</span></a>
 <span class="go">a = 42</span>
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
-<span class="go">d = 42</span></pre>
+<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion or assignment can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a53be1b93aa90608ed378323df835a2f3"><div>
             <h3>
