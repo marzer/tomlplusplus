@@ -95,12 +95,12 @@
 	</Type>
 
 	<Type Name="toml::v2::table">
-		<DisplayString>{values}</DisplayString>
+		<DisplayString>{map}</DisplayString>
 		<Expand>
 			<!-- Modified from std::map visualizer in VS 2019 stl.natvis -->
 			<TreeItems>
-				<Size>values._Mypair._Myval2._Myval2._Mysize</Size>
-				<HeadPointer>values._Mypair._Myval2._Myval2._Myhead-&gt;_Parent</HeadPointer>
+				<Size>map._Mypair._Myval2._Myval2._Mysize</Size>
+				<HeadPointer>map._Mypair._Myval2._Myval2._Myhead-&gt;_Parent</HeadPointer>
 				<LeftPointer>_Left</LeftPointer>
 				<RightPointer>_Right</RightPointer>
 				<ValueNode Condition="_Isnil == 0" Name="[{_Myval.first,s8}]">*_Myval.second</ValueNode>
@@ -109,12 +109,12 @@
 	</Type>
 
 	<Type Name="toml::v2::array">
-		<DisplayString>{values}</DisplayString>
+		<DisplayString>{elements}</DisplayString>
 		<Expand>
 			<!-- Modified from std::vector visualizer in VS 2019 stl.natvis -->
 			<IndexListItems>
-				<Size>values._Mypair._Myval2._Mylast - values._Mypair._Myval2._Myfirst</Size>
-				<ValueNode>*values._Mypair._Myval2._Myfirst[$i]</ValueNode>
+				<Size>elements._Mypair._Myval2._Mylast - elements._Mypair._Myval2._Myfirst</Size>
+				<ValueNode>*elements._Mypair._Myval2._Myfirst[$i]</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>

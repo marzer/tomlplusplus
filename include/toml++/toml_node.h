@@ -75,7 +75,10 @@ TOML_NAMESPACE_START
 
 		protected:
 			
+			node() noexcept = default;
+			node(const node&) noexcept = default;
 			node(node&& other) noexcept;
+			node& operator= (const node&) noexcept = default;
 			node& operator= (node&& rhs) noexcept;
 
 			template <typename T>
@@ -104,10 +107,6 @@ TOML_NAMESPACE_START
 
 			template <typename N, typename T>
 			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
-
-			node() noexcept = default;
-			node(const node&) = delete;
-			node& operator= (const node&) = delete;
 
 		public:
 

@@ -176,16 +176,13 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	[[nodiscard]]
 	TOML_ATTR(returns_nonnull)
-	TOML_ALWAYS_INLINE
-	auto* make_node(T&& val) noexcept
+	auto* make_node_specialized(T&& val) noexcept
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
+		static_assert(!std::is_same_v<type, node>);
+
 		if constexpr (is_one_of<type, array, table>)
 		{
-			static_assert(
-				std::is_rvalue_reference_v<decltype(val)>,
-				"Tables and arrays may only be moved (not copied)."
-			);
 			return new type{ std::forward<T>(val) };
 		}
 		else
@@ -215,7 +212,23 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	[[nodiscard]]
 	TOML_ATTR(returns_nonnull)
-	TOML_ALWAYS_INLINE
+	auto* make_node(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		if constexpr (std::is_same_v<type, node>)
+		{
+			return std::forward<T>(val).visit([](auto&& concrete) noexcept
+			{
+				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
+			});
+		}
+		else
+			return make_node_specialized(std::forward<T>(val));
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
@@ -308,9 +321,19 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			array() noexcept;
 
+			/// \brief	Copy constructor.
+			TOML_NODISCARD_CTOR
+			array(const array&) noexcept;
+
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			array(array&& other) noexcept;
+
+			/// \brief	Copy-assignment operator.
+			array& operator= (const array&) noexcept;
+
+			/// \brief	Move-assignment operator.
+			array& operator= (array&& rhs) noexcept;
 
 			/// \brief	Constructs an array with one or more initial elements.
 			///
@@ -345,7 +368,10 @@ TOML_NAMESPACE_START
 			/// \tparam	ElemTypes	One of the TOML node or value types (or a type promotable to one).
 			/// \param 	val 	The node or value used to initialize element 0.
 			/// \param 	vals	The nodes or values used to initialize elements 1...N.
-			template <typename ElemType, typename... ElemTypes>
+			template <typename ElemType, typename... ElemTypes, typename = std::enable_if_t<
+				(sizeof...(ElemTypes) > 0_sz)
+				|| !std::is_same_v<impl::remove_cvref_t<ElemType>, array>
+			>>
 			TOML_NODISCARD_CTOR
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
@@ -360,11 +386,6 @@ TOML_NAMESPACE_START
 				}
 			}
 
-			/// \brief	Move-assignment operator.
-			array& operator= (array&& rhs) noexcept;
-
-			array(const array&) = delete;
-			array& operator= (const array&) = delete;
 
 			/// \brief	Always returns node_type::array for array nodes.
 			[[nodiscard]] node_type type() const noexcept override;

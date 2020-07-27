@@ -229,6 +229,20 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			table() noexcept;
 
+			/// \brief	Copy constructor.
+			TOML_NODISCARD_CTOR
+			table(const table&) noexcept;
+
+			/// \brief	Move constructor.
+			TOML_NODISCARD_CTOR
+			table(table&& other) noexcept;
+
+			/// \brief	Copy-assignment operator.
+			table& operator= (const table&) noexcept;
+
+			/// \brief	Move-assignment operator.
+			table& operator= (table&& rhs) noexcept;
+
 			/// \brief	Constructs a table with one or more initial key-value pairs.
 			///
 			/// \detail \cpp
@@ -264,15 +278,6 @@ TOML_NAMESPACE_START
 				: table{ arr, N }
 			{}
 
-			/// \brief	Move constructor.
-			TOML_NODISCARD_CTOR
-			table(table&& other) noexcept;
-
-			/// \brief	Move-assignment operator.
-			table& operator= (table&& rhs) noexcept;
-
-			table(const table&) = delete;
-			table& operator= (const table&) = delete;
 
 			/// \brief	Always returns `node_type::table` for table nodes.
 			[[nodiscard]] node_type type() const noexcept override;

@@ -20,6 +20,49 @@ TOML_DISABLE_PADDING_WARNINGS
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
+	array::array(const array& other) noexcept
+		: node{ other }
+	{
+		elements.reserve(other.elements.size());
+		for (const auto& elem : other)
+			elements.emplace_back(impl::make_node(elem));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::array(array&& other) noexcept
+		: node{ std::move(other) },
+		elements{ std::move(other.elements) }
+	{}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::operator= (const array& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(rhs);
+			elements.clear();
+			elements.reserve(rhs.elements.size());
+			for (const auto& elem : rhs)
+				elements.emplace_back(impl::make_node(elem));
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::operator= (array&& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(std::move(rhs));
+			elements = std::move(rhs.elements);
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
 		TOML_ASSERT(idx <= elements.size());
@@ -33,23 +76,6 @@ TOML_NAMESPACE_START
 			for(size_t left = old_size, right = new_size - 1_sz; left --> idx; right--)
 				elements[right] = std::move(elements[left]);
 		}
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	array::array() noexcept = default;
-
-	TOML_EXTERNAL_LINKAGE
-	array::array(array&& other) noexcept
-		: node{ std::move(other) },
-		elements{ std::move(other.elements) }
-	{}
-
-	TOML_EXTERNAL_LINKAGE
-	array& array::operator= (array&& rhs) noexcept
-	{
-		node::operator=(std::move(rhs));
-		elements = std::move(rhs.elements);
-		return *this;
 	}
 
 	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)

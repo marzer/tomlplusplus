@@ -2087,7 +2087,10 @@ TOML_NAMESPACE_START
 
 		protected:
 
+			node() noexcept = default;
+			node(const node&) noexcept = default;
 			node(node&& other) noexcept;
+			node& operator= (const node&) noexcept = default;
 			node& operator= (node&& rhs) noexcept;
 
 			template <typename T>
@@ -2116,10 +2119,6 @@ TOML_NAMESPACE_START
 
 			template <typename N, typename T>
 			using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
-
-			node() noexcept = default;
-			node(const node&) = delete;
-			node& operator= (const node&) = delete;
 
 		public:
 
@@ -2619,20 +2618,33 @@ TOML_NAMESPACE_START
 			{}
 
 			TOML_NODISCARD_CTOR
+			value(const value& other) noexcept
+				: node{ other },
+				val_{ other.val_ }
+			{}
+
+			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
 				: node{ std::move(other) },
 				val_{ std::move(other.val_) }
 			{}
 
-			value& operator= (value&& rhs) noexcept
+			value& operator= (const value& rhs) noexcept
 			{
-				node::operator=(std::move(rhs));
-				val_ = std::move(rhs.val_);
+				node::operator=(rhs);
+				val_ = rhs.val_;
 				return *this;
 			}
 
-			value(const value&) = delete;
-			value& operator= (const value&) = delete;
+			value& operator= (value&& rhs) noexcept
+			{
+				if (&rhs != this)
+				{
+					node::operator=(std::move(rhs));
+					val_ = std::move(rhs.val_);
+				}
+				return *this;
+			}
 
 			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<value_type>; }
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
@@ -3384,16 +3396,13 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	[[nodiscard]]
 	TOML_ATTR(returns_nonnull)
-	TOML_ALWAYS_INLINE
-	auto* make_node(T&& val) noexcept
+	auto* make_node_specialized(T&& val) noexcept
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
+		static_assert(!std::is_same_v<type, node>);
+
 		if constexpr (is_one_of<type, array, table>)
 		{
-			static_assert(
-				std::is_rvalue_reference_v<decltype(val)>,
-				"Tables and arrays may only be moved (not copied)."
-			);
 			return new type{ std::forward<T>(val) };
 		}
 		else
@@ -3423,7 +3432,23 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	[[nodiscard]]
 	TOML_ATTR(returns_nonnull)
-	TOML_ALWAYS_INLINE
+	auto* make_node(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		if constexpr (std::is_same_v<type, node>)
+		{
+			return std::forward<T>(val).visit([](auto&& concrete) noexcept
+			{
+				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
+			});
+		}
+		else
+			return make_node_specialized(std::forward<T>(val));
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
 	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
@@ -3459,9 +3484,17 @@ TOML_NAMESPACE_START
 			array() noexcept;
 
 			TOML_NODISCARD_CTOR
-			array(array&& other) noexcept;
+			array(const array&) noexcept;
 
-			template <typename ElemType, typename... ElemTypes>
+			TOML_NODISCARD_CTOR
+			array(array&& other) noexcept;
+			array& operator= (const array&) noexcept;
+			array& operator= (array&& rhs) noexcept;
+
+			template <typename ElemType, typename... ElemTypes, typename = std::enable_if_t<
+				(sizeof...(ElemTypes) > 0_sz)
+				|| !std::is_same_v<impl::remove_cvref_t<ElemType>, array>
+			>>
 			TOML_NODISCARD_CTOR
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
@@ -3475,11 +3508,6 @@ TOML_NAMESPACE_START
 					);
 				}
 			}
-
-			array& operator= (array&& rhs) noexcept;
-
-			array(const array&) = delete;
-			array& operator= (const array&) = delete;
 
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;
@@ -3950,18 +3978,19 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			table() noexcept;
 
+			TOML_NODISCARD_CTOR
+			table(const table&) noexcept;
+
+			TOML_NODISCARD_CTOR
+			table(table&& other) noexcept;
+			table& operator= (const table&) noexcept;
+			table& operator= (table&& rhs) noexcept;
+
 			template <size_t N>
 			TOML_NODISCARD_CTOR
 			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
 				: table{ arr, N }
 			{}
-
-			TOML_NODISCARD_CTOR
-			table(table&& other) noexcept;
-			table& operator= (table&& rhs) noexcept;
-
-			table(const table&) = delete;
-			table& operator= (const table&) = delete;
 
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;
@@ -7295,6 +7324,49 @@ TOML_DISABLE_PADDING_WARNINGS
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
+	array::array(const array& other) noexcept
+		: node{ other }
+	{
+		elements.reserve(other.elements.size());
+		for (const auto& elem : other)
+			elements.emplace_back(impl::make_node(elem));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::array(array&& other) noexcept
+		: node{ std::move(other) },
+		elements{ std::move(other.elements) }
+	{}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::operator= (const array& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(rhs);
+			elements.clear();
+			elements.reserve(rhs.elements.size());
+			for (const auto& elem : rhs)
+				elements.emplace_back(impl::make_node(elem));
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::operator= (array&& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(std::move(rhs));
+			elements = std::move(rhs.elements);
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
 		TOML_ASSERT(idx <= elements.size());
@@ -7308,23 +7380,6 @@ TOML_NAMESPACE_START
 			for(size_t left = old_size, right = new_size - 1_sz; left --> idx; right--)
 				elements[right] = std::move(elements[left]);
 		}
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	array::array() noexcept = default;
-
-	TOML_EXTERNAL_LINKAGE
-	array::array(array&& other) noexcept
-		: node{ std::move(other) },
-		elements{ std::move(other.elements) }
-	{}
-
-	TOML_EXTERNAL_LINKAGE
-	array& array::operator= (array&& rhs) noexcept
-	{
-		node::operator=(std::move(rhs));
-		elements = std::move(rhs.elements);
-		return *this;
 	}
 
 	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)
@@ -7550,19 +7605,16 @@ TOML_DISABLE_PADDING_WARNINGS
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	table::table(impl::table_init_pair* pairs, size_t count) noexcept
-	{
-		for (size_t i = 0; i < count; i++)
-		{
-			map.insert_or_assign(
-				std::move(pairs[i].key),
-				std::move(pairs[i].value)
-			);
-		}
-	}
+	table::table() noexcept {}
 
 	TOML_EXTERNAL_LINKAGE
-	table::table() noexcept {}
+	table::table(const table& other) noexcept
+		: node{ std::move(other) },
+		inline_{ other.inline_ }
+	{
+		for (auto&& [k, v] : other)
+			map.emplace_hint(map.end(), k, impl::make_node(v));
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(table&& other) noexcept
@@ -7572,12 +7624,41 @@ TOML_NAMESPACE_START
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	table& table::operator = (table&& rhs) noexcept
+	table& table::operator= (const table& rhs) noexcept
 	{
-		node::operator=(std::move(rhs));
-		map = std::move(rhs.map);
-		inline_ = rhs.inline_;
+		if (&rhs != this)
+		{
+			node::operator=(rhs);
+			map.clear();
+			for (auto&& [k, v] : rhs)
+				map.emplace_hint(map.end(), k, impl::make_node(v));
+			inline_ = rhs.inline_;
+		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table& table::operator= (table&& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(std::move(rhs));
+			map = std::move(rhs.map);
+			inline_ = rhs.inline_;
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::table(impl::table_init_pair* pairs, size_t count) noexcept
+	{
+		for (size_t i = 0; i < count; i++)
+		{
+			map.insert_or_assign(
+				std::move(pairs[i].key),
+				std::move(pairs[i].value)
+			);
+		}
 	}
 
 	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)

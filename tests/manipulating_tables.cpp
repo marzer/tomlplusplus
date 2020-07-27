@@ -14,19 +14,22 @@ TEST_CASE("tables - moving")
 		R"(test = { val1 = "foo" })"sv,
 		[&](table&& tbl)
 		{
-			CHECK(tbl.source().begin == source_position{ 1, 1 });
-			CHECK(tbl.source().end == source_position{ 1, 24 });
-			CHECK(tbl.source().path);
-			CHECK(*tbl.source().path == filename);
-			CHECK(tbl.size() == 1_sz);
-
+			// sanity-check initial state of a freshly-parsed table
 			REQUIRE(tbl["test"].as<table>());
 			CHECK(tbl["test"].as<table>()->size() == 1_sz);
 			CHECK(tbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
 			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
 			CHECK(tbl["test"]["val1"] == "foo");
 
-			table tbl2 = std::move(tbl);
+			// sanity-check initial state of default-constructed table
+			table tbl2;
+			CHECK(tbl2.source().begin == source_position{});
+			CHECK(tbl2.source().end == source_position{});
+			CHECK(!tbl2.source().path);
+			CHECK(tbl2.size() == 0_sz);
+
+			// check the results of move-assignment
+			tbl2 = std::move(tbl);
 			CHECK(tbl2.source().begin == source_position{ 1, 1 });
 			CHECK(tbl2.source().end == source_position{ 1, 24 });
 			CHECK(tbl2.source().path);
@@ -36,11 +39,82 @@ TEST_CASE("tables - moving")
 			CHECK(tbl2["test"].as<table>()->size() == 1_sz);
 			CHECK(tbl2["test"]["val1"] == "foo"sv);
 
+			// check that moved-from table is now the same as default-constructed
 			CHECK(tbl.source().begin == source_position{});
 			CHECK(tbl.source().end == source_position{});
 			CHECK(!tbl.source().path);
 			CHECK(tbl.size() == 0_sz);
 			CHECK(!tbl["test"].as<table>());
+
+			// check the results of move-construction
+			table tbl3{ std::move(tbl2) };
+			CHECK(tbl3.source().begin == source_position{ 1, 1 });
+			CHECK(tbl3.source().end == source_position{ 1, 24 });
+			CHECK(tbl3.source().path);
+			CHECK(*tbl3.source().path == filename);
+			CHECK(tbl3.size() == 1_sz);
+			REQUIRE(tbl3["test"].as<table>());
+			CHECK(tbl3["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl3["test"]["val1"] == "foo"sv);
+
+			// check that moved-from table is now the same as default-constructed
+			CHECK(tbl2.source().begin == source_position{});
+			CHECK(tbl2.source().end == source_position{});
+			CHECK(!tbl2.source().path);
+			CHECK(tbl2.size() == 0_sz);
+			CHECK(!tbl2["test"].as<table>());
+		},
+		filename
+	);
+}
+
+TEST_CASE("tables - copying")
+{
+	static constexpr auto filename = "foo.toml"sv;
+
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		R"(test = { val1 = "foo" })"sv,
+		[&](table&& tbl)
+		{
+			// sanity-check initial state of a freshly-parsed table
+			REQUIRE(tbl["test"].as<table>());
+			CHECK(tbl["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
+			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
+			CHECK(tbl["test"]["val1"] == "foo");
+
+			// sanity-check initial state of default-constructed table
+			table tbl2;
+			CHECK(tbl2.source().begin == source_position{});
+			CHECK(tbl2.source().end == source_position{});
+			CHECK(!tbl2.source().path);
+			CHECK(tbl2.size() == 0_sz);
+
+			// check the results of copy-assignment
+			tbl2 = tbl;
+			CHECK(tbl2.source().begin == source_position{ 1, 1 });
+			CHECK(tbl2.source().end == source_position{ 1, 24 });
+			CHECK(tbl2.source().path);
+			CHECK(*tbl2.source().path == filename);
+			CHECK(tbl2.size() == 1_sz);
+			REQUIRE(tbl2["test"].as<table>());
+			CHECK(tbl2["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl2["test"]["val1"] == "foo"sv);
+			CHECK(tbl2 == tbl);
+
+			// check the results of copy-construction
+			table tbl3{ tbl2 };
+			CHECK(tbl3.source().begin == source_position{ 1, 1 });
+			CHECK(tbl3.source().end == source_position{ 1, 24 });
+			CHECK(tbl3.source().path);
+			CHECK(*tbl3.source().path == filename);
+			CHECK(tbl3.size() == 1_sz);
+			REQUIRE(tbl3["test"].as<table>());
+			CHECK(tbl3["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl3["test"]["val1"] == "foo"sv);
+			CHECK(tbl3 == tbl2);
+			CHECK(tbl3 == tbl);
 		},
 		filename
 	);

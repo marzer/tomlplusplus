@@ -173,6 +173,13 @@ TOML_NAMESPACE_START
 				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
 			{}
 
+			/// \brief	Copy constructor.
+			TOML_NODISCARD_CTOR
+			value(const value& other) noexcept
+				: node{ other },
+				val_{ other.val_ }
+			{}
+			
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
@@ -180,16 +187,24 @@ TOML_NAMESPACE_START
 				val_{ std::move(other.val_) }
 			{}
 
-			/// \brief	Move-assignment operator.
-			value& operator= (value&& rhs) noexcept
+			/// \brief	Copy-assignment operator.
+			value& operator= (const value& rhs) noexcept
 			{
-				node::operator=(std::move(rhs));
-				val_ = std::move(rhs.val_);
+				node::operator=(rhs);
+				val_ = rhs.val_;
 				return *this;
 			}
 
-			value(const value&) = delete;
-			value& operator= (const value&) = delete;
+			/// \brief	Move-assignment operator.
+			value& operator= (value&& rhs) noexcept
+			{
+				if (&rhs != this)
+				{
+					node::operator=(std::move(rhs));
+					val_ = std::move(rhs.val_);
+				}
+				return *this;
+			}
 
 			/// \brief	Returns the value's node type identifier.
 			///

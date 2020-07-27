@@ -75,11 +75,11 @@ TEST_CASE("values - construction")
 	CHECK_VALUE_INIT2(one<DWORDLONG>,			int64_t,		1u);
 
 	#if TOML_WINDOWS_COMPAT
-    
-	CHECK_VALUE_INIT2(L"kek",				std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"s,				std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv,				std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv.data(),		std::string,	"kek"sv);
+ 
+	CHECK_VALUE_INIT2(L"kek",					std::string,	"kek"sv);
+	CHECK_VALUE_INIT2(L"kek"s,					std::string,	"kek"sv);
+	CHECK_VALUE_INIT2(L"kek"sv,					std::string,	"kek"sv);
+	CHECK_VALUE_INIT2(L"kek"sv.data(),			std::string,	"kek"sv);
 	
 	#endif // TOML_WINDOWS_COMPAT
 

@@ -21,19 +21,16 @@ TOML_DISABLE_PADDING_WARNINGS
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	table::table(impl::table_init_pair* pairs, size_t count) noexcept
-	{
-		for (size_t i = 0; i < count; i++)
-		{
-			map.insert_or_assign(
-				std::move(pairs[i].key),
-				std::move(pairs[i].value)
-			);
-		}
-	}
+	table::table() noexcept {}
 
 	TOML_EXTERNAL_LINKAGE
-	table::table() noexcept {}
+	table::table(const table& other) noexcept
+		: node{ std::move(other) },
+		inline_{ other.inline_ }
+	{
+		for (auto&& [k, v] : other)
+			map.emplace_hint(map.end(), k, impl::make_node(v));
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(table&& other) noexcept
@@ -43,12 +40,41 @@ TOML_NAMESPACE_START
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	table& table::operator = (table&& rhs) noexcept
+	table& table::operator= (const table& rhs) noexcept
 	{
-		node::operator=(std::move(rhs));
-		map = std::move(rhs.map);
-		inline_ = rhs.inline_;
+		if (&rhs != this)
+		{
+			node::operator=(rhs);
+			map.clear();
+			for (auto&& [k, v] : rhs)
+				map.emplace_hint(map.end(), k, impl::make_node(v));
+			inline_ = rhs.inline_;
+		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table& table::operator= (table&& rhs) noexcept
+	{
+		if (&rhs != this)
+		{
+			node::operator=(std::move(rhs));
+			map = std::move(rhs.map);
+			inline_ = rhs.inline_;
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::table(impl::table_init_pair* pairs, size_t count) noexcept
+	{
+		for (size_t i = 0; i < count; i++)
+		{
+			map.insert_or_assign(
+				std::move(pairs[i].key),
+				std::move(pairs[i].value)
+			);
+		}
 	}
 
 	#define TOML_MEMBER_ATTR(attr) TOML_EXTERNAL_LINKAGE TOML_ATTR(attr)

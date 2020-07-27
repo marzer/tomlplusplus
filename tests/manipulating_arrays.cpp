@@ -14,12 +14,7 @@ TEST_CASE("arrays - moving")
 		R"(test = [ "foo" ])"sv,
 		[&](table&& tbl)
 		{
-			CHECK(tbl.source().begin == source_position{ 1, 1 });
-			CHECK(tbl.source().end == source_position{ 1, 17 });
-			CHECK(tbl.source().path);
-			CHECK(*tbl.source().path == filename);
-			CHECK(tbl.size() == 1_sz);
-
+			// sanity-check initial state of a freshly-parsed array
 			auto arr1 = tbl["test"].as<array>();
 			REQUIRE(arr1);
 			CHECK(arr1->size() == 1_sz);
@@ -30,12 +25,14 @@ TEST_CASE("arrays - moving")
 			REQUIRE(arr1->get_as<std::string>(0_sz));
 			CHECK(*arr1->get_as<std::string>(0_sz) == "foo"sv);
 
+			// sanity-check initial state of default-constructed array
 			array arr2;
 			CHECK(arr2.source().begin == source_position{});
 			CHECK(arr2.source().end == source_position{});
 			CHECK(!arr2.source().path);
 			CHECK(arr2.size() == 0_sz);
 
+			// check the results of move-assignment
 			arr2 = std::move(*arr1);
 			CHECK(arr2.source().begin == source_position{ 1, 8 });
 			CHECK(arr2.source().end == source_position{ 1, 17 });
@@ -45,14 +42,84 @@ TEST_CASE("arrays - moving")
 			REQUIRE(arr2.get_as<std::string>(0_sz));
 			CHECK(*arr2.get_as<std::string>(0_sz) == "foo"sv);
 
+			// check that moved-from array is now the same as default-constructed
 			CHECK(arr1->source().begin == source_position{});
 			CHECK(arr1->source().end == source_position{});
 			CHECK(!arr1->source().path);
 			CHECK(arr1->size() == 0_sz);
+
+			// check the results of move-construction
+			array arr3{ std::move(arr2) };
+			CHECK(arr3.source().begin == source_position{ 1, 8 });
+			CHECK(arr3.source().end == source_position{ 1, 17 });
+			CHECK(arr3.source().path);
+			CHECK(*arr3.source().path == filename);
+			CHECK(arr3.size() == 1_sz);
+			REQUIRE(arr3.get_as<std::string>(0_sz));
+			CHECK(*arr3.get_as<std::string>(0_sz) == "foo"sv);
+
+			// check that moved-from array is now the same as default-constructed
+			CHECK(arr2.source().begin == source_position{});
+			CHECK(arr2.source().end == source_position{});
+			CHECK(!arr2.source().path);
+			CHECK(arr2.size() == 0_sz);
 		},
 		filename
 	);
+}
 
+TEST_CASE("arrays - copying")
+{
+	static constexpr auto filename = "foo.toml"sv;
+
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		R"(test = [ "foo" ])"sv,
+		[&](table&& tbl)
+		{
+			// sanity-check initial state of a freshly-parsed array
+			auto arr1 = tbl["test"].as<array>();
+			REQUIRE(arr1);
+			CHECK(arr1->size() == 1_sz);
+			CHECK(arr1->source().begin == source_position{ 1, 8 });
+			CHECK(arr1->source().end == source_position{ 1, 17 });
+			CHECK(arr1->source().path);
+			CHECK(*arr1->source().path == filename);
+			REQUIRE(arr1->get_as<std::string>(0_sz));
+			CHECK(*arr1->get_as<std::string>(0_sz) == "foo"sv);
+
+			// sanity-check initial state of default-constructed array
+			array arr2;
+			CHECK(arr2.source().begin == source_position{});
+			CHECK(arr2.source().end == source_position{});
+			CHECK(!arr2.source().path);
+			CHECK(arr2.size() == 0_sz);
+
+			// check the results of copy-assignment
+			arr2 = *arr1;
+			CHECK(arr2.source().begin == source_position{ 1, 8 });
+			CHECK(arr2.source().end == source_position{ 1, 17 });
+			CHECK(arr2.source().path);
+			CHECK(*arr2.source().path == filename);
+			CHECK(arr2.size() == 1_sz);
+			REQUIRE(arr2.get_as<std::string>(0_sz));
+			CHECK(*arr2.get_as<std::string>(0_sz) == "foo"sv);
+			CHECK(arr2 == *arr1);
+
+			// check the results of copy-construction
+			array arr3{ arr2 };
+			CHECK(arr3.source().begin == source_position{ 1, 8 });
+			CHECK(arr3.source().end == source_position{ 1, 17 });
+			CHECK(arr3.source().path);
+			CHECK(*arr3.source().path == filename);
+			CHECK(arr3.size() == 1_sz);
+			REQUIRE(arr3.get_as<std::string>(0_sz));
+			CHECK(*arr3.get_as<std::string>(0_sz) == "foo"sv);
+			CHECK(arr3 == *arr1);
+			CHECK(arr3 == arr2);
+		},
+		filename
+	);
 }
 
 TEST_CASE("arrays - construction")
