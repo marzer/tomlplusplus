@@ -47,7 +47,7 @@ article div > section > section
 
 pre, code, .tpp-enable-if > a
 {
-	font-family: 'Consolas', 'Source Code Pro', monospace, monospace, monospace;
+	font-family: 'Consolas', 'Source Code Pro', monospace;
 }
 
 a.tpp-external
@@ -142,6 +142,7 @@ pre.m-code + pre.m-console span
 .m-doc-details div table.m-table.m-fullwidth.m-flat tbody tr td strong em
 {
 	color: #a5c9ea;
+	font-style: normal;
 }
 
 /* comments */
@@ -316,9 +317,10 @@ pre > p.godbolt
 {
   float: right;
 }
-@media only screen and ((max-width: 575px) or ((hover: none) and (pointer: coarse)))
+@media only screen and ((max-width: 575px) or (hover: none) or (pointer: coarse) or (pointer: none))
 {
-	.godbolt {
+	.godbolt
+	{
 		display: none;
 	}
 }

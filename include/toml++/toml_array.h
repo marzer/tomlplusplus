@@ -15,7 +15,7 @@ TOML_IMPL_NAMESPACE_START
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
-			friend class ::toml::array;
+			friend class TOML_NAMESPACE::array;
 
 			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
 			using raw_const_iterator = std::vector<std::unique_ptr<node>>::const_iterator;
@@ -180,6 +180,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
 		static_assert(!std::is_same_v<type, node>);
+		static_assert(!is_node_view<type>);
 
 		if constexpr (is_one_of<type, array, table>)
 		{
@@ -211,12 +212,17 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
 	auto* make_node(T&& val) noexcept
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
-		if constexpr (std::is_same_v<type, node>)
+		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
 		{
+			if constexpr (is_node_view<type>)
+			{
+				if (!val)
+					return static_cast<toml::node*>(nullptr);
+			}
+
 			return std::forward<T>(val).visit([](auto&& concrete) noexcept
 			{
 				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
@@ -228,7 +234,6 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
 	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
@@ -304,6 +309,17 @@ TOML_NAMESPACE_START
 
 			void preinsertion_resize(size_t idx, size_t count) noexcept;
 
+			template <typename T>
+			void emplace_back_if_not_empty_view(T&& val) noexcept
+			{
+				if constexpr (impl::is_node_view<T>)
+				{
+					if (!val)
+						return;
+				}
+				elements.emplace_back(impl::make_node(std::forward<T>(val)));
+			}
+
 		public:
 
 			using value_type = node;
@@ -376,11 +392,11 @@ TOML_NAMESPACE_START
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
 				elements.reserve(sizeof...(ElemTypes) + 1_sz);
-				elements.emplace_back(impl::make_node(std::forward<ElemType>(val)));
+				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
 				if constexpr (sizeof...(ElemTypes) > 0)
 				{
 					(
-						elements.emplace_back(impl::make_node(std::forward<ElemTypes>(vals))),
+						emplace_back_if_not_empty_view(std::forward<ElemTypes>(vals)),
 						...
 					);
 				}
@@ -529,14 +545,27 @@ TOML_NAMESPACE_START
 			/// [ 1, 'two', 3, [ 4, 5 ] ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// \param 	pos			The insertion position.
 			/// \param 	val			The node or value being inserted.
 			///
-			/// \returns	An iterator to the newly-inserted element.
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		 An iterator to the newly-inserted element.
+			/// 		 <br><br>
+			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// 		 end()
+			/// 
+			/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
+			/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 			template <typename ElemType>
 			iterator insert(const_iterator pos, ElemType&& val) noexcept
 			{
+				if constexpr (impl::is_node_view<ElemType>)
+				{
+					if (!val)
+						return end();
+				}
 				return { elements.emplace(pos.raw_, impl::make_node(std::forward<ElemType>(val))) };
 			}
 
@@ -562,15 +591,31 @@ TOML_NAMESPACE_START
 			/// ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// \param 	pos			The insertion position.
 			/// \param 	count		The number of times the node or value should be inserted.
 			/// \param 	val			The node or value being inserted.
 			///
-			/// \returns	An iterator to the first newly-inserted element (or a copy of `pos` if count was 0).
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		 An iterator to the newly-inserted element.
+			/// 		 <br><br>
+			/// 		 <strong><em>`count == 0`:</em></strong><br>
+			/// 		 A copy of pos
+			/// 		 <br><br>
+			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// 		 end()
+			/// 
+			/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
+			/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 			template <typename ElemType>
 			iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
 			{
+				if constexpr (impl::is_node_view<ElemType>)
+				{
+					if (!val)
+						return end();
+				}
 				switch (count)
 				{
 					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
@@ -597,50 +642,70 @@ TOML_NAMESPACE_START
 			/// \param 	first	Iterator to the first node or value being inserted.
 			/// \param 	last	Iterator to the one-past-the-last node or value being inserted.
 			///
-			/// \returns	An iterator to the first newly-inserted element (or a copy of `pos` if `first` >= `last`).
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		 An iterator to the first newly-inserted element.
+			/// 		 <br><br>
+			/// 		 <strong><em>`first >= last`:</em></strong><br>
+			/// 		 A copy of pos
+			/// 		 <br><br>
+			/// 		 <strong><em>All objects in the range were empty toml::node_views:</em></strong><br>
+			/// 		 A copy of pos
 			template <typename Iter>
 			iterator insert(const_iterator pos, Iter first, Iter last) noexcept
 			{
-				const auto count = std::distance(first, last);
-				if (count <= 0)
+				const auto distance = std::distance(first, last);
+				if (distance <= 0)
 					return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-				else if (count == 1)
-					return insert(pos, *first);
 				else
 				{
+					auto count = distance;
+					using deref_type = decltype(*first);
+					if constexpr (impl::is_node_view<deref_type>)
+					{
+						for (auto it = first; it != last; it++)
+							if (!(*it))
+								count--;
+						if (!count)
+							return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+					}
 					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
 					preinsertion_resize(start_idx, static_cast<size_t>(count));
 					size_t i = start_idx;
 					for (auto it = first; it != last; it++)
-						elements[i++].reset(impl::make_node(*it));
+					{
+						if constexpr (impl::is_node_view<deref_type>)
+						{
+							if (!(*it))
+								continue;
+						}
+						if constexpr (std::is_rvalue_reference_v<deref_type>)
+							elements[i++].reset(impl::make_node(std::move(*it)));
+						else
+							elements[i++].reset(impl::make_node(*it));
+					}
 					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
 
 			/// \brief	Inserts a range of elements into the array at a specific position.
 			///
-			/// \tparam	ElemType	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ElemType	toml::node_view, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// \param 	pos			The insertion position.
 			/// \param 	ilist		An initializer list containing the values to be inserted.
 			///
-			/// \returns	An iterator to the first newly-inserted element (or a copy of `pos` if `ilist` was empty).
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		 An iterator to the first newly-inserted element.
+			/// 		 <br><br>
+			/// 		 <strong><em>`ilist.size() == 0`:</em></strong><br>
+			/// 		 A copy of pos
+			/// 		 <br><br>
+			/// 		 <strong><em>All objects in the list were empty toml::node_views:</em></strong><br>
+			/// 		 A copy of pos
 			template <typename ElemType>
 			iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
 			{
-				switch (ilist.size())
-				{
-					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-					case 1: return insert(pos, *ilist.begin());
-					default:
-					{
-						const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
-						preinsertion_resize(start_idx, ilist.size());
-						size_t i = start_idx;
-						for (auto& val : ilist)
-							elements[i++].reset(impl::make_node(val));
-						return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
-					}
-				}
+				return insert(pos, ilist.begin(), ilist.end());
 			}
 
 			/// \brief	Emplaces a new element at a specific position in the array.
@@ -658,7 +723,7 @@ TOML_NAMESPACE_START
 			/// [ 1, 'drill', 2 ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType	One of the TOML node or value types.
+			/// \tparam ElemType	toml::table, toml::array, or any native TOML value type.
 			/// \tparam	Args		Value constructor argument types.
 			/// \param 	pos			The insertion position.
 			/// \param 	args		Arguments to forward to the value's constructor.
@@ -745,13 +810,19 @@ TOML_NAMESPACE_START
 			/// [ 1, 2 ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType			One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ElemType	toml::node, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// 
 			/// \param 	new_size			The number of elements the array will have after resizing.
 			/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
 			template <typename ElemType>
 			void resize(size_t new_size, ElemType&& default_init_val) noexcept
 			{
+				static_assert(
+					!impl::is_node_view<ElemType>,
+					"The default element type argument to toml::array::resize may not be toml::node_view."
+				);
+
 				if (!new_size)
 					elements.clear();
 				else if (new_size < elements.size())
@@ -800,16 +871,15 @@ TOML_NAMESPACE_START
 			/// [ 1, 2, 3, 4.0, [ 5, 'six' ] ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 			/// \param 	val			The node or value being added.
 			/// 
-			/// \returns A reference to the newly-constructed element.
+			/// \attention	No insertion takes place if the input value is an empty toml::node_view.
+			/// 			This is the only circumstance in which this can occur.
 			template <typename ElemType>
-			decltype(auto) push_back(ElemType&& val) noexcept
+			void push_back(ElemType&& val) noexcept
 			{
-				auto nde = impl::make_node(std::forward<ElemType>(val));
-				elements.emplace_back(nde);
-				return *nde;
+				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
 			}
 
 			/// \brief	Emplaces a new element at the end of the array.
@@ -825,7 +895,7 @@ TOML_NAMESPACE_START
 			/// [ 1, 2, [ 3, 'four' ] ]
 			/// \eout
 			/// 
-			/// \tparam	ElemType	One of the TOML node or value types.
+			/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
 			/// \tparam	Args		Value constructor argument types.
 			/// \param 	args		Arguments to forward to the value's constructor.
 			/// 
@@ -895,7 +965,7 @@ TOML_NAMESPACE_START
 			/// element [0] is an integer with value 42
 			/// \eout
 			/// 
-			/// \tparam	ElemType	The element's type.
+			/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
 			/// \param 	index		The element's index.
 			///
 			/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
@@ -910,7 +980,7 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets the element at a specific index if it is a particular type (const overload).
 			///
-			/// \tparam	ElemType	The element's type.
+			/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
 			/// \param 	index		The element's index.
 			///
 			/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.

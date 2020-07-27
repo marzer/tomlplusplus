@@ -129,7 +129,10 @@ int main(int argc, char** argv)
 		toml::node* new_node{};
 
 		if (auto arr = tree.back()->as_array())
-			new_node = &arr->push_back(std::forward<decltype(obj)>(obj));
+		{
+			arr->push_back(std::forward<decltype(obj)>(obj));
+			new_node = &arr->back();
+		}
 		else
 			new_node = &(*tree.back()->ref<toml::table>().insert_or_assign(
 				rand_string(rand<size_t>(1u, 4u), '-'),

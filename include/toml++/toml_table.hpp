@@ -70,6 +70,8 @@ TOML_NAMESPACE_START
 	{
 		for (size_t i = 0; i < count; i++)
 		{
+			if (!pairs[i].value) // empty node_views
+				continue;
 			map.insert_or_assign(
 				std::move(pairs[i].key),
 				std::move(pairs[i].value)

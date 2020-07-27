@@ -63,8 +63,8 @@ TOML_NAMESPACE_START
 			using viewed_type = ViewedType;
 
 		private:
-			friend class toml::table;
-			template <typename T> friend class toml::node_view;
+			friend class TOML_NAMESPACE::table;
+			template <typename T> friend class TOML_NAMESPACE::node_view;
 
 			mutable viewed_type* node_ = nullptr;
 
@@ -82,6 +82,19 @@ TOML_NAMESPACE_START
 			/// \brief	Constructs an empty node view.
 			TOML_NODISCARD_CTOR
 			node_view() noexcept = default;
+
+			///// \brief	Copy constructor.
+			TOML_NODISCARD_CTOR
+			node_view(const node_view&) noexcept = default;
+
+			///// \brief	Copy-assignment operator.
+			TOML_NODISCARD_CTOR
+			node_view& operator= (const node_view&) noexcept = default;
+
+			///// \brief	Move constructor.
+			node_view(node_view&&) noexcept = default;
+
+			node_view& operator= (node_view&&) noexcept = delete;
 
 			/// \brief	Returns true if the view references a node.
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }

@@ -256,7 +256,8 @@ TEST_CASE("arrays - insertion and erasure")
 
 	// push_back(ElemType&& val) noexcept
 	{
-		decltype(auto) val = arr.push_back("test"sv);
+		arr.push_back("test"sv);
+		auto& val = *arr.back().as_string();
 		CHECK(arr.size() == 6_sz);
 		REQUIRE(arr.get_as<std::string>(5_sz));
 		CHECK(*arr.get_as<std::string>(5_sz) == "test"sv);

@@ -350,7 +350,6 @@ PREDEFINED             =                                           \
     "TOML_TRIVIAL_ABI="                                            \
     "TOML_EMPTY_BASES="                                            \
     "TOML_INTERFACE"                                               \
-    "TOML_SIMPLE_STATIC_ASSERT_MESSAGES=1"                         \
     "TOML_INTERNAL_LINKAGE=static"
 EXPAND_AS_DEFINED      = 
 SKIP_FUNCTION_MACROS   = NO

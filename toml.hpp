@@ -1067,6 +1067,9 @@ TOML_IMPL_NAMESPACE_START
 	template <>           struct node_type_getter<array> { static constexpr auto value = node_type::array; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
+
+	template <typename T>
+	inline constexpr bool is_node_view = is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_IMPL_NAMESPACE_END
 
@@ -2026,7 +2029,7 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-#if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+#if defined(doxygen) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
 #define TOML_SA_NEWLINE		" "
 #define TOML_SA_LIST_SEP	", "
@@ -3235,7 +3238,7 @@ TOML_IMPL_NAMESPACE_START
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
-			friend class ::toml::array;
+			friend class TOML_NAMESPACE::array;
 
 			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
 			using raw_const_iterator = std::vector<std::unique_ptr<node>>::const_iterator;
@@ -3400,6 +3403,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
 		static_assert(!std::is_same_v<type, node>);
+		static_assert(!is_node_view<type>);
 
 		if constexpr (is_one_of<type, array, table>)
 		{
@@ -3431,12 +3435,17 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
 	auto* make_node(T&& val) noexcept
 	{
 		using type = unwrap_node<remove_cvref_t<T>>;
-		if constexpr (std::is_same_v<type, node>)
+		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
 		{
+			if constexpr (is_node_view<type>)
+			{
+				if (!val)
+					return static_cast<toml::node*>(nullptr);
+			}
+
 			return std::forward<T>(val).visit([](auto&& concrete) noexcept
 			{
 				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
@@ -3448,7 +3457,6 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
 	auto* make_node(inserter<T>&& val) noexcept
 	{
 		return make_node(std::move(val.value));
@@ -3469,6 +3477,17 @@ TOML_NAMESPACE_START
 			std::vector<std::unique_ptr<node>> elements;
 
 			void preinsertion_resize(size_t idx, size_t count) noexcept;
+
+			template <typename T>
+			void emplace_back_if_not_empty_view(T&& val) noexcept
+			{
+				if constexpr (impl::is_node_view<T>)
+				{
+					if (!val)
+						return;
+				}
+				elements.emplace_back(impl::make_node(std::forward<T>(val)));
+			}
 
 		public:
 
@@ -3499,11 +3518,11 @@ TOML_NAMESPACE_START
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
 				elements.reserve(sizeof...(ElemTypes) + 1_sz);
-				elements.emplace_back(impl::make_node(std::forward<ElemType>(val)));
+				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
 				if constexpr (sizeof...(ElemTypes) > 0)
 				{
 					(
-						elements.emplace_back(impl::make_node(std::forward<ElemTypes>(vals))),
+						emplace_back_if_not_empty_view(std::forward<ElemTypes>(vals)),
 						...
 					);
 				}
@@ -3560,12 +3579,22 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, ElemType&& val) noexcept
 			{
+				if constexpr (impl::is_node_view<ElemType>)
+				{
+					if (!val)
+						return end();
+				}
 				return { elements.emplace(pos.raw_, impl::make_node(std::forward<ElemType>(val))) };
 			}
 
 			template <typename ElemType>
 			iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
 			{
+				if constexpr (impl::is_node_view<ElemType>)
+				{
+					if (!val)
+						return end();
+				}
 				switch (count)
 				{
 					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
@@ -3587,18 +3616,36 @@ TOML_NAMESPACE_START
 			template <typename Iter>
 			iterator insert(const_iterator pos, Iter first, Iter last) noexcept
 			{
-				const auto count = std::distance(first, last);
-				if (count <= 0)
+				const auto distance = std::distance(first, last);
+				if (distance <= 0)
 					return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-				else if (count == 1)
-					return insert(pos, *first);
 				else
 				{
+					auto count = distance;
+					using deref_type = decltype(*first);
+					if constexpr (impl::is_node_view<deref_type>)
+					{
+						for (auto it = first; it != last; it++)
+							if (!(*it))
+								count--;
+						if (!count)
+							return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+					}
 					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
 					preinsertion_resize(start_idx, static_cast<size_t>(count));
 					size_t i = start_idx;
 					for (auto it = first; it != last; it++)
-						elements[i++].reset(impl::make_node(*it));
+					{
+						if constexpr (impl::is_node_view<deref_type>)
+						{
+							if (!(*it))
+								continue;
+						}
+						if constexpr (std::is_rvalue_reference_v<deref_type>)
+							elements[i++].reset(impl::make_node(std::move(*it)));
+						else
+							elements[i++].reset(impl::make_node(*it));
+					}
 					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
@@ -3606,20 +3653,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
 			{
-				switch (ilist.size())
-				{
-					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-					case 1: return insert(pos, *ilist.begin());
-					default:
-					{
-						const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
-						preinsertion_resize(start_idx, ilist.size());
-						size_t i = start_idx;
-						for (auto& val : ilist)
-							elements[i++].reset(impl::make_node(val));
-						return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
-					}
-				}
+				return insert(pos, ilist.begin(), ilist.end());
 			}
 
 			template <typename ElemType, typename... Args>
@@ -3641,6 +3675,11 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			void resize(size_t new_size, ElemType&& default_init_val) noexcept
 			{
+				static_assert(
+					!impl::is_node_view<ElemType>,
+					"The default element type argument to toml::array::resize may not be toml::node_view."
+				);
+
 				if (!new_size)
 					elements.clear();
 				else if (new_size < elements.size())
@@ -3652,11 +3691,9 @@ TOML_NAMESPACE_START
 			void truncate(size_t new_size);
 
 			template <typename ElemType>
-			decltype(auto) push_back(ElemType&& val) noexcept
+			void push_back(ElemType&& val) noexcept
 			{
-				auto nde = impl::make_node(std::forward<ElemType>(val));
-				elements.emplace_back(nde);
-				return *nde;
+				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
 			}
 
 			template <typename ElemType, typename... Args>
@@ -3786,7 +3823,7 @@ TOML_IMPL_NAMESPACE_START
 	class table_iterator final
 	{
 		private:
-			friend class ::toml::table;
+			friend class TOML_NAMESPACE::table;
 
 			using proxy_type = table_proxy_pair<IsConst>;
 			using raw_mutable_iterator = string_map<std::unique_ptr<node>>::iterator;
@@ -4031,6 +4068,12 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
+				if constexpr (impl::is_node_view<ValueType>)
+				{
+					if (!val)
+						return { end(), false };
+				}
+
 				if constexpr (impl::is_wide_string<KeyType>)
 				{
 					#if TOML_WINDOWS_COMPAT
@@ -4045,9 +4088,9 @@ TOML_NAMESPACE_START
 					if (ipos == map.end() || ipos->first != key)
 					{
 						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
-					return { ipos, false };
+					return { iterator{ ipos }, false };
 				}
 			}
 
@@ -4076,6 +4119,12 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
+				if constexpr (impl::is_node_view<ValueType>)
+				{
+					if (!val)
+						return { end(), false };
+				}
+
 				if constexpr (impl::is_wide_string<KeyType>)
 				{
 					#if TOML_WINDOWS_COMPAT
@@ -4090,12 +4139,12 @@ TOML_NAMESPACE_START
 					if (ipos == map.end() || ipos->first != key)
 					{
 						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
 					else
 					{
 						(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, false };
+						return { iterator{ ipos }, false };
 					}
 				}
 			}
@@ -4134,9 +4183,9 @@ TOML_NAMESPACE_START
 							std::forward<KeyType>(key),
 							new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... }
 						);
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
-					return { ipos, false };
+					return { iterator{ ipos }, false };
 				}
 			}
 
@@ -4274,8 +4323,8 @@ TOML_NAMESPACE_START
 			using viewed_type = ViewedType;
 
 		private:
-			friend class toml::table;
-			template <typename T> friend class toml::node_view;
+			friend class TOML_NAMESPACE::table;
+			template <typename T> friend class TOML_NAMESPACE::node_view;
 
 			mutable viewed_type* node_ = nullptr;
 
@@ -4292,6 +4341,16 @@ TOML_NAMESPACE_START
 
 			TOML_NODISCARD_CTOR
 			node_view() noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			node_view(const node_view&) noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			node_view& operator= (const node_view&) noexcept = default;
+
+			node_view(node_view&&) noexcept = default;
+
+			node_view& operator= (node_view&&) noexcept = delete;
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
 
@@ -7654,6 +7713,8 @@ TOML_NAMESPACE_START
 	{
 		for (size_t i = 0; i < count; i++)
 		{
+			if (!pairs[i].value) // empty node_views
+				continue;
 			map.insert_or_assign(
 				std::move(pairs[i].key),
 				std::move(pairs[i].value)

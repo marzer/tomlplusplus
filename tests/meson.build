@@ -21,6 +21,7 @@ test_sources = [
 	'manipulating_values.cpp',
 	'unicode.cpp',
 	'unicode_generated.cpp',
+	'user_feedback.cpp',
 	'windows_compat.cpp'
 ]
 
@@ -300,12 +301,6 @@ foreach cpp20 : cpp20_modes
 						name = name + '_tlopt'
 					endif
 					
-					if compiler_supports_float16
-						if compiler.get_id() == 'gcc'
-							args += '-mfp16-format=ieee'
-						endif
-					endif
-
 					executables += [[
 						name,
 						executable(

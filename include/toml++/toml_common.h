@@ -549,6 +549,9 @@ TOML_IMPL_NAMESPACE_START
 	template <>           struct node_type_getter<array> { static constexpr auto value = node_type::array; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
+
+	template <typename T>
+	inline constexpr bool is_node_view = is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_IMPL_NAMESPACE_END
 

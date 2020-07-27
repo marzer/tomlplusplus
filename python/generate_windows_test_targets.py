@@ -120,6 +120,7 @@ def main():
 		</ClCompile>
 		<ClCompile Include="..\..\tests\unicode.cpp" />
 		<ClCompile Include="..\..\tests\unicode_generated.cpp" />
+		<ClCompile Include="..\..\tests\user_feedback.cpp" />
 		<ClCompile Include="..\..\tests\windows_compat.cpp" />
 	</ItemGroup>
 	<ItemGroup>

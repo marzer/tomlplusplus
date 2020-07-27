@@ -25,7 +25,7 @@ TOML_IMPL_NAMESPACE_START
 	class table_iterator final
 	{
 		private:
-			friend class ::toml::table;
+			friend class TOML_NAMESPACE::table;
 
 			using proxy_type = table_proxy_pair<IsConst>;
 			using raw_mutable_iterator = string_map<std::unique_ptr<node>>::iterator;
@@ -278,7 +278,6 @@ TOML_NAMESPACE_START
 				: table{ arr, N }
 			{}
 
-
 			/// \brief	Always returns `node_type::table` for table nodes.
 			[[nodiscard]] node_type type() const noexcept override;
 			/// \brief	Always returns `true` for table nodes.
@@ -453,13 +452,22 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \tparam KeyType		std::string (or a type convertible to it).
-			/// \tparam ValueType	One of the TOML ndoe or value types (or a type promotable to one).
+			/// \tparam ValueType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// \param 	key			The key at which to insert the new value.
 			/// \param 	val			The new value to insert.
 			/// 
-			/// \returns A std::pair containing:
-			/// 		- An iterator to the insertion position (or the position of the value that prevented insertion)  
-			/// 		- A boolean indicating if the insertion was successful.
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		<ul>
+			/// 			<li>An iterator to the insertion position (or the position of the value that prevented insertion)
+			/// 			<li>A boolean indicating if the insertion was successful.
+			/// 		</ul>
+			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// 		 `{ end(), false }`
+			/// 
+			/// \attention The return value will always be `{ end(), false }` if the input value was an
+			/// 		   empty toml::node_view, because no insertion can take place. This is the only circumstance
+			/// 		   in which this can occur.
 			template <typename KeyType, typename ValueType, typename = std::enable_if_t<
 				std::is_convertible_v<KeyType&&, std::string_view>
 				|| impl::is_wide_string<KeyType>
@@ -470,6 +478,12 @@ TOML_NAMESPACE_START
 					!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
+
+				if constexpr (impl::is_node_view<ValueType>)
+				{
+					if (!val)
+						return { end(), false };
+				}
 
 				if constexpr (impl::is_wide_string<KeyType>)
 				{
@@ -485,9 +499,9 @@ TOML_NAMESPACE_START
 					if (ipos == map.end() || ipos->first != key)
 					{
 						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
-					return { ipos, false };
+					return { iterator{ ipos }, false };
 				}
 			}
 
@@ -583,13 +597,22 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \tparam KeyType		std::string (or a type convertible to it).
-			/// \tparam ValueType	One of the TOML node or value types (or a type promotable to one).
+			/// \tparam ValueType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
+			/// 					(or a type promotable to one).
 			/// \param 	key			The key at which to insert or assign the value.
 			/// \param 	val			The value to insert/assign.
 			/// 
-			/// \returns A std::pair containing:
-			/// 		- An iterator to the value's position
-			/// 		- A boolean containing `true` if the value was inserted, `false` if it was assigned.
+			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// 		<ul>
+			/// 			<li>An iterator to the value's position
+			/// 			<li>`true` if the value was inserted, `false` if it was assigned.
+			/// 		</ul>
+			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// 		 `{ end(), false }`
+			/// 
+			/// \attention The return value will always be `{ end(), false }` if the input value was
+			/// 		   an empty toml::node_view, because no insertion or assignment can take place.
+			/// 		   This is the only circumstance in which this can occur.
 			template <typename KeyType, typename ValueType>
 			std::pair<iterator, bool> insert_or_assign(KeyType&& key, ValueType&& val) noexcept
 			{
@@ -597,6 +620,12 @@ TOML_NAMESPACE_START
 					!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
+
+				if constexpr (impl::is_node_view<ValueType>)
+				{
+					if (!val)
+						return { end(), false };
+				}
 
 				if constexpr (impl::is_wide_string<KeyType>)
 				{
@@ -612,12 +641,12 @@ TOML_NAMESPACE_START
 					if (ipos == map.end() || ipos->first != key)
 					{
 						ipos = map.emplace_hint(ipos, std::forward<KeyType>(key), impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
 					else
 					{
 						(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val)));
-						return { ipos, false };
+						return { iterator{ ipos }, false };
 					}
 				}
 			}
@@ -649,13 +678,13 @@ TOML_NAMESPACE_START
 			/// { a = 1, b = 2, c = 3, d = "drill" }
 			/// \eout
 			/// 
-			/// \tparam	ValueType	One of the TOML node or value types.
+			/// \tparam ValueType	toml::table, toml::array, or any native TOML value type.
 			/// \tparam KeyType		std::string (or a type convertible to it).
 			/// \tparam ValueArgs	Value constructor argument types.
 			/// \param 	key			The key at which to emplace the new value.
 			/// \param 	args		Arguments to forward to the value's constructor.
 			/// 
-			/// \returns A std::pair containing:
+			/// \returns A std::pair containing: <br>
 			/// 		- An iterator to the emplacement position (or the position of the value that prevented emplacement)
 			/// 		- A boolean indicating if the emplacement was successful.  
 			/// 
@@ -694,9 +723,9 @@ TOML_NAMESPACE_START
 							std::forward<KeyType>(key),
 							new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... }
 						);
-						return { ipos, true };
+						return { iterator{ ipos }, true };
 					}
-					return { ipos, false };
+					return { iterator{ ipos }, false };
 				}
 			}
 
