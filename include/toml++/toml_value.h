@@ -800,21 +800,12 @@ TOML_NAMESPACE_START
 			// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
 			if constexpr (traits::is_native || traits::can_represent_native || traits::can_partially_represent_native)
 			{
-				if constexpr (traits::is_native)
-				{
-					if (type() == node_type_of<value_type>)
-						return *ref_cast<typename traits::native_type>();
-					return std::forward<T>(default_value);
-				}
+				if (auto val = this->value<value_type>())
+					return *val;
+				if constexpr (std::is_pointer_v<value_type>)
+					return value_type{ default_value };
 				else
-				{
-					if (auto val = this->value<value_type>())
-						return *val;
-					if constexpr (std::is_pointer_v<value_type>)
-						return value_type{ default_value };
-					else
-						return std::forward<T>(default_value);
-				}
+					return std::forward<T>(default_value);
 			}
 		}
 	}
