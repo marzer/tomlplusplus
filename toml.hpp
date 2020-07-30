@@ -2091,10 +2091,10 @@ TOML_NAMESPACE_START
 		protected:
 
 			node() noexcept = default;
-			node(const node&) noexcept = default;
-			node(node&& other) noexcept;
-			node& operator= (const node&) noexcept = default;
-			node& operator= (node&& rhs) noexcept;
+			node(const node&) noexcept;
+			node(node&&) noexcept;
+			node& operator= (const node&) noexcept;
+			node& operator= (node&&) noexcept;
 
 			template <typename T>
 			[[nodiscard]]
@@ -7305,6 +7305,13 @@ TOML_DISABLE_SUGGEST_WARNINGS
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	node::node(const node& /*other*/) noexcept
+	{
+		// does not copy source information
+		// this is not an error
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept
 		: source_{ std::move(other.source_) }
 	{
@@ -7313,7 +7320,17 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node & node::operator= (node && rhs) noexcept
+	node& node::operator= (const node& /*rhs*/) noexcept
+	{
+		// does not copy source information
+		// this is not an error
+
+		source_ = {};
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node& node::operator= (node && rhs) noexcept
 	{
 		source_ = std::move(rhs.source_);
 		rhs.source_.begin = {};

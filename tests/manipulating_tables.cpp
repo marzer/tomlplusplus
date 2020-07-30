@@ -93,10 +93,9 @@ TEST_CASE("tables - copying")
 
 			// check the results of copy-assignment
 			tbl2 = tbl;
-			CHECK(tbl2.source().begin == source_position{ 1, 1 });
-			CHECK(tbl2.source().end == source_position{ 1, 24 });
-			CHECK(tbl2.source().path);
-			CHECK(*tbl2.source().path == filename);
+			CHECK(tbl2.source().begin == source_position{});
+			CHECK(tbl2.source().end == source_position{});
+			CHECK(!tbl2.source().path);
 			CHECK(tbl2.size() == 1_sz);
 			REQUIRE(tbl2["test"].as<table>());
 			CHECK(tbl2["test"].as<table>()->size() == 1_sz);
@@ -105,10 +104,9 @@ TEST_CASE("tables - copying")
 
 			// check the results of copy-construction
 			table tbl3{ tbl2 };
-			CHECK(tbl3.source().begin == source_position{ 1, 1 });
-			CHECK(tbl3.source().end == source_position{ 1, 24 });
-			CHECK(tbl3.source().path);
-			CHECK(*tbl3.source().path == filename);
+			CHECK(tbl3.source().begin == source_position{});
+			CHECK(tbl3.source().end == source_position{});
+			CHECK(!tbl3.source().path);
 			CHECK(tbl3.size() == 1_sz);
 			REQUIRE(tbl3["test"].as<table>());
 			CHECK(tbl3["test"].as<table>()->size() == 1_sz);

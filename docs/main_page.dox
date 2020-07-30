@@ -14,7 +14,7 @@
 /// - Header-only (optional!)
 /// - Doesn't require RTTI
 /// - Works with or without exceptions
-/// - Tested on Clang (7+), GCC (7+) and MSVC (VS2019)
+/// - Tested on Clang (6+), GCC (7+) and MSVC (VS2019)
 /// - Tested on x64, x86 and ARM
 /// 
 //////////////////////////////////////////////////////////////////////

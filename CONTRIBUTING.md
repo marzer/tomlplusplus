@@ -35,13 +35,22 @@ If test discovery fails you can usually fix it by enabling
 `Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
 
 ### Testing on Linux (and WSL)
-Install [meson] and [ninja] if necessary, then test with both gcc and clang:
+Install [meson] and [ninja] if necessary, then:
 ```bash
-CXX=g++ meson build-gcc
-CXX=clang++ meson build-clang
-cd build-gcc && ninja && ninja test
-cd ../build-clang && ninja && ninja test
+# create the build configs (first time only)
+CXX=g++     meson build-gcc-debug     -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
+CXX=clang++ meson build-clang-debug   -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
+CXX=g++     meson build-gcc-release   --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
+CXX=clang++ meson build-clang-release --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
+
+# run the tests
+cd build-gcc-debug && ninja && ninja test				\
+	&& cd ../build-clang-debug && ninja && ninja test	\
+	&& cd ../build-gcc-release && ninja && ninja test	\
+	&& cd ../build-clang-release && ninja && ninja test	\
+	&& cd ..
 ```
+
 
 [Visual Studio 2019]: https://visualstudio.microsoft.com/vs/
 [Test Adapter for Catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01

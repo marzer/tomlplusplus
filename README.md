@@ -25,7 +25,7 @@
  - Works with or without exceptions
  - Doesn't require RTTI
  - First-class support for serializing to JSON
- - Tested on Clang (7+), GCC (7+) and MSVC (VS2019)
+ - Tested on Clang (6+), GCC (7+) and MSVC (VS2019)
  - Tested on x64, x86 and ARM
 
 <br>

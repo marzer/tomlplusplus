@@ -97,10 +97,9 @@ TEST_CASE("arrays - copying")
 
 			// check the results of copy-assignment
 			arr2 = *arr1;
-			CHECK(arr2.source().begin == source_position{ 1, 8 });
-			CHECK(arr2.source().end == source_position{ 1, 17 });
-			CHECK(arr2.source().path);
-			CHECK(*arr2.source().path == filename);
+			CHECK(arr2.source().begin == source_position{});
+			CHECK(arr2.source().end == source_position{});
+			CHECK(!arr2.source().path);
 			CHECK(arr2.size() == 1_sz);
 			REQUIRE(arr2.get_as<std::string>(0_sz));
 			CHECK(*arr2.get_as<std::string>(0_sz) == "foo"sv);
@@ -108,10 +107,9 @@ TEST_CASE("arrays - copying")
 
 			// check the results of copy-construction
 			array arr3{ arr2 };
-			CHECK(arr3.source().begin == source_position{ 1, 8 });
-			CHECK(arr3.source().end == source_position{ 1, 17 });
-			CHECK(arr3.source().path);
-			CHECK(*arr3.source().path == filename);
+			CHECK(arr3.source().begin == source_position{});
+			CHECK(arr3.source().end == source_position{});
+			CHECK(!arr3.source().path);
 			CHECK(arr3.size() == 1_sz);
 			REQUIRE(arr3.get_as<std::string>(0_sz));
 			CHECK(*arr3.get_as<std::string>(0_sz) == "foo"sv);

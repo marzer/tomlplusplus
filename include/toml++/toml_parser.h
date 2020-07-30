@@ -452,8 +452,6 @@ TOML_NAMESPACE_START
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	/// 
-	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
@@ -477,8 +475,6 @@ TOML_NAMESPACE_START
 	///
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	/// 
-	/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
@@ -505,8 +501,7 @@ TOML_NAMESPACE_START
 	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
 	/// 
-	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled and your compiler
-	/// 		   supports char8_t-based strings.
+	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
@@ -761,7 +756,7 @@ TOML_NAMESPACE_START
 
 		#ifdef __cpp_lib_char8_t
 
-		/// \brief	Parses TOML data from a utf8 string literal.
+		/// \brief	Parses TOML data from a UTF-8 string literal.
 		/// 
 		/// \detail \cpp
 		/// using namespace toml::literals;
@@ -780,8 +775,6 @@ TOML_NAMESPACE_START
 		///
 		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
 		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-		/// 
-		/// \attention This overload is not available if your compiler does not support char8_t-based strings.
 		[[nodiscard]]
 		TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;

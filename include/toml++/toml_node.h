@@ -76,10 +76,10 @@ TOML_NAMESPACE_START
 		protected:
 			
 			node() noexcept = default;
-			node(const node&) noexcept = default;
-			node(node&& other) noexcept;
-			node& operator= (const node&) noexcept = default;
-			node& operator= (node&& rhs) noexcept;
+			node(const node&) noexcept;
+			node(node&&) noexcept;
+			node& operator= (const node&) noexcept;
+			node& operator= (node&&) noexcept;
 
 			template <typename T>
 			[[nodiscard]]
