@@ -7,7 +7,7 @@ modern
 C++</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
-  <link href="tomlplusplus.css" rel="stylesheet"/>
+  <link href="muu.css" rel="stylesheet"/>
   <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
@@ -22,7 +22,7 @@ C++</title>
   for
   modern
   C++." name="description"/>
-  <script src="tomlplusplus.js"></script>
+  <script src="muu.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -46,7 +46,7 @@ C++</span></a>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a class="github tpp-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github muu-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -72,7 +72,7 @@ C++</span></a>
           <tbody>
             <tr>
               <td style="width: 1%">ValueType</td>
-              <td><p>The value's native TOML data type. Can be one of:</p><ul><li><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a></li><li><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a></li><li><a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a></li><li><a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a></li><li><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></li><li>double</li><li>bool</li></ul></td>
+              <td><p>The value's native TOML data type. Can be one of:</p><ul><li><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a></li><li><a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a></li><li><a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a></li><li><a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a></li><li><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></li><li>double</li><li>bool</li></ul></td>
             </tr>
           </tbody>
         </table>
@@ -104,7 +104,7 @@ C++</span></a>
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a class="m-doc" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, std::string&gt;, std::string_view, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
+              using <a class="m-doc" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, std::string&gt;, std::string_view, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
             </dt>
             <dd>A type alias for 'value arguments'.</dd>
             <dt id="ad87b8c7ec465c424b861aba2d4cd5526">
@@ -157,19 +157,19 @@ C++</span></a>
             <dt id="aa506d546ecd30669224e7e593a91078b">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa506d546ecd30669224e7e593a91078b">as_date</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a const pointer to the value if the data type is a <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>.</dd>
+            <dd>Returns a const pointer to the value if the data type is a <a class="m-doc muu-injected" href="structtoml_1_1date.html">date</a>.</dd>
             <dt id="ad66d88e92f607a426a28ca3d933f641d">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad66d88e92f607a426a28ca3d933f641d">as_date</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the value if the data type is a <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a>.</dd>
+            <dd>Returns a pointer to the value if the data type is a <a class="m-doc muu-injected" href="structtoml_1_1date.html">date</a>.</dd>
             <dt id="acfdcdeb1b23ee386620c0314e972f2bf">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acfdcdeb1b23ee386620c0314e972f2bf">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a const pointer to the value if the data type is a date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a const pointer to the value if the data type is a date-<a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="a693ae6fa8490000bad7c4b947a71f352">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a693ae6fa8490000bad7c4b947a71f352">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the value if the data type is date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a pointer to the value if the data type is date-<a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="a27c3f6925b7e4916ecb2285f40d78fd7">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a27c3f6925b7e4916ecb2285f40d78fd7">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -179,29 +179,29 @@ C++</span></a>
             </dt>
             <dd>Returns a pointer to the value if the data type is a floating-point.</dd>
             <dt id="a179e6c1ec49c2de5edab8072e709bf79">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a179e6c1ec49c2de5edab8072e709bf79">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a179e6c1ec49c2de5edab8072e709bf79">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const pointer to the value if the data type is an integer.</dd>
             <dt id="af4ff7751b5220c599d5dcee7fc44a595">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af4ff7751b5220c599d5dcee7fc44a595">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af4ff7751b5220c599d5dcee7fc44a595">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the value if the data type is an integer.</dd>
             <dt id="a8b3ad1c0aa409fa70ac1bac452c72e6c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8b3ad1c0aa409fa70ac1bac452c72e6c">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8b3ad1c0aa409fa70ac1bac452c72e6c">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const pointer to the value if the data type is a string.</dd>
             <dt id="ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the value if the data type is a string.</dd>
             <dt id="a8740458791de0d278be4636619847920">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8740458791de0d278be4636619847920">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a const pointer to the value if the data type is a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a const pointer to the value if the data type is a <a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="ad0f53f0e903d09aecdbd62b956113457">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad0f53f0e903d09aecdbd62b956113457">as_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the value if the data type is a <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a>.</dd>
+            <dd>Returns a pointer to the value if the data type is a <a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a>.</dd>
             <dt id="a0b4ea781b83a3c164df24129d0e73341">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0b4ea781b83a3c164df24129d0e73341">get</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -225,11 +225,11 @@ C++</span></a>
             <dt id="a8efb92838ded8eee056a295b12f861b2">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8efb92838ded8eee056a295b12f861b2">is_date</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a local <a class="m-doc tpp-injected" href="structtoml_1_1date.html">date</a> value.</dd>
+            <dd>Returns true if this node is a local <a class="m-doc muu-injected" href="structtoml_1_1date.html">date</a> value.</dd>
             <dt id="a0de55ce6d6abe26d1a94d4e2021bd331">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0de55ce6d6abe26d1a94d4e2021bd331">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a date-<a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
+            <dd>Returns true if this node is a date-<a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a> value.</dd>
             <dt id="adf9e031d41969de6d8b55f59da72cfa3">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#adf9e031d41969de6d8b55f59da72cfa3">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -253,7 +253,7 @@ C++</span></a>
             <dt id="afa64172102844454bffe7ad2e757aace">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afa64172102844454bffe7ad2e757aace">is_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a local <a class="m-doc tpp-injected" href="structtoml_1_1time.html">time</a> value.</dd>
+            <dd>Returns true if this node is a local <a class="m-doc muu-injected" href="structtoml_1_1time.html">time</a> value.</dd>
             <dt id="a9679039a2bda46d148a8b3ff842d8702">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9679039a2bda46d148a8b3ff842d8702">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -315,8 +315,8 @@ C++</span></a>
             <dd>Value less-than operator.</dd>
             <dt id="a3559f8309f337e65ee1baba5f2130f48">
               <div class="m-doc-template">template&lt;typename Char, typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3559f8309f337e65ee1baba5f2130f48">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) -&gt; <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3559f8309f337e65ee1baba5f2130f48">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) -&gt; <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;</span>
             </dt>
             <dd>Prints the value out to a stream as formatted TOML.</dd>
             <dt>
@@ -387,7 +387,7 @@ C++</span></a>
               <div class="m-doc-template">
                 template&lt;typename ValueType&gt;
               </div>
-              using toml::<wbr/>value&lt;ValueType&gt;::<wbr/><a class="m-doc-self" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, std::string&gt;, std::string_view, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc tpp-injected tpp-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
+              using toml::<wbr/>value&lt;ValueType&gt;::<wbr/><a class="m-doc-self" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;std::is_same_v&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, std::string&gt;, std::string_view, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/conditional" target="_blank">std::conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
             </h3>
             <p>A type alias for 'value arguments'.</p>
 <p>This differs according to the value's type argument:</p><ul><li>ints, floats, booleans: <code>value_type</code></li><li>strings: <code>string_view</code></li><li>everything else: <code>const value_type&amp;</code></li></ul>
@@ -679,17 +679,17 @@ C++</span></a>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <a class="tpp-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+        <a class="muu-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 •
 
-<a class="tpp-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+<a class="muu-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
 <br/><br/>Documentation
 generated
 using
-<a class="tpp-external" href="https://mcss.mosra.cz/" target="_blank">m.css</a>
+<a class="muu-external" href="https://mcss.mosra.cz/" target="_blank">m.css</a>
       </div>
     </div>
   </div>

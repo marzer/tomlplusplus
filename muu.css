@@ -42,31 +42,41 @@ article, article > header, article div > section
 
 article div > section > section
 {
-	margin-bottom: 1.25rem;
+	margin-bottom: 2.25rem;
 }
 
-pre, code, .tpp-enable-if > a
+article section.m-doc-details > div
+{
+	background-color: rgba(0,0,0,0.07)
+}
+
+article section.m-doc-details > div > h3:first-child
+{
+	background-color: #22272e;
+}
+
+pre, code, .muu-enable-if > a
 {
 	font-family: 'Consolas', 'Source Code Pro', monospace;
 }
 
-a.tpp-external
+a.muu-external
 {
 	font-weight: normal;
 }
-pre a.tpp-external,
-pre a.tpp-injected
+pre a.muu-external,
+pre a.muu-injected
 {
 	font-weight: inherit !important;
 	color: inherit !important;
 }
 
-.tpp-enable-if
+.muu-enable-if
 {
 	margin-bottom: 2px;
 }
 
-.tpp-enable-if > *
+.muu-enable-if > *
 {
 	display: inline-block;
 	border-radius: 0.2rem;
@@ -75,7 +85,7 @@ pre a.tpp-injected
 	text-decoration: none;
 }
 
-.tpp-enable-if > a
+.muu-enable-if > a
 {
 	white-space: nowrap;
 	font-size: 0.7rem;
@@ -84,13 +94,13 @@ pre a.tpp-injected
 	color: #050505;
 }
 
-.tpp-enable-if > a:hover
+.muu-enable-if > a:hover
 {
 	background-color: #747474;
 	color: initial;
 }
 
-.tpp-enable-if > span
+.muu-enable-if > span
 {
 	display: none;
 	padding-left: 2em;
@@ -206,14 +216,14 @@ pre.m-code .cp
 }
 
 /* user types and typedefs */
-.m-code .ut,
-.m-code .nc
+pre.m-code .ut,
+pre.m-code .nc
 {
 	color: rgb(78,201,176);
 }
 
 /* namespace::scopes:: */
-.m-code .ns
+pre.m-code .ns
 {
 	color: rgb(140,140,140);
 }
