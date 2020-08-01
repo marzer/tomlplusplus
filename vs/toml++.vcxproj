@@ -54,7 +54,6 @@
     <ClInclude Include="..\include\toml++\toml_preprocessor.h" />
     <ClInclude Include="..\include\toml++\toml_print_to_stream.h" />
     <ClInclude Include="..\include\toml++\toml_table.hpp" />
-    <ClInclude Include="..\include\toml++\toml_utf8_generated.h" />
     <ClInclude Include="..\include\toml++\toml_table.h" />
     <ClInclude Include="..\include\toml++\toml_utf8.h" />
     <ClInclude Include="..\include\toml++\toml_utf8_streams.h" />
@@ -78,7 +77,6 @@
     <None Include="..\python\generate_conformance_tests.py" />
     <None Include="..\python\generate_documentation.py" />
     <None Include="..\python\generate_single_header.py" />
-    <None Include="..\python\generate_unicode_functions.py" />
     <None Include="..\python\generate_windows_test_targets.py" />
     <None Include="..\python\utils.py" />
     <None Include="..\README.md" />

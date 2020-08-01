@@ -5,15 +5,21 @@
     Thanks for contributing!
 -->
 
+
+
 **What does this change do?**
 <!--
     Changes all Foos to Bars.
 --->
 
+
+
 **Is it related to an exisiting bug report or feature request?**
 <!--
     Fixes #69.
 --->
+
+
 
 **Pre-merge checklist**
 <!--
@@ -29,6 +35,8 @@
     - [ ] GCC 7 or higher
     - [ ] Visual Studio 2019
 - [ ] I've forever enshrined myself in glory by adding myself to the list of contributors in [README.md](https://github.com/marzer/tomlplusplus/blob/master/README.md)
+
+
 
 **Anything else?**
 <!--

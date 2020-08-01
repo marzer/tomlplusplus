@@ -7,16 +7,32 @@ assignees: marzer
 
 ---
 
-Replace the _italic_ text below with the relevant information to help me understand your request.
+<!--
+    Please replace the HTML comments below with the requested information.
+    Or leave them there and put your answers above/below them; you do you!
+
+    Thanks for contributing!
+-->
+
+
 
 **Is your feature request related to a problem? Please describe.**
-_A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]_
+<!--
+    "I'd like a way to Fooify all Bars in one go. Currently I have to iterate through them and
+	do it individually myself, which is cumbersome.
+-->
+
+
 
 **Describe the solution you'd like**
-_A clear and concise description of what you want to happen._
+<!--
+    A helper function like fooify_all_bars() would be great.
+-->
 
-**Describe alternatives you've considered**
-_A clear and concise description of any alternative solutions or features you've considered._
+
+
 
 **Additional context**
-_Add any other context or screenshots about the feature request here._
+<!--
+    Add any other context or screenshots about the feature request here.
+-->

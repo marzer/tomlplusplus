@@ -12,6 +12,7 @@ import traceback
 import shutil
 import fnmatch
 import requests
+import hashlib
 
 
 
@@ -19,9 +20,12 @@ def is_tool(name):
 	return shutil.which(name) is not None
 
 
-
+__script_folder = None
 def get_script_folder():
-	return path.dirname(path.realpath(sys.argv[0]))
+	global __script_folder
+	if __script_folder is None:
+		__script_folder = path.dirname(path.realpath(sys.argv[0]))
+	return __script_folder
 
 
 
@@ -158,11 +162,23 @@ def hash_combine(current_hash, next_hash, *nexts):
 
 
 def multi_hash(obj, *objs):
+	assert obj is not None
 	h = hash(obj)
 	if objs:
 		for o in objs:
+			assert o is not None
 			h = hash_combine(h, hash(o))
 	return h
+
+
+
+def multi_sha256(*objs):
+	assert objs
+	h = hashlib.sha256()
+	for o in objs:
+		assert o is not None
+		h.update(str(o).encode('utf-8'))
+	return h.hexdigest()
 
 
 

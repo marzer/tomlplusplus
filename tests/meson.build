@@ -20,7 +20,6 @@ test_sources = [
 	'manipulating_tables.cpp',
 	'manipulating_values.cpp',
 	'unicode.cpp',
-	'unicode_generated.cpp',
 	'user_feedback.cpp',
 	'windows_compat.cpp'
 ]
@@ -333,6 +332,10 @@ locales = [
 
 foreach executable : executables
 	foreach locale : locales
-		test(executable[0] + ' (' + locale + ')', executable[1], env : ['LC_ALL=' + locale])
+		test(
+			executable[0] + ' (' + locale + ')', executable[1],
+			env : ['LC_ALL=' + locale],
+			workdir : meson.source_root() / 'tests'
+		)
 	endforeach
 endforeach

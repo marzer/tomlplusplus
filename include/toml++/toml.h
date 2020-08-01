@@ -19,7 +19,6 @@
 #include "toml_array.h"
 #include "toml_table.h"
 #include "toml_node_view.h"
-#include "toml_utf8_generated.h"
 #include "toml_utf8.h"
 #include "toml_formatter.h"
 #include "toml_default_formatter.h"

@@ -89,6 +89,8 @@ namespace toml // non-abi namespace; this is not an error
 	using ::std::uint16_t;
 	using ::std::uint32_t;
 	using ::std::uint64_t;
+	using ::std::uint_least32_t;
+	using ::std::uint_least64_t;
 
 	// legacy typedefs
 	using string_char = char;

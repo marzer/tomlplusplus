@@ -40,9 +40,6 @@
     <ClInclude Include="..\include\toml++\toml_utf8.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\toml++\toml_utf8_generated.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\toml++\toml_value.h">
       <Filter>include</Filter>
     </ClInclude>
@@ -93,9 +90,6 @@
       <Filter>python</Filter>
     </None>
     <None Include="..\python\generate_single_header.py">
-      <Filter>python</Filter>
-    </None>
-    <None Include="..\python\generate_unicode_functions.py">
       <Filter>python</Filter>
     </None>
     <None Include="..\docs\Doxyfile">

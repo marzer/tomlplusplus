@@ -119,7 +119,6 @@ def main():
 			<PrecompiledHeader>Create</PrecompiledHeader>
 		</ClCompile>
 		<ClCompile Include="..\..\tests\unicode.cpp" />
-		<ClCompile Include="..\..\tests\unicode_generated.cpp" />
 		<ClCompile Include="..\..\tests\user_feedback.cpp" />
 		<ClCompile Include="..\..\tests\windows_compat.cpp" />
 	</ItemGroup>
@@ -132,7 +131,6 @@ def main():
 		<ClInclude Include="..\..\tests\settings.h" />
 		<ClInclude Include="..\..\tests\tests.h" />
 		<ClInclude Include="..\..\tests\tloptional.h" />
-		<ClInclude Include="..\..\tests\unicode.h" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\..\tests\meson.build" />
