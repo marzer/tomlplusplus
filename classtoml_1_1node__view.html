@@ -195,6 +195,20 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a43ea3eed7b0f133fa7d752a9322c758e">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the viewed node is a <a class="m-doc muu-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType = void&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a29c82d83b1d64f016eb42f95fd37e346">is_homogeneous</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Checks if the viewed node contains values/elements of only one type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afe0abd51e0e108b306be2a3ee9561cca">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Checks if the viewed node contains values/elements of only one type.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2a2902064421f401e80ea687cef536da">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              viewed_type*&amp; first_nonmatch) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Checks if the viewed node contains values/elements of only one type.</dd>
             <dt id="ab9c835ddf017f250d84fa5d5736e8520">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab9c835ddf017f250d84fa5d5736e8520">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -368,6 +382,115 @@ C++</span></a>
               </tfoot>
             </table>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a03e1bbe1a0640953b7105fe40c733118">toml::<wbr/>node::<wbr/>is()</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a29c82d83b1d64f016eb42f95fd37e346"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ViewedType&gt;
+                template&lt;typename ElemType = void&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>node_view&lt;ViewedType&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a29c82d83b1d64f016eb42f95fd37e346">is_homogeneous</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks if the viewed node contains values/elements of only one type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td>A TOML node or value type.<br/><strong><em>Left as <code>void</code>:</em></strong> "is every element the same type?"<br/><strong><em>Explicitly specified:</em></strong> "is every element a T?"</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the viewed node was homogeneous.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3 ]"</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous:   "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all doubles:  "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="o">&lt;</span><span class="ut">double</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays:   "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all integers: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="o">&lt;</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
+<span class="go">all floats:  false</span>
+<span class="go">all arrays:  false</span>
+<span class="go">all ints:    true</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> if the view does not reference a node, or if the viewed node is an empty table or array.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="afe0abd51e0e108b306be2a3ee9561cca"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ViewedType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>node_view&lt;ViewedType&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afe0abd51e0e108b306be2a3ee9561cca">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks if the viewed node contains values/elements of only one type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ntype</td>
+                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?"<br/><strong><em>Anything else:</em></strong> "is every element one of these?"</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the viewed node was homogeneous.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3 ]"</span><span class="p">);</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">node_type</span><span class="o">::</span><span class="n">none</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all floats: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">node_type</span><span class="o">::</span><span class="n">floating_point</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">node_type</span><span class="o">::</span><span class="ut">array</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all ints:   "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">node_type</span><span class="o">::</span><span class="n">integer</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
+<span class="go">all floats:  false</span>
+<span class="go">all arrays:  false</span>
+<span class="go">all ints:    true</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> if the view does not reference a node, or if the viewed node is an empty table or array.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a2a2902064421f401e80ea687cef536da"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ViewedType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>node_view&lt;ViewedType&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2a2902064421f401e80ea687cef536da">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              viewed_type*&amp; first_nonmatch) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks if the viewed node contains values/elements of only one type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ntype</td>
+                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?"<br/><strong><em>Anything else:</em></strong> "is every element one of these?"</td>
+                </tr>
+                <tr>
+                  <td>first_nonmatch</td>
+                  <td>Reference to a pointer in which the address of the first non-matching element will be stored if the return value is false.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the viewed node was homogeneous.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3, 4.0 ]"</span><span class="p">);</span>
+
+<span class="ns">toml::</span><span class="ut">node</span><span class="o">*</span> <span class="n">nonmatch</span><span class="p">{};</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml::</span><span class="ut">node_type</span><span class="o">::</span><span class="n">integer</span><span class="p">,</span> <span class="n">nonmatch</span><span class="p">))</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was homogeneous"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was not homogeneous!</span><span class="se">\n</span><span class="s">"</span>
+    <span class="o">&lt;&lt;</span> <span class="s">"first non-match was a "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" at "</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">array was not homogeneous!</span>
+<span class="go">first non-match was a floating-point at line 1, column 18</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> if the view does not reference a node, or if the viewed node is an empty table or array.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a5d13b026efcd31812415ead30eeb69db"><div>
             <h3>
