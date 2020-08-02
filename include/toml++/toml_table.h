@@ -278,16 +278,29 @@ TOML_NAMESPACE_START
 				: table{ arr, N }
 			{}
 
-			/// \brief	Always returns `node_type::table` for table nodes.
 			[[nodiscard]] node_type type() const noexcept override;
-			/// \brief	Always returns `true` for table nodes.
 			[[nodiscard]] bool is_table() const noexcept override;
-			/// \brief	Always returns `false` for table nodes.
 			[[nodiscard]] bool is_array() const noexcept override;
-			/// \brief	Always returns `false` for table nodes.
 			[[nodiscard]] bool is_value() const noexcept override;
 			[[nodiscard]] table* as_table() noexcept override;
 			[[nodiscard]] const table* as_table() const noexcept override;
+
+			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of table::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+				return is_homogeneous(impl::node_type_of<type>);
+			}
 
 			/// \brief	Returns true if this table is an inline table.
 			/// 
@@ -1083,6 +1096,49 @@ TOML_NAMESPACE_START
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
+
+	#ifndef DOXYGEN
+
+
+
+	//template <typename T>
+	//inline std::vector<T> node::select_exact() const noexcept
+	//{
+	//	using namespace impl;
+
+	//	static_assert(
+	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//		"Retrieving values as wide-character strings with node::select_exact() is only "
+	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//	);
+
+	//	static_assert(
+	//		(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
+	//		TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::select_exact()")
+	//	);
+	//}
+
+	//template <typename T>
+	//inline std::vector<T> node::select() const noexcept
+	//{
+	//	using namespace impl;
+
+	//	static_assert(
+	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//		"Retrieving values as wide-character strings with node::select() is only "
+	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//	);
+	//	static_assert(
+	//		(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
+	//		TOML_SA_VALUE_FUNC_MESSAGE("return type of node::select()")
+	//	);
+	//}
+
+
+
+
+
+	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END
 

@@ -7,6 +7,65 @@
 #include "toml_node.h"
 #include "toml_print_to_stream.h"
 
+#ifndef DOXYGEN
+	#if TOML_WINDOWS_COMPAT
+		#define TOML_SA_VALUE_MESSAGE_WSTRING			TOML_SA_LIST_SEP "std::wstring"
+	#else
+		#define TOML_SA_VALUE_MESSAGE_WSTRING
+	#endif
+
+	#ifdef __cpp_lib_char8_t
+		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW		TOML_SA_LIST_SEP "std::u8string_view"
+		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8		TOML_SA_LIST_SEP "const char8_t*"
+	#else
+		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
+		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8
+	#endif
+
+	#define TOML_SA_VALUE_EXACT_FUNC_MESSAGE(type_arg)															\
+		"The " type_arg " must be one of:"																		\
+		TOML_SA_LIST_NEW "A native TOML value type"																\
+		TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
+		TOML_SA_LIST_BEG "std::string"																			\
+		TOML_SA_VALUE_MESSAGE_WSTRING																			\
+		TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
+		TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
+		TOML_SA_LIST_BEG "std::string_view"																		\
+		TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
+		TOML_SA_LIST_SEP "const char*"																			\
+		TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+		TOML_SA_LIST_END
+
+	#define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
+		"The " type_arg " must be one of:"																		\
+		TOML_SA_LIST_NEW "A native TOML value type"																\
+		TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
+		TOML_SA_LIST_BEG "std::string"																			\
+		TOML_SA_VALUE_MESSAGE_WSTRING																			\
+		TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
+		TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"		\
+		TOML_SA_LIST_BEG "any other integer type"																\
+		TOML_SA_LIST_SEP "any floating-point type >= 32 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
+		TOML_SA_LIST_BEG "std::string_view"																		\
+		TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
+		TOML_SA_LIST_SEP "const char*"																			\
+		TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+		TOML_SA_LIST_END
+#endif // !DOXYGEN
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -218,11 +277,8 @@ TOML_NAMESPACE_START
 			/// 			- node_type::date_time
 			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<value_type>; }
 
-			/// \brief	Always returns `false` for value nodes.
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
-			/// \brief	Always returns `false` for value nodes.
 			[[nodiscard]] bool is_array() const noexcept override { return false; }
-			/// \brief	Always returns `true` for value nodes.
 			[[nodiscard]] bool is_value() const noexcept override { return true; }
 
 			[[nodiscard]] bool is_string() const noexcept override { return std::is_same_v<value_type, std::string>; }
@@ -234,35 +290,65 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<value_type, time>; }
 			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<value_type, date_time>; }
 
-			/// \brief	Returns a pointer to the value if the data type is a string.
 			[[nodiscard]] value<std::string>* as_string() noexcept override { return as_value<std::string>(this); }
-			/// \brief	Returns a pointer to the value if the data type is an integer.
 			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
-			/// \brief	Returns a pointer to the value if the data type is a floating-point.
 			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
-			/// \brief	Returns a pointer to the value if the data type is boolean.
 			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
-			/// \brief	Returns a pointer to the value if the data type is a date.
 			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
-			/// \brief	Returns a pointer to the value if the data type is a time.
 			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
-			/// \brief	Returns a pointer to the value if the data type is date-time.
 			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
 
-			/// \brief	Returns a const pointer to the value if the data type is a string.
 			[[nodiscard]] const value<std::string>* as_string() const noexcept override { return as_value<std::string>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is an integer.
 			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is a floating-point.
 			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is a boolean.
 			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is a date.
 			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is a time.
 			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
-			/// \brief	Returns a const pointer to the value if the data type is a date-time.
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
+
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype) const noexcept override
+			{
+				return ntype == node_type::none || ntype == impl::node_type_of<value_type>;
+			}
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept override
+			{
+				if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+				{
+					first_nonmatch = this;
+					return false;
+				}
+				return true;
+			}
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept override
+			{
+				if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+				{
+					first_nonmatch = this;
+					return false;
+				}
+				return true;
+			}
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of value::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+
+				using type = impl::unwrap_node<ElemType>;
+				if constexpr (std::is_void_v<type>)
+					return true;
+				else
+					return impl::node_type_of<type> == impl::node_type_of<value_type>;
+			}
 
 			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] value_type& get() & noexcept { return val_; }
@@ -315,8 +401,8 @@ TOML_NAMESPACE_START
 					using namespace impl;
 					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
 					{
-						return (static_cast<uint64_t>(unbox_enum(l)) << 32)
-							| static_cast<uint64_t>(unbox_enum(r));
+						return (static_cast<uint64_t>(unwrap_enum(l)) << 32)
+							| static_cast<uint64_t>(unwrap_enum(r));
 					};
 					
 					switch (pack(impl::fpclassify(lhs.val_), impl::fpclassify(rhs)))
@@ -467,6 +553,9 @@ TOML_NAMESPACE_START
 	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
 	#ifndef DOXYGEN
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_INIT_WARNINGS
+	TOML_DISABLE_SWITCH_WARNINGS
 
 	#if !TOML_HEADER_ONLY
 		extern template class TOML_API value<std::string>;
@@ -477,10 +566,6 @@ TOML_NAMESPACE_START
 		extern template class TOML_API value<time>;
 		extern template class TOML_API value<date_time>;
 	#endif
-	
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_INIT_WARNINGS
-	TOML_DISABLE_SWITCH_WARNINGS
 
 	template <typename T>
 	[[nodiscard]]
@@ -543,29 +628,7 @@ TOML_NAMESPACE_START
 
 		static_assert(
 			(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value_exact() must be one of:"
-			TOML_SA_LIST_NEW "A native TOML value type"
-			TOML_SA_NATIVE_VALUE_TYPE_LIST
-
-			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
-			TOML_SA_LIST_BEG "std::string"
-			#if TOML_WINDOWS_COMPAT
-			TOML_SA_LIST_SEP "std::wstring"
-			#endif
-			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
-			TOML_SA_LIST_BEG "std::string_view"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "std::u8string_view"
-			#endif
-			TOML_SA_LIST_SEP "const char*"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "const char8_t*"
-			#endif
-			TOML_SA_LIST_END
+			TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::value_exact()")
 		);
 
 		// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
@@ -590,34 +653,7 @@ TOML_NAMESPACE_START
 		);
 		static_assert(
 			(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value() must be one of:"
-			TOML_SA_LIST_NEW "A native TOML value type"
-			TOML_SA_NATIVE_VALUE_TYPE_LIST
-
-			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
-			TOML_SA_LIST_BEG "std::string"
-			#if TOML_WINDOWS_COMPAT
-			TOML_SA_LIST_SEP "std::wstring"
-			#endif
-			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
-			TOML_SA_LIST_BEG "any other integer type"
-			TOML_SA_LIST_SEP "any floating-point type >= 32 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
-			TOML_SA_LIST_BEG "std::string_view"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "std::u8string_view"
-			#endif
-			TOML_SA_LIST_SEP "const char*"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "const char8_t*"
-			#endif
-			TOML_SA_LIST_END
+			TOML_SA_VALUE_FUNC_MESSAGE("return type of node::value()")
 		);
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
@@ -760,7 +796,7 @@ TOML_NAMESPACE_START
 
 			static_assert(
 				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
-				"The default return value type of node::value_or() must be one of:"
+				"The default value type of node::value_or() must be one of:"
 				TOML_SA_LIST_NEW "A native TOML value type"
 				TOML_SA_NATIVE_VALUE_TYPE_LIST
 
@@ -799,6 +835,11 @@ TOML_NAMESPACE_START
 			// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
 			if constexpr (traits::is_native || traits::can_represent_native || traits::can_partially_represent_native)
 			{
+				if constexpr (traits::is_native)
+				{
+					if (type() == node_type_of<value_type>)
+						return *ref_cast<typename traits::native_type>();
+				}
 				if (auto val = this->value<value_type>())
 					return *val;
 				if constexpr (std::is_pointer_v<value_type>)
@@ -858,7 +899,6 @@ TOML_NAMESPACE_START
 	#endif // !TOML_HEADER_ONLY
 
 	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
-
 	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END

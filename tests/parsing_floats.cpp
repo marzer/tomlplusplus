@@ -5,8 +5,6 @@
 
 #include "tests.h"
 
-TOML_DISABLE_ARITHMETIC_WARNINGS
-
 TEST_CASE("parsing - floats")
 {
 	parsing_should_succeed(

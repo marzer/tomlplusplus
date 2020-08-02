@@ -179,6 +179,110 @@ TOML_NAMESPACE_START
 			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
+			/// \brief	Checks if the viewed node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto cfg = toml::parse("arr = [ 1, 2, 3, 4.0 ]");
+			/// 
+			/// toml::node* nonmatch{};
+			/// if (cfg["arr"].is_homogeneous(toml::node_type::integer, nonmatch))
+			/// 	std::cout << "array was homogeneous"sv << "\n";
+			/// else
+			/// 	std::cout << "array was not homogeneous!\n"
+			/// 	<< "first non-match was a "sv << nonmatch->type() << " at " << nonmatch->source() << "\n";
+			/// \ecpp
+			/// 
+			/// \out
+			/// array was not homogeneous!
+			///	first non-match was a floating-point at line 1, column 18
+			/// \eout
+			/// 
+			/// \param	ntype			A TOML node type. <br>
+			/// 						<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
+			/// 						<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// \param first_nonmatch	Reference to a pointer in which the address of the first non-matching element
+			/// 						will be stored if the return value is false.
+			///
+			/// \returns	True if the viewed node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` if the view does not reference a node, or if the viewed node is
+			/// 			an empty table or array.
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, viewed_type*& first_nonmatch) const noexcept
+			{
+				if (!node_)
+				{
+					first_nonmatch = {};
+					return false;
+				}
+				return node_->is_homogeneous(ntype, first_nonmatch);
+			}
+
+			/// \brief	Checks if the viewed node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto cfg = toml::parse("arr = [ 1, 2, 3 ]");
+			/// std::cout << "homogenous: "sv << cfg["arr"].is_homogeneous(toml::node_type::none) << "\n";
+			/// std::cout << "all floats: "sv << cfg["arr"].is_homogeneous(toml::node_type::floating_point) << "\n";
+			/// std::cout << "all arrays: "sv << cfg["arr"].is_homogeneous(toml::node_type::array) << "\n";
+			/// std::cout << "all ints:   "sv << cfg["arr"].is_homogeneous(toml::node_type::integer) << "\n";
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// homogeneous: true
+			/// all floats:  false
+			/// all arrays:  false
+			/// all ints:    true
+			/// \eout
+			/// 
+			/// \param	ntype	A TOML node type. <br>
+			/// 				<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
+			/// 				<strong><em>Anything else:</em></strong> "is every element one of these?"
+			///
+			/// \returns	True if the viewed node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` if the view does not reference a node, or if the viewed node is
+			/// 			an empty table or array.
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype) const noexcept
+			{
+				return node_ ? node_->is_homogeneous(ntype) : false;
+			}
+
+			/// \brief	Checks if the viewed node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto cfg = toml::parse("arr = [ 1, 2, 3 ]");
+			/// std::cout << "homogenous:   "sv << cfg["arr"].is_homogeneous() << "\n";
+			/// std::cout << "all doubles:  "sv << cfg["arr"].is_homogeneous<double>() << "\n";
+			/// std::cout << "all arrays:   "sv << cfg["arr"].is_homogeneous<toml::array>() << "\n";
+			/// std::cout << "all integers: "sv << cfg["arr"].is_homogeneous<int64_t>() << "\n";
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// homogeneous: true
+			/// all floats:  false
+			/// all arrays:  false
+			/// all ints:    true
+			/// \eout
+			/// 
+			/// \tparam	ElemType	A TOML node or value type. <br>
+			/// 					<strong><em>Left as `void`:</em></strong> "is every element the same type?" <br>
+			/// 					<strong><em>Explicitly specified:</em></strong> "is every element a T?"
+			///
+			/// \returns	True if the viewed node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` if the view does not reference a node, or if the viewed node is
+			/// 			an empty table or array.
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				return node_ ? node_->template is_homogeneous<impl::unwrap_node<ElemType>>() : false;
+			}
+
 			/// \brief	Gets the value contained by the referenced node.
 			///
 			/// \detail This function has 'exact' retrieval semantics; the only return value types allowed are the

@@ -195,6 +195,104 @@ TOML_NAMESPACE_START
 			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
 			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
 
+			/// \brief	Checks if a node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto cfg = toml::parse("arr = [ 1, 2, 3, 4.0 ]");
+			/// toml::array& arr = *cfg["arr"].as_array();
+			/// 
+			/// toml::node* nonmatch{};
+			/// if (arr.is_homogeneous(toml::node_type::integer, nonmatch))
+			/// 	std::cout << "array was homogeneous"sv << "\n";
+			/// else
+			/// 	std::cout << "array was not homogeneous!\n"
+			/// 	<< "first non-match was a "sv << nonmatch->type() << " at " << nonmatch->source() << "\n";
+			/// \ecpp
+			/// 
+			/// \out
+			/// array was not homogeneous!
+			///	first non-match was a floating-point at line 1, column 18
+			/// \eout
+			/// 
+			/// \param	ntype			A TOML node type. <br>
+			/// 						<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
+			/// 						<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// \param first_nonmatch	Reference to a pointer in which the address of the first non-matching element
+			/// 						will be stored if the return value is false.
+			///
+			/// \returns	True if the node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` for empty tables and arrays.
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept = 0;
+
+			/// \brief	Checks if a node contains values/elements of only one type (const overload).
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept = 0;
+
+			/// \brief	Checks if the node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto arr = toml::array{ 1, 2, 3 };
+			/// std::cout << "homogenous: "sv << arr.is_homogeneous(toml::node_type::none) << "\n";
+			/// std::cout << "all floats: "sv << arr.is_homogeneous(toml::node_type::floating_point) << "\n";
+			/// std::cout << "all arrays: "sv << arr.is_homogeneous(toml::node_type::array) << "\n";
+			/// std::cout << "all ints:   "sv << arr.is_homogeneous(toml::node_type::integer) << "\n";
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// homogeneous: true
+			/// all floats:  false
+			/// all arrays:  false
+			/// all ints:    true
+			/// \eout
+			/// 
+			/// \param	ntype	A TOML node type. <br>
+			/// 				<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
+			/// 				<strong><em>Anything else:</em></strong> "is every element one of these?"
+			///
+			/// \returns	True if the node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` for empty tables and arrays.
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype) const noexcept = 0;
+
+			/// \brief	Checks if the node contains values/elements of only one type.
+			///
+			/// \detail \cpp
+			/// auto arr = toml::array{ 1, 2, 3 };
+			/// std::cout << "homogenous:   "sv << arr.is_homogeneous() << "\n";
+			/// std::cout << "all doubles:  "sv << arr.is_homogeneous<double>() << "\n";
+			/// std::cout << "all arrays:   "sv << arr.is_homogeneous<toml::array>() << "\n";
+			/// std::cout << "all integers: "sv << arr.is_homogeneous<int64_t>() << "\n";
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// homogeneous: true
+			/// all floats:  false
+			/// all arrays:  false
+			/// all ints:    true
+			/// \eout
+			/// 
+			/// \tparam	ElemType	A TOML node or value type. <br>
+			/// 					<strong><em>Left as `void`:</em></strong> "is every element the same type?" <br>
+			/// 					<strong><em>Explicitly specified:</em></strong> "is every element a T?"
+			///
+			/// \returns	True if the node was homogeneous.
+			/// 
+			/// \remarks	Always returns `false` for empty tables and arrays.
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of node::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+				return is_homogeneous(impl::node_type_of<type>);
+			}
 
 		private:
 
@@ -376,6 +474,14 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			auto value_or(T&& default_value) const noexcept;
+
+			//template <typename T>
+			//[[nodiscard]]
+			//std::vector<T> select_exact() const noexcept;
+
+			//template <typename T>
+			//[[nodiscard]]
+			//std::vector<T> select() const noexcept;
 
 			/// \brief	Gets a pointer to the node as a more specific node type.
 			///

@@ -549,6 +549,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T> struct node_type_getter { static constexpr auto value = value_traits<T>::type; };
 	template <>           struct node_type_getter<table> { static constexpr auto value = node_type::table; };
 	template <>           struct node_type_getter<array> { static constexpr auto value = node_type::array; };
+	template <>           struct node_type_getter<void>  { static constexpr auto value = node_type::none; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
 
@@ -611,7 +612,7 @@ TOML_IMPL_NAMESPACE_START
 	[[nodiscard]]
 	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
-	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
+	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}

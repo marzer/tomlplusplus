@@ -26,27 +26,63 @@ TEST_CASE("parsing - arrays")
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["integers"].as<array>());
+			CHECK(tbl["integers"].is_homogeneous());
+			CHECK(tbl["integers"].is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers"].is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers"].is_homogeneous<int64_t>());
+			CHECK(!tbl["integers"].is_homogeneous<double>());
 			CHECK(tbl["integers"].as<array>()->is_homogeneous());
+			CHECK(tbl["integers"].as<array>()->is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers"].as<array>()->is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers"].as<array>()->is_homogeneous<int64_t>());
+			CHECK(!tbl["integers"].as<array>()->is_homogeneous<double>());
 			CHECK(tbl["integers"].as<array>()->size() == 3);
 			CHECK(tbl["integers"][0] == 1);
 			CHECK(tbl["integers"][1] == 2);
 			CHECK(tbl["integers"][2] == 3);
 
 			REQUIRE(tbl["integers2"].as<array>());
+			CHECK(tbl["integers2"].is_homogeneous());
+			CHECK(tbl["integers2"].is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers2"].is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers2"].is_homogeneous<int64_t>());
+			CHECK(!tbl["integers2"].is_homogeneous<double>());
 			CHECK(tbl["integers2"].as<array>()->is_homogeneous());
+			CHECK(tbl["integers2"].as<array>()->is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers2"].as<array>()->is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers2"].as<array>()->is_homogeneous<int64_t>());
+			CHECK(!tbl["integers2"].as<array>()->is_homogeneous<double>());
 			CHECK(tbl["integers2"].as<array>()->size() == 3);
 			CHECK(tbl["integers2"][0] == 1);
 			CHECK(tbl["integers2"][1] == 2);
 			CHECK(tbl["integers2"][2] == 3);
 
 			REQUIRE(tbl["integers3"].as<array>());
+			CHECK(tbl["integers3"].is_homogeneous());
+			CHECK(tbl["integers3"].is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers3"].is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers3"].is_homogeneous<int64_t>());
+			CHECK(!tbl["integers3"].is_homogeneous<double>());
 			CHECK(tbl["integers3"].as<array>()->is_homogeneous());
+			CHECK(tbl["integers3"].as<array>()->is_homogeneous(node_type::integer));
+			CHECK(!tbl["integers3"].as<array>()->is_homogeneous(node_type::floating_point));
+			CHECK(tbl["integers3"].as<array>()->is_homogeneous<int64_t>());
+			CHECK(!tbl["integers3"].as<array>()->is_homogeneous<double>());
 			CHECK(tbl["integers3"].as<array>()->size() == 2);
 			CHECK(tbl["integers3"][0] == 1);
 			CHECK(tbl["integers3"][1] == 2);
 
 			REQUIRE(tbl["colors"].as<array>());
+			CHECK(tbl["colors"].is_homogeneous());
+			CHECK(tbl["colors"].is_homogeneous(node_type::string));
+			CHECK(!tbl["colors"].is_homogeneous(node_type::floating_point));
+			CHECK(tbl["colors"].is_homogeneous<std::string>());
+			CHECK(!tbl["colors"].is_homogeneous<double>());
 			CHECK(tbl["colors"].as<array>()->is_homogeneous());
+			CHECK(tbl["colors"].as<array>()->is_homogeneous(node_type::string));
+			CHECK(!tbl["colors"].as<array>()->is_homogeneous(node_type::floating_point));
+			CHECK(tbl["colors"].as<array>()->is_homogeneous<std::string>());
+			CHECK(!tbl["colors"].as<array>()->is_homogeneous<double>());
 			CHECK(tbl["colors"].as<array>()->size() == 3);
 			CHECK(tbl["colors"][0] == "red"sv);
 			CHECK(tbl["colors"][1] == "yellow"sv);

@@ -97,6 +97,9 @@ TEST_CASE("feedback - github/pull/50")
 		REQUIRE(val->is_number());
 		REQUIRE(val->is_integer());
 		REQUIRE(val->ref<int64_t>() == 10);
+		REQUIRE(val->value<int64_t>() == 10);
+		REQUIRE(val->value_or(0) == 10);
 		REQUIRE(val->value<double>() == 10.0);
+		REQUIRE(val->value_or(0.0) == 10.0);
 	}
 }

@@ -83,7 +83,7 @@ TOML_ANON_NAMESPACE_START
 	{
 		using namespace ::toml::impl;
 
-		return node_type_friendly_names[unbox_enum(val)];
+		return node_type_friendly_names[unwrap_enum(val)];
 	}
 
 	[[nodiscard]]
@@ -2068,7 +2068,7 @@ TOML_IMPL_NAMESPACE_START
 					// all correct value parses will come out of this list, so doing this as a switch is likely to
 					// be a better friend to the optimizer on the success path (failure path can be slow but that
 					// doesn't matter much).
-					switch (unbox_enum(traits))
+					switch (unwrap_enum(traits))
 					{
 						//=================== binary integers
 						// 0b10

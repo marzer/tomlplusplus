@@ -105,6 +105,63 @@ TOML_NAMESPACE_START
 	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype) const noexcept
+	{
+		if (map.empty())
+			return false;
+		
+		if (ntype == node_type::none)
+			ntype = map.cbegin()->second->type();
+
+		for (const auto& [k, v] : map)
+		{
+			(void)k;
+			if (v->type() != ntype)
+				return false;
+		}
+
+		return true;
+	}
+
+	namespace impl
+	{
+		template <typename T, typename U>
+		TOML_INTERNAL_LINKAGE
+		bool table_is_homogeneous(T& map, node_type ntype, U& first_nonmatch) noexcept
+		{
+			if (map.empty())
+			{
+				first_nonmatch = {};
+				return false;
+			}
+			if (ntype == node_type::none)
+				ntype = map.cbegin()->second->type();
+			for (const auto& [k, v] : map)
+			{
+				(void)k;
+				if (v->type() != ntype)
+				{
+					first_nonmatch = v.get();
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept
+	{
+		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
+	{
+		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::string_view key) noexcept
 	{
 		return { this->get(key) };

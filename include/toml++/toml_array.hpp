@@ -114,6 +114,59 @@ TOML_NAMESPACE_START
 	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype) const noexcept
+	{
+		if (elements.empty())
+			return false;
+		
+		if (ntype == node_type::none)
+			ntype = elements[0]->type();
+
+		for (const auto& val : elements)
+			if (val->type() != ntype)
+				return false;
+
+		return true;
+	}
+
+	namespace impl
+	{
+		template <typename T, typename U>
+		TOML_INTERNAL_LINKAGE
+		bool array_is_homogeneous(T& elements, node_type ntype, U& first_nonmatch) noexcept
+		{
+			if (elements.empty())
+			{
+				first_nonmatch = {};
+				return false;
+			}
+			if (ntype == node_type::none)
+				ntype = elements[0]->type();
+			for (const auto& val : elements)
+			{
+				if (val->type() != ntype)
+				{
+					first_nonmatch = val.get();
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept
+	{
+		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
+	{
+		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void array::truncate(size_t new_size)
 	{
 		if (new_size < elements.size())
@@ -261,22 +314,6 @@ TOML_NAMESPACE_START
 		}
 
 		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool array::is_homogeneous(node_type type) const noexcept
-	{
-		if (elements.empty())
-			return false;
-
-		if (type == node_type::none)
-			type = elements[0]->type();
-
-		for (const auto& val : elements)
-			if (val->type() != type)
-				return false;
-
-		return true;
 	}
 
 	TOML_EXTERNAL_LINKAGE

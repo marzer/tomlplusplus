@@ -18,15 +18,15 @@
 	#include "../include/toml++/toml.h"
 #endif
 
+TOML_DISABLE_ARITHMETIC_WARNINGS
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ALL_WARNINGS
-
 #include "catch2.h"
 #include <sstream>
 namespace toml {}
 using namespace Catch::literals;
 using namespace toml;
-
 TOML_POP_WARNINGS
 
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
@@ -115,9 +115,6 @@ bool parsing_should_fail(
 	uint32_t test_line,
 	std::string_view toml_str);
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ARITHMETIC_WARNINGS
-
 template <typename T>
 inline bool parse_expected_value(
 	std::string_view test_file,
@@ -197,6 +194,28 @@ inline bool parse_expected_value(
 				REQUIRE(nv.node()->is<value_type>());
 				REQUIRE(nv.node()->as<value_type>());
 				REQUIRE(nv.node()->type() == impl::node_type_of<T>);
+
+				// check homogeneity
+				REQUIRE(nv.is_homogeneous());
+				REQUIRE(nv.is_homogeneous(node_type::none));
+				REQUIRE(nv.is_homogeneous(impl::node_type_of<T>));
+				REQUIRE(nv.is_homogeneous<value_type>());
+				REQUIRE(nv.node()->is_homogeneous());
+				REQUIRE(nv.node()->is_homogeneous(node_type::none));
+				REQUIRE(nv.node()->is_homogeneous(impl::node_type_of<T>));
+				REQUIRE(nv.node()->is_homogeneous<value_type>());
+				for (auto nt = impl::unwrap_enum(node_type::table); nt <= impl::unwrap_enum(node_type::date_time); nt++)
+				{
+					if (node_type{ nt } == impl::node_type_of<T>)
+						continue;
+					node* first_nonmatch{};
+					REQUIRE(!nv.is_homogeneous(node_type{ nt }));
+					REQUIRE(!nv.is_homogeneous(node_type{ nt }, first_nonmatch));
+					REQUIRE(first_nonmatch == nv.node());
+					REQUIRE(!nv.node()->is_homogeneous(node_type{ nt }));
+					REQUIRE(!nv.node()->is_homogeneous(node_type{ nt }, first_nonmatch));
+					REQUIRE(first_nonmatch == nv.node());
+				}
 
 				// check the raw value
 				REQUIRE(nv.node()->value<value_type>() == expected);
@@ -305,5 +324,3 @@ namespace Catch
 		extern template std::string stringify(const node_view<const node>&);
 	}
 }
-
-TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS

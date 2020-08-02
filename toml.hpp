@@ -1066,6 +1066,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T> struct node_type_getter { static constexpr auto value = value_traits<T>::type; };
 	template <>           struct node_type_getter<table> { static constexpr auto value = node_type::table; };
 	template <>           struct node_type_getter<array> { static constexpr auto value = node_type::array; };
+	template <>           struct node_type_getter<void>  { static constexpr auto value = node_type::none; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
 
@@ -1114,7 +1115,7 @@ TOML_IMPL_NAMESPACE_START
 	[[nodiscard]]
 	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
-	constexpr std::underlying_type_t<T> unbox_enum(T val) noexcept
+	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
@@ -2180,6 +2181,23 @@ TOML_NAMESPACE_START
 			[[nodiscard]] virtual const toml::value<date>* as_date() const noexcept;
 			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
 			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept = 0;
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept = 0;
+			[[nodiscard]] virtual bool is_homogeneous(node_type ntype) const noexcept = 0;
+
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of node::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+				return is_homogeneous(impl::node_type_of<type>);
+			}
 
 		private:
 
@@ -2204,6 +2222,14 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			auto value_or(T&& default_value) const noexcept;
+
+			//template <typename T>
+			//[[nodiscard]]
+			//std::vector<T> select_exact() const noexcept;
+
+			//template <typename T>
+			//[[nodiscard]]
+			//std::vector<T> select() const noexcept;
 
 			template <typename T>
 			[[nodiscard]]
@@ -2474,6 +2500,65 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 //------------------------------------------  ↓ toml_value.h  ----------------------------------------------------------
 #if 1
 
+#ifndef DOXYGEN
+	#if TOML_WINDOWS_COMPAT
+		#define TOML_SA_VALUE_MESSAGE_WSTRING			TOML_SA_LIST_SEP "std::wstring"
+	#else
+		#define TOML_SA_VALUE_MESSAGE_WSTRING
+	#endif
+
+	#ifdef __cpp_lib_char8_t
+		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW		TOML_SA_LIST_SEP "std::u8string_view"
+		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8		TOML_SA_LIST_SEP "const char8_t*"
+	#else
+		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
+		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8
+	#endif
+
+	#define TOML_SA_VALUE_EXACT_FUNC_MESSAGE(type_arg)															\
+		"The " type_arg " must be one of:"																		\
+		TOML_SA_LIST_NEW "A native TOML value type"																\
+		TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
+		TOML_SA_LIST_BEG "std::string"																			\
+		TOML_SA_VALUE_MESSAGE_WSTRING																			\
+		TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
+		TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
+		TOML_SA_LIST_BEG "std::string_view"																		\
+		TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
+		TOML_SA_LIST_SEP "const char*"																			\
+		TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+		TOML_SA_LIST_END
+
+	#define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
+		"The " type_arg " must be one of:"																		\
+		TOML_SA_LIST_NEW "A native TOML value type"																\
+		TOML_SA_NATIVE_VALUE_TYPE_LIST																			\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"			\
+		TOML_SA_LIST_BEG "std::string"																			\
+		TOML_SA_VALUE_MESSAGE_WSTRING																			\
+		TOML_SA_LIST_SEP "any signed integer type >= 64 bits"													\
+		TOML_SA_LIST_SEP "any floating-point type >= 64 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"		\
+		TOML_SA_LIST_BEG "any other integer type"																\
+		TOML_SA_LIST_SEP "any floating-point type >= 32 bits"													\
+		TOML_SA_LIST_END																						\
+																												\
+		TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
+		TOML_SA_LIST_BEG "std::string_view"																		\
+		TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
+		TOML_SA_LIST_SEP "const char*"																			\
+		TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+		TOML_SA_LIST_END
+#endif // !DOXYGEN
+
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
@@ -2674,6 +2759,49 @@ TOML_NAMESPACE_START
 			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
 			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype) const noexcept override
+			{
+				return ntype == node_type::none || ntype == impl::node_type_of<value_type>;
+			}
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept override
+			{
+				if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+				{
+					first_nonmatch = this;
+					return false;
+				}
+				return true;
+			}
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept override
+			{
+				if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
+				{
+					first_nonmatch = this;
+					return false;
+				}
+				return true;
+			}
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of value::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+
+				using type = impl::unwrap_node<ElemType>;
+				if constexpr (std::is_void_v<type>)
+					return true;
+				else
+					return impl::node_type_of<type> == impl::node_type_of<value_type>;
+			}
 
 			[[nodiscard]] value_type& get() & noexcept { return val_; }
 			[[nodiscard]] value_type&& get() && noexcept { return std::move(val_); }
@@ -2713,8 +2841,8 @@ TOML_NAMESPACE_START
 					using namespace impl;
 					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
 					{
-						return (static_cast<uint64_t>(unbox_enum(l)) << 32)
-							| static_cast<uint64_t>(unbox_enum(r));
+						return (static_cast<uint64_t>(unwrap_enum(l)) << 32)
+							| static_cast<uint64_t>(unwrap_enum(r));
 					};
 
 					switch (pack(impl::fpclassify(lhs.val_), impl::fpclassify(rhs)))
@@ -2815,6 +2943,9 @@ TOML_NAMESPACE_START
 	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
 	#ifndef DOXYGEN
+	TOML_PUSH_WARNINGS
+	TOML_DISABLE_INIT_WARNINGS
+	TOML_DISABLE_SWITCH_WARNINGS
 
 	#if !TOML_HEADER_ONLY
 		extern template class TOML_API value<std::string>;
@@ -2825,10 +2956,6 @@ TOML_NAMESPACE_START
 		extern template class TOML_API value<time>;
 		extern template class TOML_API value<date_time>;
 	#endif
-
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_INIT_WARNINGS
-	TOML_DISABLE_SWITCH_WARNINGS
 
 	template <typename T>
 	[[nodiscard]]
@@ -2891,29 +3018,7 @@ TOML_NAMESPACE_START
 
 		static_assert(
 			(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value_exact() must be one of:"
-			TOML_SA_LIST_NEW "A native TOML value type"
-			TOML_SA_NATIVE_VALUE_TYPE_LIST
-
-			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
-			TOML_SA_LIST_BEG "std::string"
-			#if TOML_WINDOWS_COMPAT
-			TOML_SA_LIST_SEP "std::wstring"
-			#endif
-			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
-			TOML_SA_LIST_BEG "std::string_view"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "std::u8string_view"
-			#endif
-			TOML_SA_LIST_SEP "const char*"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "const char8_t*"
-			#endif
-			TOML_SA_LIST_END
+			TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::value_exact()")
 		);
 
 		// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
@@ -2938,34 +3043,7 @@ TOML_NAMESPACE_START
 		);
 		static_assert(
 			(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
-			"The return type of node::value() must be one of:"
-			TOML_SA_LIST_NEW "A native TOML value type"
-			TOML_SA_NATIVE_VALUE_TYPE_LIST
-
-			TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
-			TOML_SA_LIST_BEG "std::string"
-			#if TOML_WINDOWS_COMPAT
-			TOML_SA_LIST_SEP "std::wstring"
-			#endif
-			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
-			TOML_SA_LIST_BEG "any other integer type"
-			TOML_SA_LIST_SEP "any floating-point type >= 32 bits"
-			TOML_SA_LIST_END
-
-			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
-			TOML_SA_LIST_BEG "std::string_view"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "std::u8string_view"
-			#endif
-			TOML_SA_LIST_SEP "const char*"
-			#ifdef __cpp_lib_char8_t
-			TOML_SA_LIST_SEP "const char8_t*"
-			#endif
-			TOML_SA_LIST_END
+			TOML_SA_VALUE_FUNC_MESSAGE("return type of node::value()")
 		);
 
 		// when asking for strings, dates, times and date_times there's no 'fuzzy' conversion
@@ -3107,7 +3185,7 @@ TOML_NAMESPACE_START
 
 			static_assert(
 				traits::is_native || traits::can_represent_native || traits::can_partially_represent_native,
-				"The default return value type of node::value_or() must be one of:"
+				"The default value type of node::value_or() must be one of:"
 				TOML_SA_LIST_NEW "A native TOML value type"
 				TOML_SA_NATIVE_VALUE_TYPE_LIST
 
@@ -3146,6 +3224,11 @@ TOML_NAMESPACE_START
 			// prevent additional compiler error spam when the static_assert fails by gating behind if constexpr
 			if constexpr (traits::is_native || traits::can_represent_native || traits::can_partially_represent_native)
 			{
+				if constexpr (traits::is_native)
+				{
+					if (type() == node_type_of<value_type>)
+						return *ref_cast<typename traits::native_type>();
+				}
 				if (auto val = this->value<value_type>())
 					return *val;
 				if constexpr (std::is_pointer_v<value_type>)
@@ -3205,7 +3288,6 @@ TOML_NAMESPACE_START
 	#endif // !TOML_HEADER_ONLY
 
 	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
-
 	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END
@@ -3523,8 +3605,10 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_value() const noexcept override;
 			[[nodiscard]] array* as_array() noexcept override;
 			[[nodiscard]] const array* as_array() const noexcept override;
-			[[nodiscard]] bool is_homogeneous(node_type type) const noexcept;
-
+			[[nodiscard]] bool is_array_of_tables() const noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
 			template <typename ElemType = void>
 			[[nodiscard]]
 			bool is_homogeneous() const noexcept
@@ -3536,14 +3620,9 @@ TOML_NAMESPACE_START
 					"The template type argument of array::is_homogeneous() must be void or one of:"
 					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
-
-				if constexpr (std::is_void_v<type>)
-					return is_homogeneous(node_type::none);
-				else
-					return is_homogeneous(impl::node_type_of<type>);
+				return is_homogeneous(impl::node_type_of<type>);
 			}
 
-			[[nodiscard]] bool is_array_of_tables() const noexcept override;
 			[[nodiscard]] node& operator[] (size_t index) noexcept;
 			[[nodiscard]] const node& operator[] (size_t index) const noexcept;
 			[[nodiscard]] node& front() noexcept;
@@ -4024,6 +4103,23 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_value() const noexcept override;
 			[[nodiscard]] table* as_table() noexcept override;
 			[[nodiscard]] const table* as_table() const noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
+			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				using type = impl::unwrap_node<ElemType>;
+				static_assert(
+					std::is_void_v<type>
+					|| ((impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>),
+					"The template type argument of table::is_homogeneous() must be void or one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+				return is_homogeneous(impl::node_type_of<type>);
+			}
+
 			[[nodiscard]] bool is_inline() const noexcept;
 			void is_inline(bool val) noexcept;
 			[[nodiscard]] node_view<node> operator[] (std::string_view key) noexcept;
@@ -4289,6 +4385,43 @@ TOML_NAMESPACE_START
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 	};
+
+	#ifndef DOXYGEN
+
+	//template <typename T>
+	//inline std::vector<T> node::select_exact() const noexcept
+	//{
+	//	using namespace impl;
+
+	//	static_assert(
+	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//		"Retrieving values as wide-character strings with node::select_exact() is only "
+	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//	);
+
+	//	static_assert(
+	//		(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
+	//		TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::select_exact()")
+	//	);
+	//}
+
+	//template <typename T>
+	//inline std::vector<T> node::select() const noexcept
+	//{
+	//	using namespace impl;
+
+	//	static_assert(
+	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//		"Retrieving values as wide-character strings with node::select() is only "
+	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//	);
+	//	static_assert(
+	//		(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
+	//		TOML_SA_VALUE_FUNC_MESSAGE("return type of node::select()")
+	//	);
+	//}
+
+	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END
 
@@ -4383,6 +4516,29 @@ TOML_NAMESPACE_START
 			[[nodiscard]] auto as_date() const noexcept { return as<date>(); }
 			[[nodiscard]] auto as_time() const noexcept { return as<time>(); }
 			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype, viewed_type*& first_nonmatch) const noexcept
+			{
+				if (!node_)
+				{
+					first_nonmatch = {};
+					return false;
+				}
+				return node_->is_homogeneous(ntype, first_nonmatch);
+			}
+
+			[[nodiscard]]
+			bool is_homogeneous(node_type ntype) const noexcept
+			{
+				return node_ ? node_->is_homogeneous(ntype) : false;
+			}
+
+			template <typename ElemType = void>
+			[[nodiscard]]
+			bool is_homogeneous() const noexcept
+			{
+				return node_ ? node_->template is_homogeneous<impl::unwrap_node<ElemType>>() : false;
+			}
 
 			template <typename T>
 			[[nodiscard]]
@@ -5656,7 +5812,7 @@ TOML_NAMESPACE_START
 	TOML_ATTR(flatten)
 	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>(impl::unbox_enum(lhs) & impl::unbox_enum(rhs));
+		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
 	}
 
 	[[nodiscard]]
@@ -5665,7 +5821,7 @@ TOML_NAMESPACE_START
 	TOML_ATTR(flatten)
 	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
 	{
-		return static_cast<format_flags>( impl::unbox_enum(lhs) | impl::unbox_enum(rhs) );
+		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
 	}
 }
 TOML_NAMESPACE_END
@@ -7485,6 +7641,58 @@ TOML_NAMESPACE_START
 	#undef TOML_MEMBER_ATTR
 
 	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype) const noexcept
+	{
+		if (elements.empty())
+			return false;
+
+		if (ntype == node_type::none)
+			ntype = elements[0]->type();
+
+		for (const auto& val : elements)
+			if (val->type() != ntype)
+				return false;
+		return true;
+	}
+
+	namespace impl
+	{
+		template <typename T, typename U>
+		TOML_INTERNAL_LINKAGE
+		bool array_is_homogeneous(T& elements, node_type ntype, U& first_nonmatch) noexcept
+		{
+			if (elements.empty())
+			{
+				first_nonmatch = {};
+				return false;
+			}
+			if (ntype == node_type::none)
+				ntype = elements[0]->type();
+			for (const auto& val : elements)
+			{
+				if (val->type() != ntype)
+				{
+					first_nonmatch = val.get();
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept
+	{
+		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
+	{
+		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void array::truncate(size_t new_size)
 	{
 		if (new_size < elements.size())
@@ -7635,21 +7843,6 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool array::is_homogeneous(node_type type) const noexcept
-	{
-		if (elements.empty())
-			return false;
-
-		if (type == node_type::none)
-			type = elements[0]->type();
-
-		for (const auto& val : elements)
-			if (val->type() != type)
-				return false;
-		return true;
-	}
-
-	TOML_EXTERNAL_LINKAGE
 	bool array::is_array_of_tables() const noexcept
 	{
 		return is_homogeneous(node_type::table);
@@ -7754,6 +7947,63 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE void table::clear()					noexcept		{ map.clear(); }
 
 	#undef TOML_MEMBER_ATTR
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype) const noexcept
+	{
+		if (map.empty())
+			return false;
+
+		if (ntype == node_type::none)
+			ntype = map.cbegin()->second->type();
+
+		for (const auto& [k, v] : map)
+		{
+			(void)k;
+			if (v->type() != ntype)
+				return false;
+		}
+
+		return true;
+	}
+
+	namespace impl
+	{
+		template <typename T, typename U>
+		TOML_INTERNAL_LINKAGE
+		bool table_is_homogeneous(T& map, node_type ntype, U& first_nonmatch) noexcept
+		{
+			if (map.empty())
+			{
+				first_nonmatch = {};
+				return false;
+			}
+			if (ntype == node_type::none)
+				ntype = map.cbegin()->second->type();
+			for (const auto& [k, v] : map)
+			{
+				(void)k;
+				if (v->type() != ntype)
+				{
+					first_nonmatch = v.get();
+					return false;
+				}
+			}
+			return true;
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype, toml::node*& first_nonmatch) noexcept
+	{
+		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
+	{
+		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::string_view key) noexcept
@@ -8415,7 +8665,7 @@ TOML_ANON_NAMESPACE_START
 	{
 		using namespace ::toml::impl;
 
-		return node_type_friendly_names[unbox_enum(val)];
+		return node_type_friendly_names[unwrap_enum(val)];
 	}
 
 	[[nodiscard]]
@@ -10398,7 +10648,7 @@ TOML_IMPL_NAMESPACE_START
 					// all correct value parses will come out of this list, so doing this as a switch is likely to
 					// be a better friend to the optimizer on the success path (failure path can be slow but that
 					// doesn't matter much).
-					switch (unbox_enum(traits))
+					switch (unwrap_enum(traits))
 					{
 						//=================== binary integers
 						// 0b10
@@ -11585,6 +11835,11 @@ TOML_NAMESPACE_END
 	#undef TOML_SA_NEWLINE
 	#undef TOML_SA_NODE_TYPE_LIST
 	#undef TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+	#undef TOML_SA_VALUE_EXACT_FUNC_MESSAGE
+	#undef TOML_SA_VALUE_FUNC_MESSAGE
+	#undef TOML_SA_VALUE_MESSAGE_CONST_CHAR8
+	#undef TOML_SA_VALUE_MESSAGE_U8STRING_VIEW
+	#undef TOML_SA_VALUE_MESSAGE_WSTRING
 	#undef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 	#undef TOML_TRIVIAL_ABI
 	#undef TOML_UINT128

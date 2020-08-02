@@ -12,9 +12,6 @@ TOML_DISABLE_ALL_WARNINGS
 TOML_POP_WARNINGS
 #endif
 
-// TOML_PUSH_WARNINGS
-// TOML_DISABLE_ARITHMETIC_WARNINGS
-
 template <typename T>
 static constexpr T one = static_cast<T>(1);
 
@@ -28,6 +25,9 @@ TEST_CASE("values - construction")
 		CHECK(equiv == v);													\
 		CHECK(*v == equiv);													\
 		CHECK(v.get() == equiv);											\
+		CHECK(v.is_homogeneous());											\
+		CHECK(v.is_homogeneous<target_type>());								\
+		CHECK(v.is_homogeneous(impl::node_type_of<target_type>));			\
 	} while (false)
 
 	#define CHECK_VALUE_INIT(initializer, target_type)						\
@@ -85,8 +85,6 @@ TEST_CASE("values - construction")
 
 	#endif
 }
-
-// TOML_POP_WARNINGS
 
 TEST_CASE("values - printing")
 {
