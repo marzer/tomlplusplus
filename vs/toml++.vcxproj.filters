@@ -121,6 +121,8 @@
     <None Include="..\python\generate_windows_test_targets.py">
       <Filter>python</Filter>
     </None>
+    <None Include="..\CODE_OF_CONDUCT.md" />
+    <None Include="..\LICENSE" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
@@ -135,5 +137,8 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\meson_options.txt" />
   </ItemGroup>
 </Project>

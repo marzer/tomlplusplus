@@ -86,3 +86,17 @@ TEST_CASE("feedback - github/issues/49")
 		}});
 	}
 }
+
+TEST_CASE("feedback - github/pull/50")
+{
+	// see: https://github.com/marzer/tomlplusplus/pull/50
+	{
+		auto tbl = toml::table{ {{"value", 10}} };
+		const toml::node* val = tbl.get("value");
+		REQUIRE(val);
+		REQUIRE(val->is_number());
+		REQUIRE(val->is_integer());
+		REQUIRE(val->ref<int64_t>() == 10);
+		REQUIRE(val->value<double>() == 10.0);
+	}
+}

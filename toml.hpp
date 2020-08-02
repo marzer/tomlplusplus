@@ -25,7 +25,6 @@
 // MIT License
 //
 // Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
-// Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de> (utf8_decoder)
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
 // documentation files (the "Software"), to deal in the Software without restriction, including without limitation the
@@ -619,7 +618,7 @@ TOML_POP_WARNINGS
 #define TOML_ENV_MESSAGE																							\
 	"If you're seeing this error it's because you're building toml++ for an environment that doesn't conform to "	\
 	"one of the 'ground truths' assumed by the library. Essentially this just means that I don't have the "			\
-	"resources to test on more esoteric platforms, but I wish I did! You can try disabling the checks by defining "	\
+	"resources to test on more platforms, but I wish I did! You can try disabling the checks by defining "			\
 	"TOML_DISABLE_ENVIRONMENT_CHECKS, but your mileage may vary. Please consider filing an issue at "				\
 	"https://github.com/marzer/tomlplusplus/issues to help me improve support for your target environment. Thanks!"
 
@@ -2039,7 +2038,6 @@ TOML_DISABLE_MISC_WARNINGS
 #define TOML_SA_LIST_END	")"
 #define TOML_SA_LIST_NEW	" "
 #define TOML_SA_LIST_NXT	", "
-#define TOML_SA_LIST_CAP(...)
 
 #else
 
@@ -2049,7 +2047,6 @@ TOML_DISABLE_MISC_WARNINGS
 #define TOML_SA_LIST_END
 #define TOML_SA_LIST_NEW		TOML_SA_NEWLINE TOML_SA_NEWLINE
 #define TOML_SA_LIST_NXT		TOML_SA_LIST_NEW
-#define TOML_SA_LIST_CAP(val)	val
 
 #endif
 
@@ -2904,14 +2901,16 @@ TOML_NAMESPACE_START
 			TOML_SA_LIST_SEP "std::wstring"
 			#endif
 			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
 			TOML_SA_LIST_END
 
 			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
 			TOML_SA_LIST_BEG "std::string_view"
-			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
 			TOML_SA_LIST_SEP "std::u8string_view"
+			#endif
+			TOML_SA_LIST_SEP "const char*"
+			#ifdef __cpp_lib_char8_t
 			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
 			TOML_SA_LIST_END
@@ -2949,19 +2948,21 @@ TOML_NAMESPACE_START
 			TOML_SA_LIST_SEP "std::wstring"
 			#endif
 			TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-			TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+			TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
 			TOML_SA_LIST_END
 
 			TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
 			TOML_SA_LIST_BEG "any other integer type"
-			TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+			TOML_SA_LIST_SEP "any floating-point type >= 32 bits"
 			TOML_SA_LIST_END
 
 			TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"
 			TOML_SA_LIST_BEG "std::string_view"
-			TOML_SA_LIST_SEP "const char*"
 			#ifdef __cpp_lib_char8_t
 			TOML_SA_LIST_SEP "std::u8string_view"
+			#endif
+			TOML_SA_LIST_SEP "const char*"
+			#ifdef __cpp_lib_char8_t
 			TOML_SA_LIST_SEP "const char8_t*"
 			#endif
 			TOML_SA_LIST_END
@@ -3116,33 +3117,28 @@ TOML_NAMESPACE_START
 				TOML_SA_LIST_SEP "std::wstring"
 				#endif
 				TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
-				TOML_SA_LIST_SEP "any floating-point type >= 64 bits of precision"
+				TOML_SA_LIST_SEP "any floating-point type >= 64 bits"
 				TOML_SA_LIST_END
 
 				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
 				TOML_SA_LIST_BEG "any other integer type"
-				TOML_SA_LIST_SEP "any floating-point type >= 32 bits of precision"
+				TOML_SA_LIST_SEP "any floating-point type >= 32 bits"
 				TOML_SA_LIST_END
 
 				TOML_SA_LIST_NXT "A compatible view type"
 				TOML_SA_LIST_BEG "std::string_view"
-				TOML_SA_LIST_SEP "const char*"
-				TOML_SA_LIST_SEP "const char[]" TOML_SA_LIST_CAP("        (returned as const char*)")
-				TOML_SA_LIST_SEP "char*" TOML_SA_LIST_CAP("               (returned as const char*)")
-				TOML_SA_LIST_SEP "char[]" TOML_SA_LIST_CAP("              (returned as const char*)")
 				#ifdef __cpp_lib_char8_t
 				TOML_SA_LIST_SEP "std::u8string_view"
-				TOML_SA_LIST_SEP "const char8_t*"
-				TOML_SA_LIST_SEP "const char8_t[]" TOML_SA_LIST_CAP("     (returned as const char8_t*)")
-				TOML_SA_LIST_SEP "char8_t*" TOML_SA_LIST_CAP("            (returned as const char8_t*)")
-				TOML_SA_LIST_SEP "char8_t[]" TOML_SA_LIST_CAP("           (returned as const char8_t*)")
 				#endif
 				#if TOML_WINDOWS_COMPAT
-				TOML_SA_LIST_SEP "std::wstring_view" TOML_SA_LIST_CAP("   (returned as std::wstring)")
-				TOML_SA_LIST_SEP "const wchar_t*" TOML_SA_LIST_CAP("      (returned as std::wstring)")
-				TOML_SA_LIST_SEP "const wchar_t[]" TOML_SA_LIST_CAP("     (returned as std::wstring)")
-				TOML_SA_LIST_SEP "wchar_t*" TOML_SA_LIST_CAP("            (returned as std::wstring)")
-				TOML_SA_LIST_SEP "wchar_t[]" TOML_SA_LIST_CAP("           (returned as std::wstring)")
+				TOML_SA_LIST_SEP "std::wstring_view"
+				#endif
+				TOML_SA_LIST_SEP "const char*"
+				#ifdef __cpp_lib_char8_t
+				TOML_SA_LIST_SEP "const char8_t*"
+				#endif
+				#if TOML_WINDOWS_COMPAT
+				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
 				TOML_SA_LIST_END
 			);
@@ -5568,6 +5564,8 @@ TOML_IMPL_NAMESPACE_START
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
+	// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	struct utf8_decoder final
 	{
 		uint_least32_t state{};
@@ -11579,7 +11577,6 @@ TOML_NAMESPACE_END
 	#undef TOML_PUSH_WARNINGS
 	#undef TOML_RELOPS_REORDERING
 	#undef TOML_SA_LIST_BEG
-	#undef TOML_SA_LIST_CAP
 	#undef TOML_SA_LIST_END
 	#undef TOML_SA_LIST_NEW
 	#undef TOML_SA_LIST_NXT

@@ -130,3 +130,276 @@ TEST_CASE("values - printing")
 	CHECK(print_value(10000000000) == "10000000000");
 	CHECK(print_value(100000000000000) == "100000000000000");
 }
+
+TEST_CASE("nodes - value() int/float/bool conversions")
+{
+	#define CHECK_VALUE_PASS(type, v) \
+		CHECK(n.value<type>() == static_cast<type>(v))
+	#define CHECK_VALUE_FAIL(type) \
+		CHECK(!n.value<type>())
+
+	// bools
+	{
+		value val{ false };
+		const node& n = val;
+		CHECK_VALUE_PASS(bool, false);
+		CHECK_VALUE_PASS(int8_t, 0);
+		CHECK_VALUE_PASS(uint8_t, 0);
+		CHECK_VALUE_PASS(int16_t, 0);
+		CHECK_VALUE_PASS(uint16_t, 0);
+		CHECK_VALUE_PASS(int32_t, 0);
+		CHECK_VALUE_PASS(uint32_t, 0);
+		CHECK_VALUE_PASS(int64_t, 0);
+		CHECK_VALUE_PASS(uint64_t, 0);
+		CHECK_VALUE_FAIL(float);
+		CHECK_VALUE_FAIL(double);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = true;
+		CHECK_VALUE_PASS(bool, true);
+		CHECK_VALUE_PASS(int8_t, 1);
+		CHECK_VALUE_PASS(uint8_t, 1);
+		CHECK_VALUE_PASS(int16_t, 1);
+		CHECK_VALUE_PASS(uint16_t, 1);
+		CHECK_VALUE_PASS(int32_t, 1);
+		CHECK_VALUE_PASS(uint32_t, 1);
+		CHECK_VALUE_PASS(int64_t, 1);
+		CHECK_VALUE_PASS(uint64_t, 1);
+		CHECK_VALUE_FAIL(float);
+		CHECK_VALUE_FAIL(double);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+	}
+
+	// ints
+	{
+		value val{ 0 };
+		const node& n = val;
+		CHECK_VALUE_PASS(bool, false); // int -> bool coercion
+		CHECK_VALUE_PASS(int8_t, 0);
+		CHECK_VALUE_PASS(uint8_t, 0);
+		CHECK_VALUE_PASS(int16_t, 0);
+		CHECK_VALUE_PASS(uint16_t, 0);
+		CHECK_VALUE_PASS(int32_t, 0);
+		CHECK_VALUE_PASS(uint32_t, 0);
+		CHECK_VALUE_PASS(int64_t, 0);
+		CHECK_VALUE_PASS(uint64_t, 0);
+		CHECK_VALUE_PASS(float, 0);
+		CHECK_VALUE_PASS(double, 0);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = 100;
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_PASS(int8_t, 100);
+		CHECK_VALUE_PASS(uint8_t, 100);
+		CHECK_VALUE_PASS(int16_t, 100);
+		CHECK_VALUE_PASS(uint16_t, 100);
+		CHECK_VALUE_PASS(int32_t, 100);
+		CHECK_VALUE_PASS(uint32_t, 100);
+		CHECK_VALUE_PASS(int64_t, 100);
+		CHECK_VALUE_PASS(uint64_t, 100);
+		CHECK_VALUE_PASS(float, 100);
+		CHECK_VALUE_PASS(double, 100);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = -100;
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_PASS(int8_t, -100);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_PASS(int16_t, -100);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_PASS(int32_t, -100);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_PASS(int64_t, -100);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, -100);
+		CHECK_VALUE_PASS(double, -100);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = 1000;
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_PASS(int16_t, 1000);
+		CHECK_VALUE_PASS(uint16_t, 1000);
+		CHECK_VALUE_PASS(int32_t, 1000);
+		CHECK_VALUE_PASS(uint32_t, 1000);
+		CHECK_VALUE_PASS(int64_t, 1000);
+		CHECK_VALUE_PASS(uint64_t, 1000);
+		CHECK_VALUE_PASS(float, 1000);
+		CHECK_VALUE_PASS(double, 1000);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = -1000;
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_PASS(int16_t, -1000);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_PASS(int32_t, -1000);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_PASS(int64_t, -1000);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, -1000);
+		CHECK_VALUE_PASS(double, -1000);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = (std::numeric_limits<int64_t>::max)();
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_PASS(int64_t, (std::numeric_limits<int64_t>::max)());
+		CHECK_VALUE_PASS(uint64_t, (std::numeric_limits<int64_t>::max)());
+		CHECK_VALUE_FAIL(float);
+		CHECK_VALUE_FAIL(double);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = (std::numeric_limits<int64_t>::min)();
+		CHECK_VALUE_PASS(bool, true); // int -> bool coercion
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_PASS(int64_t, (std::numeric_limits<int64_t>::min)());
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_FAIL(float);
+		CHECK_VALUE_FAIL(double);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+	}
+
+	// floats
+	{
+		value val{ 0.0 };
+		const node& n = val;
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_PASS(int8_t, 0);
+		CHECK_VALUE_PASS(uint8_t, 0);
+		CHECK_VALUE_PASS(int16_t, 0);
+		CHECK_VALUE_PASS(uint16_t, 0);
+		CHECK_VALUE_PASS(int32_t, 0);
+		CHECK_VALUE_PASS(uint32_t, 0);
+		CHECK_VALUE_PASS(int64_t, 0);
+		CHECK_VALUE_PASS(uint64_t, 0);
+		CHECK_VALUE_PASS(float, 0);
+		CHECK_VALUE_PASS(double, 0);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+
+		*val = 1.0;
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_PASS(int8_t, 1);
+		CHECK_VALUE_PASS(uint8_t, 1);
+		CHECK_VALUE_PASS(int16_t, 1);
+		CHECK_VALUE_PASS(uint16_t, 1);
+		CHECK_VALUE_PASS(int32_t, 1);
+		CHECK_VALUE_PASS(uint32_t, 1);
+		CHECK_VALUE_PASS(int64_t, 1);
+		CHECK_VALUE_PASS(uint64_t, 1);
+		CHECK_VALUE_PASS(float, 1);
+		CHECK_VALUE_PASS(double, 1);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = -1.0;
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_PASS(int8_t, -1);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_PASS(int16_t, -1);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_PASS(int32_t, -1);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_PASS(int64_t, -1);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, -1);
+		CHECK_VALUE_PASS(double, -1);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = 1.5;
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_FAIL(int64_t);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, 1.5);
+		CHECK_VALUE_PASS(double, 1.5);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = -1.5;
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_FAIL(int64_t);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, -1.5);
+		CHECK_VALUE_PASS(double, -1.5);
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+	}
+}

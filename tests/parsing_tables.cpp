@@ -46,23 +46,23 @@ smooth = true
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["table"].as<table>());
-			CHECK(tbl["table"].as<table>()->size() == 0_sz);
+			CHECK(tbl["table"].as<table>()->size() == 0u);
 
 			REQUIRE(tbl["table-1"].as<table>());
-			CHECK(tbl["table-1"].as<table>()->size() == 2_sz);
+			CHECK(tbl["table-1"].as<table>()->size() == 2u);
 			CHECK(tbl["table-1"]["key1"] == "some string"sv);
 			CHECK(tbl["table-1"]["key2"] == 123);
 
 			REQUIRE(tbl["table-2"].as<table>());
-			CHECK(tbl["table-2"].as<table>()->size() == 2_sz);
+			CHECK(tbl["table-2"].as<table>()->size() == 2u);
 			CHECK(tbl["table-2"]["key1"] == "another string"sv);
 			CHECK(tbl["table-2"]["key2"] == 456);
 
 			REQUIRE(tbl["dog"].as<table>());
-			CHECK(tbl["dog"].as<table>()->size() == 1_sz);
+			CHECK(tbl["dog"].as<table>()->size() == 1u);
 
 			REQUIRE(tbl["dog"]["tater.man"].as<table>());
-			CHECK(tbl["dog"]["tater.man"].as<table>()->size() == 1_sz);
+			CHECK(tbl["dog"]["tater.man"].as<table>()->size() == 1u);
 			CHECK(tbl["dog"]["tater.man"]["type"]["name"] == "pug"sv);
 
 			CHECK(tbl["a"].as<table>());
@@ -136,10 +136,10 @@ apple.taste.sweet = true
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["animal"].as<table>());
-			CHECK(tbl["animal"].as<table>()->size() == 0_sz);
+			CHECK(tbl["animal"].as<table>()->size() == 0u);
 
 			REQUIRE(tbl["fruit"].as<table>());
-			CHECK(tbl["fruit"].as<table>()->size() == 2_sz);
+			CHECK(tbl["fruit"].as<table>()->size() == 2u);
 
 			REQUIRE(tbl["fruit"]["apple"].as<table>());
 			REQUIRE(tbl["fruit"]["orange"].as<table>());
@@ -158,10 +158,10 @@ apple.taste.sweet = true
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["animal"].as<table>());
-			CHECK(tbl["animal"].as<table>()->size() == 0_sz);
+			CHECK(tbl["animal"].as<table>()->size() == 0u);
 
 			REQUIRE(tbl["fruit"].as<table>());
-			CHECK(tbl["fruit"].as<table>()->size() == 2_sz);
+			CHECK(tbl["fruit"].as<table>()->size() == 2u);
 
 			REQUIRE(tbl["fruit"]["apple"].as<table>());
 			REQUIRE(tbl["fruit"]["orange"].as<table>());
@@ -186,25 +186,25 @@ type = { name = "Nail" }
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["name"].as<table>());
-			CHECK(tbl["name"].as<table>()->size() == 2_sz);
+			CHECK(tbl["name"].as<table>()->size() == 2u);
 			CHECK(tbl["name"]["first"] == "Tom"sv);
 			CHECK(tbl["name"]["last"] == "Preston-Werner"sv);
 
 			REQUIRE(tbl["point"].as<table>());
-			CHECK(tbl["point"].as<table>()->size() == 2_sz);
+			CHECK(tbl["point"].as<table>()->size() == 2u);
 			CHECK(tbl["point"]["x"] == 1);
 			CHECK(tbl["point"]["y"] == 2);
 
 			REQUIRE(tbl["animal"].as<table>());
-			CHECK(tbl["animal"].as<table>()->size() == 1_sz);
+			CHECK(tbl["animal"].as<table>()->size() == 1u);
 			REQUIRE(tbl["animal"]["type"].as<table>());
-			CHECK(tbl["animal"]["type"].as<table>()->size() == 1_sz);
+			CHECK(tbl["animal"]["type"].as<table>()->size() == 1u);
 			CHECK(tbl["animal"]["type"]["name"] == "pug"sv);
 
 			REQUIRE(tbl["product"].as<table>());
-			CHECK(tbl["product"].as<table>()->size() == 1_sz);
+			CHECK(tbl["product"].as<table>()->size() == 1u);
 			REQUIRE(tbl["product"]["type"].as<table>());
-			CHECK(tbl["product"]["type"].as<table>()->size() == 1_sz);
+			CHECK(tbl["product"]["type"].as<table>()->size() == 1u);
 			CHECK(tbl["product"]["type"]["name"] == "Nail"sv);
 		}
 	);
@@ -233,10 +233,10 @@ test = { val1 = "foo", val2 = [
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["test"].as<table>());
-			CHECK(tbl["test"].as<table>()->size() == 3_sz);
+			CHECK(tbl["test"].as<table>()->size() == 3u);
 			CHECK(tbl["test"]["val1"] == "foo"sv);
 			REQUIRE(tbl["test"]["val2"].as<array>());
-			CHECK(tbl["test"]["val2"].as<array>()->size() == 3_sz);
+			CHECK(tbl["test"]["val2"].as<array>()->size() == 3u);
 			CHECK(tbl["test"]["val2"][0] == 1);
 			CHECK(tbl["test"]["val2"][1] == 2);
 			CHECK(tbl["test"]["val2"][2] == 3);
@@ -258,7 +258,7 @@ name = {
 			[](table&& tbl)
 			{
 				REQUIRE(tbl["name"].as<table>());
-				CHECK(tbl["name"].as<table>()->size() == 2_sz);
+				CHECK(tbl["name"].as<table>()->size() == 2u);
 				CHECK(tbl["name"]["first"] == "Tom"sv);
 				CHECK(tbl["name"]["last"] == "Preston-Werner"sv);
 			}
@@ -327,7 +327,7 @@ color = "gray"
 		[](table&& tbl)
 		{
 			REQUIRE(tbl["points"].as<array>());
-			CHECK(tbl["points"].as<array>()->size() == 3_sz);
+			CHECK(tbl["points"].as<array>()->size() == 3u);
 			CHECK(tbl["points"].as<array>()->is_homogeneous());
 			CHECK(tbl["points"].as<array>()->is_array_of_tables());
 			CHECK(tbl["points"][0]["x"] == 1);
@@ -341,52 +341,52 @@ color = "gray"
 			CHECK(tbl["points"][2]["z"] == 8);
 
 			REQUIRE(tbl["products"].as<array>());
-			CHECK(tbl["products"].as<array>()->size() == 3_sz);
+			CHECK(tbl["products"].as<array>()->size() == 3u);
 			CHECK(tbl["products"].as<array>()->is_homogeneous());
 			CHECK(tbl["products"].as<array>()->is_array_of_tables());
 
 			REQUIRE(tbl["products"][0].as<table>());
-			CHECK(tbl["products"][0].as<table>()->size() == 2_sz);
+			CHECK(tbl["products"][0].as<table>()->size() == 2u);
 			CHECK(tbl["products"][0]["name"] == "Hammer"sv);
 			CHECK(tbl["products"][0]["sku"] == 738594937);
 
 			REQUIRE(tbl["products"][1].as<table>());
-			CHECK(tbl["products"][1].as<table>()->size() == 0_sz);
+			CHECK(tbl["products"][1].as<table>()->size() == 0u);
 
 			REQUIRE(tbl["products"][2].as<table>());
-			CHECK(tbl["products"][2].as<table>()->size() == 3_sz);
+			CHECK(tbl["products"][2].as<table>()->size() == 3u);
 			CHECK(tbl["products"][2]["name"] == "Nail"sv);
 			CHECK(tbl["products"][2]["sku"] == 284758393);
 			CHECK(tbl["products"][2]["color"] == "gray"sv);
 
 
 			REQUIRE(tbl["fruit"].as<array>());
-			CHECK(tbl["fruit"].as<array>()->size() == 2_sz);
+			CHECK(tbl["fruit"].as<array>()->size() == 2u);
 			CHECK(tbl["fruit"].as<array>()->is_homogeneous());
 			CHECK(tbl["fruit"].as<array>()->is_array_of_tables());
 
 			REQUIRE(tbl["fruit"][0].as<table>());
-			CHECK(tbl["fruit"][0].as<table>()->size() == 3_sz);
+			CHECK(tbl["fruit"][0].as<table>()->size() == 3u);
 			CHECK(tbl["fruit"][0]["name"] == "apple"sv);
 
 			REQUIRE(tbl["fruit"][0]["physical"].as<table>());
-			CHECK(tbl["fruit"][0]["physical"].as<table>()->size() == 2_sz);
+			CHECK(tbl["fruit"][0]["physical"].as<table>()->size() == 2u);
 			CHECK(tbl["fruit"][0]["physical"]["color"] == "red"sv);
 			CHECK(tbl["fruit"][0]["physical"]["shape"] == "round"sv);
 
 			REQUIRE(tbl["fruit"][0]["variety"].as<array>());
-			CHECK(tbl["fruit"][0]["variety"].as<array>()->size() == 2_sz);
+			CHECK(tbl["fruit"][0]["variety"].as<array>()->size() == 2u);
 			CHECK(tbl["fruit"][0]["variety"].as<array>()->is_homogeneous());
 			CHECK(tbl["fruit"][0]["variety"].as<array>()->is_array_of_tables());
 			CHECK(tbl["fruit"][0]["variety"][0]["name"] == "red delicious"sv);
 			CHECK(tbl["fruit"][0]["variety"][1]["name"] == "granny smith"sv);
 
 			REQUIRE(tbl["fruit"][1].as<table>());
-			CHECK(tbl["fruit"][1].as<table>()->size() == 2_sz);
+			CHECK(tbl["fruit"][1].as<table>()->size() == 2u);
 			CHECK(tbl["fruit"][1]["name"] == "banana"sv);
 
 			REQUIRE(tbl["fruit"][1]["variety"].as<array>());
-			CHECK(tbl["fruit"][1]["variety"].as<array>()->size() == 1_sz);
+			CHECK(tbl["fruit"][1]["variety"].as<array>()->size() == 1u);
 			CHECK(tbl["fruit"][1]["variety"].as<array>()->is_homogeneous());
 			CHECK(tbl["fruit"][1]["variety"].as<array>()->is_array_of_tables());
 			CHECK(tbl["fruit"][1]["variety"][0]["name"] == "plantain"sv);

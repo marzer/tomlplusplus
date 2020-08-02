@@ -909,6 +909,8 @@ TOML_IMPL_NAMESPACE_START
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
+	// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	struct utf8_decoder final
 	{
 		uint_least32_t state{};

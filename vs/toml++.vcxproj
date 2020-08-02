@@ -66,12 +66,14 @@
     <None Include="..\.editorconfig" />
     <None Include="..\.gitattributes" />
     <None Include="..\.gitignore" />
+    <None Include="..\CODE_OF_CONDUCT.md" />
     <None Include="..\CONTRIBUTING.md" />
     <None Include="..\docs\Doxyfile" />
     <None Include="..\docs\Doxyfile-mcss" />
     <None Include="..\docs\main_page.dox" />
     <None Include="..\docs\tomlplusplus.css" />
     <None Include="..\docs\tomlplusplus.js" />
+    <None Include="..\LICENSE" />
     <None Include="..\meson.build" />
     <None Include="..\python\ci_single_header_check.py" />
     <None Include="..\python\generate_conformance_tests.py" />
@@ -84,6 +86,9 @@
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\meson_options.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

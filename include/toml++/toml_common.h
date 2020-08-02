@@ -47,7 +47,7 @@ TOML_POP_WARNINGS
 #define TOML_ENV_MESSAGE																							\
 	"If you're seeing this error it's because you're building toml++ for an environment that doesn't conform to "	\
 	"one of the 'ground truths' assumed by the library. Essentially this just means that I don't have the "			\
-	"resources to test on more esoteric platforms, but I wish I did! You can try disabling the checks by defining "	\
+	"resources to test on more platforms, but I wish I did! You can try disabling the checks by defining "			\
 	"TOML_DISABLE_ENVIRONMENT_CHECKS, but your mileage may vary. Please consider filing an issue at "				\
 	"https://github.com/marzer/tomlplusplus/issues to help me improve support for your target environment. Thanks!"
 

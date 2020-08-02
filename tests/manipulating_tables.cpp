@@ -16,7 +16,7 @@ TEST_CASE("tables - moving")
 		{
 			// sanity-check initial state of a freshly-parsed table
 			REQUIRE(tbl["test"].as<table>());
-			CHECK(tbl["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl["test"].as<table>()->size() == 1u);
 			CHECK(tbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
 			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
 			CHECK(tbl["test"]["val1"] == "foo");
@@ -26,7 +26,7 @@ TEST_CASE("tables - moving")
 			CHECK(tbl2.source().begin == source_position{});
 			CHECK(tbl2.source().end == source_position{});
 			CHECK(!tbl2.source().path);
-			CHECK(tbl2.size() == 0_sz);
+			CHECK(tbl2.size() == 0u);
 
 			// check the results of move-assignment
 			tbl2 = std::move(tbl);
@@ -34,16 +34,16 @@ TEST_CASE("tables - moving")
 			CHECK(tbl2.source().end == source_position{ 1, 24 });
 			CHECK(tbl2.source().path);
 			CHECK(*tbl2.source().path == filename);
-			CHECK(tbl2.size() == 1_sz);
+			CHECK(tbl2.size() == 1u);
 			REQUIRE(tbl2["test"].as<table>());
-			CHECK(tbl2["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl2["test"].as<table>()->size() == 1u);
 			CHECK(tbl2["test"]["val1"] == "foo"sv);
 
 			// check that moved-from table is now the same as default-constructed
 			CHECK(tbl.source().begin == source_position{});
 			CHECK(tbl.source().end == source_position{});
 			CHECK(!tbl.source().path);
-			CHECK(tbl.size() == 0_sz);
+			CHECK(tbl.size() == 0u);
 			CHECK(!tbl["test"].as<table>());
 
 			// check the results of move-construction
@@ -52,16 +52,16 @@ TEST_CASE("tables - moving")
 			CHECK(tbl3.source().end == source_position{ 1, 24 });
 			CHECK(tbl3.source().path);
 			CHECK(*tbl3.source().path == filename);
-			CHECK(tbl3.size() == 1_sz);
+			CHECK(tbl3.size() == 1u);
 			REQUIRE(tbl3["test"].as<table>());
-			CHECK(tbl3["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl3["test"].as<table>()->size() == 1u);
 			CHECK(tbl3["test"]["val1"] == "foo"sv);
 
 			// check that moved-from table is now the same as default-constructed
 			CHECK(tbl2.source().begin == source_position{});
 			CHECK(tbl2.source().end == source_position{});
 			CHECK(!tbl2.source().path);
-			CHECK(tbl2.size() == 0_sz);
+			CHECK(tbl2.size() == 0u);
 			CHECK(!tbl2["test"].as<table>());
 		},
 		filename
@@ -79,7 +79,7 @@ TEST_CASE("tables - copying")
 		{
 			// sanity-check initial state of a freshly-parsed table
 			REQUIRE(tbl["test"].as<table>());
-			CHECK(tbl["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl["test"].as<table>()->size() == 1u);
 			CHECK(tbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
 			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
 			CHECK(tbl["test"]["val1"] == "foo");
@@ -89,16 +89,16 @@ TEST_CASE("tables - copying")
 			CHECK(tbl2.source().begin == source_position{});
 			CHECK(tbl2.source().end == source_position{});
 			CHECK(!tbl2.source().path);
-			CHECK(tbl2.size() == 0_sz);
+			CHECK(tbl2.size() == 0u);
 
 			// check the results of copy-assignment
 			tbl2 = tbl;
 			CHECK(tbl2.source().begin == source_position{});
 			CHECK(tbl2.source().end == source_position{});
 			CHECK(!tbl2.source().path);
-			CHECK(tbl2.size() == 1_sz);
+			CHECK(tbl2.size() == 1u);
 			REQUIRE(tbl2["test"].as<table>());
-			CHECK(tbl2["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl2["test"].as<table>()->size() == 1u);
 			CHECK(tbl2["test"]["val1"] == "foo"sv);
 			CHECK(tbl2 == tbl);
 
@@ -107,9 +107,9 @@ TEST_CASE("tables - copying")
 			CHECK(tbl3.source().begin == source_position{});
 			CHECK(tbl3.source().end == source_position{});
 			CHECK(!tbl3.source().path);
-			CHECK(tbl3.size() == 1_sz);
+			CHECK(tbl3.size() == 1u);
 			REQUIRE(tbl3["test"].as<table>());
-			CHECK(tbl3["test"].as<table>()->size() == 1_sz);
+			CHECK(tbl3["test"].as<table>()->size() == 1u);
 			CHECK(tbl3["test"]["val1"] == "foo"sv);
 			CHECK(tbl3 == tbl2);
 			CHECK(tbl3 == tbl);
@@ -122,7 +122,7 @@ TEST_CASE("tables - construction")
 {
 	{
 		table tbl;
-		CHECK(tbl.size() == 0_sz);
+		CHECK(tbl.size() == 0u);
 		CHECK(tbl.empty());
 		CHECK(tbl.begin() == tbl.end());
 		CHECK(tbl.cbegin() == tbl.cend());
@@ -135,7 +135,7 @@ TEST_CASE("tables - construction")
 		table tbl{{
 			{ "foo"sv, 42 }
 		}};
-		CHECK(tbl.size() == 1_sz);
+		CHECK(tbl.size() == 1u);
 		CHECK(!tbl.empty());
 		CHECK(tbl.begin() != tbl.end());
 		CHECK(tbl.cbegin() != tbl.cend());
@@ -150,7 +150,7 @@ TEST_CASE("tables - construction")
 			{ "kek"sv, false },
 			{ "qux"sv, array{ 1 } }
 		}};
-		CHECK(tbl.size() == 4_sz);
+		CHECK(tbl.size() == 4u);
 		CHECK(!tbl.empty());
 		REQUIRE(tbl.get_as<int64_t>("foo"sv));
 		CHECK(*tbl.get_as<int64_t>("foo"sv) == 42);
@@ -170,7 +170,7 @@ TEST_CASE("tables - construction")
 			{ L"kek"s, L"test3"sv },
 			{ L"qux"sv.data(), L"test4"sv.data() }
 		} };
-		CHECK(tbl.size() == 4_sz);
+		CHECK(tbl.size() == 4u);
 		CHECK(!tbl.empty());
 		REQUIRE(tbl.get_as<std::string>("foo"sv));
 		CHECK(*tbl.get_as<std::string>("foo"sv) == "test1"sv);
@@ -256,7 +256,7 @@ TEST_CASE("tables - insertion and erasure")
 	auto res = tbl.insert("a", 42);
 	CHECK(res.first == tbl.begin());
 	CHECK(res.second == true);
-	CHECK(tbl.size() == 1_sz);
+	CHECK(tbl.size() == 1u);
 	CHECK(!tbl.empty());
 	REQUIRE(tbl.get_as<int64_t>("a"sv));
 	CHECK(*tbl.get_as<int64_t>("a"sv) == 42);
@@ -265,7 +265,7 @@ TEST_CASE("tables - insertion and erasure")
 	res = tbl.insert("a", 69);
 	CHECK(res.first == tbl.begin());
 	CHECK(res.second == false);
-	CHECK(tbl.size() == 1_sz);
+	CHECK(tbl.size() == 1u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 42);
 	REQUIRE(tbl == table{{ { "a"sv, 42 } }});
@@ -274,7 +274,7 @@ TEST_CASE("tables - insertion and erasure")
 	res = tbl.insert_or_assign(a, 69);
 	CHECK(res.first == tbl.begin());
 	CHECK(res.second == false); // should assign
-	CHECK(tbl.size() == 1_sz);
+	CHECK(tbl.size() == 1u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 69);
 	REQUIRE(tbl == table{{ { "a"sv, 69 } }});
@@ -282,7 +282,7 @@ TEST_CASE("tables - insertion and erasure")
 	res = tbl.insert_or_assign("b", "kek");
 	CHECK(res.first == advance(tbl.begin(), 1));
 	CHECK(res.second == true); // should insert
-	CHECK(tbl.size() == 2_sz);
+	CHECK(tbl.size() == 2u);
 	REQUIRE(tbl.get_as<std::string>("b"));
 	CHECK(*tbl.get_as<std::string>("b") == "kek"sv);
 	REQUIRE(tbl == table{{ { "a"sv, 69 }, { "b"sv, "kek" } }});
@@ -290,7 +290,7 @@ TEST_CASE("tables - insertion and erasure")
 	res = tbl.emplace<array>("c", 1, 2, 3);
 	CHECK(res.first == advance(tbl.begin(), 2));
 	CHECK(res.second == true);
-	CHECK(tbl.size() == 3_sz);
+	CHECK(tbl.size() == 3u);
 	REQUIRE(tbl.get_as<array>("c"));
 	CHECK(*tbl.get_as<array>("c") == array{ 1, 2, 3 });
 	REQUIRE(tbl == table{{ { "a"sv, 69 }, { "b"sv, "kek"sv }, { "c"sv, array{ 1, 2, 3 } } }});
@@ -298,7 +298,7 @@ TEST_CASE("tables - insertion and erasure")
 	res = tbl.emplace<int64_t>("c", 1);
 	CHECK(res.first == advance(tbl.begin(), 2));
 	CHECK(res.second == false);
-	CHECK(tbl.size() == 3_sz);
+	CHECK(tbl.size() == 3u);
 	REQUIRE(!tbl.get_as<int64_t>("c"));
 	REQUIRE(tbl.get_as<array>("c"));
 	REQUIRE(tbl == table{{ { "a"sv, 69 }, { "b"sv, "kek"s }, { "c"sv, array{ 1, 2, 3 } } }});
@@ -306,12 +306,12 @@ TEST_CASE("tables - insertion and erasure")
 	auto it = tbl.erase(tbl.cbegin());
 	REQUIRE(tbl == table{{ { "b"sv, "kek" }, { "c"sv, array{ 1, 2, 3 } } }});
 	CHECK(it == tbl.begin());
-	CHECK(tbl.size() == 2_sz);
+	CHECK(tbl.size() == 2u);
 
 	res = tbl.insert_or_assign("a"sv, 69);
 	CHECK(res.first == tbl.begin());
 	CHECK(res.second == true); // should insert
-	CHECK(tbl.size() == 3_sz);
+	CHECK(tbl.size() == 3u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 69);
 	REQUIRE(tbl == table{{ { "a"sv, 69 }, { "b"sv, "kek" }, { "c"sv, array{ 1, 2, 3 } } }});
@@ -319,12 +319,66 @@ TEST_CASE("tables - insertion and erasure")
 	it = tbl.erase(advance(tbl.cbegin(), 1), advance(tbl.cbegin(), 3));
 	REQUIRE(tbl == table{{ { "a"sv, 69 } }});
 	CHECK(it == tbl.end());
-	CHECK(tbl.size() == 1_sz);
+	CHECK(tbl.size() == 1u);
 
 	tbl.clear();
 	REQUIRE(tbl == table{});
-	CHECK(tbl.size() == 0_sz);
+	CHECK(tbl.size() == 0u);
 	CHECK(tbl.empty());
+
+	// void insert(Iter first, Iter last)
+	{
+		std::vector<std::pair<std::string, std::string>> vals{
+			{ "foo", "foo" },
+			{ "bar", "bar" },
+			{ "kek", "kek" }
+		};
+		tbl.insert(vals.begin(), vals.end());
+		CHECK(tbl.size() == 3u);
+		REQUIRE(tbl.get_as<std::string>("foo"));
+		CHECK(*tbl.get_as<std::string>("foo") == "foo");
+		REQUIRE(tbl.get_as<std::string>("bar"));
+		CHECK(*tbl.get_as<std::string>("bar") == "bar");
+		REQUIRE(tbl.get_as<std::string>("kek"));
+		CHECK(*tbl.get_as<std::string>("kek") == "kek");
+
+		REQUIRE(vals.size() == 3u);
+		CHECK(vals[0].first == "foo");
+		CHECK(vals[0].second == "foo");
+		CHECK(vals[1].first == "bar");
+		CHECK(vals[1].second == "bar");
+		CHECK(vals[2].first == "kek");
+		CHECK(vals[2].second == "kek");
+
+		tbl.clear();
+	}
+
+	// void insert(Iter first, Iter last) (with move iterators)
+	{
+		std::vector<std::pair<std::string, std::string>> vals{
+			{ "foo", "foo" },
+			{ "bar", "bar" },
+			{ "kek", "kek" }
+		};
+		tbl.insert(std::make_move_iterator(vals.begin()), std::make_move_iterator(vals.end()));
+		CHECK(tbl.size() == 3u);
+		REQUIRE(tbl.get_as<std::string>("foo"));
+		CHECK(*tbl.get_as<std::string>("foo") == "foo");
+		REQUIRE(tbl.get_as<std::string>("bar"));
+		CHECK(*tbl.get_as<std::string>("bar") == "bar");
+		REQUIRE(tbl.get_as<std::string>("kek"));
+		CHECK(*tbl.get_as<std::string>("kek") == "kek");
+
+		REQUIRE(vals.size() == 3u);
+		CHECK(vals[0].first == "");
+		CHECK(vals[0].second == "");
+		CHECK(vals[1].first == "");
+		CHECK(vals[1].second == "");
+		CHECK(vals[2].first == "");
+		CHECK(vals[2].second == "");
+
+		tbl.clear();
+	}
 
 
 	#if TOML_WINDOWS_COMPAT
@@ -335,11 +389,11 @@ TEST_CASE("tables - insertion and erasure")
 	REQUIRE(*tbl.get_as<std::string>(L"a"sv) == "test2"sv);
 	tbl.emplace<std::string>(L"b", L"test3");
 	REQUIRE(*tbl.get_as<std::string>(L"b"sv) == "test3"sv);
-	CHECK(tbl.size() == 2_sz);
+	CHECK(tbl.size() == 2u);
 	tbl.erase(L"b");
-	CHECK(tbl.size() == 1_sz);
+	CHECK(tbl.size() == 1u);
 	tbl.erase(L"a"s);
-	CHECK(tbl.size() == 0_sz);
+	CHECK(tbl.size() == 0u);
 
 	#endif // TOML_WINDOWS_COMPAT
 }
