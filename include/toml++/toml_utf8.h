@@ -143,7 +143,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_unicode_letter(char32_t c) noexcept
 	{
-		if (c < U'\xAA' || U'\U0003134A' < c)
+		if (U'\xAA' > c || c > U'\U0003134A')
 			return false;
 
 		const auto child_index_0 = (static_cast<uint_least64_t>(c) - 0xAAull) / 0xC4Bull;
@@ -155,7 +155,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			case 0x00: // [0] 00AA - 0CF4
 			{
-				if (U'\u0CF2' < c)
+				if (c > U'\u0CF2')
 					return false;
 				TOML_ASSUME(U'\xAA' <= c);
 
@@ -181,7 +181,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x01: // [1] 0CF5 - 193F
 			{
-				if (c < U'\u0D04' || U'\u191E' < c)
+				if (U'\u0D04' > c || c > U'\u191E')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -206,7 +206,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x02: // [2] 1940 - 258A
 			{
-				if (c < U'\u1950' || U'\u2184' < c)
+				if (U'\u1950' > c || c > U'\u2184')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -227,7 +227,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x03: // [3] 258B - 31D5
 			{
-				if (c < U'\u2C00' || U'\u31BF' < c)
+				if (U'\u2C00' > c || c > U'\u31BF')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -243,9 +243,9 @@ TOML_IMPL_NAMESPACE_START
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
 				// 771 codepoints from 30 ranges (spanning a search area of 3147)
 			}
-			case 0x04: return ((U'\u31F0' <= c && c <= U'\u31FF')) || (U'\u3400' <= c);
-			case 0x06: return (c <= U'\u4DBF') || (U'\u4E00' <= c);
-			case 0x0C: return (c <= U'\u9FFC') || (U'\uA000' <= c);
+			case 0x04: return (U'\u31F0' <= c && c <= U'\u31FF') || U'\u3400' <= c;
+			case 0x06: return c <= U'\u4DBF' || U'\u4E00' <= c;
+			case 0x0C: return c <= U'\u9FFC' || U'\uA000' <= c;
 			case 0x0D: // [13] A079 - ACC3
 			{
 				TOML_ASSUME(U'\uA079' <= c && c <= U'\uACC3');
@@ -270,10 +270,10 @@ TOML_IMPL_NAMESPACE_START
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA079ull) % 0x40ull));
 				// 2554 codepoints from 52 ranges (spanning a search area of 3147)
 			}
-			case 0x11: return (c <= U'\uD7A3') || ((U'\uD7B0' <= c && c <= U'\uD7C6')) || ((U'\uD7CB' <= c && c <= U'\uD7FB'));
+			case 0x11: return c <= U'\uD7A3' || (U'\uD7B0' <= c && c <= U'\uD7C6') || (U'\uD7CB' <= c && c <= U'\uD7FB');
 			case 0x14: // [20] F686 - 102D0
 			{
-				if (c < U'\uF900')
+				if (U'\uF900' > c)
 					return false;
 				TOML_ASSUME(c <= U'\U000102D0');
 
@@ -296,7 +296,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x15: // [21] 102D1 - 10F1B
 			{
-				if (c < U'\U00010300')
+				if (U'\U00010300' > c)
 					return false;
 				TOML_ASSUME(c <= U'\U00010F1B');
 
@@ -322,7 +322,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x16: // [22] 10F1C - 11B66
 			{
-				if (U'\U00011AF8' < c)
+				if (c > U'\U00011AF8')
 					return false;
 				TOML_ASSUME(U'\U00010F1C' <= c);
 
@@ -347,7 +347,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x17: // [23] 11B67 - 127B1
 			{
-				if (c < U'\U00011C00' || U'\U00012543' < c)
+				if (U'\U00011C00' > c || c > U'\U00012543')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -372,7 +372,7 @@ TOML_IMPL_NAMESPACE_START
 			case 0x1A: return U'\U00014400' <= c && c <= U'\U00014646';
 			case 0x1D: // [29] 16529 - 17173
 			{
-				if (c < U'\U00016800')
+				if (U'\U00016800' > c)
 					return false;
 				TOML_ASSUME(c <= U'\U00017173');
 
@@ -393,11 +393,11 @@ TOML_IMPL_NAMESPACE_START
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
 				// 1250 codepoints from 14 ranges (spanning a search area of 3147)
 			}
-			case 0x1F: return (c <= U'\U000187F7') || (U'\U00018800' <= c);
-			case 0x20: return (c <= U'\U00018CD5') || ((U'\U00018D00' <= c && c <= U'\U00018D08'));
+			case 0x1F: return c <= U'\U000187F7' || U'\U00018800' <= c;
+			case 0x20: return c <= U'\U00018CD5' || (U'\U00018D00' <= c && c <= U'\U00018D08');
 			case 0x23: // [35] 1AEEB - 1BB35
 			{
-				if (c < U'\U0001B000' || U'\U0001B2FB' < c)
+				if (U'\U0001B000' > c || c > U'\U0001B2FB')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -412,20 +412,20 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x24: // [36] 1BB36 - 1C780
 			{
-				if (c < U'\U0001BC00' || U'\U0001BC99' < c)
+				if (U'\U0001BC00' > c || c > U'\U0001BC99')
 					return false;
 
 				switch ((static_cast<uint_least64_t>(c) - 0x1BC00ull) / 0x40ull)
 				{
 					case 0x01: return c <= U'\U0001BC7C' && (1ull << (static_cast<uint_least64_t>(c) - 0x1BC40u)) & 0x1FFF07FFFFFFFFFFull;
-					case 0x02: return (c <= U'\U0001BC88') || (U'\U0001BC90' <= c);
+					case 0x02: return (1u << (static_cast<uint_least32_t>(c) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
 				// 139 codepoints from 4 ranges (spanning a search area of 3147)
 			}
 			case 0x26: // [38] 1D3CC - 1E016
 			{
-				if (c < U'\U0001D400' || U'\U0001D7CB' < c)
+				if (U'\U0001D400' > c || c > U'\U0001D7CB')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -441,7 +441,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x27: // [39] 1E017 - 1EC61
 			{
-				if (c < U'\U0001E100' || U'\U0001E94B' < c)
+				if (U'\U0001E100' > c || c > U'\U0001E94B')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -462,7 +462,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x28: // [40] 1EC62 - 1F8AC
 			{
-				if (c < U'\U0001EE00' || U'\U0001EEBB' < c)
+				if (U'\U0001EE00' > c || c > U'\U0001EEBB')
 					return false;
 
 				switch ((static_cast<uint_least64_t>(c) - 0x1EE00ull) / 0x40ull)
@@ -476,9 +476,9 @@ TOML_IMPL_NAMESPACE_START
 				// 141 codepoints from 33 ranges (spanning a search area of 3147)
 			}
 			case 0x29: return U'\U00020000' <= c;
-			case 0x37: return (c <= U'\U0002A6DD') || (U'\U0002A700' <= c);
-			case 0x38: return (c <= U'\U0002B734') || ((U'\U0002B740' <= c && c <= U'\U0002B81D')) || (U'\U0002B820' <= c);
-			case 0x3A: return (c <= U'\U0002CEA1') || (U'\U0002CEB0' <= c);
+			case 0x37: return c <= U'\U0002A6DD' || U'\U0002A700' <= c;
+			case 0x38: return c <= U'\U0002B734' || (U'\U0002B740' <= c && c <= U'\U0002B81D') || U'\U0002B820' <= c;
+			case 0x3A: return c <= U'\U0002CEA1' || U'\U0002CEB0' <= c;
 			case 0x3C: return c <= U'\U0002EBE0';
 			case 0x3D: return U'\U0002F800' <= c && c <= U'\U0002FA1D';
 			case 0x3E: return U'\U00030000' <= c;
@@ -493,7 +493,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_unicode_number(char32_t c) noexcept
 	{
-		if (c < U'\u0660' || U'\U0001FBF9' < c)
+		if (U'\u0660' > c || c > U'\U0001FBF9')
 			return false;
 
 		const auto child_index_0 = (static_cast<uint_least64_t>(c) - 0x660ull) / 0x7D7ull;
@@ -503,7 +503,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			case 0x00: // [0] 0660 - 0E36
 			{
-				if (U'\u0DEF' < c)
+				if (c > U'\u0DEF')
 					return false;
 				TOML_ASSUME(U'\u0660' <= c);
 
@@ -524,7 +524,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x01: // [1] 0E37 - 160D
 			{
-				if (c < U'\u0E50' || U'\u1099' < c)
+				if (U'\u0E50' > c || c > U'\u1099')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -539,7 +539,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x02: // [2] 160E - 1DE4
 			{
-				if (c < U'\u16EE' || U'\u1C59' < c)
+				if (U'\u16EE' > c || c > U'\u1C59')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -559,7 +559,7 @@ TOML_IMPL_NAMESPACE_START
 			case 0x05: return U'\u3007' <= c && c <= U'\u303A' && (1ull << (static_cast<uint_least64_t>(c) - 0x3007u)) & 0xE0007FC000001ull;
 			case 0x14: // [20] A32C - AB02
 			{
-				if (c < U'\uA620' || U'\uAA59' < c)
+				if (U'\uA620' > c || c > U'\uAA59')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -578,7 +578,7 @@ TOML_IMPL_NAMESPACE_START
 			case 0x1F: return U'\uFF10' <= c && c <= U'\uFF19';
 			case 0x20: // [32] 10140 - 10916
 			{
-				if (U'\U000104A9' < c)
+				if (c > U'\U000104A9')
 					return false;
 				TOML_ASSUME(U'\U00010140' <= c);
 
@@ -593,10 +593,10 @@ TOML_IMPL_NAMESPACE_START
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
 				// 70 codepoints from 5 ranges (spanning a search area of 2007)
 			}
-			case 0x21: return ((U'\U00010D30' <= c && c <= U'\U00010D39')) || ((U'\U00011066' <= c && c <= U'\U0001106F'));
+			case 0x21: return (U'\U00010D30' <= c && c <= U'\U00010D39') || (U'\U00011066' <= c && c <= U'\U0001106F');
 			case 0x22: // [34] 110EE - 118C4
 			{
-				if (c < U'\U000110F0' || U'\U00011739' < c)
+				if (U'\U000110F0' > c || c > U'\U00011739')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -615,7 +615,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x23: // [35] 118C5 - 1209B
 			{
-				if (c < U'\U000118E0' || U'\U00011DA9' < c)
+				if (U'\U000118E0' > c || c > U'\U00011DA9')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -631,12 +631,12 @@ TOML_IMPL_NAMESPACE_START
 				// 50 codepoints from 5 ranges (spanning a search area of 2007)
 			}
 			case 0x24: return U'\U00012400' <= c && c <= U'\U0001246E';
-			case 0x2D: return ((U'\U00016A60' <= c && c <= U'\U00016A69')) || ((U'\U00016B50' <= c && c <= U'\U00016B59'));
+			case 0x2D: return (U'\U00016A60' <= c && c <= U'\U00016A69') || (U'\U00016B50' <= c && c <= U'\U00016B59');
 			case 0x3B: return U'\U0001D7CE' <= c && c <= U'\U0001D7FF';
-			case 0x3C: return ((U'\U0001E140' <= c && c <= U'\U0001E149')) || ((U'\U0001E2F0' <= c && c <= U'\U0001E2F9'));
+			case 0x3C: return (U'\U0001E140' <= c && c <= U'\U0001E149') || (U'\U0001E2F0' <= c && c <= U'\U0001E2F9');
 			case 0x3D: return U'\U0001E950' <= c && c <= U'\U0001E959';
 			case 0x3F: return U'\U0001FBF0' <= c;
-				TOML_NO_DEFAULT_CASE;
+			TOML_NO_DEFAULT_CASE;
 		}
 		// 876 codepoints from 72 ranges (spanning a search area of 1114112)
 	}
@@ -647,7 +647,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_unicode_combining_mark(char32_t c) noexcept
 	{
-		if (c < U'\u0300' || U'\U000E01EF' < c)
+		if (U'\u0300' > c || c > U'\U000E01EF')
 			return false;
 
 		const auto child_index_0 = (static_cast<uint_least64_t>(c) - 0x300ull) / 0x37FCull;
@@ -657,7 +657,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			case 0x00: // [0] 0300 - 3AFB
 			{
-				if (U'\u309A' < c)
+				if (c > U'\u309A')
 					return false;
 				TOML_ASSUME(U'\u0300' <= c);
 
@@ -716,7 +716,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x02: // [2] 72F8 - AAF3
 			{
-				if (c < U'\uA66F' || U'\uAAEF' < c)
+				if (U'\uA66F' > c || c > U'\uAAEF')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -731,10 +731,10 @@ TOML_IMPL_NAMESPACE_START
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA66Full) % 0x40ull));
 				// 137 codepoints from 28 ranges (spanning a search area of 14332)
 			}
-			case 0x03: return ((U'\uAAF5' <= c && c <= U'\uAAF6')) || ((U'\uABE3' <= c && c <= U'\uABEA')) || ((U'\uABEC' <= c && c <= U'\uABED'));
+			case 0x03: return (U'\uAAF5' <= c && c <= U'\uAAF6') || (U'\uABE3' <= c && c <= U'\uABEA') || (U'\uABEC' <= c && c <= U'\uABED');
 			case 0x04: // [4] E2F0 - 11AEB
 			{
-				if (c < U'\uFB1E' || U'\U00011A99' < c)
+				if (U'\uFB1E' > c || c > U'\U00011A99')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -778,7 +778,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x05: // [5] 11AEC - 152E7
 			{
-				if (c < U'\U00011C2F' || U'\U00011EF6' < c)
+				if (U'\U00011C2F' > c || c > U'\U00011EF6')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -793,7 +793,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 			case 0x06: // [6] 152E8 - 18AE3
 			{
-				if (c < U'\U00016AF0' || U'\U00016FF1' < c)
+				if (U'\U00016AF0' > c || c > U'\U00016FF1')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -812,7 +812,7 @@ TOML_IMPL_NAMESPACE_START
 			case 0x07: return U'\U0001BC9D' <= c && c <= U'\U0001BC9E';
 			case 0x08: // [8] 1C2E0 - 1FADB
 			{
-				if (c < U'\U0001D165' || U'\U0001E94A' < c)
+				if (U'\U0001D165' > c || c > U'\U0001E94A')
 					return false;
 
 				constexpr uint_least64_t bitmask_table_1[] =
@@ -847,7 +847,7 @@ TOML_IMPL_NAMESPACE_START
 				// 223 codepoints from 21 ranges (spanning a search area of 14332)
 			}
 			case 0x3F: return U'\U000E0100' <= c;
-				TOML_NO_DEFAULT_CASE;
+			TOML_NO_DEFAULT_CASE;
 		}
 		// 2282 codepoints from 293 ranges (spanning a search area of 1114112)
 	}
