@@ -2838,39 +2838,14 @@ TOML_NAMESPACE_START
 			{
 				if constexpr (std::is_same_v<value_type, double>)
 				{
-					using namespace impl;
-					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
-					{
-						return (static_cast<uint64_t>(unwrap_enum(l)) << 32)
-							| static_cast<uint64_t>(unwrap_enum(r));
-					};
-
-					switch (pack(impl::fpclassify(lhs.val_), impl::fpclassify(rhs)))
-					{
-						case pack(fp_class::pos_inf, fp_class::neg_inf):	[[fallthrough]];
-						case pack(fp_class::pos_inf, fp_class::nan):		[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::pos_inf):	[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::nan):		[[fallthrough]];
-						case pack(fp_class::nan, fp_class::pos_inf):		[[fallthrough]];
-						case pack(fp_class::nan, fp_class::neg_inf):
-							return false;
-
-						case pack(fp_class::pos_inf, fp_class::pos_inf):	[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::neg_inf):	[[fallthrough]];
-						case pack(fp_class::nan, fp_class::nan):
-							return true;
-
-						case pack(fp_class::ok, fp_class::ok):
-							return lhs.val_ == rhs;
-
-						TOML_NO_DEFAULT_CASE;
-					}
-
-					TOML_UNREACHABLE;
+					const auto lhs_class = impl::fpclassify(lhs.val_);
+					const auto rhs_class = impl::fpclassify(rhs);
+					if (lhs_class == impl::fp_class::nan && rhs_class == impl::fp_class::nan)
+						return true;
+					if ((lhs_class == impl::fp_class::nan) != (rhs_class == impl::fp_class::nan))
+						return false;
 				}
-				else
-					return lhs.val_ == rhs;
-
+				return lhs.val_ == rhs;
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
@@ -9619,14 +9594,8 @@ TOML_IMPL_NAMESPACE_START
 				if (cp && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
-				// control for implementations that don't properly implement std::numeric_limits<double>::quiet_NaN()
-				// and/or std::numeric_limits<double>::infinity() (e.g. due to -ffast-math and friends)
-				constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
-				constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
-				constexpr uint64_t qnan    = 0b1111111111111000000000000000000000000000000000000000000000000001ull;
-				double rval;
-				std::memcpy(&rval, inf ? (negative ? &neg_inf : &pos_inf) : &qnan, sizeof(double));
-				return rval;
+				return inf ? (negative ? -std::numeric_limits<double>::infinity() : std::numeric_limits<double>::infinity())
+					: std::numeric_limits<double>::quiet_NaN();
 			}
 
 			TOML_PUSH_WARNINGS

@@ -45,26 +45,17 @@ TOML_POP_WARNINGS
 	while (false)
 #endif
 
-[[nodiscard]]
-TOML_ATTR(const)
-inline double make_infinity(int sign = 1) noexcept
-{
-	constexpr uint64_t pos_inf = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
-	constexpr uint64_t neg_inf = 0b1111111111110000000000000000000000000000000000000000000000000000ull;
-	double val;
-	std::memcpy(&val, sign >= 0 ? &pos_inf : &neg_inf, sizeof(double));
-	return val;
-}
+#define CHECK_SYMMETRIC_RELOP(lhs, op, rhs, result)	\
+	CHECK(((lhs) op (rhs)) == (result));			\
+	CHECK(((rhs) op (lhs)) == (result))
 
-[[nodiscard]]
-TOML_ATTR(const)
-inline double make_nan() noexcept
-{
-	constexpr uint64_t qnan = 0b1111111111111000000000000000000000000000000000000000000000000001ull;
-	double val;
-	std::memcpy(&val, &qnan, sizeof(double));
-	return val;
-}
+#define CHECK_SYMMETRIC_EQUAL(lhs, rhs)				\
+	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, true);		\
+	CHECK_SYMMETRIC_RELOP(lhs, !=, rhs, false)
+
+#define CHECK_SYMMETRIC_INEQUAL(lhs, rhs)			\
+	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, false);		\
+	CHECK_SYMMETRIC_RELOP(lhs, !=, rhs, true)
 
 // function_view - adapted from here: https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
 template <typename Func>
@@ -230,21 +221,61 @@ inline bool parse_expected_value(
 				REQUIRE(tbl == table{ { { "val"sv, expected } } });
 				REQUIRE(!(tbl != table{ { { "val"sv, expected } } }));
 
-				// check the value relops
-				REQUIRE(*nv.as<value_type>() == expected);
-				REQUIRE(expected == *nv.as<value_type>());
-				REQUIRE(!(*nv.as<value_type>() != expected));
-				REQUIRE(!(expected != *nv.as<value_type>()));
-
-				// check the node_view relops
-				REQUIRE(nv == expected);
-				REQUIRE(expected == nv);
-				REQUIRE(!(nv != expected));
-				REQUIRE(!(expected != nv));
+				// check value/node relops
+				CHECK_SYMMETRIC_EQUAL(*nv.as<value_type>(), *nv.as<value_type>());
+				CHECK_SYMMETRIC_EQUAL(*nv.as<value_type>(), expected);
+				CHECK_SYMMETRIC_EQUAL(nv, expected);
 
 				// make sure source info is correct
-				REQUIRE(nv.node()->source().begin == begin);
-				REQUIRE(nv.node()->source().end == end);
+				CHECK_SYMMETRIC_EQUAL(nv.node()->source().begin, begin);
+				CHECK_SYMMETRIC_EQUAL(nv.node()->source().end, end);
+
+				// check float identities etc
+				if constexpr (std::is_same_v<value_type, double>)
+				{
+					auto& float_node = *nv.as<value_type>();
+					const auto fpcls = impl::fpclassify(*float_node);
+					if (fpcls == impl::fp_class::nan)
+					{
+						CHECK_SYMMETRIC_EQUAL(float_node, std::numeric_limits<double>::quiet_NaN());
+						CHECK_SYMMETRIC_INEQUAL(float_node, std::numeric_limits<double>::infinity());
+						CHECK_SYMMETRIC_INEQUAL(float_node, -std::numeric_limits<double>::infinity());
+						CHECK_SYMMETRIC_INEQUAL(float_node, 1.0);
+						CHECK_SYMMETRIC_INEQUAL(float_node, 0.0);
+						CHECK_SYMMETRIC_INEQUAL(float_node, -1.0);
+					}
+					else if (fpcls == impl::fp_class::neg_inf || fpcls == impl::fp_class::pos_inf)
+					{
+						CHECK_SYMMETRIC_INEQUAL(float_node, std::numeric_limits<double>::quiet_NaN());
+						if (fpcls == impl::fp_class::neg_inf)
+						{
+							CHECK_SYMMETRIC_EQUAL(float_node, -std::numeric_limits<double>::infinity());
+							CHECK_SYMMETRIC_INEQUAL(float_node, std::numeric_limits<double>::infinity());
+						}
+						else
+						{
+							CHECK_SYMMETRIC_EQUAL(float_node, std::numeric_limits<double>::infinity());
+							CHECK_SYMMETRIC_INEQUAL(float_node, -std::numeric_limits<double>::infinity());
+						}
+						CHECK_SYMMETRIC_INEQUAL(float_node, 1.0);
+						CHECK_SYMMETRIC_INEQUAL(float_node, 0.0);
+						CHECK_SYMMETRIC_INEQUAL(float_node, -1.0);
+					}
+					else
+					{
+						CHECK_SYMMETRIC_INEQUAL(float_node, std::numeric_limits<double>::quiet_NaN());
+						CHECK_SYMMETRIC_INEQUAL(float_node, std::numeric_limits<double>::infinity());
+						CHECK_SYMMETRIC_INEQUAL(float_node, -std::numeric_limits<double>::infinity());
+						CHECK_SYMMETRIC_EQUAL(float_node, *float_node);
+						if (std::abs(*float_node) <= 1e10)
+						{
+							CHECK_SYMMETRIC_INEQUAL(float_node, *float_node + 100.0);
+							CHECK_SYMMETRIC_INEQUAL(float_node, *float_node - 100.0);
+						}
+						CHECK(float_node < std::numeric_limits<double>::infinity());
+						CHECK(float_node > -std::numeric_limits<double>::infinity());
+					}
+				}
 
 				// steal the val for round-trip tests
 				if (!stolen_value)

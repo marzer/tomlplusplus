@@ -398,39 +398,14 @@ TOML_NAMESPACE_START
 			{
 				if constexpr (std::is_same_v<value_type, double>)
 				{
-					using namespace impl;
-					static constexpr auto pack = [](auto l, auto r) constexpr noexcept
-					{
-						return (static_cast<uint64_t>(unwrap_enum(l)) << 32)
-							| static_cast<uint64_t>(unwrap_enum(r));
-					};
-					
-					switch (pack(impl::fpclassify(lhs.val_), impl::fpclassify(rhs)))
-					{
-						case pack(fp_class::pos_inf, fp_class::neg_inf):	[[fallthrough]];
-						case pack(fp_class::pos_inf, fp_class::nan):		[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::pos_inf):	[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::nan):		[[fallthrough]];
-						case pack(fp_class::nan, fp_class::pos_inf):		[[fallthrough]];
-						case pack(fp_class::nan, fp_class::neg_inf):
-							return false;
-
-						case pack(fp_class::pos_inf, fp_class::pos_inf):	[[fallthrough]];
-						case pack(fp_class::neg_inf, fp_class::neg_inf):	[[fallthrough]];
-						case pack(fp_class::nan, fp_class::nan):
-							return true;
-
-						case pack(fp_class::ok, fp_class::ok):
-							return lhs.val_ == rhs;
-
-						TOML_NO_DEFAULT_CASE;
-					}
-
-					TOML_UNREACHABLE;
+					const auto lhs_class = impl::fpclassify(lhs.val_);
+					const auto rhs_class = impl::fpclassify(rhs);
+					if (lhs_class == impl::fp_class::nan && rhs_class == impl::fp_class::nan)
+						return true;
+					if ((lhs_class == impl::fp_class::nan) != (rhs_class == impl::fp_class::nan))
+						return false;
 				}
-				else
-					return lhs.val_ == rhs;
-
+				return lhs.val_ == rhs;
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
 
