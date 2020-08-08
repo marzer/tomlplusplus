@@ -157,7 +157,9 @@ orange.color = "orange")"sv;
 	static constexpr auto spec_key_value_pair_7 = R"(_=1)"sv;
 	static constexpr auto spec_key_value_pair_8 = R"(-_-_-_-_-=1)"sv;
 	static constexpr auto spec_key_value_pair_9 = R"(3.14159 = "pi")"sv;
+	#if UNICODE_LITERALS_OK
 	static constexpr auto spec_quoted_basic_keys_1 = R"("ʎǝʞ" = "value")"sv;
+	#endif // UNICODE_LITERALS_OK
 	static constexpr auto spec_quoted_literal_keys_1 = R"('quoted "value"' = "value")"sv;
 	static constexpr auto spec_readme_example = R"(# This is a TOML document.
 
@@ -243,7 +245,9 @@ type.name = "pug")"sv;
 	static constexpr auto spec_table_3 = R"([a.b.c])"sv;
 	static constexpr auto spec_table_4 = R"([ d.e.f ]          # same as [d.e.f])"sv;
 	static constexpr auto spec_table_5 = R"([ g .  h  . i ]    # same as [g.h.i])"sv;
+	#if UNICODE_LITERALS_OK
 	static constexpr auto spec_table_6 = R"([ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l'])"sv;
+	#endif // UNICODE_LITERALS_OK
 	static constexpr auto spec_table_7 = R"(# [x] you
 # [x.y] don't
 # [x.y.z] need these
@@ -1065,6 +1069,7 @@ TEST_CASE("conformance - iarna/valid")
 		REQUIRE(tbl == expected);
 	});
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(FILE_LINE_ARGS, spec_quoted_basic_keys_1, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
@@ -1072,6 +1077,7 @@ TEST_CASE("conformance - iarna/valid")
 		}};
 		REQUIRE(tbl == expected);
 	});
+	#endif // UNICODE_LITERALS_OK
 
 	parsing_should_succeed(FILE_LINE_ARGS, spec_quoted_literal_keys_1, [](toml::table&& tbl)
 	{
@@ -1229,6 +1235,7 @@ Violets are blue)"sv },
 		REQUIRE(tbl == expected);
 	});
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
@@ -1237,6 +1244,7 @@ Location	SF.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
+	#endif // UNICODE_LITERALS_OK
 
 	parsing_should_succeed(FILE_LINE_ARGS, spec_string_literal_1, [](toml::table&& tbl)
 	{
@@ -1393,6 +1401,7 @@ trimmed in raw strings.
 		REQUIRE(tbl == expected);
 	});
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(FILE_LINE_ARGS, spec_table_6, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
@@ -1408,6 +1417,7 @@ trimmed in raw strings.
 		}};
 		REQUIRE(tbl == expected);
 	});
+	#endif // UNICODE_LITERALS_OK
 
 	parsing_should_succeed(FILE_LINE_ARGS, spec_table_7, [](toml::table&& tbl)
 	{

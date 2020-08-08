@@ -25,6 +25,15 @@ if build_tests or build_examples
 	compiler = meson.get_compiler('cpp')
 	message(['compiler ID: ', compiler.get_id()])
 	message(['compiler version: ', compiler.version()])
+
+	# intel-cl  __builtin_bit_cast workaround
+	if compiler.get_id() == 'intel-cl'
+		add_project_arguments([
+				'/D__builtin_bit_cast(x,y)=x{}'
+			],
+			language : 'cpp'
+		)	
+	endif
 	
 	# GCC or Clang
 	if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
@@ -124,11 +133,19 @@ if build_tests or build_examples
 		endif
 	endif
 
+	# msvc
+	if compiler.get_id() == 'msvc'
+		add_project_arguments([
+				'/utf-8'
+			],
+			language : 'cpp'
+		)
+	endif
+
 	# ICC's visual studio frontend, ICL
 	if compiler.get_id() == 'intel-cl'
 		add_project_arguments([
 				'/Qoption,cpp,--unicode_source_kind,UTF-8',
-				'/std=c++latest',
 				'/wd82', # storage class is not first
 				'/wd280', # selector expression is constant (why the fuck is that a warning?)
 				'/wd411', # class provides no constructor (duh, it's an aggregate)

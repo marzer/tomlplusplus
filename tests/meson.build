@@ -24,6 +24,24 @@ test_sources = [
 	'windows_compat.cpp'
 ]
 
+# compiler argument references:
+# msvc: https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019
+# intel and intel-cl: https://software.intel.com/content/www/us/en/develop/documentation/cpp-compiler-oneapi-dev-guide-and-reference/top/compiler-reference/compiler-options/alphabetical-list-of-compiler-options.html
+# gcc:
+# clang:
+
+#######################################################################################################################
+# c++ 20 check
+#######################################################################################################################
+
+compiler_supports_cpp20_args = []
+if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+	compiler_supports_cpp20_args += '-std=c++2a'
+elif compiler.get_id() == 'intel-cl'
+	compiler_supports_cpp20_args += '/Qstd=c++2a'
+elif compiler.get_id() == 'msvc'
+	compiler_supports_cpp20_args += '/std=c++latest'
+endif
 compiler_supports_cpp20 = compiler.links('''
 	#include <version>
 	#include <string>
@@ -37,9 +55,18 @@ compiler_supports_cpp20 = compiler.links('''
 	}
 	''',
 	name : 'supports c++20',
-	args : [ '-std=c++2a' ]
+	args : compiler_supports_cpp20_args
 )
 
+#######################################################################################################################
+# char8_t check
+#######################################################################################################################
+
+compiler_supports_char8_args = []
+compiler_supports_char8_args += compiler_supports_cpp20_args
+if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+	compiler_supports_char8_args += '-fchar8_t'
+endif
 compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	#include <version>
 	#include <string_view>
@@ -65,8 +92,12 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	}
 	''',
 	name : 'supports char8_t',
-	args : [ '-std=c++2a', '-fchar8_t' ]
+	args : compiler_supports_char8_args
 )
+
+#######################################################################################################################
+# consteval check
+#######################################################################################################################
 
 compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 
@@ -81,8 +112,12 @@ compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 	}
 	''',
 	name : 'supports consteval',
-	args : [ '-std=c++2a' ]
+	args : compiler_supports_cpp20_args
 )
+
+#######################################################################################################################
+# __fp16 and _Float16 checks
+#######################################################################################################################
 
 float_16_preprocessor_single_check_template = '''
 	#ifndef @0@
@@ -106,7 +141,14 @@ float_16_preprocessor_checks = '''
 	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_EXP__', '16')						\
 	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_10_EXP__', '4')
 
-compiler_supports_float16_args = [ '-O0' ]
+compiler_disable_optimizations = ''
+if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+	compiler_disable_optimizations = '-O0'
+elif compiler.get_id() == 'msvc' or compiler.get_id() == 'intel-cl'
+	compiler_disable_optimizations = '/Od'
+endif
+
+compiler_supports_float16_args = [ compiler_disable_optimizations ]
 if compiler.get_id() == 'gcc'
 	compiler_supports_float16_args += '-mfp16-format=ieee'
 	compiler_supports_float16_args += '-fmax-errors=1'
@@ -144,6 +186,10 @@ compiler_supports_float16 = compiler.links('''
 	args : compiler_supports_float16_args
 )
 
+#######################################################################################################################
+# int128 check
+#######################################################################################################################
+
 compiler_supports_int128 = compiler.links('''
 	#ifndef __SIZEOF_INT128__
 		#error __SIZEOF_INT128__ wasn't defined!
@@ -163,8 +209,12 @@ compiler_supports_int128 = compiler.links('''
 	}
 	''',
 	name : 'supports __int128_t',
-	args : [ '-O0' ]
+	args : [ compiler_disable_optimizations ]
 )
+
+#######################################################################################################################
+# float128 check
+#######################################################################################################################
 
 compiler_supports_float128 = compiler.links('''
 	#ifndef __SIZEOF_FLOAT128__
@@ -190,9 +240,20 @@ compiler_supports_float128 = compiler.links('''
 	}
 	''',
 	name : 'supports __float128',
-	args : [ '-O0' ]
+	args : [ compiler_disable_optimizations ]
 )
 
+#######################################################################################################################
+# fast math check
+#######################################################################################################################
+
+compiler_supports_fast_math_args = []
+if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+	compiler_supports_fast_math_args += '-ffast-math'
+	compiler_supports_fast_math_args += '-ffp-contract=fast'
+elif compiler.get_id() == 'msvc' or compiler.get_id() == 'intel-cl'
+	compiler_supports_fast_math_args += '/fp:fast'
+endif
 compiler_supports_fast_math = compiler.links('''
 	#include <cmath>
 	#include <iostream>
@@ -203,8 +264,12 @@ compiler_supports_fast_math = compiler.links('''
 	}
 	''',
 	name : 'supports fast-math',
-	args : [ '-ffast-math', '-ffp-contract=fast' ]
+	args : compiler_supports_fast_math_args
 )
+
+#######################################################################################################################
+# do the thing!
+#######################################################################################################################
 
 fast_math_modes = [ false, true ]
 exception_modes = [ true, false ]

@@ -29,6 +29,7 @@ TEST_CASE("parsing - key-value pairs")
 
 	parsing_should_fail(FILE_LINE_ARGS, R"(key = # INVALID)"sv);
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(
 		FILE_LINE_ARGS,
 		R"(
@@ -49,6 +50,7 @@ TEST_CASE("parsing - key-value pairs")
 			CHECK(tbl[""] == "blank"sv);
 		}
 	);
+	#endif // UNICODE_LITERALS_OK
 
 	parsing_should_fail(FILE_LINE_ARGS, R"(= "no key name")"sv);
 
@@ -151,6 +153,7 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 	);
 
 	// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
+	#if UNICODE_LITERALS_OK
 	#if TOML_LANG_UNRELEASED
 		parsing_should_succeed(
 			FILE_LINE_ARGS,
@@ -169,6 +172,7 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		parsing_should_fail(FILE_LINE_ARGS, R"(key+1 = 0)"sv);
 		parsing_should_fail(FILE_LINE_ARGS, R"(ʎǝʞ2 = 0)"sv);
 	#endif
+	#endif // UNICODE_LITERALS_OK
 }
 
 TEST_CASE("parsing - key-value pairs (string keys)")

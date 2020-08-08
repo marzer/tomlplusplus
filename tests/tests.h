@@ -18,6 +18,12 @@
 	#include "../include/toml++/toml.h"
 #endif
 
+#if TOML_ICC
+	#define UNICODE_LITERALS_OK 0
+#else
+	#define UNICODE_LITERALS_OK 1
+#endif
+
 TOML_DISABLE_ARITHMETIC_WARNINGS
 
 TOML_PUSH_WARNINGS

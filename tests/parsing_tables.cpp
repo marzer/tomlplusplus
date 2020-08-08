@@ -26,7 +26,7 @@ type.name = "pug"
 [a.b.c]            # this is best practice
 [ d.e.f ]          # same as [d.e.f]
 [ g .  h  . i ]    # same as [g.h.i]
-[ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l']
+[ j . "k" . 'l' ]  # same as [j."k".'l']
 
 # [x] you
 # [x.y] don't
@@ -78,8 +78,8 @@ smooth = true
 			CHECK(tbl["g"]["h"]["i"].as<table>());
 
 			CHECK(tbl["j"].as<table>());
-			CHECK(tbl["j"]["ʞ"].as<table>());
-			CHECK(tbl["j"]["ʞ"]["l"].as<table>());
+			CHECK(tbl["j"]["k"].as<table>());
+			CHECK(tbl["j"]["k"]["l"].as<table>());
 
 			REQUIRE(tbl["fruit"].as<table>());
 			CHECK(tbl["fruit"]["apple"]["color"] == "red"sv);

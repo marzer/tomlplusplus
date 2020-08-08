@@ -2031,7 +2031,7 @@ TOML_PUSH_WARNINGS
 TOML_DISABLE_PADDING_WARNINGS
 TOML_DISABLE_MISC_WARNINGS
 
-#if defined(doxygen) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+#if defined(DOXYGEN) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
 #define TOML_SA_NEWLINE		" "
 #define TOML_SA_LIST_SEP	", "
@@ -5695,10 +5695,11 @@ TOML_IMPL_NAMESPACE_START
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
-	// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	struct utf8_decoder final
 	{
+		// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
 		uint_least32_t state{};
 		char32_t codepoint{};
 
@@ -6713,7 +6714,7 @@ TOML_IMPL_NAMESPACE_START
 					return;
 
 				source->clear();
-				source->seekg(initial_pos, std::ios::beg);
+				source->seekg(initial_pos, std::basic_istream<Char>::beg);
 			}
 
 			[[nodiscard]]
@@ -6925,7 +6926,9 @@ TOML_IMPL_NAMESPACE_START
 					}
 				}
 
+				#if !TOML_ICC
 				TOML_UNREACHABLE;
+				#endif
 			}
 
 			[[nodiscard]]
@@ -7353,7 +7356,7 @@ TOML_NAMESPACE_START
 		const auto file_size = file.tellg();
 		if (file_size == -1)
 			TOML_THROW_PARSE_ERROR("Could not determine file size", file_path_str);
-		file.seekg(0, std::ios::beg);
+		file.seekg(0, ifstream::beg);
 
 		// read the whole file into memory first if the file isn't too large
 		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit

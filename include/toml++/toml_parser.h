@@ -686,7 +686,7 @@ TOML_NAMESPACE_START
 		const auto file_size = file.tellg();
 		if (file_size == -1)
 			TOML_THROW_PARSE_ERROR("Could not determine file size", file_path_str);
-		file.seekg(0, std::ios::beg);
+		file.seekg(0, ifstream::beg);
 
 		// read the whole file into memory first if the file isn't too large
 		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit

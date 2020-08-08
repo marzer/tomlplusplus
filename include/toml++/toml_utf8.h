@@ -1,6 +1,5 @@
 //# This file is a part of toml++ and is subject to the the terms of the MIT license.
 //# Copyright (c) 2019-2020 Mark Gillard <mark.gillard@outlook.com.au>
-//# Copyright (c) 2008-2010 Bjoern Hoehrmann <bjoern@hoehrmann.de> (utf8_decoder)
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
@@ -909,10 +908,11 @@ TOML_IMPL_NAMESPACE_START
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
-	// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-	// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
 	struct utf8_decoder final
 	{
+		// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
+		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>
+
 		uint_least32_t state{};
 		char32_t codepoint{};
 

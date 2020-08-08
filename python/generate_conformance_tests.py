@@ -217,6 +217,7 @@ class TomlTest:
 		self.__identifier = sanitize(name)
 		self.__data = utils.read_all_text_from_file(file_path).strip()
 		self.condition = ''
+		self.requires_unicode = False
 		if is_valid_case:
 			self.__expected = True
 			path_base = path.splitext(file_path)[0]
@@ -358,6 +359,15 @@ def load_invalid_inputs(tests, extern_root):
 	))
 
 
+
+def requires_unicode(s):
+	for c in s:
+		if ord(c) > 127:
+			return True
+	return False
+
+
+
 def write_test_file(name, test_cases):
 
 	conditions = set()
@@ -388,7 +398,14 @@ def write_test_file(name, test_cases):
 		write('namespace')
 		write('{')
 		for test in test_cases:
-			write('\t{}'.format(test))
+			s = '\t{}'.format(test)
+			test.requires_unicode = requires_unicode(s)
+			if test.requires_unicode:
+				write('\t#if UNICODE_LITERALS_OK')
+				write(s)
+				write('\t#endif // UNICODE_LITERALS_OK')
+			else:
+				write(s)
 		write('}')
 		write('')
 		write('TOML_POP_WARNINGS')
@@ -411,11 +428,18 @@ def write_test_file(name, test_cases):
 					else:
 						write('\tparsing_should_fail(FILE_LINE_ARGS, {});'.format(test.identifier()))
 				else:
+					s = expected.render('\t\t')
+					if not test.requires_unicode:
+						test.requires_unicode = requires_unicode(s)
+					if test.requires_unicode:
+						write('\t#if UNICODE_LITERALS_OK')
 					write('\tparsing_should_succeed(FILE_LINE_ARGS, {}, [](toml::table&& tbl)'.format(test.identifier()))
 					write('\t{')
-					write('\t\tauto expected = {};'.format(expected.render('\t\t')))
+					write('\t\tauto expected = {};'.format(s))
 					write('\t\tREQUIRE(tbl == expected);')
 					write('\t});')
+					if test.requires_unicode:
+						write('\t#endif // UNICODE_LITERALS_OK')
 					write('')
 			if condition != '':
 				write('\t#endif // {}'.format(condition));

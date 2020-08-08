@@ -153,6 +153,8 @@ str = ''''That's still pointless', she said.'''
 		FILE_LINE_ARGS,
 	  R"('''The quick brown fox jumps over the lazy dog''')"sv,
 		   "The quick brown fox jumps over the lazy dog"sv);
+
+	#if UNICODE_LITERALS_OK
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("Ýôú'ℓℓ λáƭè ₥è áƒƭèř ƭλïƨ - #")"sv,
@@ -165,6 +167,8 @@ str = ''''That's still pointless', she said.'''
 		FILE_LINE_ARGS,
 		R"("Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?")"sv,
 		 R"(Ýôú δôñ'ƭ ƭλïñƙ ƨô₥è úƨèř ωôñ'ƭ δô ƭλáƭ?)"sv);
+	#endif // UNICODE_LITERALS_OK
+
 	parse_expected_value(
 		FILE_LINE_ARGS,
 		R"("\"\u03B1\u03B2\u03B3\"")"sv,

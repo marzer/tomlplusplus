@@ -107,7 +107,7 @@ TOML_IMPL_NAMESPACE_START
 					return;
 				
 				source->clear();
-				source->seekg(initial_pos, std::ios::beg);
+				source->seekg(initial_pos, std::basic_istream<Char>::beg);
 			}
 
 			[[nodiscard]]
@@ -320,7 +320,9 @@ TOML_IMPL_NAMESPACE_START
 					}
 				}
 
+				#if !TOML_ICC
 				TOML_UNREACHABLE;
+				#endif
 			}
 
 			[[nodiscard]]

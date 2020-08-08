@@ -252,7 +252,9 @@ answer = 42)"sv;
 	static constexpr auto underscored_integer = R"(million = 1_000_000)"sv;
 	static constexpr auto unicode_escape = R"(answer4 = "\u03B4"
 answer8 = "\U000003B4")"sv;
+	#if UNICODE_LITERALS_OK
 	static constexpr auto unicode_literal = R"(answer = "δ")"sv;
+	#endif // UNICODE_LITERALS_OK
 }
 
 TOML_POP_WARNINGS
@@ -1135,6 +1137,7 @@ ue)"sv },
 		REQUIRE(tbl == expected);
 	});
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(FILE_LINE_ARGS, unicode_escape, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
@@ -1143,7 +1146,9 @@ ue)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
+	#endif // UNICODE_LITERALS_OK
 
+	#if UNICODE_LITERALS_OK
 	parsing_should_succeed(FILE_LINE_ARGS, unicode_literal, [](toml::table&& tbl)
 	{
 		auto expected = toml::table{{
@@ -1151,6 +1156,7 @@ ue)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
+	#endif // UNICODE_LITERALS_OK
 
 }
 
