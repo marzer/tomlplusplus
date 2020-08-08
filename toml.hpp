@@ -2488,6 +2488,9 @@ TOML_NAMESPACE_START
 			{
 				return do_ref<T>(*this);
 			}
+
+			[[nodiscard]] operator node_view<node>() noexcept;
+			[[nodiscard]] operator node_view<const node>() const noexcept;
 	};
 }
 TOML_NAMESPACE_END
@@ -4420,6 +4423,7 @@ TOML_NAMESPACE_START
 			using viewed_type = ViewedType;
 
 		private:
+			friend class TOML_NAMESPACE::node;
 			friend class TOML_NAMESPACE::table;
 			template <typename T> friend class TOML_NAMESPACE::node_view;
 
@@ -4442,12 +4446,12 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			node_view(const node_view&) noexcept = default;
 
-			TOML_NODISCARD_CTOR
-			node_view& operator= (const node_view&) noexcept = default;
+			node_view& operator= (const node_view&) & noexcept = default;
 
+			TOML_NODISCARD_CTOR
 			node_view(node_view&&) noexcept = default;
 
-			node_view& operator= (node_view&&) noexcept = delete;
+			node_view& operator= (node_view&&) & noexcept = default;
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
 
@@ -7507,6 +7511,18 @@ TOML_NAMESPACE_START
 	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
 	#undef TOML_MEMBER_ATTR
+
+	TOML_EXTERNAL_LINKAGE
+	node::operator node_view<node>() noexcept
+	{
+		return node_view<node>(this);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node::operator node_view<const node>() const noexcept
+	{
+		return node_view<const node>(this);
+	}
 }
 TOML_NAMESPACE_END
 

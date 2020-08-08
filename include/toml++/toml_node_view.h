@@ -63,6 +63,7 @@ TOML_NAMESPACE_START
 			using viewed_type = ViewedType;
 
 		private:
+			friend class TOML_NAMESPACE::node;
 			friend class TOML_NAMESPACE::table;
 			template <typename T> friend class TOML_NAMESPACE::node_view;
 
@@ -88,13 +89,14 @@ TOML_NAMESPACE_START
 			node_view(const node_view&) noexcept = default;
 
 			///// \brief	Copy-assignment operator.
-			TOML_NODISCARD_CTOR
-			node_view& operator= (const node_view&) noexcept = default;
+			node_view& operator= (const node_view&) & noexcept = default;
 
 			///// \brief	Move constructor.
+			TOML_NODISCARD_CTOR
 			node_view(node_view&&) noexcept = default;
 
-			node_view& operator= (node_view&&) noexcept = delete;
+			///// \brief	Move-assignment operator.
+			node_view& operator= (node_view&&) & noexcept = default;
 
 			/// \brief	Returns true if the view references a node.
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }

@@ -819,6 +819,12 @@ TOML_NAMESPACE_START
 			{
 				return do_ref<T>(*this);
 			}
+
+			/// \brief	Creates a `node_view` pointing to this node.
+			[[nodiscard]] operator node_view<node>() noexcept;
+
+			/// \brief	Creates a `node_view` pointing to this node (const overload).
+			[[nodiscard]] operator node_view<const node>() const noexcept;
 	};
 }
 TOML_NAMESPACE_END
