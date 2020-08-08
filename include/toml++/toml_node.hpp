@@ -87,6 +87,18 @@ TOML_NAMESPACE_START
 	TOML_MEMBER_ATTR(const) const source_region& node::source()				const noexcept { return source_; }
 
 	#undef TOML_MEMBER_ATTR
+
+	TOML_EXTERNAL_LINKAGE
+	node::operator node_view<node>() noexcept
+	{
+		return node_view<node>(this);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node::operator node_view<const node>() const noexcept
+	{
+		return node_view<const node>(this);
+	}
 }
 TOML_NAMESPACE_END
 
