@@ -5,8 +5,7 @@
 
 #pragma once
 #include "toml_date_time.h"
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <cmath>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
@@ -17,7 +16,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_INT_CHARCONV
 	#include <iomanip>
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {

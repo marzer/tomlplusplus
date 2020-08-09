@@ -392,8 +392,7 @@ def write_test_file(name, test_cases):
 		write('')
 
 		# test data
-		write('TOML_PUSH_WARNINGS')
-		write('TOML_DISABLE_ALL_WARNINGS // unused variable spam')
+		write('TOML_DISABLE_WARNINGS // unused variable spam')
 		write('')
 		write('namespace')
 		write('{')
@@ -408,7 +407,7 @@ def write_test_file(name, test_cases):
 				write(s)
 		write('}')
 		write('')
-		write('TOML_POP_WARNINGS')
+		write('TOML_ENABLE_WARNINGS')
 		write('')
 
 		# tests

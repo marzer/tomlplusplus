@@ -8,8 +8,7 @@
 #include "tests.h"
 using namespace toml::impl;
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS // unused variable spam
+TOML_DISABLE_WARNINGS // unused variable spam
 
 namespace
 {
@@ -266,7 +265,7 @@ smooth = true)"sv;
 	static constexpr auto spec_time_1 = R"(lt1 = 07:32:00)"sv;
 }
 
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TEST_CASE("conformance - iarna/valid")
 {

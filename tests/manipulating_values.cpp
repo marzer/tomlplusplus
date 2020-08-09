@@ -6,10 +6,9 @@
 #include "tests.h"
 
 #ifdef _WIN32
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <Windows.h>
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 #endif
 
 template <typename T>

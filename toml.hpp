@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.0.1
+// toml++ v2.1.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -15,10 +15,12 @@
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
-// TOML language specifications:
-// Latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// TOML Language Specifications:
+// latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.2: https://toml.io/en/v1.0.0-rc.2
 // v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
 // v0.5.0:      https://toml.io/en/v0.5.0
+// changelog:   https://github.com/toml-lang/toml/blob/master/CHANGELOG.md
 //
 //----------------------------------------------------------------------------------------------------------------------
 //
@@ -62,8 +64,14 @@
 #endif
 #ifdef __INTEL_COMPILER
 	#define TOML_ICC				__INTEL_COMPILER
+	#ifdef __ICL
+		#define TOML_ICC_CL			TOML_ICC
+	#else
+		#define TOML_ICC_CL			0
+	#endif
 #else
 	#define TOML_ICC				0
+	#define TOML_ICC_CL				0
 #endif
 #if defined(_MSC_VER) && !TOML_CLANG && !TOML_ICC
 	#define TOML_MSVC				_MSC_VER
@@ -81,16 +89,18 @@
 	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push")
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"")
 	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
-	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("clang diagnostic ignored \"-Wpadded\"")
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
 												_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-												_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"")
+												_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
+												_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("clang diagnostic ignored \"-Wshadow\"")
-	#define TOML_DISABLE_MISC_WARNINGS			_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
-												_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"")
-	#define TOML_DISABLE_ALL_WARNINGS			_Pragma("clang diagnostic ignored \"-Weverything\"")
+	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
+												_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
+												_Pragma("clang diagnostic ignored \"-Wpadded\"")
 	#define TOML_POP_WARNINGS					_Pragma("clang diagnostic pop")
-
+	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS \
+												_Pragma("clang diagnostic ignored \"-Weverything\"")
+	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 	#define TOML_ASSUME(cond)					__builtin_assume(cond)
 	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
@@ -121,9 +131,7 @@
 			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
 		#endif
 	#endif
-	#ifdef __EXCEPTIONS
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
+	#ifndef __EXCEPTIONS
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
@@ -138,33 +146,46 @@
 
 #endif // clang
 
-#if TOML_MSVC || (defined(_MSC_VER) && TOML_ICC && defined(__ICL))
+#if TOML_MSVC || TOML_ICC_CL
 
-	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
-	#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
-	#define TOML_DISABLE_ALL_WARNINGS		__pragma(warning(pop))	\
-											__pragma(warning(push, 0))
-	#define TOML_POP_WARNINGS				__pragma(warning(pop))
-
-	#define TOML_CPP_VERSION				_MSVC_LANG
+	#define TOML_CPP_VERSION					_MSVC_LANG
+	#define TOML_PUSH_WARNINGS					__pragma(warning(push))
+	#if TOML_MSVC // !intel-cl
+		#define TOML_PUSH_WARNINGS				__pragma(warning(push))
+		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
+		#define TOML_POP_WARNINGS				__pragma(warning(pop))
+		#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0))
+		#define TOML_ENABLE_WARNINGS			TOML_POP_WARNINGS
+	#endif
 	#ifndef TOML_ALWAYS_INLINE
-		#define TOML_ALWAYS_INLINE			__forceinline
+		#define TOML_ALWAYS_INLINE				__forceinline
 	#endif
-	#define TOML_NEVER_INLINE				__declspec(noinline)
-	#define TOML_ASSUME(cond)				__assume(cond)
-	#define TOML_UNREACHABLE				__assume(0)
-	#define TOML_INTERFACE					__declspec(novtable)
-	#define TOML_EMPTY_BASES				__declspec(empty_bases)
+	#define TOML_NEVER_INLINE					__declspec(noinline)
+	#define TOML_ASSUME(cond)					__assume(cond)
+	#define TOML_UNREACHABLE					__assume(0)
+	#define TOML_INTERFACE						__declspec(novtable)
+	#define TOML_EMPTY_BASES					__declspec(empty_bases)
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
+		#define TOML_RELOPS_REORDERING		1
 	#endif
-	#ifdef _CPPUNWIND
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
+	#ifndef _CPPUNWIND
+		#define TOML_COMPILER_EXCEPTIONS	0
 	#endif
 
 #endif // msvc
+
+#if TOML_ICC
+
+	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
+	#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 82))	/* storage class is not first */ \
+											__pragma(warning(disable: 111))	/* statement unreachable (false-positive) */ \
+											__pragma(warning(disable: 1011)) /* missing return (false-positive) */ \
+											__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */
+	#define TOML_POP_WARNINGS				__pragma(warning(pop))
+	#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0))
+	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
+
+#endif // icc
 
 #if TOML_GCC
 
@@ -175,26 +196,28 @@
 	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
-	#define TOML_DISABLE_PADDING_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"")
 	#define TOML_DISABLE_SUGGEST_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
-	#define TOML_DISABLE_MISC_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
+	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
-	#define TOML_DISABLE_ALL_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wall\"")							\
+	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
+	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS													\
+												_Pragma("GCC diagnostic ignored \"-Wall\"")							\
 												_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
+												_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
 												TOML_DISABLE_SWITCH_WARNINGS										\
 												TOML_DISABLE_INIT_WARNINGS											\
-												TOML_DISABLE_PADDING_WARNINGS										\
 												TOML_DISABLE_ARITHMETIC_WARNINGS									\
 												TOML_DISABLE_SHADOW_WARNINGS										\
 												TOML_DISABLE_SUGGEST_WARNINGS										\
-												TOML_DISABLE_MISC_WARNINGS
-	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
+												TOML_DISABLE_SPAM_WARNINGS
+	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 
 	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
@@ -205,9 +228,7 @@
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
 	#endif
-	#ifdef __cpp_exceptions
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
+	#ifndef __cpp_exceptions
 		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
@@ -357,11 +378,8 @@ is no longer necessary.
 #ifndef TOML_DISABLE_INIT_WARNINGS
 	#define	TOML_DISABLE_INIT_WARNINGS
 #endif
-#ifndef TOML_DISABLE_MISC_WARNINGS
-	#define TOML_DISABLE_MISC_WARNINGS
-#endif
-#ifndef TOML_DISABLE_PADDING_WARNINGS
-	#define TOML_DISABLE_PADDING_WARNINGS
+#ifndef TOML_DISABLE_SPAM_WARNINGS
+	#define TOML_DISABLE_SPAM_WARNINGS
 #endif
 #ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS
@@ -372,11 +390,14 @@ is no longer necessary.
 #ifndef TOML_DISABLE_SUGGEST_WARNINGS
 	#define TOML_DISABLE_SUGGEST_WARNINGS
 #endif
-#ifndef TOML_DISABLE_ALL_WARNINGS
-	#define TOML_DISABLE_ALL_WARNINGS
-#endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS
+#endif
+#ifndef TOML_DISABLE_WARNINGS
+	#define TOML_DISABLE_WARNINGS
+#endif
+#ifndef TOML_ENABLE_WARNINGS
+	#define TOML_ENABLE_WARNINGS
 #endif
 
 #ifndef TOML_ATTR
@@ -496,8 +517,8 @@ is no longer necessary.
 #endif
 
 #define TOML_LIB_MAJOR		2
-#define TOML_LIB_MINOR		0
-#define TOML_LIB_PATCH		1
+#define TOML_LIB_MINOR		1
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -565,8 +586,7 @@ is no longer necessary.
 	#define TOML_INTERNAL_LINKAGE				static
 #endif
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #ifndef TOML_ASSERT
 	#if defined(NDEBUG) || !defined(_DEBUG)
 		#define TOML_ASSERT(expr)	(void)0
@@ -577,7 +597,7 @@ TOML_DISABLE_ALL_WARNINGS
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 #endif
 //--------------  ↑ toml_preprocessor.h  -------------------------------------------------------------------------------
@@ -586,7 +606,9 @@ TOML_POP_WARNINGS
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
+
+TOML_DISABLE_WARNINGS
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -605,7 +627,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if TOML_HAS_INCLUDE(<version>)
 	#include <version>
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 #ifdef __cpp_lib_launder
 	#define TOML_LAUNDER(x)	std::launder(x)
@@ -635,9 +657,6 @@ static_assert(std::numeric_limits<double>::digits10 == 15, TOML_ENV_MESSAGE);
 #endif // !DOXYGEN
 
 #ifndef DOXYGEN // undocumented forward declarations are hidden from doxygen because they fuck it up =/
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml // non-abi namespace; this is not an error
 {
@@ -774,8 +793,6 @@ TOML_NAMESPACE_START // abi namespace
 	}
 }
 TOML_NAMESPACE_END
-
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
 #endif // !DOXYGEN
 
@@ -1314,6 +1331,8 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+
 #endif
 //------------------------------------------  ↑ toml_common.h  ---------------------------------------------------------
 
@@ -1321,7 +1340,7 @@ TOML_NAMESPACE_END
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -1624,7 +1643,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-----------------------------------------------------------------  ↑ toml_date_time.h  -------------------------------
@@ -1632,8 +1651,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 //---------------------------------------------------------------------------------------  ↓ toml_print_to_stream.h  ---
 #if 1
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <cmath>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
@@ -1644,7 +1662,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_INT_CHARCONV
 	#include <iomanip>
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -2028,8 +2046,7 @@ TOML_NAMESPACE_END
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 #if defined(DOXYGEN) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
@@ -2495,7 +2512,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //------------------  ↑ toml_node.h  -----------------------------------------------------------------------------------
@@ -2564,8 +2581,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -3270,7 +3286,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 
 #endif
 //------------------------------------------  ↑ toml_value.h  ----------------------------------------------------------
@@ -3279,7 +3295,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_PADDING_WARN
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -3432,8 +3448,7 @@ TOML_IMPL_NAMESPACE_START
 				return *(raw_ + idx)->get();
 			}
 
-			TOML_PUSH_WARNINGS
-			TOML_DISABLE_ALL_WARNINGS
+			TOML_DISABLE_WARNINGS
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			[[nodiscard]]
@@ -3442,7 +3457,7 @@ TOML_IMPL_NAMESPACE_START
 				return array_iterator<true>{ raw_ };
 			}
 
-			TOML_POP_WARNINGS
+			TOML_ENABLE_WARNINGS
 	};
 
 	template <typename T>
@@ -3842,7 +3857,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS //TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-------------------------------------------------------------------  ↑ toml_array.h  ---------------------------------
@@ -3851,8 +3866,7 @@ TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -3976,8 +3990,7 @@ TOML_IMPL_NAMESPACE_START
 				return lhs.raw_ != rhs.raw_;
 			}
 
-			TOML_PUSH_WARNINGS
-			TOML_DISABLE_ALL_WARNINGS
+			TOML_DISABLE_WARNINGS
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			[[nodiscard]]
@@ -3986,7 +3999,7 @@ TOML_IMPL_NAMESPACE_START
 				return table_iterator<true>{ raw_ };
 			}
 
-			TOML_POP_WARNINGS
+			TOML_ENABLE_WARNINGS
 	};
 
 	struct table_init_pair final
@@ -4403,7 +4416,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_MISC_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //--------------------------------------------------------------------------------------------  ↑ toml_table.h  --------
@@ -5771,7 +5784,7 @@ TOML_IMPL_NAMESPACE_END
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6008,7 +6021,7 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-----------------------------------------------------------------  ↑ toml_formatter.h  -------------------------------
@@ -6018,7 +6031,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -6371,7 +6384,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //--------------------------------------------------------------------------------------  ↑ toml_default_formatter.h  --
@@ -6381,7 +6394,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6490,7 +6503,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
@@ -6500,16 +6513,15 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 //---------------------------------------  ↓ toml_parse_error.h  -------------------------------------------------------
 #if 1
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #if TOML_EXCEPTIONS
 	#include <stdexcept>
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6625,8 +6637,7 @@ TOML_POP_WARNINGS
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -6930,9 +6941,7 @@ TOML_IMPL_NAMESPACE_START
 					}
 				}
 
-				#if !TOML_ICC
 				TOML_UNREACHABLE;
-				#endif
 			}
 
 			[[nodiscard]]
@@ -6995,7 +7004,7 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //----------------------------------------------------------------  ↑ toml_utf8_streams.h  -----------------------------
@@ -7004,7 +7013,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
 #if 1
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -7425,7 +7434,7 @@ TOML_NAMESPACE_END
 
 #undef TOML_THROW_PARSE_ERROR
 
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //--------------------------------------------------------------------------------------------  ↑ toml_parser.h  -------
@@ -7536,7 +7545,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -7844,7 +7853,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-----------------------------------------  ↑ toml_array.hpp  ---------------------------------------------------------
@@ -7854,7 +7863,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNING
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SUGGEST_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -8159,7 +8168,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //------------------------------------------------------------------  ↑ toml_table.hpp  --------------------------------
@@ -8167,16 +8176,14 @@ TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_PADDING_WARNING
 //-------------------------------------------------------------------------------------  ↓ toml_default_formatter.hpp  -
 #if 1
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <cmath>
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -8365,10 +8372,9 @@ TOML_NAMESPACE_END
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <Windows.h> // fuckkkk :(
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -8426,8 +8432,7 @@ TOML_IMPL_NAMESPACE_END
 
 #endif // TOML_WINDOWS_COMPAT
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS,
-				  // TOML_DISABLE_PADDING_WARNINGS, TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //-------------------------------------------------------------------------------------  ↑ toml_default_formatter.hpp  -
@@ -8591,8 +8596,7 @@ TOML_IMPL_NAMESPACE_END
 //------------------------------------------------------------------  ↓ toml_parser.hpp  -------------------------------
 #if 1
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <cmath>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
@@ -8603,11 +8607,11 @@ TOML_DISABLE_ALL_WARNINGS
 #if !TOML_HEADER_ONLY
 	using namespace std::string_view_literals;
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 #if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
 	#define TOML_RETURNS_BY_THROWING		[[noreturn]]
@@ -11589,7 +11593,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
 
 #endif
 //------------------------------------------------------------------  ↑ toml_parser.hpp  -------------------------------
@@ -11601,12 +11605,11 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_PADDING_WARNINGS
 //---------------------------------------------------------------------------------------  ↓ toml_instantiations.hpp  --
 #if 1
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <ostream>
 #include <istream>
 #include <fstream>
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 #if TOML_PARSER
 
@@ -11767,14 +11770,14 @@ TOML_NAMESPACE_END
 	#undef TOML_CONCAT_1
 	#undef TOML_CONSTEVAL
 	#undef TOML_CPP
-	#undef TOML_DISABLE_ALL_WARNINGS
 	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
-	#undef TOML_DISABLE_MISC_WARNINGS
-	#undef TOML_DISABLE_PADDING_WARNINGS
+	#undef TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_DISABLE_SHADOW_WARNINGS
 	#undef TOML_DISABLE_SUGGEST_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
+	#undef TOML_DISABLE_WARNINGS
+	#undef TOML_ENABLE_WARNINGS
 	#undef TOML_EMPTY_BASES
 	#undef TOML_EVAL_BOOL_0
 	#undef TOML_EVAL_BOOL_1
@@ -11787,6 +11790,7 @@ TOML_NAMESPACE_END
 	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#undef TOML_HAS_INCLUDE
 	#undef TOML_ICC
+	#undef TOML_ICC_CL
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_IMPL_NAMESPACE_END
 	#undef TOML_IMPL_NAMESPACE_START

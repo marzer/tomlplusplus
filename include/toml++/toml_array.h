@@ -7,7 +7,7 @@
 #include "toml_value.h"
 
 TOML_PUSH_WARNINGS
-TOML_DISABLE_MISC_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -160,8 +160,7 @@ TOML_IMPL_NAMESPACE_START
 				return *(raw_ + idx)->get();
 			}
 
-			TOML_PUSH_WARNINGS
-			TOML_DISABLE_ALL_WARNINGS
+			TOML_DISABLE_WARNINGS
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			[[nodiscard]]
@@ -170,7 +169,7 @@ TOML_IMPL_NAMESPACE_START
 				return array_iterator<true>{ raw_ };
 			}
 
-			TOML_POP_WARNINGS
+			TOML_ENABLE_WARNINGS
 	};
 
 	template <typename T>
@@ -1038,4 +1037,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS //TOML_DISABLE_MISC_WARNINGS
+TOML_POP_WARNINGS //TOML_DISABLE_SPAM_WARNINGS

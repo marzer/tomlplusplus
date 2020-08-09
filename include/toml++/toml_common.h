@@ -6,12 +6,14 @@
 #pragma once
 #include "toml_preprocessor.h"
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
+
 //#====================================================================================================================
 //# INCLUDES
 //#====================================================================================================================
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -30,7 +32,7 @@ TOML_DISABLE_ALL_WARNINGS
 #if TOML_HAS_INCLUDE(<version>)
 	#include <version>
 #endif
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 #ifdef __cpp_lib_launder
 	#define TOML_LAUNDER(x)	std::launder(x)
@@ -68,9 +70,6 @@ static_assert(std::numeric_limits<double>::digits10 == 15, TOML_ENV_MESSAGE);
 //#====================================================================================================================
 
 #ifndef DOXYGEN // undocumented forward declarations are hidden from doxygen because they fuck it up =/
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_PADDING_WARNINGS
 
 namespace toml // non-abi namespace; this is not an error
 {
@@ -207,8 +206,6 @@ TOML_NAMESPACE_START // abi namespace
 	}
 }
 TOML_NAMESPACE_END
-
-TOML_POP_WARNINGS // TOML_DISABLE_PADDING_WARNINGS
 
 #endif // !DOXYGEN
 
@@ -908,3 +905,5 @@ TOML_NAMESPACE_START
 	#endif
 }
 TOML_NAMESPACE_END
+
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS

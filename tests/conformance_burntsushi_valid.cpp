@@ -8,8 +8,7 @@
 #include "tests.h"
 using namespace toml::impl;
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS // unused variable spam
+TOML_DISABLE_WARNINGS // unused variable spam
 
 namespace
 {
@@ -257,7 +256,7 @@ answer8 = "\U000003B4")"sv;
 	#endif // UNICODE_LITERALS_OK
 }
 
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TEST_CASE("conformance - burntsushi/valid")
 {

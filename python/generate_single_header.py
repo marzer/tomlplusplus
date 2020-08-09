@@ -128,10 +128,12 @@ def main():
 // against it directly. You should instead make your changes in the relevant source file(s). The file names of the files
 // that contributed to this header can be found at the beginnings and ends of the corresponding sections of this file.''')
 	preamble.append('''
-// TOML language specifications:
-// Latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// TOML Language Specifications:
+// latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.2: https://toml.io/en/v1.0.0-rc.2
 // v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
-// v0.5.0:      https://toml.io/en/v0.5.0''')
+// v0.5.0:      https://toml.io/en/v0.5.0
+// changelog:   https://github.com/toml-lang/toml/blob/master/CHANGELOG.md''')
 	preamble.append(utils.read_all_text_from_file(path.join(utils.get_script_folder(), '..', 'LICENSE')))
 
 	# write the output

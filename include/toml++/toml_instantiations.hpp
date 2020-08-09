@@ -9,17 +9,17 @@
 #if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
-#if TOML_HEADER_ONLY
+#if TOML_HEADER_ONLY && !TOML_INTELLISENSE
 	#error This header cannot not be included when TOML_HEADER_ONLY is enabled.
 #endif
 //# }}
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS
+TOML_DISABLE_WARNINGS
 #include <ostream>
 #include <istream>
 #include <fstream>
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
+
 #include "toml_node_view.h"
 #include "toml_default_formatter.h"
 #include "toml_json_formatter.h"

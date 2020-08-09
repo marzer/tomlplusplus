@@ -8,8 +8,7 @@
 #include "tests.h"
 using namespace toml::impl;
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ALL_WARNINGS // unused variable spam
+TOML_DISABLE_WARNINGS // unused variable spam
 
 namespace
 {
@@ -132,7 +131,7 @@ fruit = []
     color = "green")"sv;
 }
 
-TOML_POP_WARNINGS
+TOML_ENABLE_WARNINGS
 
 TEST_CASE("conformance - iarna/invalid")
 {
