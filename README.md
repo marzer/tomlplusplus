@@ -67,17 +67,17 @@ for (auto&& [k, v] : config)
 {
     v.visit([](auto& node) noexcept
     {
-        std::cout << node << std::endl;
+        std::cout << node << "\n";
         if constexpr (toml::is_string<decltype(node)>)
             do_something_with_string_values(node);
     });
 }
 
 // re-serialize as TOML
-std::cout << config << std::endl;
+std::cout << config << "\n";
 
 // re-serialize as JSON
-std::cout << toml::json_formatter{ config } << std::endl;
+std::cout << toml::json_formatter{ config } << "\n";
 
 
 ```

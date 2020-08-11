@@ -178,12 +178,12 @@
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"")
-	#define TOML_DISABLE_SUGGEST_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
 	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS													\
 												_Pragma("GCC diagnostic ignored \"-Wall\"")							\
@@ -193,7 +193,6 @@
 												TOML_DISABLE_INIT_WARNINGS											\
 												TOML_DISABLE_ARITHMETIC_WARNINGS									\
 												TOML_DISABLE_SHADOW_WARNINGS										\
-												TOML_DISABLE_SUGGEST_WARNINGS										\
 												TOML_DISABLE_SPAM_WARNINGS
 	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 
@@ -372,9 +371,6 @@ is no longer necessary.
 #endif
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_DISABLE_SHADOW_WARNINGS
-#endif
-#ifndef TOML_DISABLE_SUGGEST_WARNINGS
-	#define TOML_DISABLE_SUGGEST_WARNINGS
 #endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS

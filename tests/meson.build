@@ -50,7 +50,7 @@ compiler_supports_cpp20 = compiler.links('''
 	int main()
 	{
 		std::string s = "kek";
-		std::cout << s << std::endl;
+		std::cout << s << "\n";
 		return 0;
 	}
 	''',
@@ -259,7 +259,7 @@ compiler_supports_fast_math = compiler.links('''
 	#include <iostream>
 	int main()
 	{
-		std::cout << std::exp2(2.0) << std::pow(2.0, 3.0) << std::endl;
+		std::cout << std::exp2(2.0) << std::pow(2.0, 3.0) << "\n";
 		return 0;
 	}
 	''',

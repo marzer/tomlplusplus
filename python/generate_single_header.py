@@ -32,10 +32,12 @@ class Preprocessor:
 
 		if (self.__current_level == 1):
 			header_text = '↓ ' + raw_incl
-			lpad = 28 + ((25 * (self.__header_indent % 4)) - int((len(header_text) + 4) / 2))
+			lpad = 20 + ((25 * (self.__header_indent % 4)) - int((len(header_text) + 4) / 2))
 			self.__header_indent += 1
-			text = '{}\n#if 1\n\n{}\n\n#endif\n{}\n'.format(
-				utils.make_divider(header_text, lpad), text, utils.make_divider('↑ ' + raw_incl, lpad)
+			text = '#if 1  {}\n{}\n\n#endif {}\n'.format(
+				utils.make_divider(header_text, lpad, line_length=113),
+				text,
+				utils.make_divider('↑ ' + raw_incl, lpad, line_length=113)
 			)
 
 		return '\n\n' + text + '\n\n' # will get merged later
@@ -55,13 +57,31 @@ def main():
 
 	# preprocess header(s)
 	source_text = str(Preprocessor('toml.h'))
-	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M) # 'pragma once'
-	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M) # clang-format directives
-	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M) # spdx
-	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comment blocks
-	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M) # remove 'magic' comments
-	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M) # remove trailing whitespace
-	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M) # remove double newlines
+
+	# strip various things:
+	# 'pragma once'
+	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M)
+	# clang-format directives
+	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M)
+	# spdx license identifiers
+	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M)
+	# 'magic' comment blocks (incl. doxygen)
+	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M)
+	# 'magic' comments (incl. doxygen)
+	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M)
+	# remove trailing whitespace
+	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M)
+	# bookended namespace blocks
+	source_text = re.sub('}\n+TOML_NAMESPACE_END\n+TOML_NAMESPACE_START\n+{\n+', '\n', source_text, 0, re.I | re.M)
+	source_text = re.sub('}\n+TOML_IMPL_NAMESPACE_END\n+TOML_IMPL_NAMESPACE_START\n+{\n+', '\n', source_text, 0, re.I | re.M)
+	# blank lines before some preprocessor directives
+	#source_text = re.sub('\n+\n(\s*)#\s*(elif|else|endif)(.*?)\n', '\n\\1#\\2\\3\n', source_text, 0, re.I | re.M)
+	# blank lines after some preprocessor directives
+	#source_text = re.sub('#\s*(if|ifn?def|elif|else)(.*?)\n\n+', '#\\1\\2\n', source_text, 0, re.I | re.M)
+	# blank lines after opening braces
+	source_text = re.sub('[{]\s*\n\s*\n+', '{\n', source_text, 0, re.I | re.M)
+	# double newlines
+	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M)
 
 	# source_text = re.sub(  # blank lines between various preprocessor directives
 	# 	'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#](ifn?(?:def)?|define)',

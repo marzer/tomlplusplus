@@ -11,6 +11,10 @@
 //# is used as the source for generate_single_header.py.
 
 #include "toml_preprocessor.h"
+
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS
+
 #include "toml_common.h"
 #include "toml_date_time.h"
 #include "toml_print_to_stream.h"
@@ -45,6 +49,8 @@
 #endif // !TOML_HEADER_ONLY
 
 #endif // TOML_IMPLEMENTATION
+
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 // macro hygiene
 #if TOML_UNDEF_MACROS

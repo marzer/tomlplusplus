@@ -28,11 +28,11 @@ int main(int argc, char** argv)
 		try
 		{
 			const auto table = toml::parse_file(argv[1]);
-			std::cout << toml::json_formatter{ table } << std::endl;
+			std::cout << toml::json_formatter{ table } << "\n";
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cerr << err << std::endl;
+			std::cerr << err << "\n";
 			return 1;
 		}
 	}
@@ -43,11 +43,11 @@ int main(int argc, char** argv)
 		try
 		{
 			const auto table = toml::parse(std::cin, "stdin"sv);
-			std::cout << toml::json_formatter{ table } << std::endl;
+			std::cout << toml::json_formatter{ table } << "\n";
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cerr << err << std::endl;
+			std::cerr << err << "\n";
 			return 1;
 		}
 	}

@@ -362,7 +362,7 @@ TOML_NAMESPACE_START
 	/// 
 	/// std::cout << "The value for 'bar' was found on "sv
 	///		<< tbl.get("bar")->source().begin()
-	///		<< std::endl;
+	///		<< "\n";
 	/// 
 	/// \ecpp
 	/// 
@@ -396,7 +396,7 @@ TOML_NAMESPACE_START
 	/// 
 	/// std::cout << "The value for 'bar' was found on "sv
 	///		<< tbl.get("bar")->source()
-	///		<< std::endl;
+	///		<< "\n";
 	/// 
 	/// \ecpp
 	/// 

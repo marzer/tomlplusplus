@@ -45,8 +45,7 @@
 #ifndef INCLUDE_TOMLPLUSPLUS_H
 #define INCLUDE_TOMLPLUSPLUS_H
 
-//--------------  ↓ toml_preprocessor.h  -------------------------------------------------------------------------------
-#if 1
+#if 1  //------  ↓ toml_preprocessor.h  --------------------------------------------------------------------------------
 
 #ifndef __cplusplus
 	#error toml++ is a C++ library.
@@ -200,12 +199,12 @@
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
 	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"")
-	#define TOML_DISABLE_SUGGEST_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")
+												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
 	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS													\
 												_Pragma("GCC diagnostic ignored \"-Wall\"")							\
@@ -215,7 +214,6 @@
 												TOML_DISABLE_INIT_WARNINGS											\
 												TOML_DISABLE_ARITHMETIC_WARNINGS									\
 												TOML_DISABLE_SHADOW_WARNINGS										\
-												TOML_DISABLE_SUGGEST_WARNINGS										\
 												TOML_DISABLE_SPAM_WARNINGS
 	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 
@@ -386,9 +384,6 @@ is no longer necessary.
 #endif
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
 	#define TOML_DISABLE_SHADOW_WARNINGS
-#endif
-#ifndef TOML_DISABLE_SUGGEST_WARNINGS
-	#define TOML_DISABLE_SUGGEST_WARNINGS
 #endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS
@@ -599,14 +594,12 @@ TOML_DISABLE_WARNINGS
 #endif
 TOML_ENABLE_WARNINGS
 
-#endif
-//--------------  ↑ toml_preprocessor.h  -------------------------------------------------------------------------------
-
-//------------------------------------------  ↓ toml_common.h  ---------------------------------------------------------
-#if 1
+#endif //------  ↑ toml_preprocessor.h  --------------------------------------------------------------------------------
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SPAM_WARNINGS
+
+#if 1  //----------------------------------  ↓ toml_common.h  ----------------------------------------------------------
 
 TOML_DISABLE_WARNINGS
 #include <cstdint>
@@ -1231,11 +1224,7 @@ TOML_NAMESPACE_START
 	{
 		return static_cast<size_t>(n);
 	}
-}
-TOML_NAMESPACE_END
 
-TOML_NAMESPACE_START
-{
 	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
 
 	#if TOML_LARGE_FILES
@@ -1304,11 +1293,7 @@ TOML_NAMESPACE_START
 	};
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
-}
-TOML_NAMESPACE_END
 
-TOML_NAMESPACE_START
-{
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
@@ -1331,16 +1316,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+#endif //----------------------------------  ↑ toml_common.h  ----------------------------------------------------------
 
-#endif
-//------------------------------------------  ↑ toml_common.h  ---------------------------------------------------------
-
-//-----------------------------------------------------------------  ↓ toml_date_time.h  -------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //---------------------------------------------------------  ↓ toml_date_time.h  --------------------------------
 
 TOML_NAMESPACE_START
 {
@@ -1643,13 +1621,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+#endif //---------------------------------------------------------  ↑ toml_date_time.h  --------------------------------
 
-#endif
-//-----------------------------------------------------------------  ↑ toml_date_time.h  -------------------------------
-
-//---------------------------------------------------------------------------------------  ↓ toml_print_to_stream.h  ---
-#if 1
+#if 1  //-------------------------------------------------------------------------------  ↓ toml_print_to_stream.h  ----
 
 TOML_DISABLE_WARNINGS
 #include <cmath>
@@ -2039,14 +2013,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-#endif
-//---------------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ---
+#endif //-------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ----
 
-//------------------  ↓ toml_node.h  -----------------------------------------------------------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //----------  ↓ toml_node.h  ------------------------------------------------------------------------------------
 
 #if defined(DOXYGEN) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
@@ -2512,13 +2481,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+#endif //----------  ↑ toml_node.h  ------------------------------------------------------------------------------------
 
-#endif
-//------------------  ↑ toml_node.h  -----------------------------------------------------------------------------------
-
-//------------------------------------------  ↓ toml_value.h  ----------------------------------------------------------
-#if 1
+#if 1  //----------------------------------  ↓ toml_value.h  -----------------------------------------------------------
 
 #ifndef DOXYGEN
 	#if TOML_WINDOWS_COMPAT
@@ -2581,7 +2546,6 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -3288,14 +3252,9 @@ TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 
-#endif
-//------------------------------------------  ↑ toml_value.h  ----------------------------------------------------------
+#endif //----------------------------------  ↑ toml_value.h  -----------------------------------------------------------
 
-//-------------------------------------------------------------------  ↓ toml_array.h  ---------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //-----------------------------------------------------------  ↓ toml_array.h  ----------------------------------
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -3857,16 +3816,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS //TOML_DISABLE_SPAM_WARNINGS
+#endif //-----------------------------------------------------------  ↑ toml_array.h  ----------------------------------
 
-#endif
-//-------------------------------------------------------------------  ↑ toml_array.h  ---------------------------------
-
-//--------------------------------------------------------------------------------------------  ↓ toml_table.h  --------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //------------------------------------------------------------------------------------  ↓ toml_table.h  ---------
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -4243,7 +4195,6 @@ TOML_NAMESPACE_START
 				}
 				else
 				{
-
 					using type = impl::unwrap_node<ValueType>;
 					static_assert(
 						(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
@@ -4416,13 +4367,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+#endif //------------------------------------------------------------------------------------  ↑ toml_table.h  ---------
 
-#endif
-//--------------------------------------------------------------------------------------------  ↑ toml_table.h  --------
-
-//---------------  ↓ toml_node_view.h  ---------------------------------------------------------------------------------
-#if 1
+#if 1  //-------  ↓ toml_node_view.h  ----------------------------------------------------------------------------------
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
@@ -4808,11 +4755,9 @@ TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 
-#endif
-//---------------  ↑ toml_node_view.h  ---------------------------------------------------------------------------------
+#endif //-------  ↑ toml_node_view.h  ----------------------------------------------------------------------------------
 
-//-------------------------------------------  ↓ toml_utf8.h  ----------------------------------------------------------
-#if 1
+#if 1  //-----------------------------------  ↓ toml_utf8.h  -----------------------------------------------------------
 
 #ifndef DOXYGEN
 
@@ -5776,15 +5721,12 @@ TOML_IMPL_NAMESPACE_END
 
 #endif // !DOXYGEN
 
-#endif
-//-------------------------------------------  ↑ toml_utf8.h  ----------------------------------------------------------
+#endif //-----------------------------------  ↑ toml_utf8.h  -----------------------------------------------------------
 
-//-----------------------------------------------------------------  ↓ toml_formatter.h  -------------------------------
-#if 1
+#if 1  //---------------------------------------------------------  ↓ toml_formatter.h  --------------------------------
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6021,17 +5963,14 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#endif
-//-----------------------------------------------------------------  ↑ toml_formatter.h  -------------------------------
+#endif //---------------------------------------------------------  ↑ toml_formatter.h  --------------------------------
 
-//--------------------------------------------------------------------------------------  ↓ toml_default_formatter.h  --
-#if 1
+#if 1  //------------------------------------------------------------------------------  ↓ toml_default_formatter.h  ---
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -6384,17 +6323,14 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#endif
-//--------------------------------------------------------------------------------------  ↑ toml_default_formatter.h  --
+#endif //------------------------------------------------------------------------------  ↑ toml_default_formatter.h  ---
 
-//-------------  ↓ toml_json_formatter.h  ------------------------------------------------------------------------------
-#if 1
+#if 1  //-----  ↓ toml_json_formatter.h  -------------------------------------------------------------------------------
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6503,15 +6439,13 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#endif
-//-------------  ↑ toml_json_formatter.h  ------------------------------------------------------------------------------
+#endif //-----  ↑ toml_json_formatter.h  -------------------------------------------------------------------------------
 
 #if TOML_PARSER
 
-//---------------------------------------  ↓ toml_parse_error.h  -------------------------------------------------------
-#if 1
+#if 1  //-------------------------------  ↓ toml_parse_error.h  --------------------------------------------------------
 
 TOML_DISABLE_WARNINGS
 #if TOML_EXCEPTIONS
@@ -6521,7 +6455,6 @@ TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -6628,16 +6561,11 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS
 
-#endif
-//---------------------------------------  ↑ toml_parse_error.h  -------------------------------------------------------
+#endif //-------------------------------  ↑ toml_parse_error.h  --------------------------------------------------------
 
-//----------------------------------------------------------------  ↓ toml_utf8_streams.h  -----------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //--------------------------------------------------------  ↓ toml_utf8_streams.h  ------------------------------
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -6981,7 +6909,6 @@ TOML_IMPL_NAMESPACE_START
 			utf8_reader_interface& reader;
 			struct
 			{
-
 				utf8_codepoint buffer[history_buffer_size];
 				size_t count, first;
 			}
@@ -7004,16 +6931,9 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
+#endif //--------------------------------------------------------  ↑ toml_utf8_streams.h  ------------------------------
 
-#endif
-//----------------------------------------------------------------  ↑ toml_utf8_streams.h  -----------------------------
-
-//--------------------------------------------------------------------------------------------  ↓ toml_parser.h  -------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //------------------------------------------------------------------------------------  ↓ toml_parser.h  --------
 
 TOML_NAMESPACE_START
 {
@@ -7434,20 +7354,13 @@ TOML_NAMESPACE_END
 
 #undef TOML_THROW_PARSE_ERROR
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
-
-#endif
-//--------------------------------------------------------------------------------------------  ↑ toml_parser.h  -------
+#endif //------------------------------------------------------------------------------------  ↑ toml_parser.h  --------
 
 #endif // TOML_PARSER
 
 #if TOML_IMPLEMENTATION
 
-//-----------------  ↓ toml_node.hpp  ----------------------------------------------------------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SUGGEST_WARNINGS
+#if 1  //---------  ↓ toml_node.hpp  -----------------------------------------------------------------------------------
 
 TOML_NAMESPACE_START
 {
@@ -7535,17 +7448,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS
+#endif //---------  ↑ toml_node.hpp  -----------------------------------------------------------------------------------
 
-#endif
-//-----------------  ↑ toml_node.hpp  ----------------------------------------------------------------------------------
-
-//-----------------------------------------  ↓ toml_array.hpp  ---------------------------------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SUGGEST_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //---------------------------------  ↓ toml_array.hpp  ----------------------------------------------------------
 
 TOML_NAMESPACE_START
 {
@@ -7853,17 +7758,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+#endif //---------------------------------  ↑ toml_array.hpp  ----------------------------------------------------------
 
-#endif
-//-----------------------------------------  ↑ toml_array.hpp  ---------------------------------------------------------
-
-//------------------------------------------------------------------  ↓ toml_table.hpp  --------------------------------
-#if 1
-
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SUGGEST_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
+#if 1  //----------------------------------------------------------  ↓ toml_table.hpp  ---------------------------------
 
 TOML_NAMESPACE_START
 {
@@ -8168,13 +8065,9 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SUGGEST_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+#endif //----------------------------------------------------------  ↑ toml_table.hpp  ---------------------------------
 
-#endif
-//------------------------------------------------------------------  ↑ toml_table.hpp  --------------------------------
-
-//-------------------------------------------------------------------------------------  ↓ toml_default_formatter.hpp  -
-#if 1
+#if 1  //-----------------------------------------------------------------------------  ↓ toml_default_formatter.hpp  --
 
 TOML_DISABLE_WARNINGS
 #include <cmath>
@@ -8183,7 +8076,6 @@ TOML_ENABLE_WARNINGS
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_ARITHMETIC_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -8432,13 +8324,11 @@ TOML_IMPL_NAMESPACE_END
 
 #endif // TOML_WINDOWS_COMPAT
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS
 
-#endif
-//-------------------------------------------------------------------------------------  ↑ toml_default_formatter.hpp  -
+#endif //-----------------------------------------------------------------------------  ↑ toml_default_formatter.hpp  --
 
-//------------  ↓ toml_json_formatter.hpp  -----------------------------------------------------------------------------
-#if 1
+#if 1  //----  ↓ toml_json_formatter.hpp  ------------------------------------------------------------------------------
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
@@ -8489,13 +8379,11 @@ TOML_NAMESPACE_END
 
 TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#endif
-//------------  ↑ toml_json_formatter.hpp  -----------------------------------------------------------------------------
+#endif //----  ↑ toml_json_formatter.hpp  ------------------------------------------------------------------------------
 
 #if TOML_PARSER
 
-//--------------------------------------  ↓ toml_utf8_streams.hpp  -----------------------------------------------------
-#if 1
+#if 1  //------------------------------  ↓ toml_utf8_streams.hpp  ------------------------------------------------------
 
 #if !TOML_EXCEPTIONS
 	#undef TOML_ERROR_CHECK
@@ -8590,11 +8478,9 @@ TOML_IMPL_NAMESPACE_END
 #undef TOML_ERROR_CHECK
 #undef TOML_ERROR
 
-#endif
-//--------------------------------------  ↑ toml_utf8_streams.hpp  -----------------------------------------------------
+#endif //------------------------------  ↑ toml_utf8_streams.hpp  ------------------------------------------------------
 
-//------------------------------------------------------------------  ↓ toml_parser.hpp  -------------------------------
-#if 1
+#if 1  //----------------------------------------------------------  ↓ toml_parser.hpp  --------------------------------
 
 TOML_DISABLE_WARNINGS
 #include <cmath>
@@ -8611,7 +8497,6 @@ TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 #if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
 	#define TOML_RETURNS_BY_THROWING		[[noreturn]]
@@ -11593,17 +11478,15 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
-#endif
-//------------------------------------------------------------------  ↑ toml_parser.hpp  -------------------------------
+#endif //----------------------------------------------------------  ↑ toml_parser.hpp  --------------------------------
 
 #endif // TOML_PARSER
 
 #if !TOML_HEADER_ONLY
 
-//---------------------------------------------------------------------------------------  ↓ toml_instantiations.hpp  --
-#if 1
+#if 1  //-------------------------------------------------------------------------------  ↓ toml_instantiations.hpp  ---
 
 TOML_DISABLE_WARNINGS
 #include <ostream>
@@ -11742,12 +11625,13 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-#endif
-//---------------------------------------------------------------------------------------  ↑ toml_instantiations.hpp  --
+#endif //-------------------------------------------------------------------------------  ↑ toml_instantiations.hpp  ---
 
 #endif // !TOML_HEADER_ONLY
 
 #endif // TOML_IMPLEMENTATION
+
+TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 
 // macro hygiene
 #if TOML_UNDEF_MACROS

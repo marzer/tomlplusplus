@@ -6,9 +6,6 @@
 #pragma once
 #include "toml_common.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
-
 TOML_NAMESPACE_START
 {
 	/// \brief	A local date.
@@ -82,7 +79,7 @@ TOML_NAMESPACE_START
 
 	/// \brief	Prints a date out to a stream as `YYYY-MM-DD` (per RFC 3339).
 	/// \detail \cpp
-	/// std::cout << toml::date{ 1987, 3, 16 } << std::endl;
+	/// std::cout << toml::date{ 1987, 3, 16 } << "\n";
 	/// \ecpp
 	/// 
 	/// \out
@@ -173,8 +170,8 @@ TOML_NAMESPACE_START
 
 	/// \brief	Prints a time out to a stream as `HH:MM:SS.FFFFFF` (per RFC 3339).
 	/// \detail \cpp
-	/// std::cout << toml::time{ 10, 20, 34 } << std::endl;
-	/// std::cout << toml::time{ 10, 20, 34, 500000000 } << std::endl;
+	/// std::cout << toml::time{ 10, 20, 34 } << "\n";
+	/// std::cout << toml::time{ 10, 20, 34, 500000000 } << "\n";
 	/// \ecpp
 	/// 
 	/// \out
@@ -207,10 +204,10 @@ TOML_NAMESPACE_START
 		/// \brief	Constructs a timezone offset from separate hour and minute totals.
 		///
 		/// \detail \cpp
-		/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
-		/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
-		/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
-		/// std::cout << toml::time_offset{ 0, 0 } << std::endl;
+		/// std::cout << toml::time_offset{ 2, 30 } << "\n";
+		/// std::cout << toml::time_offset{ -2, 30 } << "\n";
+		/// std::cout << toml::time_offset{ -2, -30 } << "\n";
+		/// std::cout << toml::time_offset{ 0, 0 } << "\n";
 		/// 
 		/// \ecpp
 		/// 
@@ -273,11 +270,11 @@ TOML_NAMESPACE_START
 
 	/// \brief	Prints a time_offset out to a stream as `+-HH:MM or Z` (per RFC 3339).
 	/// \detail \cpp
-	/// std::cout << toml::time_offset{ 2, 30 } << std::endl;
-	/// std::cout << toml::time_offset{ 2, -30 } << std::endl;
-	/// std::cout << toml::time_offset{} << std::endl;
-	/// std::cout << toml::time_offset{ -2, 30 } << std::endl;
-	/// std::cout << toml::time_offset{ -2, -30 } << std::endl;
+	/// std::cout << toml::time_offset{ 2, 30 } << "\n";
+	/// std::cout << toml::time_offset{ 2, -30 } << "\n";
+	/// std::cout << toml::time_offset{} << "\n";
+	/// std::cout << toml::time_offset{ -2, 30 } << "\n";
+	/// std::cout << toml::time_offset{ -2, -30 } << "\n";
 	/// \ecpp
 	/// 
 	/// \out
@@ -405,9 +402,9 @@ TOML_NAMESPACE_START
 
 	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
 	/// \detail \cpp
-	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << std::endl;
-	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, { -2, -30 } } << std::endl;
-	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, {} } << std::endl;
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 } } << "\n";
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, { -2, -30 } } << "\n";
+	/// std::cout << toml::date_time{ { 1987, 3, 16 }, { 10, 20, 34 }, {} } << "\n";
 	/// \ecpp
 	/// 
 	/// \out
@@ -427,5 +424,3 @@ TOML_NAMESPACE_START
 	#endif
 }
 TOML_NAMESPACE_END
-
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS

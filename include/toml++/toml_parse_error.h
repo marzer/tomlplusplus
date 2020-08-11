@@ -18,7 +18,6 @@ TOML_ENABLE_WARNINGS
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_INIT_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -126,7 +125,7 @@ TOML_NAMESPACE_START
 	/// }
 	/// catch (const toml::parse_error & err)
 	/// {
-	/// 	std::cerr << "Parsing failed:\n"sv << err << std::endl;
+	/// 	std::cerr << "Parsing failed:\n"sv << err << "\n";
 	/// }
 	/// \ecpp
 	/// 
@@ -157,4 +156,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS

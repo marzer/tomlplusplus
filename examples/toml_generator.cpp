@@ -203,6 +203,6 @@ int main(int argc, char** argv)
 		}
 	}
 
-	std::cout << root << std::endl;
+	std::cout << root << "\n";
 	return 0;
 }

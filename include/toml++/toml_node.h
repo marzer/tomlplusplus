@@ -6,9 +6,6 @@
 #pragma once
 #include "toml_common.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
-
 #if defined(DOXYGEN) || TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
 #define TOML_SA_NEWLINE		" "
@@ -329,6 +326,8 @@ TOML_NAMESPACE_START
 			/// 		type can be any type where a reasonable conversion from a native TOML value exists
 			/// 		(e.g. std::wstring on Windows). If the source value cannot be represented by
 			/// 		the destination type, an empty optional is returned.
+			///
+			/// \godbolt{zzG81K}
 			/// 
 			/// \cpp
 			/// auto tbl = toml::parse(R"(
@@ -341,103 +340,100 @@ TOML_NAMESPACE_START
 			/// )"sv);
 			/// 
 			/// const auto print_value_with_typename =
-			///		[&](std::string_view key, std::string_view type_name, auto* dummy)
-			///		{
-			///			std::cout << "'" << key << "' as " << type_name << ": ";
-			///			using type = std::remove_pointer_t<decltype(dummy)>;
-			///			if (std::optional<type> val = tbl.get(key)->value<type>())
-			///				std::cout << *val << "\n";
-			///			else
-			///				std::cout << "No conversion path or out-of-range\n";
-			///		};
+			/// 	[&](std::string_view key, std::string_view type_name, auto* dummy)
+			/// 	{
+			/// 		std::cout << "- " << std::setw(18) << std::left << type_name;
+			/// 		using type = std::remove_pointer_t<decltype(dummy)>;
+			/// 		if (std::optional<type> val = tbl.get(key)->value<type>())
+			/// 			std::cout << *val << "\n";
+			/// 		else
+			/// 			std::cout << "n/a\n";
+			/// 	};
 			/// 
-			/// #define print_value(key, T)	print_value_with_typename(key, #T, (T*)nullptr)
+			/// #define print_value(key, T) print_value_with_typename(key, #T, (T*)nullptr)
 			/// 
-			/// print_value("int", bool);
-			/// print_value("int", int);
-			/// print_value("int", unsigned int);
-			/// print_value("int", long long);
-			/// print_value("int", float);
-			/// print_value("int", double);
-			/// std::cout << "\n";
-			/// 
-			/// print_value("flt", bool);
-			/// print_value("flt", int);
-			/// print_value("flt", unsigned int);
-			/// print_value("flt", long long);
-			/// print_value("flt", float);
-			/// print_value("flt", double);
-			/// std::cout << "\n";
-			/// 
-			/// print_value("pi", bool);
-			/// print_value("pi", int);
-			/// print_value("pi", unsigned int);
-			/// print_value("pi", long long);
-			/// print_value("pi", float);
-			/// print_value("pi", double);
-			/// std::cout << "\n";
-			/// 
-			/// print_value("bool", bool);
-			/// print_value("bool", int);
-			/// print_value("bool", unsigned int);
-			/// print_value("bool", long long);
-			/// print_value("bool", float);
-			/// print_value("bool", double);
-			/// std::cout << "\n";
-			/// 
-			/// print_value("huge", bool);
-			/// print_value("huge", int);
-			/// print_value("huge", unsigned int);
-			/// print_value("huge", long long);
-			/// print_value("huge", float);
-			/// print_value("huge", double);
-			/// std::cout << "\n";
-			/// 
-			/// print_value("str", std::string);
-			/// print_value("str", std::string_view);
-			/// print_value("str", const char*);
-			/// std::cout << "\n";
+			/// for (auto key : { "int", "flt", "pi", "bool", "huge", "str" })
+			/// {
+			/// 	std::cout << tbl[key].type() << " value '" << key << "' as:\n";
+			/// 	print_value(key, bool);
+			/// 	print_value(key, int);
+			/// 	print_value(key, unsigned int);
+			/// 	print_value(key, long long);
+			/// 	print_value(key, float);
+			/// 	print_value(key, double);
+			/// 	print_value(key, std::string);
+			/// 	print_value(key, std::string_view);
+			/// 	print_value(key, const char*);
+			/// 	std::cout << "\n";
+			/// }
 			/// \ecpp
 			/// 
 			/// \out
-			/// 'int' as bool: true
-			/// 'int' as int: -10
-			/// 'int' as unsigned int: No conversion path or out-of-range
-			/// 'int' as long long: -10
-			/// 'int' as float: -10
-			/// 'int' as double: -10
+			/// integer value 'int' as:
+			/// - bool              true
+			/// - int               -10
+			/// - unsigned int      n/a
+			/// - long long         -10
+			/// - float             -10
+			/// - double            -10
+			/// - std::string       n/a
+			/// - std::string_view  n/a
+			/// - const char*       n/a
 			/// 
-			/// 'flt' as bool: No conversion path or out-of-range
-			/// 'flt' as int: 25
-			/// 'flt' as unsigned int: 25
-			/// 'flt' as long long: 25
-			/// 'flt' as float: 25
-			/// 'flt' as double: 25
+			/// floating-point value 'flt' as:
+			/// - bool              n/a
+			/// - int               25
+			/// - unsigned int      25
+			/// - long long         25
+			/// - float             25
+			/// - double            25
+			/// - std::string       n/a
+			/// - std::string_view  n/a
+			/// - const char*       n/a
 			/// 
-			/// 'pi' as bool: No conversion path or out-of-range
-			/// 'pi' as int: No conversion path or out-of-range
-			/// 'pi' as unsigned int: No conversion path or out-of-range
-			/// 'pi' as long long: No conversion path or out-of-range
-			/// 'pi' as float: 3.14159
-			/// 'pi' as double: 3.14159
+			/// floating-point value 'pi' as:
+			/// - bool              n/a
+			/// - int               n/a
+			/// - unsigned int      n/a
+			/// - long long         n/a
+			/// - float             3.14159
+			/// - double            3.14159
+			/// - std::string       n/a
+			/// - std::string_view  n/a
+			/// - const char*       n/a
 			/// 
-			/// 'bool' as bool: false
-			/// 'bool' as int: 0
-			/// 'bool' as unsigned int: 0
-			/// 'bool' as long long: 0
-			/// 'bool' as float: No conversion path or out-of-range
-			/// 'bool' as double: No conversion path or out-of-range
+			/// boolean value 'bool' as:
+			/// - bool              false
+			/// - int               0
+			/// - unsigned int      0
+			/// - long long         0
+			/// - float             n/a
+			/// - double            n/a
+			/// - std::string       n/a
+			/// - std::string_view  n/a
+			/// - const char*       n/a
 			/// 
-			/// 'huge' as bool: true
-			/// 'huge' as int: No conversion path or out-of-range
-			/// 'huge' as unsigned int: No conversion path or out-of-range
-			/// 'huge' as long long: 9223372036854775807
-			/// 'huge' as float: No conversion path or out-of-range
-			/// 'huge' as double: No conversion path or out-of-range
+			/// integer value 'huge' as:
+			/// - bool              true
+			/// - int               n/a
+			/// - unsigned int      n/a
+			/// - long long         9223372036854775807
+			/// - float             n/a
+			/// - double            n/a
+			/// - std::string       n/a
+			/// - std::string_view  n/a
+			/// - const char*       n/a
 			/// 
-			/// 'str' as std::string: foo
-			/// 'str' as std::string_view: foo
-			/// 'str' as const char*: foo
+			/// string value 'str' as:
+			/// - bool              n/a
+			/// - int               n/a
+			/// - unsigned int      n/a
+			/// - long long         n/a
+			/// - float             n/a
+			/// - double            n/a
+			/// - std::string       foo
+			/// - std::string_view  foo
+			/// - const char*       foo
 			/// \eout
 			///
 			/// \tparam	T	One of the native TOML value types, or a type capable of converting to one.
@@ -489,14 +485,14 @@ TOML_NAMESPACE_START
 			/// toml::value<int64_t>* int_value = node->as<int64_t>();
 			/// toml::table* tbl = node->as<toml::table>();
 			/// if (int_value)
-			///		std::cout << "Node is a value<int64_t>" << std::endl;
+			///		std::cout << "Node is a value<int64_t>\n";
 			/// else if (tbl)
-			///		std::cout << "Node is a table" << std::endl;
+			///		std::cout << "Node is a table\n";
 			///	
 			///	// fully-qualified value node types also work (useful for template code):
 			///	toml::value<int64_t>* int_value2 = node->as<toml::value<int64_t>>();
 			/// if (int_value2)
-			///		std::cout << "Node is a value<int64_t>" << std::endl;
+			///		std::cout << "Node is a value<int64_t>\n";
 			///		
 			/// \ecpp
 			/// 
@@ -827,6 +823,3 @@ TOML_NAMESPACE_START
 	};
 }
 TOML_NAMESPACE_END
-
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
-

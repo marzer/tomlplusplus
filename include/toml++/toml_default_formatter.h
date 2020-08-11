@@ -11,7 +11,6 @@
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -37,8 +36,8 @@ TOML_NAMESPACE_START
 	/// }};
 	///
 	/// // these two lines are equivalent:
-	///	std::cout << toml::default_formatter{ tbl } << std::endl;
-	///	std::cout << tbl << std::endl;
+	///	std::cout << toml::default_formatter{ tbl } << "\n";
+	///	std::cout << tbl << "\n";
 	/// 
 	/// \ecpp
 	/// 
@@ -401,5 +400,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 

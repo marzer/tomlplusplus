@@ -6,9 +6,6 @@
 #pragma once
 #include "toml_preprocessor.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
-
 //#====================================================================================================================
 //# INCLUDES
 //#====================================================================================================================
@@ -274,8 +271,8 @@ TOML_NAMESPACE_START // abi namespace
 	/// // desired result: [ [ 42 ] ]
 	/// auto bad = toml::array{ toml::array{ 42 } }
 	/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } }
-	/// std::cout << "bad: " << bad << std::endl;
-	/// std::cout << "good:" << good << std::endl;
+	/// std::cout << "bad: " << bad << "\n";
+	/// std::cout << "good:" << good << "\n";
 	/// \ecpp
 	/// 
 	/// \out
@@ -733,7 +730,7 @@ TOML_NAMESPACE_START
 	/// auto table = toml::parse_file("config.toml"sv);
 	/// std::cout << "The node 'description' was defined at "sv
 	///		<< table.get("description")->source().begin()
-	///		<< std::endl;
+	///		<< "\n";
 	///	
 	/// \ecpp
 	/// 
@@ -807,9 +804,9 @@ TOML_NAMESPACE_START
 	/// auto tbl = toml::parse_file("config.toml"sv);
 	/// if (auto server = tbl.get("server"))
 	/// {
-	///		std::cout << "begin: "sv << server->source().begin << std::endl;
-	///		std::cout << "end: "sv << server->source().end << std::endl;
-	///		std::cout << "path: "sv << *server->source().path << std::endl;
+	///		std::cout << "begin: "sv << server->source().begin << "\n";
+	///		std::cout << "end: "sv << server->source().end << "\n";
+	///		std::cout << "path: "sv << *server->source().path << "\n";
 	///	}
 	///	
 	/// \ecpp
@@ -874,7 +871,7 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto arr = toml::array{ 1, 2.0, "3", false };
 	/// for (size_t i = 0; i < arr.size() i++)
-	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << std::endl;
+	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << "\n";
 	///
 	/// \ecpp
 	/// 
@@ -906,4 +903,3 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS

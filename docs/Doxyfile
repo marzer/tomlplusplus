@@ -329,7 +329,6 @@ PREDEFINED             =                                           \
     "TOML_DISABLE_SPAM_WARNINGS="                                  \
     "TOML_DISABLE_ARITHMETIC_WARNINGS="                            \
     "TOML_DISABLE_SHADOW_WARNINGS="                                \
-    "TOML_DISABLE_SUGGEST_WARNINGS="                               \
     "TOML_DISABLE_WARNINGS="                                       \
     "TOML_ENABLE_WARNINGS="                                        \
     "TOML_POP_WARNINGS="                                           \

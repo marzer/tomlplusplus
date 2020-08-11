@@ -36,15 +36,15 @@ TOML_NAMESPACE_START
 	///		
 	/// )"sv);
 	/// 
-	/// std::cout << tbl["title"] << std::endl;
-	/// std::cout << tbl["products"][0]["name"] << std::endl;
-	/// std::cout << tbl["products"][0]["keywords"] << std::endl;
-	/// std::cout << tbl["products"][0]["keywords"][2] << std::endl;
+	/// std::cout << tbl["title"] << "\n";
+	/// std::cout << tbl["products"][0]["name"] << "\n";
+	/// std::cout << tbl["products"][0]["keywords"] << "\n";
+	/// std::cout << tbl["products"][0]["keywords"][2] << "\n";
 	/// 
 	/// tbl["products"][0]["keywords"].as_array()->push_back("heavy");
-	/// std::cout << tbl["products"][0]["keywords"] << std::endl;
-	/// std::cout << "has product[2]: "sv << !!tbl["products"][2] << std::endl;
-	/// std::cout << "product[2]: "sv << tbl["products"][2] << std::endl;
+	/// std::cout << tbl["products"][0]["keywords"] << "\n";
+	/// std::cout << "has product[2]: "sv << !!tbl["products"][2] << "\n";
+	/// std::cout << "product[2]: "sv << tbl["products"][2] << "\n";
 	/// \ecpp
 	/// 
 	/// \out

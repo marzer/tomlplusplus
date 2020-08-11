@@ -8,7 +8,6 @@
 
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
-TOML_DISABLE_SPAM_WARNINGS
 
 TOML_NAMESPACE_START
 {
@@ -23,7 +22,7 @@ TOML_NAMESPACE_START
 	///		[fruit.apple.texture]
 	///		smooth = true
 	/// )"sv);
-	///	std::cout << toml::json_formatter{ some_toml } << std::endl;
+	///	std::cout << toml::json_formatter{ some_toml } << "\n";
 	/// 
 	/// \ecpp
 	/// 
@@ -157,4 +156,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_SPAM_WARNINGS
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
