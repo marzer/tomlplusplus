@@ -32,7 +32,8 @@
 
 # Basic usage
 
-> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets instead, visit the project [homepage]_
+> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets
+instead, visit the project [homepage]_
 
 Given a [TOML] file `configuration.toml` containing the following:
 ```toml
@@ -96,16 +97,28 @@ You'll find some more code examples in the `examples` directory, and plenty more
 1. Add `tomlplusplus/include` to your include paths
 2. `#include <toml++/toml.h>`
 
-## _"What about build system X, or package manager Y?"_
-Currently there's support for use as a meson submodule. That's the extent of my knowledge in this area; clearly an area
-of opportunity! If you would like me to add support for a particular build system or package manager please let me
-know by making a [feature request]. Better still, if you have the skills and motivation to add support yourself, I'd 
-welcome a pull request with a smile and open arms!
-
 ### Conan
-`toml++` is available through the [Conan-Center-Index](https://github.com/conan-io/conan-center-index). You simply need
-to add `tomlplusplus/2.0.0` to your _conanfile_ to include this in your project. The default options are set for the
-single-header flavour, however specifying the option `"multiple_headers": True` is available.
+Add `tomlplusplus/2.1.0` to your conanfile.<br>
+This adds the single-header version by default, but you can specify the regular version using `"multiple_headers": True`.
+
+### DDS
+Add `tomlpp` to your `package.json5`, e.g.:
+```
+depends: [
+    'tomlpp^2.1.0',
+]
+```
+> ℹ _[What is DDS?](https://dds.pizza/)_
+
+### Vcpkg
+```
+vcpkg install tomlplusplus
+```
+
+### Other environments and package managers
+`toml++` is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options
+in the modern C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
+assured that I fully support it being added, and welcome [pull requests](./CONTRIBUTING.md)!
 
 <br>
 
@@ -186,7 +199,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@okureta](https://github.com/okureta)** - Reported a bug
 - **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
-- **[@Reedbeta](https://github.com/Reedbeta)** - Added additional Visual Studio debugger native visualizers
+- **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
