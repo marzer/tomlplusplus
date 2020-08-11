@@ -315,14 +315,14 @@ C++</span></a>
 <pre class="m-code"><span class="ns">toml::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;*</span> <span class="n">int_value</span> <span class="o">=</span> <span class="ut">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">();</span>
 <span class="ns">toml::</span><span class="ut">table</span><span class="o">*</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ut">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">table</span><span class="o">&gt;</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">int_value</span><span class="p">)</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;"</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tbl</span><span class="p">)</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a table"</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a table</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="c1">// fully-qualified value node types also work (useful for template code):</span>
 <span class="ns">toml::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;*</span> <span class="n">int_value2</span> <span class="o">=</span> <span class="ut">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ns">toml::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;&gt;</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">int_value2</span><span class="p">)</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;"</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">endl</span><span class="p">;</span></pre>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre>
           </div></section>
           <section class="m-doc-details" id="a03e1bbe1a0640953b7105fe40c733118"><div>
             <h3>
@@ -511,7 +511,7 @@ C++</span></a>
                 </tr>
               </tfoot>
             </table>
-<p>This function has 'permissive' retrieval semantics; some value types are allowed to convert to others (e.g. retrieving a boolean as an integer), and the specified return value type can be any type where a reasonable conversion from a native TOML value exists (e.g. <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a> on Windows). If the source value cannot be represented by the destination type, an empty optional is returned.</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
+<p>This function has 'permissive' retrieval semantics; some value types are allowed to convert to others (e.g. retrieving a boolean as an integer), and the specified return value type can be any type where a reasonable conversion from a native TOML value exists (e.g. <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a> on Windows). If the source value cannot be represented by the destination type, an empty optional is returned.</p><pre class="m-code"><p class="m-note m-success godbolt"><a class="muu-external godbolt" href="https://godbolt.org/z/zzG81K" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span><span class="s"></span>
 <span class="s">    int = -10</span>
 <span class="s">    flt = 25.0</span>
 <span class="s">    pi  = 3.14159</span>
@@ -523,97 +523,94 @@ C++</span></a>
 <span class="k">const</span> <span class="k">auto</span> <span class="n">print_value_with_typename</span> <span class="o">=</span>
     <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="ns">std::</span><span class="ut">string_view</span> <span class="n">key</span><span class="p">,</span> <span class="ns">std::</span><span class="ut">string_view</span> <span class="n">type_name</span><span class="p">,</span> <span class="k">auto</span><span class="o">*</span> <span class="n">dummy</span><span class="p">)</span>
     <span class="p">{</span>
-        <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"'"</span> <span class="o">&lt;&lt;</span> <span class="n">key</span> <span class="o">&lt;&lt;</span> <span class="s">"' as "</span> <span class="o">&lt;&lt;</span> <span class="n">type_name</span> <span class="o">&lt;&lt;</span> <span class="s">": "</span><span class="p">;</span>
+        <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"- "</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">setw</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std::</span><span class="n">left</span> <span class="o">&lt;&lt;</span> <span class="n">type_name</span><span class="p">;</span>
         <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="ns">std::</span><span class="n">remove_pointer_t</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ns">std::</span><span class="ut">optional</span><span class="o">&lt;</span><span class="n">type</span><span class="o">&gt;</span> <span class="n">val</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">-&gt;</span><span class="ut">value</span><span class="o">&lt;</span><span class="n">type</span><span class="o">&gt;</span><span class="p">())</span>
             <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
         <span class="k">else</span>
-            <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"No conversion path or out-of-range</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+            <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"n/a</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
     <span class="p">};</span>
 
 <span class="cp">#define print_value(key, T) print_value_with_typename(key, #T, (T*)nullptr)</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"int"</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">key</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"int"</span><span class="p">,</span> <span class="s">"flt"</span><span class="p">,</span> <span class="s">"pi"</span><span class="p">,</span> <span class="s">"bool"</span><span class="p">,</span> <span class="s">"huge"</span><span class="p">,</span> <span class="s">"str"</span> <span class="p">})</span>
+<span class="p">{</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="n">key</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" value '"</span> <span class="o">&lt;&lt;</span> <span class="n">key</span> <span class="o">&lt;&lt;</span> <span class="s">"' as:</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std::</span><span class="ut">string</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std::</span><span class="ut">string_view</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="ut">char</span><span class="o">*</span><span class="p">);</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-console"><span class="go">integer value 'int' as:</span>
+<span class="go">- bool              true</span>
+<span class="go">- int               -10</span>
+<span class="go">- unsigned int      n/a</span>
+<span class="go">- long long         -10</span>
+<span class="go">- float             -10</span>
+<span class="go">- double            -10</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
+<span class="go">- const char*       n/a</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"flt"</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="go">floating-point value 'flt' as:</span>
+<span class="go">- bool              n/a</span>
+<span class="go">- int               25</span>
+<span class="go">- unsigned int      25</span>
+<span class="go">- long long         25</span>
+<span class="go">- float             25</span>
+<span class="go">- double            25</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
+<span class="go">- const char*       n/a</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"pi"</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="go">floating-point value 'pi' as:</span>
+<span class="go">- bool              n/a</span>
+<span class="go">- int               n/a</span>
+<span class="go">- unsigned int      n/a</span>
+<span class="go">- long long         n/a</span>
+<span class="go">- float             3.14159</span>
+<span class="go">- double            3.14159</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
+<span class="go">- const char*       n/a</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"bool"</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="go">boolean value 'bool' as:</span>
+<span class="go">- bool              false</span>
+<span class="go">- int               0</span>
+<span class="go">- unsigned int      0</span>
+<span class="go">- long long         0</span>
+<span class="go">- float             n/a</span>
+<span class="go">- double            n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
+<span class="go">- const char*       n/a</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">bool</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">unsigned</span> <span class="ut">int</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">long</span> <span class="ut">long</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">float</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"huge"</span><span class="p">,</span> <span class="ut">double</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="go">integer value 'huge' as:</span>
+<span class="go">- bool              true</span>
+<span class="go">- int               n/a</span>
+<span class="go">- unsigned int      n/a</span>
+<span class="go">- long long         9223372036854775807</span>
+<span class="go">- float             n/a</span>
+<span class="go">- double            n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
+<span class="go">- const char*       n/a</span>
 
-<span class="n">print_value</span><span class="p">(</span><span class="s">"str"</span><span class="p">,</span> <span class="ns">std::</span><span class="ut">string</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"str"</span><span class="p">,</span> <span class="ns">std::</span><span class="ut">string_view</span><span class="p">);</span>
-<span class="n">print_value</span><span class="p">(</span><span class="s">"str"</span><span class="p">,</span> <span class="k">const</span> <span class="ut">char</span><span class="o">*</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">'int' as bool: true</span>
-<span class="go">'int' as int: -10</span>
-<span class="go">'int' as unsigned int: No conversion path or out-of-range</span>
-<span class="go">'int' as long long: -10</span>
-<span class="go">'int' as float: -10</span>
-<span class="go">'int' as double: -10</span>
-
-<span class="go">'flt' as bool: No conversion path or out-of-range</span>
-<span class="go">'flt' as int: 25</span>
-<span class="go">'flt' as unsigned int: 25</span>
-<span class="go">'flt' as long long: 25</span>
-<span class="go">'flt' as float: 25</span>
-<span class="go">'flt' as double: 25</span>
-
-<span class="go">'pi' as bool: No conversion path or out-of-range</span>
-<span class="go">'pi' as int: No conversion path or out-of-range</span>
-<span class="go">'pi' as unsigned int: No conversion path or out-of-range</span>
-<span class="go">'pi' as long long: No conversion path or out-of-range</span>
-<span class="go">'pi' as float: 3.14159</span>
-<span class="go">'pi' as double: 3.14159</span>
-
-<span class="go">'bool' as bool: false</span>
-<span class="go">'bool' as int: 0</span>
-<span class="go">'bool' as unsigned int: 0</span>
-<span class="go">'bool' as long long: 0</span>
-<span class="go">'bool' as float: No conversion path or out-of-range</span>
-<span class="go">'bool' as double: No conversion path or out-of-range</span>
-
-<span class="go">'huge' as bool: true</span>
-<span class="go">'huge' as int: No conversion path or out-of-range</span>
-<span class="go">'huge' as unsigned int: No conversion path or out-of-range</span>
-<span class="go">'huge' as long long: 9223372036854775807</span>
-<span class="go">'huge' as float: No conversion path or out-of-range</span>
-<span class="go">'huge' as double: No conversion path or out-of-range</span>
-
-<span class="go">'str' as <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>: foo</span>
-<span class="go">'str' as <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>: foo</span>
-<span class="go">'str' as const char*: foo</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a></p></aside>
+<span class="go">string value 'str' as:</span>
+<span class="go">- bool              n/a</span>
+<span class="go">- int               n/a</span>
+<span class="go">- unsigned int      n/a</span>
+<span class="go">- long long         n/a</span>
+<span class="go">- float             n/a</span>
+<span class="go">- double            n/a</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       foo</span>
+<span class="go">- <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  foo</span>
+<span class="go">- const char*       foo</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ac1417bb4313b2624e3ea270a487f153b"><div>
             <h3>

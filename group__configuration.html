@@ -129,7 +129,7 @@ C++</span></a>
             <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
             </dt>
-            <dd>Enables the use of wide strings (wchar_t, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a>) in various places throughout the library when building for Windows.</dd>
+            <dd>Enables the use of wide strings (<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">wchar_t</a>, std::wstring) in various places throughout the library when building for Windows.</dd>
           </dl>
         </section>
         <section>
@@ -228,7 +228,7 @@ C++</span></a>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
             </h3>
-            <p>Enables the use of wide strings (wchar_t, <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::wstring</a>) in various places throughout the library when building for Windows.</p>
+            <p>Enables the use of wide strings (<a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">wchar_t</a>, std::wstring) in various places throughout the library when building for Windows.</p>
 <p>Defaults to <code>1</code> when building for Windows, <code>0</code> otherwise. Has no effect when building for anything other than Windows.</p><aside class="m-note m-warning"><h4>Attention</h4><p>This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values; that will still be <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>. This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at various interface boundaries.<br/><br/>If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings, you can safely set this to <code>0</code>.</p></aside>
           </div></section>
         </section>
