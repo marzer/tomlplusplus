@@ -160,12 +160,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::string_view key) noexcept
 	{
-		return { this->get(key) };
+		return node_view<node>{ this->get(key) };
 	}
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> table::operator[] (std::string_view key) const noexcept
 	{
-		return { this->get(key) };
+		return node_view<const node>{ this->get(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -232,12 +232,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::wstring_view key) noexcept
 	{
-		return { this->get(key) };
+		return node_view<node>{ this->get(key) };
 	}
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> table::operator[] (std::wstring_view key) const noexcept
 	{
-		return { this->get(key) };
+		return node_view<const node>{ this->get(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE

@@ -2475,8 +2475,8 @@ TOML_NAMESPACE_START
 				return do_ref<T>(*this);
 			}
 
-			[[nodiscard]] operator node_view<node>() noexcept;
-			[[nodiscard]] operator node_view<const node>() const noexcept;
+			[[nodiscard]] explicit operator node_view<node>() noexcept;
+			[[nodiscard]] explicit operator node_view<const node>() const noexcept;
 	};
 }
 TOML_NAMESPACE_END
@@ -4379,20 +4379,18 @@ TOML_NAMESPACE_START
 	template <typename ViewedType>
 	class TOML_API TOML_TRIVIAL_ABI node_view
 	{
+		static_assert(
+			impl::is_one_of<ViewedType, toml::node, const toml::node>,
+			"A toml::node_view<> must wrap toml::node or const toml::node."
+		);
+
 		public:
 			using viewed_type = ViewedType;
 
 		private:
-			friend class TOML_NAMESPACE::node;
-			friend class TOML_NAMESPACE::table;
 			template <typename T> friend class TOML_NAMESPACE::node_view;
 
 			mutable viewed_type* node_ = nullptr;
-
-			TOML_NODISCARD_CTOR
-			node_view(viewed_type* node) noexcept
-				: node_{ node }
-			{}
 
 			template <typename Func>
 			static constexpr bool visit_is_nothrow
@@ -4402,6 +4400,16 @@ TOML_NAMESPACE_START
 
 			TOML_NODISCARD_CTOR
 			node_view() noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			explicit node_view(viewed_type* node) noexcept
+				: node_{ node }
+			{}
+
+			TOML_NODISCARD_CTOR
+			explicit node_view(viewed_type& node) noexcept
+				: node_{ &node }
+			{}
 
 			TOML_NODISCARD_CTOR
 			node_view(const node_view&) noexcept = default;
@@ -4655,8 +4663,8 @@ TOML_NAMESPACE_START
 			node_view operator[] (std::string_view key) const noexcept
 			{
 				if (auto tbl = this->as_table())
-					return { tbl->get(key) };
-				return { nullptr };
+					return node_view{ tbl->get(key) };
+				return node_view{ nullptr };
 			}
 
 			#if TOML_WINDOWS_COMPAT
@@ -4665,8 +4673,8 @@ TOML_NAMESPACE_START
 			node_view operator[] (std::wstring_view key) const noexcept
 			{
 				if (auto tbl = this->as_table())
-					return { tbl->get(key) };
-				return { nullptr };
+					return node_view{ tbl->get(key) };
+				return node_view{ nullptr };
 			}
 
 			#endif // TOML_WINDOWS_COMPAT
@@ -4675,13 +4683,21 @@ TOML_NAMESPACE_START
 			node_view operator[] (size_t index) const noexcept
 			{
 				if (auto arr = this->as_array())
-					return { arr->get(index) };
-				return { nullptr };
+					return node_view{ arr->get(index) };
+				return node_view{ nullptr };
 			}
 
 			template <typename Char, typename T>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
 	};
+	template <typename T> node_view(const value<T>&)	-> node_view<const node>;
+	node_view(const table&)								-> node_view<const node>;
+	node_view(const array&)								-> node_view<const node>;
+	template <typename T> node_view(value<T>&)			-> node_view<node>;
+	node_view(table&)									-> node_view<node>;
+	node_view(array&)									-> node_view<node>;
+	template <typename T> node_view(const T*)			-> node_view<const node>;
+	template <typename T> node_view(T*)					-> node_view<node>;
 
 	template <typename Char, typename T>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& os, const node_view<T>& nv)
@@ -7908,12 +7924,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::string_view key) noexcept
 	{
-		return { this->get(key) };
+		return node_view<node>{ this->get(key) };
 	}
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> table::operator[] (std::string_view key) const noexcept
 	{
-		return { this->get(key) };
+		return node_view<const node>{ this->get(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -7980,12 +7996,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> table::operator[] (std::wstring_view key) noexcept
 	{
-		return { this->get(key) };
+		return node_view<node>{ this->get(key) };
 	}
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> table::operator[] (std::wstring_view key) const noexcept
 	{
-		return { this->get(key) };
+		return node_view<const node>{ this->get(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE

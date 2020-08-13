@@ -816,10 +816,10 @@ TOML_NAMESPACE_START
 			}
 
 			/// \brief	Creates a `node_view` pointing to this node.
-			[[nodiscard]] operator node_view<node>() noexcept;
+			[[nodiscard]] explicit operator node_view<node>() noexcept;
 
 			/// \brief	Creates a `node_view` pointing to this node (const overload).
-			[[nodiscard]] operator node_view<const node>() const noexcept;
+			[[nodiscard]] explicit operator node_view<const node>() const noexcept;
 	};
 }
 TOML_NAMESPACE_END

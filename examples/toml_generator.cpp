@@ -123,6 +123,7 @@ int main(int argc, char** argv)
 	tree.push_back(&root);
 	constexpr size_t max_depth = 10u;
 	int container_min_values = 10;
+	bool in_arr = false;
 
 	const auto add = [&](auto&& obj) noexcept -> toml::node&
 	{
@@ -143,6 +144,7 @@ int main(int argc, char** argv)
 		{
 			tree.push_back(new_node);
 			container_min_values = rand(1, 4);
+			in_arr = toml::is_array<decltype(obj)>;
 		}
 		else
 			container_min_values--;
@@ -153,14 +155,20 @@ int main(int argc, char** argv)
 
 	while (node_budget)
 	{
-		if (rand(100) >= 75)
+		if (!in_arr && rand(100) >= 75)
 		{
 			if (container_min_values <= 0 && tree.size() < max_depth)
 				add(toml::table{}).ref<toml::table>().is_inline(tree.size() >= max_depth - 2u && rand(100) >= 85);
 		}
 		else
 		{
-			switch (static_cast<toml::node_type>((rand() % 8) + 2))
+			toml::node_type new_node_type;
+			if (auto arr = tree.back()->as_array(); arr && !arr->empty())
+				new_node_type = arr->front().type();
+			else
+				new_node_type = static_cast<toml::node_type>((rand() % 8) + 2);
+
+			switch (new_node_type)
 			{
 				case toml::node_type::array:
 					if (container_min_values <= 0 && tree.size() < max_depth)
@@ -199,7 +207,10 @@ int main(int argc, char** argv)
 					break;
 			}
 			if (container_min_values <= 0 && tree.size() >= 2u && rand(100) >= 85)
+			{
 				tree.pop_back();
+				in_arr = !tree.empty() && tree.back()->type() == toml::node_type::array;
+			}
 		}
 	}
 
