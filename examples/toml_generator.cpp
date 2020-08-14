@@ -9,6 +9,7 @@
 
 */
 #include <iostream>
+#include <sstream>
 #include <array>
 #include <ctime>
 #include "utf8_console.h"
@@ -113,10 +114,16 @@ int main(int argc, char** argv)
 	init_utf8_console();
 	srand(static_cast<unsigned int>(time(nullptr)));
 
-	size_t node_budget = 100u;
+	int node_budget{};
 	for (int i = 1; i < argc; i++)
-		if (std::string_view{ argv[i] } == "--many"sv)
-			node_budget *= 100u;
+	{
+		std::stringstream ss{ argv[i] };
+		int nodes;
+		if ((ss >> nodes))
+			node_budget += nodes;
+	}
+	if (node_budget <= 0)
+		node_budget = 100;
 
 	toml::table root;
 	std::vector<toml::node*> tree;
@@ -145,6 +152,8 @@ int main(int argc, char** argv)
 			tree.push_back(new_node);
 			container_min_values = rand(1, 4);
 			in_arr = toml::is_array<decltype(obj)>;
+			if constexpr (toml::is_array<decltype(obj)>)
+				tree.back()->as_array()->reserve(static_cast<size_t>(container_min_values));
 		}
 		else
 			container_min_values--;
