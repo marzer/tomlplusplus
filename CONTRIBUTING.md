@@ -35,13 +35,24 @@ If test discovery fails you can usually fix it by enabling
 `Auto Detect runsettings Files` (settings gear icon > `Configure Run Settings`).
 
 ### Testing on Linux (and WSL)
-Install [meson] and [ninja] if necessary, then:
 ```bash
+# install ninja, meson, locales (first time only)
+sudo apt update && sudo apt install -y locales python3 python3-pip ninja-build
+sudo pip3 install meson
+sudo locale-gen	'en_US.utf8' \
+				'ja_JP.utf8' \
+				'de_DE.utf8' \
+				'it_IT.utf8' \
+				'tr_TR.utf8' \
+				'fi_FI.utf8' \
+				'fr_FR.utf8' \
+				'zh_CN.utf8'
+
 # create the build configs (first time only)
 CXX=g++     meson build-gcc-debug     -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
 CXX=clang++ meson build-clang-debug   -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
-CXX=g++     meson build-gcc-release   --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
-CXX=clang++ meson build-clang-release --buildtype=release -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true
+CXX=g++     meson build-gcc-release   -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true --buildtype=release
+CXX=clang++ meson build-clang-release -DGENERATE_CMAKE_CONFIG=disabled -DALL_WARNINGS=true --buildtype=release
 
 # run the tests
 cd build-gcc-debug && ninja && ninja test				\

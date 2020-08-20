@@ -1,0 +1,4 @@
+requests
+bs4
+pyyaml
+python-dateutil

@@ -85,6 +85,7 @@ def main():
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'=='false'">SHOULD_HAVE_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'!='false'">SHOULD_HAVE_EXCEPTIONS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<LanguageStandard>std{standard}</LanguageStandard>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
 		</ClCompile>
 	</ItemDefinitionGroup>
 	<PropertyGroup>
