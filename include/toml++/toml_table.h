@@ -117,13 +117,13 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator == (const table_iterator& lhs, const table_iterator& rhs) noexcept
+			friend bool operator == (const table_iterator& lhs, const table_iterator& rhs) noexcept
 			{
 				return lhs.raw_ == rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator != (const table_iterator& lhs, const table_iterator& rhs) noexcept
+			friend bool operator != (const table_iterator& lhs, const table_iterator& rhs) noexcept
 			{
 				return lhs.raw_ != rhs.raw_;
 			}
@@ -131,7 +131,6 @@ TOML_IMPL_NAMESPACE_START
 			TOML_DISABLE_WARNINGS
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
-			[[nodiscard]]
 			operator table_iterator<true>() const noexcept
 			{
 				return table_iterator<true>{ raw_ };

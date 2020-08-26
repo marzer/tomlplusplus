@@ -97,9 +97,6 @@
 			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
 		#endif
 	#endif
-	#ifndef __EXCEPTIONS
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
 	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
@@ -137,9 +134,6 @@
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING		1
-	#endif
-	#ifndef _CPPUNWIND
-		#define TOML_COMPILER_EXCEPTIONS	0
 	#endif
 
 #endif // msvc
@@ -204,9 +198,6 @@
 	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
 		#define TOML_RELOPS_REORDERING 1
-	#endif
-	#ifndef __cpp_exceptions
-		#define TOML_COMPILER_EXCEPTIONS 0
 	#endif
 	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
@@ -319,8 +310,10 @@ is no longer necessary.
 	#define TOML_HAS_INCLUDE(header)		0
 #endif
 
-#ifndef TOML_COMPILER_EXCEPTIONS
+#if defined(__EXCEPTIONS) || defined(_CPPUNWIND) || defined(__cpp_exceptions)
 	#define TOML_COMPILER_EXCEPTIONS 1
+#else
+	#define TOML_COMPILER_EXCEPTIONS 0
 #endif
 #if TOML_COMPILER_EXCEPTIONS
 	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
@@ -414,14 +407,20 @@ is no longer necessary.
 	#define TOML_CONSTEVAL		constexpr
 #endif
 
+#ifdef __has_cpp_attribute
+	#define TOML_HAS_ATTR(...)	__has_cpp_attribute(__VA_ARGS__)
+#else
+	#define TOML_HAS_ATTR(...)	0
+#endif
+
 #if !defined(DOXYGEN) && !TOML_INTELLISENSE
-	#if !defined(TOML_LIKELY) && __has_cpp_attribute(likely)
+	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely)
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
-	#if !defined(TOML_UNLIKELY) && __has_cpp_attribute(unlikely)
+	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely)
 		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 	#endif
-	#if __has_cpp_attribute(nodiscard) >= 201907L
+	#if TOML_HAS_ATTR(nodiscard) >= 201907L
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
 #endif

@@ -92,61 +92,61 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			[[nodiscard]]
-			friend constexpr array_iterator operator + (const array_iterator& lhs, ptrdiff_t rhs) noexcept
+			friend array_iterator operator + (const array_iterator& lhs, ptrdiff_t rhs) noexcept
 			{
 				return { lhs.raw_ + rhs };
 			}
 
 			[[nodiscard]]
-			friend constexpr array_iterator operator + (ptrdiff_t lhs, const array_iterator& rhs) noexcept
+			friend array_iterator operator + (ptrdiff_t lhs, const array_iterator& rhs) noexcept
 			{
 				return { rhs.raw_ + lhs };
 			}
 
 			[[nodiscard]]
-			friend constexpr array_iterator operator - (const array_iterator& lhs, ptrdiff_t rhs) noexcept
+			friend array_iterator operator - (const array_iterator& lhs, ptrdiff_t rhs) noexcept
 			{
 				return { lhs.raw_ - rhs };
 			}
 
 			[[nodiscard]]
-			friend constexpr ptrdiff_t operator - (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend ptrdiff_t operator - (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ - rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator == (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator == (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ == rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator != (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator != (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ != rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator < (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator < (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ < rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator <= (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator <= (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ <= rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator > (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator > (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ > rhs.raw_;
 			}
 
 			[[nodiscard]]
-			friend constexpr bool operator >= (const array_iterator& lhs, const array_iterator& rhs) noexcept
+			friend bool operator >= (const array_iterator& lhs, const array_iterator& rhs) noexcept
 			{
 				return lhs.raw_ >= rhs.raw_;
 			}
@@ -160,7 +160,6 @@ TOML_IMPL_NAMESPACE_START
 			TOML_DISABLE_WARNINGS
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
-			[[nodiscard]]
 			operator array_iterator<true>() const noexcept
 			{
 				return array_iterator<true>{ raw_ };
