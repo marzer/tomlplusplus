@@ -201,6 +201,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
 - **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
+- **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions

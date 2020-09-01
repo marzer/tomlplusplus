@@ -483,7 +483,7 @@ is no longer necessary.
 		#if (TOML_ARM && TOML_GCC) || TOML_CLANG
 			#define TOML_FP16 __fp16
 		#endif
-		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
+		#if TOML_ARM && TOML_CLANG // not present in g++
 			#define TOML_FLOAT16 _Float16
 		#endif
 	#endif

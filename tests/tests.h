@@ -17,6 +17,30 @@
 #else
 	#include "../include/toml++/toml.h"
 #endif
+#if defined(TOML_FP16) ^ SHOULD_HAVE_FP16
+	#error TOML_FP16 was not deduced correctly
+#endif
+#if defined(TOML_FLOAT16) ^ SHOULD_HAVE_FLOAT16
+	#error TOML_FLOAT16 was not deduced correctly
+#endif
+#if defined(TOML_FLOAT128) ^ SHOULD_HAVE_FLOAT128
+	#error TOML_FLOAT128 was not deduced correctly
+#endif
+#if defined(TOML_INT128) ^ SHOULD_HAVE_INT128
+	#error TOML_INT128 was not deduced correctly
+#endif
+#if defined(TOML_INT128) ^ defined(TOML_UINT128)
+	#error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
+#endif
+#if TOML_COMPILER_EXCEPTIONS != SHOULD_HAVE_EXCEPTIONS
+	#error TOML_COMPILER_EXCEPTIONS was not deduced correctly
+#endif
+#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
+	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
+#endif
+#if (defined(_WIN32) && !TOML_WINDOWS_COMPAT) || (!defined(_WIN32) && TOML_WINDOWS_COMPAT)
+	#error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#endif
 
 #if TOML_ICC
 	#define UNICODE_LITERALS_OK 0
