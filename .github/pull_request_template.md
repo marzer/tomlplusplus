@@ -27,6 +27,7 @@
     That's OK.
 --->
 - [ ] I've read [CONTRIBUTING.md]
+- [ ] I've rebased my changes against the current HEAD of `origin/master` (if necessary)
 - [ ] I've added new test cases to verify my change
 - [ ] I've regenerated toml.hpp ([how-to])
 - [ ] I've updated any affected documentation
@@ -34,7 +35,7 @@
     - [ ] Clang 6 or higher
     - [ ] GCC 7 or higher
     - [ ] Visual Studio 2019
-- [ ] I've forever enshrined myself in glory by adding myself to the list of contributors in [README.md](https://github.com/marzer/tomlplusplus/blob/master/README.md)
+- [ ] I've given myself mad props by adding my name to the list of contributors in [README.md](https://github.com/marzer/tomlplusplus/blob/master/README.md)
 
 
 
