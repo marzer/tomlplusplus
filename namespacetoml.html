@@ -165,13 +165,6 @@ C++</span></a>
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
-              <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</a> = 1,
-              <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa328473763ff1ab919ce0b01d66ad3bf6">allow_literal_strings</a> = 2,
-              <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fad9467c39215be4189dc8395a830f9051">allow_multi_line_strings</a> = 4 }</span>
-            </dt>
-            <dd>Format flags for modifying how TOML data is printed to streams.</dd>
-            <dt>
               <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a>,
@@ -184,6 +177,13 @@ C++</span></a>
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a> }</span>
             </dt>
             <dd>TOML node type identifiers.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea3d21a9285de175ffffc99cfa13df21df">format_as_binary</a> = 1,
+              <a class="m-doc" href="#afb4d25262a72170134337eb67e6793deadfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</a> = 2,
+              <a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</a> = 3 }</span>
+            </dt>
+            <dd>Metadata associated with TOML values.</dd>
           </dl>
         </section>
         <section id="typedef-members">
@@ -275,12 +275,6 @@ C++</span></a>
               const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs) -&gt; <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;</span>
             </dt>
             <dd>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename Char&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aba6195d5e83ab18f30c9a211384e2c1a">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; lhs,
-              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs) -&gt; <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp;</span>
-            </dt>
-            <dd>Pretty-prints the value of a node_type to a stream.</dd>
             <dt id="af05142410823b801c5337566ec4167e9">
               <div class="m-doc-template">template&lt;typename Char, typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af05142410823b801c5337566ec4167e9">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; os,
@@ -364,6 +358,10 @@ C++</span></a>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3ed2791fdc270afa33bc0cb1a902c7df">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::basic_string_view</a>&lt;Char&gt; file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af4c543439261c21aee726ae9afb2b2d5">TOML_MAKE_BITOPS</a>(</span><span class="m-doc-wrap">format_flags) template&lt; typename Char &gt; inline std -&gt; TOML_MAKE_BITOPS(<a class="m-doc" href="namespacetoml.html#afb4d25262a72170134337eb67e6793de">value_<wbr/>flags</a>) enum class format_flags</span>
+            </dt>
+            <dd>Format flags for modifying how TOML data is printed to streams.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -423,41 +421,6 @@ C++</span></a>
         </section>
         <section>
           <h2>Enum documentation</h2>
-          <section class="m-doc-details" id="af1a6761a2f4d80b1a541ba819d9c8e0f"><div>
-            <h3>
-              enum class toml::<wbr/><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
-            </h3>
-            <p>Format flags for modifying how TOML data is printed to streams.</p>
-            <table class="m-table m-fullwidth m-flat m-doc">
-              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
-              <tbody>
-                <tr>
-                  <td><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa334c4a4c42fdb79d7ebc3e73b517e6f8" id="af1a6761a2f4d80b1a541ba819d9c8e0fa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
-                  <td>
-                  <p>None.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa6e569050aafc6eca4c0c5dfab35fd25a" id="af1a6761a2f4d80b1a541ba819d9c8e0fa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</a></td>
-                  <td>
-                  <p>Dates and times will be emitted as quoted strings.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa328473763ff1ab919ce0b01d66ad3bf6" id="af1a6761a2f4d80b1a541ba819d9c8e0fa328473763ff1ab919ce0b01d66ad3bf6">allow_literal_strings</a></td>
-                  <td>
-                  <p>Strings will be emitted as single-quoted literal strings where possible.</p>
-                  </td>
-                </tr>
-                <tr>
-                  <td><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0fad9467c39215be4189dc8395a830f9051" id="af1a6761a2f4d80b1a541ba819d9c8e0fad9467c39215be4189dc8395a830f9051">allow_multi_line_strings</a></td>
-                  <td>
-                  <p>Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.</p>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div></section>
           <section class="m-doc-details" id="abac3e84bbf1f2c90717fca107055f48d"><div>
             <h3>
               enum class toml::<wbr/><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
@@ -524,6 +487,41 @@ C++</span></a>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264" id="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a></td>
                   <td>
                   <p>The node is a <a class="m-doc muu-injected" href="classtoml_1_1value.html">toml::value</a>&lt;date_time&gt;.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="afb4d25262a72170134337eb67e6793de"><div>
+            <h3>
+              enum class toml::<wbr/><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>: <a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
+            </h3>
+            <p>Metadata associated with TOML values.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793dea334c4a4c42fdb79d7ebc3e73b517e6f8" id="afb4d25262a72170134337eb67e6793dea334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
+                  <td>
+                  <p>None.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793dea3d21a9285de175ffffc99cfa13df21df" id="afb4d25262a72170134337eb67e6793dea3d21a9285de175ffffc99cfa13df21df">format_as_binary</a></td>
+                  <td>
+                  <p>Format integer values as binary.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793deadfc26763754dabbdf97d3c8833a2e8ba" id="afb4d25262a72170134337eb67e6793deadfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</a></td>
+                  <td>
+                  <p>Format integer values as octal.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793dea4dd3fec464b7da02debfbc0bd4725c29" id="afb4d25262a72170134337eb67e6793dea4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</a></td>
+                  <td>
+                  <p>Format integer values as hexadecimal.</p>
                   </td>
                 </tr>
               </tbody>
@@ -749,22 +747,6 @@ C++</span></a>
 <span class="go">Z</span>
 <span class="go">-01:30</span>
 <span class="go">-02:30</span></pre>
-          </div></section>
-          <section class="m-doc-details" id="aba6195d5e83ab18f30c9a211384e2c1a"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename Char&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aba6195d5e83ab18f30c9a211384e2c1a">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/io/basic_ostream" target="_blank">std::basic_ostream</a>&lt;Char&gt;&amp; lhs,
-              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs)</span></span>
-            </h3>
-            <p>Pretty-prints the value of a node_type to a stream.</p>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
-<span class="k">for</span> <span class="p">(</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
-<span class="go">Element [1] is: floating-point</span>
-<span class="go">Element [2] is: string</span>
-<span class="go">Element [3] is: boolean</span></pre>
           </div></section>
           <section class="m-doc-details" id="a64954bc71af181daba9ef3a1d12f05db"><div>
             <h3>
@@ -1125,6 +1107,18 @@ C++</span></a>
 <span class="p">{</span>
     <span class="k">return</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>You must <code>#include &lt;fstream&gt;</code> to use this function (toml++ does not transitively include it for you).</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af4c543439261c21aee726ae9afb2b2d5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">TOML_MAKE_BITOPS(<a class="m-doc" href="namespacetoml.html#afb4d25262a72170134337eb67e6793de">value_<wbr/>flags</a>) enum class format_flags toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af4c543439261c21aee726ae9afb2b2d5">TOML_MAKE_BITOPS</a>(</span><span class="m-doc-wrap">format_flags) template&lt; typename Char &gt; inline std</span></span>
+            </h3>
+            <p>Format flags for modifying how TOML data is printed to streams.</p>
+<p>Pretty-prints the value of a node_type to a stream.</p><pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
+<span class="k">for</span> <span class="p">(</span><span class="ut"><a class="m-doc muu-injected muu-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
+    <span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
+<span class="go">Element [1] is: floating-point</span>
+<span class="go">Element [2] is: string</span>
+<span class="go">Element [3] is: boolean</span></pre>
           </div></section>
         </section>
       </div>
