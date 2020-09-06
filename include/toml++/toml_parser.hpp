@@ -2022,11 +2022,20 @@ TOML_IMPL_NAMESPACE_START
 					if (has_any(has_p))
 						val = new value{ parse_hex_float() };
 					else if (has_any(has_x))
+					{
 						val = new value{ parse_integer<16>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+					}
 					else if (has_any(has_o))
+					{
 						val = new value{ parse_integer<8>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+					}
 					else if (has_any(has_b))
+					{
 						val = new value{ parse_integer<2>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+					}
 					else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 						val = new value{ parse_float() };
 					else if (has_any(begins_sign))
@@ -2066,12 +2075,14 @@ TOML_IMPL_NAMESPACE_START
 						// 0b10
 						case bzero_msk | has_b:
 							val = new value{ parse_integer<2>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
 							break;
 
 						//=================== octal integers
 						// 0o10
 						case bzero_msk | has_o:
 							val = new value{ parse_integer<8>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
 							break;
 
 						//=================== decimal integers
@@ -2090,6 +2101,7 @@ TOML_IMPL_NAMESPACE_START
 						// 0x10
 						case bzero_msk | has_x:
 							val = new value{ parse_integer<16>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
 							break;
 
 						//=================== decimal floats

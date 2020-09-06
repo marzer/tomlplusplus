@@ -481,6 +481,24 @@ is no longer necessary.
 	#define TOML_ARM 0
 #endif
 
+#define TOML_MAKE_BITOPS(type)																		\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	TOML_ATTR(flatten)																				\
+	constexpr type operator & (type lhs, type rhs) noexcept											\
+	{																								\
+		return static_cast<type>(::toml::impl::unwrap_enum(lhs) & ::toml::impl::unwrap_enum(rhs));	\
+	}																								\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	TOML_ATTR(flatten)																				\
+	constexpr type operator | (type lhs, type rhs) noexcept											\
+	{																								\
+		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
+	}
+
 #ifdef __FLT16_MANT_DIG__
 	#if __FLT_RADIX__ == 2					\
 			&& __FLT16_MANT_DIG__ == 11		\
@@ -742,24 +760,6 @@ TOML_NAMESPACE_START // abi namespace
 
 		template <typename T>
 		inline constexpr bool dependent_false = false;
-
-		#define TOML_P2S_DECL(Type)											\
-			template <typename Char>										\
-			inline void print_to_stream(Type, std::basic_ostream<Char>&)
-		TOML_P2S_DECL(int8_t);
-		TOML_P2S_DECL(int16_t);
-		TOML_P2S_DECL(int32_t);
-		TOML_P2S_DECL(int64_t);
-		TOML_P2S_DECL(uint8_t);
-		TOML_P2S_DECL(uint16_t);
-		TOML_P2S_DECL(uint32_t);
-		TOML_P2S_DECL(uint64_t);
-		TOML_P2S_DECL(float);
-		TOML_P2S_DECL(const date&);
-		TOML_P2S_DECL(const time&);
-		TOML_P2S_DECL(time_offset);
-		TOML_P2S_DECL(const date_time&);
-		#undef TOML_P2S_DECL
 
 		#if TOML_WINDOWS_COMPAT
 		[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
@@ -1293,6 +1293,32 @@ TOML_NAMESPACE_START
 
 	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
 
+	enum class value_flags : uint8_t
+	{
+		none,
+
+		format_as_binary = 1,
+
+		format_as_octal = 2,
+
+		format_as_hexadecimal = 3,
+	};
+	TOML_MAKE_BITOPS(value_flags)
+
+	enum class format_flags : uint8_t
+	{
+		none,
+
+		quote_dates_and_times = 1,
+
+		allow_literal_strings = 2,
+
+		allow_multi_line_strings = 4,
+
+		allow_value_format_flags = 8,
+	};
+	TOML_MAKE_BITOPS(format_flags)
+
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
 	{
@@ -1309,9 +1335,39 @@ TOML_NAMESPACE_START
 		}
 	}
 
-	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
+	#ifndef DOXYGEN
+
+	namespace impl
+	{
+		#define TOML_P2S_DECL(Type)															\
+			template <typename Char>														\
+			inline void print_to_stream(Type, std::basic_ostream<Char>&, value_flags = {})
+		TOML_P2S_DECL(int8_t);
+		TOML_P2S_DECL(int16_t);
+		TOML_P2S_DECL(int32_t);
+		TOML_P2S_DECL(int64_t);
+		TOML_P2S_DECL(uint8_t);
+		TOML_P2S_DECL(uint16_t);
+		TOML_P2S_DECL(uint32_t);
+		TOML_P2S_DECL(uint64_t);
+		#undef TOML_P2S_DECL
+
+		#define TOML_P2S_DECL(Type)											\
+			template <typename Char>										\
+			inline void print_to_stream(Type, std::basic_ostream<Char>&)
+		TOML_P2S_DECL(double);
+		TOML_P2S_DECL(const date&);
+		TOML_P2S_DECL(const time&);
+		TOML_P2S_DECL(time_offset);
+		TOML_P2S_DECL(const date_time&);
+		#undef TOML_P2S_DECL
+	}
+
+	#if !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
-	#endif
+	#endif // !TOML_HEADER_ONLY
+
+	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END
 
@@ -1637,6 +1693,9 @@ TOML_DISABLE_WARNINGS
 #endif
 TOML_ENABLE_WARNINGS
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+
 TOML_IMPL_NAMESPACE_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
@@ -1714,38 +1773,85 @@ TOML_IMPL_NAMESPACE_START
 	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
 	template <typename T, typename Char>
-	inline void print_integer_to_stream(T val, std::basic_ostream<Char>& stream)
+	inline void print_integer_to_stream(T val, std::basic_ostream<Char>& stream, value_flags format = {})
 	{
 		static_assert(
 			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
+		if (!val)
+		{
+			print_to_stream('0', stream);
+			return;
+		}
+
+		int base = 10;
+		if (format != value_flags::none && val >= T{})
+		{
+			switch (format)
+			{
+				case value_flags::format_as_binary: base = 2; break;
+				case value_flags::format_as_octal: base = 8; break;
+				case value_flags::format_as_hexadecimal: base = 16; break;
+				default: break;
+			}
+		}
+
 		#if TOML_INT_CHARCONV
-
-			char buf[charconv_buffer_length<T>];
-			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+		{
+			char buf[(sizeof(T) * CHAR_BIT)];
+			const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
 			const auto len = static_cast<size_t>(res.ptr - buf);
+			if (base == 16)
+			{
+				for (size_t i = 0; i < len; i++)
+					if (buf[i] >= 'a')
+						buf[i] -= 32;
+			}
 			print_to_stream(buf, len, stream);
-
+		}
 		#else
+		{
+			using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
+			using cast_type = std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
 
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-			ss << static_cast<cast_type>(val);
-			const auto str = std::move(ss).str();
-			print_to_stream(str, stream);
-
+			if TOML_UNLIKELY(format == value_flags::format_as_binary)
+			{
+				bool found_one = false;
+				const auto v = static_cast<unsigned_type>(val);
+				unsigned_type mask = unsigned_type{ 1 } << (sizeof(unsigned_type) * CHAR_BIT - 1u);
+				for (unsigned i = 0; i < sizeof(unsigned_type) * CHAR_BIT; i++)
+				{
+					if ((v & mask))
+					{
+						print_to_stream('1', stream);
+						found_one = true;
+					}
+					else if (found_one)
+						print_to_stream('0', stream);
+					mask >>= 1;
+				}
+			}
+			else
+			{
+				std::ostringstream ss;
+				ss.imbue(std::locale::classic());
+				ss << std::uppercase << std::setbase(base);
+				ss << static_cast<cast_type>(val);
+				const auto str = std::move(ss).str();
+				print_to_stream(str, stream);
+			}
+		}
 		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(Type)												\
-		template <typename Char>												\
-		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
-		{																		\
-			static_assert(sizeof(Char) == 1);									\
-			print_integer_to_stream(val, stream);								\
+	#define TOML_P2S_OVERLOAD(Type)																	\
+		template <typename Char>																	\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream, value_flags format)	\
+		{																							\
+			static_assert(sizeof(Char) == 1);														\
+			print_integer_to_stream(val, stream, format);											\
 		}
 
 	TOML_P2S_OVERLOAD(int8_t)
@@ -2011,6 +2117,8 @@ TOML_NAMESPACE_START
 	#endif
 }
 TOML_NAMESPACE_END
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
 #endif //-------------------------------------------------------------------------------  ↑ toml_print_to_stream.h  ----
 
@@ -2667,6 +2775,7 @@ TOML_NAMESPACE_START
 			}
 
 			ValueType val_;
+			value_flags flags_ = value_flags::none;
 
 		public:
 
@@ -2689,19 +2798,22 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			value(const value& other) noexcept
 				: node{ other },
-				val_{ other.val_ }
+				val_{ other.val_ },
+				flags_{ other.flags_ }
 			{}
 
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
 				: node{ std::move(other) },
-				val_{ std::move(other.val_) }
+				val_{ std::move(other.val_) },
+				flags_{ other.flags_ }
 			{}
 
 			value& operator= (const value& rhs) noexcept
 			{
 				node::operator=(rhs);
 				val_ = rhs.val_;
+				flags_ = rhs.flags_;
 				return *this;
 			}
 
@@ -2711,6 +2823,7 @@ TOML_NAMESPACE_START
 				{
 					node::operator=(std::move(rhs));
 					val_ = std::move(rhs.val_);
+					flags_ = rhs.flags_;
 				}
 				return *this;
 			}
@@ -2797,8 +2910,21 @@ TOML_NAMESPACE_START
 			[[nodiscard]] explicit operator value_type && () && noexcept { return std::move(val_); }
 			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
+			[[nodiscard]] value_flags flags() const noexcept
+			{
+				return flags_;
+			}
+
+			value& flags(value_flags new_flags) noexcept
+			{
+				flags_ = new_flags;
+				return *this;
+			}
+
 			template <typename Char, typename T>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs);
+			// implemented in toml_default_formatter.h
+
 			value& operator= (value_arg rhs) noexcept
 			{
 				if constexpr (std::is_same_v<value_type, std::string>)
@@ -3810,6 +3936,7 @@ TOML_NAMESPACE_START
 
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
+			// implemented in toml_default_formatter.h
 	};
 }
 TOML_NAMESPACE_END
@@ -4323,6 +4450,7 @@ TOML_NAMESPACE_START
 
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
+			// implemented in toml_default_formatter.h
 	};
 
 	#ifndef DOXYGEN
@@ -5741,39 +5869,6 @@ TOML_IMPL_NAMESPACE_END
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 
-TOML_NAMESPACE_START
-{
-	enum class format_flags : uint8_t
-	{
-		none,
-
-		quote_dates_and_times = 1,
-
-		allow_literal_strings = 2,
-
-		allow_multi_line_strings = 4,
-	};
-
-	[[nodiscard]]
-	TOML_ALWAYS_INLINE
-	TOML_ATTR(const)
-	TOML_ATTR(flatten)
-	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
-	{
-		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
-	}
-
-	[[nodiscard]]
-	TOML_ALWAYS_INLINE
-	TOML_ATTR(const)
-	TOML_ATTR(flatten)
-	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
-	{
-		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
-	}
-}
-TOML_NAMESPACE_END
-
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename Char = char>
@@ -5783,7 +5878,7 @@ TOML_IMPL_NAMESPACE_START
 			const toml::node* source_;
 			std::basic_ostream<Char>* stream_ = nullptr;
 			format_flags flags_;
-			int8_t indent_;
+			int indent_;
 			bool naked_newline_;
 
 		protected:
@@ -5793,8 +5888,8 @@ TOML_IMPL_NAMESPACE_START
 
 			static constexpr size_t indent_columns = 4;
 			static constexpr std::string_view indent_string = "    "sv;
-			[[nodiscard]] int8_t indent() const noexcept { return indent_; }
-			void indent(int8_t level) noexcept { indent_ = level; }
+			[[nodiscard]] int indent() const noexcept { return indent_; }
+			void indent(int level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
 			[[nodiscard]]
@@ -5813,6 +5908,12 @@ TOML_IMPL_NAMESPACE_START
 			bool multi_line_strings_allowed() const noexcept
 			{
 				return (flags_ & format_flags::allow_multi_line_strings) != format_flags::none;
+			}
+
+			[[nodiscard]]
+			bool value_format_flags_allowed() const noexcept
+			{
+				return (flags_ & format_flags::allow_value_format_flags) != format_flags::none;
 			}
 
 			[[nodiscard]]
@@ -5849,7 +5950,7 @@ TOML_IMPL_NAMESPACE_START
 
 			void print_indent()
 			{
-				for (int8_t i = 0; i < indent_; i++)
+				for (int i = 0; i < indent_; i++)
 				{
 					print_to_stream(indent_string, *stream_);
 					naked_newline_ = false;
@@ -5923,12 +6024,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else
 				{
-					static constexpr auto is_dt =
-						std::is_same_v<T, date>
-						|| std::is_same_v<T, time>
-						|| std::is_same_v<T, date_time>;
-
-					if constexpr (is_dt)
+					if constexpr (is_one_of<T, date, time, date_time>)
 					{
 						if (quote_dates_and_times())
 						{
@@ -5936,6 +6032,27 @@ TOML_IMPL_NAMESPACE_START
 							print_to_stream(quot, *stream_);
 							print_to_stream(*val, *stream_);
 							print_to_stream(quot, *stream_);
+						}
+						else
+							print_to_stream(*val, *stream_);
+					}
+					else if constexpr (is_one_of<T, int64_t/*, double*/>)
+					{
+						if (value_format_flags_allowed() && *val >= 0)
+						{
+							const auto fmt = val.flags() & value_flags::format_as_hexadecimal;
+							if (fmt != value_flags::none)
+							{
+								switch (fmt)
+								{
+									case value_flags::format_as_binary: print_to_stream("0b"sv, *stream_); break;
+									case value_flags::format_as_octal: print_to_stream("0o"sv, *stream_); break;
+									case value_flags::format_as_hexadecimal: print_to_stream("0x"sv, *stream_); break;
+								}
+								print_to_stream(*val, *stream_, fmt);
+							}
+							else
+								print_to_stream(*val, *stream_);
 						}
 						else
 							print_to_stream(*val, *stream_);
@@ -6261,7 +6378,9 @@ TOML_NAMESPACE_START
 		public:
 
 			static constexpr format_flags default_flags
-				= format_flags::allow_literal_strings | format_flags::allow_multi_line_strings;
+				= format_flags::allow_literal_strings
+				| format_flags::allow_multi_line_strings
+				| format_flags::allow_value_format_flags;
 
 			TOML_NODISCARD_CTOR
 			explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
@@ -10500,11 +10619,20 @@ TOML_IMPL_NAMESPACE_START
 					if (has_any(has_p))
 						val = new value{ parse_hex_float() };
 					else if (has_any(has_x))
+					{
 						val = new value{ parse_integer<16>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+					}
 					else if (has_any(has_o))
+					{
 						val = new value{ parse_integer<8>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+					}
 					else if (has_any(has_b))
+					{
 						val = new value{ parse_integer<2>() };
+						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+					}
 					else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 						val = new value{ parse_float() };
 					else if (has_any(begins_sign))
@@ -10544,12 +10672,14 @@ TOML_IMPL_NAMESPACE_START
 						// 0b10
 						case bzero_msk | has_b:
 							val = new value{ parse_integer<2>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
 							break;
 
 						//=================== octal integers
 						// 0o10
 						case bzero_msk | has_o:
 							val = new value{ parse_integer<8>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
 							break;
 
 						//=================== decimal integers
@@ -10568,6 +10698,7 @@ TOML_IMPL_NAMESPACE_START
 						// 0x10
 						case bzero_msk | has_x:
 							val = new value{ parse_integer<16>() };
+							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
 							break;
 
 						//=================== decimal floats
@@ -11703,6 +11834,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_LANG_UNRELEASED
 	#undef TOML_LAUNDER
 	#undef TOML_LIKELY
+	#undef TOML_MAKE_BITOPS
 	#undef TOML_MAKE_VERSION
 	#undef TOML_MAY_THROW
 	#undef TOML_MSVC

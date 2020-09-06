@@ -319,7 +319,9 @@ TOML_NAMESPACE_START
 
 			/// \brief	The default flags for a default_formatter.
 			static constexpr format_flags default_flags
-				= format_flags::allow_literal_strings | format_flags::allow_multi_line_strings;
+				= format_flags::allow_literal_strings
+				| format_flags::allow_multi_line_strings
+				| format_flags::allow_value_format_flags;
 
 			/// \brief	Constructs a default formatter and binds it to a TOML object.
 			///

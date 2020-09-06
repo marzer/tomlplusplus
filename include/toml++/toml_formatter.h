@@ -9,44 +9,6 @@
 TOML_PUSH_WARNINGS
 TOML_DISABLE_SWITCH_WARNINGS
 
-TOML_NAMESPACE_START
-{
-	/// \brief	Format flags for modifying how TOML data is printed to streams.
-	enum class format_flags : uint8_t
-	{
-		/// \brief None.
-		none,
-
-		/// \brief Dates and times will be emitted as quoted strings.
-		quote_dates_and_times = 1,
-
-		/// \brief Strings will be emitted as single-quoted literal strings where possible.
-		allow_literal_strings = 2,
-
-		/// \brief Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.
-		allow_multi_line_strings = 4,
-	};
-
-	[[nodiscard]]
-	TOML_ALWAYS_INLINE
-	TOML_ATTR(const)
-	TOML_ATTR(flatten)
-	constexpr format_flags operator & (format_flags lhs, format_flags rhs) noexcept
-	{
-		return static_cast<format_flags>(impl::unwrap_enum(lhs) & impl::unwrap_enum(rhs));
-	}
-
-	[[nodiscard]]
-	TOML_ALWAYS_INLINE
-	TOML_ATTR(const)
-	TOML_ATTR(flatten)
-	constexpr format_flags operator | (format_flags lhs, format_flags rhs) noexcept
-	{
-		return static_cast<format_flags>( impl::unwrap_enum(lhs) | impl::unwrap_enum(rhs) );
-	}
-}
-TOML_NAMESPACE_END
-
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename Char = char>
@@ -56,7 +18,7 @@ TOML_IMPL_NAMESPACE_START
 			const toml::node* source_;
 			std::basic_ostream<Char>* stream_ = nullptr;
 			format_flags flags_;
-			int8_t indent_;
+			int indent_;
 			bool naked_newline_;
 
 		protected:
@@ -66,8 +28,8 @@ TOML_IMPL_NAMESPACE_START
 
 			static constexpr size_t indent_columns = 4;
 			static constexpr std::string_view indent_string = "    "sv;
-			[[nodiscard]] int8_t indent() const noexcept { return indent_; }
-			void indent(int8_t level) noexcept { indent_ = level; }
+			[[nodiscard]] int indent() const noexcept { return indent_; }
+			void indent(int level) noexcept { indent_ = level; }
 			void increase_indent() noexcept { indent_++; }
 			void decrease_indent() noexcept { indent_--; }
 
@@ -87,6 +49,12 @@ TOML_IMPL_NAMESPACE_START
 			bool multi_line_strings_allowed() const noexcept
 			{
 				return (flags_ & format_flags::allow_multi_line_strings) != format_flags::none;
+			}
+
+			[[nodiscard]]
+			bool value_format_flags_allowed() const noexcept
+			{
+				return (flags_ & format_flags::allow_value_format_flags) != format_flags::none;
 			}
 
 			[[nodiscard]]
@@ -123,7 +91,7 @@ TOML_IMPL_NAMESPACE_START
 
 			void print_indent()
 			{
-				for (int8_t i = 0; i < indent_; i++)
+				for (int i = 0; i < indent_; i++)
 				{
 					print_to_stream(indent_string, *stream_);
 					naked_newline_ = false;
@@ -197,12 +165,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else
 				{
-					static constexpr auto is_dt =
-						std::is_same_v<T, date>
-						|| std::is_same_v<T, time>
-						|| std::is_same_v<T, date_time>;
-
-					if constexpr (is_dt)
+					if constexpr (is_one_of<T, date, time, date_time>)
 					{
 						if (quote_dates_and_times())
 						{
@@ -210,6 +173,27 @@ TOML_IMPL_NAMESPACE_START
 							print_to_stream(quot, *stream_);
 							print_to_stream(*val, *stream_);
 							print_to_stream(quot, *stream_);
+						}
+						else
+							print_to_stream(*val, *stream_);
+					}
+					else if constexpr (is_one_of<T, int64_t/*, double*/>)
+					{
+						if (value_format_flags_allowed() && *val >= 0)
+						{
+							const auto fmt = val.flags() & value_flags::format_as_hexadecimal;
+							if (fmt != value_flags::none)
+							{
+								switch (fmt)
+								{
+									case value_flags::format_as_binary: print_to_stream("0b"sv, *stream_); break;
+									case value_flags::format_as_octal: print_to_stream("0o"sv, *stream_); break;
+									case value_flags::format_as_hexadecimal: print_to_stream("0x"sv, *stream_); break;
+								}
+								print_to_stream(*val, *stream_, fmt);
+							}
+							else
+								print_to_stream(*val, *stream_);
 						}
 						else
 							print_to_stream(*val, *stream_);

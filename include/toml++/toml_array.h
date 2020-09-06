@@ -1029,6 +1029,7 @@ TOML_NAMESPACE_START
 			/// \brief	Prints the array out to a stream as formatted TOML.
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const array&);
+			// implemented in toml_default_formatter.h
 	};
 }
 TOML_NAMESPACE_END

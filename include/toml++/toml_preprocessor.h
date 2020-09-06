@@ -467,6 +467,24 @@ is no longer necessary.
 #else
 	#define TOML_ARM 0
 #endif
+
+#define TOML_MAKE_BITOPS(type)																		\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	TOML_ATTR(flatten)																				\
+	constexpr type operator & (type lhs, type rhs) noexcept											\
+	{																								\
+		return static_cast<type>(::toml::impl::unwrap_enum(lhs) & ::toml::impl::unwrap_enum(rhs));	\
+	}																								\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	TOML_ATTR(flatten)																				\
+	constexpr type operator | (type lhs, type rhs) noexcept											\
+	{																								\
+		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
+	}
  
 //#====================================================================================================================
 //# EXTENDED INT AND FLOAT TYPES

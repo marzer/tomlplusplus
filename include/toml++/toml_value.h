@@ -200,6 +200,7 @@ TOML_NAMESPACE_START
 			}
 
 			ValueType val_;
+			value_flags flags_ = value_flags::none;
 
 		public:
 
@@ -234,14 +235,16 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			value(const value& other) noexcept
 				: node{ other },
-				val_{ other.val_ }
+				val_{ other.val_ },
+				flags_{ other.flags_ }
 			{}
 			
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
 				: node{ std::move(other) },
-				val_{ std::move(other.val_) }
+				val_{ std::move(other.val_) },
+				flags_{ other.flags_ }
 			{}
 
 			/// \brief	Copy-assignment operator.
@@ -249,6 +252,7 @@ TOML_NAMESPACE_START
 			{
 				node::operator=(rhs);
 				val_ = rhs.val_;
+				flags_ = rhs.flags_;
 				return *this;
 			}
 
@@ -259,6 +263,7 @@ TOML_NAMESPACE_START
 				{
 					node::operator=(std::move(rhs));
 					val_ = std::move(rhs.val_);
+					flags_ = rhs.flags_;
 				}
 				return *this;
 			}
@@ -369,9 +374,24 @@ TOML_NAMESPACE_START
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
+			/// \brief	Returns the metadata flags associated with this value.
+			[[nodiscard]] value_flags flags() const noexcept
+			{
+				return flags_;
+			}
+
+			/// \brief	Sets the metadata flags associated with this value.
+			/// \returns A reference to the value object.
+			value& flags(value_flags new_flags) noexcept
+			{
+				flags_ = new_flags;
+				return *this;
+			}
+
 			/// \brief	Prints the value out to a stream as formatted TOML.
 			template <typename Char, typename T>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, const value<T>& rhs);
+			// implemented in toml_default_formatter.h
 
 			/// \brief	Value-assignment operator.
 			value& operator= (value_arg rhs) noexcept

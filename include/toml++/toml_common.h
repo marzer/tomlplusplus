@@ -161,24 +161,6 @@ TOML_NAMESPACE_START // abi namespace
 		template <typename T>
 		inline constexpr bool dependent_false = false;
 
-		#define TOML_P2S_DECL(Type)											\
-			template <typename Char>										\
-			inline void print_to_stream(Type, std::basic_ostream<Char>&)
-		TOML_P2S_DECL(int8_t);
-		TOML_P2S_DECL(int16_t);
-		TOML_P2S_DECL(int32_t);
-		TOML_P2S_DECL(int64_t);
-		TOML_P2S_DECL(uint8_t);
-		TOML_P2S_DECL(uint16_t);
-		TOML_P2S_DECL(uint32_t);
-		TOML_P2S_DECL(uint64_t);
-		TOML_P2S_DECL(float);
-		TOML_P2S_DECL(const date&);
-		TOML_P2S_DECL(const time&);
-		TOML_P2S_DECL(time_offset);
-		TOML_P2S_DECL(const date_time&);
-		#undef TOML_P2S_DECL
-
 		#if TOML_WINDOWS_COMPAT
 		[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
 		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
@@ -314,7 +296,6 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T> struct value_traits<T* volatile> : value_traits<T*> {};
 	template <typename T> struct value_traits<T* const volatile> : value_traits<T*> {};
 
-		
 	// integer value traits
 	template <typename T>
 	struct integer_value_limits
@@ -866,6 +847,43 @@ TOML_NAMESPACE_END
 
 TOML_NAMESPACE_START
 {
+	/// \brief Metadata associated with TOML values.
+	enum class value_flags : uint8_t
+	{
+		/// \brief None.
+		none,
+
+		/// \brief Format integer values as binary.
+		format_as_binary = 1,
+
+		/// \brief Format integer values as octal.
+		format_as_octal = 2,
+
+		/// \brief Format integer values as hexadecimal.
+		format_as_hexadecimal = 3,
+	};
+	TOML_MAKE_BITOPS(value_flags)
+
+	/// \brief	Format flags for modifying how TOML data is printed to streams.
+	enum class format_flags : uint8_t
+	{
+		/// \brief None.
+		none,
+
+		/// \brief Dates and times will be emitted as quoted strings.
+		quote_dates_and_times = 1,
+
+		/// \brief Strings will be emitted as single-quoted literal strings where possible.
+		allow_literal_strings = 2,
+
+		/// \brief Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.
+		allow_multi_line_strings = 4,
+
+		/// \brief Values with special format flags will be formatted accordingly.
+		allow_value_format_flags = 8,
+	};
+	TOML_MAKE_BITOPS(format_flags)
+
 	/// \brief	Pretty-prints the value of a node_type to a stream.
 	/// 
 	/// \detail \cpp
@@ -897,9 +915,39 @@ TOML_NAMESPACE_START
 		}
 	}
 
-	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
+	#ifndef DOXYGEN
+
+	namespace impl
+	{
+		#define TOML_P2S_DECL(Type)															\
+			template <typename Char>														\
+			inline void print_to_stream(Type, std::basic_ostream<Char>&, value_flags = {})
+		TOML_P2S_DECL(int8_t);
+		TOML_P2S_DECL(int16_t);
+		TOML_P2S_DECL(int32_t);
+		TOML_P2S_DECL(int64_t);
+		TOML_P2S_DECL(uint8_t);
+		TOML_P2S_DECL(uint16_t);
+		TOML_P2S_DECL(uint32_t);
+		TOML_P2S_DECL(uint64_t);
+		#undef TOML_P2S_DECL
+
+		#define TOML_P2S_DECL(Type)											\
+			template <typename Char>										\
+			inline void print_to_stream(Type, std::basic_ostream<Char>&)
+		TOML_P2S_DECL(double);
+		TOML_P2S_DECL(const date&);
+		TOML_P2S_DECL(const time&);
+		TOML_P2S_DECL(time_offset);
+		TOML_P2S_DECL(const date_time&);
+		#undef TOML_P2S_DECL
+	}
+
+	#if !TOML_HEADER_ONLY
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
-	#endif
+	#endif // !TOML_HEADER_ONLY
+
+	#endif // !DOXYGEN
 }
 TOML_NAMESPACE_END
 

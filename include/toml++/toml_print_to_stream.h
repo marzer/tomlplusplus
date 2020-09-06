@@ -18,6 +18,9 @@ TOML_DISABLE_WARNINGS
 #endif
 TOML_ENABLE_WARNINGS
 
+TOML_PUSH_WARNINGS
+TOML_DISABLE_SWITCH_WARNINGS
+
 TOML_IMPL_NAMESPACE_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
@@ -95,38 +98,85 @@ TOML_IMPL_NAMESPACE_START
 	template <> inline constexpr size_t charconv_buffer_length<uint8_t> = 3;   // strlen("255")
 
 	template <typename T, typename Char>
-	inline void print_integer_to_stream(T val, std::basic_ostream<Char>& stream)
+	inline void print_integer_to_stream(T val, std::basic_ostream<Char>& stream, value_flags format = {})
 	{
 		static_assert(
 			sizeof(Char) == 1,
 			"The stream's underlying character type must be 1 byte in size."
 		);
 
+		if (!val)
+		{
+			print_to_stream('0', stream);
+			return;
+		}
+
+		int base = 10;
+		if (format != value_flags::none && val >= T{})
+		{
+			switch (format)
+			{
+				case value_flags::format_as_binary: base = 2; break;
+				case value_flags::format_as_octal: base = 8; break;
+				case value_flags::format_as_hexadecimal: base = 16; break;
+				default: break;
+			}
+		}
+
 		#if TOML_INT_CHARCONV
-
-			char buf[charconv_buffer_length<T>];
-			const auto res = std::to_chars(buf, buf + sizeof(buf), val);
+		{
+			char buf[(sizeof(T) * CHAR_BIT)];
+			const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
 			const auto len = static_cast<size_t>(res.ptr - buf);
+			if (base == 16)
+			{
+				for (size_t i = 0; i < len; i++)
+					if (buf[i] >= 'a')
+						buf[i] -= 32;
+			}
 			print_to_stream(buf, len, stream);
-
+		}
 		#else
+		{
+			using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
+			using cast_type = std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
 
-			std::ostringstream ss;
-			ss.imbue(std::locale::classic());
-			using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-			ss << static_cast<cast_type>(val);
-			const auto str = std::move(ss).str();
-			print_to_stream(str, stream);
-
+			if TOML_UNLIKELY(format == value_flags::format_as_binary)
+			{
+				bool found_one = false;
+				const auto v = static_cast<unsigned_type>(val);
+				unsigned_type mask = unsigned_type{ 1 } << (sizeof(unsigned_type) * CHAR_BIT - 1u);
+				for (unsigned i = 0; i < sizeof(unsigned_type) * CHAR_BIT; i++)
+				{
+					if ((v & mask))
+					{
+						print_to_stream('1', stream);
+						found_one = true;
+					}
+					else if (found_one)
+						print_to_stream('0', stream);
+					mask >>= 1;
+				}
+			}
+			else
+			{
+				std::ostringstream ss;
+				ss.imbue(std::locale::classic());
+				ss << std::uppercase << std::setbase(base);
+				ss << static_cast<cast_type>(val);
+				const auto str = std::move(ss).str();
+				print_to_stream(str, stream);
+			}
+		}
 		#endif
 	}
 
-	#define TOML_P2S_OVERLOAD(Type)												\
-		template <typename Char>												\
-		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream)	\
-		{																		\
-			static_assert(sizeof(Char) == 1);									\
-			print_integer_to_stream(val, stream);								\
+	#define TOML_P2S_OVERLOAD(Type)																	\
+		template <typename Char>																	\
+		inline void print_to_stream(Type val, std::basic_ostream<Char>& stream, value_flags format)	\
+		{																							\
+			static_assert(sizeof(Char) == 1);														\
+			print_integer_to_stream(val, stream, format);											\
 		}
 
 	TOML_P2S_OVERLOAD(int8_t)
@@ -432,3 +482,5 @@ TOML_NAMESPACE_START
 	#endif
 }
 TOML_NAMESPACE_END
+
+TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
