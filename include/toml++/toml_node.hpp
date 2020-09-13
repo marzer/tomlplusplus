@@ -18,8 +18,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node::node(const node& /*other*/) noexcept
 	{
-		// does not copy source information
-		// this is not an error
+		// does not copy source information - this is not an error
+		// 
+		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -33,8 +34,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node& node::operator= (const node& /*rhs*/) noexcept
 	{
-		// does not copy source information
-		// this is not an error
+		// does not copy source information - this is not an error
+		// 
+		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
 		return *this;

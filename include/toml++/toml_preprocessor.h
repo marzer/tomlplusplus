@@ -132,9 +132,6 @@
 	#define TOML_UNREACHABLE					__assume(0)
 	#define TOML_INTERFACE						__declspec(novtable)
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING		1
-	#endif
 
 #endif // msvc
 
@@ -196,9 +193,6 @@
 	#endif
 	#define TOML_NEVER_INLINE					__attribute__((__noinline__))
 	#define TOML_UNREACHABLE					__builtin_unreachable()
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
-	#endif
 	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
 
@@ -439,17 +433,10 @@ is no longer necessary.
 	#define TOML_TRIVIAL_ABI
 #endif
 
-#ifndef TOML_RELOPS_REORDERING
-	#define TOML_RELOPS_REORDERING 0
-#endif
-#if TOML_RELOPS_REORDERING
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(...)
-#else
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
-		__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
-#endif
+#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
+	__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
+	__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0

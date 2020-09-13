@@ -34,7 +34,8 @@ TOML_IMPL_NAMESPACE_START
 				: source{ sv }
 			{
 				// trim trailing nulls
-				size_t actual_len = source.length();
+				const size_t initial_len = source.length();
+				size_t actual_len = initial_len;
 				for (size_t i = actual_len; i --> 0_sz;)
 				{
 					if (source[i] != Char{}) // not '\0'
@@ -43,11 +44,11 @@ TOML_IMPL_NAMESPACE_START
 						break;
 					}
 				}
-				if (source.length() != actual_len) // not '\0'
+				if (initial_len != actual_len)
 					source = source.substr(0_sz, actual_len);
 
 				// skip bom
-				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
+				if (actual_len >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
 			}
 

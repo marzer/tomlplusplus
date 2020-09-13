@@ -15,9 +15,9 @@ TOML_NAMESPACE_START
 {
 	/// \brief	A view of a node.
 	/// 
-	/// \detail A node_view is like a std::optional<toml::node> with lots of toml-specific stuff built-in.
-	/// 		It _may_ represent a node, and allows you to do many of the same operations that you'd do
-	/// 		on nodes directly, as well as easily traversing the node tree by creating
+	/// \detail A node_view is like a std::optional<toml::node&> (if such a construct were legal), with lots of
+	///			toml-specific stuff built-in. It _may_ represent a node, and allows you to do many of the
+	///			same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating
 	/// 		subviews (via node_view::operator[]). \cpp
 	/// 
 	/// auto tbl = toml::parse(R"(

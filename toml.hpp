@@ -161,9 +161,6 @@
 	#define TOML_UNREACHABLE					__assume(0)
 	#define TOML_INTERFACE						__declspec(novtable)
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING		1
-	#endif
 
 #endif // msvc
 
@@ -217,9 +214,6 @@
 	#endif
 	#define TOML_NEVER_INLINE					__attribute__((__noinline__))
 	#define TOML_UNREACHABLE					__builtin_unreachable()
-	#if !defined(TOML_RELOPS_REORDERING) && defined(__cpp_impl_three_way_comparison)
-		#define TOML_RELOPS_REORDERING 1
-	#endif
 	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
 
@@ -452,17 +446,10 @@ is no longer necessary.
 	#define TOML_TRIVIAL_ABI
 #endif
 
-#ifndef TOML_RELOPS_REORDERING
-	#define TOML_RELOPS_REORDERING 0
-#endif
-#if TOML_RELOPS_REORDERING
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(...)
-#else
-	#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
-		__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-		__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
-#endif
+#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
+	__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
+	__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
@@ -6720,7 +6707,8 @@ TOML_IMPL_NAMESPACE_START
 				: source{ sv }
 			{
 				// trim trailing nulls
-				size_t actual_len = source.length();
+				const size_t initial_len = source.length();
+				size_t actual_len = initial_len;
 				for (size_t i = actual_len; i --> 0_sz;)
 				{
 					if (source[i] != Char{}) // not '\0'
@@ -6729,11 +6717,11 @@ TOML_IMPL_NAMESPACE_START
 						break;
 					}
 				}
-				if (source.length() != actual_len) // not '\0'
+				if (initial_len != actual_len)
 					source = source.substr(0_sz, actual_len);
 
 				// skip bom
-				if (source.length() >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
+				if (actual_len >= 3_sz && memcmp(utf8_byte_order_mark.data(), source.data(), 3_sz) == 0)
 					position += 3_sz;
 			}
 
@@ -7499,8 +7487,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node::node(const node& /*other*/) noexcept
 	{
-		// does not copy source information
-		// this is not an error
+		// does not copy source information - this is not an error
+		//
+		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -7514,8 +7503,9 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node& node::operator= (const node& /*rhs*/) noexcept
 	{
-		// does not copy source information
-		// this is not an error
+		// does not copy source information - this is not an error
+		//
+		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
 		return *this;
@@ -11847,7 +11837,6 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_PARSER_TYPENAME
 	#undef TOML_POP_WARNINGS
 	#undef TOML_PUSH_WARNINGS
-	#undef TOML_RELOPS_REORDERING
 	#undef TOML_SA_LIST_BEG
 	#undef TOML_SA_LIST_END
 	#undef TOML_SA_LIST_NEW
