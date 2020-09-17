@@ -164,7 +164,7 @@ if is_msvc or is_icc_cl
 		'/GF', # string pooling
 		'/openmp-',
 		'/permissive-',
-		'/sdl-', 
+		'/sdl-',
 		'/utf-8',
 		'/volatile:iso',
 		'/Zc:__cplusplus',
@@ -182,7 +182,7 @@ if is_msvc or is_icc_cl
 			'/Oy', # omit frame pointers
 			'/Oi', # generate intrinsics
 			language : 'cpp'
-		) 
+		)
 		add_project_link_arguments('/ltcg', language : 'cpp')
 	endif
 	if is_pedantic
@@ -479,10 +479,11 @@ tomlplusplus_dep = declare_dependency(
 )
 
 pkgc = import('pkgconfig')
-pkgc.generate (
+pkgc.generate(
 	name: meson.project_name(),
 	version: meson.project_version(),
-	description: 'Header-only TOML config file parser and serializer for modern C++'
+	description: 'Header-only TOML config file parser and serializer for modern C++',
+	install_dir: join_paths(get_option('datadir'), 'pkgconfig'),
 )
 
 # cmake
@@ -490,13 +491,15 @@ if get_option('generate_cmake_config') and not is_subproject
 	cmake = import('cmake')
 	cmake.write_basic_package_version_file(
 		name: meson.project_name(),
-		version: meson.project_version()
+		version: meson.project_version(),
+		install_dir: join_paths('lib', 'cmake', meson.project_name()),
 	)
-		
+
 	cmake_conf = configuration_data()
 	cmake.configure_package_config_file(
 		name: meson.project_name(),
 		input: 'cmake/tomlplusplus.cmake.in',
 		configuration: cmake_conf,
+		install_dir: join_paths('lib', 'cmake', meson.project_name()),
 	)
 endif
