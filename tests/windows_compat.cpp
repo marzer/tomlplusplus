@@ -8,7 +8,7 @@
 #if TOML_WINDOWS_COMPAT
 
 TOML_DISABLE_WARNINGS
-#include <Windows.h>
+#include <windows.h>
 TOML_ENABLE_WARNINGS
 
 TEST_CASE("windows compat")

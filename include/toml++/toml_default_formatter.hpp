@@ -208,7 +208,7 @@ TOML_NAMESPACE_END
 #if TOML_WINDOWS_COMPAT
 
 TOML_DISABLE_WARNINGS
-#include <Windows.h> // fuckkkk :(
+#include <windows.h> // fuckkkk :(
 TOML_ENABLE_WARNINGS
 
 TOML_IMPL_NAMESPACE_START

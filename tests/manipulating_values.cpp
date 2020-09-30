@@ -7,7 +7,7 @@
 
 #ifdef _WIN32
 TOML_DISABLE_WARNINGS
-#include <Windows.h>
+#include <windows.h>
 TOML_ENABLE_WARNINGS
 #endif
 

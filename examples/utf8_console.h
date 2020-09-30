@@ -5,7 +5,7 @@
 
 #include <iostream>
 #ifdef _WIN32
-#include <Windows.h>
+#include <windows.h>
 #endif
 
 inline void init_utf8_console() noexcept
