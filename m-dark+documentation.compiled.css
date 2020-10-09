@@ -898,6 +898,9 @@ figure.m-figure figcaption, .m-code-figure figcaption, .m-console-figure figcapt
   font-weight: 600;
   font-size: 1.17rem;
 }
+figure.m-figure figcaption a, .m-code-figure figcaption a, .m-console-figure figcaption a {
+  text-decoration: none;
+}
 .m-imagegrid > div {
   background-color: #2f363f;
 }
@@ -2629,7 +2632,7 @@ span.m-doc-wrap-bumper {
   margin-right: -1rem;
 }
 span.m-doc-wrap {
-  padding-left: 1rem;
+  margin-left: 1rem;
   display: inline-block;
   vertical-align: text-top;
   white-space: pre-line;
