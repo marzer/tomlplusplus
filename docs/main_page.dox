@@ -437,7 +437,7 @@
 //////////////////////////////////
 ///
 /// \subsection mainpage-adding-lib-conan Conan
-/// Add `tomlplusplus/2.1.0` to your conanfile. This adds the single-header version by default, but you can specify the
+/// Add `tomlplusplus/2.2.0` to your conanfile. This adds the single-header version by default, but you can specify the
 /// regular version using `"multiple_headers": True`.
 /// 
 //////////////////////////////////
@@ -446,7 +446,7 @@
 /// Add `tomlpp` to your `package.json5`, e.g.:
 /// \bash
 /// depends: [
-///		'tomlpp^2.1.0',
+///		'tomlpp^2.2.0',
 /// ]
 /// \ebash
 ///
