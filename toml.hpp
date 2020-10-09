@@ -11425,9 +11425,11 @@ TOML_IMPL_NAMESPACE_START
 						|| consume_comment())
 						continue;
 
+					return_if_error_or_eof();
+
 					// [tables]
 					// [[table array]]
-					else if (*cp == U'[')
+					if (*cp == U'[')
 						current_table = parse_table_header();
 
 					// bare_keys

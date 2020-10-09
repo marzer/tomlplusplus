@@ -26,6 +26,7 @@ namespace
 		"########## comments"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
+		"# \xf1\x63"sv,
 
 		"########## inline tables"sv,
 		"val = {,}"sv,

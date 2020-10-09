@@ -7,10 +7,12 @@
 
 // this file is about testing user misc. repros submitted via github issues, et cetera.
 
-TEST_CASE("feedback - github/issues/49")
+TEST_CASE("user feedback")
 {
-	// see: https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
+	SECTION("feedback - github/issues/49")
 	{
+		// see: https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
+
 		toml::table t1;
 		t1.insert_or_assign("bar1", toml::array{ 1, 2, 3 });
 		CHECK(t1 == toml::table{{
@@ -85,21 +87,18 @@ TEST_CASE("feedback - github/issues/49")
 			{ "foo3"sv, toml::array{ 1, 2, 3, 4 } }
 		}});
 	}
-}
 
-TEST_CASE("feedback - github/pull/50")
-{
-	// see: https://github.com/marzer/tomlplusplus/pull/50
+	SECTION("feedback - github/issues/65")
 	{
-		auto tbl = toml::table{ {{"value", 10}} };
-		const toml::node* val = tbl.get("value");
-		REQUIRE(val);
-		REQUIRE(val->is_number());
-		REQUIRE(val->is_integer());
-		REQUIRE(val->ref<int64_t>() == 10);
-		REQUIRE(val->value<int64_t>() == 10);
-		REQUIRE(val->value_or(0) == 10);
-		REQUIRE(val->value<double>() == 10.0);
-		REQUIRE(val->value_or(0.0) == 10.0);
+		// see: https://github.com/marzer/tomlplusplus/issues/65
+
+		// this tests two things:
+		// - a comment at EOF
+		// - a malformed UTF-8 sequence
+		// 
+		// it should fail to parse, but correctly issue an error (not crash!)
+
+		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63");
 	}
 }
+
