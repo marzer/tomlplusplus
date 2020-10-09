@@ -125,6 +125,15 @@ TOML_ANON_NAMESPACE_START
 			return cp.as_view();
 	}
 
+	[[nodiscard]]
+	TOML_INTERNAL_LINKAGE
+	std::string_view to_sv(const ::toml::impl::utf8_codepoint* cp) noexcept
+	{
+		if (cp)
+			return to_sv(*cp);
+		return ""sv;
+	}
+
 	template <typename T>
 	TOML_ATTR(nonnull)
 	TOML_INTERNAL_LINKAGE
@@ -1579,7 +1588,7 @@ TOML_IMPL_NAMESPACE_START
 				// "YYYY"
 				uint32_t digits[4];
 				if (!consume_digit_sequence(digits, 4_sz))
-					set_error_and_return_default("expected 4-digit year, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 4-digit year, saw '"sv, to_sv(cp), "'"sv);
 				const auto year = digits[3]
 					+ digits[2] * 10u
 					+ digits[1] * 100u
@@ -1594,7 +1603,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "MM"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
 				const auto month = digits[1] + digits[0] * 10u;
 				if (month == 0u || month > 12u)
 					set_error_and_return_default(
@@ -1614,7 +1623,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "DD"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(cp), "'"sv);
 				const auto day = digits[1] + digits[0] * 10u;
 				if (day == 0u || day > max_days_in_month)
 					set_error_and_return_default(
@@ -1646,7 +1655,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "HH"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 				const auto hour = digits[1] + digits[0] * 10u;
 				if (hour > 23u)
 					set_error_and_return_default(
@@ -1661,7 +1670,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "MM"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 				const auto minute = digits[1] + digits[0] * 10u;
 				if (minute > 59u)
 					set_error_and_return_default(
@@ -1688,7 +1697,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "SS"
 				if (!consume_digit_sequence(digits, 2_sz))
-					set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
 				const auto second = digits[1] + digits[0] * 10u;
 				if (second > 59u)
 					set_error_and_return_default(
@@ -1778,7 +1787,7 @@ TOML_IMPL_NAMESPACE_START
 					// "HH"
 					int digits[2];
 					if (!consume_digit_sequence(digits, 2_sz))
-						set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 					const auto hour = digits[1] + digits[0] * 10;
 					if (hour > 23)
 						set_error_and_return_default(
@@ -1793,7 +1802,7 @@ TOML_IMPL_NAMESPACE_START
 
 					// "MM"
 					if (!consume_digit_sequence(digits, 2_sz))
-						set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 					const auto minute = digits[1] + digits[0] * 10;
 					if (minute > 59)
 						set_error_and_return_default(
@@ -2517,7 +2526,7 @@ TOML_IMPL_NAMESPACE_START
 					// handle the rest of the line after the header
 					consume_leading_whitespace();
 					if (!is_eof() && !consume_comment() && !consume_line_break())
-						set_error_and_return_default("expected a comment or whitespace, saw '"sv, to_sv(*cp), "'"sv);
+						set_error_and_return_default("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
 				}
 				TOML_ASSERT(!key.segments.empty());
 
@@ -2711,7 +2720,7 @@ TOML_IMPL_NAMESPACE_START
 						|| consume_comment())
 						continue;
 
-					return_if_error_or_eof();
+					return_if_error();
 
 					// [tables]
 					// [[table array]]
@@ -2732,12 +2741,12 @@ TOML_IMPL_NAMESPACE_START
 						consume_leading_whitespace();
 						return_if_error();
 						if (!is_eof() && !consume_comment() && !consume_line_break())
-							set_error("expected a comment or whitespace, saw '"sv, to_sv(*cp), "'"sv);
+							set_error("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
 					}
 
 
 					else // ??
-						set_error("expected keys, tables, whitespace or comments, saw '"sv, to_sv(*cp), "'"sv);
+						set_error("expected keys, tables, whitespace or comments, saw '"sv, to_sv(cp), "'"sv);
 
 				}
 				while (!is_eof());

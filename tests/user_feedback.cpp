@@ -97,8 +97,12 @@ TEST_CASE("user feedback")
 		// - a malformed UTF-8 sequence
 		// 
 		// it should fail to parse, but correctly issue an error (not crash!)
-
 		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63");
+
+		// a malformed UTF-8 sequence during a KVP
+		// 
+		// it should fail to parse, but correctly issue an error (not crash!)
+		parsing_should_fail(FILE_LINE_ARGS, "1= 0x6cA#+\xf1");
 	}
 }
 

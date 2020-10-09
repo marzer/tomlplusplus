@@ -63,6 +63,7 @@ namespace
 		"[foo]\nbar.? = 'kek'"sv,
 		R"('''val''' = 1)"sv,
 		R"(a."""val""" = 1)"sv,
+		"1= 0x6cA#+\xf1"sv,
 
 		"########## values"sv,
 		"val = _"sv,
