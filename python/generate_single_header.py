@@ -150,6 +150,7 @@ def main():
 	preamble.append('''
 // TOML Language Specifications:
 // latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.3: https://toml.io/en/v1.0.0-rc.3
 // v1.0.0-rc.2: https://toml.io/en/v1.0.0-rc.2
 // v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
 // v0.5.0:      https://toml.io/en/v0.5.0

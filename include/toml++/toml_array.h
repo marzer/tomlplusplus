@@ -315,6 +315,11 @@ TOML_NAMESPACE_START
 				elements.emplace_back(impl::make_node(std::forward<T>(val)));
 			}
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept;
+			void lh_dtor() noexcept;
+			#endif
+
 		public:
 
 			using value_type = node;
@@ -345,6 +350,9 @@ TOML_NAMESPACE_START
 
 			/// \brief	Move-assignment operator.
 			array& operator= (array&& rhs) noexcept;
+
+			/// \brief	Destructor.
+			~array() noexcept override;
 
 			/// \brief	Constructs an array with one or more initial elements.
 			///
@@ -395,8 +403,11 @@ TOML_NAMESPACE_START
 						...
 					);
 				}
-			}
 
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;

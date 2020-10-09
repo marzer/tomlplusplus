@@ -210,6 +210,11 @@ TOML_NAMESPACE_START
 			impl::string_map<std::unique_ptr<node>> map;
 			bool inline_ = false;
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept;
+			void lh_dtor() noexcept;
+			#endif
+
 			table(impl::table_init_pair*, size_t) noexcept;
 
 		public:
@@ -236,6 +241,9 @@ TOML_NAMESPACE_START
 
 			/// \brief	Move-assignment operator.
 			table& operator= (table&& rhs) noexcept;
+
+			/// \brief	Destructor.
+			~table() noexcept override;
 
 			/// \brief	Constructs a table with one or more initial key-value pairs.
 			///
@@ -270,7 +278,11 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
 				: table{ arr, N }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;

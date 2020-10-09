@@ -15,8 +15,29 @@
 
 TOML_NAMESPACE_START
 {
+	#if TOML_LIFETIME_HOOKS
+
 	TOML_EXTERNAL_LINKAGE
-	array::array() noexcept = default;
+	void array::lh_ctor() noexcept
+	{
+		TOML_ARRAY_CREATED;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::lh_dtor() noexcept
+	{
+		TOML_ARRAY_DESTROYED;
+	}
+
+	#endif
+
+	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) noexcept
@@ -25,13 +46,21 @@ TOML_NAMESPACE_START
 		elements.reserve(other.elements.size());
 		for (const auto& elem : other)
 			elements.emplace_back(impl::make_node(elem));
+
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(array&& other) noexcept
 		: node{ std::move(other) },
 		elements{ std::move(other.elements) }
-	{}
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::operator= (const array& rhs) noexcept
@@ -56,6 +85,14 @@ TOML_NAMESPACE_START
 			elements = std::move(rhs.elements);
 		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::~array() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_dtor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE

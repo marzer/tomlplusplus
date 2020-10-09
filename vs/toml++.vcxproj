@@ -71,8 +71,8 @@
     <None Include="..\docs\Doxyfile" />
     <None Include="..\docs\Doxyfile-mcss" />
     <None Include="..\docs\main_page.dox" />
-    <None Include="..\docs\tomlplusplus.css" />
-    <None Include="..\docs\tomlplusplus.js" />
+    <None Include="..\docs\muu.css" />
+    <None Include="..\docs\muu.js" />
     <None Include="..\LICENSE" />
     <None Include="..\meson.build" />
     <None Include="..\python\ci_single_header_check.py" />
@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\meson_options.txt" />
+    <Text Include="..\python\requirements.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

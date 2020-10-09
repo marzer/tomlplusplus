@@ -16,13 +16,13 @@ inline constexpr func_type* funcs[] =
 	impl::is_ascii_line_break<true>,
 	impl::is_decimal_digit,
 	impl::is_string_delimiter,
-	impl::is_unicode_whitespace,
-	impl::is_unicode_line_break,
+	impl::is_non_ascii_whitespace,
+	impl::is_non_ascii_line_break,
 	impl::is_unicode_surrogate,
 	#if TOML_LANG_UNRELEASED
-	impl::is_unicode_letter,
-	impl::is_unicode_number,
-	impl::is_unicode_combining_mark,
+	impl::is_non_ascii_letter,
+	impl::is_non_ascii_number,
+	impl::is_combining_mark,
 	#endif
 };
 
@@ -178,9 +178,9 @@ TEST_CASE("unicode - is_string_delimiter")
 	REQUIRE(not_in(fn,	{	U'(',		unimax		}));
 }
 
-TEST_CASE("unicode - is_unicode_whitespace")
+TEST_CASE("unicode - is_non_ascii_whitespace")
 {
-	static constexpr auto fn = is_unicode_whitespace;
+	static constexpr auto fn = is_non_ascii_whitespace;
 	REQUIRE(not_in(fn,	{	U'\0',		U'\u009F'	}));
 	REQUIRE(in_only(fn,		U'\u00A0'				));
 	REQUIRE(not_in(fn,	{	U'\u00A1',	U'\u167F'	}));
@@ -196,9 +196,9 @@ TEST_CASE("unicode - is_unicode_whitespace")
 	REQUIRE(not_in(fn,	{	U'\u3001',	unimax		}));
 }
 
-TEST_CASE("unicode - is_unicode_line_break")
+TEST_CASE("unicode - is_non_ascii_line_break")
 {
-	static constexpr auto fn = is_unicode_line_break;
+	static constexpr auto fn = is_non_ascii_line_break;
 	REQUIRE(not_in(fn,	{	U'\0',		U'\u0084'	}));
 	REQUIRE(in_only(fn,		U'\u0085'				));
 	REQUIRE(not_in(fn,	{	U'\u0086',	U'\u2027'	}));

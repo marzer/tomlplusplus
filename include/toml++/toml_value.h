@@ -202,6 +202,18 @@ TOML_NAMESPACE_START
 			ValueType val_;
 			value_flags flags_ = value_flags::none;
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept
+			{
+				TOML_VALUE_CREATED;
+			}
+
+			void lh_dtor() noexcept
+			{
+				TOML_VALUE_DESTROYED;
+			}
+			#endif
+
 		public:
 
 			/// \brief	The value's underlying data type.
@@ -229,7 +241,11 @@ TOML_NAMESPACE_START
 					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...)
 				)))
 				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			/// \brief	Copy constructor.
 			TOML_NODISCARD_CTOR
@@ -237,7 +253,11 @@ TOML_NAMESPACE_START
 				: node{ other },
 				val_{ other.val_ },
 				flags_{ other.flags_ }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 			
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
@@ -245,7 +265,11 @@ TOML_NAMESPACE_START
 				: node{ std::move(other) },
 				val_{ std::move(other.val_) },
 				flags_{ other.flags_ }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			/// \brief	Copy-assignment operator.
 			value& operator= (const value& rhs) noexcept
@@ -267,6 +291,13 @@ TOML_NAMESPACE_START
 				}
 				return *this;
 			}
+
+			#if TOML_LIFETIME_HOOKS
+			~value() noexcept override
+			{
+				lh_dtor();
+			}
+			#endif
 
 			/// \brief	Returns the value's node type identifier.
 			///

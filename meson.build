@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '2.1.0',
+	version : '2.2.0',
 	meson_version : '>=0.53.0',
 	license : 'MIT',
 	default_options : [
@@ -35,6 +35,7 @@ is_clang = compiler.get_id() == 'clang'
 is_msvc = compiler.get_id() == 'msvc'
 is_icc_cl = compiler.get_id() == 'intel-cl'
 is_icc = is_icc_cl or compiler.get_id() == 'intel'
+is_lld = compiler.get_linker_id() == 'ld.lld'
 is_debug = get_option('debug')
 is_release = not is_debug
 is_pedantic = get_option('pedantic')
@@ -81,51 +82,53 @@ if is_gcc
 		language : 'cpp'
 	)
 	if is_pedantic
-		add_project_arguments([
-				'-Wcast-align',
-				'-Wcast-qual',
-				'-Wctor-dtor-privacy',
-				'-Wdisabled-optimization',
-				'-Wextra',
-				'-Wfloat-equal',
-				'-Wimport',
-				'-Winit-self',
-				'-Wlogical-op',
-				'-Wmissing-declarations',
-				'-Wmissing-field-initializers',
-				'-Wmissing-format-attribute',
-				'-Wmissing-include-dirs',
-				'-Wmissing-noreturn',
-				'-Wnoexcept',
-				'-Wold-style-cast',
-				'-Woverloaded-virtual',
-				'-Wpacked',
-				'-Wpadded',
-				'-Wpedantic',
-				'-Wpointer-arith',
-				'-Wredundant-decls',
-				'-Wshadow',
-				'-Wsign-conversion',
-				'-Wsign-promo',
-				'-Wstack-protector',
-				'-Wstrict-null-sentinel',
-				'-Wswitch-default',
-				'-Wswitch-enum',
-				'-Wundef',
-				'-Wunreachable-code',
-				'-Wunused',
-				'-Wunused-parameter',
-				'-Wvariadic-macros',
-				'-Wwrite-strings',
-				'-Wmissing-noreturn',
-				'-Wsuggest-attribute=const',
-				'-Wsuggest-attribute=pure'
-			],
+		add_project_arguments(
+			'-Wcast-align',
+			'-Wcast-qual',
+			'-Wctor-dtor-privacy',
+			'-Wdisabled-optimization',
+			'-Wextra',
+			'-Wfloat-equal',
+			'-Wimport',
+			'-Winit-self',
+			'-Wlogical-op',
+			'-Wmissing-declarations',
+			'-Wmissing-field-initializers',
+			'-Wmissing-format-attribute',
+			'-Wmissing-include-dirs',
+			'-Wmissing-noreturn',
+			'-Wnoexcept',
+			'-Wold-style-cast',
+			'-Woverloaded-virtual',
+			'-Wpacked',
+			'-Wpadded',
+			'-Wpedantic',
+			'-Wpointer-arith',
+			'-Wredundant-decls',
+			'-Wshadow',
+			'-Wsign-conversion',
+			'-Wsign-promo',
+			'-Wstack-protector',
+			'-Wstrict-null-sentinel',
+			'-Wswitch-default',
+			'-Wswitch-enum',
+			'-Wundef',
+			'-Wunreachable-code',
+			'-Wunused',
+			'-Wunused-parameter',
+			'-Wvariadic-macros',
+			'-Wwrite-strings',
+			'-Wmissing-noreturn',
+			'-Wsuggest-attribute=const',
+			'-Wsuggest-attribute=pure',
 			language : 'cpp'
 		)
 	endif
 	if is_release
-		add_project_arguments('-fmerge-constants', language : 'cpp')
+		add_project_arguments(
+			'-fmerge-constants',
+			language : 'cpp'
+		)
 	endif
 endif
 
@@ -151,7 +154,11 @@ if is_clang
 		add_project_arguments('-ftime-trace', language : 'cpp')
 	endif
 	if is_release
-		add_project_arguments('-Oz', '-fmerge-all-constants', language : 'cpp')
+		add_project_arguments(
+			'-Oz',
+			'-fmerge-all-constants',
+			language : 'cpp'
+		)
 	endif
 endif
 
@@ -234,6 +241,11 @@ elif is_release
 	overrides += 'strip=true'
 endif
 
+# LTO
+if is_lld or is_debug
+	overrides += 'b_lto=false'
+endif
+
 #######################################################################################################################
 # c++ 20 check
 # (used by tests)
@@ -310,17 +322,18 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 
 compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 
-	consteval int kek() noexcept
+	consteval int test() noexcept
 	{
 		return 42;
 	}
 
 	int main()
 	{
-		return kek();
+		constexpr auto val = test(); // test() should be compiletime-callable
+		return val;
 	}
 	''',
-	name : 'supports consteval',
+	name : 'supports consteval keyword',
 	args : compiler_supports_cpp20_args
 )
 
@@ -341,12 +354,12 @@ float_16_preprocessor_single_check_template = '''
 float_16_preprocessor_checks = '''
 	#define MAKE_STRING(s)		MAKE_STRING_1(s)
 	#define MAKE_STRING_1(s)	#s
-	''' + float_16_preprocessor_single_check_template.format('__FLT_RADIX__', '2')		\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MANT_DIG__', '11')	\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_DIG__', '3')			\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_EXP__', '-13')	\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_10_EXP__', '-4')	\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_EXP__', '16')		\
+	''' + float_16_preprocessor_single_check_template.format('__FLT_RADIX__', '2')						\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MANT_DIG__', '11')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_DIG__', '3')							\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_EXP__', '-13')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_10_EXP__', '-4')					\
+	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_EXP__', '16')						\
 	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_10_EXP__', '4')
 
 compiler_supports_float16_args = []
@@ -354,8 +367,6 @@ if is_gcc
 	compiler_supports_float16_args += '-mfp16-format=ieee'
 endif
 compiler_supports_fp16 = compiler.links('''
-	@0@
-
 	int main()
 	{
 		static_assert(sizeof(__fp16) == 2);
@@ -364,7 +375,7 @@ compiler_supports_fp16 = compiler.links('''
 		const auto f3 = static_cast<__fp16>(0.2L);
 		return 0;
 	}
-	'''.format(float_16_preprocessor_checks),
+	''',
 	name : 'supports __fp16',
 	args : compiler_supports_float16_args
 )

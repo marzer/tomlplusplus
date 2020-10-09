@@ -16,8 +16,29 @@
 
 TOML_NAMESPACE_START
 {
+	#if TOML_LIFETIME_HOOKS
+
 	TOML_EXTERNAL_LINKAGE
-	table::table() noexcept {}
+	void table::lh_ctor() noexcept
+	{
+		TOML_TABLE_CREATED;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void table::lh_dtor() noexcept
+	{
+		TOML_TABLE_DESTROYED;
+	}
+
+	#endif
+
+	TOML_EXTERNAL_LINKAGE
+	table::table() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) noexcept
@@ -26,6 +47,10 @@ TOML_NAMESPACE_START
 	{
 		for (auto&& [k, v] : other)
 			map.emplace_hint(map.end(), k, impl::make_node(v));
+
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -33,7 +58,11 @@ TOML_NAMESPACE_START
 		: node{ std::move(other) },
 		map{ std::move(other.map) },
 		inline_{ other.inline_ }
-	{}
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table& table::operator= (const table& rhs) noexcept
@@ -59,6 +88,14 @@ TOML_NAMESPACE_START
 			inline_ = rhs.inline_;
 		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::~table() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_dtor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE

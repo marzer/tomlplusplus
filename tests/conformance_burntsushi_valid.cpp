@@ -247,6 +247,11 @@ answer = 42)"sv;
 [a.'b']
 [a.'b'.c]
 answer = 42)"sv;
+	static constexpr auto table_without_super = R"(# [x] you
+# [x.y] don't
+# [x.y.z] need these
+[x.y.z.w] # for this to work
+[x] # defining a super-table afterwards is ok)"sv;
 	static constexpr auto underscored_float = R"(electron_mass = 9_109.109_383e-3_4)"sv;
 	static constexpr auto underscored_integer = R"(million = 1_000_000)"sv;
 	static constexpr auto unicode_escape = R"(answer4 = "\u03B4"
@@ -1110,6 +1115,26 @@ ue)"sv },
 							{ 
 								R"(c)"sv, toml::table{{
 									{ R"(answer)"sv, 42 },
+								}}
+							},
+						}}
+					},
+				}}
+			},
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, table_without_super, [](toml::table&& tbl)
+	{
+		auto expected = toml::table{{
+			{ 
+				R"(x)"sv, toml::table{{
+					{ 
+						R"(y)"sv, toml::table{{
+							{ 
+								R"(z)"sv, toml::table{{
+									{ R"(w)"sv, toml::table{} },
 								}}
 							},
 						}}

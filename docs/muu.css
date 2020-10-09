@@ -162,6 +162,7 @@ pre.m-code .c1
 }
 
 /* int and float literals */
+pre.m-code .mb,
 pre.m-code .mi,
 pre.m-code .mf,
 pre.m-code .mh

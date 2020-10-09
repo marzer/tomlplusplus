@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.1.0
+// toml++ v2.2.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -17,6 +17,7 @@
 //
 // TOML Language Specifications:
 // latest:      https://github.com/toml-lang/toml/blob/master/README.md
+// v1.0.0-rc.3: https://toml.io/en/v1.0.0-rc.3
 // v1.0.0-rc.2: https://toml.io/en/v1.0.0-rc.2
 // v1.0.0-rc.1: https://toml.io/en/v1.0.0-rc.1
 // v0.5.0:      https://toml.io/en/v0.5.0
@@ -486,6 +487,10 @@ is no longer necessary.
 		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
 	}
 
+#ifndef TOML_LIFETIME_HOOKS
+	#define TOML_LIFETIME_HOOKS 0
+#endif
+
 #ifdef __FLT16_MANT_DIG__
 	#if __FLT_RADIX__ == 2					\
 			&& __FLT16_MANT_DIG__ == 11		\
@@ -494,7 +499,7 @@ is no longer necessary.
 			&& __FLT16_MIN_10_EXP__ == -4	\
 			&& __FLT16_MAX_EXP__ == 16		\
 			&& __FLT16_MAX_10_EXP__ == 4
-		#if (TOML_ARM && TOML_GCC) || TOML_CLANG
+		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
 			#define TOML_FP16 __fp16
 		#endif
 		#if TOML_ARM && TOML_CLANG // not present in g++
@@ -516,7 +521,7 @@ is no longer necessary.
 #endif
 
 #define TOML_LIB_MAJOR		2
-#define TOML_LIB_MINOR		1
+#define TOML_LIB_MINOR		2
 #define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
@@ -2764,6 +2769,18 @@ TOML_NAMESPACE_START
 			ValueType val_;
 			value_flags flags_ = value_flags::none;
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept
+			{
+				TOML_VALUE_CREATED;
+			}
+
+			void lh_dtor() noexcept
+			{
+				TOML_VALUE_DESTROYED;
+			}
+			#endif
+
 		public:
 
 			using value_type = ValueType;
@@ -2780,21 +2797,33 @@ TOML_NAMESPACE_START
 					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...)
 				)))
 				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			TOML_NODISCARD_CTOR
 			value(const value& other) noexcept
 				: node{ other },
 				val_{ other.val_ },
 				flags_{ other.flags_ }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
 				: node{ std::move(other) },
 				val_{ std::move(other.val_) },
 				flags_{ other.flags_ }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			value& operator= (const value& rhs) noexcept
 			{
@@ -2814,6 +2843,13 @@ TOML_NAMESPACE_START
 				}
 				return *this;
 			}
+
+			#if TOML_LIFETIME_HOOKS
+			~value() noexcept override
+			{
+				lh_dtor();
+			}
+			#endif
 
 			[[nodiscard]] node_type type() const noexcept override { return impl::node_type_of<value_type>; }
 			[[nodiscard]] bool is_table() const noexcept override { return false; }
@@ -3623,6 +3659,11 @@ TOML_NAMESPACE_START
 				elements.emplace_back(impl::make_node(std::forward<T>(val)));
 			}
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept;
+			void lh_dtor() noexcept;
+			#endif
+
 		public:
 
 			using value_type = node;
@@ -3644,6 +3685,8 @@ TOML_NAMESPACE_START
 			array& operator= (const array&) noexcept;
 			array& operator= (array&& rhs) noexcept;
 
+			~array() noexcept override;
+
 			template <typename ElemType, typename... ElemTypes, typename = std::enable_if_t<
 				(sizeof...(ElemTypes) > 0_sz)
 				|| !std::is_same_v<impl::remove_cvref_t<ElemType>, array>
@@ -3660,6 +3703,10 @@ TOML_NAMESPACE_START
 						...
 					);
 				}
+
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
 			}
 
 			[[nodiscard]] node_type type() const noexcept override;
@@ -4127,6 +4174,11 @@ TOML_NAMESPACE_START
 			impl::string_map<std::unique_ptr<node>> map;
 			bool inline_ = false;
 
+			#if TOML_LIFETIME_HOOKS
+			void lh_ctor() noexcept;
+			void lh_dtor() noexcept;
+			#endif
+
 			table(impl::table_init_pair*, size_t) noexcept;
 
 		public:
@@ -4145,11 +4197,17 @@ TOML_NAMESPACE_START
 			table& operator= (const table&) noexcept;
 			table& operator= (table&& rhs) noexcept;
 
+			~table() noexcept override;
+
 			template <size_t N>
 			TOML_NODISCARD_CTOR
 			explicit table(impl::table_init_pair(&& arr)[N]) noexcept
 				: table{ arr, N }
-			{}
+			{
+				#if TOML_LIFETIME_HOOKS
+				lh_ctor();
+				#endif
+			}
 
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;
@@ -4891,15 +4949,6 @@ TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
-	template <typename... T>
-	[[nodiscard]]
-	TOML_ATTR(const)
-	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
-	{
-		static_assert((std::is_same_v<char32_t, T> && ...));
-		return ((codepoint == vals) || ...);
-	}
-
 	[[nodiscard]]
 	TOML_ATTR(const)
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
@@ -4909,7 +4958,7 @@ TOML_IMPL_NAMESPACE_START
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
+	constexpr bool is_non_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that don't say "is a line-break")
@@ -4927,7 +4976,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
-		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
+		return is_ascii_whitespace(codepoint) || is_non_ascii_whitespace(codepoint);
 	}
 
 	template <bool IncludeCarriageReturn = true>
@@ -4941,7 +4990,7 @@ TOML_IMPL_NAMESPACE_START
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
+	constexpr bool is_non_ascii_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that say "is a line-break")
@@ -4957,7 +5006,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
-		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_unicode_line_break(codepoint);
+		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_non_ascii_line_break(codepoint);
 	}
 
 	[[nodiscard]]
@@ -5021,7 +5070,7 @@ TOML_IMPL_NAMESPACE_START
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_letter(char32_t c) noexcept
+	constexpr bool is_non_ascii_letter(char32_t c) noexcept
 	{
 		if (U'\xAA' > c || c > U'\U0003134A')
 			return false;
@@ -5057,7 +5106,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xAAull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xAAull) % 0x40ull));
-				// 1922 codepoints from 124 ranges (spanning a search area of 3147)
+				// 1922 code units from 124 ranges (spanning a search area of 3145)
 			}
 			case 0x01: // [1] 0CF5 - 193F
 			{
@@ -5082,7 +5131,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xD04ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xD04ull) % 0x40ull));
-				// 2239 codepoints from 83 ranges (spanning a search area of 3147)
+				// 2239 code units from 83 ranges (spanning a search area of 3099)
 			}
 			case 0x02: // [2] 1940 - 258A
 			{
@@ -5103,7 +5152,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1950ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x1950ull) % 0x40ull));
-				// 1184 codepoints from 59 ranges (spanning a search area of 3147)
+				// 1184 code units from 59 ranges (spanning a search area of 2101)
 			}
 			case 0x03: // [3] 258B - 31D5
 			{
@@ -5121,7 +5170,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x2C00ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 771 codepoints from 30 ranges (spanning a search area of 3147)
+				// 771 code units from 30 ranges (spanning a search area of 1472)
 			}
 			case 0x04: return (U'\u31F0' <= c && c <= U'\u31FF') || U'\u3400' <= c;
 			case 0x06: return c <= U'\u4DBF' || U'\u4E00' <= c;
@@ -5148,7 +5197,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA079ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA079ull) % 0x40ull));
-				// 2554 codepoints from 52 ranges (spanning a search area of 3147)
+				// 2554 code units from 52 ranges (spanning a search area of 3147)
 			}
 			case 0x11: return c <= U'\uD7A3' || (U'\uD7B0' <= c && c <= U'\uD7C6') || (U'\uD7CB' <= c && c <= U'\uD7FB');
 			case 0x14: // [20] F686 - 102D0
@@ -5172,7 +5221,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xF900ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1710 codepoints from 34 ranges (spanning a search area of 3147)
+				// 1710 code units from 34 ranges (spanning a search area of 2513)
 			}
 			case 0x15: // [21] 102D1 - 10F1B
 			{
@@ -5198,7 +5247,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10300ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1620 codepoints from 48 ranges (spanning a search area of 3147)
+				// 1620 code units from 48 ranges (spanning a search area of 3100)
 			}
 			case 0x16: // [22] 10F1C - 11B66
 			{
@@ -5223,7 +5272,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10F1Cull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x10F1Cull) % 0x40ull));
-				// 1130 codepoints from 67 ranges (spanning a search area of 3147)
+				// 1130 code units from 67 ranges (spanning a search area of 3037)
 			}
 			case 0x17: // [23] 11B67 - 127B1
 			{
@@ -5245,7 +5294,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x11C00ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1304 codepoints from 16 ranges (spanning a search area of 3147)
+				// 1304 code units from 16 ranges (spanning a search area of 2372)
 			}
 			case 0x18: return U'\U00013000' <= c;
 			case 0x19: return c <= U'\U0001342E';
@@ -5271,7 +5320,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16800ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1250 codepoints from 14 ranges (spanning a search area of 3147)
+				// 1250 code units from 14 ranges (spanning a search area of 2420)
 			}
 			case 0x1F: return c <= U'\U000187F7' || U'\U00018800' <= c;
 			case 0x20: return c <= U'\U00018CD5' || (U'\U00018D00' <= c && c <= U'\U00018D08');
@@ -5288,7 +5337,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1B000ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 690 codepoints from 4 ranges (spanning a search area of 3147)
+				// 690 code units from 4 ranges (spanning a search area of 764)
 			}
 			case 0x24: // [36] 1BB36 - 1C780
 			{
@@ -5301,7 +5350,8 @@ TOML_IMPL_NAMESPACE_START
 					case 0x02: return (1u << (static_cast<uint_least32_t>(c) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
-				// 139 codepoints from 4 ranges (spanning a search area of 3147)
+				// 139 code units from 4 ranges (spanning a search area of 154)
+				TOML_UNREACHABLE;
 			}
 			case 0x26: // [38] 1D3CC - 1E016
 			{
@@ -5317,7 +5367,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1D400ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 936 codepoints from 30 ranges (spanning a search area of 3147)
+				// 936 code units from 30 ranges (spanning a search area of 972)
 			}
 			case 0x27: // [39] 1E017 - 1EC61
 			{
@@ -5338,7 +5388,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1E100ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 363 codepoints from 7 ranges (spanning a search area of 3147)
+				// 363 code units from 7 ranges (spanning a search area of 2124)
 			}
 			case 0x28: // [40] 1EC62 - 1F8AC
 			{
@@ -5353,7 +5403,8 @@ TOML_IMPL_NAMESPACE_START
 					case 0x02: return (1ull << (static_cast<uint_least64_t>(c) - 0x1EE80u)) & 0xFFFFBEE0FFFFBFFull;
 					TOML_NO_DEFAULT_CASE;
 				}
-				// 141 codepoints from 33 ranges (spanning a search area of 3147)
+				// 141 code units from 33 ranges (spanning a search area of 188)
+				TOML_UNREACHABLE;
 			}
 			case 0x29: return U'\U00020000' <= c;
 			case 0x37: return c <= U'\U0002A6DD' || U'\U0002A700' <= c;
@@ -5364,12 +5415,13 @@ TOML_IMPL_NAMESPACE_START
 			case 0x3E: return U'\U00030000' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 131189 codepoints from 620 ranges (spanning a search area of 1114112)
+		// 131189 code units from 620 ranges (spanning a search area of 201377)
+		TOML_UNREACHABLE;
 	}
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_number(char32_t c) noexcept
+	constexpr bool is_non_ascii_number(char32_t c) noexcept
 	{
 		if (U'\u0660' > c || c > U'\U0001FBF9')
 			return false;
@@ -5398,7 +5450,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x660ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x660ull) % 0x40ull));
-				// 130 codepoints from 13 ranges (spanning a search area of 2007)
+				// 130 code units from 13 ranges (spanning a search area of 1936)
 			}
 			case 0x01: // [1] 0E37 - 160D
 			{
@@ -5413,7 +5465,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xE50ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xE50ull) % 0x40ull));
-				// 50 codepoints from 5 ranges (spanning a search area of 2007)
+				// 50 code units from 5 ranges (spanning a search area of 586)
 			}
 			case 0x02: // [2] 160E - 1DE4
 			{
@@ -5431,7 +5483,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16EEull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x16EEull) % 0x40ull));
-				// 103 codepoints from 11 ranges (spanning a search area of 2007)
+				// 103 code units from 11 ranges (spanning a search area of 1388)
 			}
 			case 0x03: return U'\u2160' <= c && c <= U'\u2188' && (1ull << (static_cast<uint_least64_t>(c) - 0x2160u)) & 0x1E7FFFFFFFFull;
 			case 0x05: return U'\u3007' <= c && c <= U'\u303A' && (1ull << (static_cast<uint_least64_t>(c) - 0x3007u)) & 0xE0007FC000001ull;
@@ -5450,7 +5502,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA620ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA620ull) % 0x40ull));
-				// 70 codepoints from 7 ranges (spanning a search area of 2007)
+				// 70 code units from 7 ranges (spanning a search area of 1082)
 			}
 			case 0x15: return U'\uABF0' <= c && c <= U'\uABF9';
 			case 0x1F: return U'\uFF10' <= c && c <= U'\uFF19';
@@ -5469,7 +5521,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10140ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 70 codepoints from 5 ranges (spanning a search area of 2007)
+				// 70 code units from 5 ranges (spanning a search area of 874)
 			}
 			case 0x21: return (U'\U00010D30' <= c && c <= U'\U00010D39') || (U'\U00011066' <= c && c <= U'\U0001106F');
 			case 0x22: // [34] 110EE - 118C4
@@ -5489,7 +5541,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x110F0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x110F0ull) % 0x40ull));
-				// 90 codepoints from 9 ranges (spanning a search area of 2007)
+				// 90 code units from 9 ranges (spanning a search area of 1610)
 			}
 			case 0x23: // [35] 118C5 - 1209B
 			{
@@ -5506,7 +5558,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x118E0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x118E0ull) % 0x40ull));
-				// 50 codepoints from 5 ranges (spanning a search area of 2007)
+				// 50 code units from 5 ranges (spanning a search area of 1226)
 			}
 			case 0x24: return U'\U00012400' <= c && c <= U'\U0001246E';
 			case 0x2D: return (U'\U00016A60' <= c && c <= U'\U00016A69') || (U'\U00016B50' <= c && c <= U'\U00016B59');
@@ -5516,12 +5568,13 @@ TOML_IMPL_NAMESPACE_START
 			case 0x3F: return U'\U0001FBF0' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 876 codepoints from 72 ranges (spanning a search area of 1114112)
+		// 876 code units from 72 ranges (spanning a search area of 128410)
+		TOML_UNREACHABLE;
 	}
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_combining_mark(char32_t c) noexcept
+	constexpr bool is_combining_mark(char32_t c) noexcept
 	{
 		if (U'\u0300' > c || c > U'\U000E01EF')
 			return false;
@@ -5588,7 +5641,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x300ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1106 codepoints from 156 ranges (spanning a search area of 14332)
+				// 1106 code units from 156 ranges (spanning a search area of 11675)
 			}
 			case 0x02: // [2] 72F8 - AAF3
 			{
@@ -5605,7 +5658,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA66Full) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA66Full) % 0x40ull));
-				// 137 codepoints from 28 ranges (spanning a search area of 14332)
+				// 137 code units from 28 ranges (spanning a search area of 1153)
 			}
 			case 0x03: return (U'\uAAF5' <= c && c <= U'\uAAF6') || (U'\uABE3' <= c && c <= U'\uABEA') || (U'\uABEC' <= c && c <= U'\uABED');
 			case 0x04: // [4] E2F0 - 11AEB
@@ -5650,7 +5703,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xFB1Eull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xFB1Eull) % 0x40ull));
-				// 402 codepoints from 63 ranges (spanning a search area of 14332)
+				// 402 code units from 63 ranges (spanning a search area of 8060)
 			}
 			case 0x05: // [5] 11AEC - 152E7
 			{
@@ -5665,7 +5718,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x11C2Full) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x11C2Full) % 0x40ull));
-				// 85 codepoints from 13 ranges (spanning a search area of 14332)
+				// 85 code units from 13 ranges (spanning a search area of 712)
 			}
 			case 0x06: // [6] 152E8 - 18AE3
 			{
@@ -5683,7 +5736,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16AF0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x16AF0ull) % 0x40ull));
-				// 75 codepoints from 7 ranges (spanning a search area of 14332)
+				// 75 code units from 7 ranges (spanning a search area of 1282)
 			}
 			case 0x07: return U'\U0001BC9D' <= c && c <= U'\U0001BC9E';
 			case 0x08: // [8] 1C2E0 - 1FADB
@@ -5720,12 +5773,13 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1D165ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x1D165ull) % 0x40ull));
-				// 223 codepoints from 21 ranges (spanning a search area of 14332)
+				// 223 code units from 21 ranges (spanning a search area of 6118)
 			}
 			case 0x3F: return U'\U000E0100' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 2282 codepoints from 293 ranges (spanning a search area of 1114112)
+		// 2282 code units from 293 ranges (spanning a search area of 917232)
+		TOML_UNREACHABLE;
 	}
 
 	#endif // TOML_LANG_UNRELEASED
@@ -5740,9 +5794,9 @@ TOML_IMPL_NAMESPACE_START
 			|| codepoint == U'_'
 			#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
 			|| codepoint == U'+'
-			|| is_unicode_letter(codepoint)
-			|| is_unicode_number(codepoint)
-			|| is_unicode_combining_mark(codepoint)
+			|| is_non_ascii_letter(codepoint)
+			|| is_non_ascii_number(codepoint)
+			|| is_combining_mark(codepoint)
 			#endif
 		;
 	}
@@ -5757,8 +5811,8 @@ TOML_IMPL_NAMESPACE_START
 			|| codepoint == U'}'
 			|| codepoint == U','
 			|| codepoint == U'#'
-			|| is_unicode_line_break(codepoint)
-			|| is_unicode_whitespace(codepoint)
+			|| is_non_ascii_line_break(codepoint)
+			|| is_non_ascii_whitespace(codepoint)
 		;
 	}
 
@@ -7576,8 +7630,29 @@ TOML_NAMESPACE_END
 
 TOML_NAMESPACE_START
 {
+	#if TOML_LIFETIME_HOOKS
+
 	TOML_EXTERNAL_LINKAGE
-	array::array() noexcept = default;
+	void array::lh_ctor() noexcept
+	{
+		TOML_ARRAY_CREATED;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::lh_dtor() noexcept
+	{
+		TOML_ARRAY_DESTROYED;
+	}
+
+	#endif
+
+	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) noexcept
@@ -7586,13 +7661,21 @@ TOML_NAMESPACE_START
 		elements.reserve(other.elements.size());
 		for (const auto& elem : other)
 			elements.emplace_back(impl::make_node(elem));
+
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(array&& other) noexcept
 		: node{ std::move(other) },
 		elements{ std::move(other.elements) }
-	{}
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	array& array::operator= (const array& rhs) noexcept
@@ -7617,6 +7700,14 @@ TOML_NAMESPACE_START
 			elements = std::move(rhs.elements);
 		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::~array() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_dtor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -7886,8 +7977,29 @@ TOML_NAMESPACE_END
 
 TOML_NAMESPACE_START
 {
+	#if TOML_LIFETIME_HOOKS
+
 	TOML_EXTERNAL_LINKAGE
-	table::table() noexcept {}
+	void table::lh_ctor() noexcept
+	{
+		TOML_TABLE_CREATED;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void table::lh_dtor() noexcept
+	{
+		TOML_TABLE_DESTROYED;
+	}
+
+	#endif
+
+	TOML_EXTERNAL_LINKAGE
+	table::table() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) noexcept
@@ -7896,6 +8008,10 @@ TOML_NAMESPACE_START
 	{
 		for (auto&& [k, v] : other)
 			map.emplace_hint(map.end(), k, impl::make_node(v));
+
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -7903,7 +8019,11 @@ TOML_NAMESPACE_START
 		: node{ std::move(other) },
 		map{ std::move(other.map) },
 		inline_{ other.inline_ }
-	{}
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_ctor();
+		#endif
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	table& table::operator= (const table& rhs) noexcept
@@ -7929,6 +8049,14 @@ TOML_NAMESPACE_START
 			inline_ = rhs.inline_;
 		}
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::~table() noexcept
+	{
+		#if TOML_LIFETIME_HOOKS
+		lh_dtor();
+		#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -8628,6 +8756,15 @@ TOML_DISABLE_SWITCH_WARNINGS
 
 TOML_ANON_NAMESPACE_START
 {
+	template <typename... T>
+	[[nodiscard]]
+	TOML_ATTR(const)
+	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
+	{
+		static_assert((std::is_same_v<char32_t, T> && ...));
+		return ((codepoint == vals) || ...);
+	}
+
 	template <uint64_t> struct parse_integer_traits;
 	template <> struct parse_integer_traits<2> final
 	{
@@ -8828,6 +8965,65 @@ TOML_ANON_NAMESPACE_START
 	#define push_parse_scope_1(scope, line)		push_parse_scope_2(scope, line)
 	#define push_parse_scope(scope)				push_parse_scope_1(scope, __LINE__)
 
+	// Q: "why not std::unique_ptr??
+	// A: It caused a lot of bloat on some implementations so this exists an internal substitute.
+	class node_ptr
+	{
+		private:
+			toml::node* node_ = {};
+
+		public:
+			TOML_NODISCARD_CTOR
+			node_ptr() noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			explicit node_ptr(toml::node* n) noexcept
+				: node_{ n }
+			{}
+
+			~node_ptr() noexcept
+			{
+				delete node_;
+			}
+
+			node_ptr& operator=(toml::node* val) noexcept
+			{
+				if (val != node_)
+				{
+					delete node_;
+					node_ = val;
+				}
+				return *this;
+			}
+
+			node_ptr(const node_ptr&) = delete;
+			node_ptr& operator=(const node_ptr&) = delete;
+			node_ptr(node_ptr&&) = delete;
+			node_ptr& operator=(node_ptr&&) = delete;
+
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			operator bool() const noexcept
+			{
+				return node_ != nullptr;
+			}
+
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			toml::node* get() const noexcept
+			{
+				return node_;
+			}
+
+			[[nodiscard]]
+			toml::node* release() noexcept
+			{
+				auto n = node_;
+				node_ = nullptr;
+				return n;
+			}
+	};
+
 	struct parsed_key final
 	{
 		std::vector<std::string> segments;
@@ -8836,7 +9032,7 @@ TOML_ANON_NAMESPACE_START
 	struct parsed_key_value_pair final
 	{
 		parsed_key key;
-		toml::node* value;
+		node_ptr value;
 	};
 
 }
@@ -10395,7 +10591,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("values may not begin with underscores"sv);
 
 				const auto begin_pos = cp->position;
-				node* val{};
+				node_ptr val;
 
 				do
 				{
@@ -10611,17 +10807,17 @@ TOML_IMPL_NAMESPACE_START
 					else if (has_any(has_x))
 					{
 						val = new value{ parse_integer<16>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
 					}
 					else if (has_any(has_o))
 					{
 						val = new value{ parse_integer<8>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
 					}
 					else if (has_any(has_b))
 					{
 						val = new value{ parse_integer<2>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
 					}
 					else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 						val = new value{ parse_float() };
@@ -10662,14 +10858,14 @@ TOML_IMPL_NAMESPACE_START
 						// 0b10
 						case bzero_msk | has_b:
 							val = new value{ parse_integer<2>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
 							break;
 
 						//=================== octal integers
 						// 0o10
 						case bzero_msk | has_o:
 							val = new value{ parse_integer<8>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
 							break;
 
 						//=================== decimal integers
@@ -10688,7 +10884,7 @@ TOML_IMPL_NAMESPACE_START
 						// 0x10
 						case bzero_msk | has_x:
 							val = new value{ parse_integer<16>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
 							break;
 
 						//=================== decimal floats
@@ -10862,8 +11058,8 @@ TOML_IMPL_NAMESPACE_START
 				}
 				#endif
 
-				val->source_ = { begin_pos, current_position(1), reader.source_path() };
-				return val;
+				val.get()->source_ = { begin_pos, current_position(1), reader.source_path() };
+				return val.release();
 			}
 
 			[[nodiscard]]
@@ -10880,7 +11076,7 @@ TOML_IMPL_NAMESPACE_START
 				while (!is_error())
 				{
 					#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
-					if (is_unicode_combining_mark(*cp))
+					if (is_combining_mark(*cp))
 						set_error_and_return_default("bare keys may not begin with unicode combining marks"sv);
 					else
 					#endif
@@ -10965,7 +11161,7 @@ TOML_IMPL_NAMESPACE_START
 				// get the value
 				if (is_value_terminator(*cp))
 					set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
-				return { std::move(key), parse_value() };
+				return { std::move(key), node_ptr{ parse_value() } };
 			}
 
 			[[nodiscard]]
@@ -11179,12 +11375,12 @@ TOML_IMPL_NAMESPACE_START
 							).first->second.get();
 							dotted_key_tables.push_back(&child->ref_cast<table>());
 							dotted_key_tables.back()->inline_ = true;
-							child->source_ = kvp.value->source_;
+							child->source_ = kvp.value.get()->source_;
 						}
 						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
 							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
-							child->source_.end = kvp.value->source_.end;
+							child->source_.end = kvp.value.get()->source_.end;
 						return_if_error();
 						tab = &child->ref_cast<table>();
 					}
@@ -11192,7 +11388,7 @@ TOML_IMPL_NAMESPACE_START
 
 				if (auto conflicting_node = tab->get(kvp.key.segments.back()))
 				{
-					if (conflicting_node->type() == kvp.value->type())
+					if (conflicting_node->type() == kvp.value.get()->type())
 						set_error(
 							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
 							" '"sv, to_sv(recording_buffer), "'"sv
@@ -11201,14 +11397,14 @@ TOML_IMPL_NAMESPACE_START
 						set_error(
 							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
 							" '"sv, to_sv(recording_buffer),
-							"' as "sv, to_sv(kvp.value->type())
+							"' as "sv, to_sv(kvp.value.get()->type())
 						);
 				}
 
 				return_if_error();
 				tab->map.emplace(
 					std::move(kvp.key.segments.back()),
-					std::unique_ptr<node>{ kvp.value }
+					std::unique_ptr<node>{ kvp.value.release() }
 				);
 			}
 
@@ -11361,8 +11557,8 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '['
 		advance_and_return_if_error_or_eof({});
 
-		auto arr = new array{};
-		auto& vals = arr->elements;
+		node_ptr arr{ new array{} };
+		auto& vals = reinterpret_cast<array*>(arr.get())->elements;
 		enum parse_elem : int
 		{
 			none,
@@ -11412,7 +11608,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return arr;
+		return reinterpret_cast<array*>(arr.release());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -11426,8 +11622,8 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '{'
 		advance_and_return_if_error_or_eof({});
 
-		auto tab = new table{};
-		tab->inline_ = true;
+		node_ptr tab{ new table{} };
+		reinterpret_cast<table*>(tab.get())->inline_ = true;
 		enum parse_elem : int
 		{
 			none,
@@ -11487,7 +11683,7 @@ TOML_IMPL_NAMESPACE_START
 				else
 				{
 					prev = kvp;
-					parse_key_value_pair_and_insert(tab);
+					parse_key_value_pair_and_insert(reinterpret_cast<table*>(tab.get()));
 				}
 			}
 
@@ -11496,7 +11692,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return tab;
+		return reinterpret_cast<table*>(tab.release());
 	}
 
 	TOML_API
@@ -11823,6 +12019,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_LANG_HIGHER_THAN
 	#undef TOML_LANG_UNRELEASED
 	#undef TOML_LAUNDER
+	#undef TOML_LIFETIME_HOOKS
 	#undef TOML_LIKELY
 	#undef TOML_MAKE_BITOPS
 	#undef TOML_MAKE_VERSION

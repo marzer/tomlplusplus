@@ -81,6 +81,7 @@ def main():
 			<PrecompiledHeader>Use</PrecompiledHeader>
 			<PrecompiledHeaderFile>tests.h</PrecompiledHeaderFile>
 			<PreprocessorDefinitions>TOML_UNRELEASED_FEATURES={unreleased_features};%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>LEAK_TESTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'=='false'">_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'=='false'">SHOULD_HAVE_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'!='false'">SHOULD_HAVE_EXCEPTIONS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -129,6 +130,7 @@ def main():
 	<ItemGroup>
 		<ClInclude Include="..\..\tests\catch2.h" />
 		<ClInclude Include="..\..\tests\evil_macros.h" />
+		<ClInclude Include="..\..\tests\leakproof.h" />
 		<ClInclude Include="..\..\tests\settings.h" />
 		<ClInclude Include="..\..\tests\tests.h" />
 		<ClInclude Include="..\..\tests\tloptional.h" />

@@ -39,6 +39,15 @@ TOML_DISABLE_SWITCH_WARNINGS
 
 TOML_ANON_NAMESPACE_START
 {
+	template <typename... T>
+	[[nodiscard]]
+	TOML_ATTR(const)
+	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
+	{
+		static_assert((std::is_same_v<char32_t, T> && ...));
+		return ((codepoint == vals) || ...);
+	}
+
 	template <uint64_t> struct parse_integer_traits;
 	template <> struct parse_integer_traits<2> final
 	{
@@ -239,6 +248,65 @@ TOML_ANON_NAMESPACE_START
 	#define push_parse_scope_1(scope, line)		push_parse_scope_2(scope, line)
 	#define push_parse_scope(scope)				push_parse_scope_1(scope, __LINE__)
 
+	// Q: "why not std::unique_ptr??
+	// A: It caused a lot of bloat on some implementations so this exists an internal substitute.
+	class node_ptr
+	{
+		private:
+			toml::node* node_ = {};
+
+		public:
+			TOML_NODISCARD_CTOR
+			node_ptr() noexcept = default;
+
+			TOML_NODISCARD_CTOR
+			explicit node_ptr(toml::node* n) noexcept
+				: node_{ n }
+			{}
+
+			~node_ptr() noexcept
+			{
+				delete node_;
+			}
+
+			node_ptr& operator=(toml::node* val) noexcept
+			{
+				if (val != node_)
+				{
+					delete node_;
+					node_ = val;
+				}
+				return *this;
+			}
+
+			node_ptr(const node_ptr&) = delete;
+			node_ptr& operator=(const node_ptr&) = delete;
+			node_ptr(node_ptr&&) = delete;
+			node_ptr& operator=(node_ptr&&) = delete;
+
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			operator bool() const noexcept
+			{
+				return node_ != nullptr;
+			}
+
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			toml::node* get() const noexcept
+			{
+				return node_;
+			}
+
+			[[nodiscard]]
+			toml::node* release() noexcept
+			{
+				auto n = node_;
+				node_ = nullptr;
+				return n;
+			}
+	};
+
 	struct parsed_key final
 	{
 		std::vector<std::string> segments;
@@ -247,7 +315,7 @@ TOML_ANON_NAMESPACE_START
 	struct parsed_key_value_pair final
 	{
 		parsed_key key;
-		toml::node* value;
+		node_ptr value;
 	};
 
 }
@@ -1808,7 +1876,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("values may not begin with underscores"sv);
 
 				const auto begin_pos = cp->position;
-				node* val{};
+				node_ptr val;
 
 				do
 				{
@@ -2024,17 +2092,17 @@ TOML_IMPL_NAMESPACE_START
 					else if (has_any(has_x))
 					{
 						val = new value{ parse_integer<16>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
 					}
 					else if (has_any(has_o))
 					{
 						val = new value{ parse_integer<8>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
 					}
 					else if (has_any(has_b))
 					{
 						val = new value{ parse_integer<2>() };
-						reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
 					}
 					else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 						val = new value{ parse_float() };
@@ -2075,14 +2143,14 @@ TOML_IMPL_NAMESPACE_START
 						// 0b10
 						case bzero_msk | has_b:
 							val = new value{ parse_integer<2>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_binary);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
 							break;
 
 						//=================== octal integers
 						// 0o10
 						case bzero_msk | has_o:
 							val = new value{ parse_integer<8>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_octal);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
 							break;
 
 						//=================== decimal integers
@@ -2101,7 +2169,7 @@ TOML_IMPL_NAMESPACE_START
 						// 0x10
 						case bzero_msk | has_x:
 							val = new value{ parse_integer<16>() };
-							reinterpret_cast<value<int64_t>*>(val)->flags(value_flags::format_as_hexadecimal);
+							reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
 							break;
 
 						//=================== decimal floats
@@ -2275,8 +2343,8 @@ TOML_IMPL_NAMESPACE_START
 				}
 				#endif
 
-				val->source_ = { begin_pos, current_position(1), reader.source_path() };
-				return val;
+				val.get()->source_ = { begin_pos, current_position(1), reader.source_path() };
+				return val.release();
 			}
 
 			[[nodiscard]]
@@ -2293,7 +2361,7 @@ TOML_IMPL_NAMESPACE_START
 				while (!is_error())
 				{
 					#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
-					if (is_unicode_combining_mark(*cp))
+					if (is_combining_mark(*cp))
 						set_error_and_return_default("bare keys may not begin with unicode combining marks"sv);
 					else
 					#endif
@@ -2378,7 +2446,7 @@ TOML_IMPL_NAMESPACE_START
 				// get the value
 				if (is_value_terminator(*cp))
 					set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
-				return { std::move(key), parse_value() };
+				return { std::move(key), node_ptr{ parse_value() } };
 			}
 
 			[[nodiscard]]
@@ -2592,12 +2660,12 @@ TOML_IMPL_NAMESPACE_START
 							).first->second.get();
 							dotted_key_tables.push_back(&child->ref_cast<table>());
 							dotted_key_tables.back()->inline_ = true;
-							child->source_ = kvp.value->source_;
+							child->source_ = kvp.value.get()->source_;
 						}
 						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
 							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
-							child->source_.end = kvp.value->source_.end;
+							child->source_.end = kvp.value.get()->source_.end;
 						return_if_error();
 						tab = &child->ref_cast<table>();
 					}
@@ -2605,7 +2673,7 @@ TOML_IMPL_NAMESPACE_START
 
 				if (auto conflicting_node = tab->get(kvp.key.segments.back()))
 				{
-					if (conflicting_node->type() == kvp.value->type())
+					if (conflicting_node->type() == kvp.value.get()->type())
 						set_error(
 							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
 							" '"sv, to_sv(recording_buffer), "'"sv
@@ -2614,14 +2682,14 @@ TOML_IMPL_NAMESPACE_START
 						set_error(
 							"cannot redefine existing "sv, to_sv(conflicting_node->type()),
 							" '"sv, to_sv(recording_buffer),
-							"' as "sv, to_sv(kvp.value->type())
+							"' as "sv, to_sv(kvp.value.get()->type())
 						);
 				}
 
 				return_if_error();
 				tab->map.emplace(
 					std::move(kvp.key.segments.back()),
-					std::unique_ptr<node>{ kvp.value }
+					std::unique_ptr<node>{ kvp.value.release() }
 				);
 			}
 
@@ -2776,8 +2844,8 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '['
 		advance_and_return_if_error_or_eof({});
 
-		auto arr = new array{};
-		auto& vals = arr->elements;
+		node_ptr arr{ new array{} };
+		auto& vals = reinterpret_cast<array*>(arr.get())->elements;
 		enum parse_elem : int
 		{
 			none,
@@ -2827,7 +2895,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return arr;
+		return reinterpret_cast<array*>(arr.release());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -2841,8 +2909,8 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '{'
 		advance_and_return_if_error_or_eof({});
 
-		auto tab = new table{};
-		tab->inline_ = true;
+		node_ptr tab{ new table{} };
+		reinterpret_cast<table*>(tab.get())->inline_ = true;
 		enum parse_elem : int
 		{
 			none,
@@ -2902,7 +2970,7 @@ TOML_IMPL_NAMESPACE_START
 				else
 				{
 					prev = kvp;
-					parse_key_value_pair_and_insert(tab);
+					parse_key_value_pair_and_insert(reinterpret_cast<table*>(tab.get()));
 				}
 			}
 
@@ -2912,7 +2980,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return tab;
+		return reinterpret_cast<table*>(tab.release());
 	}
 
 	TOML_API

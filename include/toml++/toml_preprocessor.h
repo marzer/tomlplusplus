@@ -472,7 +472,11 @@ is no longer necessary.
 	{																								\
 		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
 	}
- 
+
+#ifndef TOML_LIFETIME_HOOKS
+	#define TOML_LIFETIME_HOOKS 0
+#endif
+
 //#====================================================================================================================
 //# EXTENDED INT AND FLOAT TYPES
 //#====================================================================================================================
@@ -485,7 +489,7 @@ is no longer necessary.
 			&& __FLT16_MIN_10_EXP__ == -4	\
 			&& __FLT16_MAX_EXP__ == 16		\
 			&& __FLT16_MAX_10_EXP__ == 4
-		#if (TOML_ARM && TOML_GCC) || TOML_CLANG
+		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
 			#define TOML_FP16 __fp16
 		#endif
 		#if TOML_ARM && TOML_CLANG // not present in g++

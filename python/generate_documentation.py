@@ -29,46 +29,66 @@ inline_namespaces = [
 inline_namespace_explainer = 'All members of this namespace are automatically members of the parent namespace. '	\
 	+ 'It does not require an explicit \'using\' statement.'
 type_names = [
-	#------ standard types
-	'size_t',
-	'uint8_t',
-	'uint16_t',
-	'uint32_t',
-	'uint64_t',
-	'int8_t',
+	#------ standard/built-in types
+	'_Float16',
+	'__float128',
+	'__fp16',
+	'__int128_t',
+	'__m128',
+	'__m128d',
+	'__m128i',
+	'__m256',
+	'__m256d',
+	'__m256i',
+	'__m512',
+	'__m512d',
+	'__m512i',
+	'__m64',
+	'__uint128_t',
+	'bool',
+	'byte',
+	'char',
+	'const_iterator',
+	'double',
+	'exception',
+	'float',
+	'fstream',
+	'ifstream',
+	'int',
+	'int128_t',
 	'int16_t',
 	'int32_t',
 	'int64_t',
-	'ptrdiff_t',
+	'int8_t',
 	'intptr_t',
-	'uintptr_t',
-	'exception',
+	'istream',
+	'istringstream',
 	'iterator',
-	'const_iterator',
-	'void',
-	'char',
-	'wchar_t',
-	'int',
 	'long',
+	'ofstream',
+	'optional',
+	'ostream',
+	'ostringstream',
+	'pair',
+	'ptrdiff_t',
 	'short',
 	'signed',
-	'unsigned',
-	'float',
-	'double',
-	'bool',
-	'pair',
-	'tuple',
-	'istream',
-	'ostream',
-	'ifstream',
-	'ofstream',
-	'stringstream',
-	'istringstream',
-	'ostringstream',
-	'string_view',
+	'size_t',
+	'span',
 	'string',
-	'byte',
-	'optional',
+	'string_view',
+	'stringstream',
+	'tuple',
+	'uint128_t',
+	'uint16_t',
+	'uint32_t',
+	'uint64_t',
+	'uint8_t',
+	'uintptr_t',
+	'unsigned',
+	'vector',
+	'void',
+	'wchar_t',
 	#------ toml++ types
 	'node',
 	'table',
@@ -144,6 +164,7 @@ external_links = [
 	(r'std::enable_if(?:_t)?', 'https://en.cppreference.com/w/cpp/types/enable_if'),
 	(r'std::exceptions?', 'https://en.cppreference.com/w/cpp/error/exception'),
 	(r'std::has_single_bit(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/has_single_bit'),
+	(r'std::hash', 'https://en.cppreference.com/w/cpp/utility/hash'),
 	(r'std::initializer_lists?', 'https://en.cppreference.com/w/cpp/utility/initializer_list'),
 	(r'std::integral_constants?', 'https://en.cppreference.com/w/cpp/types/integral_constant'),
 	(r'std::is_(?:nothrow_)?convertible(?:_v)?', 'https://en.cppreference.com/w/cpp/types/is_convertible'),
@@ -177,6 +198,8 @@ external_links = [
 	(r'std::spans?', 'https://en.cppreference.com/w/cpp/container/span'),
 	(r'std::to_address(?:\(\))?', 'https://en.cppreference.com/w/cpp/memory/to_address'),
 	(r'std::tuples?', 'https://en.cppreference.com/w/cpp/utility/tuple'),
+	(r'std::tuple_size(?:_v)?', 'https://en.cppreference.com/w/cpp/utility/tuple/tuple_size'),
+	(r'std::tuple_element(?:_t)?', 'https://en.cppreference.com/w/cpp/utility/tuple/tuple_element'),
 	(r'std::type_identity(?:_t)?', 'https://en.cppreference.com/w/cpp/types/type_identity'),
 	(r'std::underlying_type(?:_t)?', 'https://en.cppreference.com/w/cpp/types/underlying_type'),
 	(r'std::unique_ptrs?', 'https://en.cppreference.com/w/cpp/memory/unique_ptr'),
@@ -219,11 +242,12 @@ external_links = [
 			+ r')',
 		'https://en.cppreference.com/w/cpp/preprocessor/replace'
 	),
+	(r'(?:_Float|__fp)16s?','https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html'),
 	# toml-specific
-	(r'toml::values?', 'classtoml_1_1value.html'),
-	(r'(toml::)?date_times?', 'structtoml_1_1date__time.html'),
-	(r'(toml::)?time', 'structtoml_1_1time.html'),
-	(r'(toml::)?dates?', 'structtoml_1_1date.html')
+	(r'(?:toml::)values?', 'classtoml_1_1value.html'),
+	(r'(?:toml::)?date_times?', 'structtoml_1_1date__time.html'),
+	(r'(?:toml::)times?', 'structtoml_1_1time.html'),
+	(r'(?:toml::)dates?', 'structtoml_1_1date.html')
 ]
 header_overrides = [
 
@@ -245,9 +269,9 @@ badges = [
 		'https://en.cppreference.com/w/cpp/compiler_support'
 	),
 	(
-		'TOML v1.0.0-rc.2',
+		'TOML v1.0.0-rc.3',
 		'badge-TOML.svg',
-		'https://toml.io/en/v1.0.0-rc.2'
+		'https://toml.io/en/v1.0.0-rc.3'
 	),
 	(None, None, None), # <br>
 	(
@@ -1110,9 +1134,9 @@ def main():
 		, IndexPageFix()
 		, ModifiersFix1()
 		, ModifiersFix2()
-		, InlineNamespaceFix1()
-		, InlineNamespaceFix2()
-		, InlineNamespaceFix3()
+		#, InlineNamespaceFix1()
+		#, InlineNamespaceFix2()
+		#, InlineNamespaceFix3()
 		, ExtDocLinksFix()
 		, EnableIfFix()
 		, ExternalLinksFix()

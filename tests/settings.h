@@ -13,6 +13,12 @@
 #ifndef USE_SINGLE_HEADER
 	#define USE_SINGLE_HEADER 0
 #endif
+#if defined(LEAK_TESTS) && LEAK_TESTS
+	#define TOML_CONFIG_HEADER "leakproof.h"
+#else
+	#undef LEAK_TESTS
+	#define LEAK_TESTS 0
+#endif
 
 // use tl::optional?
 #if defined(USE_TARTANLLAMA_OPTIONAL) && USE_TARTANLLAMA_OPTIONAL

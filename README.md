@@ -2,7 +2,7 @@
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
 [![C++17](docs/badge-C++17.svg)][cpp_compilers]
 [![C++20](docs/badge-C++20.svg)][cpp_compilers]
-[![TOML](docs/badge-TOML.svg)][v1.0.0-rc.2]
+[![TOML](docs/badge-TOML.svg)][v1.0.0-rc.3]
 [![MIT license](docs/badge-license-MIT.svg)](./LICENSE)
 [![CircleCI](https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square)](https://circleci.com/gh/marzer/tomlplusplus)
 [![Mentioned in Awesome C++](docs/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
@@ -19,7 +19,7 @@
 # Library features
 
  - Header-only
- - Supports the latest [TOML] release ([v1.0.0-rc.2]), plus optional support for some [unreleased TOML language features]
+ - Supports the latest [TOML] release ([v1.0.0-rc.3]), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
@@ -165,12 +165,13 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
 > ℹ _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
-### 🔹 **TOML v1.0.0-rc.2:**
+### 🔹 **TOML v1.0.0-rc.3:**
 All features supported, including:
 - [#356]: Allow leading zeros in the exponent part of a float
 - [#567]: Control characters are not permitted in comments
 - [#571]: Allow raw tabs inside strings
 - [#665]: Make arrays heterogeneous
+- [#766]: Allow comments before commas in arrays
 
 ### 🔹 **TOML v0.5.0:**
 All features supported.
@@ -202,6 +203,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
+- **[@sneves](https://github.com/sneves)** - Reported a bug
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
@@ -227,7 +229,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [TOML]: https://toml.io/
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[v1.0.0-rc.2]: https://toml.io/en/v1.0.0-rc.2
+[v1.0.0-rc.3]: https://toml.io/en/v1.0.0-rc.3
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
@@ -246,6 +248,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
 [#709]: https://github.com/toml-lang/toml/pull/709
+[#766]: https://github.com/toml-lang/toml/issues/766
 [LICENSE-utf8-decoder]: ./LICENSE-utf8-decoder
 [something better than std::optional]: https://github.com/TartanLlama/optional
 [m.css]: https://mcss.mosra.cz/documentation/doxygen

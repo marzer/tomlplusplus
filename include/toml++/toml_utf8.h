@@ -8,15 +8,6 @@
 
 TOML_IMPL_NAMESPACE_START
 {
-	template <typename... T>
-	[[nodiscard]]
-	TOML_ATTR(const)
-	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
-	{
-		static_assert((std::is_same_v<char32_t, T> && ...));
-		return ((codepoint == vals) || ...);
-	}
-
 	[[nodiscard]]
 	TOML_ATTR(const)
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
@@ -26,7 +17,7 @@ TOML_IMPL_NAMESPACE_START
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_whitespace(char32_t codepoint) noexcept
+	constexpr bool is_non_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that don't say "is a line-break")
@@ -44,7 +35,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
-		return is_ascii_whitespace(codepoint) || is_unicode_whitespace(codepoint);
+		return is_ascii_whitespace(codepoint) || is_non_ascii_whitespace(codepoint);
 	}
 
 	template <bool IncludeCarriageReturn = true>
@@ -58,7 +49,7 @@ TOML_IMPL_NAMESPACE_START
 
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_line_break(char32_t codepoint) noexcept
+	constexpr bool is_non_ascii_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
 		// (characters that say "is a line-break")
@@ -74,7 +65,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
-		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_unicode_line_break(codepoint);
+		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_non_ascii_line_break(codepoint);
 	}
 
 	[[nodiscard]]
@@ -140,7 +131,7 @@ TOML_IMPL_NAMESPACE_START
 	//# 	Ll, Lm, Lo, Lt, Lu
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_letter(char32_t c) noexcept
+	constexpr bool is_non_ascii_letter(char32_t c) noexcept
 	{
 		if (U'\xAA' > c || c > U'\U0003134A')
 			return false;
@@ -176,7 +167,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xAAull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xAAull) % 0x40ull));
-				// 1922 codepoints from 124 ranges (spanning a search area of 3147)
+				// 1922 code units from 124 ranges (spanning a search area of 3145)
 			}
 			case 0x01: // [1] 0CF5 - 193F
 			{
@@ -201,7 +192,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xD04ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xD04ull) % 0x40ull));
-				// 2239 codepoints from 83 ranges (spanning a search area of 3147)
+				// 2239 code units from 83 ranges (spanning a search area of 3099)
 			}
 			case 0x02: // [2] 1940 - 258A
 			{
@@ -222,7 +213,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1950ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x1950ull) % 0x40ull));
-				// 1184 codepoints from 59 ranges (spanning a search area of 3147)
+				// 1184 code units from 59 ranges (spanning a search area of 2101)
 			}
 			case 0x03: // [3] 258B - 31D5
 			{
@@ -240,7 +231,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x2C00ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 771 codepoints from 30 ranges (spanning a search area of 3147)
+				// 771 code units from 30 ranges (spanning a search area of 1472)
 			}
 			case 0x04: return (U'\u31F0' <= c && c <= U'\u31FF') || U'\u3400' <= c;
 			case 0x06: return c <= U'\u4DBF' || U'\u4E00' <= c;
@@ -267,7 +258,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA079ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA079ull) % 0x40ull));
-				// 2554 codepoints from 52 ranges (spanning a search area of 3147)
+				// 2554 code units from 52 ranges (spanning a search area of 3147)
 			}
 			case 0x11: return c <= U'\uD7A3' || (U'\uD7B0' <= c && c <= U'\uD7C6') || (U'\uD7CB' <= c && c <= U'\uD7FB');
 			case 0x14: // [20] F686 - 102D0
@@ -291,7 +282,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xF900ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1710 codepoints from 34 ranges (spanning a search area of 3147)
+				// 1710 code units from 34 ranges (spanning a search area of 2513)
 			}
 			case 0x15: // [21] 102D1 - 10F1B
 			{
@@ -317,7 +308,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10300ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1620 codepoints from 48 ranges (spanning a search area of 3147)
+				// 1620 code units from 48 ranges (spanning a search area of 3100)
 			}
 			case 0x16: // [22] 10F1C - 11B66
 			{
@@ -342,7 +333,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10F1Cull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x10F1Cull) % 0x40ull));
-				// 1130 codepoints from 67 ranges (spanning a search area of 3147)
+				// 1130 code units from 67 ranges (spanning a search area of 3037)
 			}
 			case 0x17: // [23] 11B67 - 127B1
 			{
@@ -364,7 +355,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x11C00ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1304 codepoints from 16 ranges (spanning a search area of 3147)
+				// 1304 code units from 16 ranges (spanning a search area of 2372)
 			}
 			case 0x18: return U'\U00013000' <= c;
 			case 0x19: return c <= U'\U0001342E';
@@ -390,7 +381,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16800ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1250 codepoints from 14 ranges (spanning a search area of 3147)
+				// 1250 code units from 14 ranges (spanning a search area of 2420)
 			}
 			case 0x1F: return c <= U'\U000187F7' || U'\U00018800' <= c;
 			case 0x20: return c <= U'\U00018CD5' || (U'\U00018D00' <= c && c <= U'\U00018D08');
@@ -407,7 +398,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1B000ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 690 codepoints from 4 ranges (spanning a search area of 3147)
+				// 690 code units from 4 ranges (spanning a search area of 764)
 			}
 			case 0x24: // [36] 1BB36 - 1C780
 			{
@@ -420,7 +411,8 @@ TOML_IMPL_NAMESPACE_START
 					case 0x02: return (1u << (static_cast<uint_least32_t>(c) - 0x1BC80u)) & 0x3FF01FFu;
 					default: return true;
 				}
-				// 139 codepoints from 4 ranges (spanning a search area of 3147)
+				// 139 code units from 4 ranges (spanning a search area of 154)
+				TOML_UNREACHABLE;
 			}
 			case 0x26: // [38] 1D3CC - 1E016
 			{
@@ -436,7 +428,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1D400ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 936 codepoints from 30 ranges (spanning a search area of 3147)
+				// 936 code units from 30 ranges (spanning a search area of 972)
 			}
 			case 0x27: // [39] 1E017 - 1EC61
 			{
@@ -457,7 +449,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1E100ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 363 codepoints from 7 ranges (spanning a search area of 3147)
+				// 363 code units from 7 ranges (spanning a search area of 2124)
 			}
 			case 0x28: // [40] 1EC62 - 1F8AC
 			{
@@ -472,7 +464,8 @@ TOML_IMPL_NAMESPACE_START
 					case 0x02: return (1ull << (static_cast<uint_least64_t>(c) - 0x1EE80u)) & 0xFFFFBEE0FFFFBFFull;
 					TOML_NO_DEFAULT_CASE;
 				}
-				// 141 codepoints from 33 ranges (spanning a search area of 3147)
+				// 141 code units from 33 ranges (spanning a search area of 188)
+				TOML_UNREACHABLE;
 			}
 			case 0x29: return U'\U00020000' <= c;
 			case 0x37: return c <= U'\U0002A6DD' || U'\U0002A700' <= c;
@@ -483,14 +476,15 @@ TOML_IMPL_NAMESPACE_START
 			case 0x3E: return U'\U00030000' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 131189 codepoints from 620 ranges (spanning a search area of 1114112)
+		// 131189 code units from 620 ranges (spanning a search area of 201377)
+		TOML_UNREACHABLE;
 	}
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Nd, Nl
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_number(char32_t c) noexcept
+	constexpr bool is_non_ascii_number(char32_t c) noexcept
 	{
 		if (U'\u0660' > c || c > U'\U0001FBF9')
 			return false;
@@ -519,7 +513,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x660ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x660ull) % 0x40ull));
-				// 130 codepoints from 13 ranges (spanning a search area of 2007)
+				// 130 code units from 13 ranges (spanning a search area of 1936)
 			}
 			case 0x01: // [1] 0E37 - 160D
 			{
@@ -534,7 +528,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xE50ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xE50ull) % 0x40ull));
-				// 50 codepoints from 5 ranges (spanning a search area of 2007)
+				// 50 code units from 5 ranges (spanning a search area of 586)
 			}
 			case 0x02: // [2] 160E - 1DE4
 			{
@@ -552,7 +546,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16EEull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x16EEull) % 0x40ull));
-				// 103 codepoints from 11 ranges (spanning a search area of 2007)
+				// 103 code units from 11 ranges (spanning a search area of 1388)
 			}
 			case 0x03: return U'\u2160' <= c && c <= U'\u2188' && (1ull << (static_cast<uint_least64_t>(c) - 0x2160u)) & 0x1E7FFFFFFFFull;
 			case 0x05: return U'\u3007' <= c && c <= U'\u303A' && (1ull << (static_cast<uint_least64_t>(c) - 0x3007u)) & 0xE0007FC000001ull;
@@ -571,7 +565,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA620ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA620ull) % 0x40ull));
-				// 70 codepoints from 7 ranges (spanning a search area of 2007)
+				// 70 code units from 7 ranges (spanning a search area of 1082)
 			}
 			case 0x15: return U'\uABF0' <= c && c <= U'\uABF9';
 			case 0x1F: return U'\uFF10' <= c && c <= U'\uFF19';
@@ -590,7 +584,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x10140ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 70 codepoints from 5 ranges (spanning a search area of 2007)
+				// 70 code units from 5 ranges (spanning a search area of 874)
 			}
 			case 0x21: return (U'\U00010D30' <= c && c <= U'\U00010D39') || (U'\U00011066' <= c && c <= U'\U0001106F');
 			case 0x22: // [34] 110EE - 118C4
@@ -610,7 +604,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x110F0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x110F0ull) % 0x40ull));
-				// 90 codepoints from 9 ranges (spanning a search area of 2007)
+				// 90 code units from 9 ranges (spanning a search area of 1610)
 			}
 			case 0x23: // [35] 118C5 - 1209B
 			{
@@ -627,7 +621,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x118E0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x118E0ull) % 0x40ull));
-				// 50 codepoints from 5 ranges (spanning a search area of 2007)
+				// 50 code units from 5 ranges (spanning a search area of 1226)
 			}
 			case 0x24: return U'\U00012400' <= c && c <= U'\U0001246E';
 			case 0x2D: return (U'\U00016A60' <= c && c <= U'\U00016A69') || (U'\U00016B50' <= c && c <= U'\U00016B59');
@@ -637,14 +631,15 @@ TOML_IMPL_NAMESPACE_START
 			case 0x3F: return U'\U0001FBF0' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 876 codepoints from 72 ranges (spanning a search area of 1114112)
+		// 876 code units from 72 ranges (spanning a search area of 128410)
+		TOML_UNREACHABLE;
 	}
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Mn, Mc
 	[[nodiscard]]
 	TOML_ATTR(const)
-	constexpr bool is_unicode_combining_mark(char32_t c) noexcept
+	constexpr bool is_combining_mark(char32_t c) noexcept
 	{
 		if (U'\u0300' > c || c > U'\U000E01EF')
 			return false;
@@ -711,7 +706,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x300ull) / 0x40ull]
 					& (0x1ull << (static_cast<uint_least64_t>(c) % 0x40ull));
-				// 1106 codepoints from 156 ranges (spanning a search area of 14332)
+				// 1106 code units from 156 ranges (spanning a search area of 11675)
 			}
 			case 0x02: // [2] 72F8 - AAF3
 			{
@@ -728,7 +723,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xA66Full) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xA66Full) % 0x40ull));
-				// 137 codepoints from 28 ranges (spanning a search area of 14332)
+				// 137 code units from 28 ranges (spanning a search area of 1153)
 			}
 			case 0x03: return (U'\uAAF5' <= c && c <= U'\uAAF6') || (U'\uABE3' <= c && c <= U'\uABEA') || (U'\uABEC' <= c && c <= U'\uABED');
 			case 0x04: // [4] E2F0 - 11AEB
@@ -773,7 +768,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0xFB1Eull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0xFB1Eull) % 0x40ull));
-				// 402 codepoints from 63 ranges (spanning a search area of 14332)
+				// 402 code units from 63 ranges (spanning a search area of 8060)
 			}
 			case 0x05: // [5] 11AEC - 152E7
 			{
@@ -788,7 +783,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x11C2Full) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x11C2Full) % 0x40ull));
-				// 85 codepoints from 13 ranges (spanning a search area of 14332)
+				// 85 code units from 13 ranges (spanning a search area of 712)
 			}
 			case 0x06: // [6] 152E8 - 18AE3
 			{
@@ -806,7 +801,7 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x16AF0ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x16AF0ull) % 0x40ull));
-				// 75 codepoints from 7 ranges (spanning a search area of 14332)
+				// 75 code units from 7 ranges (spanning a search area of 1282)
 			}
 			case 0x07: return U'\U0001BC9D' <= c && c <= U'\U0001BC9E';
 			case 0x08: // [8] 1C2E0 - 1FADB
@@ -843,12 +838,13 @@ TOML_IMPL_NAMESPACE_START
 				};
 				return bitmask_table_1[(static_cast<uint_least64_t>(c) - 0x1D165ull) / 0x40ull]
 					& (0x1ull << ((static_cast<uint_least64_t>(c) - 0x1D165ull) % 0x40ull));
-				// 223 codepoints from 21 ranges (spanning a search area of 14332)
+				// 223 code units from 21 ranges (spanning a search area of 6118)
 			}
 			case 0x3F: return U'\U000E0100' <= c;
 			TOML_NO_DEFAULT_CASE;
 		}
-		// 2282 codepoints from 293 ranges (spanning a search area of 1114112)
+		// 2282 code units from 293 ranges (spanning a search area of 917232)
+		TOML_UNREACHABLE;
 	}
 
 	#endif // TOML_LANG_UNRELEASED
@@ -863,9 +859,9 @@ TOML_IMPL_NAMESPACE_START
 			|| codepoint == U'_'
 			#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
 			|| codepoint == U'+'
-			|| is_unicode_letter(codepoint)
-			|| is_unicode_number(codepoint)
-			|| is_unicode_combining_mark(codepoint)
+			|| is_non_ascii_letter(codepoint)
+			|| is_non_ascii_number(codepoint)
+			|| is_combining_mark(codepoint)
 			#endif
 		;
 	}
@@ -880,8 +876,8 @@ TOML_IMPL_NAMESPACE_START
 			|| codepoint == U'}'
 			|| codepoint == U','
 			|| codepoint == U'#'
-			|| is_unicode_line_break(codepoint)
-			|| is_unicode_whitespace(codepoint)
+			|| is_non_ascii_line_break(codepoint)
+			|| is_non_ascii_whitespace(codepoint)
 		;
 	}
 
