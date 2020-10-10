@@ -559,6 +559,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (consume_line_break())
 						return true;
+					return_if_error({});
 
 					if constexpr (TOML_LANG_AT_LEAST(1, 0, 0))
 					{
@@ -896,7 +897,7 @@ TOML_IMPL_NAMESPACE_START
 				std::string str;
 				do
 				{
-					assert_not_error();
+					return_if_error({});
 
 					// handle closing delimiters
 					if (*cp == U'\'')
@@ -957,6 +958,7 @@ TOML_IMPL_NAMESPACE_START
 					if (multi_line && is_line_break(*cp))
 					{
 						consume_line_break();
+						return_if_error({});
 						str += '\n';
 						continue;
 					}
@@ -1194,10 +1196,6 @@ TOML_IMPL_NAMESPACE_START
 						else if (!is_match(*prev, U'e', U'E'))
 							set_error_and_return_default("expected exponent digit, saw '"sv, to_sv(*cp), "'"sv);
 					}
-					else if (length == sizeof(chars))
-						set_error_and_return_default(
-							"exceeds maximum length of "sv, static_cast<uint64_t>(sizeof(chars)), " characters"sv
-						);
 					else if (is_decimal_digit(*cp))
 					{
 						if (!seen_decimal)
@@ -1210,6 +1208,11 @@ TOML_IMPL_NAMESPACE_START
 					}
 					else
 						set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
+
+					if (length == sizeof(chars))
+						set_error_and_return_default(
+							"exceeds maximum length of "sv, static_cast<uint64_t>(sizeof(chars)), " characters"sv
+						);
 
 					chars[length++] = static_cast<char>(cp->bytes[0]);
 					prev = cp;
@@ -2719,7 +2722,6 @@ TOML_IMPL_NAMESPACE_START
 						|| consume_line_break()
 						|| consume_comment())
 						continue;
-
 					return_if_error();
 
 					// [tables]
@@ -2944,6 +2946,7 @@ TOML_IMPL_NAMESPACE_START
 				while (consume_leading_whitespace())
 					continue;
 			}
+			return_if_error({});
 			set_error_and_return_if_eof({});
 
 			// commas - only legal after a key-value pair

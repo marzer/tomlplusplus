@@ -315,6 +315,13 @@ TOML_NAMESPACE_START
 			{
 				return is_err ? const_table_iterator{} : table().cend();
 			}
+
+			/// \brief Prints the held error or table object out to a text stream.
+			template <typename Char>
+			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& os, const parse_result& result)
+			{
+				return result.is_err ? (os << result.error()) : (os << result.table());
+			}
 	};
 
 	#else

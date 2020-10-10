@@ -92,17 +92,26 @@ TEST_CASE("user feedback")
 	{
 		// see: https://github.com/marzer/tomlplusplus/issues/65
 
-		// this tests two things:
+		// these test a number of things
 		// - a comment at EOF
-		// - a malformed UTF-8 sequence
-		// 
-		// it should fail to parse, but correctly issue an error (not crash!)
+		// - a malformed UTF-8 sequence in a comment
+		// - a malformed UTF-8 sequence during a KVP
+		// - overlong numeric literals
+		// all should fail to parse, but correctly issue an error (not crash!)
+		
 		parsing_should_fail(FILE_LINE_ARGS, "#\xf1\x63");
-
-		// a malformed UTF-8 sequence during a KVP
-		// 
-		// it should fail to parse, but correctly issue an error (not crash!)
 		parsing_should_fail(FILE_LINE_ARGS, "1= 0x6cA#+\xf1");
+		parsing_should_fail(FILE_LINE_ARGS, "p=06:06:06#\x0b\xff");
+		parsing_should_fail(FILE_LINE_ARGS, "''''d' 't' '+o\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
+			"\x0c\x0c\x0c\x0c\x0c\r\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
+			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
+			"\x0c\x0c\x0c\x0c\x0c\x0c\x0cop1\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
+			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c"
+			"\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c\x0c' 'ml'\n\n%\x87"
+		);
+		parsing_should_fail(FILE_LINE_ARGS,
+			R"(t =[ 9, 2, 1,"r", 9999999999999999999999999999999999999999999999999999999999999995.0 ])"
+		);
 	}
 }
 
