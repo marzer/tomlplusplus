@@ -3085,8 +3085,12 @@ TOML_NAMESPACE_START
 
 	#endif // __cpp_lib_char8_t
 
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+
 	inline namespace literals
 	{
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
+
 		TOML_API
 		TOML_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
@@ -3104,9 +3108,9 @@ TOML_NAMESPACE_START
 		}
 
 		#endif // __cpp_lib_char8_t
-	}
 
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	}
 }
 TOML_NAMESPACE_END
 

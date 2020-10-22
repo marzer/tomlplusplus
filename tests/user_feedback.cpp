@@ -136,5 +136,11 @@ TEST_CASE("user feedback")
 			CHECK(ss.str() == "array = [ 'v1', 'v2', 'v3' ]"sv);
 		});
 	}
+
+	SECTION("github/issues/69") // https://github.com/marzer/tomlplusplus/issues/69
+	{
+		using namespace toml::literals; // should compile without namespace ambiguity
+		auto table = "[table]\nkey=\"value\""_toml;
+	}
 }
 

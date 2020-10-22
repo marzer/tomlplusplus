@@ -733,8 +733,12 @@ TOML_NAMESPACE_START
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
+	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+
 	inline namespace literals
 	{
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
+
 		/// \brief	Parses TOML data from a string literal.
 		/// 
 		/// \detail \cpp
@@ -785,9 +789,8 @@ TOML_NAMESPACE_START
 
 		#endif // __cpp_lib_char8_t
 
+		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 	}
-
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
 }
 TOML_NAMESPACE_END
 
