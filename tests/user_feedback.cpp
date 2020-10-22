@@ -9,10 +9,8 @@
 
 TEST_CASE("user feedback")
 {
-	SECTION("feedback - github/issues/49")
+	SECTION("github/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
 	{
-		// see: https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
-
 		toml::table t1;
 		t1.insert_or_assign("bar1", toml::array{ 1, 2, 3 });
 		CHECK(t1 == toml::table{{
@@ -88,10 +86,8 @@ TEST_CASE("user feedback")
 		}});
 	}
 
-	SECTION("feedback - github/issues/65")
+	SECTION("github/issues/65") // https://github.com/marzer/tomlplusplus/issues/65
 	{
-		// see: https://github.com/marzer/tomlplusplus/issues/65
-
 		// these test a number of things
 		// - a comment at EOF
 		// - a malformed UTF-8 sequence in a comment
@@ -112,6 +108,33 @@ TEST_CASE("user feedback")
 		parsing_should_fail(FILE_LINE_ARGS,
 			R"(t =[ 9, 2, 1,"r", 9999999999999999999999999999999999999999999999999999999999999995.0 ])"
 		);
+	}
+
+	SECTION("github/issues/67") // https://github.com/marzer/tomlplusplus/issues/67
+	{
+		const auto data = R"(array=["v1", "v2", "v3"])"sv;
+
+		parsing_should_succeed(FILE_LINE_ARGS, data, [](auto&& table)
+		{
+			auto arr = table["array"].as_array();
+			for (auto it = arr->cbegin(); it != arr->cend();)
+				if (it->value_or(std::string_view{}) == "v2"sv)
+					it = arr->erase(it);
+				else
+					++it;
+			CHECK(arr->size() == 2);
+		});
+	}
+
+	SECTION("github/issues/68") // https://github.com/marzer/tomlplusplus/issues/68
+	{
+		const auto data = R"(array=["v1", "v2", "v3"])"sv;
+		parsing_should_succeed(FILE_LINE_ARGS, data, [](auto&& table)
+		{
+			std::stringstream ss;
+			ss << table;
+			CHECK(ss.str() == "array = [ 'v1', 'v2', 'v3' ]"sv);
+		});
 	}
 }
 

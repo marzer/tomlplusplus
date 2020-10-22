@@ -411,8 +411,7 @@ TEST_CASE("tables - printing")
 	{
 		static constexpr auto some_toml = R"(val1 = 1
 val2 = 2
-val3 = 3
-)"sv; //new line at end!
+val3 = 3)"sv;
 
 		CHECK(to_string(some_toml) == some_toml);
 	}
@@ -421,8 +420,7 @@ val3 = 3
 		static constexpr auto some_toml = R"([a_table]
 a = 1
 b = 2
-c = 3
-)"sv; //new line at end!
+c = 3)"sv;
 
 		CHECK(to_string(some_toml) == some_toml);
 	}
@@ -435,8 +433,7 @@ val3 = 3
 [a_table]
 a = 1
 b = 2
-c = 3
-)"sv; //new line at end!
+c = 3)"sv;
 
 		CHECK(to_string(some_toml) == some_toml);
 	}

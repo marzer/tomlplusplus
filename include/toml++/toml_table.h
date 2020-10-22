@@ -21,6 +21,8 @@ TOML_IMPL_NAMESPACE_START
 	class table_iterator final
 	{
 		private:
+			template <bool C>
+			friend class table_iterator;
 			friend class TOML_NAMESPACE::table;
 
 			using proxy_type = table_proxy_pair<IsConst>;

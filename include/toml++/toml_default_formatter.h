@@ -301,7 +301,6 @@ TOML_NAMESPACE_START
 						{
 							base::decrease_indent(); // so root kvps and tables have the same indent
 							print(tbl);
-							base::print_newline();
 						}
 						break;
 					}

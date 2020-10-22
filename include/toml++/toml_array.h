@@ -12,6 +12,8 @@ TOML_IMPL_NAMESPACE_START
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
+			template <bool C>
+			friend class array_iterator;
 			friend class TOML_NAMESPACE::array;
 
 			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;

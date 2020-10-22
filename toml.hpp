@@ -3410,6 +3410,8 @@ TOML_IMPL_NAMESPACE_START
 	class TOML_TRIVIAL_ABI array_iterator final
 	{
 		private:
+			template <bool C>
+			friend class array_iterator;
 			friend class TOML_NAMESPACE::array;
 
 			using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
@@ -3994,6 +3996,8 @@ TOML_IMPL_NAMESPACE_START
 	class table_iterator final
 	{
 		private:
+			template <bool C>
+			friend class table_iterator;
 			friend class TOML_NAMESPACE::table;
 
 			using proxy_type = table_proxy_pair<IsConst>;
@@ -6402,7 +6406,6 @@ TOML_NAMESPACE_START
 						{
 							base::decrease_indent(); // so root kvps and tables have the same indent
 							print(tbl);
-							base::print_newline();
 						}
 						break;
 					}
