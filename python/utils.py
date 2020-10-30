@@ -29,10 +29,10 @@ def get_script_folder():
 
 
 
-def read_all_text_from_file(path, fallback_url=None):
+def read_all_text_from_file(path, fallback_url=None, encoding='utf-8'):
 	try:
 		print("Reading {}".format(path))
-		with open(path, 'r', encoding='utf-8') as f:
+		with open(path, 'r', encoding=encoding) as f:
 			text = f.read()
 		return text
 	except:
@@ -117,6 +117,7 @@ def get_all_files(dir, all=None, any=None):
 			for fil in any:
 				results.update(fnmatch.filter(files, fil))
 			files = [f for f in results]
+	files.sort()
 	return files
 
 

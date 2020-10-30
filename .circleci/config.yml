@@ -2,16 +2,11 @@ version: 2
 
 jobs:
 
-    debug_clang9:
+    debug_clang:
         docker:
-            - image: marzer/misc_cpp17_dev:latest
+            - image: marzer/misc_cpp17_dev:0.2.0
         steps:
             - checkout
-            - run:
-                name: Initializing locales
-                command: |
-                    sudo apt-get update && sudo apt-get install -y locales
-                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
                 command: |
@@ -22,21 +17,16 @@ jobs:
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building and testing with clang 9
+                name: Building and testing with clang
                 command: |
-                    CXX=clang++-9 meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false
-                    cd build && ninja -v -j 4 && ninja test
+                    CXX_LD=lld CXX=clang++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    cd build && ninja -j 4 && meson test --num-processes 1 --verbose
 
-    release_clang9:
+    release_clang:
         docker:
-            - image: marzer/misc_cpp17_dev:latest
+            - image: marzer/misc_cpp17_dev:0.2.0
         steps:
             - checkout
-            - run:
-                name: Initializing locales
-                command: |
-                    sudo apt-get update && sudo apt-get install -y locales
-                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Checking toml.hpp
                 command: |
@@ -47,56 +37,46 @@ jobs:
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building and testing with clang 9
+                name: Building and testing with clang
                 command: |
-                    CXX=clang++-9 meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false
-                    cd build && ninja -v -j 4 && ninja test
+                    CXX_LD=lld CXX=clang++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    cd build && ninja -j 4 && meson test --num-processes 1 --verbose
 
-    debug_gcc9:
+    debug_gcc:
         docker:
-            - image: marzer/misc_cpp17_dev:latest
+            - image: marzer/misc_cpp17_dev:0.2.0
         steps:
             - checkout
-            - run:
-                name: Initializing locales
-                command: |
-                    sudo apt-get update && sudo apt-get install -y locales
-                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Pulling submodules
                 command: |
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building and testing with gcc9
+                name: Building and testing with gcc
                 command: |
-                    CXX=g++-9 meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false
-                    cd build && ninja -v -j 4 && ninja test
+                    CXX_LD=lld CXX=g++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    cd build && ninja -j 4 && meson test --num-processes 1 --verbose
 
-    release_gcc9:
+    release_gcc:
         docker:
-            - image: marzer/misc_cpp17_dev:latest
+            - image: marzer/misc_cpp17_dev:0.2.0
         steps:
             - checkout
-            - run:
-                name: Initializing locales
-                command: |
-                    sudo apt-get update && sudo apt-get install -y locales
-                    sudo locale-gen 'en_US.utf8' 'ja_JP.utf8' 'de_DE.utf8' 'it_IT.utf8' 'tr_TR.utf8' 'fi_FI.utf8' 'fr_FR.utf8' 'zh_CN.utf8'
             - run:
                 name: Pulling submodules
                 command: |
                     git submodule update --init extern/Catch2
                     git submodule update --init extern/tloptional
             - run:
-                name: Building and testing with gcc9
+                name: Building and testing with gcc
                 command: |
-                    CXX=g++-9 meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false
-                    cd build && ninja -v -j 4 && ninja test
+                    CXX_LD=lld CXX=g++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    cd build && ninja -j 4 && meson test --num-processes 1 --verbose
 
     generate_dox:
         docker:
-            - image: marzer/misc_cpp17_dev:latest
+            - image: marzer/misc_cpp17_dev:0.2.0
         steps:
             - checkout
             - run:
@@ -139,16 +119,16 @@ workflows:
     version: 2
     build:
         jobs:
-            - debug_clang9
-            - release_clang9
-            - debug_gcc9
-            - release_gcc9
+            - debug_clang
+            - release_clang
+            - debug_gcc
+            - release_gcc
             - generate_dox:
                 requires:
-                    - debug_clang9
-                    - release_clang9
-                    - debug_gcc9
-                    - release_gcc9
+                    - debug_clang
+                    - release_clang
+                    - debug_gcc
+                    - release_gcc
                 filters:
                     branches:
                         only: master

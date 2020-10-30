@@ -16,6 +16,7 @@ import concurrent.futures as futures
 import html
 import bs4 as soup
 import json
+import xml.etree.ElementTree as ET
 
 
 #=== CONFIG ============================================================================================================
@@ -26,12 +27,13 @@ repository = 'marzer/tomlplusplus'
 inline_namespaces = [
 	"toml::literals",
 ]
-inline_namespace_explainer = 'All members of this namespace are automatically members of the parent namespace. '	\
-	+ 'It does not require an explicit \'using\' statement.'
 type_names = [
 	#------ standard/built-in types
+	'_Float128',
 	'_Float16',
+	'_Float80',
 	'__float128',
+	'__float80',
 	'__fp16',
 	'__int128_t',
 	'__m128',
@@ -52,42 +54,24 @@ type_names = [
 	'double',
 	'exception',
 	'float',
-	'fstream',
-	'ifstream',
+	'float128_t',
 	'int',
-	'int128_t',
-	'int16_t',
-	'int32_t',
-	'int64_t',
-	'int8_t',
-	'intptr_t',
-	'istream',
-	'istringstream',
 	'iterator',
 	'long',
-	'ofstream',
 	'optional',
-	'ostream',
-	'ostringstream',
 	'pair',
 	'ptrdiff_t',
 	'short',
 	'signed',
 	'size_t',
 	'span',
-	'string',
-	'string_view',
-	'stringstream',
+	'string(?:_view)?',
+	'i?o?f?(?:string)?stream',
 	'tuple',
-	'uint128_t',
-	'uint16_t',
-	'uint32_t',
-	'uint64_t',
-	'uint8_t',
-	'uintptr_t',
+	'u?int(?:8|16|32|64|128)_t',
+	'u?intptr_t',
 	'unsigned',
 	'vector',
-	'void',
 	'wchar_t',
 	#------ toml++ types
 	'node',
@@ -105,6 +89,12 @@ type_names = [
 	'format_flags',
 	'inserter',
 	'node_type',
+	#------ documentation-only types
+	'[T-V]',
+	'[a-zA-Z_]+_type',
+]
+preprocessor_macros = [
+	'TOML_[A-Z0-9_]+?'
 ]
 all_namespaces = [
 	'std',
@@ -117,11 +107,16 @@ string_literals = [
 	'sv',
 	'_toml'
 ]
+
+
+
+
+
+
+
+
+
 external_links = [
-	(r'static_cast','https://en.cppreference.com/w/cpp/language/static_cast'),
-	(r'const_cast','https://en.cppreference.com/w/cpp/language/const_cast'),
-	(r'dynamic_cast','https://en.cppreference.com/w/cpp/language/dynamic_cast'),
-	(r'reinterpret_cast','https://en.cppreference.com/w/cpp/language/reinterpret_cast'),
 	('std::assume_aligned(?:\(\))?', 'https://en.cppreference.com/w/cpp/memory/assume_aligned'),
 	(r'(?:std::)?nullptr_t', 'https://en.cppreference.com/w/cpp/types/nullptr_t'),
 	(r'(?:std::)?size_t', 'https://en.cppreference.com/w/cpp/types/size_t'),
@@ -133,6 +128,10 @@ external_links = [
 	(r'\s(?:<|&lt;)sstream(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/sstream'),
 	(r'\s(?:<|&lt;)string(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string'),
 	(r'\s(?:<|&lt;)string_view(?:>|&gt;)', 'https://en.cppreference.com/w/cpp/header/string_view'),
+	(r'const_cast','https://en.cppreference.com/w/cpp/language/const_cast'),
+	(r'dynamic_cast','https://en.cppreference.com/w/cpp/language/dynamic_cast'),
+	(r'reinterpret_cast','https://en.cppreference.com/w/cpp/language/reinterpret_cast'),
+	(r'static_cast','https://en.cppreference.com/w/cpp/language/static_cast'),
 	(r'std::(?:basic_|w)?fstreams?', 'https://en.cppreference.com/w/cpp/io/basic_fstream'),
 	(r'std::(?:basic_|w)?ifstreams?', 'https://en.cppreference.com/w/cpp/io/basic_ifstream'),
 	(r'std::(?:basic_|w)?iostreams?', 'https://en.cppreference.com/w/cpp/io/basic_iostream'),
@@ -144,25 +143,33 @@ external_links = [
 	(r'std::(?:basic_|w)?stringstreams?', 'https://en.cppreference.com/w/cpp/io/basic_stringstream'),
 	(r'std::(?:basic_|w|u(?:8|16|32))?string_views?', 'https://en.cppreference.com/w/cpp/string/basic_string_view'),
 	(r'std::(?:basic_|w|u(?:8|16|32))?strings?', 'https://en.cppreference.com/w/cpp/string/basic_string'),
+	(r'std::[fl]?abs[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/abs'),
+	(r'std::acos[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/acos'),
 	(r'std::add_[lr]value_reference(?:_t)?', 'https://en.cppreference.com/w/cpp/types/add_reference'),
 	(r'std::allocators?', 'https://en.cppreference.com/w/cpp/memory/allocator'),
 	(r'std::arrays?', 'https://en.cppreference.com/w/cpp/container/array'),
 	(r'std::as_(writable_)?bytes(?:\(\))?', 'https://en.cppreference.com/w/cpp/container/span/as_bytes'),
+	(r'std::asin[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/asin'),
+	(r'std::atan2[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/atan2'),
+	(r'std::atan[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/atan'),
 	(r'std::bit_cast(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/bit_cast'),
 	(r'std::bit_ceil(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/bit_ceil'),
 	(r'std::bit_floor(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/bit_floor'),
 	(r'std::bit_width(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/bit_width'),
 	(r'std::bytes?', 'https://en.cppreference.com/w/cpp/types/byte'),
+	(r'std::ceil[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/ceil'),
 	(r'std::char_traits', 'https://en.cppreference.com/w/cpp/string/char_traits'),
 	(r'std::chrono::durations?', 'https://en.cppreference.com/w/cpp/chrono/duration'),
 	(r'std::clamp(?:\(\))?', 'https://en.cppreference.com/w/cpp/algorithm/clamp'),
 	(r'std::conditional(?:_t)?', 'https://en.cppreference.com/w/cpp/types/conditional'),
+	(r'std::cos[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/cos'),
 	(r'std::countl_one(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/countl_one'),
 	(r'std::countl_zero(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/countl_zero'),
 	(r'std::countr_one(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/countr_one'),
 	(r'std::countr_zero(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/countr_zero'),
 	(r'std::enable_if(?:_t)?', 'https://en.cppreference.com/w/cpp/types/enable_if'),
 	(r'std::exceptions?', 'https://en.cppreference.com/w/cpp/error/exception'),
+	(r'std::floor[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/floor'),
 	(r'std::has_single_bit(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/has_single_bit'),
 	(r'std::hash', 'https://en.cppreference.com/w/cpp/utility/hash'),
 	(r'std::initializer_lists?', 'https://en.cppreference.com/w/cpp/utility/initializer_list'),
@@ -195,11 +202,15 @@ external_links = [
 	(r'std::runtime_errors?', 'https://en.cppreference.com/w/cpp/error/runtime_error'),
 	(r'std::sets?', 'https://en.cppreference.com/w/cpp/container/set'),
 	(r'std::shared_ptrs?', 'https://en.cppreference.com/w/cpp/memory/shared_ptr'),
+	(r'std::sin[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/sin'),
 	(r'std::spans?', 'https://en.cppreference.com/w/cpp/container/span'),
+	(r'std::sqrt[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/sqrt'),
+	(r'std::tan[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/tan'),
 	(r'std::to_address(?:\(\))?', 'https://en.cppreference.com/w/cpp/memory/to_address'),
-	(r'std::tuples?', 'https://en.cppreference.com/w/cpp/utility/tuple'),
-	(r'std::tuple_size(?:_v)?', 'https://en.cppreference.com/w/cpp/utility/tuple/tuple_size'),
+	(r'std::trunc[fl]?(?:\(\))?', 'https://en.cppreference.com/w/cpp/numeric/math/trunc'),
 	(r'std::tuple_element(?:_t)?', 'https://en.cppreference.com/w/cpp/utility/tuple/tuple_element'),
+	(r'std::tuple_size(?:_v)?', 'https://en.cppreference.com/w/cpp/utility/tuple/tuple_size'),
+	(r'std::tuples?', 'https://en.cppreference.com/w/cpp/utility/tuple'),
 	(r'std::type_identity(?:_t)?', 'https://en.cppreference.com/w/cpp/types/type_identity'),
 	(r'std::underlying_type(?:_t)?', 'https://en.cppreference.com/w/cpp/types/underlying_type'),
 	(r'std::unique_ptrs?', 'https://en.cppreference.com/w/cpp/memory/unique_ptr'),
@@ -243,15 +254,22 @@ external_links = [
 		'https://en.cppreference.com/w/cpp/preprocessor/replace'
 	),
 	(r'(?:_Float|__fp)16s?','https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html'),
+	(r'(?:_Float|__float)(128|80)s?','https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html'),
 	# toml-specific
 	(r'(?:toml::)values?', 'classtoml_1_1value.html'),
 	(r'(?:toml::)?date_times?', 'structtoml_1_1date__time.html'),
 	(r'(?:toml::)times?', 'structtoml_1_1time.html'),
 	(r'(?:toml::)dates?', 'structtoml_1_1date.html')
 ]
-header_overrides = [
+implementation_headers = [ ]
 
-]
+
+
+
+
+
+
+
 badges = [
 	(
 		'Releases',
@@ -450,7 +468,7 @@ class RegexReplacer(object):
 
 	def __substitute(self, m):
 		self.__result = True
-		self.__groups = [str(m.group(0))]
+		self.__groups = [m[0]]
 		self.__groups += [str(g) for g in m.groups()]
 		return self.__handler(m)
 
@@ -490,31 +508,32 @@ class CustomTagsFix(object):
 	@classmethod
 	def __double_tags_substitute(cls, m):
 		return '<{}{}>{}</{}>'.format(
-			m.group(1),
-			html.unescape(m.group(2)),
-			m.group(3),
-			m.group(1)
+			m[1],
+			html.unescape(m[2]),
+			m[3],
+			m[1]
 		)
 
 	@classmethod
 	def __single_tags_substitute(cls, m):
-		if (str(m.group(1)).lower() == 'emoji'):
-			emoji = str(m.group(2)).strip().lower()
+		if (str(m[1]).lower() == 'emoji'):
+			emoji = str(m[2]).strip().lower()
 			if emoji == '':
 				return ''
 			if cls.__emojis is None:
-				cls.__emojis = json.loads(utils.read_all_text_from_file('emojis.json', 'https://api.github.com/emojis'))
+				file_path = path.join(utils.get_script_folder(), 'emojis.json')
+				cls.__emojis = json.loads(utils.read_all_text_from_file(file_path, 'https://api.github.com/emojis'))
 				if '__processed' not in cls.__emojis:
 					emojis = {}
 					for key, uri in cls.__emojis.items():
 						m2 = cls.__emoji_uri.fullmatch(uri)
 						if m2:
-							emojis[key] = [ str(m2.group(1)).upper(), uri ]
+							emojis[key] = [ str(m2[1]).upper(), uri ]
 					aliases = [('sundae', 'ice_cream')]
 					for alias, key in aliases:
 						emojis[alias] = emojis[key]
 					emojis['__processed'] = True
-					with open('emojis.json', 'w', encoding='utf-8', newline='\n') as f:
+					with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
 						f.write(json.dumps(emojis, sort_keys=True, indent=4))
 					cls.__emojis = emojis
 			if emoji not in cls.__emojis:
@@ -523,8 +542,8 @@ class CustomTagsFix(object):
 
 		else:
 			return '<{}{}>'.format(
-				m.group(1),
-				(' ' + str(m.group(2)).strip()) if m.group(2) else ''
+				m[1],
+				(' ' + str(m[2]).strip()) if m[2] else ''
 			)
 
 	def __call__(self, file, doc):
@@ -548,33 +567,6 @@ class CustomTagsFix(object):
 					continue
 
 		return changed
-
-
-
-#=======================================================================================================================
-
-
-
-# adds custom links to the navbar.
-class NavBarFix(object):
-
-	def __call__(self, file, doc):
-		global repository
-		__links = [
-			('Report an issue', f'https://github.com/{repository}/issues'),
-			('Github', f'https://github.com/{repository}/')
-		]
-		list = doc.body.header.nav.div.div.select_one('#m-navbar-collapse').div.ol
-		if (list.select_one('.muu-injected') is None):
-			for label, url in self.__links:
-				doc.new_tag('a',
-					parent=doc.new_tag('li', parent=list, class_='muu-injected muu-external-navbar', index=0),
-					string=label,
-					href=url,
-					target='_blank'
-				)
-			return True
-		return False
 
 
 
@@ -613,10 +605,10 @@ class ModifiersFix1(ModifiersFixBase):
 	@classmethod
 	def __substitute(cls, m):
 		return '{}<span class="muu-injected m-label m-flat {}">{}</span>{}'.format(
-			m.group(1),
-			cls._modifierClasses[m.group(2)],
-			m.group(2),
-			m.group(3)
+			m[1],
+			cls._modifierClasses[m[2]],
+			m[2],
+			m[3]
 		)
 
 	def __call__(self, file, doc):
@@ -643,7 +635,7 @@ class ModifiersFix2(ModifiersFixBase):
 
 	@classmethod
 	def __substitute(cls, m, matches):
-		matches.append(m.group(1))
+		matches.append(m[1])
 		return ' '
 
 	def __call__(self, file, doc):
@@ -708,106 +700,6 @@ class IndexPageFix(object):
 
 
 
-# base type for applying inline namespace annotations.
-class InlineNamespaceFixBase(object):
-	_namespaceFiles = ['namespace{}.html'.format(ns.lower().replace('::','_1_1')) for ns in inline_namespaces]
-
-
-
-#=======================================================================================================================
-
-
-
-# adds inline namespace annotations in class and namespace trees.
-class InlineNamespaceFix1(InlineNamespaceFixBase):
-	__allowedFiles = ['annotated.html', 'namespaces.html']
-
-	def __call__(self, file, doc):
-		global inline_namespace_explainer
-		changed = False
-		if (file in self.__allowedFiles):
-			anchors = []
-			for f in self._namespaceFiles:
-				anchors += doc.body.find_all("a", href=f)
-			for anchor in anchors:
-				next = anchor.next_sibling
-				while (next is not None and isinstance(next, soup.NavigableString)):
-					next = next.next_sibling
-				if (next is not None and next.get('class') is not None and 'muu-injected' in next.get('class')):
-					continue
-				doc.new_tag('span',
-					after=anchor,
-					string='inline',
-					title=inline_namespace_explainer,
-					class_='m-label m-info m-flat muu-injected muu-inline-namespace'
-				)
-				anchor.insert_after(' ')
-				changed = True
-		return changed
-
-
-
-#=======================================================================================================================
-
-
-
-# adds inline namespace annotations to the h1 element of inline namespace pages.
-class InlineNamespaceFix2(InlineNamespaceFixBase):
-
-	def __call__(self, file, doc):
-		global inline_namespace_explainer
-		changed = False
-		if (file in self._namespaceFiles):
-			h1 = doc.body.find('h1')
-			tag = h1.select_one('span.muu-injected')
-			if (tag is None):
-				tag = doc.new_tag('span',
-					parent=h1,
-					string='inline',
-					title=inline_namespace_explainer,
-					class_='m-label m-info muu-injected muu-inline-namespace'
-				)
-				tag.insert_before(' ')
-				changed = True
-		return changed
-
-
-
-#=======================================================================================================================
-
-
-
-# adds inline namespace annotations to sections with id=namespaces.
-class InlineNamespaceFix3(InlineNamespaceFixBase):
-
-	def __call__(self, file, doc):
-		global inline_namespace_explainer
-		anchors = doc.find_all_from_sections('a', section='namespaces')
-		changed = False
-		for anchor in anchors:
-			if (anchor.get('href') not in self._namespaceFiles):
-				continue
-			next = anchor.next_sibling
-			while (next is not None and isinstance(next, soup.NavigableString)):
-				next = next.next_sibling
-			if (next is not None and next.get('class') is not None and 'muu-injected' in next.get('class')):
-				continue
-			doc.new_tag('span',
-				after=anchor,
-				string='inline',
-				title=inline_namespace_explainer,
-				class_='m-label m-info m-flat muu-injected muu-inline-namespace'
-			)
-			anchor.insert_after(' ')
-			changed = True
-		return changed
-
-
-
-#=======================================================================================================================
-
-
-
 # adds some additional colouring to the syntax highlighting in code blocks.
 class SyntaxHighlightingFix(object):
 
@@ -820,11 +712,13 @@ class SyntaxHighlightingFix(object):
 		'const',
 		'noexcept',
 		'template',
-		'typename'
+		'typename',
+		'void'
 	]
 
 	def __call__(self, file, doc):
 		global type_names
+		global preprocessor_macros
 		global all_namespaces
 		global string_literals
 
@@ -832,46 +726,70 @@ class SyntaxHighlightingFix(object):
 		changed = False
 		for code_block in code_blocks:
 
-			# namespaces
-			names = code_block('span', class_='n')
-			names_ = []
-			for name in names:
-				if (name.string is None or name.string not in all_namespaces):
-					names_.append(name)
-					continue
-				next = name.next_sibling
-				if (next is None or next.string is None or next.string != '::'):
-					names_.append(name)
-					continue
+			# collect all names
+			names = [n for n in code_block('span', class_='n') if n.string is not None]
 
+			# namespaces
+			for i in range(len(names)-1, -1, -1):
+				if (names[i].string not in all_namespaces):
+					continue
+				next = names[i].next_sibling
+				if (next is None or next.string is None or next.string != '::'):
+					continue
 				next.extract()
-				name.string.replace_with(name.string + '::')
-				name['class'] = 'ns'
+				names[i].string.replace_with(names[i].string + '::')
+				names[i]['class'] = 'ns'
+				del names[i]
 				changed = True
 
 			# string literals
-			names = names_
-			names_ = []
-			for name in names:
-				if (name.string is None or name.string not in string_literals):
-					names_.append(name)
+			for i in range(len(names)-1, -1, -1):
+				if (names[i].string not in string_literals):
 					continue
-				prev = name.previous_sibling
+				prev = names[i].previous_sibling
 				if (prev is None or prev['class'] is None or 's' not in prev['class']):
-					names_.append(name)
 					continue
-				name['class'] = 'sa'
+				names[i]['class'] = 'sa'
+				del names[i]
 				changed = True
 
-			# types and typedefs
-			names = names_ + code_block('span', class_='kt')
-			for name in names:
-				if (name.string is not None and name.string in type_names):
-					name['class'] = 'ut'
+			# preprocessor macros
+			names = names + [n for n in code_block('span', class_='nc') if n.string is not None]
+			names = names + [n for n in code_block('span', class_='nf') if n.string is not None]
+			names = names + [n for n in code_block('span', class_='nl') if n.string is not None]
+			if preprocessor_macros:
+				for i in range(len(names)-1, -1, -1):
+					matched = False
+					for macro in preprocessor_macros:
+						if re.fullmatch(macro, names[i].string) is not None:
+							matched = True
+							break
+					if not matched:
+						continue
+					names[i]['class'] = 'm'
+					del names[i]
 					changed = True
 
+			# types and typedefs
+			names = names + [n for n in code_block('span', class_='kt') if n.string is not None]
+			for i in range(len(names)-1, -1, -1):
+				if (names[i].previous_sibling is not None and names[i].previous_sibling.string.endswith('~')):
+					continue
+				if (names[i].next_sibling is not None and names[i].next_sibling.string.startswith('(')):
+					continue
+				matched = False
+				for type_name in type_names:
+					if re.fullmatch(type_name, names[i].string) is not None:
+						matched = True
+						break
+				if not matched:
+					continue
+				names[i]['class'] = 'ut'
+				del names[i]
+				changed = True
+
 			# misidentifed keywords
-			for keywordClass in ['nf', 'nb']:
+			for keywordClass in ['nf', 'nb', 'kt']:
 				kws = code_block('span', class_=keywordClass)
 				for kw in kws:
 					if (kw.string is not None and kw.string in self.__keywords):
@@ -904,7 +822,7 @@ class ExtDocLinksFix(object):
 			uri,
 			' muu-external' if external else '',
 			' target="_blank"' if external else '',
-			m.group(0),
+			m[0],
 		)
 
 	def __call__(self, file, doc):
@@ -952,9 +870,9 @@ class EnableIfFix(object):
 	@classmethod
 	def __substitute(cls, m):
 		return r'{}<span class="muu-injected muu-enable-if"><a href="#" onclick="ToggleEnableIf(this);return false;">...</a><span>{}</span></span>{}'.format(
-			m.group(1),
-			m.group(2),
-			m.group(3)
+			m[1],
+			m[2],
+			m[3]
 		)
 
 	def __call__(self, file, doc):
@@ -1018,38 +936,22 @@ class ExternalLinksFix(object):
 
 
 
-# overrides <path/to/header.h> links
-class HeaderOverridesFix(object):
+# spreads consecutive template <> declarations out over multiple lines
+class TemplateTemplateFix(object):
 
-	def __init__(self):
-		global header_overrides
-		self.__expressions = []
-		for header, repl, html_file in header_overrides:
-			self.__expressions.append((
-				re.compile('(?:<|")'+header+'(?:>|")'),
-				'<' + repl + '>',
-				html_file
-			))
+	__expression = re.compile(r'(template&lt;.+?&gt;)\s+(template&lt;)', re.S)
 
 	@classmethod
-	def __substitute(cls, m, repl):
-		return repl
+	def __substitute(cls, m):
+		return f'{m[1]}<br>\n{m[2]}'
 
 	def __call__(self, file, doc):
 		changed = False
-		root = doc.body.main.article.div.div
-		tags = root.find_all('a', string=True)
-		for tag in tags:
-			skip = False
-			for expr, repl, html_file in self.__expressions:
-				replacer = RegexReplacer(expr, lambda m: self.__substitute(m, repl), tag.string)
-				if replacer:
-					tag.string = str(replacer)
-					tag["href"] = html_file
-					changed = True
-					skip = True
-				if skip:
-					continue
+		for template in doc.body('div', class_='m-doc-template'):
+			replacer = RegexReplacer(self.__expression, lambda m: self.__substitute(m), str(template))
+			if replacer:
+				html_replace_tag(template, str(replacer))
+				changed = True
 		return changed
 
 
@@ -1059,6 +961,18 @@ class HeaderOverridesFix(object):
 
 
 _threadError = False
+
+
+
+def print_exception(exc):
+	print(
+		'Error: [{}] {}'.format(
+			type(exc).__name__,
+			str(exc)
+		),
+		file=sys.stderr
+	)
+	traceback.print_exc(file=sys.stderr)
 
 
 
@@ -1080,22 +994,212 @@ def postprocess_file(dir, file, fixes):
 			doc.flush()
 
 	except Exception as err:
-		print(
-			'Error: [{}] {}'.format(
-				type(err).__name__,
-				str(err)
-			),
-			file=sys.stderr
-		)
-		traceback.print_exc(file=sys.stderr)
+		print_exception(err)
 		_threadError = True
 
 	return changed
 
 
 
-def preprocess_xml(xml_dir):
-	pass
+# this is a lightweight version of doxygen's escapeCharsInString()
+# (see https://github.com/doxygen/doxygen/blob/master/src/util.cpp)
+def doxygen_mangle_name(name):
+	assert name is not None
+
+	name = name.replace('_', '__')
+	name = name.replace(':', '_1')
+	name = name.replace('/', '_2')
+	name = name.replace('<', '_3')
+	name = name.replace('>', '_4')
+	name = name.replace('*', '_5')
+	name = name.replace('&', '_6')
+	name = name.replace('|', '_7')
+	name = name.replace('.', '_8')
+	name = name.replace('!', '_9')
+	name = name.replace(',', '_00')
+	name = name.replace(' ', '_01')
+	name = name.replace('{', '_02')
+	name = name.replace('}', '_03')
+	name = name.replace('?', '_04')
+	name = name.replace('^', '_05')
+	name = name.replace('%', '_06')
+	name = name.replace('(', '_07')
+	name = name.replace(')', '_08')
+	name = name.replace('+', '_09')
+	name = name.replace('=', '_0a')
+	name = name.replace('$', '_0b')
+	name = name.replace('\\','_0c')
+	name = name.replace('@', '_0d')
+	name = name.replace(']', '_0e')
+	name = name.replace('[', '_0f')
+	name = name.replace('#', '_0g')
+	name = re.sub(r'[A-Z]', lambda m: '_' + m[0].lower(), name)
+	return name
+
+
+
+def preprocess_xml(dir):
+	global inline_namespaces
+	global implementation_headers
+	
+	if not inline_namespaces and not implementation_headers:
+		return
+
+	write_xml_to_file = lambda x, f: x.write(f, encoding='utf-8', xml_declaration=True)
+	inline_namespace_ids = [f'namespace{doxygen_mangle_name(ns)}' for ns in inline_namespaces]
+	implementation_header_data = [
+		(
+			hp,
+			path.basename(hp),
+			doxygen_mangle_name(path.basename(hp)),
+			[(i, path.basename(i), doxygen_mangle_name(path.basename(i))) for i in impl]
+		)
+		for hp, impl in implementation_headers
+	]
+	implementation_header_mappings = dict()
+	implementation_header_innernamespaces = dict()
+	implementation_header_sectiondefs = dict()
+	for hdata in implementation_header_data:
+		implementation_header_innernamespaces[hdata[2]] = []
+		implementation_header_sectiondefs[hdata[2]] = []
+		for (ip, ifn, iid) in hdata[3]:
+			implementation_header_mappings[iid] = hdata
+
+	if 1:
+		extracted_implementation = False
+		xml_files = utils.get_all_files(dir, any=('*.xml'))
+		for xml_file in xml_files:
+			print(f'Pre-processing {xml_file}')
+			xml = ET.parse(xml_file)
+			
+			root = xml.getroot().find('compounddef')
+			if root is None:
+				continue
+
+			changed = False
+
+			# namespaces
+			if root.get("kind") == "namespace" and inline_namespaces:
+				for nsid in inline_namespace_ids:
+					if root.get("id") == nsid:
+						root.set("inline", "yes")
+						changed = True
+						break
+
+			# dirs
+			if root.get("kind") == "dir" and implementation_headers:
+				innerfiles = root.findall('innerfile')
+				for innerfile in innerfiles:
+					if innerfile.get('refid') in implementation_header_mappings:
+						root.remove(innerfile)
+						changed = True
+
+			# header files
+			if root.get("kind") == "file" and implementation_headers:
+				# remove junk not required by m.css
+				for tag in ('includes', 'includedby', 'incdepgraph', 'invincdepgraph'):
+					tags = root.findall(tag)
+					if tags:
+						for t in tags:
+							root.remove(t)
+							changed = True
+
+				# rip the good bits out of implementation headers
+				if root.get("id") in implementation_header_mappings:
+					hid = implementation_header_mappings[root.get("id")][2]
+					innernamespaces = root.findall('innernamespace')
+					if innernamespaces:
+						implementation_header_innernamespaces[hid] = implementation_header_innernamespaces[hid] + innernamespaces
+						extracted_implementation = True
+						for tag in innernamespaces:
+							root.remove(tag)
+							changed = True
+					sectiondefs = root.findall('sectiondef')
+					if sectiondefs:
+						implementation_header_sectiondefs[hid] = implementation_header_sectiondefs[hid] + sectiondefs
+						extracted_implementation = True
+						for tag in sectiondefs:
+							root.remove(tag)
+							changed = True
+
+			if changed:
+				write_xml_to_file(xml, xml_file)
+
+		# merge extracted implementations
+		if extracted_implementation:
+			for (hp, hfn, hid, impl) in implementation_header_data:
+				xml_file = path.join(dir, f'{hid}.xml')
+				print(f'Merging implementation nodes into {xml_file}')
+				xml = ET.parse(xml_file)
+				root = xml.getroot().find('compounddef')
+				changed = False
+
+				innernamespaces = root.findall('innernamespace')
+				for new_tag in implementation_header_innernamespaces[hid]:
+					matched = False
+					for existing_tag in innernamespaces:
+						if existing_tag.get('refid') == new_tag.get('refid'):
+							matched = True
+							break
+					if not matched:
+						root.append(new_tag)
+						innernamespaces.append(new_tag)
+						changed = True
+
+				sectiondefs = root.findall('sectiondef')
+				for new_section in implementation_header_sectiondefs[hid]:
+					matched_section = False
+					for existing_section in sectiondefs:
+						if existing_section.get('kind') == new_section.get('kind'):
+							matched_section = True
+
+							memberdefs = existing_section.findall('memberdef')
+							new_memberdefs = new_section.findall('memberdef')
+							for new_memberdef in new_memberdefs:
+								matched = False
+								for existing_memberdef in memberdefs:
+									if existing_memberdef.get('id') == new_memberdef.get('id'):
+										matched = True
+										break
+
+								if not matched:
+									new_section.remove(new_memberdef)
+									existing_section.append(new_memberdef)
+									memberdefs.append(new_memberdef)
+									changed = True
+							break
+
+					if not matched_section:
+						root.append(new_section)
+						sectiondefs.append(new_section)
+						changed = True
+
+				if changed:
+					write_xml_to_file(xml, xml_file)
+
+	# delete the impl header xml files
+	if 1 and implementation_headers:
+		for hdata in implementation_header_data:
+			for (ip, ifn, iid) in hdata[3]:
+				xml_file = path.join(dir, f'{iid}.xml')
+				if (path.exists(xml_file)):
+					print(f'Deleting {xml_file}')
+					os.remove(xml_file)
+
+
+	# scan through the files and substitute impl header ids and paths as appropriate
+	if 1 and implementation_headers:
+		xml_files = utils.get_all_files(dir, any=('*.xml'))
+		for xml_file in xml_files:
+			print(f'Re-linking implementation headers in {xml_file}')
+			xml = utils.read_all_text_from_file(xml_file)
+			for (hp, hfn, hid, impl) in implementation_header_data:
+				for (ip, ifn, iid) in impl:
+					#xml = xml.replace(f'refid="{iid}"',f'refid="{hid}"')
+					xml = xml.replace(f'compoundref="{iid}"',f'compoundref="{hid}"')
+					xml = xml.replace(ip,hp)
+			with open(xml_file, 'w', encoding='utf-8', newline='\n') as f:
+				f.write(xml)
 
 
 
@@ -1110,51 +1214,49 @@ def main():
 	mcss_dir = path.join(root_dir, 'extern', 'mcss')
 	doxygen = path.join(mcss_dir, 'documentation', 'doxygen.py')
 
-	# delete any previously generated html and xml
-	utils.delete_directory(xml_dir)
-	utils.delete_directory(html_dir)
+	# delete any leftovers from the previous run
+	if 1:
+		utils.delete_directory(xml_dir)
+		utils.delete_directory(html_dir)
 
-	# run doxygen
-	subprocess.check_call( ['doxygen', 'Doxyfile'], shell=True, cwd=docs_dir )
+	# run doxygen to generate the xml
+	if 1:
+		subprocess.check_call( ['doxygen', 'Doxyfile'], shell=True, cwd=docs_dir )
 
 	# fix some shit that's broken in the xml
-	preprocess_xml(xml_dir)
+	if 1:
+		preprocess_xml(xml_dir)
 
-	# run doxygen.py (m.css)
-	utils.run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'), '--no-doxygen')
-
-	# delete xml
-	utils.delete_directory(xml_dir)
+	# run doxygen.py (m.css) to generate the html
+	if 1:
+		utils.run_python_script(doxygen, path.join(docs_dir, 'Doxyfile-mcss'), '--no-doxygen')
 
 	# post-process html files
-	fixes = [
-		CustomTagsFix()
-		, SyntaxHighlightingFix()
-		#, NavBarFix()
-		, IndexPageFix()
-		, ModifiersFix1()
-		, ModifiersFix2()
-		#, InlineNamespaceFix1()
-		#, InlineNamespaceFix2()
-		#, InlineNamespaceFix3()
-		, ExtDocLinksFix()
-		, EnableIfFix()
-		, ExternalLinksFix()
-		, HeaderOverridesFix()
-	]
-	files = [path.split(f) for f in utils.get_all_files(html_dir, any=('*.html', '*.htm'))]
-	if files:
-		with futures.ThreadPoolExecutor(max_workers=min(len(files), num_threads)) as executor:
-			jobs = { executor.submit(postprocess_file, dir, file, fixes) : file for dir, file in files }
-			for job in futures.as_completed(jobs):
-				if _threadError:
-					executor.shutdown(False)
-					break
-				else:
-					file = jobs[job]
-					print('Finished processing {}.'.format(file))
-		if _threadError:
-			return 1
+	if 1:
+		fixes = [
+			CustomTagsFix()
+			, SyntaxHighlightingFix()
+			, IndexPageFix()
+			, ModifiersFix1()
+			, ModifiersFix2()
+			, ExtDocLinksFix()
+			, EnableIfFix()
+			, ExternalLinksFix()
+			, TemplateTemplateFix()
+		]
+		files = [path.split(f) for f in utils.get_all_files(html_dir, any=('*.html', '*.htm'))]
+		if files:
+			with futures.ThreadPoolExecutor(max_workers=min(len(files), num_threads)) as executor:
+				jobs = { executor.submit(postprocess_file, dir, file, fixes) : file for dir, file in files }
+				for job in futures.as_completed(jobs):
+					if _threadError:
+						executor.shutdown(False)
+						break
+					else:
+						file = jobs[job]
+						print('Finished processing {}.'.format(file))
+			if _threadError:
+				return 1
 
 
 if __name__ == '__main__':

@@ -4,7 +4,7 @@ project(
 	version : '2.2.0',
 	meson_version : '>=0.53.0',
 	license : 'MIT',
-	default_options : [
+	default_options : [ # https://mesonbuild.com/Builtin-options.html
 		# core options
 		'buildtype=release',
 		'warning_level=3',
@@ -50,6 +50,7 @@ additional_arguments = []
 message(['is_release', is_release])
 message(['is_windows', is_windows])
 message(['is_x64', is_x64])
+message(['has_exceptions', has_exceptions])
 
 # compiler argument references:
 # msvc: https://docs.microsoft.com/en-us/cpp/build/reference/compiler-options-listed-alphabetically?view=vs-2019
@@ -73,6 +74,7 @@ if is_gcc or is_clang
 		)
 	endif
 endif
+
 
 # GCC
 if is_gcc
@@ -241,6 +243,7 @@ elif is_release
 	overrides += 'strip=true'
 endif
 
+
 # LTO
 if is_lld or is_debug
 	overrides += 'b_lto=false'
@@ -248,7 +251,6 @@ endif
 
 #######################################################################################################################
 # c++ 20 check
-# (used by tests)
 #######################################################################################################################
 
 compiler_supports_cpp20_args = []
@@ -277,7 +279,6 @@ compiler_supports_cpp20 = compiler_supports_cpp20_args.length() > 0 and compiler
 
 #######################################################################################################################
 # char8_t check
-# (used by tests)
 #######################################################################################################################
 
 compiler_supports_char8_args = []
@@ -317,7 +318,7 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 
 #######################################################################################################################
 # consteval check
-# (this doesn't inform the build in any way; it's just so i can see who supports it)
+# (this doesn't inform the build in any way; it's just so i can see who supports it properly)
 #######################################################################################################################
 
 compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
@@ -334,6 +335,24 @@ compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 	}
 	''',
 	name : 'supports consteval keyword',
+	args : compiler_supports_cpp20_args
+)
+
+compiler_supports_consteval_properly = compiler_supports_consteval and not compiler.compiles('''
+
+	consteval int test(int i) noexcept
+	{
+		return 42 + i;
+	}
+
+	int get_value() noexcept;
+
+	int main()
+	{
+		return test(get_value()); // test() should not be runtime-callable
+	}
+	''',
+	name : 'consteval is just renamed constexpr',
 	args : compiler_supports_cpp20_args
 )
 
@@ -453,10 +472,8 @@ compiler_supports_float128 = compiler.links('''
 	name : 'supports __float128'
 )
 
-if compiler_supports_float16 or compiler_supports_int128 or compiler_supports_float128
-	if is_gcc
-		additional_arguments += '-fext-numeric-literals'
-	endif
+if compiler_supports_float128 and is_gcc
+	add_global_arguments('-fext-numeric-literals', language : 'cpp')
 endif
 
 #######################################################################################################################
