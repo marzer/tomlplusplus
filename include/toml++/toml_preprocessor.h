@@ -100,11 +100,6 @@
 	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
 
-	//floating-point from_chars and to_chars are not implemented in any version of clang as of 1/1/2020
-	#ifndef TOML_FLOAT_CHARCONV
-		#define TOML_FLOAT_CHARCONV 0
-	#endif
-
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
 
 #endif // clang
@@ -195,11 +190,6 @@
 	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
-
-	// floating-point from_chars and to_chars are not implemented in any version of gcc as of 1/1/2020
-	#ifndef TOML_FLOAT_CHARCONV
-		#define TOML_FLOAT_CHARCONV 0
-	#endif
 
 #endif
 
@@ -328,6 +318,12 @@ is no longer necessary.
 	#define TOML_MAY_THROW				noexcept
 #endif
 
+#if TOML_GCC || TOML_CLANG // fp charconv not in supported gcc or clang as of 26/11/2020
+	#define TOML_FLOAT_CHARCONV 0
+#endif
+#if defined(__EMSCRIPTEN__) // causes link errors on emscripten
+	#define TOML_INT_CHARCONV 0
+#endif
 #ifndef TOML_INT_CHARCONV
 	#define TOML_INT_CHARCONV 1
 #endif
