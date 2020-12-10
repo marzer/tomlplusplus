@@ -141,6 +141,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.                  |
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `0`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].                        |
 | `TOML_WINDOWS_COMPAT`      |     boolean    | `1` on Windows                    | Enables support for transparent conversion between wide and narrow strings in some places when building for Windows. |
+| `TOML_DEFAULT_LINE_WRAP`   |     size_t     | 120                               | Threshold for adding newlines between array elements
 
 > ℹ _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
 linking incompatible combinations together._

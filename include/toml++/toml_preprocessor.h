@@ -391,6 +391,10 @@ is no longer necessary.
 
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
+#ifndef TOML_DEFAULT_LINE_WRAP
+	#define TOML_DEFAULT_LINE_WRAP	120_sz
+#endif
+
 #ifdef __cpp_consteval
 	#define TOML_CONSTEVAL		consteval
 #else

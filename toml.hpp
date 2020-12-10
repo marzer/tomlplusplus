@@ -405,6 +405,10 @@ is no longer necessary.
 
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
+#ifndef TOML_DEFAULT_LINE_WRAP
+	#define TOML_DEFAULT_LINE_WRAP	120_sz
+#endif
+
 #ifdef __cpp_consteval
 	#define TOML_CONSTEVAL		consteval
 #else
@@ -8337,7 +8341,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
-	inline constexpr size_t default_formatter_line_wrap = 120_sz;
+	inline constexpr size_t default_formatter_line_wrap = TOML_DEFAULT_LINE_WRAP;
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
@@ -12010,6 +12014,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_CONCAT_1
 	#undef TOML_CONSTEVAL
 	#undef TOML_CPP
+	#undef TOML_DEFAULT_LINE_WRAP
 	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_SPAM_WARNINGS

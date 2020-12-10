@@ -22,7 +22,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS
 
 TOML_IMPL_NAMESPACE_START
 {
-	inline constexpr size_t default_formatter_line_wrap = 120_sz;
+	inline constexpr size_t default_formatter_line_wrap = TOML_DEFAULT_LINE_WRAP;
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
