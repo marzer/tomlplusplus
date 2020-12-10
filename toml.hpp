@@ -8347,20 +8347,20 @@ TOML_IMPL_NAMESPACE_START
 			return "''"s;
 		else
 		{
-			bool requiresQuotes = false;
+			bool requires_quotes = false;
 			{
 				utf8_decoder decoder;
-				for (size_t i = 0; i < str.length() && !requiresQuotes; i++)
+				for (size_t i = 0; i < str.length() && !requires_quotes; i++)
 				{
 					decoder(static_cast<uint8_t>(str[i]));
 					if (decoder.error())
-						requiresQuotes = true;
+						requires_quotes = true;
 					else if (decoder.has_code_point())
-						requiresQuotes = !is_bare_key_character(decoder.codepoint);
+						requires_quotes = !is_bare_key_character(decoder.codepoint);
 				}
 			}
 
-			if (requiresQuotes)
+			if (requires_quotes)
 			{
 				std::string s;
 				s.reserve(str.length() + 2_sz);
@@ -8475,7 +8475,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
-		return (default_formatter_inline_columns(node) + starting_column_bias) > default_formatter_line_wrap;
+		return (default_formatter_inline_columns(node) + starting_column_bias) >= default_formatter_line_wrap;
 	}
 }
 TOML_IMPL_NAMESPACE_END
