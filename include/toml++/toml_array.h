@@ -1036,7 +1036,7 @@ TOML_NAMESPACE_START
 			/// \returns An rvalue reference to the array.
 			array&& flatten() &&
 			{
-				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
+				return std::move(this->flatten());
 			}
 
 			/// \brief	Prints the array out to a stream as formatted TOML.
