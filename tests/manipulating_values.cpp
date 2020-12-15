@@ -11,6 +11,8 @@ TOML_DISABLE_WARNINGS
 TOML_ENABLE_WARNINGS
 #endif
 
+TOML_DISABLE_SPAM_WARNINGS
+
 template <typename T>
 static constexpr T one = static_cast<T>(1);
 

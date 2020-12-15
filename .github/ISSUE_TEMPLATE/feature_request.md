@@ -8,8 +8,8 @@ assignees: marzer
 ---
 
 <!--
-    Please replace the HTML comments below with the requested information.
-    Or leave them there and put your answers above/below them; you do you!
+    Replace the HTML comments below with the requested information.
+    DO NOT delete this template and roll your own!
 
     Thanks for contributing!
 -->
@@ -19,7 +19,7 @@ assignees: marzer
 **Is your feature request related to a problem? Please describe.**
 <!--
     "I'd like a way to Fooify all Bars in one go. Currently I have to iterate through them and
-	do it individually myself, which is cumbersome.
+    do it individually myself, which is cumbersome.
 -->
 
 

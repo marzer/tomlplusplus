@@ -190,6 +190,7 @@
 												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
@@ -3963,7 +3964,7 @@ TOML_NAMESPACE_START
 			array& flatten() &;
 			array&& flatten() &&
 			{
-				return static_cast<toml::array&&>(static_cast<toml::array&>(*this).flatten());
+				return static_cast<toml::array&&>(this->flatten());
 			}
 
 			template <typename Char>
@@ -8368,10 +8369,7 @@ TOML_IMPL_NAMESPACE_START
 				for (auto c : str)
 				{
 					if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
-					{
-						const auto& sv = low_character_escape_table[c];
-						s.append(reinterpret_cast<const char*>(sv.data()), sv.length());
-					}
+						s.append(low_character_escape_table[c]);
 					else if TOML_UNLIKELY(c == '\x7F')
 						s.append("\\u007F"sv);
 					else if TOML_UNLIKELY(c == '"')
@@ -8456,7 +8454,7 @@ TOML_IMPL_NAMESPACE_START
 					weight += 1;
 					v *= -1.0;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1_sz;
+				return weight + static_cast<size_t>(log10(v)) + 1_sz;
 				break;
 			}
 

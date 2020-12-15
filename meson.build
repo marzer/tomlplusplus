@@ -118,6 +118,7 @@ if is_gcc
 			'-Wunreachable-code',
 			'-Wunused',
 			'-Wunused-parameter',
+			'-Wuseless-cast',
 			'-Wvariadic-macros',
 			'-Wwrite-strings',
 			'-Wmissing-noreturn',

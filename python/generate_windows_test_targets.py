@@ -129,7 +129,6 @@ def main():
 	</ItemGroup>
 	<ItemGroup>
 		<ClInclude Include="..\..\tests\catch2.h" />
-		<ClInclude Include="..\..\tests\evil_macros.h" />
 		<ClInclude Include="..\..\tests\leakproof.h" />
 		<ClInclude Include="..\..\tests\settings.h" />
 		<ClInclude Include="..\..\tests\tests.h" />

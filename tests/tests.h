@@ -10,8 +10,6 @@
 	#include "tloptional.h"
 #endif
 
-#include "evil_macros.h"
-
 #if USE_SINGLE_HEADER
 	#include "../toml.hpp"
 #else

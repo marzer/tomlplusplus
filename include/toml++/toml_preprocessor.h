@@ -168,6 +168,7 @@
 												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+												_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
 	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
