@@ -75,6 +75,8 @@ TOML_IMPL_NAMESPACE_START
 			using value_type = table_proxy_pair<IsConst>;
 			using reference = value_type&;
 			using pointer = value_type*;
+			using difference_type = typename std::iterator_traits<raw_iterator>::difference_type;
+			using iterator_category = typename std::iterator_traits<raw_iterator>::iterator_category;
 
 			table_iterator& operator++() noexcept // ++pre
 			{

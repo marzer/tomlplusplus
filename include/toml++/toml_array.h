@@ -38,6 +38,7 @@ TOML_IMPL_NAMESPACE_START
 			using reference = value_type&;
 			using pointer = value_type*;
 			using difference_type = ptrdiff_t;
+			using iterator_category = typename std::iterator_traits<raw_iterator>::iterator_category;
 
 			array_iterator() noexcept = default;
 			array_iterator(const array_iterator&) noexcept = default;
