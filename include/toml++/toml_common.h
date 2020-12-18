@@ -16,6 +16,7 @@ TOML_DISABLE_WARNINGS
 #include <cstring>
 #include <cfloat>
 #include <climits>
+#include <iterator>
 #include <limits>
 #include <memory>
 #include <string_view>
