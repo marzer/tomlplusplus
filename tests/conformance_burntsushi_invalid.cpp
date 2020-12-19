@@ -12,6 +12,8 @@ TOML_DISABLE_WARNINGS // unused variable spam
 
 namespace
 {
+	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
+	static constexpr auto bool_wrong_case_true = R"(a = TRUE)"sv;
 	static constexpr auto datetime_malformed_no_leads = R"(no-leads = 1987-7-05T17:45:00Z)"sv;
 	static constexpr auto datetime_malformed_no_secs = R"(no-secs = 1987-07-05T17:45Z)"sv;
 	static constexpr auto datetime_malformed_no_t = R"(no-t = 1987-07-0517:45:00Z)"sv;
@@ -123,6 +125,8 @@ TOML_ENABLE_WARNINGS
 
 TEST_CASE("conformance - burntsushi/invalid")
 {
+	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false);
+	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true);
 	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_no_leads);
 	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_no_t);
 	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_with_milli);

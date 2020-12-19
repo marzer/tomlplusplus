@@ -333,10 +333,13 @@ is no longer necessary.
 	#define TOML_MAY_THROW				noexcept
 #endif
 
-#if TOML_GCC || TOML_CLANG // fp charconv not in supported gcc or clang as of 26/11/2020
+#if TOML_GCC || TOML_CLANG
+	// fp charconv not in supported any version of gcc or clang as of 26/11/2020
 	#define TOML_FLOAT_CHARCONV 0
 #endif
-#if defined(__EMSCRIPTEN__) // causes link errors on emscripten
+#if defined(__EMSCRIPTEN__) || defined(__APPLE__)
+	// causes link errors on emscripten
+	// causes Mac OS SDK version errors on some versions of Apple Clang
 	#define TOML_INT_CHARCONV 0
 #endif
 #ifndef TOML_INT_CHARCONV

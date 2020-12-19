@@ -4,7 +4,7 @@ TOML_DISABLE_WARNINGS
 #include <algorithm>
 TOML_ENABLE_WARNINGS
 
-TEST_CASE("Using std::distance, std::count_if, etc. with Iterators")
+TEST_CASE("using iterators")
 {
 	constexpr auto data = R"(array=[1,"Foo",true]
 string="Bar"
