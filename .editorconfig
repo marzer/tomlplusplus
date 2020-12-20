@@ -7,19 +7,18 @@ indent_size = 4
 tab_width = 4
 end_of_line = lf
 
-[*.{gitattributes, yml, props, vcxproj}]
+[*.{gitattributes,yml,props,vcxproj,rc,clang-format}]
 indent_style = space
 
-[{Doxyfile, Doxyfile-mcss}]
+[{Doxyfile,Doxyfile-mcss}]
 indent_style = space
 
-[*.{natvis, props, vcxproj, sln, runsettings}]
+[*.{natvis,props,vcxproj,sln,runsettings,rc}]
 end_of_line = crlf
 
-[*.{c, cpp, cxx, dox, h, hpp, hxx, inl, toml, xml, py, natvis, props, build, vcxproj, runsettings, yml, ini, json}]
+[*.{c,cpp,cxx,dox,h,hpp,hxx,inl,toml,xml,py,natvis,props,build,vcxproj,runsettings,yml,ini,json}]
 charset = utf-8
 trim_trailing_whitespace = true
 
 [*.sln]
 charset = utf-8-bom
-
