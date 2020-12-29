@@ -155,14 +155,14 @@ TOML_NAMESPACE_START
 			explicit parse_result(toml::table&& tbl) noexcept
 				: is_err{ false }
 			{
-				::new (&storage) toml::table{ std::move(tbl) };
+				::new (static_cast<void*>(&storage)) toml::table{ std::move(tbl) };
 			}
 
 			TOML_NODISCARD_CTOR
 			explicit parse_result(parse_error&& err) noexcept
 				: is_err{ true }
 			{
-				::new (&storage) parse_error{ std::move(err) };
+				::new (static_cast<void*>(&storage)) parse_error{ std::move(err) };
 			}
 
 			/// \brief	Move constructor.
@@ -171,9 +171,9 @@ TOML_NAMESPACE_START
 				: is_err{ res.is_err }
 			{
 				if (is_err)
-					::new (&storage) parse_error{ std::move(res).error() };
+					::new (static_cast<void*>(&storage)) parse_error{ std::move(res).error() };
 				else
-					::new (&storage) toml::table{ std::move(res).table() };
+					::new (static_cast<void*>(&storage)) toml::table{ std::move(res).table() };
 			}
 
 			/// \brief	Move-assignment operator.
@@ -184,9 +184,9 @@ TOML_NAMESPACE_START
 					destroy();
 					is_err = rhs.is_err;
 					if (is_err)
-						::new (&storage) parse_error{ std::move(rhs).error() };
+						::new (static_cast<void*>(&storage)) parse_error{ std::move(rhs).error() };
 					else
-						::new (&storage) toml::table{ std::move(rhs).table() };
+						::new (static_cast<void*>(&storage)) toml::table{ std::move(rhs).table() };
 				}
 				else
 				{

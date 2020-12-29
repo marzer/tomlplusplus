@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.2.0
+// toml++ v2.3.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -521,7 +521,7 @@ is no longer necessary.
 #endif
 
 #define TOML_LIB_MAJOR		2
-#define TOML_LIB_MINOR		2
+#define TOML_LIB_MINOR		3
 #define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
@@ -4016,7 +4016,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				if (!proxy_instantiated)
 				{
-					auto p = new (&proxy) proxy_type{ raw_->first, *raw_->second.get() };
+					auto p = ::new (static_cast<void*>(&proxy)) proxy_type{ raw_->first, *raw_->second.get() };
 					proxy_instantiated = true;
 					return p;
 				}
@@ -7201,14 +7201,14 @@ TOML_NAMESPACE_START
 			explicit parse_result(toml::table&& tbl) noexcept
 				: is_err{ false }
 			{
-				::new (&storage) toml::table{ std::move(tbl) };
+				::new (static_cast<void*>(&storage)) toml::table{ std::move(tbl) };
 			}
 
 			TOML_NODISCARD_CTOR
 			explicit parse_result(parse_error&& err) noexcept
 				: is_err{ true }
 			{
-				::new (&storage) parse_error{ std::move(err) };
+				::new (static_cast<void*>(&storage)) parse_error{ std::move(err) };
 			}
 
 			TOML_NODISCARD_CTOR
@@ -7216,9 +7216,9 @@ TOML_NAMESPACE_START
 				: is_err{ res.is_err }
 			{
 				if (is_err)
-					::new (&storage) parse_error{ std::move(res).error() };
+					::new (static_cast<void*>(&storage)) parse_error{ std::move(res).error() };
 				else
-					::new (&storage) toml::table{ std::move(res).table() };
+					::new (static_cast<void*>(&storage)) toml::table{ std::move(res).table() };
 			}
 
 			parse_result& operator=(parse_result&& rhs) noexcept
@@ -7228,9 +7228,9 @@ TOML_NAMESPACE_START
 					destroy();
 					is_err = rhs.is_err;
 					if (is_err)
-						::new (&storage) parse_error{ std::move(rhs).error() };
+						::new (static_cast<void*>(&storage)) parse_error{ std::move(rhs).error() };
 					else
-						::new (&storage) toml::table{ std::move(rhs).table() };
+						::new (static_cast<void*>(&storage)) toml::table{ std::move(rhs).table() };
 				}
 				else
 				{

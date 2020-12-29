@@ -98,14 +98,14 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ### Conan
-Add `tomlplusplus/2.2.0` to your conanfile.<br>
+Add `tomlplusplus/2.3.0` to your conanfile.<br>
 This adds the single-header version by default, but you can specify the regular version using `"multiple_headers": True`.
 
 ### DDS
 Add `tomlpp` to your `package.json5`, e.g.:
 ```
 depends: [
-    'tomlpp^2.2.0',
+    'tomlpp^2.3.0',
 ]
 ```
 > ℹ _[What is DDS?](https://dds.pizza/)_

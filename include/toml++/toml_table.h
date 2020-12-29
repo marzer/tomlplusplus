@@ -39,7 +39,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				if (!proxy_instantiated)
 				{
-					auto p = new (&proxy) proxy_type{ raw_->first, *raw_->second.get() };
+					auto p = ::new (static_cast<void*>(&proxy)) proxy_type{ raw_->first, *raw_->second.get() };
 					proxy_instantiated = true;
 					return p;
 				}
