@@ -740,7 +740,8 @@ TOML_NAMESPACE_START
 						else
 						{
 							const double val = *ref_cast<double>();
-							if (val < (std::numeric_limits<T>::lowest)() || val > (std::numeric_limits<T>::max)())
+							if (impl::fpclassify(val) == fp_class::ok
+								&& (val < (std::numeric_limits<T>::lowest)() || val > (std::numeric_limits<T>::max)()))
 								return {};
 							return { static_cast<T>(val) };
 						}
