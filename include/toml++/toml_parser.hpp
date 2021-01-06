@@ -2591,10 +2591,7 @@ TOML_IMPL_NAMESPACE_START
 							).first->second->ref_cast<array>();
 						table_arrays.push_back(tab_arr);
 						tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						
-						tab_arr->elements.emplace_back(new toml::table{});
-						tab_arr->elements.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-						return &tab_arr->elements.back()->ref_cast<table>();
+						return parent;
 					}
 
 					//otherwise we're just making a table
@@ -2710,9 +2707,9 @@ TOML_IMPL_NAMESPACE_START
 				assert_not_error();
 				assert_not_eof();
 				push_parse_scope("root table"sv);
-					
-				table* current_table = &root;
 
+				table* current_table = &root;
+				size_t old_size_tables_array = table_arrays.size();
 				do
 				{
 					return_if_error();
@@ -2727,13 +2724,21 @@ TOML_IMPL_NAMESPACE_START
 					// [tables]
 					// [[table array]]
 					if (*cp == U'[')
+					{
+						static_cast<void>(insert_table_to_table_arrays_if_need(old_size_tables_array));
 						current_table = parse_table_header();
+					}
 
 					// bare_keys
 					// dotted.keys
 					// "quoted keys"
 					else if (is_bare_key_character(*cp) || is_string_delimiter(*cp))
 					{
+						if (auto table = insert_table_to_table_arrays_if_need(old_size_tables_array); table)
+						{
+							current_table = table;
+						}
+
 						push_parse_scope("key-value pair"sv);
 
 						parse_key_value_pair_and_insert(current_table);
@@ -2794,6 +2799,18 @@ TOML_IMPL_NAMESPACE_START
 					}
 					nde.source_.end = end;
 				}
+			}
+
+			[[nodiscard]]
+			toml::table* insert_table_to_table_arrays_if_need(size_t &old) noexcept
+			{
+				if (old < table_arrays.size())
+				{
+					old = table_arrays.size();
+					return table_arrays.back()->insert(table_arrays.back()->end(), toml::table{})->as_table();
+				}
+
+				return nullptr;
 			}
 
 		public:
