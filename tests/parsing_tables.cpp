@@ -439,3 +439,31 @@ fruit = []
 )"sv);
 
 }
+
+TEST_CASE("parsing - empty arrays-of-tables")
+{
+	parsing_should_succeed(
+		FILE_LINE_ARGS,
+		R"(
+[[fruit.variety]]
+)"sv,
+		[](table&& tbl)
+		{
+			REQUIRE(tbl["fruit"].as<table>());
+			REQUIRE(tbl["fruit"]["variety"].as<array>());
+			CHECK(tbl["fruit"]["variety"].as<array>()->size() == 0u);
+		}
+	);
+
+		parsing_should_succeed(
+		FILE_LINE_ARGS,
+		R"(
+[[fruit]]
+)"sv,
+		[](table&& tbl)
+		{
+			REQUIRE(tbl["fruit"].as<array>());
+			CHECK(tbl["fruit"].as<array>()->size() == 0u);
+		}
+	);
+}
