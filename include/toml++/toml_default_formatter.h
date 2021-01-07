@@ -57,6 +57,17 @@ TOML_NAMESPACE_START
 		private:
 			using base = impl::formatter<Char>;
 			std::vector<std::string> key_path;
+			bool pending_table_separator_ = false;
+
+			void print_pending_table_separator()
+			{
+				if (pending_table_separator_)
+				{
+					base::print_newline(true);
+					base::print_newline(true);
+					pending_table_separator_ = false;
+				}
+			}
 
 			void print_key_segment(const std::string& str)
 			{
@@ -181,6 +192,7 @@ TOML_NAMESPACE_START
 						|| (type == node_type::array && is_non_inline_array_of_tables(v)))
 						continue;
 
+					pending_table_separator_ = true;
 					base::print_newline();
 					base::print_indent();
 					print_key_segment(k);
@@ -241,17 +253,13 @@ TOML_NAMESPACE_START
 
 					if (!skip_self)
 					{
-						if (!base::naked_newline())
-						{
-							base::print_newline();
-							base::print_newline(true);
-						}
+						print_pending_table_separator();
 						base::increase_indent();
 						base::print_indent();
 						impl::print_to_stream("["sv, base::stream());
 						print_key_path();
 						impl::print_to_stream("]"sv, base::stream());
-						base::print_newline();
+						pending_table_separator_ = true;
 					}
 
 					print(child_tbl);
@@ -273,13 +281,12 @@ TOML_NAMESPACE_START
 
 					for (size_t i = 0; i < arr.size(); i++)
 					{
-						base::print_newline();
-						base::print_newline(true);
+						print_pending_table_separator();
 						base::print_indent();
 						impl::print_to_stream("[["sv, base::stream());
 						print_key_path();
 						impl::print_to_stream("]]"sv, base::stream());
-						base::print_newline(true);
+						pending_table_separator_ = true;
 						print(*reinterpret_cast<const table*>(&arr[i]));
 					}
 

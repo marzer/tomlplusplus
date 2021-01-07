@@ -400,5 +400,67 @@ TEST_CASE("nodes - value() int/float/bool conversions")
 		CHECK_VALUE_FAIL(toml::date);
 		CHECK_VALUE_FAIL(toml::time);
 		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = std::numeric_limits<double>::infinity();
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_FAIL(int64_t);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, std::numeric_limits<float>::infinity());
+		CHECK_VALUE_PASS(double, std::numeric_limits<double>::infinity());
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = -std::numeric_limits<double>::infinity();
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_FAIL(int64_t);
+		CHECK_VALUE_FAIL(uint64_t);
+		CHECK_VALUE_PASS(float, -std::numeric_limits<float>::infinity());
+		CHECK_VALUE_PASS(double, -std::numeric_limits<double>::infinity());
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
+
+		*val = std::numeric_limits<double>::quiet_NaN();
+		CHECK_VALUE_FAIL(bool);
+		CHECK_VALUE_FAIL(int8_t);
+		CHECK_VALUE_FAIL(uint8_t);
+		CHECK_VALUE_FAIL(int16_t);
+		CHECK_VALUE_FAIL(uint16_t);
+		CHECK_VALUE_FAIL(int32_t);
+		CHECK_VALUE_FAIL(uint32_t);
+		CHECK_VALUE_FAIL(int64_t);
+		CHECK_VALUE_FAIL(uint64_t);
+		{
+			auto fval = n.value<float>();
+			REQUIRE(fval.has_value());
+			CHECK(impl::fpclassify(*fval) == impl::fp_class::nan);
+		}
+		{
+			auto fval = n.value<double>();
+			REQUIRE(fval.has_value());
+			CHECK(impl::fpclassify(*fval) == impl::fp_class::nan);
+		}
+		CHECK_VALUE_FAIL(std::string);
+		CHECK_VALUE_FAIL(std::string_view);
+		CHECK_VALUE_FAIL(toml::date);
+		CHECK_VALUE_FAIL(toml::time);
+		CHECK_VALUE_FAIL(toml::date_time);
 	}
 }

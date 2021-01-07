@@ -142,5 +142,25 @@ TEST_CASE("user feedback")
 		using namespace toml::literals; // should compile without namespace ambiguity
 		auto table = "[table]\nkey=\"value\""_toml;
 	}
+
+	SECTION("github/pull/80") // https://github.com/marzer/tomlplusplus/pull/80
+	{
+		const auto data = R"(
+			a = { "key" = 1 } # inline table
+			b = []            # array value
+			[[c]]             # array-of-tables with a single, empty table element
+		)"sv;
+
+		parsing_should_succeed(FILE_LINE_ARGS, data, [](auto&& table)
+		{
+			std::stringstream ss;
+			ss << table;
+			CHECK(ss.str() == R"(a = { key = 1 }
+b = []
+
+[[c]])"sv);
+		});
+	}
+
 }
 

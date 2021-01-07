@@ -751,7 +751,8 @@ TOML_NAMESPACE_START
 					else if constexpr (is_natively_one_of<T, int64_t>)
 					{
 						const double val = *ref_cast<double>();
-						if (static_cast<double>(static_cast<int64_t>(val)) == val)
+						if (impl::fpclassify(val) == fp_class::ok
+							&& static_cast<double>(static_cast<int64_t>(val)) == val)
 							return node_integer_cast<T>(static_cast<int64_t>(val));
 						else
 							return {};

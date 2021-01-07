@@ -437,5 +437,25 @@ c = 3)"sv;
 
 		CHECK(to_string(some_toml) == some_toml);
 	}
+
+	{
+		static constexpr auto some_toml = "[a]\n\n[b]\n\n[c]"sv;
+		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		static constexpr auto some_toml = "[a]\nkey = 1\n\n[b]\n\n[c]"sv;
+		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		static constexpr auto some_toml = "key = 1\n\n[a]\nkey = 1\n\n[b]\n\n[c]"sv;
+		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		static constexpr auto some_toml = "key = 1\n\n[a]\nkey = 1\n\n[b]\n\n[[c]]\n\n[[c]]"sv;
+		CHECK(to_string(some_toml) == some_toml);
+	}
 }
 
