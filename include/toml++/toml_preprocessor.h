@@ -381,6 +381,9 @@ is no longer necessary.
 	#define TOML_EMPTY_BASES
 #endif
 
+#ifndef TOML_ALWAYS_INLINE
+	#define TOML_ALWAYS_INLINE	inline
+#endif
 #ifndef TOML_NEVER_INLINE
 	#define TOML_NEVER_INLINE
 #endif
