@@ -41,7 +41,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) noexcept
-		: node{ other }
+		: node( other )
 	{
 		elements.reserve(other.elements.size());
 		for (const auto& elem : other)
@@ -54,7 +54,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(array&& other) noexcept
-		: node{ std::move(other) },
+		: node( std::move(other) ),
 		elements{ std::move(other.elements) }
 	{
 		#if TOML_LIFETIME_HOOKS

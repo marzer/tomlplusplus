@@ -333,8 +333,9 @@ is no longer necessary.
 	#define TOML_MAY_THROW				noexcept
 #endif
 
-#if TOML_GCC || TOML_CLANG
-	// fp charconv not in supported any version of gcc or clang as of 26/11/2020
+#if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
+	// not supported by any version of GCC or Clang as of 26/11/2020
+	// not supported by any version of ICC on Linux as of 11/01/2021
 	#define TOML_FLOAT_CHARCONV 0
 #endif
 #if defined(__EMSCRIPTEN__) || defined(__APPLE__)
@@ -1074,9 +1075,6 @@ TOML_IMPL_NAMESPACE_START
 	template <>           struct node_type_getter<void>  { static constexpr auto value = node_type::none; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
-
-	template <typename T>
-	inline constexpr bool is_node_view = is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_IMPL_NAMESPACE_END
 
@@ -1111,6 +1109,9 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
+
+	template <typename T>
+	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_NAMESPACE_END
 
@@ -1588,13 +1589,15 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		constexpr date_time() noexcept
 			: date{},
-			time{}
+			time{},
+			offset{} // TINAE - icc bugfix
 		{}
 
 		TOML_NODISCARD_CTOR
 		constexpr date_time(toml::date d, toml::time t) noexcept
 			: date{ d },
-			time{ t }
+			time{ t },
+			offset{} // TINAE - icc bugfix
 		{}
 
 		TOML_NODISCARD_CTOR
@@ -2809,7 +2812,7 @@ TOML_NAMESPACE_START
 
 			TOML_NODISCARD_CTOR
 			value(const value& other) noexcept
-				: node{ other },
+				: node( other ),
 				val_{ other.val_ },
 				flags_{ other.flags_ }
 			{
@@ -2820,7 +2823,7 @@ TOML_NAMESPACE_START
 
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
-				: node{ std::move(other) },
+				: node( std::move(other) ),
 				val_{ std::move(other.val_) },
 				flags_{ other.flags_ }
 			{
@@ -3586,7 +3589,11 @@ TOML_IMPL_NAMESPACE_START
 
 		if constexpr (is_one_of<type, array, table>)
 		{
-			return new type{ std::forward<T>(val) };
+			return new type{ static_cast<T&&>(val) };
+		}
+		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
+		{
+			return new value<type>{ static_cast<T&&>(val) };
 		}
 		else
 		{
@@ -3599,16 +3606,18 @@ TOML_IMPL_NAMESPACE_START
 				is_native<type> || is_losslessly_convertible_to_native<type>,
 				"Value initializers must be (or be promotable to) one of the TOML value types"
 			);
+
+			using value_type = native_type_of<remove_cvref_t<T>>;
 			if constexpr (is_wide_string<T>)
 			{
 				#if TOML_WINDOWS_COMPAT
-				return new value{ narrow(std::forward<T>(val)) };
+				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
 				#else
 				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
 				#endif
 			}
 			else
-				return new value{ std::forward<T>(val) };
+				return new value<value_type>{ static_cast<T&&>(val) };
 		}
 	}
 
@@ -3625,13 +3634,13 @@ TOML_IMPL_NAMESPACE_START
 					return static_cast<toml::node*>(nullptr);
 			}
 
-			return std::forward<T>(val).visit([](auto&& concrete) noexcept
+			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
 			{
 				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
 			});
 		}
 		else
-			return make_node_specialized(std::forward<T>(val));
+			return make_node_specialized(static_cast<T&&>(val));
 	}
 
 	template <typename T>
@@ -3660,7 +3669,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			void emplace_back_if_not_empty_view(T&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<T>)
+				if constexpr (is_node_view<T>)
 				{
 					if (!val)
 						return;
@@ -3766,7 +3775,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, ElemType&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<ElemType>)
+				if constexpr (is_node_view<ElemType>)
 				{
 					if (!val)
 						return end();
@@ -3777,7 +3786,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<ElemType>)
+				if constexpr (is_node_view<ElemType>)
 				{
 					if (!val)
 						return end();
@@ -3810,7 +3819,7 @@ TOML_NAMESPACE_START
 				{
 					auto count = distance;
 					using deref_type = decltype(*first);
-					if constexpr (impl::is_node_view<deref_type>)
+					if constexpr (is_node_view<deref_type>)
 					{
 						for (auto it = first; it != last; it++)
 							if (!(*it))
@@ -3823,7 +3832,7 @@ TOML_NAMESPACE_START
 					size_t i = start_idx;
 					for (auto it = first; it != last; it++)
 					{
-						if constexpr (impl::is_node_view<deref_type>)
+						if constexpr (is_node_view<deref_type>)
 						{
 							if (!(*it))
 								continue;
@@ -3863,7 +3872,7 @@ TOML_NAMESPACE_START
 			void resize(size_t new_size, ElemType&& default_init_val) noexcept
 			{
 				static_assert(
-					!impl::is_node_view<ElemType>,
+					!is_node_view<ElemType>,
 					"The default element type argument to toml::array::resize may not be toml::node_view."
 				);
 
@@ -4278,7 +4287,7 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_node_view<ValueType>)
+				if constexpr (is_node_view<ValueType>)
 				{
 					if (!val)
 						return { end(), false };
@@ -4329,7 +4338,7 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_node_view<ValueType>)
+				if constexpr (is_node_view<ValueType>)
 				{
 					if (!val)
 						return { end(), false };
@@ -7683,7 +7692,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) noexcept
-		: node{ other }
+		: node( other )
 	{
 		elements.reserve(other.elements.size());
 		for (const auto& elem : other)
@@ -7696,7 +7705,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(array&& other) noexcept
-		: node{ std::move(other) },
+		: node( std::move(other) ),
 		elements{ std::move(other.elements) }
 	{
 		#if TOML_LIFETIME_HOOKS
@@ -8030,7 +8039,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) noexcept
-		: node{ std::move(other) },
+		: node( other ),
 		inline_{ other.inline_ }
 	{
 		for (auto&& [k, v] : other)
@@ -8043,7 +8052,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(table&& other) noexcept
-		: node{ std::move(other) },
+		: node( std::move(other) ),
 		map{ std::move(other.map) },
 		inline_{ other.inline_ }
 	{

@@ -502,7 +502,7 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_node_view<ValueType>)
+				if constexpr (is_node_view<ValueType>)
 				{
 					if (!val)
 						return { end(), false };
@@ -644,7 +644,7 @@ TOML_NAMESPACE_START
 					"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled."
 				);
 
-				if constexpr (impl::is_node_view<ValueType>)
+				if constexpr (is_node_view<ValueType>)
 				{
 					if (!val)
 						return { end(), false };

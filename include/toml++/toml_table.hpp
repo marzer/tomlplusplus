@@ -42,7 +42,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) noexcept
-		: node{ std::move(other) },
+		: node( other ),
 		inline_{ other.inline_ }
 	{
 		for (auto&& [k, v] : other)
@@ -55,7 +55,7 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	table::table(table&& other) noexcept
-		: node{ std::move(other) },
+		: node( std::move(other) ),
 		map{ std::move(other.map) },
 		inline_{ other.inline_ }
 	{

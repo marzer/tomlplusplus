@@ -319,8 +319,9 @@ is no longer necessary.
 	#define TOML_MAY_THROW				noexcept
 #endif
 
-#if TOML_GCC || TOML_CLANG
-	// fp charconv not in supported any version of gcc or clang as of 26/11/2020
+#if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
+	// not supported by any version of GCC or Clang as of 26/11/2020
+	// not supported by any version of ICC on Linux as of 11/01/2021
 	#define TOML_FLOAT_CHARCONV 0
 #endif
 #if defined(__EMSCRIPTEN__) || defined(__APPLE__)

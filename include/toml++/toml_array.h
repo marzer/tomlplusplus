@@ -182,7 +182,11 @@ TOML_IMPL_NAMESPACE_START
 
 		if constexpr (is_one_of<type, array, table>)
 		{
-			return new type{ std::forward<T>(val) };
+			return new type{ static_cast<T&&>(val) };
+		}
+		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
+		{
+			return new value<type>{ static_cast<T&&>(val) };
 		}
 		else
 		{
@@ -195,16 +199,18 @@ TOML_IMPL_NAMESPACE_START
 				is_native<type> || is_losslessly_convertible_to_native<type>,
 				"Value initializers must be (or be promotable to) one of the TOML value types"
 			);
+
+			using value_type = native_type_of<remove_cvref_t<T>>;
 			if constexpr (is_wide_string<T>)
 			{
 				#if TOML_WINDOWS_COMPAT
-				return new value{ narrow(std::forward<T>(val)) };
+				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
 				#else
 				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
 				#endif
 			}
 			else
-				return new value{ std::forward<T>(val) };
+				return new value<value_type>{ static_cast<T&&>(val) };
 		}
 	}
 
@@ -221,13 +227,13 @@ TOML_IMPL_NAMESPACE_START
 					return static_cast<toml::node*>(nullptr);
 			}
 
-			return std::forward<T>(val).visit([](auto&& concrete) noexcept
+			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
 			{
 				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
 			});
 		}
 		else
-			return make_node_specialized(std::forward<T>(val));
+			return make_node_specialized(static_cast<T&&>(val));
 	}
 
 	template <typename T>
@@ -310,7 +316,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			void emplace_back_if_not_empty_view(T&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<T>)
+				if constexpr (is_node_view<T>)
 				{
 					if (!val)
 						return;
@@ -511,7 +517,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, ElemType&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<ElemType>)
+				if constexpr (is_node_view<ElemType>)
 				{
 					if (!val)
 						return end();
@@ -561,7 +567,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
 			{
-				if constexpr (impl::is_node_view<ElemType>)
+				if constexpr (is_node_view<ElemType>)
 				{
 					if (!val)
 						return end();
@@ -610,7 +616,7 @@ TOML_NAMESPACE_START
 				{
 					auto count = distance;
 					using deref_type = decltype(*first);
-					if constexpr (impl::is_node_view<deref_type>)
+					if constexpr (is_node_view<deref_type>)
 					{
 						for (auto it = first; it != last; it++)
 							if (!(*it))
@@ -623,7 +629,7 @@ TOML_NAMESPACE_START
 					size_t i = start_idx;
 					for (auto it = first; it != last; it++)
 					{
-						if constexpr (impl::is_node_view<deref_type>)
+						if constexpr (is_node_view<deref_type>)
 						{
 							if (!(*it))
 								continue;
@@ -769,7 +775,7 @@ TOML_NAMESPACE_START
 			void resize(size_t new_size, ElemType&& default_init_val) noexcept
 			{
 				static_assert(
-					!impl::is_node_view<ElemType>,
+					!is_node_view<ElemType>,
 					"The default element type argument to toml::array::resize may not be toml::node_view."
 				);
 

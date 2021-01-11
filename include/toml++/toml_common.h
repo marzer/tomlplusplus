@@ -528,9 +528,6 @@ TOML_IMPL_NAMESPACE_START
 	template <>           struct node_type_getter<void>  { static constexpr auto value = node_type::none; };
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
-
-	template <typename T>
-	inline constexpr bool is_node_view = is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_IMPL_NAMESPACE_END
 
@@ -575,6 +572,10 @@ TOML_NAMESPACE_START
 	/// \brief	Metafunction for determining if a type is a toml::date_time or toml::value<date_time>.
 	template <typename T>
 	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
+
+	/// \brief	Metafunction for determining if a type is a toml::node_view.
+	template <typename T>
+	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_NAMESPACE_END
 

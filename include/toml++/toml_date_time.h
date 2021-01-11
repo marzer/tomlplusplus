@@ -313,7 +313,8 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		constexpr date_time() noexcept
 			: date{},
-			time{}
+			time{},
+			offset{} // TINAE - icc bugfix
 		{}
 
 		/// \brief	Constructs a local date-time.
@@ -323,7 +324,8 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		constexpr date_time(toml::date d, toml::time t) noexcept
 			: date{ d },
-			time{ t }
+			time{ t },
+			offset{} // TINAE - icc bugfix
 		{}
 
 		/// \brief	Constructs an offset date-time.

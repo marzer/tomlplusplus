@@ -250,7 +250,7 @@ TOML_NAMESPACE_START
 			/// \brief	Copy constructor.
 			TOML_NODISCARD_CTOR
 			value(const value& other) noexcept
-				: node{ other },
+				: node( other ),
 				val_{ other.val_ },
 				flags_{ other.flags_ }
 			{
@@ -262,7 +262,7 @@ TOML_NAMESPACE_START
 			/// \brief	Move constructor.
 			TOML_NODISCARD_CTOR
 			value(value&& other) noexcept
-				: node{ std::move(other) },
+				: node( std::move(other) ),
 				val_{ std::move(other.val_) },
 				flags_{ other.flags_ }
 			{
