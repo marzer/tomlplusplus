@@ -287,9 +287,9 @@ badges = [
 		'https://en.cppreference.com/w/cpp/compiler_support'
 	),
 	(
-		'TOML v1.0.0-rc.3',
+		'TOML v1.0.0',
 		'badge-TOML.svg',
-		'https://toml.io/en/v1.0.0-rc.3'
+		'https://toml.io/en/v1.0.0'
 	),
 	(None, None, None), # <br>
 	(

@@ -6,7 +6,7 @@
 //////////////////////////////////////////////////////////////////////
 /// 
 /// \section mainpage-features Features
-/// - Supports the latest [TOML](https://toml.io/) release ([v1.0.0-rc.3](https://toml.io/en/v1.0.0-rc.3)), plus
+/// - Supports the latest [TOML](https://toml.io/) release ([v1.0.0](https://toml.io/en/v1.0.0)), plus
 ///   optional support for some unreleased TOML features
 /// - Supports serializing to JSON
 /// - Proper UTF-8 handling (incl. BOM)
@@ -316,7 +316,7 @@
 /// 	auto tbl = toml::table{{
 /// 		{ "lib", "toml++" },
 /// 		{ "cpp", toml::array{ 17, 20, "and beyond" } },
-/// 		{ "toml", toml::array{ "1.0.0-rc.3", "and beyond" } },
+/// 		{ "toml", toml::array{ "1.0.0", "and beyond" } },
 /// 		{ "repo", "https://github.com/marzer/tomlplusplus/" },
 /// 		{ "author", toml::table{{
 /// 				{ "name", "Mark Gillard" },
@@ -343,7 +343,7 @@
 /// cpp = [ 17, 20, 'and beyond' ]
 /// lib = 'toml++'
 /// repo = 'https://github.com/marzer/tomlplusplus/'
-/// toml = [ '1.0.0-rc.3', 'and beyond' ]
+/// toml = [ '1.0.0', 'and beyond' ]
 /// 
 /// [author]
 /// github = 'https://github.com/marzer'
@@ -366,7 +366,7 @@
 ///     "lib" : "toml++", 
 ///     "repo" : "https://github.com/marzer/tomlplusplus/", 
 ///     "toml" : [
-///         "1.0.0-rc.3",
+///         "1.0.0",
 ///         "and beyond"
 ///     ]
 /// }

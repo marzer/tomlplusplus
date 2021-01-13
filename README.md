@@ -2,7 +2,7 @@
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
 [![C++17](docs/badge-C++17.svg)][cpp_compilers]
 [![C++20](docs/badge-C++20.svg)][cpp_compilers]
-[![TOML](docs/badge-TOML.svg)][v1.0.0-rc.3]
+[![TOML](docs/badge-TOML.svg)][v1.0.0]
 [![MIT license](docs/badge-license-MIT.svg)](./LICENSE)
 [![CircleCI](https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square)](https://circleci.com/gh/marzer/tomlplusplus)
 [![Mentioned in Awesome C++](docs/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
@@ -19,7 +19,7 @@
 # Library features
 
  - Header-only
- - Supports the latest [TOML] release ([v1.0.0-rc.3]), plus optional support for some [unreleased TOML language features]
+ - Supports the latest [TOML] release ([v1.0.0]), plus optional support for some [unreleased TOML language features]
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Proper UTF-8 handling (incl. BOM)
  - Works with or without exceptions
@@ -165,7 +165,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
 > ℹ _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
-### 🔹 **TOML v1.0.0-rc.3:**
+### 🔹 **TOML v1.0.0:**
 All features supported, including:
 - [#356]: Allow leading zeros in the exponent part of a float
 - [#567]: Control characters are not permitted in comments
@@ -230,7 +230,7 @@ though you're welcome to reach out via other means. In order of likely response 
 [TOML]: https://toml.io/
 [TOML master]: https://github.com/toml-lang/toml/blob/master/README.md
 [TOML issues list]: https://github.com/toml-lang/toml/issues
-[v1.0.0-rc.3]: https://toml.io/en/v1.0.0-rc.3
+[v1.0.0]: https://toml.io/en/v1.0.0
 [CONTRIBUTING]: ./CONTRIBUTING.md
 [LICENSE]: ./LICENSE
 [Flexible and Economical UTF-8 Decoder]: http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
