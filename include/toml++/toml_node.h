@@ -61,7 +61,7 @@ TOML_NAMESPACE_START
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
 	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
-	class TOML_INTERFACE TOML_API node
+	class TOML_ABSTRACT_BASE TOML_API node
 	{
 		private:
 			friend class TOML_PARSER_TYPENAME;
@@ -78,6 +78,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			impl::wrap_node<T>& ref_cast() & noexcept
 			{
 				return *reinterpret_cast<impl::wrap_node<T>*>(this);
@@ -86,6 +87,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			impl::wrap_node<T>&& ref_cast() && noexcept
 			{
 				return std::move(*reinterpret_cast<impl::wrap_node<T>*>(this));
@@ -94,6 +96,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			const impl::wrap_node<T>& ref_cast() const & noexcept
 			{
 				return *reinterpret_cast<const impl::wrap_node<T>*>(this);
@@ -106,8 +109,25 @@ TOML_NAMESPACE_START
 
 			virtual ~node() noexcept = default;
 
+
+
+			#if defined(DOXYGEN) || !TOML_ICC || TOML_ICC_CL
+
 			/// \brief	Returns the node's type identifier.
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
+
+			#else
+
+			[[nodiscard]] virtual node_type type() const noexcept
+			{
+				// Q: "what the fuck?"
+				// A: https://github.com/marzer/tomlplusplus/issues/83
+				//    tl,dr: go home ICC, you're drunk.
+
+				return type();
+			}
+
+			#endif
 
 			/// \brief	Returns true if this node is a table.
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
@@ -142,6 +162,7 @@ TOML_NAMESPACE_START
 			/// \returns	Returns true if this node is an instance of the specified type.
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			bool is() const noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -278,6 +299,7 @@ TOML_NAMESPACE_START
 			/// \remarks	Always returns `false` for empty tables and arrays.
 			template <typename ElemType = void>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			bool is_homogeneous() const noexcept
 			{
 				using type = impl::unwrap_node<ElemType>;
@@ -501,6 +523,7 @@ TOML_NAMESPACE_START
 			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::wrap_node<T>* as() noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -524,6 +547,7 @@ TOML_NAMESPACE_START
 			/// \brief	Gets a pointer to the node as a more specific node type (const overload).
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			const impl::wrap_node<T>* as() const noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -702,6 +726,7 @@ TOML_NAMESPACE_START
 
 			template <typename T, typename N>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			static decltype(auto) do_ref(N&& n) noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -794,6 +819,7 @@ TOML_NAMESPACE_START
 			/// \returns	A reference to the underlying data.
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::unwrap_node<T>& ref() & noexcept
 			{
 				return do_ref<T>(*this);
@@ -802,6 +828,7 @@ TOML_NAMESPACE_START
 			/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::unwrap_node<T>&& ref() && noexcept
 			{
 				return do_ref<T>(std::move(*this));
@@ -810,6 +837,7 @@ TOML_NAMESPACE_START
 			/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			const impl::unwrap_node<T>& ref() const& noexcept
 			{
 				return do_ref<T>(*this);

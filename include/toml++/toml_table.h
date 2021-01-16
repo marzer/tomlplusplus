@@ -47,6 +47,7 @@ TOML_IMPL_NAMESPACE_START
 					return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy));
 			}
 
+			TOML_NODISCARD_CTOR
 			table_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
@@ -59,8 +60,10 @@ TOML_IMPL_NAMESPACE_START
 
 		public:
 
+			TOML_NODISCARD_CTOR
 			table_iterator() noexcept = default;
 
+			TOML_NODISCARD_CTOR
 			table_iterator(const table_iterator& other) noexcept
 				: raw_{ other.raw_ }
 			{}

@@ -73,7 +73,7 @@
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
-				#define TOML_INTERFACE		__declspec(novtable)
+				#define TOML_ABSTRACT_BASE		__declspec(novtable)
 			#endif
 			#if __has_declspec_attribute(empty_bases)
 				#define TOML_EMPTY_BASES	__declspec(empty_bases)
@@ -125,7 +125,7 @@
 	#define TOML_NEVER_INLINE					__declspec(noinline)
 	#define TOML_ASSUME(cond)					__assume(cond)
 	#define TOML_UNREACHABLE					__assume(0)
-	#define TOML_INTERFACE						__declspec(novtable)
+	#define TOML_ABSTRACT_BASE					__declspec(novtable)
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
 
 #endif // msvc
@@ -374,8 +374,8 @@ is no longer necessary.
 	#define TOML_ATTR(...)
 #endif
 
-#ifndef TOML_INTERFACE
-	#define TOML_INTERFACE
+#ifndef TOML_ABSTRACT_BASE
+	#define TOML_ABSTRACT_BASE
 #endif
 
 #ifndef TOML_EMPTY_BASES

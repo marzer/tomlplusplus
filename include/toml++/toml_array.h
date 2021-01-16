@@ -22,6 +22,7 @@ TOML_IMPL_NAMESPACE_START
 			
 			mutable raw_iterator raw_;
 
+			TOML_NODISCARD_CTOR
 			array_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
@@ -40,8 +41,12 @@ TOML_IMPL_NAMESPACE_START
 			using difference_type = ptrdiff_t;
 			using iterator_category = typename std::iterator_traits<raw_iterator>::iterator_category;
 
+			TOML_NODISCARD_CTOR
 			array_iterator() noexcept = default;
+
+			TOML_NODISCARD_CTOR
 			array_iterator(const array_iterator&) noexcept = default;
+
 			array_iterator& operator = (const array_iterator&) noexcept = default;
 
 			array_iterator& operator++() noexcept // ++pre
@@ -429,6 +434,7 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+
 			template <typename ElemType = void>
 			[[nodiscard]]
 			bool is_homogeneous() const noexcept

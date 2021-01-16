@@ -174,7 +174,7 @@ TOML_IMPL_NAMESPACE_START
 		#define TOML_ERROR			err.emplace
 	#endif
 
-	struct TOML_INTERFACE utf8_reader_interface
+	struct TOML_ABSTRACT_BASE utf8_reader_interface
 	{
 		[[nodiscard]]
 		virtual const source_path_ptr& source_path() const noexcept = 0;

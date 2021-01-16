@@ -2659,6 +2659,9 @@ TOML_IMPL_NAMESPACE_START
 				return_if_error();
 
 				TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
+
+				// if it's a dotted kvp we need to spawn the sub-tables if necessary,
+				// and set the target table to the second-to-last one in the chain
 				if (kvp.key.segments.size() > 1_sz)
 				{
 					for (size_t i = 0; i < kvp.key.segments.size() - 1_sz; i++)
@@ -2671,13 +2674,14 @@ TOML_IMPL_NAMESPACE_START
 								new toml::table{}
 							).first->second.get();
 							dotted_key_tables.push_back(&child->ref_cast<table>());
-							dotted_key_tables.back()->inline_ = true;
 							child->source_ = kvp.value.get()->source_;
 						}
-						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
+						else if (!child->is_table()
+							|| !(find(dotted_key_tables, &child->ref_cast<table>()) || find(implicit_tables, &child->ref_cast<table>())))
 							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
 							child->source_.end = kvp.value.get()->source_.end;
+
 						return_if_error();
 						tab = &child->ref_cast<table>();
 					}

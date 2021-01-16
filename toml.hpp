@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.3.0
+// toml++ v2.3.1
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -108,7 +108,7 @@
 	#if defined(_MSC_VER) // msvc compat mode
 		#ifdef __has_declspec_attribute
 			#if __has_declspec_attribute(novtable)
-				#define TOML_INTERFACE		__declspec(novtable)
+				#define TOML_ABSTRACT_BASE		__declspec(novtable)
 			#endif
 			#if __has_declspec_attribute(empty_bases)
 				#define TOML_EMPTY_BASES	__declspec(empty_bases)
@@ -156,7 +156,7 @@
 	#define TOML_NEVER_INLINE					__declspec(noinline)
 	#define TOML_ASSUME(cond)					__assume(cond)
 	#define TOML_UNREACHABLE					__assume(0)
-	#define TOML_INTERFACE						__declspec(novtable)
+	#define TOML_ABSTRACT_BASE					__declspec(novtable)
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
 
 #endif // msvc
@@ -389,8 +389,8 @@ is no longer necessary.
 	#define TOML_ATTR(...)
 #endif
 
-#ifndef TOML_INTERFACE
-	#define TOML_INTERFACE
+#ifndef TOML_ABSTRACT_BASE
+	#define TOML_ABSTRACT_BASE
 #endif
 
 #ifndef TOML_EMPTY_BASES
@@ -527,7 +527,7 @@ is no longer necessary.
 
 #define TOML_LIB_MAJOR		2
 #define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		0
+#define TOML_LIB_PATCH		1
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -2175,7 +2175,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
 
 TOML_NAMESPACE_START
 {
-	class TOML_INTERFACE TOML_API node
+	class TOML_ABSTRACT_BASE TOML_API node
 	{
 		private:
 			friend class TOML_PARSER_TYPENAME;
@@ -2192,6 +2192,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			impl::wrap_node<T>& ref_cast() & noexcept
 			{
 				return *reinterpret_cast<impl::wrap_node<T>*>(this);
@@ -2200,6 +2201,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			impl::wrap_node<T>&& ref_cast() && noexcept
 			{
 				return std::move(*reinterpret_cast<impl::wrap_node<T>*>(this));
@@ -2208,6 +2210,7 @@ TOML_NAMESPACE_START
 			template <typename T>
 			[[nodiscard]]
 			TOML_ALWAYS_INLINE
+			TOML_ATTR(pure)
 			const impl::wrap_node<T>& ref_cast() const & noexcept
 			{
 				return *reinterpret_cast<const impl::wrap_node<T>*>(this);
@@ -2220,7 +2223,23 @@ TOML_NAMESPACE_START
 
 			virtual ~node() noexcept = default;
 
+			#if defined(DOXYGEN) || !TOML_ICC || TOML_ICC_CL
+
 			[[nodiscard]] virtual node_type type() const noexcept = 0;
+
+			#else
+
+			[[nodiscard]] virtual node_type type() const noexcept
+			{
+				// Q: "what the fuck?"
+				// A: https://github.com/marzer/tomlplusplus/issues/83
+				//    tl,dr: go home ICC, you're drunk.
+
+				return type();
+			}
+
+			#endif
+
 			[[nodiscard]] virtual bool is_table() const noexcept = 0;
 			[[nodiscard]] virtual bool is_array() const noexcept = 0;
 			[[nodiscard]] virtual bool is_value() const noexcept = 0;
@@ -2236,6 +2255,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			bool is() const noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -2280,6 +2300,7 @@ TOML_NAMESPACE_START
 
 			template <typename ElemType = void>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			bool is_homogeneous() const noexcept
 			{
 				using type = impl::unwrap_node<ElemType>;
@@ -2326,6 +2347,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::wrap_node<T>* as() noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -2348,6 +2370,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			const impl::wrap_node<T>* as() const noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -2520,6 +2543,7 @@ TOML_NAMESPACE_START
 
 			template <typename T, typename N>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			static decltype(auto) do_ref(N&& n) noexcept
 			{
 				using type = impl::unwrap_node<T>;
@@ -2563,6 +2587,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::unwrap_node<T>& ref() & noexcept
 			{
 				return do_ref<T>(*this);
@@ -2570,6 +2595,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			impl::unwrap_node<T>&& ref() && noexcept
 			{
 				return do_ref<T>(std::move(*this));
@@ -2577,6 +2603,7 @@ TOML_NAMESPACE_START
 
 			template <typename T>
 			[[nodiscard]]
+			TOML_ATTR(pure)
 			const impl::unwrap_node<T>& ref() const& noexcept
 			{
 				return do_ref<T>(*this);
@@ -3430,6 +3457,7 @@ TOML_IMPL_NAMESPACE_START
 
 			mutable raw_iterator raw_;
 
+			TOML_NODISCARD_CTOR
 			array_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
@@ -3448,8 +3476,12 @@ TOML_IMPL_NAMESPACE_START
 			using difference_type = ptrdiff_t;
 			using iterator_category = typename std::iterator_traits<raw_iterator>::iterator_category;
 
+			TOML_NODISCARD_CTOR
 			array_iterator() noexcept = default;
+
+			TOML_NODISCARD_CTOR
 			array_iterator(const array_iterator&) noexcept = default;
+
 			array_iterator& operator = (const array_iterator&) noexcept = default;
 
 			array_iterator& operator++() noexcept // ++pre
@@ -3738,6 +3770,7 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+
 			template <typename ElemType = void>
 			[[nodiscard]]
 			bool is_homogeneous() const noexcept
@@ -4039,6 +4072,7 @@ TOML_IMPL_NAMESPACE_START
 					return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy));
 			}
 
+			TOML_NODISCARD_CTOR
 			table_iterator(raw_mutable_iterator raw) noexcept
 				: raw_{ raw }
 			{}
@@ -4051,8 +4085,10 @@ TOML_IMPL_NAMESPACE_START
 
 		public:
 
+			TOML_NODISCARD_CTOR
 			table_iterator() noexcept = default;
 
+			TOML_NODISCARD_CTOR
 			table_iterator(const table_iterator& other) noexcept
 				: raw_{ other.raw_ }
 			{}
@@ -6929,7 +6965,7 @@ TOML_IMPL_NAMESPACE_START
 		#define TOML_ERROR			err.emplace
 	#endif
 
-	struct TOML_INTERFACE utf8_reader_interface
+	struct TOML_ABSTRACT_BASE utf8_reader_interface
 	{
 		[[nodiscard]]
 		virtual const source_path_ptr& source_path() const noexcept = 0;
@@ -11408,6 +11444,9 @@ TOML_IMPL_NAMESPACE_START
 				return_if_error();
 
 				TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
+
+				// if it's a dotted kvp we need to spawn the sub-tables if necessary,
+				// and set the target table to the second-to-last one in the chain
 				if (kvp.key.segments.size() > 1_sz)
 				{
 					for (size_t i = 0; i < kvp.key.segments.size() - 1_sz; i++)
@@ -11420,13 +11459,14 @@ TOML_IMPL_NAMESPACE_START
 								new toml::table{}
 							).first->second.get();
 							dotted_key_tables.push_back(&child->ref_cast<table>());
-							dotted_key_tables.back()->inline_ = true;
 							child->source_ = kvp.value.get()->source_;
 						}
-						else if (!child->is_table() || !find(dotted_key_tables, &child->ref_cast<table>()))
+						else if (!child->is_table()
+							|| !(find(dotted_key_tables, &child->ref_cast<table>()) || find(implicit_tables, &child->ref_cast<table>())))
 							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
 							child->source_.end = kvp.value.get()->source_.end;
+
 						return_if_error();
 						tab = &child->ref_cast<table>();
 					}
@@ -12021,6 +12061,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_ABI_NAMESPACE_BOOL
 	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_ABI_NAMESPACE_START
+	#undef TOML_ABSTRACT_BASE
 	#undef TOML_ALWAYS_INLINE
 	#undef TOML_ANON_NAMESPACE
 	#undef TOML_ANON_NAMESPACE_END
@@ -12063,7 +12104,6 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_IMPL_NAMESPACE_START
 	#undef TOML_INT128
 	#undef TOML_INTELLISENSE
-	#undef TOML_INTERFACE
 	#undef TOML_INTERNAL_LINKAGE
 	#undef TOML_INT_CHARCONV
 	#undef TOML_LANG_AT_LEAST
