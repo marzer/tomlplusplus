@@ -286,6 +286,10 @@ is no longer necessary.
 	#endif
 #endif
 
+#ifndef TOML_FORMAT_SETPRECISION
+    #define TOML_FORMAT_SETPRECISION 1
+#endif
+
 #ifndef TOML_CPP_VERSION
 	#define TOML_CPP_VERSION __cplusplus
 #endif
@@ -1912,7 +1916,11 @@ TOML_IMPL_NAMESPACE_START
 				{
 					std::ostringstream ss;
 					ss.imbue(std::locale::classic());
+
+					#if TOML_FORMAT_SETPRECISION
 					ss.precision(std::numeric_limits<T>::digits10 + 1);
+					#endif
+
 					if (hexfloat)
 						ss << std::hexfloat;
 					ss << val;
@@ -12146,6 +12154,7 @@ TOML_POP_WARNINGS // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_UNLIKELY
 	#undef TOML_UNREACHABLE
 	#undef TOML_USING_ANON_NAMESPACE
+	#undef TOML_FORMAT_SETPRECISION
 #endif
 
 #endif // INCLUDE_TOMLPLUSPLUS_H
