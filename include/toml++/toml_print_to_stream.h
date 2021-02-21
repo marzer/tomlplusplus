@@ -222,12 +222,31 @@ TOML_IMPL_NAMESPACE_START
 					return true;
 				};
 
+				static constexpr auto num_decimal_places = [](T number) {
+					// This prints numbers with up to 3 decimal places more coincely
+					constexpr double precision { 1e-4 };
+
+					T temp {};
+					int decimal_places {};
+					do {
+						number *= 10;
+						temp = number - int(number);
+
+						decimal_places++;
+					} while(temp > precision && decimal_places < std::numeric_limits<T>::digits10 + 1);
+
+					return decimal_places;
+				};
+
+				auto decimal_places = num_decimal_places(val);
+
+
 				#if TOML_FLOAT_CHARCONV
 				{
 					char buf[charconv_buffer_length<T>];
 					const auto res = hexfloat
-						? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
-						: std::to_chars(buf, buf + sizeof(buf), val);
+						? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex, decimal_places)
+						: std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::general, decimal_places);
 					const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
 					print_to_stream(str, stream);
 					if (!hexfloat && needs_decimal_point(str))
@@ -237,7 +256,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					std::ostringstream ss;
 					ss.imbue(std::locale::classic());
-					ss.precision(std::numeric_limits<T>::digits10 + 1);
+					ss.precision(decimal_places);
 					if (hexfloat)
 						ss << std::hexfloat;
 					ss << val;
@@ -409,17 +428,17 @@ TOML_NAMESPACE_START
 	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse("bar = 42"sv);
-	/// 
+	///
 	/// std::cout << "The value for 'bar' was found on "sv
 	///		<< tbl.get("bar")->source().begin()
 	///		<< "\n";
-	/// 
+	///
 	/// \ecpp
-	/// 
+	///
 	/// \out
 	/// The value for 'bar' was found on line 1, column 7
 	/// \eout
-	/// 
+	///
 	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 	/// \param 	lhs	The stream.
 	/// \param 	rhs	The source_position.
@@ -443,17 +462,17 @@ TOML_NAMESPACE_START
 	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse("bar = 42", "config.toml");
-	/// 
+	///
 	/// std::cout << "The value for 'bar' was found on "sv
 	///		<< tbl.get("bar")->source()
 	///		<< "\n";
-	/// 
+	///
 	/// \ecpp
-	/// 
+	///
 	/// \out
 	/// The value for 'bar' was found on line 1, column 7 of 'config.toml'
 	/// \eout
-	/// 
+	///
 	/// \tparam Char The output stream's underlying character type. Must be 1 byte in size.
 	/// \param 	lhs	The stream.
 	/// \param 	rhs	The source_position.
