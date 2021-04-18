@@ -99,4 +99,4 @@ TOML_NAMESPACE_START
 		return node_view<const node>(this);
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

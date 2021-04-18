@@ -1,17 +1,17 @@
-[![banner](docs/banner_small.png)][homepage]  
+[![banner](docs/images/banner_small.png)][homepage]  
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
-[![C++17](docs/badge-C++17.svg)][cpp_compilers]
-[![C++20](docs/badge-C++20.svg)][cpp_compilers]
-[![TOML](docs/badge-TOML.svg)][v1.0.0]
-[![MIT license](docs/badge-license-MIT.svg)](./LICENSE)
+[![C++17](docs/images/badge-C++17.svg)][cpp_compilers]
+[![C++20](docs/images/badge-C++20.svg)][cpp_compilers]
+[![TOML](docs/images/badge-TOML.svg)][v1.0.0]
+[![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
 [![CircleCI](https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square)](https://circleci.com/gh/marzer/tomlplusplus)
-[![Mentioned in Awesome C++](docs/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
+[![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 ====
 
 # toml++ homepage
 
 <p align="center">
-	<strong>✨ This README is fine, but the <a href="https://marzer.github.io/tomlplusplus/">toml++ homepage</a> is better. ✨</strong>
+	<strong>✨&#xFE0F; This README is fine, but the <a href="https://marzer.github.io/tomlplusplus/">toml++ homepage</a> is better. ✨&#xFE0F;</strong>
 </p>
 
 <br>
@@ -32,7 +32,7 @@
 
 # Basic usage
 
-> ℹ _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets
+> ℹ&#xFE0F; _The following example favours brevity. If you'd prefer full API documentation and lots of specific code snippets
 instead, visit the project [homepage]_
 
 Given a [TOML] file `configuration.toml` containing the following:
@@ -89,11 +89,11 @@ You'll find some more code examples in the `examples` directory, and plenty more
 # Adding toml++ to your project
 `toml++` comes in two flavours: Single-header and Regular. The API is the same for both. 
 
-### 🍦 Single-header flavour
+### 🍦&#xFE0F; Single-header flavour
 1. Drop `toml.hpp` wherever you like in your source tree
 2. There is no step two
 
-### 🍨 Regular flavour
+### 🍨&#xFE0F; Regular flavour
 1. Add `tomlplusplus/include` to your include paths
 2. `#include <toml++/toml.h>`
 
@@ -108,7 +108,7 @@ depends: [
     'tomlpp^2.3.0',
 ]
 ```
-> ℹ _[What is DDS?](https://dds.pizza/)_
+> ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
 
 ### Vcpkg
 ```
@@ -142,7 +142,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_UNRELEASED_FEATURES` |     boolean    | `0`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].                        |
 | `TOML_WINDOWS_COMPAT`      |     boolean    | `1` on Windows                    | Enables support for transparent conversion between wide and narrow strings in some places when building for Windows. |
 
-> ℹ _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
+> ℹ&#xFE0F; _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
 linking incompatible combinations together._
 
 <br>
@@ -155,7 +155,7 @@ support for a number of unreleased features from the [TOML master] and some sane
 The library advertises the most recent numbered language version it fully supports via the preprocessor
 defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
-### 🔸 **Unreleased language features:**
+### 🔸&#xFE0F; **Unreleased language features:**
 - [#516]: Allow newlines and trailing commas in inline tables
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
@@ -163,9 +163,9 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#687]: Relax bare key restrictions to allow additional unicode characters
 - [#709]: Include an \xHH escape code sequence
 
-> ℹ _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
+> ℹ&#xFE0F; _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
-### 🔹 **TOML v1.0.0:**
+### 🔹&#xFE0F; **TOML v1.0.0:**
 All features supported, including:
 - [#356]: Allow leading zeros in the exponent part of a float
 - [#567]: Control characters are not permitted in comments
@@ -173,7 +173,7 @@ All features supported, including:
 - [#665]: Make arrays heterogeneous
 - [#766]: Allow comments before commas in arrays
 
-### 🔹 **TOML v0.5.0:**
+### 🔹&#xFE0F; **TOML v0.5.0:**
 All features supported.
 
 <br>

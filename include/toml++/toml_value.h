@@ -66,9 +66,10 @@
 		TOML_SA_LIST_END
 #endif // !DOXYGEN
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename T, typename...>
@@ -161,7 +162,8 @@ TOML_IMPL_NAMESPACE_START
 		return { static_cast<T>(val) };
 	}
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -186,6 +188,8 @@ TOML_NAMESPACE_START
 
 		private:
 			friend class TOML_PARSER_TYPENAME;
+
+			/// \cond
 
 			template <typename T, typename U>
 			[[nodiscard]]
@@ -213,6 +217,8 @@ TOML_NAMESPACE_START
 				TOML_VALUE_DESTROYED;
 			}
 			#endif
+
+			/// \endcond
 
 		public:
 
@@ -299,6 +305,9 @@ TOML_NAMESPACE_START
 			}
 			#endif
 
+			/// \name Type checks
+			/// @{
+
 			/// \brief	Returns the value's node type identifier.
 			///
 			/// \returns	One of:
@@ -323,22 +332,6 @@ TOML_NAMESPACE_START
 			[[nodiscard]] bool is_date() const noexcept override { return std::is_same_v<value_type, date>; }
 			[[nodiscard]] bool is_time() const noexcept override { return std::is_same_v<value_type, time>; }
 			[[nodiscard]] bool is_date_time() const noexcept override { return std::is_same_v<value_type, date_time>; }
-
-			[[nodiscard]] value<std::string>* as_string() noexcept override { return as_value<std::string>(this); }
-			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
-			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
-			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
-			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
-			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
-			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
-
-			[[nodiscard]] const value<std::string>* as_string() const noexcept override { return as_value<std::string>(this); }
-			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
-			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
-			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
-			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
-			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
-			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
 			[[nodiscard]]
 			bool is_homogeneous(node_type ntype) const noexcept override
@@ -384,6 +377,32 @@ TOML_NAMESPACE_START
 					return impl::node_type_of<type> == impl::node_type_of<value_type>;
 			}
 
+			/// @}
+
+			/// \name Type casts
+			/// @{
+
+			[[nodiscard]] value<std::string>* as_string() noexcept override { return as_value<std::string>(this); }
+			[[nodiscard]] value<int64_t>* as_integer() noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] value<double>* as_floating_point() noexcept override { return as_value<double>(this); }
+			[[nodiscard]] value<bool>* as_boolean() noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] value<date>* as_date() noexcept override { return as_value<date>(this); }
+			[[nodiscard]] value<time>* as_time() noexcept override { return as_value<time>(this); }
+			[[nodiscard]] value<date_time>* as_date_time() noexcept override { return as_value<date_time>(this); }
+
+			[[nodiscard]] const value<std::string>* as_string() const noexcept override { return as_value<std::string>(this); }
+			[[nodiscard]] const value<int64_t>* as_integer() const noexcept override { return as_value<int64_t>(this); }
+			[[nodiscard]] const value<double>* as_floating_point() const noexcept override { return as_value<double>(this); }
+			[[nodiscard]] const value<bool>* as_boolean() const noexcept override { return as_value<bool>(this); }
+			[[nodiscard]] const value<date>* as_date() const noexcept override { return as_value<date>(this); }
+			[[nodiscard]] const value<time>* as_time() const noexcept override { return as_value<time>(this); }
+			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
+
+			/// @}
+
+			/// \name Value retrieval
+			/// @{
+
 			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] value_type& get() & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
@@ -405,6 +424,11 @@ TOML_NAMESPACE_START
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
+			/// @}
+
+			/// \name Metadata
+			/// @{
+
 			/// \brief	Returns the metadata flags associated with this value.
 			[[nodiscard]] value_flags flags() const noexcept
 			{
@@ -418,6 +442,8 @@ TOML_NAMESPACE_START
 				flags_ = new_flags;
 				return *this;
 			}
+
+			/// @}
 
 			/// \brief	Prints the value out to a stream as formatted TOML.
 			template <typename Char, typename T>
@@ -441,6 +467,9 @@ TOML_NAMESPACE_START
 				return *this;
 			}
 
+			/// \name Equality
+			/// @{
+
 			/// \brief	Value equality operator.
 			[[nodiscard]]
 			friend bool operator == (const value& lhs, value_arg rhs) noexcept
@@ -456,7 +485,7 @@ TOML_NAMESPACE_START
 				}
 				return lhs.val_ == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, )
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, );
 
 			/// \brief	Value less-than operator.
 			[[nodiscard]] friend bool operator <  (const value& lhs, value_arg rhs) noexcept { return lhs.val_ < rhs; }
@@ -510,8 +539,10 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() < rhs.get()` <br>
-			/// 			<strong><em>Different value types:</em></strong> `lhs.type() < rhs.type()`
+			/// \returns	\conditional_return{Same value types}
+			///				`lhs.get() < rhs.get()`
+			/// 			\conditional_return{Different value types}
+			///				`lhs.type() < rhs.type()`
 			template <typename T>
 			[[nodiscard]]
 			friend bool operator < (const value& lhs, const value<T>& rhs) noexcept
@@ -527,8 +558,10 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() <= rhs.get()` <br>
-			/// 			<strong><em>Different value types:</em></strong> `lhs.type() <= rhs.type()`
+			/// \returns	\conditional_return{Same value types}
+			///				`lhs.get() <= rhs.get()`
+			/// 			\conditional_return{Different value types}
+			///				`lhs.type() <= rhs.type()`
 			template <typename T>
 			[[nodiscard]]
 			friend bool operator <= (const value& lhs, const value<T>& rhs) noexcept
@@ -544,8 +577,10 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() > rhs.get()` <br>
-			/// 			<strong><em>Different value types:</em></strong> `lhs.type() > rhs.type()`
+			/// \returns	\conditional_return{Same value types}
+			///				`lhs.get() > rhs.get()`
+			/// 			\conditional_return{Different value types}
+			///				`lhs.type() > rhs.type()`
 			template <typename T>
 			[[nodiscard]]
 			friend bool operator > (const value& lhs, const value<T>& rhs) noexcept
@@ -561,8 +596,10 @@ TOML_NAMESPACE_START
 			/// \param 	lhs	The LHS toml::value.
 			/// \param 	rhs	The RHS toml::value.
 			///
-			/// \returns	<strong><em>Same value types:</em></strong> `lhs.get() >= rhs.get()` <br>
-			/// 			<strong><em>Different value types:</em></strong> `lhs.type() >= rhs.type()`
+			/// \returns	\conditional_return{Same value types}
+			///				`lhs.get() >= rhs.get()`
+			/// 			\conditional_return{Different value types}
+			///				`lhs.type() >= rhs.type()`
 			template <typename T>
 			[[nodiscard]]
 			friend bool operator >= (const value& lhs, const value<T>& rhs) noexcept
@@ -572,14 +609,17 @@ TOML_NAMESPACE_START
 				else
 					return impl::node_type_of<value_type> >= impl::node_type_of<T>;
 			}
+
+			/// @}
 	};
+
+	/// \cond
 	template <typename T>
 	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
 
-	#ifndef DOXYGEN
-	TOML_PUSH_WARNINGS
-	TOML_DISABLE_INIT_WARNINGS
-	TOML_DISABLE_SWITCH_WARNINGS
+	TOML_PUSH_WARNINGS;
+	TOML_DISABLE_INIT_WARNINGS;
+	TOML_DISABLE_SWITCH_WARNINGS;
 
 	#if !TOML_HEADER_ONLY
 		extern template class TOML_API value<std::string>;
@@ -924,9 +964,9 @@ TOML_NAMESPACE_START
 
 	#endif // !TOML_HEADER_ONLY
 
-	TOML_POP_WARNINGS // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
-	#endif // !DOXYGEN
+	TOML_POP_WARNINGS; // TOML_DISABLE_INIT_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
+	/// \endcond
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_POP_WARNINGS; // TOML_DISABLE_ARITHMETIC_WARNINGS

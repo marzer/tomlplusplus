@@ -355,4 +355,4 @@ TOML_NAMESPACE_START
 		return is_homogeneous(node_type::table);
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

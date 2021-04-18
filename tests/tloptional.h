@@ -19,7 +19,7 @@
 #if __has_include(<tloptional/include/tl/optional.hpp>)
 	#include <tloptional/include/tl/optional.hpp>
 #else
-	#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init extern/tloptional")
+	#error  TartanLlama/optional is missing! You probably need to fetch submodules ("git submodule update --init --depth 1 external/tloptional")
 #endif
 
 #ifdef __clang__

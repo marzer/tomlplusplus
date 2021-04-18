@@ -4,19 +4,19 @@ jobs:
 
     debug_clang:
         docker:
-            - image: marzer/misc_cpp17_dev:0.2.0
+            - image: marzer/cpp_dev:0.1.0
         resource_class: large
         steps:
             - checkout
             - run:
                 name: Checking toml.hpp
                 command: |
-                    cd python && python3 ci_single_header_check.py
+                    cd tools && python3 ci_single_header_check.py
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init extern/Catch2
-                    git submodule update --init extern/tloptional
+                    git submodule update --init --depth 1 external/Catch2
+                    git submodule update --init --depth 1 external/tloptional
             - run:
                 name: Building and testing with clang
                 command: |
@@ -25,19 +25,19 @@ jobs:
 
     release_clang:
         docker:
-            - image: marzer/misc_cpp17_dev:0.2.0
+            - image: marzer/cpp_dev:0.1.0
         resource_class: large
         steps:
             - checkout
             - run:
                 name: Checking toml.hpp
                 command: |
-                    cd python && python3 ci_single_header_check.py
+                    cd tools && python3 ci_single_header_check.py
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init extern/Catch2
-                    git submodule update --init extern/tloptional
+                    git submodule update --init --depth 1 external/Catch2
+                    git submodule update --init --depth 1 external/tloptional
             - run:
                 name: Building and testing with clang
                 command: |
@@ -46,15 +46,15 @@ jobs:
 
     debug_gcc:
         docker:
-            - image: marzer/misc_cpp17_dev:0.2.0
+            - image: marzer/cpp_dev:0.1.0
         resource_class: large
         steps:
             - checkout
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init extern/Catch2
-                    git submodule update --init extern/tloptional
+                    git submodule update --init --depth 1 external/Catch2
+                    git submodule update --init --depth 1 external/tloptional
             - run:
                 name: Building and testing with gcc
                 command: |
@@ -63,15 +63,15 @@ jobs:
 
     release_gcc:
         docker:
-            - image: marzer/misc_cpp17_dev:0.2.0
+            - image: marzer/cpp_dev:0.1.0
         resource_class: large
         steps:
             - checkout
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init extern/Catch2
-                    git submodule update --init extern/tloptional
+                    git submodule update --init --depth 1 external/Catch2
+                    git submodule update --init --depth 1 external/tloptional
             - run:
                 name: Building and testing with gcc
                 command: |
@@ -80,18 +80,22 @@ jobs:
 
     generate_dox:
         docker:
-            - image: marzer/misc_cpp17_dev:0.2.0
+            - image: marzer/cpp_dev:0.1.0
         resource_class: small
         steps:
             - checkout
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init extern/mcss
+                    git submodule update --init --depth 1 --recursive external/dox
+            - run:
+                name: Installing dependencies
+                command: |
+                    pip3 install --upgrade -r external/dox/requirements.txt
             - run:
                 name: Generating documentation
                 command: |
-                    cd python && python3 generate_documentation.py
+                    cd docs && python3 ../external/dox --verbose
             - persist_to_workspace:
                 root: docs
                 paths: html

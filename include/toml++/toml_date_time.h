@@ -400,7 +400,7 @@ TOML_NAMESPACE_START
 		}
 	};
 
-	TOML_ABI_NAMESPACE_END // TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	TOML_ABI_NAMESPACE_END; // TOML_HAS_CUSTOM_OPTIONAL_TYPE
 
 	/// \brief	Prints a date_time out to a stream in RFC 3339 format.
 	/// \detail \cpp
@@ -425,4 +425,4 @@ TOML_NAMESPACE_START
 		extern template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
 	#endif
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

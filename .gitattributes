@@ -1,26 +1,61 @@
-*                    text=auto   encoding=UTF-8
-*.c                  text        encoding=UTF-8      eol=lf
-*.cpp                text        encoding=UTF-8      eol=lf
-*.cxx                text        encoding=UTF-8      eol=lf
-*.dox                text        encoding=UTF-8      eol=lf
-*.h                  text        encoding=UTF-8      eol=lf
-*.hpp                text        encoding=UTF-8      eol=lf
-*.hxx                text        encoding=UTF-8      eol=lf
-*.inl                text        encoding=UTF-8      eol=lf
-*.toml               text=auto   encoding=UTF-8
-*.xml                text=auto   encoding=UTF-8
-*.py                 text        encoding=UTF-8      eol=lf
-*.natvis             text        encoding=UTF-8      eol=crlf
-*.props              text        encoding=UTF-8      eol=crlf
-*.vcxproj            text        encoding=UTF-8      eol=crlf
-*.sln                text        encoding=UTF-8-BOM  eol=crlf
-*.runsettings        text        encoding=UTF-8      eol=crlf
-*.md                 text        encoding=UTF-8      eol=lf
-*.css                text        encoding=UTF-8      eol=lf
-.gitignore           text        encoding=UTF-8      eol=lf
-.gitattributes       text        encoding=UTF-8      eol=lf
-.editorconfig        text        encoding=UTF-8      eol=lf
-meson.build          text        encoding=UTF-8      eol=lf
-meson_options.txt    text        encoding=UTF-8      eol=lf
-Doxyfile             text        encoding=UTF-8      eol=lf
-Doxyfile-mcss        text        encoding=UTF-8      eol=lf
+*                  text=auto                encoding=UTF-8
+
+*.c                text         eol=lf      encoding=UTF-8
+*.cpp              text         eol=lf      encoding=UTF-8
+*.css              text         eol=lf      encoding=UTF-8
+*.cxx              text         eol=lf      encoding=UTF-8
+*.dox              text         eol=lf      encoding=UTF-8
+*.h                text         eol=lf      encoding=UTF-8
+*.hint             text         eol=lf      encoding=UTF-8
+*.hlsl             text         eol=crlf    encoding=UTF-8
+*.hpp              text         eol=lf      encoding=UTF-8
+*.htm              text         eol=lf      encoding=UTF-8
+*.html             text         eol=lf      encoding=UTF-8
+*.hxx              text         eol=lf      encoding=UTF-8
+*.ini              text         eol=lf      encoding=UTF-8
+*.inl              text         eol=lf      encoding=UTF-8
+*.md               text         eol=lf      encoding=UTF-8
+*.natvis           text         eol=lf      encoding=UTF-8
+*.props            text         eol=lf      encoding=UTF-8
+*.py               text         eol=lf      encoding=UTF-8
+*.rc               text         eol=crlf    encoding=UTF-8
+*.runsettings      text         eol=lf      encoding=UTF-8
+*.sln              text         eol=crlf    encoding=UTF-8-BOM
+*.toml             text         eol=lf      encoding=UTF-8
+*.txt              text         eol=lf      encoding=UTF-8
+*.vcxproj          text         eol=crlf    encoding=UTF-8-BOM
+*.vcxproj.filters  text         eol=crlf    encoding=UTF-8-BOM
+*.xml              text         eol=lf      encoding=UTF-8
+.clang-format      text         eol=lf      encoding=UTF-8
+.editorconfig      text         eol=lf      encoding=UTF-8
+.gitattributes     text         eol=lf      encoding=UTF-8
+.gitignore         text         eol=lf      encoding=UTF-8
+Doxyfile           text         eol=lf      encoding=UTF-8
+Doxyfile-mcss      text         eol=lf      encoding=UTF-8
+meson.build        text         eol=lf      encoding=UTF-8
+
+*.cs            eol=lf diff=csharp
+
+*.doc           diff=astextplain
+*.DOC           diff=astextplain
+*.docx          diff=astextplain
+*.DOCX          diff=astextplain
+*.dot           diff=astextplain
+*.DOT           diff=astextplain
+*.pdf           diff=astextplain
+*.PDF           diff=astextplain
+*.rtf           diff=astextplain
+*.RTF           diff=astextplain
+
+*.ai               binary
+*.bin              binary
+*.bmp              binary
+*.dat              binary
+*.gif              binary
+*.ico              binary
+*.jpeg             binary
+*.jpg              binary
+*.png              binary
+*.psd              binary
+*.rc               binary
+*.xlsx             binary

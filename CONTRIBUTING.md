@@ -13,7 +13,8 @@ If you wish to submit a PR, please be aware that:
 1. Make your changes as necessary
     - If you've added a new header file that isn't going to be transitively included by one of the
         others, add an include directive to `include/toml++/toml.h`
-2. Run `python/generate_single_header.py`
+2. Install the prerequisite python packages: `pip3 install -r tools/requirements.txt`
+3. Run `tools/generate_single_header.py`
 
 <br>
 
@@ -21,8 +22,7 @@ If you wish to submit a PR, please be aware that:
 Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
 The first time you want to begin testing you'll need to ensure submodules have been fetched:  
 ```bash
-git submodule update --init extern/Catch2
-git submodule update --init extern/tloptional
+git submodule update --init --depth 1 external/Catch2 external/tloptional
 ```
 
 ### Testing on Windows with Visual Studio

@@ -46,7 +46,7 @@ TOML_NAMESPACE_START
 	/// parse_result is also safe since `begin()` and `end()` return the same iterator and will not lead to any
 	/// dereferences and iterations.
 	/// 
-	/// \attention <strong>This type only exists when exceptions are not enabled.</strong>
+	/// \availability <strong>This type only exists when exceptions are disabled.</strong>
 	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
 	/// #if TOML_EXCEPTIONS
 	///		using parse_result = table;
@@ -236,14 +236,14 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table.
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key The key used for the lookup.
 			///
 			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
 			/// 			or an empty node view.
 			///
 			/// \see toml::node_view
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]]
 			node_view<node> operator[] (std::wstring_view key) noexcept
 			{
@@ -252,14 +252,14 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key The key used for the lookup.
 			///
 			/// \returns	A view of the value at the given key if parsing was successful and a matching key existed,
 			/// 			or an empty node view.
 			///
 			/// \see toml::node_view
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]]
 			node_view<const node> operator[] (std::wstring_view key) const noexcept
 			{
@@ -330,19 +330,20 @@ TOML_NAMESPACE_START
 
 	#endif
 
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 	
 	[[nodiscard]] TOML_API parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 	
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
 
 #if TOML_EXCEPTIONS
 	#define TOML_THROW_PARSE_ERROR(msg, path)												\
@@ -355,6 +356,7 @@ TOML_IMPL_NAMESPACE_END
 			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
 		}}
 #endif
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -377,8 +379,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
@@ -400,8 +404,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW;
@@ -420,15 +426,17 @@ TOML_NAMESPACE_START
 	/// 3
 	/// \eout
 	/// 
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	/// 
-	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
@@ -454,8 +462,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
@@ -477,8 +487,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW;
@@ -490,22 +502,23 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse(u8"a = 3"sv, L"foo.toml");
 	/// std::cout << tbl["a"] << "\n";
-	/// 
 	/// \ecpp
 	/// 
 	/// \out
 	/// 3
 	/// \eout
 	/// 
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// 
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	/// 
-	/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
@@ -535,8 +548,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	template <typename Char>
 	[[nodiscard]]
 	inline parse_result parse(std::basic_istream<Char>& doc, std::string_view source_path = {}) TOML_MAY_THROW
@@ -570,8 +585,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	template <typename Char>
 	[[nodiscard]]
 	inline parse_result parse(std::basic_istream<Char>& doc, std::string&& source_path) TOML_MAY_THROW
@@ -600,6 +617,8 @@ TOML_NAMESPACE_START
 	/// \out
 	/// 3
 	/// \eout
+	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	/// 
 	/// \tparam	Char			The stream's underlying character type. Must be 1 byte in size.
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
@@ -607,10 +626,10 @@ TOML_NAMESPACE_START
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
-	///
-	///  \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	template <typename Char>
 	[[nodiscard]]
 	inline parse_result parse(std::basic_istream<Char>& doc, std::wstring_view source_path) TOML_MAY_THROW
@@ -641,8 +660,10 @@ TOML_NAMESPACE_START
 	/// \tparam	Char			The path's character type.
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
-	/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-	/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	/// 
 	/// \attention You must `#include <fstream>` to use this function (toml++ does not transitively include it for you).
 	template <typename Char, typename StreamChar = char>
@@ -733,7 +754,7 @@ TOML_NAMESPACE_START
 		return parse_file(std::basic_string_view<Char>{ file_path });
 	}
 
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
 	inline namespace literals
 	{
@@ -756,8 +777,10 @@ TOML_NAMESPACE_START
 		/// \param 	str	The string data. Must be valid UTF-8.
 		/// \param 	len	The string length.
 		///
-		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+		/// \returns	\conditional_return{With exceptions}
+		///				A toml::table.
+		/// 			\conditional_return{Without exceptions}
+		///				A toml::parse_result.
 		[[nodiscard]]
 		TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
@@ -781,17 +804,19 @@ TOML_NAMESPACE_START
 		/// \param 	str	The string data. Must be valid UTF-8.
 		/// \param 	len	The string length.
 		///
-		/// \returns <strong><em>With exceptions:</em></strong> A toml::table. <br>
-		/// 		 <strong><em>Without exceptions:</em></strong> A toml::parse_result detailing the parsing outcome.
+		/// \returns	\conditional_return{With exceptions}
+		///				A toml::table.
+		/// 			\conditional_return{Without exceptions}
+		///				A toml::parse_result.
 		[[nodiscard]]
 		TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
 		#endif // __cpp_lib_char8_t
 
-		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
 #undef TOML_THROW_PARSE_ERROR

@@ -6,6 +6,7 @@
 #pragma once
 #include "toml_value.h"
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <bool IsConst>
@@ -165,7 +166,7 @@ TOML_IMPL_NAMESPACE_START
 				return *(raw_ + idx)->get();
 			}
 
-			TOML_DISABLE_WARNINGS
+			TOML_DISABLE_WARNINGS;
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			operator array_iterator<true>() const noexcept
@@ -173,7 +174,7 @@ TOML_IMPL_NAMESPACE_START
 				return array_iterator<true>{ raw_ };
 			}
 
-			TOML_ENABLE_WARNINGS
+			TOML_ENABLE_WARNINGS;
 	};
 
 	template <typename T>
@@ -248,7 +249,8 @@ TOML_IMPL_NAMESPACE_START
 		return make_node(std::move(val.value));
 	}
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -313,6 +315,8 @@ TOML_NAMESPACE_START
 		: public node
 	{
 		private:
+			/// \cond
+
 			friend class TOML_PARSER_TYPENAME;
 			std::vector<std::unique_ptr<node>> elements;
 
@@ -333,6 +337,11 @@ TOML_NAMESPACE_START
 			void lh_ctor() noexcept;
 			void lh_dtor() noexcept;
 			#endif
+
+			[[nodiscard]] size_t total_leaf_count() const noexcept;
+
+			void flatten_child(array&& child, size_t& dest_index) noexcept;
+			/// \endcond
 
 		public:
 
@@ -423,6 +432,9 @@ TOML_NAMESPACE_START
 				#endif
 			}
 
+			/// \name Type checks
+			/// @{
+
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;
 			[[nodiscard]] bool is_array() const noexcept override;
@@ -448,6 +460,11 @@ TOML_NAMESPACE_START
 				);
 				return is_homogeneous(impl::node_type_of<type>);
 			}
+
+			/// @}
+
+			/// \name Array operations
+			/// @{
 
 			/// \brief	Gets a reference to the element at a specific index.
 			[[nodiscard]] node& operator[] (size_t index) noexcept;
@@ -512,10 +529,9 @@ TOML_NAMESPACE_START
 			/// \param 	pos			The insertion position.
 			/// \param 	val			The node or value being inserted.
 			///
-			/// \returns <strong><em>Valid input:</em></strong><br>
-			/// 		 An iterator to the newly-inserted element.
-			/// 		 <br><br>
-			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// \returns \conditional_return{Valid input}
+			///			 An iterator to the newly-inserted element.
+			///			 \conditional_return{Input is an empty toml::node_view}
 			/// 		 end()
 			/// 
 			/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
@@ -559,13 +575,11 @@ TOML_NAMESPACE_START
 			/// \param 	count		The number of times the node or value should be inserted.
 			/// \param 	val			The node or value being inserted.
 			///
-			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// \returns \conditional_return{Valid input}
 			/// 		 An iterator to the newly-inserted element.
-			/// 		 <br><br>
-			/// 		 <strong><em>`count == 0`:</em></strong><br>
+			/// 		 \conditional_return{count == 0}
 			/// 		 A copy of pos
-			/// 		 <br><br>
-			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
+			/// 		 \conditional_return{Input is an empty toml::node_view}
 			/// 		 end()
 			/// 
 			/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
@@ -604,13 +618,11 @@ TOML_NAMESPACE_START
 			/// \param 	first	Iterator to the first node or value being inserted.
 			/// \param 	last	Iterator to the one-past-the-last node or value being inserted.
 			///
-			/// \returns <strong><em>Valid input:</em></strong><br>
+			/// \returns \conditional_return{Valid input}
 			/// 		 An iterator to the first newly-inserted element.
-			/// 		 <br><br>
-			/// 		 <strong><em>`first >= last`:</em></strong><br>
+			/// 		 \conditional_return{first >= last}
 			/// 		 A copy of pos
-			/// 		 <br><br>
-			/// 		 <strong><em>All objects in the range were empty toml::node_views:</em></strong><br>
+			/// 		 \conditional_return{All objects in the range were empty toml::node_views}
 			/// 		 A copy of pos
 			template <typename Iter>
 			iterator insert(const_iterator pos, Iter first, Iter last) noexcept
@@ -656,14 +668,12 @@ TOML_NAMESPACE_START
 			/// \param 	pos			The insertion position.
 			/// \param 	ilist		An initializer list containing the values to be inserted.
 			///
-			/// \returns <strong><em>Valid input:</em></strong><br>
-			/// 		 An iterator to the first newly-inserted element.
-			/// 		 <br><br>
-			/// 		 <strong><em>`ilist.size() == 0`:</em></strong><br>
-			/// 		 A copy of pos
-			/// 		 <br><br>
-			/// 		 <strong><em>All objects in the list were empty toml::node_views:</em></strong><br>
-			/// 		 A copy of pos
+			/// \returns \conditional_return{Valid input}
+			///			 An iterator to the first newly-inserted element.
+			/// 		 \conditional_return{Input list is empty}
+			///			 A copy of pos
+			/// 		 \conditional_return{All objects in the list were empty toml::node_views}
+			///			 A copy of pos
 			template <typename ElemType>
 			iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
 			{
@@ -955,6 +965,40 @@ TOML_NAMESPACE_START
 				return nullptr;
 			}
 
+			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
+			/// 
+			/// \detail \cpp
+			/// 
+			/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
+			/// std::cout << arr << "\n";
+			/// 
+			/// arr.flatten();
+			/// std::cout << arr << "\n";
+			/// 
+			/// \ecpp
+			/// 
+			/// \out
+			/// [ 1, 2, [ 3, 4, [ 5 ] ], 6, [] ]
+			/// [ 1, 2, 3, 4, 5, 6 ]
+			/// \eout
+			/// 
+			/// \remarks	Arrays inside child tables are not flattened.
+			/// 
+			/// \returns A reference to the array.
+			array& flatten()&;
+
+			/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
+			/// \returns An rvalue reference to the array.
+			array&& flatten()&&
+			{
+				return static_cast<toml::array&&>(this->flatten());
+			}
+
+			/// @}
+
+			/// \name Equality
+			/// @{
+
 			/// \brief	Equality operator.
 			///
 			/// \param 	lhs	The LHS array.
@@ -999,10 +1043,6 @@ TOML_NAMESPACE_START
 				return true;
 			}
 
-			[[nodiscard]] size_t total_leaf_count() const noexcept;
-
-			void flatten_child(array&& child, size_t& dest_index) noexcept;
-
 		public:
 
 			/// \brief	Initializer list equality operator.
@@ -1012,7 +1052,7 @@ TOML_NAMESPACE_START
 			{
 				return container_equality(lhs, rhs);
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>);
 
 			/// \brief	Vector equality operator.
 			template <typename T>
@@ -1021,36 +1061,9 @@ TOML_NAMESPACE_START
 			{
 				return container_equality(lhs, rhs);
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>);
 
-			/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
-			/// 
-			/// \detail \cpp
-			/// 
-			/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
-			/// std::cout << arr << "\n";
-			/// 
-			/// arr.flatten();
-			/// std::cout << arr << "\n";
-			/// 
-			/// \ecpp
-			/// 
-			/// \out
-			/// [ 1, 2, [ 3, 4, [ 5 ] ], 6, [] ]
-			/// [ 1, 2, 3, 4, 5, 6 ]
-			/// \eout
-			/// 
-			/// \remarks	Arrays inside child tables are not flattened.
-			/// 
-			/// \returns A reference to the array.
-			array& flatten() &;
-
-			/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
-			/// \returns An rvalue reference to the array.
-			array&& flatten() &&
-			{
-				return static_cast<toml::array&&>(this->flatten());
-			}
+			/// @}
 
 			/// \brief	Prints the array out to a stream as formatted TOML.
 			template <typename Char>
@@ -1058,4 +1071,4 @@ TOML_NAMESPACE_START
 			// implemented in toml_default_formatter.h
 	};
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

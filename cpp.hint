@@ -1,0 +1,14 @@
+#define TOML_API
+#define TOML_ATTR(...)
+#define TOML_ALWAYS_INLINE		inline
+#define TOML_NEVER_INLINE
+#define TOML_TRIVIAL_ABI
+#define TOML_ABSTRACT_BASE
+#define TOML_EMPTY_BASES
+#define TOML_MAY_THROW
+#define TOML_CONSTEVAL			constexpr
+#define TOML_LIKELY(...)				(__VA_ARGS__)
+#define TOML_UNLIKELY(...)				(__VA_ARGS__)
+#define TOML_NODISCARD_CTOR
+#define TOML_EXTERNAL_LINKAGE
+#define TOML_INTERNAL_LINKAGE

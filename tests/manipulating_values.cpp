@@ -6,12 +6,12 @@
 #include "tests.h"
 
 #ifdef _WIN32
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #include <windows.h>
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 #endif
 
-TOML_DISABLE_SPAM_WARNINGS
+TOML_DISABLE_SPAM_WARNINGS;
 
 template <typename T>
 static constexpr T one = static_cast<T>(1);

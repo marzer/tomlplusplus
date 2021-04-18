@@ -43,7 +43,7 @@ is_windows = host_machine.system() == 'windows'
 is_x64 = host_machine.cpu_family() == 'x86_64'
 is_subproject = meson.is_subproject()
 has_exceptions = get_option('cpp_eh') != 'none'
-include_dirs = include_directories('include', 'extern')
+include_dirs = include_directories('include', 'external')
 overrides = []
 additional_arguments = []
 
@@ -62,6 +62,8 @@ message(['has_exceptions', has_exceptions])
 if is_gcc or is_clang
 	add_project_arguments(
 		'-march=native',
+		'-fvisibility=hidden',
+		'-fvisibility-inlines-hidden',
 		language : 'cpp'
 	)
 	if is_release
@@ -70,6 +72,7 @@ if is_gcc or is_clang
 			'-ffunction-sections',
 			'-Wl,--gc-sections',
 			'-Wl,-s',
+			'-mfma',
 			language : 'cpp'
 		)
 	endif
@@ -483,8 +486,8 @@ endif
 
 build_tests = get_option('build_tests') and not is_subproject
 if build_tests
-	run_command('git', 'submodule', 'update', '--init', 'extern/Catch2')
-	run_command('git', 'submodule', 'update', '--init', 'extern/tloptional')
+	run_command('git', 'submodule', 'update', '--init', '--depth', '1', 'external/Catch2')
+	run_command('git', 'submodule', 'update', '--init', '--depth', '1', 'external/tloptional')
 	subdir('tests')
 endif
 

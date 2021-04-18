@@ -13,6 +13,7 @@
 #include "toml_utf8.h"
 #include "toml_parse_error.h"
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename T>
@@ -162,7 +163,7 @@ TOML_IMPL_NAMESPACE_START
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
+	TOML_ABI_NAMESPACE_END; // TOML_LARGE_FILES
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
 
@@ -376,6 +377,7 @@ TOML_IMPL_NAMESPACE_START
 			#endif
 	};
 
-	TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond

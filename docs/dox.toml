@@ -1,0 +1,56 @@
+name			= 'toml++'
+description		= 'TOML for modern C++'
+cpp				= 17
+github			= 'marzer/tomlplusplus'
+license			= [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
+show_includes	= false
+logo			= 'images/logo.png'
+favicon			= 'images/favicon.ico'
+navbar			= [ 'namespaces', 'annotated' ]
+extra_files		= [
+	'images/banner_small.png',
+	'images/badge-awesome.svg',
+	'images/badge-TOML.svg',
+	'images/badge-C++20.svg'
+]
+
+
+
+[warnings]
+enabled			= true
+treat_as_errors	= false
+undocumented	= false
+
+
+
+[defines]
+'TOML_ASYMMETRICAL_EQUALITY_OPS(...)' = 'static_assert(true)'
+'TOML_ABI_NAMESPACE_START(...)' = ''
+'TOML_ABI_NAMESPACE_BOOL(...)' = ''
+
+
+
+[meta]
+'google-site-verification' = 'gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8'
+
+
+
+[highlighting]
+types = []
+macros = [
+	'TOML_[A-Z0-9_]+?',
+	'print_value'
+]
+string_literals = [ '_toml' ]
+
+
+
+[badges]
+'1. C++20' = [ 'badge-C++20.svg', 'https://en.cppreference.com/w/cpp/compiler_support' ]
+'2. TOML v1.0.0' = [ 'badge-TOML.svg', 'https://toml.io/en/v1.0.0' ]
+'3. CircleCI' = [ 'https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square', 'https://circleci.com/gh/marzer/tomlplusplus' ]
+'4. Mentioned in Awesome C++' = [ 'badge-awesome.svg', 'https://github.com/fffaraz/awesome-cpp' ]
+
+
+
+[autolinks]

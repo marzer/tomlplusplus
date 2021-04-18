@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug|x64">
+			<Configuration>Debug</Configuration>
+			<Platform>x64</Platform>
+		</ProjectConfiguration>
+	</ItemGroup>
+	<PropertyGroup Label="Globals">
+		<VCProjectVersion>16.0</VCProjectVersion>
+		<ProjectGuid>{202DCF23-B4E4-5FB9-AFA8-CC9A718067FF}</ProjectGuid>
+		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<UseDebugLibraries>true</UseDebugLibraries>
+		<PlatformToolset>v142</PlatformToolset>
+		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<UseDebugLibraries>false</UseDebugLibraries>
+		<PlatformToolset>v142</PlatformToolset>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<CharacterSet>MultiByte</CharacterSet>
+	</PropertyGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+	<ImportGroup Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+			Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+	</ImportGroup>
+	<Import Project="../../toml++.props" />
+	<ItemDefinitionGroup>
+		<ClCompile>
+			<AdditionalIncludeDirectories>..\tests;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<ExceptionHandling>Sync</ExceptionHandling>
+			<PrecompiledHeader>Use</PrecompiledHeader>
+			<PrecompiledHeaderFile>tests.h</PrecompiledHeaderFile>
+			<PreprocessorDefinitions>TOML_UNRELEASED_FEATURES=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions>LEAK_TESTS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'=='false'">_HAS_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'=='false'">SHOULD_HAVE_EXCEPTIONS=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'!='false'">SHOULD_HAVE_EXCEPTIONS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<LanguageStandard>stdcpp17</LanguageStandard>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+		</ClCompile>
+	</ItemDefinitionGroup>
+	<PropertyGroup>
+		<LocalDebuggerWorkingDirectory>$(ProjectDir)..\</LocalDebuggerWorkingDirectory>
+	</PropertyGroup>
+	<ItemGroup>
+		<ClCompile Include="..\conformance_burntsushi_invalid.cpp" />
+		<ClCompile Include="..\conformance_burntsushi_valid.cpp" />
+		<ClCompile Include="..\conformance_iarna_invalid.cpp" />
+		<ClCompile Include="..\conformance_iarna_valid.cpp" />
+		<ClCompile Include="..\impl_catch2.cpp">
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<ClCompile Include="..\impl_toml.cpp">
+			<PrecompiledHeader>NotUsing</PrecompiledHeader>
+		</ClCompile>
+		<ClCompile Include="..\manipulating_arrays.cpp" />
+		<ClCompile Include="..\manipulating_tables.cpp" />
+		<ClCompile Include="..\manipulating_parse_result.cpp" />
+		<ClCompile Include="..\manipulating_values.cpp" />
+		<ClCompile Include="..\parsing_arrays.cpp" />
+		<ClCompile Include="..\parsing_booleans.cpp" />
+		<ClCompile Include="..\parsing_comments.cpp" />
+		<ClCompile Include="..\parsing_dates_and_times.cpp" />
+		<ClCompile Include="..\parsing_floats.cpp" />
+		<ClCompile Include="..\parsing_integers.cpp" />
+		<ClCompile Include="..\parsing_key_value_pairs.cpp" />
+		<ClCompile Include="..\parsing_spec_example.cpp" />
+		<ClCompile Include="..\parsing_strings.cpp" />
+		<ClCompile Include="..\parsing_tables.cpp" />
+		<ClCompile Include="..\tests.cpp">
+			<PrecompiledHeader>Create</PrecompiledHeader>
+		</ClCompile>
+		<ClCompile Include="..\unicode.cpp" />
+		<ClCompile Include="..\user_feedback.cpp" />
+		<ClCompile Include="..\using_iterators.cpp" />
+		<ClCompile Include="..\windows_compat.cpp" />
+	</ItemGroup>
+	<ItemGroup>
+		<Natvis Include="..\..\toml++.natvis" />
+	</ItemGroup>
+	<ItemGroup>
+		<ClInclude Include="..\catch2.h" />
+		<ClInclude Include="..\leakproof.h" />
+		<ClInclude Include="..\settings.h" />
+		<ClInclude Include="..\tests.h" />
+		<ClInclude Include="..\tloptional.h" />
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="..\cpp.hint" />
+		<None Include="..\meson.build" />
+	</ItemGroup>
+	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

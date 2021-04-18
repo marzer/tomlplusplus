@@ -46,15 +46,15 @@
 	#define UNICODE_LITERALS_OK 1
 #endif
 
-TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #include "catch2.h"
 #include <sstream>
 namespace toml {}
 using namespace Catch::literals;
 using namespace toml;
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 #define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
 #define BOM_PREFIX "\xEF\xBB\xBF"

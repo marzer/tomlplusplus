@@ -8,8 +8,8 @@
 #include "toml_array.h"
 #include "toml_value.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -209,9 +209,10 @@ TOML_NAMESPACE_START
 			///	first non-match was a floating-point at line 1, column 18
 			/// \eout
 			/// 
-			/// \param	ntype			A TOML node type. <br>
-			/// 						<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
-			/// 						<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// \param	ntype	A TOML node type. <br>
+			/// 				\conditional_return{toml::node_type::none} "is every element the same type?"
+			/// 				\conditional_return{Anything else} "is every element one of these?"
+			/// 
 			/// \param first_nonmatch	Reference to a pointer in which the address of the first non-matching element
 			/// 						will be stored if the return value is false.
 			///
@@ -249,8 +250,8 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \param	ntype	A TOML node type. <br>
-			/// 				<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
-			/// 				<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// 				\conditional_return{toml::node_type::none} "is every element the same type?"
+			/// 				\conditional_return{Anything else} "is every element one of these?"
 			///
 			/// \returns	True if the viewed node was homogeneous.
 			/// 
@@ -281,8 +282,8 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \tparam	ElemType	A TOML node or value type. <br>
-			/// 					<strong><em>Left as `void`:</em></strong> "is every element the same type?" <br>
-			/// 					<strong><em>Explicitly specified:</em></strong> "is every element a T?"
+			/// 					\conditional_return{Left as `void`} "is every element the same type?" <br>
+			/// 					\conditional_return{Explicitly specified} "is every element a T?"
 			///
 			/// \returns	True if the viewed node was homogeneous.
 			/// 
@@ -316,8 +317,8 @@ TOML_NAMESPACE_START
 				return {};
 			}
 
-			TOML_PUSH_WARNINGS
-			TOML_DISABLE_INIT_WARNINGS
+			TOML_PUSH_WARNINGS;
+			TOML_DISABLE_INIT_WARNINGS;
 
 			/// \brief	Gets the value contained by the referenced node.
 			/// 
@@ -332,8 +333,8 @@ TOML_NAMESPACE_START
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
 			/// 			and within the range of the output type, or an empty optional.
 			/// 
-			/// \attention If you want strict value retrieval semantics that do not allow for any type conversions,
-			/// 		   use node_view::value_exact() instead.
+			/// \note	If you want strict value retrieval semantics that do not allow for any type conversions,
+			/// 		use node_view::value_exact() instead.
 			/// 
 			/// \see
 			/// 	- node_view::value()
@@ -347,7 +348,7 @@ TOML_NAMESPACE_START
 				return {};
 			}
 
-			TOML_POP_WARNINGS
+			TOML_POP_WARNINGS;
 
 			/// \brief	Gets the raw value contained by the referenced node, or a default.
 			///
@@ -359,9 +360,9 @@ TOML_NAMESPACE_START
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
 			/// 			and within the range of the output type, or the provided default.
 			/// 
-			/// \attention This function has the same permissive retrieval semantics as node::value(). If you want strict
-			/// 		   value retrieval semantics that do not allow for any type conversions, use node_view::value_exact()
-			/// 		   instead.
+			/// \note	This function has the same permissive retrieval semantics as node::value(). If you want strict
+			/// 		value retrieval semantics that do not allow for any type conversions, use node_view::value_exact()
+			/// 		instead.
 			/// 
 			/// \see
 			/// 	- node_view::value()
@@ -465,7 +466,7 @@ TOML_NAMESPACE_START
 				const auto tbl = lhs.as<table>();
 				return tbl && *tbl == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, )
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const table&, );
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as RHS.
 			[[nodiscard]]
@@ -476,7 +477,7 @@ TOML_NAMESPACE_START
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, )
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const array&, );
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename T>
@@ -488,7 +489,7 @@ TOML_NAMESPACE_START
 				const auto val = lhs.as<T>();
 				return val && *val == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<T>&, template <typename T>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<T>&, template <typename T>);
 
 			/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 			template <typename T, typename = std::enable_if_t<
@@ -522,10 +523,10 @@ TOML_NAMESPACE_START
 				const node_view&,
 				const T&,
 				template <typename T, typename = std::enable_if_t<
-					impl::is_native<T>
-					|| impl::is_losslessly_convertible_to_native<T>
+				impl::is_native<T>
+				|| impl::is_losslessly_convertible_to_native<T>
 				>>
-			)
+			);
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
 			template <typename T>
@@ -535,7 +536,7 @@ TOML_NAMESPACE_START
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<T>&, template <typename T>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::initializer_list<T>&, template <typename T>);
 
 			/// \brief	Returns true if the viewed node is an array with the same contents as the RHS vector.
 			template <typename T>
@@ -545,7 +546,7 @@ TOML_NAMESPACE_START
 				const auto arr = lhs.as<array>();
 				return arr && *arr == rhs;
 			}
-			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<T>&, template <typename T>)
+			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<T>&, template <typename T>);
 
 			/// \brief	Returns a view of the selected subnode.
 			///
@@ -565,12 +566,12 @@ TOML_NAMESPACE_START
 
 			/// \brief	Returns a view of the selected subnode.
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key	The key of the node to retrieve
 			///
 			/// \returns	A view of the selected node if this node represented a table and it contained a
 			/// 			value at the given key, or an empty view.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]]
 			node_view operator[] (std::wstring_view key) const noexcept
 			{
@@ -676,6 +677,6 @@ TOML_NAMESPACE_START
 
 	#endif // !TOML_HEADER_ONLY
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS // TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_POP_WARNINGS; // TOML_DISABLE_ARITHMETIC_WARNINGS

@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#ifndef DOXYGEN
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	[[nodiscard]]
@@ -964,6 +964,5 @@ TOML_IMPL_NAMESPACE_START
 		}
 	};
 }
-TOML_IMPL_NAMESPACE_END
-
-#endif // !DOXYGEN
+TOML_IMPL_NAMESPACE_END;
+/// \endcond

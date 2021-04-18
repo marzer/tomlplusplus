@@ -8,7 +8,7 @@
 #include "tests.h"
 using namespace toml::impl;
 
-TOML_DISABLE_WARNINGS // unused variable spam
+TOML_DISABLE_WARNINGS; // unused variable spam
 
 namespace
 {
@@ -121,7 +121,7 @@ answer = 42)"sv;
 ])"sv;
 }
 
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 TEST_CASE("conformance - burntsushi/invalid")
 {

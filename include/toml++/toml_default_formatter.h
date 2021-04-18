@@ -9,16 +9,18 @@
 #include "toml_array.h"
 #include "toml_utf8.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_SWITCH_WARNINGS
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_SWITCH_WARNINGS;
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	[[nodiscard]] TOML_API std::string default_formatter_make_key_segment(const std::string&) noexcept;
 	[[nodiscard]] TOML_API size_t default_formatter_inline_columns(const node&) noexcept;
 	[[nodiscard]] TOML_API bool default_formatter_forces_multiline(const node&, size_t = 0) noexcept;
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -406,7 +408,7 @@ TOML_NAMESPACE_START
 
 	#endif // !DOXYGEN
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS // TOML_DISABLE_SWITCH_WARNINGS
+TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
 

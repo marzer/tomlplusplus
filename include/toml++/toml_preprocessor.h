@@ -52,21 +52,38 @@
 
 #if TOML_CLANG
 
-	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push")
-	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"")
-	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"")
+	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push") \
+												static_assert(true)
+
+	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
+												static_assert(true)
+
+	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
+												static_assert(true)
+
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
 												_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
 												_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
-												_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"")
-	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("clang diagnostic ignored \"-Wshadow\"")
+												_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
+												static_assert(true)
+
+	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
+												static_assert(true)
+
 	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 												_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
-												_Pragma("clang diagnostic ignored \"-Wpadded\"")
-	#define TOML_POP_WARNINGS					_Pragma("clang diagnostic pop")
-	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS \
-												_Pragma("clang diagnostic ignored \"-Weverything\"")
+												_Pragma("clang diagnostic ignored \"-Wpadded\"") \
+												static_assert(true)
+
+	#define TOML_POP_WARNINGS					_Pragma("clang diagnostic pop") \
+												static_assert(true)
+
+	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS; \
+												_Pragma("clang diagnostic ignored \"-Weverything\"") \
+												static_assert(true)
+
 	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
+
 	#define TOML_ASSUME(cond)					__builtin_assume(cond)
 	#define TOML_UNREACHABLE					__builtin_unreachable()
 	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
@@ -111,13 +128,29 @@
 #if TOML_MSVC || TOML_ICC_CL
 
 	#define TOML_CPP_VERSION					_MSVC_LANG
-	#define TOML_PUSH_WARNINGS					__pragma(warning(push))
 	#if TOML_MSVC // !intel-cl
-		#define TOML_PUSH_WARNINGS				__pragma(warning(push))
-		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063))
-		#define TOML_POP_WARNINGS				__pragma(warning(pop))
-		#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0))
+
+		#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
+												static_assert(true)
+
+		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063)) \
+												static_assert(true)
+
+		#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
+												__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
+												__pragma(warning(disable: 4348)) \
+												__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
+												__pragma(warning(disable: 26490)) /* cg: dont use reinterpret_cast */ \
+												static_assert(true)
+
+		#define TOML_POP_WARNINGS				__pragma(warning(pop)) \
+												static_assert(true)
+
+		#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0)) \
+												static_assert(true)
+
 		#define TOML_ENABLE_WARNINGS			TOML_POP_WARNINGS
+
 	#endif
 	#ifndef TOML_ALWAYS_INLINE
 		#define TOML_ALWAYS_INLINE				__forceinline
@@ -136,14 +169,24 @@
 
 #if TOML_ICC
 	
-	#define TOML_PUSH_WARNINGS				__pragma(warning(push))
+	#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
+											static_assert(true)
+
 	#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 82))	/* storage class is not first */ \
 											__pragma(warning(disable: 111))	/* statement unreachable (false-positive) */ \
+											__pragma(warning(disable: 869)) /* unreferenced parameter */ \
 											__pragma(warning(disable: 1011)) /* missing return (false-positive) */ \
-											__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */
-	#define TOML_POP_WARNINGS				__pragma(warning(pop))
-	#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0))
-	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
+											__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */  \
+											static_assert(true)
+
+	#define TOML_POP_WARNINGS				__pragma(warning(pop)) \
+											static_assert(true)
+
+	#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0)) \
+											static_assert(true)
+
+	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS \
+											static_assert(true)
 
 #endif // icc
 
@@ -153,34 +196,51 @@
 
 #if TOML_GCC
 
-	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push")
+	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push") \
+												static_assert(true)
+
 	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-												_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")
+												_Pragma("GCC diagnostic ignored \"-Wswitch-default\"") \
+												static_assert(true)
+
 	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"")
+												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"") \
+												static_assert(true)
+
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
-												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")
-	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"")
+												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"") \
+												static_assert(true)
+
+	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
+												static_assert(true)
+
 	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
 												_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
 												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")
-	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop")
-	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS													\
+												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"") \
+												static_assert(true)
+
+	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop") \
+												static_assert(true)
+
+	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS;													\
 												_Pragma("GCC diagnostic ignored \"-Wall\"")							\
 												_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 												_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
-												TOML_DISABLE_SWITCH_WARNINGS										\
-												TOML_DISABLE_INIT_WARNINGS											\
-												TOML_DISABLE_ARITHMETIC_WARNINGS									\
-												TOML_DISABLE_SHADOW_WARNINGS										\
-												TOML_DISABLE_SPAM_WARNINGS
+												TOML_DISABLE_SWITCH_WARNINGS;										\
+												TOML_DISABLE_INIT_WARNINGS;											\
+												TOML_DISABLE_ARITHMETIC_WARNINGS;									\
+												TOML_DISABLE_SHADOW_WARNINGS;										\
+												TOML_DISABLE_SPAM_WARNINGS; \
+												static_assert(true)
+
+
 	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 
 	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
@@ -313,7 +373,7 @@ is no longer necessary.
 	#define TOML_EXCEPTIONS	0
 #endif
 
-#if TOML_EXCEPTIONS
+#if defined(DOXYGEN) || TOML_EXCEPTIONS
 	#define TOML_MAY_THROW
 #else
 	#define TOML_MAY_THROW				noexcept
@@ -343,31 +403,31 @@ is no longer necessary.
 #endif
 
 #ifndef TOML_PUSH_WARNINGS
-	#define TOML_PUSH_WARNINGS
+	#define TOML_PUSH_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_SWITCH_WARNINGS
-	#define	TOML_DISABLE_SWITCH_WARNINGS
+	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_INIT_WARNINGS
-	#define	TOML_DISABLE_INIT_WARNINGS
+	#define	TOML_DISABLE_INIT_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_SPAM_WARNINGS
-	#define TOML_DISABLE_SPAM_WARNINGS
+	#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_SHADOW_WARNINGS
-	#define TOML_DISABLE_SHADOW_WARNINGS
+	#define TOML_DISABLE_SHADOW_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_POP_WARNINGS
-	#define TOML_POP_WARNINGS
+	#define TOML_POP_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_WARNINGS
-	#define TOML_DISABLE_WARNINGS
+	#define TOML_DISABLE_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_ENABLE_WARNINGS
-	#define TOML_ENABLE_WARNINGS
+	#define TOML_ENABLE_WARNINGS static_assert(true)
 #endif
 
 #ifndef TOML_ATTR
@@ -440,7 +500,8 @@ is no longer necessary.
 #define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
 	__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
 	__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-	__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }
+	__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); } \
+	static_assert(true)
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
@@ -475,7 +536,8 @@ is no longer necessary.
 	constexpr type operator | (type lhs, type rhs) noexcept											\
 	{																								\
 		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
-	}
+	}																								\
+	static_assert(true)
 
 #ifndef TOML_LIFETIME_HOOKS
 	#define TOML_LIFETIME_HOOKS 0
@@ -551,18 +613,18 @@ is no longer necessary.
 #endif
 #if TOML_ABI_NAMESPACES
 	#define TOML_NAMESPACE_START				namespace toml { inline namespace TOML_CONCAT(v, TOML_LIB_MAJOR)
-	#define TOML_NAMESPACE_END					}
+	#define TOML_NAMESPACE_END					} static_assert(true)
 	#define TOML_NAMESPACE						::toml::TOML_CONCAT(v, TOML_LIB_MAJOR)
 	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name {
 	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
-	#define TOML_ABI_NAMESPACE_END				}
+	#define TOML_ABI_NAMESPACE_END				} static_assert(true)
 #else
 	#define TOML_NAMESPACE_START				namespace toml
-	#define TOML_NAMESPACE_END
+	#define TOML_NAMESPACE_END					static_assert(true)
 	#define TOML_NAMESPACE						toml
 	#define TOML_ABI_NAMESPACE_START(...)
 	#define TOML_ABI_NAMESPACE_BOOL(...)
-	#define TOML_ABI_NAMESPACE_END
+	#define TOML_ABI_NAMESPACE_END				static_assert(true)
 #endif
 #define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
 #define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
@@ -575,9 +637,9 @@ is no longer necessary.
 	#define TOML_INTERNAL_LINKAGE				inline
 #else
 	#define TOML_ANON_NAMESPACE_START			namespace
-	#define TOML_ANON_NAMESPACE_END
+	#define TOML_ANON_NAMESPACE_END				static_assert(true)
 	#define TOML_ANON_NAMESPACE
-	#define TOML_USING_ANON_NAMESPACE			(void)0
+	#define TOML_USING_ANON_NAMESPACE			static_cast<void>(0)
 	#define TOML_EXTERNAL_LINKAGE
 	#define TOML_INTERNAL_LINKAGE				static
 #endif
@@ -586,10 +648,10 @@ is no longer necessary.
 //# ASSERT
 //#====================================================================================================================
 
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #ifndef TOML_ASSERT
 	#if defined(NDEBUG) || !defined(_DEBUG)
-		#define TOML_ASSERT(expr)	(void)0
+		#define TOML_ASSERT(expr)	static_cast<void>(0)
 	#else
 		#ifndef assert
 			#include <cassert>
@@ -597,7 +659,7 @@ TOML_DISABLE_WARNINGS
 		#define TOML_ASSERT(expr)	assert(expr)
 	#endif
 #endif
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 //#====================================================================================================================
 //# DOXYGEN SPAM
@@ -630,7 +692,6 @@ TOML_ENABLE_WARNINGS
 /// \ecpp
 
 
-#define TOML_API
 /// \def TOML_API
 /// \brief An annotation to add to public symbols.
 /// \detail Not defined by default.
@@ -643,7 +704,6 @@ TOML_ENABLE_WARNINGS
 /// \detail Defaults to the standard C `assert()`.
 
 
-#define TOML_CONFIG_HEADER
 /// \def TOML_CONFIG_HEADER
 /// \brief An additional header to include before any other toml++ header files.
 /// \detail Not defined by default.
@@ -685,8 +745,8 @@ TOML_ENABLE_WARNINGS
 /// \def TOML_SMALL_FLOAT_TYPE
 /// \brief If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.
 /// \detail Not defined by default.
-/// \attention If you're building for a platform that has a built-in half precision float (e.g. `_Float16`), you don't
-/// 		   need to use this configuration option to make toml++ aware of it; the library comes with that built-in.
+/// \remark	If you're building for a platform that has a built-in half precision float (e.g. `_Float16`), you don't
+/// 		need to use this configuration option to make toml++ aware of it; the library comes with that built-in.
 
 #define TOML_SMALL_INT_TYPE
 /// \def TOML_SMALL_INT_TYPE
@@ -706,12 +766,12 @@ TOML_ENABLE_WARNINGS
 /// 	   when building for Windows.
 /// \detail Defaults to `1` when building for Windows, `0` otherwise. Has no effect when building for anything other
 /// 		than Windows.
-/// \attention This <strong>does not</strong> change the underlying string type used to represent TOML keys and string
-/// 		   values; that will still be std::string. This setting simply enables some narrow &lt;=&gt; wide string
-/// 		   conversions when necessary at various interface boundaries.
-/// 		   <br><br>
-/// 		   If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings,
-/// 		   you can safely set this to `0`.
+/// \remark	This <strong>does not</strong> change the underlying string type used to represent TOML keys and string
+/// 		values; that will still be std::string. This setting simply enables some narrow &lt;=&gt; wide string
+/// 		conversions when necessary at various interface boundaries.
+/// 		<br><br>
+/// 		If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings,
+/// 		you can safely set this to `0`.
 
 
 /// @}

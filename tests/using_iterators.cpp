@@ -1,8 +1,8 @@
 #include "tests.h"
 
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #include <algorithm>
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 TEST_CASE("using iterators")
 {

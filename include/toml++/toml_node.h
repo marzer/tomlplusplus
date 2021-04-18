@@ -67,6 +67,35 @@ TOML_NAMESPACE_START
 			friend class TOML_PARSER_TYPENAME;
 			source_region source_{};
 
+			/// \cond
+
+			template <typename T>
+			[[nodiscard]]
+			decltype(auto) get_value_exact() const noexcept;
+
+			template <typename T, typename N>
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			static decltype(auto) do_ref(N&& n) noexcept
+			{
+				using type = impl::unwrap_node<T>;
+				static_assert(
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
+					"The template type argument of node::ref() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+				TOML_ASSERT(
+					n.template is<T>()
+					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
+				);
+				if constexpr (impl::is_native<type>)
+					return std::forward<N>(n).template ref_cast<type>().get();
+				else
+					return std::forward<N>(n).template ref_cast<type>();
+			}
+
+			/// \endcond
+
 		protected:
 			
 			node() noexcept = default;
@@ -109,7 +138,8 @@ TOML_NAMESPACE_START
 
 			virtual ~node() noexcept = default;
 
-
+			/// \name Type checks
+			/// @{
 
 			#if defined(DOXYGEN) || !TOML_ICC || TOML_ICC_CL
 
@@ -183,35 +213,6 @@ TOML_NAMESPACE_START
 				else if constexpr (std::is_same_v<type, date_time>) return is_date_time();
 			}
 
-			/// \brief	Returns a pointer to the node as a toml::table, if it is one.
-			[[nodiscard]] virtual table* as_table() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::array, if it is one.
-			[[nodiscard]] virtual array* as_array() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<string>, if it is one.
-			[[nodiscard]] virtual toml::value<std::string>* as_string() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<int64_t>, if it is one.
-			[[nodiscard]] virtual toml::value<int64_t>* as_integer() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<double>, if it is one.
-			[[nodiscard]] virtual toml::value<double>* as_floating_point() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<bool>, if it is one.
-			[[nodiscard]] virtual toml::value<bool>* as_boolean() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<date>, if it is one.
-			[[nodiscard]] virtual toml::value<date>* as_date() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<time>, if it is one.
-			[[nodiscard]] virtual toml::value<time>* as_time() noexcept;
-			/// \brief	Returns a pointer to the node as a toml::value<date_time>, if it is one.
-			[[nodiscard]] virtual toml::value<date_time>* as_date_time() noexcept;
-
-			[[nodiscard]] virtual const table* as_table() const noexcept;
-			[[nodiscard]] virtual const array* as_array() const noexcept;
-			[[nodiscard]] virtual const toml::value<std::string>* as_string() const noexcept;
-			[[nodiscard]] virtual const toml::value<int64_t>* as_integer() const noexcept;
-			[[nodiscard]] virtual const toml::value<double>* as_floating_point() const noexcept;
-			[[nodiscard]] virtual const toml::value<bool>* as_boolean() const noexcept;
-			[[nodiscard]] virtual const toml::value<date>* as_date() const noexcept;
-			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
-			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
-
 			/// \brief	Checks if a node contains values/elements of only one type.
 			///
 			/// \detail \cpp
@@ -231,9 +232,12 @@ TOML_NAMESPACE_START
 			///	first non-match was a floating-point at line 1, column 18
 			/// \eout
 			/// 
-			/// \param	ntype			A TOML node type. <br>
-			/// 						<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
-			/// 						<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// \param	ntype	A TOML node type. <br>
+			/// 				\conditional_return{toml::node_type::none}
+			///					"is every element the same type?"
+			/// 				\conditional_return{Anything else}
+			///					"is every element one of these?"
+			/// 
 			/// \param first_nonmatch	Reference to a pointer in which the address of the first non-matching element
 			/// 						will be stored if the return value is false.
 			///
@@ -264,8 +268,10 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \param	ntype	A TOML node type. <br>
-			/// 				<strong><em>toml::node_type::none: </em></strong> "is every element the same type?" <br>
-			/// 				<strong><em>Anything else:</em></strong> "is every element one of these?"
+			/// 				\conditional_return{toml::node_type::none}
+			///					"is every element the same type?"
+			/// 				\conditional_return{Anything else}
+			///					"is every element one of these?"
 			///
 			/// \returns	True if the node was homogeneous.
 			/// 
@@ -291,8 +297,10 @@ TOML_NAMESPACE_START
 			/// \eout
 			/// 
 			/// \tparam	ElemType	A TOML node or value type. <br>
-			/// 					<strong><em>Left as `void`:</em></strong> "is every element the same type?" <br>
-			/// 					<strong><em>Explicitly specified:</em></strong> "is every element a T?"
+			/// 					\conditional_return{Left as `void`}
+			///						"is every element the same type?" <br>
+			/// 					\conditional_return{Explicitly specified}
+			///						"is every element a T?"
 			///
 			/// \returns	True if the node was homogeneous.
 			/// 
@@ -312,18 +320,112 @@ TOML_NAMESPACE_START
 				return is_homogeneous(impl::node_type_of<type>);
 			}
 
-		private:
+			/// @}
 
+			/// \name Type casts
+			/// @{
 
-			#ifndef DOXYGEN
+			/// \brief	Returns a pointer to the node as a toml::table, if it is one.
+			[[nodiscard]] virtual table* as_table() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::array, if it is one.
+			[[nodiscard]] virtual array* as_array() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<string>, if it is one.
+			[[nodiscard]] virtual toml::value<std::string>* as_string() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<int64_t>, if it is one.
+			[[nodiscard]] virtual toml::value<int64_t>* as_integer() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<double>, if it is one.
+			[[nodiscard]] virtual toml::value<double>* as_floating_point() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<bool>, if it is one.
+			[[nodiscard]] virtual toml::value<bool>* as_boolean() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<date>, if it is one.
+			[[nodiscard]] virtual toml::value<date>* as_date() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<time>, if it is one.
+			[[nodiscard]] virtual toml::value<time>* as_time() noexcept;
+			/// \brief	Returns a pointer to the node as a toml::value<date_time>, if it is one.
+			[[nodiscard]] virtual toml::value<date_time>* as_date_time() noexcept;
 
+			[[nodiscard]] virtual const table* as_table() const noexcept;
+			[[nodiscard]] virtual const array* as_array() const noexcept;
+			[[nodiscard]] virtual const toml::value<std::string>* as_string() const noexcept;
+			[[nodiscard]] virtual const toml::value<int64_t>* as_integer() const noexcept;
+			[[nodiscard]] virtual const toml::value<double>* as_floating_point() const noexcept;
+			[[nodiscard]] virtual const toml::value<bool>* as_boolean() const noexcept;
+			[[nodiscard]] virtual const toml::value<date>* as_date() const noexcept;
+			[[nodiscard]] virtual const toml::value<time>* as_time() const noexcept;
+			[[nodiscard]] virtual const toml::value<date_time>* as_date_time() const noexcept;
+
+			/// \brief	Gets a pointer to the node as a more specific node type.
+			///
+			/// \details \cpp
+			/// 
+			/// toml::value<int64_t>* int_value = node->as<int64_t>();
+			/// toml::table* tbl = node->as<toml::table>();
+			/// if (int_value)
+			///		std::cout << "Node is a value<int64_t>\n";
+			/// else if (tbl)
+			///		std::cout << "Node is a table\n";
+			///	
+			///	// fully-qualified value node types also work (useful for template code):
+			///	toml::value<int64_t>* int_value2 = node->as<toml::value<int64_t>>();
+			/// if (int_value2)
+			///		std::cout << "Node is a value<int64_t>\n";
+			///		
+			/// \ecpp
+			/// 
+			/// \tparam	T	The node type or TOML value type to cast to.
+			///
+			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
 			template <typename T>
 			[[nodiscard]]
-			decltype(auto) get_value_exact() const noexcept;
+			TOML_ATTR(pure)
+			impl::wrap_node<T>* as() noexcept
+			{
+				using type = impl::unwrap_node<T>;
+				static_assert(
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
 
-			#endif // !DOXYGEN
+					 if constexpr (std::is_same_v<type, table>) return as_table();
+				else if constexpr (std::is_same_v<type, array>) return as_array();
+				else if constexpr (std::is_same_v<type, std::string>) return as_string();
+				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
+				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
+				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
+				else if constexpr (std::is_same_v<type, date>) return as_date();
+				else if constexpr (std::is_same_v<type, time>) return as_time();
+				else if constexpr (std::is_same_v<type, date_time>) return as_date_time();
+			}
 
-		public:
+			/// \brief	Gets a pointer to the node as a more specific node type (const overload).
+			template <typename T>
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			const impl::wrap_node<T>* as() const noexcept
+			{
+				using type = impl::unwrap_node<T>;
+				static_assert(
+					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
+					"The template type argument of node::as() must be one of:"
+					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
+				);
+
+					 if constexpr (std::is_same_v<type, table>) return as_table();
+				else if constexpr (std::is_same_v<type, array>) return as_array();
+				else if constexpr (std::is_same_v<type, std::string>) return as_string();
+				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
+				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
+				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
+				else if constexpr (std::is_same_v<type, date>) return as_date();
+				else if constexpr (std::is_same_v<type, time>) return as_time();
+				else if constexpr (std::is_same_v<type, date_time>) return as_date_time();
+			}
+
+			/// @}
+
+			/// \name Value retrieval
+			/// @{
 
 			/// \brief	Gets the value contained by this node.
 			/// 
@@ -463,8 +565,8 @@ TOML_NAMESPACE_START
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
 			/// 			and within the range of the output type, or an empty optional.
 			/// 
-			/// \attention If you want strict value retrieval semantics that do not allow for any type conversions,
-			/// 		   use node::value_exact() instead.
+			/// \note		If you want strict value retrieval semantics that do not allow for any type conversions,
+			/// 			use node::value_exact() instead.
 			/// 
 			/// \see node::value_exact()
 			template <typename T>
@@ -481,9 +583,9 @@ TOML_NAMESPACE_START
 			/// \returns	The underlying value if the node was a value of the matching type (or convertible to it)
 			/// 			and within the range of the output type, or the provided default.
 			/// 
-			/// \attention This function has the same permissive retrieval semantics as node::value(). If you want strict
-			/// 		   value retrieval semantics that do not allow for any type conversions, use node::value_exact()
-			/// 		   instead.
+			/// \note	This function has the same permissive retrieval semantics as node::value(). If you want strict
+			/// 		value retrieval semantics that do not allow for any type conversions, use node::value_exact()
+			/// 		instead.
 			/// 
 			/// \see
 			/// 	- node::value()
@@ -500,78 +602,64 @@ TOML_NAMESPACE_START
 			//[[nodiscard]]
 			//std::vector<T> select() const noexcept;
 
-			/// \brief	Gets a pointer to the node as a more specific node type.
+			/// \brief	Gets a raw reference to a value node's underlying data.
 			///
-			/// \details \cpp
+			/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
+			///			 chosen value type doesn't match the node's actual type. In debug builds an assertion
+			///			 will fire when invalid accesses are attempted: \cpp
+			///
+			/// auto tbl = toml::parse(R"(
+			///		min = 32
+			///		max = 45
+			/// )"sv);
 			/// 
-			/// toml::value<int64_t>* int_value = node->as<int64_t>();
-			/// toml::table* tbl = node->as<toml::table>();
-			/// if (int_value)
-			///		std::cout << "Node is a value<int64_t>\n";
-			/// else if (tbl)
-			///		std::cout << "Node is a table\n";
-			///	
-			///	// fully-qualified value node types also work (useful for template code):
-			///	toml::value<int64_t>* int_value2 = node->as<toml::value<int64_t>>();
-			/// if (int_value2)
-			///		std::cout << "Node is a value<int64_t>\n";
-			///		
+			/// int64_t& min_ref = tbl.get("min")->ref<int64_t>(); // matching type
+			/// double& max_ref = tbl.get("max")->ref<double>();  // mismatched type, hits assert()
+			///
 			/// \ecpp
 			/// 
-			/// \tparam	T	The node type or TOML value type to cast to.
+			/// \tparam	T	One of the TOML value types.
 			///
-			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
+			/// \returns	A reference to the underlying data.
 			template <typename T>
 			[[nodiscard]]
 			TOML_ATTR(pure)
-			impl::wrap_node<T>* as() noexcept
+			impl::unwrap_node<T>& ref() & noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of:"
-					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
-				);
-
-					 if constexpr (std::is_same_v<type, table>) return as_table();
-				else if constexpr (std::is_same_v<type, array>) return as_array();
-				else if constexpr (std::is_same_v<type, std::string>) return as_string();
-				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
-				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
-				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
-				else if constexpr (std::is_same_v<type, date>) return as_date();
-				else if constexpr (std::is_same_v<type, time>) return as_time();
-				else if constexpr (std::is_same_v<type, date_time>) return as_date_time();
+				return do_ref<T>(*this);
 			}
 
-			/// \brief	Gets a pointer to the node as a more specific node type (const overload).
+			/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
 			template <typename T>
 			[[nodiscard]]
 			TOML_ATTR(pure)
-			const impl::wrap_node<T>* as() const noexcept
+			impl::unwrap_node<T>&& ref() && noexcept
 			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::as() must be one of:"
-					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
-				);
-
-					 if constexpr (std::is_same_v<type, table>) return as_table();
-				else if constexpr (std::is_same_v<type, array>) return as_array();
-				else if constexpr (std::is_same_v<type, std::string>) return as_string();
-				else if constexpr (std::is_same_v<type, int64_t>) return as_integer();
-				else if constexpr (std::is_same_v<type, double>) return as_floating_point();
-				else if constexpr (std::is_same_v<type, bool>) return as_boolean();
-				else if constexpr (std::is_same_v<type, date>) return as_date();
-				else if constexpr (std::is_same_v<type, time>) return as_time();
-				else if constexpr (std::is_same_v<type, date_time>) return as_date_time();
+				return do_ref<T>(std::move(*this));
 			}
+
+			/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
+			template <typename T>
+			[[nodiscard]]
+			TOML_ATTR(pure)
+			const impl::unwrap_node<T>& ref() const& noexcept
+			{
+				return do_ref<T>(*this);
+			}
+
+			/// @}
+
+			/// \name Metadata
+			/// @{
 
 			/// \brief	Returns the source region responsible for generating this node during parsing.
 			[[nodiscard]] const source_region& source() const noexcept;
 
+			/// @}
+
 		private:
+
+			/// \cond
 
 			template <typename Func, typename N, typename T>
 			static constexpr bool can_visit = std::is_invocable_v<Func, ref_cast_type<N, T>>;
@@ -723,29 +811,12 @@ TOML_NAMESPACE_START
 				}
 			}
 
-
-			template <typename T, typename N>
-			[[nodiscard]]
-			TOML_ATTR(pure)
-			static decltype(auto) do_ref(N&& n) noexcept
-			{
-				using type = impl::unwrap_node<T>;
-				static_assert(
-					(impl::is_native<type> || impl::is_one_of<type, table, array>) && !impl::is_cvref<type>,
-					"The template type argument of node::ref() must be one of:"
-					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
-				);
-				TOML_ASSERT(
-					n.template is<T>()
-					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
-				);
-				if constexpr (impl::is_native<type>)
-					return std::forward<N>(n).template ref_cast<type>().get();
-				else
-					return std::forward<N>(n).template ref_cast<type>();
-			}
+			/// \endcond
 
 		public:
+
+			/// \name Visitation
+			/// @{
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type.
 			/// 
@@ -798,56 +869,18 @@ TOML_NAMESPACE_START
 				return do_visit(*this, std::forward<Func>(visitor));
 			}
 
-			/// \brief	Gets a raw reference to a value node's underlying data.
-			///
-			/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
-			///			 chosen value type doesn't match the node's actual type. In debug builds an assertion
-			///			 will fire when invalid accesses are attempted: \cpp
-			///
-			/// auto tbl = toml::parse(R"(
-			///		min = 32
-			///		max = 45
-			/// )"sv);
-			/// 
-			/// int64_t& min_ref = tbl.get("min")->ref<int64_t>(); // matching type
-			/// double& max_ref = tbl.get("max")->ref<double>();  // mismatched type, hits assert()
-			///
-			/// \ecpp
-			/// 
-			/// \tparam	T	One of the TOML value types.
-			///
-			/// \returns	A reference to the underlying data.
-			template <typename T>
-			[[nodiscard]]
-			TOML_ATTR(pure)
-			impl::unwrap_node<T>& ref() & noexcept
-			{
-				return do_ref<T>(*this);
-			}
+			/// @}
 
-			/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
-			template <typename T>
-			[[nodiscard]]
-			TOML_ATTR(pure)
-			impl::unwrap_node<T>&& ref() && noexcept
-			{
-				return do_ref<T>(std::move(*this));
-			}
+			/// \name Node views
+			/// @{
 
-			/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
-			template <typename T>
-			[[nodiscard]]
-			TOML_ATTR(pure)
-			const impl::unwrap_node<T>& ref() const& noexcept
-			{
-				return do_ref<T>(*this);
-			}
-
-			/// \brief	Creates a `node_view` pointing to this node.
+			/// \brief	Creates a node_view pointing to this node.
 			[[nodiscard]] explicit operator node_view<node>() noexcept;
 
-			/// \brief	Creates a `node_view` pointing to this node (const overload).
+			/// \brief	Creates a node_view pointing to this node (const overload).
 			[[nodiscard]] explicit operator node_view<const node>() const noexcept;
+
+			/// @}
 	};
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

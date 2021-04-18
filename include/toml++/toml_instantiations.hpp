@@ -14,11 +14,11 @@
 #endif
 //# }}
 
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #include <ostream>
 #include <istream>
 #include <fstream>
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 #include "toml_node_view.h"
 #include "toml_default_formatter.h"
@@ -36,7 +36,7 @@ TOML_IMPL_NAMESPACE_START
 	// print to stream machinery
 	template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
 
 // public namespace
 TOML_NAMESPACE_START
@@ -148,8 +148,8 @@ TOML_NAMESPACE_START
 			template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
 		#endif
 
-		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
 	#endif // TOML_PARSER
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

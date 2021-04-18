@@ -352,5 +352,5 @@ TOML_NAMESPACE_START
 		return !(lhs == rhs);
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 

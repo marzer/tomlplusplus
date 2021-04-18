@@ -5,8 +5,8 @@
 
 #include "tests.h"
 
-TOML_PUSH_WARNINGS
-TOML_DISABLE_INIT_WARNINGS
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_INIT_WARNINGS;
 
 TEST_CASE("parsing - dates and times")
 {
@@ -162,5 +162,3 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 1"sv);
 }
-
-TOML_POP_WARNINGS

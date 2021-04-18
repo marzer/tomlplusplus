@@ -6,6 +6,7 @@
 #pragma once
 #include "toml_array.h"
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <bool IsConst>
@@ -135,7 +136,7 @@ TOML_IMPL_NAMESPACE_START
 				return lhs.raw_ != rhs.raw_;
 			}
 
-			TOML_DISABLE_WARNINGS
+			TOML_DISABLE_WARNINGS;
 
 			template <bool C = IsConst, typename = std::enable_if_t<!C>>
 			operator table_iterator<true>() const noexcept
@@ -143,7 +144,7 @@ TOML_IMPL_NAMESPACE_START
 				return table_iterator<true>{ raw_ };
 			}
 
-			TOML_ENABLE_WARNINGS
+			TOML_ENABLE_WARNINGS;
 	};
 
 	struct table_init_pair final
@@ -192,7 +193,8 @@ TOML_IMPL_NAMESPACE_START
 		#endif
 	};
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -214,6 +216,8 @@ TOML_NAMESPACE_START
 		private:
 			friend class TOML_PARSER_TYPENAME;
 
+			/// \cond
+
 			impl::string_map<std::unique_ptr<node>> map;
 			bool inline_ = false;
 
@@ -223,6 +227,8 @@ TOML_NAMESPACE_START
 			#endif
 
 			table(impl::table_init_pair*, size_t) noexcept;
+
+			/// \endcond
 
 		public:
 
@@ -291,13 +297,13 @@ TOML_NAMESPACE_START
 				#endif
 			}
 
+			/// \name Type checks
+			/// @{
+
 			[[nodiscard]] node_type type() const noexcept override;
 			[[nodiscard]] bool is_table() const noexcept override;
 			[[nodiscard]] bool is_array() const noexcept override;
 			[[nodiscard]] bool is_value() const noexcept override;
-			[[nodiscard]] table* as_table() noexcept override;
-			[[nodiscard]] const table* as_table() const noexcept override;
-
 			[[nodiscard]] bool is_homogeneous(node_type ntype) const noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
 			[[nodiscard]] bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
@@ -314,6 +320,19 @@ TOML_NAMESPACE_START
 				);
 				return is_homogeneous(impl::node_type_of<type>);
 			}
+
+			/// @}
+
+			/// \name Type casts
+			/// @{
+
+			[[nodiscard]] table* as_table() noexcept override;
+			[[nodiscard]] const table* as_table() const noexcept override;
+
+			/// @}
+
+			/// \name Metadata
+			/// @{
 
 			/// \brief	Returns true if this table is an inline table.
 			/// 
@@ -362,6 +381,11 @@ TOML_NAMESPACE_START
 			/// \param 	val	The new value for 'inline'.
 			void is_inline(bool val) noexcept;
 
+			/// @}
+
+			/// \name Node views
+			/// @{
+
 			/// \brief	Gets a node_view for the selected key-value pair.
 			///
 			/// \param 	key The key used for the lookup.
@@ -392,6 +416,8 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets a node_view for the selected key-value pair.
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key The key used for the lookup.
 			///
 			/// \returns	A view of the value at the given key if one existed, or an empty node view.
@@ -401,11 +427,11 @@ TOML_NAMESPACE_START
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]] node_view<node> operator[] (std::wstring_view key) noexcept;
 
 			/// \brief	Gets a node_view for the selected key-value pair (const overload).
+			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			/// 
 			/// \param 	key The key used for the lookup.
 			///
@@ -416,11 +442,14 @@ TOML_NAMESPACE_START
 			/// 		 <strong>This is not an error.</strong>
 			/// 
 			/// \see toml::node_view
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]] node_view<const node> operator[] (std::wstring_view key) const noexcept;
 
 			#endif // TOML_WINDOWS_COMPAT
+
+			/// @}
+
+			/// \name Table operations
+			/// @{
 
 			/// \brief	Returns an iterator to the first key-value pair.
 			[[nodiscard]] iterator begin() noexcept;
@@ -483,13 +512,13 @@ TOML_NAMESPACE_START
 			/// \param 	key			The key at which to insert the new value.
 			/// \param 	val			The new value to insert.
 			/// 
-			/// \returns <strong><em>Valid input:</em></strong><br>
-			/// 		<ul>
-			/// 			<li>An iterator to the insertion position (or the position of the value that prevented insertion)
-			/// 			<li>A boolean indicating if the insertion was successful.
-			/// 		</ul>
-			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
-			/// 		 `{ end(), false }`
+			/// \returns	\conditional_return{Valid input}
+			/// 			<ul>
+			/// 				<li>An iterator to the insertion position (or the position of the value that prevented insertion)
+			/// 				<li>A boolean indicating if the insertion was successful.
+			/// 			</ul>
+			///				\conditional_return{Input is an empty toml::node_view}
+			/// 			`{ end(), false }`
 			/// 
 			/// \attention The return value will always be `{ end(), false }` if the input value was an
 			/// 		   empty toml::node_view, because no insertion can take place. This is the only circumstance
@@ -628,13 +657,13 @@ TOML_NAMESPACE_START
 			/// \param 	key			The key at which to insert or assign the value.
 			/// \param 	val			The value to insert/assign.
 			/// 
-			/// \returns <strong><em>Valid input:</em></strong><br>
-			/// 		<ul>
-			/// 			<li>An iterator to the value's position
-			/// 			<li>`true` if the value was inserted, `false` if it was assigned.
-			/// 		</ul>
-			/// 		 <strong><em>`val` is an empty toml::node_view:</em></strong><br>
-			/// 		 `{ end(), false }`
+			/// \returns	\conditional_return{Valid input}
+			/// 			<ul>
+			/// 				<li>An iterator to the value's position
+			/// 				<li>`true` if the value was inserted, `false` if it was assigned.
+			/// 			</ul>
+			/// 			\conditional_return{Input is an empty toml::node_view}
+			/// 			 `{ end(), false }`
 			/// 
 			/// \attention The return value will always be `{ end(), false }` if the input value was
 			/// 		   an empty toml::node_view, because no insertion or assignment can take place.
@@ -864,16 +893,64 @@ TOML_NAMESPACE_START
 
 			/// \brief	Removes the value with the given key from the table.
 			/// 
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			/// 
 			/// \param 	key		Key to erase.
 			/// 
 			/// \returns True if any values with matching keys were found and erased.
-			/// 
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			bool erase(std::wstring_view key) noexcept;
 
-			#endif
+			#endif // TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets an iterator to the node at a specific key.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	An iterator to the node at the specified key, or end().
+			[[nodiscard]] iterator find(std::string_view key) noexcept;
+
+			/// \brief	Gets an iterator to the node at a specific key (const overload)
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A const iterator to the node at the specified key, or cend().
+			[[nodiscard]] const_iterator find(std::string_view key) const noexcept;
+
+			/// \brief	Returns true if the table contains a node at the given key.
+			[[nodiscard]] bool contains(std::string_view key) const noexcept;
+
+			#if TOML_WINDOWS_COMPAT
+
+			/// \brief	Gets an iterator to the node at a specific key.
+			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	An iterator to the node at the specified key, or end().
+			[[nodiscard]] iterator find(std::wstring_view key) noexcept;
+
+			/// \brief	Gets an iterator to the node at a specific key (const overload).
+			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
+			/// \param 	key	The node's key.
+			///
+			/// \returns	A const iterator to the node at the specified key, or cend().
+			[[nodiscard]] const_iterator find(std::wstring_view key) const noexcept;
+
+			/// \brief	Returns true if the table contains a node at the given key.
+			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			[[nodiscard]] bool contains(std::wstring_view key) const noexcept;
+
+			#endif // TOML_WINDOWS_COMPAT
+
+			/// @}
 
 		private:
+
+			/// \cond
 
 			template <typename Map, typename Key>
 			[[nodiscard]]
@@ -917,7 +994,12 @@ TOML_NAMESPACE_START
 				return do_get(vals, key) != nullptr;
 			}
 
+			/// \endcond
+
 		public:
+
+			/// \name Value retrieval
+			/// @{
 
 			/// \brief	Gets the node at a specific key.
 			///
@@ -953,65 +1035,25 @@ TOML_NAMESPACE_START
 			/// \returns	A pointer to the node at the specified key, or nullptr.
 			[[nodiscard]] const node* get(std::string_view key) const noexcept;
 
-			/// \brief	Gets an iterator to the node at a specific key.
-			///
-			/// \param 	key	The node's key.
-			///
-			/// \returns	An iterator to the node at the specified key, or end().
-			[[nodiscard]] iterator find(std::string_view key) noexcept;
-
-			/// \brief	Gets an iterator to the node at a specific key (const overload)
-			///
-			/// \param 	key	The node's key.
-			///
-			/// \returns	A const iterator to the node at the specified key, or cend().
-			[[nodiscard]] const_iterator find(std::string_view key) const noexcept;
-
-			/// \brief	Returns true if the table contains a node at the given key.
-			[[nodiscard]] bool contains(std::string_view key) const noexcept;
-
 			#if TOML_WINDOWS_COMPAT
 
 			/// \brief	Gets the node at a specific key.
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]] node* get(std::wstring_view key) noexcept;
 
 			/// \brief	Gets the node at a specific key (const overload).
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \param 	key	The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key, or nullptr.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			[[nodiscard]] const node* get(std::wstring_view key) const noexcept;
-
-			/// \brief	Gets an iterator to the node at a specific key.
-			///
-			/// \param 	key	The node's key.
-			///
-			/// \returns	An iterator to the node at the specified key, or end().
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			[[nodiscard]] iterator find(std::wstring_view key) noexcept;
-
-			/// \brief	Gets an iterator to the node at a specific key (const overload).
-			///
-			/// \param 	key	The node's key.
-			///
-			/// \returns	A const iterator to the node at the specified key, or cend().
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			[[nodiscard]] const_iterator find(std::wstring_view key) const noexcept;
-
-			/// \brief	Returns true if the table contains a node at the given key.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
-			[[nodiscard]] bool contains(std::wstring_view key) const noexcept;
 
 			#endif // TOML_WINDOWS_COMPAT
 
@@ -1059,12 +1101,12 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets the node at a specific key if it is a particular type.
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \tparam	ValueType	One of the TOML node or value types.
 			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename ValueType>
 			[[nodiscard]]
 			impl::wrap_node<ValueType>* get_as(std::wstring_view key) noexcept
@@ -1074,12 +1116,12 @@ TOML_NAMESPACE_START
 
 			/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 			///
+			/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+			///
 			/// \tparam	ValueType	One of the TOML node or value types.
 			/// \param 	key			The node's key.
 			///
 			/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-			///
-			/// \attention This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 			template <typename ValueType>
 			[[nodiscard]]
 			const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const noexcept
@@ -1088,6 +1130,11 @@ TOML_NAMESPACE_START
 			}
 
 			#endif // TOML_WINDOWS_COMPAT
+
+			/// @}
+
+			/// \name Equality
+			/// @{
 
 			/// \brief	Equality operator.
 			///
@@ -1109,11 +1156,11 @@ TOML_NAMESPACE_START
 			template <typename Char>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const table&);
 			// implemented in toml_default_formatter.h
+
+			/// @}
 	};
 
 	#ifndef DOXYGEN
-
-
 
 	//template <typename T>
 	//inline std::vector<T> node::select_exact() const noexcept
@@ -1154,4 +1201,4 @@ TOML_NAMESPACE_START
 
 	#endif // !DOXYGEN
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;

@@ -10,7 +10,7 @@
 //# INCLUDES
 //#====================================================================================================================
 
-TOML_DISABLE_WARNINGS
+TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
 #include <cstring>
@@ -30,7 +30,7 @@ TOML_DISABLE_WARNINGS
 #if TOML_HAS_INCLUDE(<version>)
 	#include <version>
 #endif
-TOML_ENABLE_WARNINGS
+TOML_ENABLE_WARNINGS;
 
 #ifdef __cpp_lib_launder
 	#define TOML_LAUNDER(x)	std::launder(x)
@@ -42,7 +42,7 @@ TOML_ENABLE_WARNINGS
 //# ENVIRONMENT GROUND-TRUTHS
 //#====================================================================================================================
 
-#ifndef DOXYGEN
+/// \cond
 #ifndef TOML_DISABLE_ENVIRONMENT_CHECKS
 #define TOML_ENV_MESSAGE																							\
 	"If you're seeing this error it's because you're building toml++ for an environment that doesn't conform to "	\
@@ -61,13 +61,14 @@ static_assert(std::numeric_limits<double>::digits10 == 15, TOML_ENV_MESSAGE);
 
 #undef TOML_ENV_MESSAGE
 #endif // !TOML_DISABLE_ENVIRONMENT_CHECKS
-#endif // !DOXYGEN
+/// \endcond
 
 //#====================================================================================================================
 //# UNDOCUMENTED TYPEDEFS AND FORWARD DECLARATIONS
 //#====================================================================================================================
 
-#ifndef DOXYGEN // undocumented forward declarations are hidden from doxygen because they fuck it up =/
+/// \cond
+// undocumented forward declarations are hidden from doxygen because they fuck it up =/
 
 namespace toml // non-abi namespace; this is not an error
 {
@@ -103,7 +104,7 @@ TOML_NAMESPACE_START // abi namespace
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
 	struct date_time;
-	TOML_ABI_NAMESPACE_END
+	TOML_ABI_NAMESPACE_END;
 
 	class node;
 	class array;
@@ -182,12 +183,12 @@ TOML_NAMESPACE_START // abi namespace
 			#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::parser
 		#endif
 		class parser;
-		TOML_ABI_NAMESPACE_END // TOML_EXCEPTIONS
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
-#endif // !DOXYGEN
+/// \endcond
 
 //#====================================================================================================================
 //# TYPEDEFS AND FORWARD DECLARATIONS
@@ -271,12 +272,13 @@ TOML_NAMESPACE_START // abi namespace
 	};
 	template <typename T> inserter(T&&) -> inserter<T>;
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
 //#====================================================================================================================
 //# VALUE AND NODE TRAITS
 //#====================================================================================================================
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	// general value traits
@@ -529,7 +531,8 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref_t<T>>>::value;
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -577,12 +580,13 @@ TOML_NAMESPACE_START
 	template <typename T>
 	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
 //#====================================================================================================================
 //# INTERNAL HELPERS
 //#====================================================================================================================
 
+/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename T>
@@ -677,7 +681,8 @@ TOML_IMPL_NAMESPACE_START
 		"date-time"sv
 	};
 }
-TOML_IMPL_NAMESPACE_END
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 TOML_NAMESPACE_START
 {
@@ -689,7 +694,7 @@ TOML_NAMESPACE_START
 		return static_cast<size_t>(n);
 	}
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
 //#====================================================================================================================
 //# SOURCE POSITIONS & REGIONS
@@ -824,10 +829,10 @@ TOML_NAMESPACE_START
 		#if TOML_WINDOWS_COMPAT
 
 		/// \brief	The path to the corresponding source document as a wide-string.
+		/// 
+		/// \availability This function is only available when #TOML_WINDOWS_COMPAT is enabled.
 		///
 		/// \remarks This will return an empty optional if no path was provided to toml::parse().
-		/// 
-		/// \attention This function is only available when #TOML_WINDOWS_COMPAT is enabled.
 		[[nodiscard]]
 		optional<std::wstring> wide_path() const noexcept
 		{
@@ -839,9 +844,9 @@ TOML_NAMESPACE_START
 		#endif
 	};
 
-	TOML_ABI_NAMESPACE_END // TOML_LARGE_FILES
+	TOML_ABI_NAMESPACE_END; // TOML_LARGE_FILES
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
 //#====================================================================================================================
 //# OTHER
@@ -864,7 +869,7 @@ TOML_NAMESPACE_START
 		/// \brief Format integer values as hexadecimal.
 		format_as_hexadecimal = 3,
 	};
-	TOML_MAKE_BITOPS(value_flags)
+	TOML_MAKE_BITOPS(value_flags);
 
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
@@ -884,7 +889,7 @@ TOML_NAMESPACE_START
 		/// \brief Values with special format flags will be formatted accordingly.
 		allow_value_format_flags = 8,
 	};
-	TOML_MAKE_BITOPS(format_flags)
+	TOML_MAKE_BITOPS(format_flags);
 
 	/// \brief	Pretty-prints the value of a node_type to a stream.
 	/// 
@@ -917,8 +922,7 @@ TOML_NAMESPACE_START
 		}
 	}
 
-	#ifndef DOXYGEN
-
+	/// \cond
 	namespace impl
 	{
 		#define TOML_P2S_DECL(Type)															\
@@ -949,7 +953,7 @@ TOML_NAMESPACE_START
 		extern template TOML_API std::ostream& operator << (std::ostream&, node_type);
 	#endif // !TOML_HEADER_ONLY
 
-	#endif // !DOXYGEN
+	/// \endcond
 }
-TOML_NAMESPACE_END
+TOML_NAMESPACE_END;
 
