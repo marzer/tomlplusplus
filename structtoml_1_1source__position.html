@@ -1,37 +1,27 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml::source_position struct | toml++ TOML
-for
-modern
-C++</title>
+  <title>toml::source_position struct | toml++ TOML for modern C++</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
-  <link href="muu.css" rel="stylesheet"/>
   <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
   <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
   <meta content="#22272e" name="theme-color"/>
+  
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <meta content="Header-only
-  TOML
-  config
-  file
-  parser
-  and
-  serializer
+
+  <meta content="TOML
   for
   modern
-  C++." name="description"/>
-  <script src="muu.js"></script>
+  C++" name="description"/>
+
+  <link href="dox.css" rel="stylesheet"/>
 </head>
 <body>
 <header><nav id="navigation">
   <div class="m-container">
     <div class="m-row">
-      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img alt="" src="logo.png"/>toml++ <span class="m-thin">TOML
-for
-modern
-C++</span></a>
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img alt="" src="logo.png"/>toml++ <span class="m-thin">TOML for modern C++</span></a>
       <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
         <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
           <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
@@ -43,10 +33,10 @@ C++</span></a>
         <div class="m-row">
           <ol class="m-col-t-6 m-col-m-none">
             <li><a href="namespaces.html">Namespaces</a></li>
-          </ol>
-          <ol class="m-col-t-6 m-col-m-none" start="2">
             <li><a href="annotated.html">Classes</a></li>
-            <li><a class="github muu-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a class="github dox-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -77,9 +67,9 @@ C++</span></a>
             </li>
           </ul>
         </div>
-<pre class="m-code"><span class="k">auto</span> <span class="ut">table</span> <span class="o">=</span> <span class="ns">toml::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'description' was defined at "</span><span class="sa">sv</span>
-    <span class="o">&lt;&lt;</span> <span class="ut">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"description"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
+<pre class="m-code"><span class="k">auto</span> <span class="n">table</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'description' was defined at "</span><span class="sa">sv</span>
+    <span class="o">&lt;&lt;</span> <span class="n">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"description"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
     <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value 'description' was defined at line 7, column 15</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
@@ -189,17 +179,31 @@ C++</span></a>
   <div class="m-container">
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
-        <a class="muu-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
-•
+        
+<a class="dox-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 
-<a class="muu-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+•
+<a class="dox-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
-<br/><br/>Documentation
-generated
+•
+<a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen
+tagfile</a>
+
+<br/><br/>
+
+Documentation
+created
 using
-<a class="muu-external" href="https://mcss.mosra.cz/" target="_blank">m.css</a>
+
+<a class="dox-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
+
++
+<a class="dox-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
+
++
+<a class="dox-external" href="https://github.com/marzer/dox/" target="_blank">marzer/dox</a>
       </div>
     </div>
   </div>
