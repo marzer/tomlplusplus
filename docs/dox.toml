@@ -1,25 +1,25 @@
-name			= 'toml++'
-description		= 'TOML for modern C++'
-cpp				= 17
-github			= 'marzer/tomlplusplus'
-license			= [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
-show_includes	= false
-logo			= 'images/logo.png'
-favicon			= 'images/favicon.ico'
-navbar			= [ 'namespaces', 'annotated' ]
-extra_files		= [
-	'images/banner_small.png',
-	'images/badge-awesome.svg',
-	'images/badge-TOML.svg',
-	'images/badge-C++20.svg'
+name            = 'toml++'
+description     = 'TOML for modern C++'
+cpp             = 17
+github          = 'marzer/tomlplusplus'
+license         = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
+show_includes   = false
+logo            = 'images/logo.png'
+favicon         = 'images/favicon.ico'
+navbar          = [ 'namespaces', 'annotated' ]
+extra_files     = [
+    'images/banner_small.png',
+    'images/badge-awesome.svg',
+    'images/badge-TOML.svg',
+    'images/badge-C++20.svg'
 ]
 
 
 
 [warnings]
-enabled			= true
-treat_as_errors	= false
-undocumented	= false
+enabled         = true
+treat_as_errors = false
+undocumented    = false
 
 
 
@@ -38,8 +38,8 @@ undocumented	= false
 [highlighting]
 types = []
 macros = [
-	'TOML_[A-Z0-9_]+?',
-	'print_value'
+    'TOML_[A-Z0-9_]+?',
+    'print_value'
 ]
 string_literals = [ '_toml' ]
 

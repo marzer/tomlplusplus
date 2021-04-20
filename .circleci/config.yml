@@ -91,7 +91,7 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    pip3 install --upgrade -r external/dox/requirements.txt
+                    pip3 install -r external/dox/requirements.txt
             - run:
                 name: Generating documentation
                 command: |
