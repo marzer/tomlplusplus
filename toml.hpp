@@ -470,7 +470,9 @@ is no longer necessary.
 
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
-#ifdef __cpp_consteval
+#if defined(__cpp_consteval) \
+		&& (!defined(_MSC_FULL_VER) || _MSC_FULL_VER != 192930031)
+		// https://developercommunity.visualstudio.com/t/Erroneous-C7595-error-with-consteval-in/1404234
 	#define TOML_CONSTEVAL		consteval
 #else
 	#define TOML_CONSTEVAL		constexpr
