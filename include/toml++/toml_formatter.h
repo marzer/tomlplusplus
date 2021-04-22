@@ -190,6 +190,7 @@ TOML_IMPL_NAMESPACE_START
 									case value_flags::format_as_binary: print_to_stream("0b"sv, *stream_); break;
 									case value_flags::format_as_octal: print_to_stream("0o"sv, *stream_); break;
 									case value_flags::format_as_hexadecimal: print_to_stream("0x"sv, *stream_); break;
+									TOML_NO_DEFAULT_CASE;
 								}
 								print_to_stream(*val, *stream_, fmt);
 							}

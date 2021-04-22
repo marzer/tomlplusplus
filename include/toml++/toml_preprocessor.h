@@ -133,14 +133,31 @@
 		#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
 												static_assert(true)
 
-		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063)) \
+		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4061)) \
+												__pragma(warning(disable: 4063)) \
+												__pragma(warning(disable: 26819)) \
 												static_assert(true)
 
 		#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
 												__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
 												__pragma(warning(disable: 4348)) \
 												__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
-												__pragma(warning(disable: 26490)) /* cg: dont use reinterpret_cast */ \
+												__pragma(warning(disable: 4514)) /* unreferenced inline function has been removed */ \
+												__pragma(warning(disable: 4623)) /* default constructor was implicitly defined as deleted		*/ \
+												__pragma(warning(disable: 4625)) /* copy constructor was implicitly defined as deleted			*/ \
+												__pragma(warning(disable: 4626)) /* assignment operator was implicitly defined as deleted		*/ \
+												__pragma(warning(disable: 4710)) /* function not inlined */ \
+												__pragma(warning(disable: 4711)) /* function selected for automatic expansion */ \
+												__pragma(warning(disable: 4820)) /* N bytes padding added */  \
+												__pragma(warning(disable: 4946)) /* reinterpret_cast used between related classes */ \
+												__pragma(warning(disable: 5026)) /* move constructor was implicitly defined as deleted	*/ \
+												__pragma(warning(disable: 5027)) /* move assignment operator was implicitly defined as deleted	*/ \
+												__pragma(warning(disable: 5045)) /* Compiler will insert Spectre mitigation */ \
+												__pragma(warning(disable: 26451)) \
+												__pragma(warning(disable: 26490)) \
+												__pragma(warning(disable: 26495)) \
+												__pragma(warning(disable: 26812)) \
+												__pragma(warning(disable: 26819)) \
 												static_assert(true)
 
 		#define TOML_POP_WARNINGS				__pragma(warning(pop)) \

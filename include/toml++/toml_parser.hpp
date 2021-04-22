@@ -29,6 +29,7 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
+TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
 #if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
@@ -1405,7 +1406,7 @@ TOML_IMPL_NAMESPACE_START
 				for (int fragment_idx = 0; fragment_idx < 3; fragment_idx++)
 				{
 					auto& f = fragments[fragment_idx];
-					const uint32_t base = fragment_idx == 2 ? 10 : 16;
+					const uint32_t base = fragment_idx == 2 ? 10u : 16u;
 
 					// left-trim zeroes
 					const char* c = f.chars;
@@ -1458,6 +1459,11 @@ TOML_IMPL_NAMESPACE_START
 
 				#endif // !TOML_LANG_UNRELEASED
 			}
+
+			TOML_PUSH_WARNINGS;
+			#if TOML_MSVC
+				#pragma warning(disable: 6001) // false positive
+			#endif
 
 			template <uint64_t base>
 			[[nodiscard]]
@@ -1579,6 +1585,8 @@ TOML_IMPL_NAMESPACE_START
 				else
 					return static_cast<int64_t>(result);
 			}
+
+			TOML_POP_WARNINGS;
 
 			[[nodiscard]]
 			date parse_date(bool part_of_datetime = false) TOML_MAY_THROW
@@ -3118,4 +3126,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS

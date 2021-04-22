@@ -4,6 +4,10 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include "toml_preprocessor.h"
+
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_SWITCH_WARNINGS;
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -966,3 +970,5 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
+
+TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS

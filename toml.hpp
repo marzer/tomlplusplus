@@ -161,14 +161,31 @@
 		#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
 												static_assert(true)
 
-		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4063)) \
+		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4061)) \
+												__pragma(warning(disable: 4063)) \
+												__pragma(warning(disable: 26819)) \
 												static_assert(true)
 
 		#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
 												__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
 												__pragma(warning(disable: 4348)) \
 												__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
-												__pragma(warning(disable: 26490)) /* cg: dont use reinterpret_cast */ \
+												__pragma(warning(disable: 4514)) /* unreferenced inline function has been removed */ \
+												__pragma(warning(disable: 4623)) /* default constructor was implicitly defined as deleted		*/ \
+												__pragma(warning(disable: 4625)) /* copy constructor was implicitly defined as deleted			*/ \
+												__pragma(warning(disable: 4626)) /* assignment operator was implicitly defined as deleted		*/ \
+												__pragma(warning(disable: 4710)) /* function not inlined */ \
+												__pragma(warning(disable: 4711)) /* function selected for automatic expansion */ \
+												__pragma(warning(disable: 4820)) /* N bytes padding added */  \
+												__pragma(warning(disable: 4946)) /* reinterpret_cast used between related classes */ \
+												__pragma(warning(disable: 5026)) /* move constructor was implicitly defined as deleted	*/ \
+												__pragma(warning(disable: 5027)) /* move assignment operator was implicitly defined as deleted	*/ \
+												__pragma(warning(disable: 5045)) /* Compiler will insert Spectre mitigation */ \
+												__pragma(warning(disable: 26451)) \
+												__pragma(warning(disable: 26490)) \
+												__pragma(warning(disable: 26495)) \
+												__pragma(warning(disable: 26812)) \
+												__pragma(warning(disable: 26819)) \
 												static_assert(true)
 
 		#define TOML_POP_WARNINGS				__pragma(warning(pop)) \
@@ -5069,6 +5086,9 @@ TOML_POP_WARNINGS; // TOML_DISABLE_ARITHMETIC_WARNINGS
 
 #if 1  //-----------------------------------  ↓ toml_utf8.h  -----------------------------------------------------------
 
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_SWITCH_WARNINGS;
+
 TOML_IMPL_NAMESPACE_START
 {
 	[[nodiscard]]
@@ -6023,6 +6043,8 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+
 #endif //-----------------------------------  ↑ toml_utf8.h  -----------------------------------------------------------
 
 #if 1  //---------------------------------------------------------  ↓ toml_formatter.h  --------------------------------
@@ -6209,6 +6231,7 @@ TOML_IMPL_NAMESPACE_START
 									case value_flags::format_as_binary: print_to_stream("0b"sv, *stream_); break;
 									case value_flags::format_as_octal: print_to_stream("0o"sv, *stream_); break;
 									case value_flags::format_as_hexadecimal: print_to_stream("0x"sv, *stream_); break;
+									TOML_NO_DEFAULT_CASE;
 								}
 								print_to_stream(*val, *stream_, fmt);
 							}
@@ -7584,7 +7607,7 @@ TOML_NAMESPACE_START
 		// open file with a custom-sized stack buffer
 		using ifstream = std::basic_ifstream<StreamChar>;
 		ifstream file;
-		StreamChar file_buffer[sizeof(void*) * 4096_sz];
+		StreamChar file_buffer[sizeof(void*) * 1024_sz];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
 		if (!file.is_open())
@@ -8877,6 +8900,7 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 
 TOML_PUSH_WARNINGS;
+TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
 #if TOML_EXCEPTIONS && !defined(__INTELLISENSE__)
@@ -10253,7 +10277,7 @@ TOML_IMPL_NAMESPACE_START
 				for (int fragment_idx = 0; fragment_idx < 3; fragment_idx++)
 				{
 					auto& f = fragments[fragment_idx];
-					const uint32_t base = fragment_idx == 2 ? 10 : 16;
+					const uint32_t base = fragment_idx == 2 ? 10u : 16u;
 
 					// left-trim zeroes
 					const char* c = f.chars;
@@ -10306,6 +10330,11 @@ TOML_IMPL_NAMESPACE_START
 
 				#endif // !TOML_LANG_UNRELEASED
 			}
+
+			TOML_PUSH_WARNINGS;
+			#if TOML_MSVC
+				#pragma warning(disable: 6001) // false positive
+			#endif
 
 			template <uint64_t base>
 			[[nodiscard]]
@@ -10427,6 +10456,8 @@ TOML_IMPL_NAMESPACE_START
 				else
 					return static_cast<int64_t>(result);
 			}
+
+			TOML_POP_WARNINGS;
 
 			[[nodiscard]]
 			date parse_date(bool part_of_datetime = false) TOML_MAY_THROW
@@ -11961,7 +11992,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
 
 #endif //----------------------------------------------------------  ↑ toml_parser.hpp  --------------------------------
 

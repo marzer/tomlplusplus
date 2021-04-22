@@ -701,7 +701,7 @@ TOML_NAMESPACE_START
 		// open file with a custom-sized stack buffer
 		using ifstream = std::basic_ifstream<StreamChar>;
 		ifstream file;
-		StreamChar file_buffer[sizeof(void*) * 4096_sz];
+		StreamChar file_buffer[sizeof(void*) * 1024_sz];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
 		if (!file.is_open())
