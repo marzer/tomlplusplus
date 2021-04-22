@@ -1,38 +1,44 @@
 html, body
 {
+	height: 100%;
 	scroll-padding-top: 3.5rem;
 }
 
 body
 {
-	margin-top: 3rem;
+	display: flex;
+	flex-direction: column;
+	padding-top: 3rem;
 }
 
-@media screen and (min-width: 768px) and (max-width: 991px)
+body > header
 {
-	body
-	{
-		margin-top: 6rem;
-	}
+	position: fixed;
+	top: 0;
+	left: 0;
+	right: 0;
+	z-index: 100;
+}
+
+body > main
+{
+	flex: 1 0 auto;
+}
+
+body > footer
+{
+	flex-shrink: 0;
+}
+
+body > header,
+body > header *
+{
+	white-space: nowrap;
 }
 
 a
 {
 	text-decoration: none !important;
-}
-
-header
-{
-	position: fixed;
-	left: 0;
-	right: 0;
-	top: 0;
-	z-index: 100;
-}
-
-header, header *
-{
-	white-space: nowrap;
 }
 
 article div > section
@@ -486,4 +492,12 @@ h5:last-child,
 h6:last-child
 {
 	margin-bottom: 0.0rem;
+}
+
+/* namespace/class/struct etc prefixes in treeviews */
+ul.m-doc > li.m-doc-collapsible,
+ul.m-doc > li.m-doc-collapsible > a:first-child,
+ul.m-doc > li.m-doc-collapsible li
+{
+	color: #CCCCCC !important;
 }
