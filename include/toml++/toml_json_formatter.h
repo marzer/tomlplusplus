@@ -5,6 +5,8 @@
 
 #pragma once
 #include "toml_formatter.h"
+#include "toml_table.h"
+#include "toml_array.h"
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
@@ -47,6 +49,8 @@ TOML_NAMESPACE_START
 	class TOML_API json_formatter final : impl::formatter<Char>
 	{
 		private:
+			/// \cond
+
 			using base = impl::formatter<Char>;
 
 			void print(const toml::table& tbl);
@@ -105,6 +109,8 @@ TOML_NAMESPACE_START
 						base::print_value(base::source(), source_type);
 				}
 			}
+
+			/// \endcond
 
 		public:
 

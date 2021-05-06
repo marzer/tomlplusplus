@@ -9,6 +9,7 @@ favicon           = 'images/favicon.ico'
 navbar            = [ 'namespaces', 'annotated' ]
 sources           = [ 'pages' ]
 recursive_sources = [ '../include' ]
+source_patterns   = [ '*.h', '*.dox' ]
 strip_paths       = [ '../include' ]
 extra_files       = [
     'images/banner_small.png',

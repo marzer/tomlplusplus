@@ -57,6 +57,8 @@ TOML_NAMESPACE_START
 	class TOML_API default_formatter final : impl::formatter<Char>
 	{
 		private:
+			/// \cond
+
 			using base = impl::formatter<Char>;
 			std::vector<std::string> key_path;
 			bool pending_table_separator_ = false;
@@ -325,6 +327,8 @@ TOML_NAMESPACE_START
 						base::print_value(base::source(), source_type);
 				}
 			}
+
+			/// \endcond
 
 		public:
 

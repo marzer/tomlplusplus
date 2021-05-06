@@ -2,7 +2,6 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-/// \cond
 
 #pragma once
 //# {{
@@ -154,5 +153,3 @@ TOML_NAMESPACE_START
 	#endif // TOML_PARSER
 }
 TOML_NAMESPACE_END;
-
-/// \endcond

@@ -7282,6 +7282,7 @@ TOML_NAMESPACE_START
 	class TOML_API default_formatter final : impl::formatter<Char>
 	{
 		private:
+
 			using base = impl::formatter<Char>;
 			std::vector<std::string> key_path;
 			bool pending_table_separator_ = false;
@@ -7653,6 +7654,7 @@ TOML_NAMESPACE_START
 	class TOML_API json_formatter final : impl::formatter<Char>
 	{
 		private:
+
 			using base = impl::formatter<Char>;
 
 			void print(const toml::table& tbl);
