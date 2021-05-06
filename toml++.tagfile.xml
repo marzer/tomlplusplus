@@ -1347,11 +1347,86 @@
     <name>toml::default_formatter</name>
     <filename>classtoml_1_1default__formatter.html</filename>
     <templarg>typename Char</templarg>
+    <member kind="function">
+      <type></type>
+      <name>default_formatter</name>
+      <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
+      <anchor>af2e597925932cf03b0df8f7379621582</anchor>
+      <arglist>(const toml::node &amp;source, format_flags flags=default_flags) noexcept</arglist>
+    </member>
+    <member kind="function">
+      <type></type>
+      <name>default_formatter</name>
+      <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
+      <anchor>a4ddc92e5b0c25edfffe95be72bb043a2</anchor>
+      <arglist>(const toml::parse_result &amp;result, format_flags flags=default_flags) noexcept</arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static constexpr format_flags</type>
+      <name>default_flags</name>
+      <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
+      <anchor>a5672645717f5a096d64af5d25690f8e5</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="friend">
+      <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
+      <anchor>a516a015d387a195a4abb0f6262f88698</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;)</arglist>
+    </member>
+    <member kind="friend">
+      <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
+      <anchor>a09799f1ec6ad5804b5001fb37053e377</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;&amp;)</arglist>
+    </member>
   </compound>
   <compound kind="struct">
     <name>toml::inserter</name>
     <filename>structtoml_1_1inserter.html</filename>
     <templarg>typename T</templarg>
+  </compound>
+  <compound kind="class">
+    <name>toml::json_formatter</name>
+    <filename>classtoml_1_1json__formatter.html</filename>
+    <templarg>typename Char</templarg>
+    <member kind="function">
+      <type></type>
+      <name>json_formatter</name>
+      <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
+      <anchor>ace8cd7a487b042df7b78767022d54bc5</anchor>
+      <arglist>(const toml::node &amp;source, format_flags flags=default_flags) noexcept</arglist>
+    </member>
+    <member kind="function">
+      <type></type>
+      <name>json_formatter</name>
+      <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
+      <anchor>a89e23abb89d86f79e232654cf0f9e22d</anchor>
+      <arglist>(const toml::parse_result &amp;result, format_flags flags=default_flags) noexcept</arglist>
+    </member>
+    <member kind="variable" static="yes">
+      <type>static constexpr format_flags</type>
+      <name>default_flags</name>
+      <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
+      <anchor>ab4a448a50aa58f3111ce6e829d428b55</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="friend">
+      <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
+      <anchor>ababd7a7f97d0673d75407a612bfc887d</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;)</arglist>
+    </member>
+    <member kind="friend">
+      <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
+      <anchor>a7a4c90e29dbda20e5fbcfbe5e7121f62</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;&amp;)</arglist>
+    </member>
   </compound>
   <compound kind="class">
     <name>toml::node</name>
@@ -5225,6 +5300,7 @@
     <class kind="struct">toml::time_offset</class>
     <class kind="struct">toml::date_time</class>
     <class kind="class">toml::default_formatter</class>
+    <class kind="class">toml::json_formatter</class>
     <class kind="class">toml::node</class>
     <class kind="class">toml::node_view</class>
     <class kind="class">toml::parse_error</class>
@@ -5368,6 +5444,20 @@
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a7751ef32d579a26d6d718bd20727c366</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, default_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a71f00c85c2e052bc37e68901e528adf8</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;rhs)</arglist>
+    </member>
+    <member kind="function">
+      <type>std::basic_ostream&lt; T &gt; &amp;</type>
+      <name>operator&lt;&lt;</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a5950cf269cd3a637e75a0c5d862bb59e</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>

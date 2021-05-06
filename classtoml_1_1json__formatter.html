@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>toml::json_formatter class | toml++ TOML for modern C++</title>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  
+  <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
+
+  <meta content="TOML
+  for
+  modern
+  C++" name="description"/>
+
+  <link href="poxy.css" rel="stylesheet"/>
+
+  <script src="jquery-3.6.0.slim.min.js"></script>
+
+  <script src="poxy.js"></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img alt="" src="logo.png"/>toml++ <span class="m-thin">TOML for modern C++</span></a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="annotated.html">Classes</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a class="github poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <div class="m-doc-template">template&lt;typename Char = char&gt;</div>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>json_formatter <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+        </h1>
+        <p>A wrapper for printing TOML objects out to a stream as formatted JSON.</p>
+        <table class="m-table m-fullwidth m-flat">
+          <thead>
+            <tr><th colspan="2">Template parameters</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="width: 1%">Char</td>
+              <td>The underlying character type of the output stream. Must be 1 byte in size.</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="m-block m-default">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-static-attribs">Public static variables</a></li>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+<pre class="m-code"><span class="k">auto</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<span class="s">    [fruit]</span>
+<span class="s">    apple.color = "red"</span>
+<span class="s">    apple.taste.sweet = true</span>
+
+<span class="s">    [fruit.apple.texture]</span>
+<span class="s">    smooth = true</span>
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{</span>
+<span class="go">    "fruit" : {</span>
+<span class="go">        "apple" : {</span>
+<span class="go">            "color" : "red",</span>
+<span class="go">            "taste" : {</span>
+<span class="go">                "sweet" : true</span>
+<span class="go">            },</span>
+<span class="go">            "texture" : {</span>
+<span class="go">                "smooth" : true</span>
+<span class="go">            }</span>
+<span class="go">        }</span>
+<span class="go">    }</span>
+<span class="go">}</span></pre>
+        <section id="pub-static-attribs">
+          <h2><a href="#pub-static-attribs">Public static variables</a></h2>
+          <dl class="m-doc">
+            <dt id="ab4a448a50aa58f3111ce6e829d428b55">
+              static <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> <a class="m-doc-self" href="#ab4a448a50aa58f3111ce6e829d428b55">default_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>The default flags for a <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>.</dd>
+          </dl>
+        </section>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#ab4a448a50aa58f3111ce6e829d428b55">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs a JSON formatter and binds it to a TOML object.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#ab4a448a50aa58f3111ce6e829d428b55">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs a JSON formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt id="ababd7a7f97d0673d75407a612bfc887d">
+              <div class="m-doc-template">template&lt;typename T, typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ababd7a7f97d0673d75407a612bfc887d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;,
+              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&lt;U&gt;&amp;) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;</span>
+            </dt>
+            <dd>Prints the bound TOML object out to the stream as JSON.</dd>
+            <dt id="a7a4c90e29dbda20e5fbcfbe5e7121f62">
+              <div class="m-doc-template">template&lt;typename T, typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7a4c90e29dbda20e5fbcfbe5e7121f62">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;,
+              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&lt;U&gt;&amp;&amp;) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;</span>
+            </dt>
+            <dd>Prints the bound TOML object out to the stream as JSON (rvalue overload).</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ace8cd7a487b042df7b78767022d54bc5"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Char&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>json_formatter&lt;Char&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ace8cd7a487b042df7b78767022d54bc5">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#ab4a448a50aa58f3111ce6e829d428b55">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Constructs a JSON formatter and binds it to a TOML object.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">source</td>
+                  <td>The source TOML object.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Format option flags.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a89e23abb89d86f79e232654cf0f9e22d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Char&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>json_formatter&lt;Char&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a89e23abb89d86f79e232654cf0f9e22d">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
+              <a class="m-doc" href="namespacetoml.html#af1a6761a2f4d80b1a541ba819d9c8e0f">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#ab4a448a50aa58f3111ce6e829d428b55">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Constructs a JSON formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">result</td>
+                  <td>The <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a>.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Format option flags.</td>
+                </tr>
+              </tbody>
+            </table>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid JSON, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
+          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
+          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
+          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{</span>
+<span class="go">    "a" : "b"</span>
+<span class="go">}</span>
+
+<span class="go">Error while parsing key-value pair: encountered end-of-file</span>
+<span class="go">        (error occurred at line 1, column 5)</span></pre><p>Use the library with exceptions if you want to avoid this scenario.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v1.js"></script>
+<script async="async" src="searchdata-v1.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+
+•
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+an
+issue</a>
+
+•
+<a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen
+tagfile</a>
+
+<br/><br/>
+
+Documentation
+created
+using
+
+<a class="poxy-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
+
++
+<a class="poxy-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
+
++
+<a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">marzer/poxy</a>
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>

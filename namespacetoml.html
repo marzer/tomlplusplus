@@ -123,6 +123,11 @@
             </dt>
             <dd>A wrapper for printing TOML objects out to a stream as formatted TOML.</dd>
             <dt>
+              <div class="m-doc-template">template&lt;typename Char = char&gt;</div>
+              class <a class="m-doc" href="classtoml_1_1json__formatter.html">json_formatter</a>
+            </dt>
+            <dd>A wrapper for printing TOML objects out to a stream as formatted JSON.</dd>
+            <dt>
               class <a class="m-doc" href="classtoml_1_1node.html">node</a>
             </dt>
             <dd>A TOML node.</dd>
@@ -267,6 +272,18 @@
               <a class="m-doc" href="classtoml_1_1default__formatter.html">default_<wbr/>formatter</a>&lt;U&gt;&amp;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;</span>
             </dt>
             <dd>Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).</dd>
+            <dt id="a71f00c85c2e052bc37e68901e528adf8">
+              <div class="m-doc-template">template&lt;typename T, typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a71f00c85c2e052bc37e68901e528adf8">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp; lhs,
+              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&lt;U&gt;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;</span>
+            </dt>
+            <dd>Prints the bound TOML object out to the stream as JSON.</dd>
+            <dt id="a5950cf269cd3a637e75a0c5d862bb59e">
+              <div class="m-doc-template">template&lt;typename T, typename U&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5950cf269cd3a637e75a0c5d862bb59e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp; lhs,
+              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&lt;U&gt;&amp;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;T&gt;&amp;</span>
+            </dt>
+            <dd>Prints the bound TOML object out to the stream as JSON (rvalue overload).</dd>
             <dt id="af05142410823b801c5337566ec4167e9">
               <div class="m-doc-template">template&lt;typename Char, typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af05142410823b801c5337566ec4167e9">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; os,
