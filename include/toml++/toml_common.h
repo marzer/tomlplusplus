@@ -102,7 +102,7 @@ TOML_NAMESPACE_START // abi namespace
 	struct time;
 	struct time_offset;
 
-	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
+	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt);
 	struct date_time;
 	TOML_ABI_NAMESPACE_END;
 
@@ -136,6 +136,14 @@ TOML_NAMESPACE_START // abi namespace
 	std::basic_ostream<T>& operator << (std::basic_ostream<T>&, json_formatter<U>&&);
 	template <typename Char, typename T>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);
+
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
+	#if TOML_EXCEPTIONS
+	using parse_result = table;
+	#else
+	class parse_result;
+	#endif // TOML_EXCEPTIONS
+	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
 	namespace impl
 	{
@@ -171,19 +179,19 @@ TOML_NAMESPACE_START // abi namespace
 		#endif
 		#endif // TOML_WINDOWS_COMPAT
 
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
+		class parser;
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
+
 		#if TOML_ABI_NAMESPACES
 			#if TOML_EXCEPTIONS
-				TOML_ABI_NAMESPACE_START(ex)
 				#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::ex::parser
 			#else
-				TOML_ABI_NAMESPACE_START(noex)
 				#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::noex::parser
 			#endif
 		#else
 			#define TOML_PARSER_TYPENAME TOML_NAMESPACE::impl::parser
 		#endif
-		class parser;
-		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
 TOML_NAMESPACE_END;
@@ -702,7 +710,7 @@ TOML_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf)
+	TOML_ABI_NAMESPACE_BOOL(TOML_LARGE_FILES, lf, sf);
 
 	#if TOML_LARGE_FILES
 	using source_index = uint32_t;

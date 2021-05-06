@@ -24,30 +24,29 @@ TOML_DISABLE_SPAM_WARNINGS;
 #include "toml_table.h"
 #include "toml_node_view.h"
 #include "toml_utf8.h"
-#include "toml_formatter.h"
-#include "toml_default_formatter.h"
-#include "toml_json_formatter.h"
 #if TOML_PARSER
 	#include "toml_parse_error.h"
+	#include "toml_parse_result.h"
 	#include "toml_utf8_streams.h"
 	#include "toml_parser.h"
 #endif // TOML_PARSER
+#include "toml_formatter.h"
+#include "toml_default_formatter.h"
+#include "toml_json_formatter.h"
 
 #if TOML_IMPLEMENTATION
 	#include "toml_node.hpp"
 	#include "toml_array.hpp"
 	#include "toml_table.hpp"
+	#if TOML_PARSER
+		#include "toml_utf8_streams.hpp"
+		#include "toml_parser.hpp"
+	#endif // TOML_PARSER
 	#include "toml_default_formatter.hpp"
 	#include "toml_json_formatter.hpp"
-#if TOML_PARSER
-	#include "toml_utf8_streams.hpp"
-	#include "toml_parser.hpp"
-#endif // TOML_PARSER
-
-#if !TOML_HEADER_ONLY
-	#include "toml_instantiations.hpp"
-#endif // !TOML_HEADER_ONLY
-
+	#if !TOML_HEADER_ONLY
+		#include "toml_instantiations.hpp"
+	#endif // !TOML_HEADER_ONLY
 #endif // TOML_IMPLEMENTATION
 
 TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS

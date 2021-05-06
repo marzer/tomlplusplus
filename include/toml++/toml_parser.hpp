@@ -2,6 +2,7 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
+/// \cond
 
 #pragma once
 //# {{
@@ -378,7 +379,7 @@ TOML_IMPL_NAMESPACE_START
 			set_error_and_return_if_eof(__VA_ARGS__);	\
 		} while (false)
 
-	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	class parser final
 	{
@@ -3041,7 +3042,7 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
@@ -3101,7 +3102,7 @@ TOML_NAMESPACE_START
 
 	inline namespace literals
 	{
-		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex)
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
 
 		TOML_API
 		TOML_EXTERNAL_LINKAGE
@@ -3127,3 +3128,5 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS, TOML_DISABLE_SWITCH_WARNINGS
+
+/// \endcond

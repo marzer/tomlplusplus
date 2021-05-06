@@ -299,6 +299,9 @@ TOML_NAMESPACE_START
 
 			void print()
 			{
+				if (base::dump_failed_parse_result())
+					return;
+
 				switch (auto source_type = base::source().type())
 				{
 					case node_type::table:
@@ -339,6 +342,37 @@ TOML_NAMESPACE_START
 			explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
 				: base{ source, flags }
 			{}
+
+			#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+
+			/// \brief	Constructs a default TOML formatter and binds it to a toml::parse_result.
+			///
+			/// \availability This constructor is only available when exceptions are disabled.
+			///
+			/// \attention Formatting a failed parse result will simply dump the error message out as-is.
+			///		This will not be valid TOML, but at least gives you something to log or show up in diagnostics:
+			/// \cpp
+			/// std::cout << toml::default_formatter{ toml::parse("a = 'b'"sv) } // ok
+			///           << "\n\n"
+			///           << toml::default_formatter{ toml::parse("a = "sv) } // malformed
+			///           << "\n";
+			/// \ecpp
+			/// \out
+			/// a = 'b'
+			/// 
+			/// Error while parsing key-value pair: encountered end-of-file
+			///         (error occurred at line 1, column 5)
+			/// \eout
+			/// Use the library with exceptions if you want to avoid this scenario.
+			/// 
+			/// \param 	result	The parse result.
+			/// \param 	flags 	Format option flags.
+			TOML_NODISCARD_CTOR
+			explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
+				: base{ result, flags }
+			{}
+
+			#endif
 
 			template <typename T, typename U>
 			friend std::basic_ostream<T>& operator << (std::basic_ostream<T>&, default_formatter<U>&);

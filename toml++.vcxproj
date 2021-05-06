@@ -51,6 +51,7 @@
     <ClInclude Include="include\toml++\toml_node_view.h" />
     <ClInclude Include="include\toml++\toml_parser.hpp" />
     <ClInclude Include="include\toml++\toml_parse_error.h" />
+    <ClInclude Include="include\toml++\toml_parse_result.h" />
     <ClInclude Include="include\toml++\toml_preprocessor.h" />
     <ClInclude Include="include\toml++\toml_print_to_stream.h" />
     <ClInclude Include="include\toml++\toml_table.hpp" />
@@ -70,9 +71,9 @@
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="cpp.hint" />
-    <None Include="docs\dox.toml" />
     <None Include="docs\Doxyfile" />
     <None Include="docs\pages\main_page.dox" />
+    <None Include="docs\poxy.toml" />
     <None Include="LICENSE" />
     <None Include="meson.build" />
     <None Include="README.md" />

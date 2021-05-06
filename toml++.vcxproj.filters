@@ -79,6 +79,9 @@
     <ClInclude Include="include\toml++\toml_version.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\toml_parse_result.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />
@@ -114,10 +117,10 @@
     <None Include="docs\pages\main_page.dox">
       <Filter>docs\pages</Filter>
     </None>
-    <None Include="docs\dox.toml">
+    <None Include="cpp.hint" />
+    <None Include="docs\poxy.toml">
       <Filter>docs</Filter>
     </None>
-    <None Include="cpp.hint" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">

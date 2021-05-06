@@ -2,14 +2,17 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
+/// \cond
 
 #pragma once
 #include "toml_print_to_stream.h"
+#if TOML_PARSER && !TOML_EXCEPTIONS
+	#include "toml_parse_result.h"
+#endif
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
-/// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename Char = char>
@@ -17,10 +20,13 @@ TOML_IMPL_NAMESPACE_START
 	{
 		private:
 			const toml::node* source_;
-			std::basic_ostream<Char>* stream_ = nullptr;
+			std::basic_ostream<Char>* stream_ = {};
 			format_flags flags_;
 			int indent_;
 			bool naked_newline_;
+			#if TOML_PARSER && !TOML_EXCEPTIONS
+			const parse_result* result_ = {};
+			#endif
 
 		protected:
 			
@@ -223,10 +229,35 @@ TOML_IMPL_NAMESPACE_START
 				}
 			}
 
+			[[nodiscard]]
+			bool dump_failed_parse_result()
+			{
+				#if TOML_PARSER && !TOML_EXCEPTIONS
+				if (result_ && !(*result_))
+				{
+					stream() << result_->error();
+					return true;
+				}
+				#endif
+
+				return false;
+			}
+
 			formatter(const toml::node& source, format_flags flags) noexcept
 				: source_{ &source },
 				flags_{ flags }
 			{}
+
+			#if TOML_PARSER && !TOML_EXCEPTIONS
+
+			formatter(const parse_result& result, format_flags flags) noexcept
+				: source_{ result ? &result.table() : nullptr },
+				flags_{ flags },
+				result_{ &result }
+			{
+			}
+
+			#endif
 	};
 
 	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
@@ -235,6 +266,7 @@ TOML_IMPL_NAMESPACE_START
 
 }
 TOML_IMPL_NAMESPACE_END;
-/// \endcond
 
 TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+
+/// \endcond

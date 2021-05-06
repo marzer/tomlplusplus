@@ -177,6 +177,11 @@
 	#define TOML_UNREACHABLE					__assume(0)
 	#define TOML_ABSTRACT_BASE					__declspec(novtable)
 	#define TOML_EMPTY_BASES					__declspec(empty_bases)
+	#ifdef _CPPUNWIND
+		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
+	#endif
 
 #endif // msvc
 
@@ -372,10 +377,12 @@ is no longer necessary.
 	#define TOML_HAS_INCLUDE(header)		0
 #endif
 
-#if defined(__EXCEPTIONS) || defined(_CPPUNWIND) || defined(__cpp_exceptions)
-	#define TOML_COMPILER_EXCEPTIONS 1
-#else
-	#define TOML_COMPILER_EXCEPTIONS 0
+#ifndef TOML_COMPILER_EXCEPTIONS
+	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
+		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
+	#endif
 #endif
 #if TOML_COMPILER_EXCEPTIONS
 	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
@@ -634,15 +641,15 @@ is no longer necessary.
 	#define TOML_NAMESPACE_START				namespace toml { inline namespace TOML_CONCAT(v, TOML_LIB_MAJOR)
 	#define TOML_NAMESPACE_END					} static_assert(true)
 	#define TOML_NAMESPACE						::toml::TOML_CONCAT(v, TOML_LIB_MAJOR)
-	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name {
+	#define TOML_ABI_NAMESPACE_START(name)		inline namespace name { static_assert(true)
 	#define TOML_ABI_NAMESPACE_BOOL(cond, T, F)	TOML_ABI_NAMESPACE_START(TOML_CONCAT(TOML_EVAL_BOOL_, cond)(T, F))
 	#define TOML_ABI_NAMESPACE_END				} static_assert(true)
 #else
 	#define TOML_NAMESPACE_START				namespace toml
 	#define TOML_NAMESPACE_END					static_assert(true)
 	#define TOML_NAMESPACE						toml
-	#define TOML_ABI_NAMESPACE_START(...)
-	#define TOML_ABI_NAMESPACE_BOOL(...)
+	#define TOML_ABI_NAMESPACE_START(...)		static_assert(true)
+	#define TOML_ABI_NAMESPACE_BOOL(...)		static_assert(true)
 	#define TOML_ABI_NAMESPACE_END				static_assert(true)
 #endif
 #define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl

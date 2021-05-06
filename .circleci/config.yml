@@ -15,8 +15,7 @@ jobs:
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init --depth 1 external/Catch2
-                    git submodule update --init --depth 1 external/tloptional
+                    git submodule update --init --depth 1 external/Catch2 external/tloptional
             - run:
                 name: Building and testing with clang
                 command: |
@@ -36,8 +35,7 @@ jobs:
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init --depth 1 external/Catch2
-                    git submodule update --init --depth 1 external/tloptional
+                    git submodule update --init --depth 1 external/Catch2 external/tloptional
             - run:
                 name: Building and testing with clang
                 command: |
@@ -53,8 +51,7 @@ jobs:
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init --depth 1 external/Catch2
-                    git submodule update --init --depth 1 external/tloptional
+                    git submodule update --init --depth 1 external/Catch2 external/tloptional
             - run:
                 name: Building and testing with gcc
                 command: |
@@ -70,8 +67,7 @@ jobs:
             - run:
                 name: Pulling submodules
                 command: |
-                    git submodule update --init --depth 1 external/Catch2
-                    git submodule update --init --depth 1 external/tloptional
+                    git submodule update --init --depth 1 external/Catch2 external/tloptional
             - run:
                 name: Building and testing with gcc
                 command: |
@@ -85,17 +81,13 @@ jobs:
         steps:
             - checkout
             - run:
-                name: Pulling submodules
-                command: |
-                    git submodule update --init --depth 1 --recursive external/dox
-            - run:
                 name: Installing dependencies
                 command: |
-                    pip3 install -r external/dox/requirements.txt
+                    pip3 install -r tools/requirements.txt
             - run:
                 name: Generating documentation
                 command: |
-                    cd docs && python3 ../external/dox --verbose
+                    cd docs && poxy --verbose
             - persist_to_workspace:
                 root: docs
                 paths: html

@@ -295,7 +295,7 @@ TOML_NAMESPACE_START
 		extern template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
 	#endif
 
-	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt)
+	TOML_ABI_NAMESPACE_BOOL(TOML_HAS_CUSTOM_OPTIONAL_TYPE, custopt, stdopt);
 
 	/// \brief	A date-time.
 	struct date_time

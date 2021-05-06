@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
@@ -35,8 +35,13 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <Import Project="..\toml++.props" />
+  <ItemDefinitionGroup>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
   <PropertyGroup>
-    <LocalDebuggerWorkingDirectory>$(SolutionDir)..\examples\</LocalDebuggerWorkingDirectory>
+    <LocalDebuggerWorkingDirectory>..\examples</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="toml_generator.cpp" />

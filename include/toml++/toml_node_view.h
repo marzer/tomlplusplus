@@ -108,13 +108,15 @@ TOML_NAMESPACE_START
 			///// \brief	Move-assignment operator.
 			node_view& operator= (node_view&&) & noexcept = default;
 
+
+
 			/// \brief	Returns true if the view references a node.
 			[[nodiscard]] explicit operator bool() const noexcept { return node_ != nullptr; }
 			/// \brief	Returns the node that's being referenced by the view.
 			[[nodiscard]] viewed_type* node() const noexcept { return node_; }
 
-			[[nodiscard, deprecated("use node_view::node() instead")]]
-			viewed_type* get() const noexcept { return node_; }
+			/// \name Type checks
+			/// @{
 
 			/// \brief	Returns the type identifier for the viewed node.
 			[[nodiscard]] node_type type() const noexcept { return node_ ? node_->type() : node_type::none; }
@@ -157,39 +159,6 @@ TOML_NAMESPACE_START
 			{
 				return node_ ? node_->template is<T>() : false;
 			}
-
-			/// \brief	Gets a pointer to the viewed node as a more specific node type.
-			///
-			/// \tparam	T	The node type or TOML value type to cast to.
-			///
-			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
-			/// 
-			/// \see toml::node::as()
-			template <typename T>
-			[[nodiscard]]
-			auto as() const noexcept
-			{
-				return node_ ? node_->template as<T>() : nullptr;
-			}
-
-			/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
-			[[nodiscard]] auto as_table() const noexcept { return as<table>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one.
-			[[nodiscard]] auto as_array() const noexcept { return as<array>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one.
-			[[nodiscard]] auto as_string() const noexcept { return as<std::string>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one.
-			[[nodiscard]] auto as_integer() const noexcept { return as<int64_t>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one.
-			[[nodiscard]] auto as_floating_point() const noexcept { return as<double>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one.
-			[[nodiscard]] auto as_boolean() const noexcept { return as<bool>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one.
-			[[nodiscard]] auto as_date() const noexcept { return as<date>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one.
-			[[nodiscard]] auto as_time() const noexcept { return as<time>(); }
-			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
-			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
 
 			/// \brief	Checks if the viewed node contains values/elements of only one type.
 			///
@@ -295,6 +264,49 @@ TOML_NAMESPACE_START
 			{
 				return node_ ? node_->template is_homogeneous<impl::unwrap_node<ElemType>>() : false;
 			}
+
+			/// @}
+
+			/// \name Type casts
+			/// @{
+
+			/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
+			[[nodiscard]] auto as_table() const noexcept { return as<table>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one.
+			[[nodiscard]] auto as_array() const noexcept { return as<array>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one.
+			[[nodiscard]] auto as_string() const noexcept { return as<std::string>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one.
+			[[nodiscard]] auto as_integer() const noexcept { return as<int64_t>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one.
+			[[nodiscard]] auto as_floating_point() const noexcept { return as<double>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one.
+			[[nodiscard]] auto as_boolean() const noexcept { return as<bool>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one.
+			[[nodiscard]] auto as_date() const noexcept { return as<date>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one.
+			[[nodiscard]] auto as_time() const noexcept { return as<time>(); }
+			/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
+			[[nodiscard]] auto as_date_time() const noexcept { return as<date_time>(); }
+
+			/// \brief	Gets a pointer to the viewed node as a more specific node type.
+			///
+			/// \tparam	T	The node type or TOML value type to cast to.
+			///
+			/// \returns	A pointer to the node as the given type, or nullptr if it was a different type.
+			/// 
+			/// \see toml::node::as()
+			template <typename T>
+			[[nodiscard]]
+			auto as() const noexcept
+			{
+				return node_ ? node_->template as<T>() : nullptr;
+			}
+
+			/// @}
+
+			/// \name Value retrieval
+			/// @{
 
 			/// \brief	Gets the value contained by the referenced node.
 			///
@@ -410,22 +422,6 @@ TOML_NAMESPACE_START
 				}
 			}
 
-			/// \brief	Invokes a visitor on the viewed node based on its concrete type.
-			/// 
-			/// \remarks Has no effect if the view does not reference a node.
-			/// 
-			/// \see node::visit()
-			template <typename Func>
-			decltype(auto) visit(Func&& visitor) const
-				noexcept(visit_is_nothrow<Func&&>)
-			{
-				using return_type = decltype(node_->visit(std::forward<Func>(visitor)));
-				if (node_)
-					return node_->visit(std::forward<Func>(visitor));
-				if constexpr (!std::is_void_v<return_type>)
-					return return_type{};
-			}
-
 			/// \brief	Gets a raw reference to the viewed node's underlying data.
 			///
 			/// \warning This function is dangerous if used carelessly and **WILL** break your code if the 
@@ -456,6 +452,32 @@ TOML_NAMESPACE_START
 				);
 				return node_->template ref<impl::unwrap_node<T>>();
 			}
+
+			/// @}
+
+			/// \name Visitation
+			/// @{
+
+			/// \brief	Invokes a visitor on the viewed node based on its concrete type.
+			/// 
+			/// \remarks Has no effect if the view does not reference a node.
+			/// 
+			/// \see node::visit()
+			template <typename Func>
+			decltype(auto) visit(Func&& visitor) const
+				noexcept(visit_is_nothrow<Func&&>)
+			{
+				using return_type = decltype(node_->visit(std::forward<Func>(visitor)));
+				if (node_)
+					return node_->visit(std::forward<Func>(visitor));
+				if constexpr (!std::is_void_v<return_type>)
+					return return_type{};
+			}
+
+			/// @}
+
+			/// \name Equality
+			/// @{
 
 			/// \brief	Returns true if the viewed node is a table with the same contents as RHS.
 			[[nodiscard]]
@@ -548,6 +570,11 @@ TOML_NAMESPACE_START
 			}
 			TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const std::vector<T>&, template <typename T>);
 
+			/// @}
+
+			/// \name Subviews
+			/// @{
+
 			/// \brief	Returns a view of the selected subnode.
 			///
 			/// \param 	key	The key of the node to retrieve
@@ -595,6 +622,8 @@ TOML_NAMESPACE_START
 					return node_view{ arr->get(index) };
 				return node_view{ nullptr };
 			}
+
+			/// @}
 
 			template <typename Char, typename T>
 			friend std::basic_ostream<Char>& operator << (std::basic_ostream<Char>&, const node_view<T>&);

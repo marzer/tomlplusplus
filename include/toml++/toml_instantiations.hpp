@@ -2,6 +2,7 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
+/// \cond
 
 #pragma once
 //# {{
@@ -136,7 +137,7 @@ TOML_NAMESPACE_START
 		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
 
 		// parse() and parse_file()
-		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
 		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
@@ -153,3 +154,5 @@ TOML_NAMESPACE_START
 	#endif // TOML_PARSER
 }
 TOML_NAMESPACE_END;
+
+/// \endcond

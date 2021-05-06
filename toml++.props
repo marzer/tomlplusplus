@@ -100,6 +100,7 @@
 			<TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
 			<GenerateDebugInformation>DebugFull</GenerateDebugInformation>
 			<LargeAddressAware>true</LargeAddressAware>
+			<SubSystem>Console</SubSystem>
 		</Link>
 	</ItemDefinitionGroup>
 

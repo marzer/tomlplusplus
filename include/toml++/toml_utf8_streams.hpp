@@ -2,6 +2,7 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
+/// \cond
 
 #pragma once
 //# {{
@@ -23,7 +24,7 @@
 
 TOML_IMPL_NAMESPACE_START
 {
-	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex)
+	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_EXTERNAL_LINKAGE
 	utf8_buffered_reader::utf8_buffered_reader(utf8_reader_interface& reader_) noexcept
@@ -108,3 +109,5 @@ TOML_IMPL_NAMESPACE_END;
 
 #undef TOML_ERROR_CHECK
 #undef TOML_ERROR
+
+/// \endcond
