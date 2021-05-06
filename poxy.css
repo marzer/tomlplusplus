@@ -17,7 +17,7 @@ body > header
 	top: 0;
 	left: 0;
 	right: 0;
-	z-index: 100;
+	z-index: 5;
 }
 
 body > main
@@ -61,12 +61,12 @@ article section.m-doc-details > div > h3:first-child
 	background-color: #22272e;
 }
 
-pre, code, .dox-enable-if > a
+pre, code
 {
 	font-family: 'Consolas', 'Source Code Pro', monospace;
 }
 
-a.dox-external
+a.poxy-external
 {
 	font-weight: normal;
 }
@@ -82,41 +82,6 @@ pre.m-console a:hover
 	text-decoration: underline !important;
 }
 
-.dox-enable-if
-{
-	margin-bottom: 2px;
-}
-
-.dox-enable-if > *
-{
-	display: inline-block;
-	border-radius: 0.2rem;
-	background-clip: padding-box !important;
-	padding: 0px 2px;
-	text-decoration: none;
-}
-
-.dox-enable-if > a
-{
-	white-space: nowrap;
-	font-size: 0.7rem;
-	font-weight: bold;
-	background-color: #858585;
-	color: #050505;
-}
-
-.dox-enable-if > a:hover
-{
-	background-color: #747474;
-	color: initial;
-}
-
-.dox-enable-if > span
-{
-	display: none;
-	padding-left: 2em;
-}
-
 @media screen and (min-width: 576px)
 {
 	nav .m-thin
@@ -127,7 +92,7 @@ pre.m-console a:hover
 	nav .github
 	{
 		padding-left: 44px !important;
-		background-image: url("dox-github-icon.png");
+		background-image: url("poxy-github-icon.png");
 		background-repeat: no-repeat;
 		background-size: 25px 25px;
 		background-position: -30px center;
@@ -135,7 +100,7 @@ pre.m-console a:hover
 	}
 }
 
-@media screen and (max-width: 575px)
+@media screen and (max-width: 576px)
 {
 	nav .m-thin, nav .github
 	{
@@ -277,7 +242,7 @@ pre.m-code + pre.m-console span
 		display: none;
 	}
 }
-@media screen and (max-width: 991px)
+@media screen and (max-width: 992px)
 {
 	.gh-badges
 	{
@@ -353,7 +318,7 @@ pre > p.godbolt
 {
   float: right;
 }
-@media screen and (max-width: 767px)
+@media screen and (max-width: 768px)
 {
 	.godbolt
 	{

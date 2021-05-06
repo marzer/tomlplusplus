@@ -15,11 +15,11 @@
   modern
   C++" name="description"/>
 
-  <link href="dox.css" rel="stylesheet"/>
+  <link href="poxy.css" rel="stylesheet"/>
 
   <script src="jquery-3.6.0.slim.min.js"></script>
 
-  <script src="dox.js"></script>
+  <script src="poxy.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -40,7 +40,7 @@
             <li><a href="annotated.html">Classes</a></li>
           </ol>
           <ol class="m-col-t-6 m-col-m-none" start="3">
-            <li><a class="github dox-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li><a class="github poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
             <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
               <use href="#m-doc-search-icon-path"></use>
             </svg></a></li>
@@ -70,7 +70,7 @@
             </li>
           </ul>
         </div>
-<pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span><span class="cp"></span>
+<pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span>
 
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">server</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">))</span>
@@ -80,12 +80,12 @@
     <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"path: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">path</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">begin: line 3, column 1</span>
 <span class="go">end: line 3, column 22</span>
-<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
+<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your <a class="m-doc poxy-injected" href="structtoml_1_1source__position.html">source_positions</a> don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external dox-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>The path to the corresponding source document as a wide-string.</dd>
           </dl>
@@ -111,7 +111,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="ae4aaf4e5c7a8b178b4ba46e7f9d050bd"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external dox-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; toml::<wbr/>source_region::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; toml::<wbr/>source_region::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>The path to the corresponding source document as a wide-string.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This function is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p>This will return an empty optional if no path was provided to <a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a>.</p></aside>
@@ -172,10 +172,10 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         
-<a class="dox-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
 
 •
-<a class="dox-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
 
@@ -189,13 +189,13 @@ Documentation
 created
 using
 
-<a class="dox-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
+<a class="poxy-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
 
 +
-<a class="dox-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
+<a class="poxy-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
 
 +
-<a class="dox-external" href="https://github.com/marzer/dox/" target="_blank">marzer/dox</a>
+<a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">marzer/poxy</a>
       </div>
     </div>
   </div>
