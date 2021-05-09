@@ -554,15 +554,15 @@
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">key</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"int"</span><span class="p">,</span> <span class="s">"flt"</span><span class="p">,</span> <span class="s">"pi"</span><span class="p">,</span> <span class="s">"bool"</span><span class="p">,</span> <span class="s">"huge"</span><span class="p">,</span> <span class="s">"str"</span> <span class="p">})</span>
 <span class="p">{</span>
     <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="n">key</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" value '"</span> <span class="o">&lt;&lt;</span> <span class="n">key</span> <span class="o">&lt;&lt;</span> <span class="s">"' as:</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">bool</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">int</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">unsigned</span> <span class="k">int</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">long</span> <span class="k">long</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">float</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">double</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span><span class="p">);</span>
-    <span class="m">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="k">char</span><span class="o">*</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">bool</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">int</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">unsigned</span> <span class="k">int</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">long</span> <span class="k">long</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">float</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">double</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span><span class="p">);</span>
+    <span class="n">print_value</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="k">const</span> <span class="k">char</span><span class="o">*</span><span class="p">);</span>
     <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">integer value 'int' as:</span>
 <span class="go">- bool              true</span>
@@ -789,6 +789,9 @@
 <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
 an
 issue</a>
+
+•
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
 
 •
 <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen

@@ -5652,6 +5652,13 @@
     </member>
     <member kind="define">
       <type>#define</type>
+      <name>TOML_CONFIG_HEADER</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>ga09204feb4a3ff5534623c2bd052dcec0</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
       <name>TOML_EXCEPTIONS</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga93097ecd88ca4bca393f60a78bda643b</anchor>
