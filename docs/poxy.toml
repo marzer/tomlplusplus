@@ -1,3 +1,6 @@
+# this is a config file for Poxy - a Doxygen + m.css front-end written in Python.
+# https://github.com/marzer/poxy
+
 name              = 'toml++'
 description       = 'TOML for modern C++'
 cpp               = 17
@@ -7,10 +10,6 @@ show_includes     = false
 logo              = 'images/logo.png'
 favicon           = 'images/favicon.ico'
 navbar            = [ 'namespaces', 'annotated' ]
-sources           = [ 'pages' ]
-recursive_sources = [ '../include' ]
-source_patterns   = [ '*.h', '*.dox' ]
-strip_paths       = [ '../include' ]
 extra_files       = [
     'images/banner_small.png',
     'images/badge-awesome.svg',
@@ -18,10 +17,25 @@ extra_files       = [
     'images/badge-C++20.svg'
 ]
 
+
+
 [warnings]
-enabled         = true
-treat_as_errors = false
-undocumented    = true
+enabled           = true
+treat_as_errors   = false
+undocumented      = true
+
+
+
+[sources]
+paths             = [ 'pages' ]
+recursive_paths   = [ '../include' ]
+patterns          = [ '*.h', '*.dox' ]
+strip_paths       = [ '../include' ]
+
+
+
+[images]
+paths             = [ 'images' ]
 
 
 
@@ -37,29 +51,37 @@ undocumented    = true
 
 
 
-[highlighting]
-types = []
-macros = [
-    'TOML_[A-Z0-9_]+?',
-    'print_value'
-]
-string_literals = [ '_toml' ]
+[code_blocks]
+macros            = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
+string_literals   = [ '_toml' ]
 
 
 
 [badges]
-'1. C++20' = [ 'badge-C++20.svg', 'https://en.cppreference.com/w/cpp/compiler_support' ]
-'2. TOML v1.0.0' = [ 'badge-TOML.svg', 'https://toml.io/en/v1.0.0' ]
-'3. CircleCI' = [ 'https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square', 'https://circleci.com/gh/marzer/tomlplusplus' ]
-'4. Mentioned in Awesome C++' = [ 'badge-awesome.svg', 'https://github.com/fffaraz/awesome-cpp' ]
+'1. C++20'        = [
+    'badge-C++20.svg',
+    'https://en.cppreference.com/w/cpp/compiler_support'
+ ]
+'2. TOML v1.0.0'  = [
+    'badge-TOML.svg',
+    'https://toml.io/en/v1.0.0'
+]
+'3. CircleCI'     = [
+    'https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square',
+    'https://circleci.com/gh/marzer/tomlplusplus'
+]
+'4. Mentioned in Awesome C++' = [
+    'badge-awesome.svg',
+    'https://github.com/fffaraz/awesome-cpp'
+]
 
 
 
 [autolinks]
-'(?:toml::)?parse[_ ]results?' = 'classtoml_1_1parse__result.html'
-'(?:toml::)?parse[_ ]errors?' = 'classtoml_1_1parse__error.html'
-'(?:toml::)?node[_ ]views?' = 'classtoml_1_1node__view.html'
-'(?:toml::)?json[_ ]formatters?' = 'classtoml_1_1json__formatter.html'
+'(?:toml::)?parse[_ ]results?'      = 'classtoml_1_1parse__result.html'
+'(?:toml::)?parse[_ ]errors?'       = 'classtoml_1_1parse__error.html'
+'(?:toml::)?node[_ ]views?'         = 'classtoml_1_1node__view.html'
+'(?:toml::)?json[_ ]formatters?'    = 'classtoml_1_1json__formatter.html'
 '(?:toml::)?default[_ ]formatters?' = 'classtoml_1_1default__formatter.html'
-'(?:toml::)?source[_ ]positions?' = 'structtoml_1_1source__position.html'
-'(?:toml::)?source[_ ]regions?' = 'structtoml_1_1source__region.html'
+'(?:toml::)?source[_ ]positions?'   = 'structtoml_1_1source__position.html'
+'(?:toml::)?source[_ ]regions?'     = 'structtoml_1_1source__region.html'

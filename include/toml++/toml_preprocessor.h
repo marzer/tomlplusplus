@@ -730,6 +730,7 @@ TOML_ENABLE_WARNINGS;
 /// \detail Defaults to the standard C `assert()`.
 
 
+#define TOML_CONFIG_HEADER
 /// \def TOML_CONFIG_HEADER
 /// \brief An additional header to include before any other toml++ header files.
 /// \detail Not defined by default.
