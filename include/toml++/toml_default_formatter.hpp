@@ -204,9 +204,16 @@ TOML_NAMESPACE_END;
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
 
-TOML_DISABLE_WARNINGS;
-#include <windows.h> // fuckkkk :(
-TOML_ENABLE_WARNINGS;
+namespace winapi
+{
+    extern "C"
+    {
+        int __stdcall WideCharToMultiByte(unsigned int CodePage, unsigned long dwFlags, const wchar_t* lpWideCharStr, int cchWideChar,
+                                          const char* lpMultiByteStr, int cbMultiByte, const char* lpDefaultChar, int* lpUsedDefaultChar);
+        int __stdcall MultiByteToWideChar(unsigned int CodePage, unsigned long dwFlags, const char* lpMultiByteStr, int cbMultiByte,
+                                      const wchar_t* lpWideCharStr, int cchWideChar);
+    }
+}
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -218,13 +225,13 @@ TOML_IMPL_NAMESPACE_START
 			return {};
 
 		std::string s;
-		const auto len = WideCharToMultiByte(
+		const auto len = winapi::WideCharToMultiByte(
 			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
 		);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
+            winapi::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
 		}
 		return s;
 	}
@@ -237,11 +244,11 @@ TOML_IMPL_NAMESPACE_START
 			return {};
 
 		std::wstring s;
-		const auto len = MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
+		const auto len = winapi::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
+            winapi::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
 		}
 		return s;
 	}
