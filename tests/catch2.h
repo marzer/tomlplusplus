@@ -7,14 +7,19 @@
 #include "settings.h"
 
 #ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
+	#pragma clang diagnostic push
+	#pragma clang diagnostic ignored "-Weverything"
 #elif defined (__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wall"
+	#pragma GCC diagnostic ignored "-Wextra"
+	#pragma GCC diagnostic ignored "-Wpadded"
+	#pragma GCC diagnostic ignored "-Wfloat-equal"
+#elif defined(_MSC_VER)
+	#pragma warning(push, 0)
+	#pragma warning(disable : 4365)
+	#pragma warning(disable : 4868)
+	#pragma warning(disable : 5105)
 #endif
 
 #if __has_include(<Catch2/single_include/catch2/catch.hpp>)
@@ -24,8 +29,10 @@
 #endif
 
 #ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined (__GNUC__)
-#pragma GCC diagnostic pop
+	#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+	#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+	#pragma warning(pop)
 #endif
 

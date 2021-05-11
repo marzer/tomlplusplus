@@ -87,6 +87,28 @@ def main():
 			<PreprocessorDefinitions Condition="'%(ExceptionHandling)'!='false'">SHOULD_HAVE_EXCEPTIONS=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
 			<LanguageStandard>std{standard}</LanguageStandard>
 			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<WarningLevel>EnableAllWarnings</WarningLevel>
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4127</DisableSpecificWarnings> <!-- conditional expr is constant -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4324</DisableSpecificWarnings> <!-- structure was padded due to alignment specifier -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4464</DisableSpecificWarnings> <!-- relative include path contains '..' -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4505</DisableSpecificWarnings> <!-- unreferenced local function removed -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4514</DisableSpecificWarnings> <!-- unreferenced inline function has been removed -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4577</DisableSpecificWarnings> <!-- 'noexcept' used with no exception handling mode specified -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4582</DisableSpecificWarnings> <!-- constructor is not implicitly called -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4623</DisableSpecificWarnings> <!-- default constructor was implicitly defined as deleted -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4625</DisableSpecificWarnings> <!-- copy constructor was implicitly defined as deleted -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4626</DisableSpecificWarnings> <!-- assignment operator was implicitly defined as deleted -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4710</DisableSpecificWarnings> <!-- function not inlined -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4711</DisableSpecificWarnings> <!-- function selected for automatic expansion -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4738</DisableSpecificWarnings> <!-- storing 32-bit float result in memory -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4820</DisableSpecificWarnings> <!-- N bytes padding added -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4866</DisableSpecificWarnings> <!-- compiler may not enforce ltr eval in operator[] -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4868</DisableSpecificWarnings> <!-- compiler may not enforce ltr eval in initializer list -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);4946</DisableSpecificWarnings> <!-- reinterpret_cast used between related classes -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);5026</DisableSpecificWarnings> <!-- move constructor was implicitly defined as deleted -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);5027</DisableSpecificWarnings> <!-- move assignment operator was implicitly defined as deleted -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);5039</DisableSpecificWarnings> <!-- potentially throwing function passed to 'extern "C"' -->
+			<DisableSpecificWarnings>%(DisableSpecificWarnings);5045</DisableSpecificWarnings> <!-- Compiler will insert Spectre mitigation -->
 		</ClCompile>
 	</ItemDefinitionGroup>
 	<PropertyGroup>

@@ -82,37 +82,51 @@
 	#define TOML_GCC				0
 #endif
 
+#ifdef __has_include
+	#define TOML_HAS_INCLUDE(header)		__has_include(header)
+#else
+	#define TOML_HAS_INCLUDE(header)		0
+#endif
+
 #if TOML_CLANG
 
-	#define TOML_PUSH_WARNINGS					_Pragma("clang diagnostic push") \
-												static_assert(true)
+	#define TOML_PUSH_WARNINGS \
+		_Pragma("clang diagnostic push") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SWITCH_WARNINGS \
+		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
-												static_assert(true)
+	#define TOML_DISABLE_INIT_WARNINGS \
+		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
-												_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-												_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
-												_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
-												static_assert(true)
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
+		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
+		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
+		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
+		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SHADOW_WARNINGS \
+		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
-												_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
-												_Pragma("clang diagnostic ignored \"-Wpadded\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SPAM_WARNINGS \
+		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
+		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
+		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
+		static_assert(true)
 
-	#define TOML_POP_WARNINGS					_Pragma("clang diagnostic pop") \
-												static_assert(true)
+	#define TOML_POP_WARNINGS \
+		_Pragma("clang diagnostic pop") \
+		static_assert(true)
 
-	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS; \
-												_Pragma("clang diagnostic ignored \"-Weverything\"") \
-												static_assert(true)
+	#define TOML_DISABLE_WARNINGS \
+		TOML_PUSH_WARNINGS; \
+		_Pragma("clang diagnostic ignored \"-Weverything\"") \
+		static_assert(true)
 
 	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
 
@@ -158,41 +172,75 @@
 	#define TOML_CPP_VERSION					_MSVC_LANG
 	#if TOML_MSVC // !intel-cl
 
-		#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
-												static_assert(true)
+		#define TOML_PUSH_WARNINGS \
+			__pragma(warning(push)) \
+			static_assert(true)
 
-		#define TOML_DISABLE_SWITCH_WARNINGS	__pragma(warning(disable: 4061)) \
-												__pragma(warning(disable: 4063)) \
-												__pragma(warning(disable: 26819)) \
-												static_assert(true)
+		#if TOML_HAS_INCLUDE(<CodeAnalysis\Warnings.h>)
+			#pragma warning(push, 0)
+			#include <CodeAnalysis\Warnings.h>
+			#pragma warning(pop)
+			#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS \
+				__pragma(warning(disable: ALL_CODE_ANALYSIS_WARNINGS)) \
+				static_assert(true)
+		#else
+			#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS
+				static_assert(true)
+		#endif
 
-		#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
-												__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
-												__pragma(warning(disable: 4348)) \
-												__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
-												__pragma(warning(disable: 4514)) /* unreferenced inline function has been removed */ \
-												__pragma(warning(disable: 4623)) /* default constructor was implicitly defined as deleted		*/ \
-												__pragma(warning(disable: 4625)) /* copy constructor was implicitly defined as deleted			*/ \
-												__pragma(warning(disable: 4626)) /* assignment operator was implicitly defined as deleted		*/ \
-												__pragma(warning(disable: 4710)) /* function not inlined */ \
-												__pragma(warning(disable: 4711)) /* function selected for automatic expansion */ \
-												__pragma(warning(disable: 4820)) /* N bytes padding added */  \
-												__pragma(warning(disable: 4946)) /* reinterpret_cast used between related classes */ \
-												__pragma(warning(disable: 5026)) /* move constructor was implicitly defined as deleted	*/ \
-												__pragma(warning(disable: 5027)) /* move assignment operator was implicitly defined as deleted	*/ \
-												__pragma(warning(disable: 5045)) /* Compiler will insert Spectre mitigation */ \
-												__pragma(warning(disable: 26451)) \
-												__pragma(warning(disable: 26490)) \
-												__pragma(warning(disable: 26495)) \
-												__pragma(warning(disable: 26812)) \
-												__pragma(warning(disable: 26819)) \
-												static_assert(true)
+		#define TOML_DISABLE_SWITCH_WARNINGS \
+			__pragma(warning(disable: 4061)) \
+			__pragma(warning(disable: 4062)) \
+			__pragma(warning(disable: 4063)) \
+			__pragma(warning(disable: 26819)) \
+			static_assert(true)
 
-		#define TOML_POP_WARNINGS				__pragma(warning(pop)) \
-												static_assert(true)
+		#define TOML_DISABLE_SPAM_WARNINGS \
+			__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
+			__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
+			__pragma(warning(disable: 4348)) \
+			__pragma(warning(disable: 4464)) /* relative include path contains '..' */ \
+			__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
+			__pragma(warning(disable: 4514)) /* unreferenced inline function has been removed */ \
+			__pragma(warning(disable: 4582)) /* constructor is not implicitly called */ \
+			__pragma(warning(disable: 4623)) /* default constructor was implicitly defined as deleted		*/ \
+			__pragma(warning(disable: 4625)) /* copy constructor was implicitly defined as deleted			*/ \
+			__pragma(warning(disable: 4626)) /* assignment operator was implicitly defined as deleted		*/ \
+			__pragma(warning(disable: 4710)) /* function not inlined */ \
+			__pragma(warning(disable: 4711)) /* function selected for automatic expansion */ \
+			__pragma(warning(disable: 4820)) /* N bytes padding added */  \
+			__pragma(warning(disable: 4946)) /* reinterpret_cast used between related classes */ \
+			__pragma(warning(disable: 5026)) /* move constructor was implicitly defined as deleted	*/ \
+			__pragma(warning(disable: 5027)) /* move assignment operator was implicitly defined as deleted	*/ \
+			__pragma(warning(disable: 5039)) /* potentially throwing function passed to 'extern "C"' function */ \
+			__pragma(warning(disable: 5045)) /* Compiler will insert Spectre mitigation */ \
+			__pragma(warning(disable: 26451)) \
+			__pragma(warning(disable: 26490)) \
+			__pragma(warning(disable: 26495)) \
+			__pragma(warning(disable: 26812)) \
+			__pragma(warning(disable: 26819)) \
+			static_assert(true)
 
-		#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0)) \
-												static_assert(true)
+		#define TOML_DISABLE_ARITHMETIC_WARNINGS \
+			__pragma(warning(disable: 4365)) /* argument signed/unsigned mismatch */ \
+			__pragma(warning(disable: 4738)) /* storing 32-bit float result in memory */ \
+			__pragma(warning(disable: 5219)) /* implicit conversion from integral to float */ \
+			static_assert(true)
+
+		#define TOML_POP_WARNINGS \
+			__pragma(warning(pop)) \
+			static_assert(true)
+
+		#define TOML_DISABLE_WARNINGS \
+			__pragma(warning(push, 0))			\
+			__pragma(warning(disable: 4348))	\
+			__pragma(warning(disable: 4668))	\
+			__pragma(warning(disable: 5105))	\
+			TOML_DISABLE_CODE_ANALYSIS_WARNINGS;\
+			TOML_DISABLE_SWITCH_WARNINGS;		\
+			TOML_DISABLE_SPAM_WARNINGS;			\
+			TOML_DISABLE_ARITHMETIC_WARNINGS;	\
+			static_assert(true)
 
 		#define TOML_ENABLE_WARNINGS			TOML_POP_WARNINGS
 
@@ -215,74 +263,87 @@
 
 #if TOML_ICC
 
-	#define TOML_PUSH_WARNINGS				__pragma(warning(push)) \
-											static_assert(true)
+	#define TOML_PUSH_WARNINGS \
+		__pragma(warning(push)) \
+		static_assert(true)
 
-	#define TOML_DISABLE_SPAM_WARNINGS		__pragma(warning(disable: 82))	/* storage class is not first */ \
-											__pragma(warning(disable: 111))	/* statement unreachable (false-positive) */ \
-											__pragma(warning(disable: 869)) /* unreferenced parameter */ \
-											__pragma(warning(disable: 1011)) /* missing return (false-positive) */ \
-											__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */  \
-											static_assert(true)
+	#define TOML_DISABLE_SPAM_WARNINGS \
+		__pragma(warning(disable: 82))	/* storage class is not first */ \
+		__pragma(warning(disable: 111))	/* statement unreachable (false-positive) */ \
+		__pragma(warning(disable: 869)) /* unreferenced parameter */ \
+		__pragma(warning(disable: 1011)) /* missing return (false-positive) */ \
+		__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */  \
+		static_assert(true)
 
-	#define TOML_POP_WARNINGS				__pragma(warning(pop)) \
-											static_assert(true)
+	#define TOML_POP_WARNINGS \
+		__pragma(warning(pop)) \
+		static_assert(true)
 
-	#define TOML_DISABLE_WARNINGS			__pragma(warning(push, 0)) \
-											static_assert(true)
+	#define TOML_DISABLE_WARNINGS \
+		__pragma(warning(push, 0)) \
+		static_assert(true)
 
-	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS \
-											static_assert(true)
+	#define TOML_ENABLE_WARNINGS \
+		TOML_POP_WARNINGS
 
 #endif // icc
 
 #if TOML_GCC
 
-	#define TOML_PUSH_WARNINGS					_Pragma("GCC diagnostic push") \
-												static_assert(true)
+	#define TOML_PUSH_WARNINGS \
+		_Pragma("GCC diagnostic push") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SWITCH_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-												_Pragma("GCC diagnostic ignored \"-Wswitch-default\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SWITCH_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
+		_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
+		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_INIT_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-												_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-												_Pragma("GCC diagnostic ignored \"-Wuninitialized\"") \
-												static_assert(true)
+	#define TOML_DISABLE_INIT_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
+		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
+		_Pragma("GCC diagnostic ignored \"-Wuninitialized\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS	_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
-												_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
-												_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"") \
-												static_assert(true)
+	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
+		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SHADOW_WARNINGS		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SHADOW_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
+		static_assert(true)
 
-	#define TOML_DISABLE_SPAM_WARNINGS			_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
-												_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
-												_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
-												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-												_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"") \
-												static_assert(true)
+	#define TOML_DISABLE_SPAM_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
+		_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
+		_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
+		_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
+		_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"") \
+		static_assert(true)
 
-	#define TOML_POP_WARNINGS					_Pragma("GCC diagnostic pop") \
-												static_assert(true)
+	#define TOML_POP_WARNINGS \
+		_Pragma("GCC diagnostic pop") \
+		static_assert(true)
 
-	#define TOML_DISABLE_WARNINGS				TOML_PUSH_WARNINGS;													\
-												_Pragma("GCC diagnostic ignored \"-Wall\"")							\
-												_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
-												_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
-												TOML_DISABLE_SWITCH_WARNINGS;										\
-												TOML_DISABLE_INIT_WARNINGS;											\
-												TOML_DISABLE_ARITHMETIC_WARNINGS;									\
-												TOML_DISABLE_SHADOW_WARNINGS;										\
-												TOML_DISABLE_SPAM_WARNINGS; \
-												static_assert(true)
+	#define TOML_DISABLE_WARNINGS \
+		TOML_PUSH_WARNINGS;													\
+		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
+		_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
+		_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
+		TOML_DISABLE_SWITCH_WARNINGS;										\
+		TOML_DISABLE_INIT_WARNINGS;											\
+		TOML_DISABLE_ARITHMETIC_WARNINGS;									\
+		TOML_DISABLE_SHADOW_WARNINGS;										\
+		TOML_DISABLE_SPAM_WARNINGS;											\
+		static_assert(true)
 
-	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
+	#define TOML_ENABLE_WARNINGS \
+		TOML_POP_WARNINGS
 
 	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
 	#ifndef TOML_ALWAYS_INLINE
@@ -382,12 +443,6 @@ is no longer necessary.
 #endif
 #undef TOML_CPP_VERSION
 
-#ifdef __has_include
-	#define TOML_HAS_INCLUDE(header)		__has_include(header)
-#else
-	#define TOML_HAS_INCLUDE(header)		0
-#endif
-
 #ifndef TOML_COMPILER_EXCEPTIONS
 	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
 		#define TOML_COMPILER_EXCEPTIONS 1
@@ -439,6 +494,9 @@ is no longer necessary.
 
 #ifndef TOML_PUSH_WARNINGS
 	#define TOML_PUSH_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
+	#define	TOML_DISABLE_CODE_ANALYSIS_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_SWITCH_WARNINGS
 	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
@@ -11963,19 +12021,19 @@ TOML_NAMESPACE_END;
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
 
-namespace winapi
-{
-    extern "C"
-    {
-        int __stdcall WideCharToMultiByte(unsigned int CodePage, unsigned long dwFlags, const wchar_t* lpWideCharStr, int cchWideChar,
-                                          const char* lpMultiByteStr, int cbMultiByte, const char* lpDefaultChar, int* lpUsedDefaultChar);
-        int __stdcall MultiByteToWideChar(unsigned int CodePage, unsigned long dwFlags, const char* lpMultiByteStr, int cbMultiByte,
-                                      const wchar_t* lpWideCharStr, int cchWideChar);
-    }
-}
-
 TOML_IMPL_NAMESPACE_START
 {
+	namespace winapi
+	{
+		extern "C"
+		{
+			int __stdcall WideCharToMultiByte(unsigned int CodePage, unsigned long dwFlags, const wchar_t* lpWideCharStr, int cchWideChar,
+											  char* lpMultiByteStr, int cbMultiByte, const char* lpDefaultChar, int* lpUsedDefaultChar);
+			int __stdcall MultiByteToWideChar(unsigned int CodePage, unsigned long dwFlags, const char* lpMultiByteStr, int cbMultiByte,
+											  wchar_t* lpWideCharStr, int cchWideChar);
+		}
+	}
+
 	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str) noexcept
@@ -11990,7 +12048,7 @@ TOML_IMPL_NAMESPACE_START
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-            winapi::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
+			winapi::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
 		}
 		return s;
 	}
@@ -12007,7 +12065,7 @@ TOML_IMPL_NAMESPACE_START
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-            winapi::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
+			winapi::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
 		}
 		return s;
 	}
@@ -12258,6 +12316,7 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_CONSTEVAL
 	#undef TOML_CPP
 	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
+	#undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
 	#undef TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_DISABLE_SHADOW_WARNINGS

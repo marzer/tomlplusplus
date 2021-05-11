@@ -380,7 +380,7 @@
 /// \subsection mainpage-example-speed-up-compilation Speeding up compilation
 /// Because toml++ is a header-only library of nontrivial size you might find that compilation times noticeably
 /// increase after you add it to your project, especially if you add the library's header somewhere that's visible from
-/// a large number of translation units. You can counter this by disabling 'all inline' mode and explicitly controlling
+/// a large number of translation units. You can counter this by disabling header-only mode and explicitly controlling
 /// where the library's implementation is compiled.
 /// 
 /// <strong>Step 1: Set \ref TOML_HEADER_ONLY to [code]0[/code] before including toml++</strong>

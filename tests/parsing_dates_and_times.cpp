@@ -5,7 +5,6 @@
 
 #include "tests.h"
 
-TOML_PUSH_WARNINGS;
 TOML_DISABLE_INIT_WARNINGS;
 
 TEST_CASE("parsing - dates and times")
