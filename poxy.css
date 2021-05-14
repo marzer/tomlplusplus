@@ -374,12 +374,6 @@ figure.m-figure::before
 	opacity: 0.85;
 }
 
-/* word-breaks in doc links */
-p a.m-doc > wbr
-{
-	display: none;
-}
-
 /* m-special (purple) */
 .m-note.m-special,
 table.m-table tr.m-special td,
