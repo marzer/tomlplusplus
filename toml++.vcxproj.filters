@@ -96,9 +96,6 @@
     <None Include=".circleci\config.yml">
       <Filter>.circleci</Filter>
     </None>
-    <None Include="docs\Doxyfile">
-      <Filter>docs</Filter>
-    </None>
     <None Include="tools\ci_single_header_check.py">
       <Filter>tools</Filter>
     </None>

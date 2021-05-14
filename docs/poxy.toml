@@ -39,7 +39,7 @@ paths             = [ 'images' ]
 
 
 
-[defines]
+[macros]
 'TOML_ASYMMETRICAL_EQUALITY_OPS(...)' = 'static_assert(true)'
 'TOML_ABI_NAMESPACE_START(...)'       = 'static_assert(true)'
 'TOML_ABI_NAMESPACE_BOOL(...)'        = 'static_assert(true)'
