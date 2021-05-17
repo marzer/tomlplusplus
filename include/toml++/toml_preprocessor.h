@@ -386,6 +386,12 @@
 	#define TOML_PARSER 1
 #endif
 
+#ifndef TOML_MAX_NESTED_VALUES
+	#define TOML_MAX_NESTED_VALUES 256
+	// this refers to the depth of nested values, e.g. inline tables and arrays.
+	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
+#endif
+
 #ifndef DOXYGEN
 	#if defined(_WIN32) && !defined(TOML_WINDOWS_COMPAT)
 		#define TOML_WINDOWS_COMPAT 1

@@ -234,6 +234,11 @@ TOML_ANON_NAMESPACE_START
 				};
 			#endif
 		}
+
+		error_builder(const error_builder&) = delete;
+		error_builder(error_builder&&) = delete;
+		error_builder& operator=(const error_builder&) = delete;
+		error_builder& operator=(error_builder&&) = delete;
 	};
 
 	struct parse_scope final
@@ -253,6 +258,11 @@ TOML_ANON_NAMESPACE_START
 		{
 			storage_ = parent_;
 		}
+
+		parse_scope(const parse_scope&) = delete;
+		parse_scope(parse_scope&&) = delete;
+		parse_scope& operator=(const parse_scope&) = delete;
+		parse_scope& operator=(parse_scope&&) = delete;
 	};
 	#define push_parse_scope_2(scope, line)		parse_scope ps_##line{ current_scope, scope }
 	#define push_parse_scope_1(scope, line)		push_parse_scope_2(scope, line)
@@ -296,6 +306,7 @@ TOML_ANON_NAMESPACE_START
 
 			[[nodiscard]]
 			TOML_ATTR(pure)
+			TOML_ALWAYS_INLINE
 			operator bool() const noexcept
 			{
 				return node_ != nullptr;
@@ -303,6 +314,7 @@ TOML_ANON_NAMESPACE_START
 
 			[[nodiscard]]
 			TOML_ATTR(pure)
+			TOML_ALWAYS_INLINE
 			toml::node* get() const noexcept
 			{
 				return node_;
@@ -326,6 +338,28 @@ TOML_ANON_NAMESPACE_START
 	{
 		parsed_key key;
 		node_ptr value;
+	};
+
+	struct parse_depth_counter final
+	{
+		size_t& depth_;
+
+		TOML_NODISCARD_CTOR
+		explicit parse_depth_counter(size_t& depth) noexcept
+			: depth_{ depth }
+		{
+			depth_++;
+		}
+
+		~parse_depth_counter() noexcept
+		{
+			depth_--;
+		}
+
+		parse_depth_counter(const parse_depth_counter&) = delete;
+		parse_depth_counter(parse_depth_counter&&) = delete;
+		parse_depth_counter& operator=(const parse_depth_counter&) = delete;
+		parse_depth_counter& operator=(parse_depth_counter&&) = delete;
 	};
 
 }
@@ -383,6 +417,8 @@ TOML_IMPL_NAMESPACE_START
 	class parser final
 	{
 		private:
+			static constexpr size_t max_nested_values = TOML_MAX_NESTED_VALUES;
+
 			utf8_buffered_reader reader;
 			table root;
 			source_position prev_pos = { 1, 1 };
@@ -393,6 +429,7 @@ TOML_IMPL_NAMESPACE_START
 			std::string recording_buffer; //for diagnostics 
 			bool recording = false, recording_whitespace = true;
 			std::string_view current_scope;
+			size_t nested_values = {};
 			#if !TOML_EXCEPTIONS
 			mutable optional<toml::parse_error> err;
 			#endif
@@ -1884,6 +1921,14 @@ TOML_IMPL_NAMESPACE_START
 				assert_not_eof();
 				assert_or_assume(!is_value_terminator(*cp));
 				push_parse_scope("value"sv);
+
+				const parse_depth_counter depth_counter{ nested_values };
+				if (nested_values > max_nested_values)
+					set_error_and_return_default(
+						"exceeded maximum nested value depth of "sv,
+						static_cast<uint64_t>(max_nested_values),
+						" (TOML_MAX_NESTED_VALUES)"sv
+					);
 
 				// check if it begins with some control character
 				// (note that this will also fail for whitespace but we're assuming we've

@@ -63,7 +63,7 @@ TOML_NAMESPACE_START
 				static constexpr size_t align_ =
 					(alignof(toml::table) < alignof(parse_error) ? alignof(parse_error) : alignof(toml::table));
 
-				alignas(align_) unsigned char bytes[size_ + 1u];
+				alignas(align_) unsigned char bytes[size_];
 			};
 
 			mutable storage_t storage_;
@@ -161,6 +161,13 @@ TOML_NAMESPACE_START
 			[[nodiscard]] explicit operator parse_error && () noexcept { return std::move(error()); }
 			/// \brief	Returns the internal toml::parse_error (const lvalue overload).
 			[[nodiscard]] explicit operator const parse_error& () const noexcept { return error(); }
+
+			TOML_NODISCARD_CTOR
+			parse_result() noexcept
+				: err_{ true }
+			{
+				::new (static_cast<void*>(storage_.bytes)) parse_error{ std::string{}, source_region{} };
+			}
 
 			TOML_NODISCARD_CTOR
 			explicit parse_result(toml::table&& tbl) noexcept

@@ -128,12 +128,11 @@
 	</Type>
 	
 	<Type Name="toml::v2::noex::parse_result">
-		<DisplayString Condition="!is_err">{*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage)}</DisplayString>
-		<DisplayString Condition="is_err">{*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage)}</DisplayString>
+		<DisplayString Condition="!err_">{*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage_.bytes)}</DisplayString>
+		<DisplayString Condition="err_">{*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage_.bytes)}</DisplayString>
 		<Expand>
-			<Item Name="[table]" Condition="!is_err">*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage)</Item>
-			<Item Name="[error]" Condition="is_err">*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage)</Item>
-			<Item Name="is_err" ExcludeView="simple">is_err</Item>
+			<Item Name="[table]" Condition="!err_">*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage_.bytes)</Item>
+			<Item Name="[error]" Condition="err_">*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage_.bytes)</Item>
 		</Expand>
 	</Type>
 

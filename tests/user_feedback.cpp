@@ -162,5 +162,19 @@ b = []
 		});
 	}
 
+	SECTION("github/issues/100") // https://github.com/marzer/tomlplusplus/issues/100
+	{
+		// this tests for two separate things that should fail gracefully, not crash:
+		// 1. pathologically-nested inputs
+		// 2. a particular sequence of malformed UTF-8
+
+		parsing_should_fail(FILE_LINE_ARGS, "fl =[ [[[[[[[[[[[[[[[\x36\x80\x86\x00\x00\x00\x2D\x36\x9F\x20\x00"sv);
+
+		std::string s(2048_sz, '[');
+		constexpr auto start = "fl =[ "sv;
+		memcpy(s.data(), start.data(), start.length());
+		parsing_should_fail(FILE_LINE_ARGS, std::string_view{ s });
+	}
+
 }
 

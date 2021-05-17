@@ -191,23 +191,24 @@ def main():
 			if m:
 				defines[m.group(1)] = defined
 		ignore_list = ( # macros that are meant to stay public (user configs etc)
-			'INCLUDE_TOMLPLUSPLUS_H',
-			'TOML_API',
-			'TOML_UNRELEASED_FEATURES',
-			'TOML_LARGE_FILES',
-			'TOML_PARSER',
-			'TOML_WINDOWS_COMPAT',
-			'TOML_EXCEPTIONS',
-			'TOML_LIB_SINGLE_HEADER',
-			'TOML_LIB_MAJOR',
-			'TOML_LIB_MINOR',
-			'TOML_LIB_PATCH',
-			'TOML_LANG_MAJOR',
-			'TOML_LANG_MINOR',
-			'TOML_LANG_PATCH',
-			'TOML_UNDEF_MACROS',
-			'TOML_HEADER_ONLY',
-			'TOML_ALL_INLINE'
+			r'INCLUDE_TOMLPLUSPLUS_H',
+			r'TOML_API',
+			r'TOML_UNRELEASED_FEATURES',
+			r'TOML_LARGE_FILES',
+			r'TOML_PARSER',
+			r'TOML_WINDOWS_COMPAT',
+			r'TOML_EXCEPTIONS',
+			r'TOML_LIB_SINGLE_HEADER',
+			r'TOML_LIB_MAJOR',
+			r'TOML_LIB_MINOR',
+			r'TOML_LIB_PATCH',
+			r'TOML_LANG_MAJOR',
+			r'TOML_LANG_MINOR',
+			r'TOML_LANG_PATCH',
+			r'TOML_UNDEF_MACROS',
+			r'TOML_HEADER_ONLY',
+			r'TOML_ALL_INLINE',
+			r'TOML_MAX_NESTED_VALUES'
 		)
 		set_defines = []
 		for define, currently_set in defines.items():

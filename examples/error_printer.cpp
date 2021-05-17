@@ -43,7 +43,7 @@ namespace
 		"[foo] [bar]"sv,
 		"[foo]\n[foo]"sv,
 		"? = 'foo' ?"sv,
-		"[ [foo] ]"sv
+		"[ [foo] ]"sv,
 
 		"########## arrays"sv,
 		"val = [,]"sv,
@@ -68,6 +68,7 @@ namespace
 		"########## values"sv,
 		"val = _"sv,
 		"val = G"sv,
+		"PATHOLOGICALLY_NESTED"sv, // generated inline
 
 		"########## strings"sv,
 		"val = \" \r \""sv,
@@ -136,7 +137,18 @@ int main(int /*argc*/, char** /*argv*/)
 		}
 		else
 		{
-			auto result = toml::parse(str);
+			toml::parse_result result;
+
+			if (str == "PATHOLOGICALLY_NESTED"sv)
+			{
+				std::string s(1000_sz, '[');
+				constexpr auto start = "array = "sv;
+				memcpy(s.data(), start.data(), start.length());
+				result = toml::parse(s);
+			}
+			else
+				result = toml::parse(str);
+
 			if (!result)
 			{
 				std::cout << result.error();

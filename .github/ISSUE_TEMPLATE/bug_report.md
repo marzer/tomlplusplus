@@ -9,7 +9,7 @@ assignees: marzer
 
 <!--
     Replace the HTML comments below with the requested information.
-    DO NOT delete this template and roll your own!
+    Please DO NOT delete this template and roll your own!
 
     Thanks for contributing!
 -->
@@ -21,7 +21,7 @@ assignees: marzer
 <!--
     If you're using the single-header version of the library, the version number is right at the top of the file.
     Otherwise you can find it by opening toml++/toml_version.h; it'll be represented by three defines -
-    TOML_LANG_MAJOR, TOML_LANG_MINOR and TOML_LANG_PATCH.
+    TOML_LIB_MAJOR, TOML_LIB_MINOR and TOML_LIB_PATCH.
     
     If you're not using any particular release and are instead just living large at HEAD of master, the commit hash
     would be super helpful too, though it's not critical.
@@ -36,14 +36,14 @@ assignees: marzer
 
 
 
-**C++ standard mode (e.g. 17, 20, 'latest'):**  
+**C++ standard mode:**  
 <!--
-    The C++ standard level you were targeting, e.g. C++17
+    The C++ standard level you were targeting, e.g. 17, 20, 'latest'
 -->
 
 
 
-**Target arch (e.g. x64):**  
+**Target arch:**  
 <!--
     The architecture you were targeting, e.g. x86, x64, ARM
 -->
