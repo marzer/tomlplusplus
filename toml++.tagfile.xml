@@ -5741,6 +5741,7 @@
     <docanchor file="index.html" title="DDS">mainpage-adding-lib-dds</docanchor>
     <docanchor file="index.html" title="Meson">mainpage-adding-lib-meson</docanchor>
     <docanchor file="index.html" title="Vcpkg">mainpage-adding-lib-vcpkg</docanchor>
+    <docanchor file="index.html" title="CMake FetchContent">mainpage-adding-lib-cmake-fetch-content</docanchor>
     <docanchor file="index.html" title="Other environments and package managers">mainpage-adding-lib-other</docanchor>
     <docanchor file="index.html" title="Special mention: Python">mainpage-adding-lib-python</docanchor>
     <docanchor file="index.html" title="Library configuration options">mainpage-configuration</docanchor>
