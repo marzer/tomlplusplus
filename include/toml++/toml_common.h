@@ -24,18 +24,23 @@ TOML_DISABLE_WARNINGS;
 #include <vector>
 #include <map>
 #include <iosfwd>
+#include <new>
 #if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#include <optional>
 #endif
-#if TOML_HAS_INCLUDE(<version>)
-	#include <version>
-#endif
 TOML_ENABLE_WARNINGS;
 
-#ifdef __cpp_lib_launder
+#if defined(__cpp_lib_launder) && __cpp_lib_launder >= 201606
 	#define TOML_LAUNDER(x)	std::launder(x)
 #else
 	#define TOML_LAUNDER(x)	x
+#endif
+
+#if defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
+		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907
+	#define TOML_HAS_CHAR8 1
+#else
+	#define TOML_HAS_CHAR8 0
 #endif
 
 //#====================================================================================================================
@@ -174,7 +179,7 @@ TOML_NAMESPACE_START // abi namespace
 		#if TOML_WINDOWS_COMPAT
 		[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
 		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 		[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
 		#endif
 		#endif // TOML_WINDOWS_COMPAT
@@ -460,7 +465,7 @@ TOML_IMPL_NAMESPACE_START
 	template <size_t N> struct value_traits<const char[N]>		: string_value_traits<const char[N]> {};
 	template <>         struct value_traits<char*>				: string_value_traits<char*> {};
 	template <size_t N> struct value_traits<char[N]>			: string_value_traits<char[N]> {};
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	template <>         struct value_traits<std::u8string>		: string_value_traits<std::u8string> {};
 	template <>         struct value_traits<std::u8string_view>	: string_value_traits<std::u8string_view> {};
 	template <>         struct value_traits<const char8_t*>		: string_value_traits<const char8_t*> {};
@@ -795,8 +800,6 @@ TOML_NAMESPACE_START
 	/// \brief	A source document region.
 	/// 
 	/// \detail \cpp
-	/// #include <fstream>
-	/// 
 	/// auto tbl = toml::parse_file("config.toml"sv);
 	/// if (auto server = tbl.get("server"))
 	/// {

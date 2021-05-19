@@ -17,6 +17,7 @@
 #include "toml_parser.h"
 TOML_DISABLE_WARNINGS;
 #include <cmath>
+#include <fstream>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
 #endif
@@ -384,6 +385,7 @@ TOML_IMPL_NAMESPACE_START
 	#define is_eof()							!cp
 	#define assert_not_eof()					assert_or_assume(cp != nullptr)
 	#define return_if_eof(...)					do { if (is_eof()) return __VA_ARGS__; } while(false)
+
 	#if TOML_EXCEPTIONS
 		#define is_error()						false
 		#define return_after_error(...)			TOML_UNREACHABLE
@@ -397,13 +399,18 @@ TOML_IMPL_NAMESPACE_START
 		#define return_if_error(...)			do { if (is_error()) return __VA_ARGS__; } while(false)
 		#define return_if_error_or_eof(...)		do { if (is_eof() || is_error()) return __VA_ARGS__; } while(false)
 	#endif
+
 	#define set_error_and_return(ret, ...)		\
 		do { if (!is_error()) set_error(__VA_ARGS__); return_after_error(ret); } while(false)
+
 	#define set_error_and_return_default(...)	set_error_and_return({}, __VA_ARGS__)
+
 	#define set_error_and_return_if_eof(...)	\
 		do { if (is_eof()) set_error_and_return(__VA_ARGS__, "encountered end-of-file"sv); } while(false)
+
 	#define advance_and_return_if_error(...)	\
 		do { assert_not_eof(); advance(); return_if_error(__VA_ARGS__); } while (false)
+
 	#define advance_and_return_if_error_or_eof(...)		\
 		do {											\
 			assert_not_eof();							\
@@ -3054,11 +3061,59 @@ TOML_IMPL_NAMESPACE_START
 		return reinterpret_cast<table*>(tab.release());
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result do_parse(utf8_reader_interface&& reader) TOML_MAY_THROW
 	{
 		return impl::parser{ std::move(reader) };
+	}
+
+	[[nodiscard]]
+	TOML_INTERNAL_LINKAGE
+	parse_result do_parse_file(std::string_view file_path) TOML_MAY_THROW
+	{
+		#if TOML_EXCEPTIONS
+		#define TOML_PARSE_FILE_ERROR(msg, path)													\
+				throw parse_error{																	\
+					msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+				}
+		#else
+		#define TOML_PARSE_FILE_ERROR(msg, path)													\
+				return parse_result{ parse_error{													\
+					msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+				}}
+		#endif
+
+		std::string file_path_str(file_path);
+
+		// open file with a custom-sized stack buffer
+		std::ifstream file;
+		char file_buffer[sizeof(void*) * 1024_sz];
+		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
+		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+		if (!file.is_open())
+			TOML_PARSE_FILE_ERROR("File could not be opened for reading", file_path_str);
+
+		// get size
+		const auto file_size = file.tellg();
+		if (file_size == -1)
+			TOML_PARSE_FILE_ERROR("Could not determine file size", file_path_str);
+		file.seekg(0, std::ifstream::beg);
+
+		// read the whole file into memory first if the file isn't too large
+		constexpr auto large_file_threshold = 1024 * 1024 * 2; // 2 MB
+		if (file_size <= large_file_threshold)
+		{
+			std::vector<char> file_data;
+			file_data.resize(static_cast<size_t>(file_size));
+			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
+			return parse(std::string_view{ file_data.data(), file_data.size() }, std::move(file_path_str));
+		}
+
+		// otherwise parse it using the streams
+		else
+			return parse(file, std::move(file_path_str));
+
+		#undef TOML_PARSE_FILE_ERROR
 	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
@@ -3088,59 +3143,74 @@ TOML_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#if TOML_WINDOWS_COMPAT
-
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW
 	{
-		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
+		return impl::do_parse_file(file_path);
 	}
 
-	#endif // TOML_WINDOWS_COMPAT
+	#if TOML_HAS_CHAR8
 
-	#ifdef __cpp_lib_char8_t
-
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW
+	{
+		std::string file_path_str;
+		file_path_str.resize(file_path.length());
+		memcpy(file_path_str.data(), file_path.data(), file_path.length());
+		return impl::do_parse_file(file_path_str);
+	}
+
+	#endif // TOML_HAS_CHAR8
+
 	#if TOML_WINDOWS_COMPAT
 
-	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	{
+		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW
+	{
+		return impl::do_parse_file(impl::narrow(file_path));
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
+
+	#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-	#endif // TOML_WINDOWS_COMPAT
-
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -3148,23 +3218,21 @@ TOML_NAMESPACE_START
 	{
 		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
 
-		TOML_API
 		TOML_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::string_view{ str, len });
 		}
 
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 
-		TOML_API
 		TOML_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::u8string_view{ str, len });
 		}
 
-		#endif // __cpp_lib_char8_t
+		#endif // TOML_HAS_CHAR8
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}

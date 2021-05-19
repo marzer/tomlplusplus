@@ -66,7 +66,7 @@ TOML_IMPL_NAMESPACE_START
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
 	}
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
 	template <typename Char>
 	inline void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)

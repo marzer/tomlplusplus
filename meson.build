@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '2.3.1',
+	version : '2.4.0',
 	meson_version : '>=0.53.0',
 	license : 'MIT',
 	default_options : [ # https://mesonbuild.com/Builtin-options.html
@@ -299,7 +299,7 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	#include <type_traits>
 	using namespace std::string_view_literals;
 
-	#ifndef __cpp_lib_char8_t
+	#if !defined(__cpp_char8_t)	|| __cpp_char8_t < 201811 || !defined(__cpp_lib_char8_t) || __cpp_lib_char8_t < 201907
 		#error oh noes
 	#endif
 

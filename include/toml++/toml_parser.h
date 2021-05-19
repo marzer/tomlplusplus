@@ -20,23 +20,15 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 	
-	[[nodiscard]] TOML_API parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
+	[[nodiscard]]
+	TOML_API
+	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 	
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
 TOML_IMPL_NAMESPACE_END;
 
-#if TOML_EXCEPTIONS
-	#define TOML_THROW_PARSE_ERROR(msg, path)												\
-		throw parse_error{																	\
-			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
-		}
-#else
-	#define TOML_THROW_PARSE_ERROR(msg, path)												\
-		return parse_result{ parse_error{													\
-			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
-		}}
-#endif
+
 /// \endcond
 
 TOML_NAMESPACE_START
@@ -124,7 +116,7 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
@@ -206,7 +198,7 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -320,120 +312,77 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	// Q: "why are the parse_file functions templated??"
-	// A: I don't want to force users to drag in <fstream> if they're not going to do
-	//    any parsing directly from files. Keeping them templated delays their instantiation
-	//    until they're actually required, so only those users wanting to use parse_file()
-	//    are burdened by the <fstream> overhead.
-
+	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
+		extern template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+		extern template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
+	#endif
 
 	/// \brief	Parses a TOML document from a file.
 	///
 	/// \detail \cpp
-	/// #include <fstream>
-	/// 
 	/// toml::parse_result get_foo_toml()
 	/// {
 	///		return toml::parse_file("foo.toml");
 	/// }
 	/// \ecpp
 	/// 
-	/// \tparam	Char			The path's character type.
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
 	/// 			\conditional_return{Without exceptions}
 	///				A toml::parse_result.
+	[[nodiscard]]
+	TOML_API
+	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW;
+
+	#if TOML_HAS_CHAR8
+
+	/// \brief	Parses a TOML document from a file.
+	///
+	/// \detail \cpp
+	/// toml::parse_result get_foo_toml()
+	/// {
+	///		return toml::parse_file(u8"foo.toml");
+	/// }
+	/// \ecpp
 	/// 
-	/// \attention You must `#include <fstream>` to use this function (toml++ does not transitively include it for you).
-	template <typename Char, typename StreamChar = char>
+	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	///
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
-	inline parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
-	{
-		static_assert(
-			!std::is_same_v<Char, wchar_t> || TOML_WINDOWS_COMPAT,
-			"Wide-character file paths are only supported on Windows with TOML_WINDOWS_COMPAT enabled."
-		);
-		#if TOML_WINDOWS_COMPAT
-			static_assert(
-				sizeof(Char) == 1 || std::is_same_v<Char, wchar_t>,
-				"The file path's underlying character type must be wchar_t or be 1 byte in size."
-			);
-		#else
-			static_assert(
-				sizeof(Char) == 1,
-				"The file path's underlying character type must be 1 byte in size."
-			);
-		#endif
-		static_assert(
-			std::is_same_v<StreamChar, char>,
-			"StreamChar must be 'char' (it is as an instantiation-delaying hack and is not user-configurable)."
-		);
+	TOML_API
+	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW;
 
-		std::string file_path_str;
-		#if TOML_WINDOWS_COMPAT
-		if constexpr (std::is_same_v<Char, wchar_t>)
-			file_path_str = impl::narrow(file_path);
-		else
-		#endif
-			file_path_str = std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() };
+	#endif // TOML_HAS_CHAR8
 
-		// open file with a custom-sized stack buffer
-		using ifstream = std::basic_ifstream<StreamChar>;
-		ifstream file;
-		StreamChar file_buffer[sizeof(void*) * 1024_sz];
-		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
-		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
-		if (!file.is_open())
-			TOML_THROW_PARSE_ERROR("File could not be opened for reading", file_path_str);
+	#if TOML_WINDOWS_COMPAT
 
-		// get size
-		const auto file_size = file.tellg();
-		if (file_size == -1)
-			TOML_THROW_PARSE_ERROR("Could not determine file size", file_path_str);
-		file.seekg(0, ifstream::beg);
-
-		// read the whole file into memory first if the file isn't too large
-		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit
-		if (file_size <= large_file_threshold)
-		{
-			std::vector<StreamChar> file_data;
-			file_data.resize(static_cast<size_t>(file_size));
-			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
-			return parse(std::basic_string_view<StreamChar>{ file_data.data(), file_data.size() }, std::move(file_path_str));
-		}
-
-		// otherwise parse it using the streams
-		else
-			return parse(file, std::move(file_path_str));
-	}
-
-	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
-		extern template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
-		extern template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
-		extern template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
-		#ifdef __cpp_lib_char8_t
-			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
-		#endif
-		#if TOML_WINDOWS_COMPAT
-			extern template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
-		#endif
-	#endif
-
-	template <typename Char>
+	/// \brief	Parses a TOML document from a file.
+	///
+	/// \detail \cpp
+	/// toml::parse_result get_foo_toml()
+	/// {
+	///		return toml::parse_file(L"foo.toml");
+	/// }
+	/// \ecpp
+	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	///
+	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	///
+	/// \returns	\conditional_return{With exceptions}
+	///				A toml::table.
+	/// 			\conditional_return{Without exceptions}
+	///				A toml::parse_result.
 	[[nodiscard]]
-	inline parse_result parse_file(const std::basic_string<Char>& file_path) TOML_MAY_THROW
-	{
-		return parse_file(std::basic_string_view<Char>{ file_path });
-	}
+	TOML_API
+	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW;
 
-	template <typename Char>
-	[[nodiscard]]
-	inline parse_result parse_file(const Char* file_path) TOML_MAY_THROW
-	{
-		return parse_file(std::basic_string_view<Char>{ file_path });
-	}
+	#endif // TOML_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -466,7 +415,7 @@ TOML_NAMESPACE_START
 		TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 
 		/// \brief	Parses TOML data from a UTF-8 string literal.
 		/// 
@@ -493,11 +442,9 @@ TOML_NAMESPACE_START
 		TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
-		#endif // __cpp_lib_char8_t
+		#endif // TOML_HAS_CHAR8
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
 TOML_NAMESPACE_END;
-
-#undef TOML_THROW_PARSE_ERROR

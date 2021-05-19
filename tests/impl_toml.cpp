@@ -91,7 +91,7 @@ namespace toml
 	CHECK_CAN_REPRESENT_NATIVE(const char*const,		true);
 	CHECK_CAN_REPRESENT_NATIVE(std::string,				true);
 	CHECK_CAN_REPRESENT_NATIVE(std::string_view,		true);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	CHECK_CAN_REPRESENT_NATIVE(char8_t*,				false);
 	CHECK_CAN_REPRESENT_NATIVE(char8_t*const,			false);
 	CHECK_CAN_REPRESENT_NATIVE(char8_t[2],				false);
@@ -137,7 +137,7 @@ namespace toml
 	CHECK_VALUE_EXACT(	const char*,					const char*);
 	CHECK_VALUE_EXACT(	std::string_view,				std::string_view);
 	CHECK_VALUE_EXACT(	std::string,					std::string);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	CHECK_VALUE_EXACT(	const char8_t*,					const char8_t*);
 	CHECK_VALUE_EXACT(	std::u8string_view,				std::u8string_view);
 	CHECK_VALUE_EXACT(	std::u8string,					std::u8string);
@@ -217,7 +217,7 @@ namespace toml
 	CHECK_VALUE_OR(		const std::string,				std::string);
 	CHECK_VALUE_OR(		const std::string&,				std::string);
 	CHECK_VALUE_OR(		const std::string&&,			std::string);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	CHECK_VALUE_OR(		char8_t*,						const char8_t*);
 	CHECK_VALUE_OR(		char8_t*&,						const char8_t*);
 	CHECK_VALUE_OR(		char8_t*&&,						const char8_t*);

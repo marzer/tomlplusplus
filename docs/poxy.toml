@@ -2,6 +2,7 @@
 # https://github.com/marzer/poxy
 
 name              = 'toml++'
+author            = 'Mark Gillard'
 description       = 'TOML for modern C++'
 cpp               = 17
 github            = 'marzer/tomlplusplus'

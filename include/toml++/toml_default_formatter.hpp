@@ -24,7 +24,6 @@ TOML_IMPL_NAMESPACE_START
 {
 	inline constexpr size_t default_formatter_line_wrap = 120_sz;
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string default_formatter_make_key_segment(const std::string& str) noexcept
 	{
@@ -69,7 +68,6 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	size_t default_formatter_inline_columns(const node& node) noexcept
 	{
@@ -153,7 +151,6 @@ TOML_IMPL_NAMESPACE_START
 		TOML_UNREACHABLE;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
@@ -230,7 +227,6 @@ extern "C"
 
 TOML_IMPL_NAMESPACE_START
 {
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str) noexcept
 	{
@@ -249,7 +245,6 @@ TOML_IMPL_NAMESPACE_START
 		return s;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::wstring widen(std::string_view str) noexcept
 	{
@@ -266,9 +261,8 @@ TOML_IMPL_NAMESPACE_START
 		return s;
 	}
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::wstring widen(std::u8string_view str) noexcept
 	{
@@ -278,7 +272,7 @@ TOML_IMPL_NAMESPACE_START
 		return widen(std::string_view{ reinterpret_cast<const char*>(str.data()), str.length() });
 	}
 
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 }
 TOML_IMPL_NAMESPACE_END;
 

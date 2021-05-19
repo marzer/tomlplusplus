@@ -315,7 +315,6 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator == (const table& lhs, const table& rhs) noexcept
 	{
@@ -345,7 +344,6 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator != (const table& lhs, const table& rhs) noexcept
 	{

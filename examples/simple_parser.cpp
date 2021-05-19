@@ -9,7 +9,6 @@
 
 */
 #include <iostream>
-#include <fstream>
 #include "utf8_console.h"
 
 #define TOML_UNRELEASED_FEATURES 1

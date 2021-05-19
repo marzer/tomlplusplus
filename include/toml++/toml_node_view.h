@@ -690,7 +690,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN(value, time);
 	TOML_EXTERN(value, date_time);
 	TOML_EXTERN(value, bool);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	TOML_EXTERN(value_exact, std::u8string_view);
 	TOML_EXTERN(value_exact, std::u8string);
 	TOML_EXTERN(value_exact, const char8_t*);

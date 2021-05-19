@@ -1,6 +1,6 @@
 //----------------------------------------------------------------------------------------------------------------------
 //
-// toml++ v2.3.1
+// toml++ v2.4.0
 // https://github.com/marzer/tomlplusplus
 // SPDX-License-Identifier: MIT
 //
@@ -558,7 +558,7 @@ is no longer necessary.
 
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
-#if defined(__cpp_consteval) \
+#if defined(__cpp_consteval) && __cpp_consteval >= 201811 \
 		&& (!defined(_MSC_FULL_VER) || _MSC_FULL_VER != 192930031)
 		// https://developercommunity.visualstudio.com/t/Erroneous-C7595-error-with-consteval-in/1404234
 	#define TOML_CONSTEVAL		consteval
@@ -573,13 +573,13 @@ is no longer necessary.
 #endif
 
 #if !defined(DOXYGEN) && !TOML_INTELLISENSE
-	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely)
+	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely) >= 201803
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
-	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely)
+	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely) >= 201803
 		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 	#endif
-	#if TOML_HAS_ATTR(nodiscard) >= 201907L
+	#if TOML_HAS_ATTR(nodiscard) >= 201907
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
 #endif
@@ -674,8 +674,8 @@ is no longer necessary.
 #endif
 
 #define TOML_LIB_MAJOR		2
-#define TOML_LIB_MINOR		3
-#define TOML_LIB_PATCH		1
+#define TOML_LIB_MINOR		4
+#define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1
 #define TOML_LANG_MINOR		0
@@ -777,18 +777,23 @@ TOML_DISABLE_WARNINGS;
 #include <vector>
 #include <map>
 #include <iosfwd>
+#include <new>
 #if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#include <optional>
 #endif
-#if TOML_HAS_INCLUDE(<version>)
-	#include <version>
-#endif
 TOML_ENABLE_WARNINGS;
 
-#ifdef __cpp_lib_launder
+#if defined(__cpp_lib_launder) && __cpp_lib_launder >= 201606
 	#define TOML_LAUNDER(x)	std::launder(x)
 #else
 	#define TOML_LAUNDER(x)	x
+#endif
+
+#if defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
+		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907
+	#define TOML_HAS_CHAR8 1
+#else
+	#define TOML_HAS_CHAR8 0
 #endif
 
 #ifndef TOML_DISABLE_ENVIRONMENT_CHECKS
@@ -916,7 +921,7 @@ TOML_NAMESPACE_START // abi namespace
 		#if TOML_WINDOWS_COMPAT
 		[[nodiscard]] TOML_API std::string narrow(std::wstring_view) noexcept;
 		[[nodiscard]] TOML_API std::wstring widen(std::string_view) noexcept;
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 		[[nodiscard]] TOML_API std::wstring widen(std::u8string_view) noexcept;
 		#endif
 		#endif // TOML_WINDOWS_COMPAT
@@ -1150,7 +1155,7 @@ TOML_IMPL_NAMESPACE_START
 	template <size_t N> struct value_traits<const char[N]>		: string_value_traits<const char[N]> {};
 	template <>         struct value_traits<char*>				: string_value_traits<char*> {};
 	template <size_t N> struct value_traits<char[N]>			: string_value_traits<char[N]> {};
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	template <>         struct value_traits<std::u8string>		: string_value_traits<std::u8string> {};
 	template <>         struct value_traits<std::u8string_view>	: string_value_traits<std::u8string_view> {};
 	template <>         struct value_traits<const char8_t*>		: string_value_traits<const char8_t*> {};
@@ -1898,7 +1903,7 @@ TOML_IMPL_NAMESPACE_START
 		stream.write(reinterpret_cast<const Char*>(str), static_cast<std::streamsize>(len));
 	}
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
 	template <typename Char>
 	inline void print_to_stream(char8_t character, std::basic_ostream<Char>& stream)
@@ -2777,7 +2782,7 @@ TOML_NAMESPACE_END;
 		#define TOML_SA_VALUE_MESSAGE_WSTRING
 	#endif
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW		TOML_SA_LIST_SEP "std::u8string_view"
 		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8		TOML_SA_LIST_SEP "const char8_t*"
 	#else
@@ -2857,7 +2862,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	};
 
-	#if defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+	#if TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
 
 	struct string_maker
 	{
@@ -2865,12 +2870,12 @@ TOML_IMPL_NAMESPACE_START
 		[[nodiscard]]
 		static std::string make(T&& arg) noexcept
 		{
-			#ifdef __cpp_lib_char8_t
+			#if TOML_HAS_CHAR8
 			if constexpr (is_one_of<std::decay_t<T>, char8_t*, const char8_t*>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg)));
 			else if constexpr (is_one_of<remove_cvref_t<T>, std::u8string, std::u8string_view>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg.data())), arg.length());
-			#endif // __cpp_lib_char8_t
+			#endif // TOML_HAS_CHAR8
 
 			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
@@ -2878,12 +2883,12 @@ TOML_IMPL_NAMESPACE_START
 			#endif // TOML_WINDOWS_COMPAT
 		}
 	};
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	template <>	struct native_value_maker<std::string, char8_t*>			: string_maker {};
 	template <>	struct native_value_maker<std::string, const char8_t*>		: string_maker {};
 	template <>	struct native_value_maker<std::string, std::u8string>		: string_maker {};
 	template <>	struct native_value_maker<std::string, std::u8string_view>	: string_maker {};
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 	#if TOML_WINDOWS_COMPAT
 	template <>	struct native_value_maker<std::string, wchar_t*>			: string_maker {};
 	template <>	struct native_value_maker<std::string, const wchar_t*>		: string_maker {};
@@ -2891,7 +2896,7 @@ TOML_IMPL_NAMESPACE_START
 	template <>	struct native_value_maker<std::string, std::wstring_view>	: string_maker {};
 	#endif // TOML_WINDOWS_COMPAT
 
-	#endif // defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+	#endif // TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
 
 	template <typename T>
 	[[nodiscard]]
@@ -3283,7 +3288,7 @@ TOML_NAMESPACE_START
 				#endif
 			}
 
-			#ifdef __cpp_lib_char8_t
+			#if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
 			else if constexpr (is_one_of<T, std::u8string, std::u8string_view>)
@@ -3501,14 +3506,14 @@ TOML_NAMESPACE_START
 
 				TOML_SA_LIST_NXT "A compatible view type"
 				TOML_SA_LIST_BEG "std::string_view"
-				#ifdef __cpp_lib_char8_t
+				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "std::u8string_view"
 				#endif
 				#if TOML_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "std::wstring_view"
 				#endif
 				TOML_SA_LIST_SEP "const char*"
-				#ifdef __cpp_lib_char8_t
+				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "const char8_t*"
 				#endif
 				#if TOML_WINDOWS_COMPAT
@@ -3567,7 +3572,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN(value, time);
 	TOML_EXTERN(value, date_time);
 	TOML_EXTERN(value, bool);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	TOML_EXTERN(value_exact, std::u8string_view);
 	TOML_EXTERN(value_exact, std::u8string);
 	TOML_EXTERN(value_exact, const char8_t*);
@@ -5139,7 +5144,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN(value, time);
 	TOML_EXTERN(value, date_time);
 	TOML_EXTERN(value, bool);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	TOML_EXTERN(value_exact, std::u8string_view);
 	TOML_EXTERN(value_exact, std::u8string);
 	TOML_EXTERN(value_exact, const char8_t*);
@@ -6852,23 +6857,13 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-	[[nodiscard]] TOML_API parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
+	[[nodiscard]]
+	TOML_API
+	parse_result do_parse(utf8_reader_interface&&) TOML_MAY_THROW;
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
 TOML_IMPL_NAMESPACE_END;
-
-#if TOML_EXCEPTIONS
-	#define TOML_THROW_PARSE_ERROR(msg, path)												\
-		throw parse_error{																	\
-			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
-		}
-#else
-	#define TOML_THROW_PARSE_ERROR(msg, path)												\
-		return parse_result{ parse_error{													\
-			msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
-		}}
-#endif
 
 TOML_NAMESPACE_START
 {
@@ -6890,7 +6885,7 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
 	[[nodiscard]]
 	TOML_API
@@ -6908,7 +6903,7 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 
 	template <typename Char>
 	[[nodiscard]]
@@ -6945,99 +6940,30 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	// Q: "why are the parse_file functions templated??"
-	// A: I don't want to force users to drag in <fstream> if they're not going to do
-	//    any parsing directly from files. Keeping them templated delays their instantiation
-	//    until they're actually required, so only those users wanting to use parse_file()
-	//    are burdened by the <fstream> overhead.
-
-	template <typename Char, typename StreamChar = char>
-	[[nodiscard]]
-	inline parse_result parse_file(std::basic_string_view<Char> file_path) TOML_MAY_THROW
-	{
-		static_assert(
-			!std::is_same_v<Char, wchar_t> || TOML_WINDOWS_COMPAT,
-			"Wide-character file paths are only supported on Windows with TOML_WINDOWS_COMPAT enabled."
-		);
-		#if TOML_WINDOWS_COMPAT
-			static_assert(
-				sizeof(Char) == 1 || std::is_same_v<Char, wchar_t>,
-				"The file path's underlying character type must be wchar_t or be 1 byte in size."
-			);
-		#else
-			static_assert(
-				sizeof(Char) == 1,
-				"The file path's underlying character type must be 1 byte in size."
-			);
-		#endif
-		static_assert(
-			std::is_same_v<StreamChar, char>,
-			"StreamChar must be 'char' (it is as an instantiation-delaying hack and is not user-configurable)."
-		);
-
-		std::string file_path_str;
-		#if TOML_WINDOWS_COMPAT
-		if constexpr (std::is_same_v<Char, wchar_t>)
-			file_path_str = impl::narrow(file_path);
-		else
-		#endif
-			file_path_str = std::string_view{ reinterpret_cast<const char*>(file_path.data()), file_path.length() };
-
-		// open file with a custom-sized stack buffer
-		using ifstream = std::basic_ifstream<StreamChar>;
-		ifstream file;
-		StreamChar file_buffer[sizeof(void*) * 1024_sz];
-		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
-		file.open(file_path_str, ifstream::in | ifstream::binary | ifstream::ate);
-		if (!file.is_open())
-			TOML_THROW_PARSE_ERROR("File could not be opened for reading", file_path_str);
-
-		// get size
-		const auto file_size = file.tellg();
-		if (file_size == -1)
-			TOML_THROW_PARSE_ERROR("Could not determine file size", file_path_str);
-		file.seekg(0, ifstream::beg);
-
-		// read the whole file into memory first if the file isn't too large
-		constexpr auto large_file_threshold = 1024 * 1024 * static_cast<int>(sizeof(void*)) * 4; // 32 megabytes on 64-bit
-		if (file_size <= large_file_threshold)
-		{
-			std::vector<StreamChar> file_data;
-			file_data.resize(static_cast<size_t>(file_size));
-			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
-			return parse(std::basic_string_view<StreamChar>{ file_data.data(), file_data.size() }, std::move(file_path_str));
-		}
-
-		// otherwise parse it using the streams
-		else
-			return parse(file, std::move(file_path_str));
-	}
-
 	#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
 		extern template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
 		extern template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
-		extern template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
-		#ifdef __cpp_lib_char8_t
-			extern template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
-		#endif
-		#if TOML_WINDOWS_COMPAT
-			extern template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
-		#endif
 	#endif
 
-	template <typename Char>
 	[[nodiscard]]
-	inline parse_result parse_file(const std::basic_string<Char>& file_path) TOML_MAY_THROW
-	{
-		return parse_file(std::basic_string_view<Char>{ file_path });
-	}
+	TOML_API
+	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW;
 
-	template <typename Char>
+	#if TOML_HAS_CHAR8
+
 	[[nodiscard]]
-	inline parse_result parse_file(const Char* file_path) TOML_MAY_THROW
-	{
-		return parse_file(std::basic_string_view<Char>{ file_path });
-	}
+	TOML_API
+	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW;
+
+	#endif // TOML_HAS_CHAR8
+
+	#if TOML_WINDOWS_COMPAT
+
+	[[nodiscard]]
+	TOML_API
+	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW;
+
+	#endif // TOML_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -7049,20 +6975,18 @@ TOML_NAMESPACE_START
 		TOML_API
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW;
 
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 
 		[[nodiscard]]
 		TOML_API
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW;
 
-		#endif // __cpp_lib_char8_t
+		#endif // TOML_HAS_CHAR8
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
 TOML_NAMESPACE_END;
-
-#undef TOML_THROW_PARSE_ERROR
 
 #endif //----------------------------------  ↑ toml_parser.h  ----------------------------------------------------------
 
@@ -8162,7 +8086,6 @@ TOML_NAMESPACE_START
 		return index < elements.size() ? elements[index].get() : nullptr;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator == (const array& lhs, const array& rhs) noexcept
 	{
@@ -8188,7 +8111,6 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator != (const array& lhs, const array& rhs) noexcept
 	{
@@ -8586,7 +8508,6 @@ TOML_NAMESPACE_START
 
 	#endif // TOML_WINDOWS_COMPAT
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator == (const table& lhs, const table& rhs) noexcept
 	{
@@ -8616,7 +8537,6 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator != (const table& lhs, const table& rhs) noexcept
 	{
@@ -8730,6 +8650,7 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_DISABLE_WARNINGS;
 #include <cmath>
+#include <fstream>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 	#include <charconv>
 #endif
@@ -9097,6 +9018,7 @@ TOML_IMPL_NAMESPACE_START
 	#define is_eof()							!cp
 	#define assert_not_eof()					assert_or_assume(cp != nullptr)
 	#define return_if_eof(...)					do { if (is_eof()) return __VA_ARGS__; } while(false)
+
 	#if TOML_EXCEPTIONS
 		#define is_error()						false
 		#define return_after_error(...)			TOML_UNREACHABLE
@@ -9110,13 +9032,18 @@ TOML_IMPL_NAMESPACE_START
 		#define return_if_error(...)			do { if (is_error()) return __VA_ARGS__; } while(false)
 		#define return_if_error_or_eof(...)		do { if (is_eof() || is_error()) return __VA_ARGS__; } while(false)
 	#endif
+
 	#define set_error_and_return(ret, ...)		\
 		do { if (!is_error()) set_error(__VA_ARGS__); return_after_error(ret); } while(false)
+
 	#define set_error_and_return_default(...)	set_error_and_return({}, __VA_ARGS__)
+
 	#define set_error_and_return_if_eof(...)	\
 		do { if (is_eof()) set_error_and_return(__VA_ARGS__, "encountered end-of-file"sv); } while(false)
+
 	#define advance_and_return_if_error(...)	\
 		do { assert_not_eof(); advance(); return_if_error(__VA_ARGS__); } while (false)
+
 	#define advance_and_return_if_error_or_eof(...)		\
 		do {											\
 			assert_not_eof();							\
@@ -11762,11 +11689,59 @@ TOML_IMPL_NAMESPACE_START
 		return reinterpret_cast<table*>(tab.release());
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result do_parse(utf8_reader_interface&& reader) TOML_MAY_THROW
 	{
 		return impl::parser{ std::move(reader) };
+	}
+
+	[[nodiscard]]
+	TOML_INTERNAL_LINKAGE
+	parse_result do_parse_file(std::string_view file_path) TOML_MAY_THROW
+	{
+		#if TOML_EXCEPTIONS
+		#define TOML_PARSE_FILE_ERROR(msg, path)													\
+				throw parse_error{																	\
+					msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+				}
+		#else
+		#define TOML_PARSE_FILE_ERROR(msg, path)													\
+				return parse_result{ parse_error{													\
+					msg, source_position{}, std::make_shared<const std::string>(std::move(path))	\
+				}}
+		#endif
+
+		std::string file_path_str(file_path);
+
+		// open file with a custom-sized stack buffer
+		std::ifstream file;
+		char file_buffer[sizeof(void*) * 1024_sz];
+		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
+		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+		if (!file.is_open())
+			TOML_PARSE_FILE_ERROR("File could not be opened for reading", file_path_str);
+
+		// get size
+		const auto file_size = file.tellg();
+		if (file_size == -1)
+			TOML_PARSE_FILE_ERROR("Could not determine file size", file_path_str);
+		file.seekg(0, std::ifstream::beg);
+
+		// read the whole file into memory first if the file isn't too large
+		constexpr auto large_file_threshold = 1024 * 1024 * 2; // 2 MB
+		if (file_size <= large_file_threshold)
+		{
+			std::vector<char> file_data;
+			file_data.resize(static_cast<size_t>(file_size));
+			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
+			return parse(std::string_view{ file_data.data(), file_data.size() }, std::move(file_path_str));
+		}
+
+		// otherwise parse it using the streams
+		else
+			return parse(file, std::move(file_path_str));
+
+		#undef TOML_PARSE_FILE_ERROR
 	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
@@ -11796,59 +11771,74 @@ TOML_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
-	#if TOML_WINDOWS_COMPAT
-
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW
 	{
-		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
+		return impl::do_parse_file(file_path);
 	}
 
-	#endif // TOML_WINDOWS_COMPAT
+	#if TOML_HAS_CHAR8
 
-	#ifdef __cpp_lib_char8_t
-
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, source_path });
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::string&& source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, std::move(source_path) });
 	}
 
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW
+	{
+		std::string file_path_str;
+		file_path_str.resize(file_path.length());
+		memcpy(file_path_str.data(), file_path.data(), file_path.length());
+		return impl::do_parse_file(file_path_str);
+	}
+
+	#endif // TOML_HAS_CHAR8
+
 	#if TOML_WINDOWS_COMPAT
 
-	TOML_API
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	{
+		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW
+	{
+		return impl::do_parse_file(impl::narrow(file_path));
+	}
+
+	#endif // TOML_WINDOWS_COMPAT
+
+	#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW
 	{
 		return impl::do_parse(impl::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-	#endif // TOML_WINDOWS_COMPAT
-
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -11856,23 +11846,21 @@ TOML_NAMESPACE_START
 	{
 		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
 
-		TOML_API
 		TOML_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::string_view{ str, len });
 		}
 
-		#ifdef __cpp_lib_char8_t
+		#if TOML_HAS_CHAR8
 
-		TOML_API
 		TOML_EXTERNAL_LINKAGE
 		parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW
 		{
 			return parse(std::u8string_view{ str, len });
 		}
 
-		#endif // __cpp_lib_char8_t
+		#endif // TOML_HAS_CHAR8
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
@@ -11899,7 +11887,6 @@ TOML_IMPL_NAMESPACE_START
 {
 	inline constexpr size_t default_formatter_line_wrap = 120_sz;
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string default_formatter_make_key_segment(const std::string& str) noexcept
 	{
@@ -11944,7 +11931,6 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	size_t default_formatter_inline_columns(const node& node) noexcept
 	{
@@ -12028,7 +12014,6 @@ TOML_IMPL_NAMESPACE_START
 		TOML_UNREACHABLE;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool default_formatter_forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
@@ -12105,7 +12090,6 @@ extern "C"
 
 TOML_IMPL_NAMESPACE_START
 {
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::string narrow(std::wstring_view str) noexcept
 	{
@@ -12124,7 +12108,6 @@ TOML_IMPL_NAMESPACE_START
 		return s;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::wstring widen(std::string_view str) noexcept
 	{
@@ -12141,9 +12124,8 @@ TOML_IMPL_NAMESPACE_START
 		return s;
 	}
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	std::wstring widen(std::u8string_view str) noexcept
 	{
@@ -12153,7 +12135,7 @@ TOML_IMPL_NAMESPACE_START
 		return widen(std::string_view{ reinterpret_cast<const char*>(str.data()), str.length() });
 	}
 
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -12223,7 +12205,6 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
 TOML_DISABLE_WARNINGS;
 #include <ostream>
 #include <istream>
-#include <fstream>
 TOML_ENABLE_WARNINGS;
 
 #if TOML_PARSER
@@ -12234,10 +12215,10 @@ TOML_ENABLE_WARNINGS;
 TOML_IMPL_NAMESPACE_START
 {
 	// formatters
-	template class TOML_API formatter<char>;
+	template class formatter<char>;
 
 	// print to stream machinery
-	template TOML_API void print_floating_point_to_stream(double, std::ostream&, bool);
+	template void print_floating_point_to_stream(double, std::ostream&, bool);
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -12245,51 +12226,51 @@ TOML_IMPL_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	// value<>
-	template class TOML_API value<std::string>;
-	template class TOML_API value<int64_t>;
-	template class TOML_API value<double>;
-	template class TOML_API value<bool>;
-	template class TOML_API value<date>;
-	template class TOML_API value<time>;
-	template class TOML_API value<date_time>;
+	template class value<std::string>;
+	template class value<int64_t>;
+	template class value<double>;
+	template class value<bool>;
+	template class value<date>;
+	template class value<time>;
+	template class value<date_time>;
 
 	// node_view
-	template class TOML_API node_view<node>;
-	template class TOML_API node_view<const node>;
+	template class node_view<node>;
+	template class node_view<const node>;
 
 	// formatters
-	template class TOML_API default_formatter<char>;
-	template class TOML_API json_formatter<char>;
+	template class default_formatter<char>;
+	template class json_formatter<char>;
 
 	// various ostream operators
-	template TOML_API std::ostream& operator << (std::ostream&, const source_position&);
-	template TOML_API std::ostream& operator << (std::ostream&, const source_region&);
-	template TOML_API std::ostream& operator << (std::ostream&, const date&);
-	template TOML_API std::ostream& operator << (std::ostream&, const time&);
-	template TOML_API std::ostream& operator << (std::ostream&, const time_offset&);
-	template TOML_API std::ostream& operator << (std::ostream&, const date_time&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<std::string>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<int64_t>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<double>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<bool>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::time>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
-	template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&);
-	template TOML_API std::ostream& operator << (std::ostream&, default_formatter<char>&&);
-	template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&);
-	template TOML_API std::ostream& operator << (std::ostream&, json_formatter<char>&&);
-	template TOML_API std::ostream& operator << (std::ostream&, const table&);
-	template TOML_API std::ostream& operator << (std::ostream&, const array&);
-	template TOML_API std::ostream& operator << (std::ostream&, const node_view<node>&);
-	template TOML_API std::ostream& operator << (std::ostream&, const node_view<const node>&);
-	template TOML_API std::ostream& operator << (std::ostream&, node_type);
+	template std::ostream& operator << (std::ostream&, const source_position&);
+	template std::ostream& operator << (std::ostream&, const source_region&);
+	template std::ostream& operator << (std::ostream&, const date&);
+	template std::ostream& operator << (std::ostream&, const time&);
+	template std::ostream& operator << (std::ostream&, const time_offset&);
+	template std::ostream& operator << (std::ostream&, const date_time&);
+	template std::ostream& operator << (std::ostream&, const value<std::string>&);
+	template std::ostream& operator << (std::ostream&, const value<int64_t>&);
+	template std::ostream& operator << (std::ostream&, const value<double>&);
+	template std::ostream& operator << (std::ostream&, const value<bool>&);
+	template std::ostream& operator << (std::ostream&, const value<toml::date>&);
+	template std::ostream& operator << (std::ostream&, const value<toml::time>&);
+	template std::ostream& operator << (std::ostream&, const value<toml::date_time>&);
+	template std::ostream& operator << (std::ostream&, default_formatter<char>&);
+	template std::ostream& operator << (std::ostream&, default_formatter<char>&&);
+	template std::ostream& operator << (std::ostream&, json_formatter<char>&);
+	template std::ostream& operator << (std::ostream&, json_formatter<char>&&);
+	template std::ostream& operator << (std::ostream&, const table&);
+	template std::ostream& operator << (std::ostream&, const array&);
+	template std::ostream& operator << (std::ostream&, const node_view<node>&);
+	template std::ostream& operator << (std::ostream&, const node_view<const node>&);
+	template std::ostream& operator << (std::ostream&, node_type);
 
 	// node::value, node_view:::value etc
 	#define TOML_INSTANTIATE(name, T)														\
-		template TOML_API optional<T>		node::name<T>() const noexcept;					\
-		template TOML_API optional<T>		node_view<node>::name<T>() const noexcept;		\
-		template TOML_API optional<T>		node_view<const node>::name<T>() const noexcept
+		template optional<T>		node::name<T>() const noexcept;					\
+		template optional<T>		node_view<node>::name<T>() const noexcept;		\
+		template optional<T>		node_view<const node>::name<T>() const noexcept
 	TOML_INSTANTIATE(value_exact, std::string_view);
 	TOML_INSTANTIATE(value_exact, std::string);
 	TOML_INSTANTIATE(value_exact, const char*);
@@ -12318,7 +12299,7 @@ TOML_NAMESPACE_START
 	TOML_INSTANTIATE(value, time);
 	TOML_INSTANTIATE(value, date_time);
 	TOML_INSTANTIATE(value, bool);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	TOML_INSTANTIATE(value_exact, std::u8string_view);
 	TOML_INSTANTIATE(value_exact, std::u8string);
 	TOML_INSTANTIATE(value_exact, const char8_t*);
@@ -12336,20 +12317,13 @@ TOML_NAMESPACE_START
 	#if TOML_PARSER
 
 		// parse error ostream
-		template TOML_API std::ostream& operator << (std::ostream&, const parse_error&);
+		template std::ostream& operator << (std::ostream&, const parse_error&);
 
 		// parse() and parse_file()
 		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-		template TOML_API parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
-		template TOML_API parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
-		template TOML_API parse_result parse_file(std::string_view) TOML_MAY_THROW;
-		#ifdef __cpp_lib_char8_t
-			template TOML_API parse_result parse_file(std::u8string_view) TOML_MAY_THROW;
-		#endif
-		#if TOML_WINDOWS_COMPAT
-			template TOML_API parse_result parse_file(std::wstring_view) TOML_MAY_THROW;
-		#endif
+		template parse_result parse(std::istream&, std::string_view) TOML_MAY_THROW;
+		template parse_result parse(std::istream&, std::string&&) TOML_MAY_THROW;
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -12406,6 +12380,7 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_GCC
 	#undef TOML_HAS_ATTR
 	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
+	#undef TOML_HAS_CHAR8
 	#undef TOML_HAS_INCLUDE
 	#undef TOML_ICC
 	#undef TOML_ICC_CL

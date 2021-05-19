@@ -14,7 +14,7 @@
 		#define TOML_SA_VALUE_MESSAGE_WSTRING
 	#endif
 
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 		#define TOML_SA_VALUE_MESSAGE_U8STRING_VIEW		TOML_SA_LIST_SEP "std::u8string_view"
 		#define TOML_SA_VALUE_MESSAGE_CONST_CHAR8		TOML_SA_LIST_SEP "const char8_t*"
 	#else
@@ -95,7 +95,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	};
 
-	#if defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+	#if TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
 
 	struct string_maker
 	{
@@ -103,12 +103,12 @@ TOML_IMPL_NAMESPACE_START
 		[[nodiscard]]
 		static std::string make(T&& arg) noexcept
 		{
-			#ifdef __cpp_lib_char8_t
+			#if TOML_HAS_CHAR8
 			if constexpr (is_one_of<std::decay_t<T>, char8_t*, const char8_t*>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg)));
 			else if constexpr (is_one_of<remove_cvref_t<T>, std::u8string, std::u8string_view>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg.data())), arg.length());
-			#endif // __cpp_lib_char8_t
+			#endif // TOML_HAS_CHAR8
 
 			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
@@ -116,12 +116,12 @@ TOML_IMPL_NAMESPACE_START
 			#endif // TOML_WINDOWS_COMPAT
 		}
 	};
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	template <>	struct native_value_maker<std::string, char8_t*>			: string_maker {};
 	template <>	struct native_value_maker<std::string, const char8_t*>		: string_maker {};
 	template <>	struct native_value_maker<std::string, std::u8string>		: string_maker {};
 	template <>	struct native_value_maker<std::string, std::u8string_view>	: string_maker {};
-	#endif // __cpp_lib_char8_t
+	#endif // TOML_HAS_CHAR8
 	#if TOML_WINDOWS_COMPAT
 	template <>	struct native_value_maker<std::string, wchar_t*>			: string_maker {};
 	template <>	struct native_value_maker<std::string, const wchar_t*>		: string_maker {};
@@ -129,7 +129,7 @@ TOML_IMPL_NAMESPACE_START
 	template <>	struct native_value_maker<std::string, std::wstring_view>	: string_maker {};
 	#endif // TOML_WINDOWS_COMPAT
 
-	#endif // defined(__cpp_lib_char8_t) || TOML_WINDOWS_COMPAT
+	#endif // TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
 
 	template <typename T>
 	[[nodiscard]]
@@ -663,7 +663,7 @@ TOML_NAMESPACE_START
 				#endif
 			}
 
-			#ifdef __cpp_lib_char8_t
+			#if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
 			else if constexpr (is_one_of<T, std::u8string, std::u8string_view>)
@@ -882,14 +882,14 @@ TOML_NAMESPACE_START
 
 				TOML_SA_LIST_NXT "A compatible view type"
 				TOML_SA_LIST_BEG "std::string_view"
-				#ifdef __cpp_lib_char8_t
+				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "std::u8string_view"
 				#endif
 				#if TOML_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "std::wstring_view"
 				#endif
 				TOML_SA_LIST_SEP "const char*"
-				#ifdef __cpp_lib_char8_t
+				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "const char8_t*"
 				#endif
 				#if TOML_WINDOWS_COMPAT
@@ -948,7 +948,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN(value, time);
 	TOML_EXTERN(value, date_time);
 	TOML_EXTERN(value, bool);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	TOML_EXTERN(value_exact, std::u8string_view);
 	TOML_EXTERN(value_exact, std::u8string);
 	TOML_EXTERN(value_exact, const char8_t*);

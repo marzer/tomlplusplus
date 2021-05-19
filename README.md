@@ -47,7 +47,6 @@ cpp = 17
 Reading it in C++ is easy with toml++:
 ```cpp
 #include <toml.hpp>
-#include <fstream> //required for toml::parse_file()
 
 auto config = toml::parse_file( "configuration.toml" );
 
@@ -98,14 +97,13 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ### Conan
-Add `tomlplusplus/2.3.0` to your conanfile.<br>
-This adds the single-header version by default, but you can specify the regular version using `"multiple_headers": True`.
+Add `tomlplusplus/2.4.0` to your conanfile.
 
 ### DDS
 Add `tomlpp` to your `package.json5`, e.g.:
 ```
 depends: [
-    'tomlpp^2.3.0',
+    'tomlpp^2.4.0',
 ]
 ```
 > ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
@@ -121,7 +119,7 @@ include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        0fcbfbe655917738c39321fcbcbdc7b048a40e33
+    GIT_TAG        v2.4.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 ```

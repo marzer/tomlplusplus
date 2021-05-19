@@ -547,7 +547,7 @@ is no longer necessary.
 
 #define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
 
-#if defined(__cpp_consteval) \
+#if defined(__cpp_consteval) && __cpp_consteval >= 201811 \
 		&& (!defined(_MSC_FULL_VER) || _MSC_FULL_VER != 192930031)
 		// https://developercommunity.visualstudio.com/t/Erroneous-C7595-error-with-consteval-in/1404234
 	#define TOML_CONSTEVAL		consteval
@@ -562,13 +562,13 @@ is no longer necessary.
 #endif
 
 #if !defined(DOXYGEN) && !TOML_INTELLISENSE
-	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely)
+	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely) >= 201803
 		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 	#endif
-	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely)
+	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely) >= 201803
 		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 	#endif
-	#if TOML_HAS_ATTR(nodiscard) >= 201907L
+	#if TOML_HAS_ATTR(nodiscard) >= 201907
 		#define TOML_NODISCARD_CTOR [[nodiscard]]
 	#endif
 #endif
@@ -672,7 +672,7 @@ is no longer necessary.
 
 #include "toml_version.h"
 
-#define	TOML_LIB_SINGLE_HEADER 0
+#define TOML_LIB_SINGLE_HEADER 0
 
 #define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))

@@ -50,7 +50,7 @@ TEST_CASE("values - construction")
 	CHECK_VALUE_INIT("kek"s,					std::string);
 	CHECK_VALUE_INIT("kek"sv,					std::string);
 	CHECK_VALUE_INIT2("kek"sv.data(),			std::string,	"kek"sv);
-	#ifdef __cpp_lib_char8_t
+	#if TOML_HAS_CHAR8
 	CHECK_VALUE_INIT2(u8"kek",					std::string,	"kek"sv);
 	CHECK_VALUE_INIT2(u8"kek"s,					std::string,	"kek"sv);
 	CHECK_VALUE_INIT2(u8"kek"sv,				std::string,	"kek"sv);

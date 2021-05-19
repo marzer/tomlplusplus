@@ -238,7 +238,6 @@ TOML_NAMESPACE_START
 		return index < elements.size() ? elements[index].get() : nullptr;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator == (const array& lhs, const array& rhs) noexcept
 	{
@@ -264,7 +263,6 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_API
 	TOML_EXTERNAL_LINKAGE
 	bool operator != (const array& lhs, const array& rhs) noexcept
 	{

@@ -34,7 +34,6 @@
 /// 
 /// \cpp
 /// #include <iostream>
-/// #include <fstream> //required for parse_file()
 /// #include <toml++/toml.h>
 /// 
 /// int main(int argc, char** argv)
@@ -55,15 +54,6 @@
 /// }
 /// 
 /// \ecpp
-/// 
-/// \m_class{m-note m-warning}
-/// 
-/// \parblock
-/// <h3>Don't forget [code]\#include &lt;fstream&gt;[/code]!</h3>
-/// Not everyone who uses the library is going to work directly from files, so not everybody is forced to pay
-/// the compilation overhead of including `<fstream>`. You need to explicitly include it if you're going to be calling
-/// toml::parse_file().
-/// \endparblock
 /// 
 /// \see
 /// 	- toml::parse_file()  
@@ -144,7 +134,6 @@
 /// 
 /// \cpp
 /// #include <iostream>
-/// #include <fstream>
 /// 
 /// #define TOML_EXCEPTIONS 0 // only necessary if you've left them enabled in your compiler
 /// #include <toml++/toml.h>
@@ -437,8 +426,7 @@
 //////////////////////////////////
 ///
 /// \subsection mainpage-adding-lib-conan Conan
-/// Add `tomlplusplus/2.3.0` to your conanfile. This adds the single-header version by default, but you can specify the
-/// regular version using `"multiple_headers": True`.
+/// Add `tomlplusplus/2.4.0` to your conanfile.
 /// 
 //////////////////////////////////
 ///
@@ -446,7 +434,7 @@
 /// Add `tomlpp` to your `package.json5`, e.g.:
 /// \bash
 /// depends: [
-///		'tomlpp^2.3.0',
+///		'tomlpp^2.4.0',
 /// ]
 /// \ebash
 ///
@@ -472,7 +460,7 @@
 /// FetchContent_Declare(
 ///     tomlplusplus
 ///     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-///     GIT_TAG        0fcbfbe655917738c39321fcbcbdc7b048a40e33
+///     GIT_TAG        v2.4.0
 /// )
 /// FetchContent_MakeAvailable(tomlplusplus)
 /// \ebash
