@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.13...3.19)
 
-project(tomlplusplus LANGUAGES CXX VERSION 2.3.1)
+project(tomlplusplus LANGUAGES CXX VERSION 2.4.0)
 
 # Determine if this project is built as a subproject (using
 # add_subdirectory) or if it is the master project.

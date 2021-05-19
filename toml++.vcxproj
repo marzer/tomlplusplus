@@ -68,6 +68,7 @@
     <None Include=".editorconfig" />
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
+    <None Include=".runsettings" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="cpp.hint" />
@@ -87,6 +88,7 @@
     <Natvis Include="toml++.natvis" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="CMakeLists.txt" />
     <Text Include="meson_options.txt" />
     <Text Include="tools\requirements.txt" />
   </ItemGroup>

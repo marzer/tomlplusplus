@@ -118,6 +118,7 @@
     <None Include="docs\poxy.toml">
       <Filter>docs</Filter>
     </None>
+    <None Include=".runsettings" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -144,5 +145,6 @@
     <Text Include="tools\requirements.txt">
       <Filter>tools</Filter>
     </Text>
+    <Text Include="CMakeLists.txt" />
   </ItemGroup>
 </Project>

@@ -3,7 +3,7 @@
    <!-- Configurations that affect the Test Framework -->
    <RunConfiguration>
        <MaxCpuCount>0</MaxCpuCount>
-       <ResultsDirectory>..\build\TestResults</ResultsDirectory><!-- Path relative to solution directory -->
+       <ResultsDirectory>build\TestResults</ResultsDirectory><!-- Path relative to solution directory -->
        <TestSessionTimeout>60000</TestSessionTimeout><!-- Milliseconds -->
    </RunConfiguration>
 
@@ -13,7 +13,7 @@
        <DiscoverTimeout>500</DiscoverTimeout><!-- Milliseconds -->
 	   <FilenameFilter>(?i:test)</FilenameFilter>
        <WorkingDirectoryRoot>Solution</WorkingDirectoryRoot>
-       <WorkingDirectory>..\tests\</WorkingDirectory>
+       <WorkingDirectory>tests\</WorkingDirectory>
 	   <MessageFormat>AdditionalInfo</MessageFormat>
    </Catch2Adapter>
 
