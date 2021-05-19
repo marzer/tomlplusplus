@@ -10,6 +10,8 @@
   <meta content="toml++" name="twitter:title"/>
   <meta content="toml++" property="og:title"/>
   <meta content="toml++" itemprop="name"/>
+  <meta content="Mark Gillard" name="author"/>
+  <meta content="Mark Gillard" property="article:author"/>
   <meta content="TOML for modern C++" name="description"/>
   <meta content="TOML for modern C++" name="twitter:description"/>
   <meta content="TOML for modern C++" property="og:description"/>
@@ -71,9 +73,7 @@
             </li>
           </ul>
         </div>
-<pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span>
-
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">server</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">))</span>
 <span class="p">{</span>
     <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"begin: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>

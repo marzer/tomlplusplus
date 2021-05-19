@@ -5519,8 +5519,15 @@
       <type>parse_result</type>
       <name>parse_file</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a3ed2791fdc270afa33bc0cb1a902c7df</anchor>
-      <arglist>(std::basic_string_view&lt; Char &gt; file_path)</arglist>
+      <anchor>a8dbc58dad43c3b66f4476a7131f5741a</anchor>
+      <arglist>(std::string_view file_path)</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>parse_file</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>ad425af491341206589ca6acc37c3b19e</anchor>
+      <arglist>(std::wstring_view file_path)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>

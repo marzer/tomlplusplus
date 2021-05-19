@@ -10,6 +10,8 @@
   <meta content="toml++" name="twitter:title"/>
   <meta content="toml++" property="og:title"/>
   <meta content="toml++" itemprop="name"/>
+  <meta content="Mark Gillard" name="author"/>
+  <meta content="Mark Gillard" property="article:author"/>
   <meta content="TOML for modern C++" name="description"/>
   <meta content="TOML for modern C++" name="twitter:description"/>
   <meta content="TOML for modern C++" property="og:description"/>
@@ -343,8 +345,11 @@
             </dt>
             <dd>Parses a TOML document from a stream.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Char, typename StreamChar = char&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3ed2791fdc270afa33bc0cb1a902c7df">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>basic_string_view</a>&lt;Char&gt; file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8dbc58dad43c3b66f4476a7131f5741a">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad425af491341206589ca6acc37c3b19e">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a file.</dd>
           </dl>
@@ -1020,34 +1025,18 @@
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
 <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a3ed2791fdc270afa33bc0cb1a902c7df"><div>
+          <section class="m-doc-details" id="a8dbc58dad43c3b66f4476a7131f5741a"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;typename Char, typename StreamChar = char&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3ed2791fdc270afa33bc0cb1a902c7df">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>basic_string_view</a>&lt;Char&gt; file_path)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8dbc58dad43c3b66f4476a7131f5741a">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path)</span></span>
             </h3>
             <p>Parses a TOML document from a file.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Char</td>
-                  <td>The path's character type.</td>
-                </tr>
-                <tr>
-                  <td>StreamChar</td>
-                  <td></td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>file_path</td>
+                  <td style="width: 1%">file_path</td>
                   <td>The TOML document to parse. Must be valid UTF-8.</td>
                 </tr>
               </tbody>
@@ -1058,12 +1047,37 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;fstream&gt;</span>
-
-<span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
     <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="p">}</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>You must <code>#include &lt;fstream&gt;</code> to use this function (toml++ does not transitively include it for you).</p></aside>
+<span class="p">}</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ad425af491341206589ca6acc37c3b19e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad425af491341206589ca6acc37c3b19e">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path)</span></span>
+            </h3>
+            <p>Parses a TOML document from a file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file_path</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>With exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>. <strong><em>Without exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<span class="p">{</span>
+    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="p">}</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
         </section>
       </div>
