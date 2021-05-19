@@ -115,6 +115,18 @@ depends: [
 vcpkg install tomlplusplus
 ```
 
+### CMake FetchContent
+```
+include(FetchContent)
+FetchContent_Declare(
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG        0fcbfbe655917738c39321fcbcbdc7b048a40e33
+)
+FetchContent_MakeAvailable(tomlplusplus)
+```
+> ℹ&#xFE0F; _[What is FetchContent?](https://cmake.org/cmake/help/latest/module/FetchContent.html)_
+
 ### Other environments and package managers
 `toml++` is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options
 in the modern C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
