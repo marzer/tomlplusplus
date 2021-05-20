@@ -1,54 +1,44 @@
-cmake_minimum_required(VERSION 3.13...3.19)
+cmake_minimum_required(VERSION 3.14)
 
-project(tomlplusplus LANGUAGES CXX VERSION 2.4.0)
-
-# Determine if this project is built as a subproject (using
-# add_subdirectory) or if it is the master project.
-set(MASTER_PROJECT OFF)
-if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
-    set(MASTER_PROJECT ON)
-    message(STATUS "CMake version: ${CMAKE_VERSION}")
-endif()
-
-
-add_library(tomlplusplus INTERFACE)
-add_library(tomlplusplus::tomlplusplus ALIAS tomlplusplus)
-target_compile_features(tomlplusplus INTERFACE cxx_std_17)
-target_include_directories(tomlplusplus INTERFACE
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<INSTALL_INTERFACE:include>
+project(
+    tomlplusplus
+    VERSION 2.4.0
+    DESCRIPTION "Header-only TOML config file parser and serializer for C++17 (and later!)"
+    HOMEPAGE_URL "https://marzer.github.io/tomlplusplus/"
+    LANGUAGES CXX
 )
 
+include(cmake/project-is-top-level.cmake)
+include(cmake/variables.cmake)
 
-option(TOMLPP_BUILD_EXAMPLES "Build examples." ${MASTER_PROJECT})
-if(TOMLPP_BUILD_EXAMPLES)
+# ---- Declare library ----
+
+add_library(tomlplusplus_tomlplusplus INTERFACE)
+add_library(tomlplusplus::tomlplusplus ALIAS tomlplusplus_tomlplusplus)
+
+set_property(
+    TARGET tomlplusplus_tomlplusplus PROPERTY
+    EXPORT_NAME tomlplusplus
+)
+
+target_include_directories(
+  tomlplusplus_tomlplusplus
+  ${tomlplusplus_warning_guard} # unquoted for list expansion
+  INTERFACE
+  "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>"
+)
+
+target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
+
+# ---- Install rules ----
+
+include(cmake/install-rules.cmake)
+
+# ---- Examples ----
+
+if(PROJECT_IS_TOP_LEVEL)
+  option(BUILD_EXAMPLES "Build examples tree." OFF)
+  if(BUILD_EXAMPLES)
     add_subdirectory(examples)
-endif()
-
-
-option(TOMLPP_INSTALL "Generate the install target" ${MASTER_PROJECT})
-if(TOMLPP_INSTALL)
-    include(CMakePackageConfigHelpers)
-    include(GNUInstallDirs)
-    install(TARGETS tomlplusplus EXPORT ${PROJECT_NAME}Targets)
-
-    install(DIRECTORY include/toml++ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
-
-    write_basic_package_version_file(
-        ${PROJECT_NAME}ConfigVersion.cmake
-        COMPATIBILITY SameMajorVersion
-    )
-
-    install(
-        FILES cmake/tomlplusplusConfig.cmake # ---------->
-        ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-    )
-
-    install(
-        EXPORT ${PROJECT_NAME}Targets
-        NAMESPACE ${PROJECT_NAME}::
-        FILE ${PROJECT_NAME}Targets.cmake   # <----------
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-    )
+  endif()
 endif()

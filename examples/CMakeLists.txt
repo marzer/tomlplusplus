@@ -1,15 +1,25 @@
-cmake_minimum_required(VERSION 3.13...3.19)
+cmake_minimum_required(VERSION 3.14)
 
 project(Examples LANGUAGES CXX)
 
-if(NOT TARGET tomlplusplus::tomlplusplus)
-    find_package(tomlplusplus REQUIRED)
+include(../cmake/project-is-top-level.cmake)
+
+if(PROJECT_IS_TOP_LEVEL)
+  find_package(tomlplusplus REQUIRED)
 endif()
 
-add_executable(toml_to_json_transcoder toml_to_json_transcoder.cpp)
-target_link_libraries(toml_to_json_transcoder PRIVATE tomlplusplus::tomlplusplus)
+add_custom_target(run_examples COMMENT "Running all examples")
 
-enable_testing()
-add_test(NAME toml_to_json_transcoder
-    COMMAND toml_to_json_transcoder ${CMAKE_CURRENT_LIST_DIR}/example.toml
-)
+function(add_example name)
+  cmake_parse_arguments(PARSE_ARGV 1 "" "" "" ARGS)
+  add_executable("${name}" "${name}.cpp")
+  target_link_libraries("${name}" PRIVATE tomlplusplus::tomlplusplus)
+  target_compile_features("${name}" PRIVATE cxx_std_17)
+  add_custom_target("run_${name}" COMMAND "${name}" ${_ARGS} VERBATIM)
+  add_dependencies(run_examples "run_${name}")
+endfunction()
+
+add_example(error_printer)
+add_example(simple_parser ARGS "${PROJECT_SOURCE_DIR}/example.toml")
+add_example(toml_generator ARGS 100)
+add_example(toml_to_json_transcoder ARGS "${PROJECT_SOURCE_DIR}/example.toml")
