@@ -4317,8 +4317,8 @@
       <type></type>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a919970cca7c6545878a9ff5b79f7567d</anchor>
-      <arglist>(Args &amp;&amp;... args) noexcept(noexcept(value_type(impl::native_value_maker&lt; value_type, std::decay_t&lt; Args &gt;... &gt;::make(std::forward&lt; Args &gt;(args)...))))</arglist>
+      <anchor>addb06e973867c52b1ea77efae1c6ad10</anchor>
+      <arglist>(Args &amp;&amp;... args) noexcept(noexcept(value_type(impl::native_value_maker&lt; value_type, std::decay_t&lt; Args &gt;... &gt;::make(static_cast&lt; Args &amp;&amp; &gt;(args)...))))</arglist>
     </member>
     <member kind="function">
       <type></type>
@@ -5336,6 +5336,13 @@
       <arglist></arglist>
     </member>
     <member kind="typedef">
+      <type>typename impl::inserted_type_of_&lt; impl::remove_cvref_t&lt; T &gt; &gt;::type</type>
+      <name>inserted_type_of</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a42d815ed50a34bce24289004e57e1ed8</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="typedef">
       <type>uint16_t</type>
       <name>source_index</name>
       <anchorfile>namespacetoml.html</anchorfile>
@@ -5559,6 +5566,13 @@
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
+      <name>is_container</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>ad6c6e1677e1cc564d40efa89af2514a2</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>constexpr bool</type>
       <name>is_string</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>aea14621807afe92a840d82c7139cde07</anchor>
@@ -5611,6 +5625,27 @@
       <name>is_date_time</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a3285caf012789a607851026f9827a33d</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>constexpr bool</type>
+      <name>is_chronological</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a7f8764060ca7dccb7e829f67d82c0485</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>constexpr bool</type>
+      <name>is_value</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a0d9cd265e448130b95305ccd68d2f508</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="variable">
+      <type>constexpr bool</type>
+      <name>is_node</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a4e4126f63ba560963de095cd9bee0704</anchor>
       <arglist></arglist>
     </member>
     <member kind="variable">

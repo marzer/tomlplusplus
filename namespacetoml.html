@@ -206,6 +206,11 @@
               using <a class="m-doc-self" href="#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dt id="a42d815ed50a34bce24289004e57e1ed8">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              using <a class="m-doc-self" href="#a42d815ed50a34bce24289004e57e1ed8">inserted_type_of</a> = typename impl::inserted_type_of_&lt;impl::remove_cvref_t&lt;T&gt;&gt;::type
+            </dt>
+            <dd>Metafunction for determining which toml node type would be constructed.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               using <a class="m-doc" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>&lt;T&gt;
@@ -361,57 +366,77 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a2251b703f3ec4d1a3036c82ead3d69cc">is_array</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
             <dt id="a8e79820651cc9a835082cf9abd47d885">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a8e79820651cc9a835082cf9abd47d885">is_boolean</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a bool toml::value&lt;bool&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a bool or toml::value&lt;bool&gt;.</dd>
+            <dt id="a7f8764060ca7dccb7e829f67d82c0485">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              bool <a class="m-doc-self" href="#a7f8764060ca7dccb7e829f67d82c0485">is_chronological</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type satisfies any of <a class="m-doc" href="namespacetoml.html#a3c5daa4563e3aff2b5e6460aa97d28df">toml::<wbr/>is_date</a>, <a class="m-doc" href="namespacetoml.html#a87aee32768a32bb838150421e4e3cf97">toml::<wbr/>is_time</a> or <a class="m-doc" href="namespacetoml.html#a3285caf012789a607851026f9827a33d">toml::<wbr/>is_date_time</a>.</dd>
+            <dt id="ad6c6e1677e1cc564d40efa89af2514a2">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              bool <a class="m-doc-self" href="#ad6c6e1677e1cc564d40efa89af2514a2">is_container</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type satisfies either <a class="m-doc" href="namespacetoml.html#ad11c8c8a8286d6931e40658679aa7ddb">toml::<wbr/>is_table</a> or <a class="m-doc" href="namespacetoml.html#a2251b703f3ec4d1a3036c82ead3d69cc">toml::<wbr/>is_array</a>.</dd>
             <dt id="a3c5daa4563e3aff2b5e6460aa97d28df">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a3c5daa4563e3aff2b5e6460aa97d28df">is_date</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or toml::value&lt;date&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or toml::value&lt;date&gt;.</dd>
             <dt id="a3285caf012789a607851026f9827a33d">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a3285caf012789a607851026f9827a33d">is_date_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or toml::value&lt;date_time&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or toml::value&lt;date_time&gt;.</dd>
             <dt id="a1aaaa0e264cdd4f43518571f2f61ac36">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a1aaaa0e264cdd4f43518571f2f61ac36">is_floating_point</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a double or toml::value&lt;double&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a double or toml::value&lt;double&gt;.</dd>
             <dt id="a513bdc4a19071f0be70e92bb6cb1a1a3">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is an <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dt id="a4e4126f63ba560963de095cd9bee0704">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              bool <a class="m-doc-self" href="#a4e4126f63ba560963de095cd9bee0704">is_node</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> (or one of its subclasses).</dd>
             <dt id="ab5b06dac8c1e0de9e06411917e10b618">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#ab5b06dac8c1e0de9e06411917e10b618">is_node_view</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>.</dd>
             <dt id="a64ce7ed6974d2b17823565bc67c40873">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a64ce7ed6974d2b17823565bc67c40873">is_number</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type satisfies <code><a class="m-doc" href="namespacetoml.html#a513bdc4a19071f0be70e92bb6cb1a1a3">toml::<wbr/>is_integer</a> || <a class="m-doc" href="namespacetoml.html#a1aaaa0e264cdd4f43518571f2f61ac36">toml::<wbr/>is_floating_point</a></code>.</dd>
+            <dd>Metafunction for determining if a type satisfies either <a class="m-doc" href="namespacetoml.html#a513bdc4a19071f0be70e92bb6cb1a1a3">toml::<wbr/>is_integer</a> or <a class="m-doc" href="namespacetoml.html#a1aaaa0e264cdd4f43518571f2f61ac36">toml::<wbr/>is_floating_point</a>.</dd>
             <dt id="aea14621807afe92a840d82c7139cde07">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
             <dt id="ad11c8c8a8286d6931e40658679aa7ddb">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="a87aee32768a32bb838150421e4e3cf97">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a87aee32768a32bb838150421e4e3cf97">is_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or toml::value&lt;time&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or toml::value&lt;time&gt;.</dd>
+            <dt id="a0d9cd265e448130b95305ccd68d2f508">
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              bool <a class="m-doc-self" href="#a0d9cd265e448130b95305ccd68d2f508">is_value</a> <span class="m-label m-flat m-primary">constexpr</span>
+            </dt>
+            <dd>Metafunction for determining if a type is, or is a reference to, any of the toml value types. Excludes tables and arrays.</dd>
           </dl>
         </section>
         <section>
