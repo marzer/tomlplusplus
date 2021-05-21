@@ -114,6 +114,17 @@ vcpkg install tomlplusplus
 ```
 
 ### CMake FetchContent
+Using the tar archive
+```
+include(FetchContent)
+FetchContent_Declare(
+    tomlplusplus
+    URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v2.4.0.tar.gz
+    URL_HASH MD5=546d163e5f37d9bbdc5e19702aaaac8f
+)
+FetchContent_MakeAvailable(tomlplusplus)
+```
+Using the git tag
 ```
 include(FetchContent)
 FetchContent_Declare(
