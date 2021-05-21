@@ -5505,6 +5505,27 @@
       <type>parse_result</type>
       <name>parse</name>
       <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>ae9ee4300ddfbd72b7237283ab8d97618</anchor>
+      <arglist>(std::u8string_view doc, std::string_view source_path={})</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>parse</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a02a2724564149ad8439c0457357308b8</anchor>
+      <arglist>(std::u8string_view doc, std::string &amp;&amp;source_path)</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>parse</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a38852451309f406db281f17334ea8dfe</anchor>
+      <arglist>(std::u8string_view doc, std::wstring_view source_path)</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>parse</name>
+      <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a23fd62ae7ec77404532a589672ae1d0e</anchor>
       <arglist>(std::basic_istream&lt; Char &gt; &amp;doc, std::string_view source_path={})</arglist>
     </member>
@@ -5528,6 +5549,13 @@
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a8dbc58dad43c3b66f4476a7131f5741a</anchor>
       <arglist>(std::string_view file_path)</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>parse_file</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>acdbabd4b771d221fe98b0053d848d69d</anchor>
+      <arglist>(std::u8string_view file_path)</arglist>
     </member>
     <member kind="function">
       <type>parse_result</type>
@@ -5665,6 +5693,13 @@
       <anchorfile>namespacetoml_1_1literals.html</anchorfile>
       <anchor>a401530e560c2dc540729af01e10b2a74</anchor>
       <arglist>(const char *str, size_t len)</arglist>
+    </member>
+    <member kind="function">
+      <type>parse_result</type>
+      <name>operator&quot;&quot;_toml</name>
+      <anchorfile>namespacetoml_1_1literals.html</anchorfile>
+      <anchor>abb2307d66538d0d43dd074040f83224c</anchor>
+      <arglist>(const char8_t *str, size_t len)</arglist>
     </member>
   </compound>
   <compound kind="group">
