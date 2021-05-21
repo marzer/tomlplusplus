@@ -789,8 +789,8 @@ TOML_ENABLE_WARNINGS;
 	#define TOML_LAUNDER(x)	x
 #endif
 
-#if defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
-		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907
+#if defined(DOXYGEN) || (defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
+		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907)
 	#define TOML_HAS_CHAR8 1
 #else
 	#define TOML_HAS_CHAR8 0
@@ -1474,7 +1474,6 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	//			if an object of this type was inserted into a toml::table or toml::array.
 	template <typename T>
 	using inserted_type_of = typename impl::inserted_type_of_<impl::remove_cvref_t<T>>::type;
 

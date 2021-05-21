@@ -36,8 +36,8 @@ TOML_ENABLE_WARNINGS;
 	#define TOML_LAUNDER(x)	x
 #endif
 
-#if defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
-		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907
+#if defined(DOXYGEN) || (defined(__cpp_char8_t)	&& __cpp_char8_t >= 201811 \
+		&& defined(__cpp_lib_char8_t) && __cpp_lib_char8_t >= 201907)
 	#define TOML_HAS_CHAR8 1
 #else
 	#define TOML_HAS_CHAR8 0
@@ -806,8 +806,11 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	/// \brief	Metafunction for determining which toml node type would be constructed
-	//			if an object of this type was inserted into a toml::table or toml::array.
+	/// \brief	Metafunction for determining which node type would be constructed
+	///			if an object of this type was inserted into a toml::table or toml::array.
+	///
+	/// \note	This will return toml::node for nodes and node_views, even though a more specific node subclass
+	///			would actually be inserted. There is no way around this in a compile-time metafunction.
 	template <typename T>
 	using inserted_type_of = typename impl::inserted_type_of_<impl::remove_cvref_t<T>>::type;
 
