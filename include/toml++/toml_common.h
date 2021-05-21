@@ -549,47 +549,64 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	/// \brief	Metafunction for determining if a type is a toml::table.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::table.
 	template <typename T>
 	inline constexpr bool is_table = std::is_same_v<impl::remove_cvref_t<T>, table>;
 
-	/// \brief	Metafunction for determining if a type is a toml::array.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::array.
 	template <typename T>
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
 
-	/// \brief	Metafunction for determining if a type is a std::string or toml::value<std::string>.
+	/// \brief	Metafunction for determining if a type satisfies either toml::is_table or toml::is_array.
+	template <typename T>
+	inline constexpr bool is_container = is_table<T> || is_array<T>;
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a std::string or toml::value<std::string>.
 	template <typename T>
 	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<std::string>>;
 
-	/// \brief	Metafunction for determining if a type is an int64_t or toml::value<int64_t>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a int64_t or toml::value<int64_t>.
 	template <typename T>
 	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<int64_t>>;
 
-	/// \brief	Metafunction for determining if a type is a double or toml::value<double>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a double or toml::value<double>.
 	template <typename T>
 	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<double>>;
 
-	/// \brief	Metafunction for determining if a type satisfies `toml::is_integer || toml::is_floating_point`.
+	/// \brief	Metafunction for determining if a type satisfies either toml::is_integer or toml::is_floating_point.
 	template <typename T>
 	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
 
-	/// \brief	Metafunction for determining if a type is a bool toml::value<bool>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a bool or toml::value<bool>.
 	template <typename T>
 	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<bool>>;
 
-	/// \brief	Metafunction for determining if a type is a toml::date or toml::value<date>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::date or toml::value<date>.
 	template <typename T>
 	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date>>;
 
-	/// \brief	Metafunction for determining if a type is a toml::time or toml::value<time>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::time or toml::value<time>.
 	template <typename T>
 	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<time>>;
 
-	/// \brief	Metafunction for determining if a type is a toml::date_time or toml::value<date_time>.
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::date_time or toml::value<date_time>.
 	template <typename T>
 	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
 
-	/// \brief	Metafunction for determining if a type is a toml::node_view.
+	/// \brief	Metafunction for determining if a type satisfies any of toml::is_date, toml::is_time or toml::is_date_time.
+	template <typename T>
+	inline constexpr bool is_chronological = is_date<T> || is_time<T> || is_date_time<T>;
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, any of the toml value types. Excludes tables and arrays.
+	template <typename T>
+	inline constexpr bool is_value = is_string<T> || is_number<T> || is_boolean<T> || is_chronological<T>;
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::node (or one of its subclasses).
+	template <typename T>
+	inline constexpr bool is_node = std::is_same_v<toml::node, impl::remove_cvref_t<T>>
+		|| std::is_base_of_v<toml::node, impl::remove_cvref_t<T>>;
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::node_view.
 	template <typename T>
 	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
@@ -618,6 +635,8 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(pure)
 	inline fp_class fpclassify(const double& val) noexcept
 	{
+		static_assert(sizeof(uint64_t) == sizeof(double));
+
 		constexpr uint64_t sign     = 0b1000000000000000000000000000000000000000000000000000000000000000ull;
 		constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
 		constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
@@ -693,12 +712,105 @@ TOML_IMPL_NAMESPACE_START
 		"time"sv,
 		"date-time"sv
 	};
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
+	auto* make_node_specialized(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		static_assert(!std::is_same_v<type, node>);
+		static_assert(!is_node_view<type>);
+
+		if constexpr (is_one_of<type, array, table>)
+		{
+			return new type{ static_cast<T&&>(val) };
+		}
+		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
+		{
+			return new value<type>{ static_cast<T&&>(val) };
+		}
+		else
+		{
+			static_assert(
+				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+				"Instantiating values from wide-character strings is only "
+				"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+			);
+			static_assert(
+				is_native<type> || is_losslessly_convertible_to_native<type>,
+				"Value initializers must be (or be promotable to) one of the TOML value types"
+			);
+
+			using value_type = native_type_of<remove_cvref_t<T>>;
+			if constexpr (is_wide_string<T>)
+			{
+				#if TOML_WINDOWS_COMPAT
+				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
+				#else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				#endif
+			}
+			else
+				return new value<value_type>{ static_cast<T&&>(val) };
+		}
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto* make_node(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
+		{
+			if constexpr (is_node_view<type>)
+			{
+				if (!val)
+					return static_cast<toml::node*>(nullptr);
+			}
+
+			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
+			{
+				return static_cast<toml::node*>(make_node_specialized(static_cast<decltype(concrete)&&>(concrete)));
+			});
+		}
+		else
+			return make_node_specialized(static_cast<T&&>(val));
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto* make_node(inserter<T>&& val) noexcept
+	{
+		return make_node(static_cast<T&&>(val.value));
+	}
+
+	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
+	struct inserted_type_of_
+	{
+		using type = std::remove_pointer_t<decltype(make_node(std::declval<T>()))>;
+	};
+	template <typename T>
+	struct inserted_type_of_<inserter<T>, false>
+	{
+		using type = typename inserted_type_of_<T>::type;
+	};
+	template <typename T>
+	struct inserted_type_of_<T, false>
+	{
+		using type = void;
+	};
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
 
 TOML_NAMESPACE_START
 {
+	/// \brief	Metafunction for determining which toml node type would be constructed
+	//			if an object of this type was inserted into a toml::table or toml::array.
+	template <typename T>
+	using inserted_type_of = typename impl::inserted_type_of_<impl::remove_cvref_t<T>>::type;
+
 	[[nodiscard]]
 	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE

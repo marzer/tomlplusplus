@@ -176,78 +176,6 @@ TOML_IMPL_NAMESPACE_START
 
 			TOML_ENABLE_WARNINGS;
 	};
-
-	template <typename T>
-	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T&& val) noexcept
-	{
-		using type = unwrap_node<remove_cvref_t<T>>;
-		static_assert(!std::is_same_v<type, node>);
-		static_assert(!is_node_view<type>);
-
-		if constexpr (is_one_of<type, array, table>)
-		{
-			return new type{ static_cast<T&&>(val) };
-		}
-		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
-		{
-			return new value<type>{ static_cast<T&&>(val) };
-		}
-		else
-		{
-			static_assert(
-				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-				"Instantiating values from wide-character strings is only "
-				"supported on Windows with TOML_WINDOWS_COMPAT enabled."
-			);
-			static_assert(
-				is_native<type> || is_losslessly_convertible_to_native<type>,
-				"Value initializers must be (or be promotable to) one of the TOML value types"
-			);
-
-			using value_type = native_type_of<remove_cvref_t<T>>;
-			if constexpr (is_wide_string<T>)
-			{
-				#if TOML_WINDOWS_COMPAT
-				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
-				#else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
-				#endif
-			}
-			else
-				return new value<value_type>{ static_cast<T&&>(val) };
-		}
-	}
-
-	template <typename T>
-	[[nodiscard]]
-	auto* make_node(T&& val) noexcept
-	{
-		using type = unwrap_node<remove_cvref_t<T>>;
-		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
-		{
-			if constexpr (is_node_view<type>)
-			{
-				if (!val)
-					return static_cast<toml::node*>(nullptr);
-			}
-
-			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
-			{
-				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
-			});
-		}
-		else
-			return make_node_specialized(static_cast<T&&>(val));
-	}
-
-	template <typename T>
-	[[nodiscard]]
-	auto* make_node(inserter<T>&& val) noexcept
-	{
-		return make_node(std::move(val.value));
-	}
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
@@ -330,7 +258,7 @@ TOML_NAMESPACE_START
 					if (!val)
 						return;
 				}
-				elements.emplace_back(impl::make_node(std::forward<T>(val)));
+				elements.emplace_back(impl::make_node(static_cast<T&&>(val)));
 			}
 
 			#if TOML_LIFETIME_HOOKS
@@ -418,11 +346,11 @@ TOML_NAMESPACE_START
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
 				elements.reserve(sizeof...(ElemTypes) + 1_sz);
-				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
+				emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 				if constexpr (sizeof...(ElemTypes) > 0)
 				{
 					(
-						emplace_back_if_not_empty_view(std::forward<ElemTypes>(vals)),
+						emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals)),
 						...
 					);
 				}
@@ -544,7 +472,7 @@ TOML_NAMESPACE_START
 					if (!val)
 						return end();
 				}
-				return { elements.emplace(pos.raw_, impl::make_node(std::forward<ElemType>(val))) };
+				return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val))) };
 			}
 
 			/// \brief	Repeatedly inserts a new element starting at a specific position in the array.
@@ -595,7 +523,7 @@ TOML_NAMESPACE_START
 				switch (count)
 				{
 					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-					case 1: return insert(pos, std::forward<ElemType>(val));
+					case 1: return insert(pos, static_cast<ElemType&&>(val));
 					default:
 					{
 						const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
@@ -605,7 +533,7 @@ TOML_NAMESPACE_START
 							elements[i].reset(impl::make_node(val));
 
 						//# potentially move the initial value into the last element
-						elements[i].reset(impl::make_node(std::forward<ElemType>(val)));
+						elements[i].reset(impl::make_node(static_cast<ElemType&&>(val)));
 						return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
@@ -714,7 +642,7 @@ TOML_NAMESPACE_START
 					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<Args>(args)...} ) };
+				return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)...} ) };
 			}
 
 			/// \brief	Removes the specified element from the array.
@@ -800,7 +728,7 @@ TOML_NAMESPACE_START
 				else if (new_size < elements.size())
 					elements.resize(new_size);
 				else if (new_size > elements.size())
-					insert(cend(), new_size - elements.size(), std::forward<ElemType>(default_init_val));
+					insert(cend(), new_size - elements.size(), static_cast<ElemType&&>(default_init_val));
 			}
 
 			/// \brief	Shrinks the array to the given size.
@@ -851,7 +779,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			void push_back(ElemType&& val) noexcept
 			{
-				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
+				emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 			}
 
 			/// \brief	Emplaces a new element at the end of the array.
@@ -885,7 +813,7 @@ TOML_NAMESPACE_START
 					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				auto nde = new impl::wrap_node<type>{ std::forward<Args>(args)... };
+				auto nde = new impl::wrap_node<type>{ static_cast<Args&&>(args)... };
 				elements.emplace_back(nde);
 				return *nde;
 			}

@@ -1245,6 +1245,9 @@ TOML_NAMESPACE_START
 	inline constexpr bool is_array = std::is_same_v<impl::remove_cvref_t<T>, array>;
 
 	template <typename T>
+	inline constexpr bool is_container = is_table<T> || is_array<T>;
+
+	template <typename T>
 	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<std::string>>;
 
 	template <typename T>
@@ -1269,6 +1272,16 @@ TOML_NAMESPACE_START
 	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref_t<T>>, value<date_time>>;
 
 	template <typename T>
+	inline constexpr bool is_chronological = is_date<T> || is_time<T> || is_date_time<T>;
+
+	template <typename T>
+	inline constexpr bool is_value = is_string<T> || is_number<T> || is_boolean<T> || is_chronological<T>;
+
+	template <typename T>
+	inline constexpr bool is_node = std::is_same_v<toml::node, impl::remove_cvref_t<T>>
+		|| std::is_base_of_v<toml::node, impl::remove_cvref_t<T>>;
+
+	template <typename T>
 	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref_t<T>, node_view<node>, node_view<const node>>;
 }
 TOML_NAMESPACE_END;
@@ -1291,6 +1304,8 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(pure)
 	inline fp_class fpclassify(const double& val) noexcept
 	{
+		static_assert(sizeof(uint64_t) == sizeof(double));
+
 		constexpr uint64_t sign     = 0b1000000000000000000000000000000000000000000000000000000000000000ull;
 		constexpr uint64_t exponent = 0b0111111111110000000000000000000000000000000000000000000000000000ull;
 		constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
@@ -1366,11 +1381,103 @@ TOML_IMPL_NAMESPACE_START
 		"time"sv,
 		"date-time"sv
 	};
+
+	template <typename T>
+	[[nodiscard]]
+	TOML_ATTR(returns_nonnull)
+	auto* make_node_specialized(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		static_assert(!std::is_same_v<type, node>);
+		static_assert(!is_node_view<type>);
+
+		if constexpr (is_one_of<type, array, table>)
+		{
+			return new type{ static_cast<T&&>(val) };
+		}
+		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
+		{
+			return new value<type>{ static_cast<T&&>(val) };
+		}
+		else
+		{
+			static_assert(
+				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+				"Instantiating values from wide-character strings is only "
+				"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+			);
+			static_assert(
+				is_native<type> || is_losslessly_convertible_to_native<type>,
+				"Value initializers must be (or be promotable to) one of the TOML value types"
+			);
+
+			using value_type = native_type_of<remove_cvref_t<T>>;
+			if constexpr (is_wide_string<T>)
+			{
+				#if TOML_WINDOWS_COMPAT
+				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
+				#else
+				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				#endif
+			}
+			else
+				return new value<value_type>{ static_cast<T&&>(val) };
+		}
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto* make_node(T&& val) noexcept
+	{
+		using type = unwrap_node<remove_cvref_t<T>>;
+		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
+		{
+			if constexpr (is_node_view<type>)
+			{
+				if (!val)
+					return static_cast<toml::node*>(nullptr);
+			}
+
+			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
+			{
+				return static_cast<toml::node*>(make_node_specialized(static_cast<decltype(concrete)&&>(concrete)));
+			});
+		}
+		else
+			return make_node_specialized(static_cast<T&&>(val));
+	}
+
+	template <typename T>
+	[[nodiscard]]
+	auto* make_node(inserter<T>&& val) noexcept
+	{
+		return make_node(static_cast<T&&>(val.value));
+	}
+
+	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
+	struct inserted_type_of_
+	{
+		using type = std::remove_pointer_t<decltype(make_node(std::declval<T>()))>;
+	};
+	template <typename T>
+	struct inserted_type_of_<inserter<T>, false>
+	{
+		using type = typename inserted_type_of_<T>::type;
+	};
+	template <typename T>
+	struct inserted_type_of_<T, false>
+	{
+		using type = void;
+	};
 }
 TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
+	//			if an object of this type was inserted into a toml::table or toml::array.
+	template <typename T>
+	using inserted_type_of = typename impl::inserted_type_of_<impl::remove_cvref_t<T>>::type;
+
 	[[nodiscard]]
 	TOML_ATTR(const)
 	TOML_ALWAYS_INLINE
@@ -2363,9 +2470,9 @@ TOML_NAMESPACE_START
 					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
 				);
 				if constexpr (impl::is_native<type>)
-					return std::forward<N>(n).template ref_cast<type>().get();
+					return static_cast<N&&>(n).template ref_cast<type>().get();
 				else
-					return std::forward<N>(n).template ref_cast<type>();
+					return static_cast<N&&>(n).template ref_cast<type>();
 			}
 
 		protected:
@@ -2667,47 +2774,47 @@ TOML_NAMESPACE_START
 				{
 					case node_type::table:
 						if constexpr (can_visit<Func&&, N&&, table>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<table>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<table>());
 						break;
 
 					case node_type::array:
 						if constexpr (can_visit<Func&&, N&&, array>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<array>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<array>());
 						break;
 
 					case node_type::string:
 						if constexpr (can_visit<Func&&, N&&, std::string>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<std::string>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<std::string>());
 						break;
 
 					case node_type::integer:
 						if constexpr (can_visit<Func&&, N&&, int64_t>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<int64_t>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<int64_t>());
 						break;
 
 					case node_type::floating_point:
 						if constexpr (can_visit<Func&&, N&&, double>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<double>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<double>());
 						break;
 
 					case node_type::boolean:
 						if constexpr (can_visit<Func&&, N&&, bool>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<bool>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<bool>());
 						break;
 
 					case node_type::date:
 						if constexpr (can_visit<Func&&, N&&, date>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date>());
 						break;
 
 					case node_type::time:
 						if constexpr (can_visit<Func&&, N&&, time>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<time>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<time>());
 						break;
 
 					case node_type::date_time:
 						if constexpr (can_visit<Func&&, N&&, date_time>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date_time>());
 						break;
 
 					case node_type::none: TOML_UNREACHABLE;
@@ -2747,21 +2854,21 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) &
 				noexcept(visit_is_nothrow<Func&&, node&>)
 			{
-				return do_visit(*this, std::forward<Func>(visitor));
+				return do_visit(*this, static_cast<Func&&>(visitor));
 			}
 
 			template <typename Func>
 			decltype(auto) visit(Func&& visitor) &&
 				noexcept(visit_is_nothrow<Func&&, node&&>)
 			{
-				return do_visit(std::move(*this), std::forward<Func>(visitor));
+				return do_visit(static_cast<node&&>(*this), static_cast<Func&&>(visitor));
 			}
 
 			template <typename Func>
 			decltype(auto) visit(Func&& visitor) const&
 				noexcept(visit_is_nothrow<Func&&, const node&>)
 			{
-				return do_visit(*this, std::forward<Func>(visitor));
+				return do_visit(*this, static_cast<Func&&>(visitor));
 			}
 
 			[[nodiscard]] explicit operator node_view<node>() noexcept;
@@ -2846,7 +2953,7 @@ TOML_IMPL_NAMESPACE_START
 		[[nodiscard]]
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			return T(std::forward<Args>(args)...);
+			return T(static_cast<Args&&>(args)...);
 		}
 	};
 
@@ -2858,7 +2965,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_ALWAYS_INLINE
 		static U&& make(U&& val) noexcept
 		{
-			return std::forward<U>(val);
+			return static_cast<U&&>(val);
 		}
 	};
 
@@ -2879,7 +2986,7 @@ TOML_IMPL_NAMESPACE_START
 
 			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
-				return narrow(std::forward<T>(arg));
+				return narrow(static_cast<T&&>(arg));
 			#endif // TOML_WINDOWS_COMPAT
 		}
 	};
@@ -2985,9 +3092,9 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			explicit value(Args&&... args)
 				noexcept(noexcept(value_type(
-					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...)
+					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...)
 				)))
-				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
+				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))
 			{
 				#if TOML_LIFETIME_HOOKS
 				lh_ctor();
@@ -3114,15 +3221,15 @@ TOML_NAMESPACE_START
 			[[nodiscard]] const value<date_time>* as_date_time() const noexcept override { return as_value<date_time>(this); }
 
 			[[nodiscard]] value_type& get() & noexcept { return val_; }
-			[[nodiscard]] value_type&& get() && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& get() && noexcept { return static_cast<value_type&&>(val_); }
 			[[nodiscard]] const value_type& get() const & noexcept { return val_; }
 
 			[[nodiscard]] value_type& operator* () & noexcept { return val_; }
-			[[nodiscard]] value_type&& operator* () && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& operator* () && noexcept { return static_cast<value_type&&>(val_); }
 			[[nodiscard]] const value_type& operator* () const& noexcept { return val_; }
 
 			[[nodiscard]] explicit operator value_type& () & noexcept { return val_; }
-			[[nodiscard]] explicit operator value_type && () && noexcept { return std::move(val_); }
+			[[nodiscard]] explicit operator value_type && () && noexcept { return static_cast<value_type&&>(val_); }
 			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
 			[[nodiscard]] value_flags flags() const noexcept
@@ -3467,7 +3574,7 @@ TOML_NAMESPACE_START
 
 			if (type() == node_type::string)
 				return widen(*ref_cast<std::string>());
-			return std::wstring{ std::forward<T>(default_value) };
+			return std::wstring{ static_cast<T&&>(default_value) };
 
 			#else
 
@@ -3535,7 +3642,7 @@ TOML_NAMESPACE_START
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else
-					return std::forward<T>(default_value);
+					return static_cast<T&&>(default_value);
 			}
 		}
 	}
@@ -3767,78 +3874,6 @@ TOML_IMPL_NAMESPACE_START
 
 			TOML_ENABLE_WARNINGS;
 	};
-
-	template <typename T>
-	[[nodiscard]]
-	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T&& val) noexcept
-	{
-		using type = unwrap_node<remove_cvref_t<T>>;
-		static_assert(!std::is_same_v<type, node>);
-		static_assert(!is_node_view<type>);
-
-		if constexpr (is_one_of<type, array, table>)
-		{
-			return new type{ static_cast<T&&>(val) };
-		}
-		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
-		{
-			return new value<type>{ static_cast<T&&>(val) };
-		}
-		else
-		{
-			static_assert(
-				!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-				"Instantiating values from wide-character strings is only "
-				"supported on Windows with TOML_WINDOWS_COMPAT enabled."
-			);
-			static_assert(
-				is_native<type> || is_losslessly_convertible_to_native<type>,
-				"Value initializers must be (or be promotable to) one of the TOML value types"
-			);
-
-			using value_type = native_type_of<remove_cvref_t<T>>;
-			if constexpr (is_wide_string<T>)
-			{
-				#if TOML_WINDOWS_COMPAT
-				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
-				#else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
-				#endif
-			}
-			else
-				return new value<value_type>{ static_cast<T&&>(val) };
-		}
-	}
-
-	template <typename T>
-	[[nodiscard]]
-	auto* make_node(T&& val) noexcept
-	{
-		using type = unwrap_node<remove_cvref_t<T>>;
-		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
-		{
-			if constexpr (is_node_view<type>)
-			{
-				if (!val)
-					return static_cast<toml::node*>(nullptr);
-			}
-
-			return static_cast<T&&>(val).visit([](auto&& concrete) noexcept
-			{
-				return static_cast<toml::node*>(make_node_specialized(std::forward<decltype(concrete)>(concrete)));
-			});
-		}
-		else
-			return make_node_specialized(static_cast<T&&>(val));
-	}
-
-	template <typename T>
-	[[nodiscard]]
-	auto* make_node(inserter<T>&& val) noexcept
-	{
-		return make_node(std::move(val.value));
-	}
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -3865,7 +3900,7 @@ TOML_NAMESPACE_START
 					if (!val)
 						return;
 				}
-				elements.emplace_back(impl::make_node(std::forward<T>(val)));
+				elements.emplace_back(impl::make_node(static_cast<T&&>(val)));
 			}
 
 			#if TOML_LIFETIME_HOOKS
@@ -3907,11 +3942,11 @@ TOML_NAMESPACE_START
 			explicit array(ElemType&& val, ElemTypes&&... vals)
 			{
 				elements.reserve(sizeof...(ElemTypes) + 1_sz);
-				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
+				emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 				if constexpr (sizeof...(ElemTypes) > 0)
 				{
 					(
-						emplace_back_if_not_empty_view(std::forward<ElemTypes>(vals)),
+						emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals)),
 						...
 					);
 				}
@@ -3975,7 +4010,7 @@ TOML_NAMESPACE_START
 					if (!val)
 						return end();
 				}
-				return { elements.emplace(pos.raw_, impl::make_node(std::forward<ElemType>(val))) };
+				return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val))) };
 			}
 
 			template <typename ElemType>
@@ -3989,7 +4024,7 @@ TOML_NAMESPACE_START
 				switch (count)
 				{
 					case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-					case 1: return insert(pos, std::forward<ElemType>(val));
+					case 1: return insert(pos, static_cast<ElemType&&>(val));
 					default:
 					{
 						const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
@@ -3998,7 +4033,7 @@ TOML_NAMESPACE_START
 						for (size_t e = start_idx + count - 1_sz; i < e; i++)
 							elements[i].reset(impl::make_node(val));
 
-						elements[i].reset(impl::make_node(std::forward<ElemType>(val)));
+						elements[i].reset(impl::make_node(static_cast<ElemType&&>(val)));
 						return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 					}
 				}
@@ -4057,7 +4092,7 @@ TOML_NAMESPACE_START
 					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ std::forward<Args>(args)...} ) };
+				return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)...} ) };
 			}
 
 			iterator erase(const_iterator pos) noexcept;
@@ -4076,7 +4111,7 @@ TOML_NAMESPACE_START
 				else if (new_size < elements.size())
 					elements.resize(new_size);
 				else if (new_size > elements.size())
-					insert(cend(), new_size - elements.size(), std::forward<ElemType>(default_init_val));
+					insert(cend(), new_size - elements.size(), static_cast<ElemType&&>(default_init_val));
 			}
 
 			void truncate(size_t new_size);
@@ -4084,7 +4119,7 @@ TOML_NAMESPACE_START
 			template <typename ElemType>
 			void push_back(ElemType&& val) noexcept
 			{
-				emplace_back_if_not_empty_view(std::forward<ElemType>(val));
+				emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 			}
 
 			template <typename ElemType, typename... Args>
@@ -4097,7 +4132,7 @@ TOML_NAMESPACE_START
 					TOML_SA_UNWRAPPED_NODE_TYPE_LIST
 				);
 
-				auto nde = new impl::wrap_node<type>{ std::forward<Args>(args)... };
+				auto nde = new impl::wrap_node<type>{ static_cast<Args&&>(args)... };
 				elements.emplace_back(nde);
 				return *nde;
 			}
@@ -4338,19 +4373,19 @@ TOML_IMPL_NAMESPACE_START
 		template <typename V>
 		table_init_pair(std::string&& k, V&& v) noexcept
 			: key{ std::move(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(std::string_view k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(const char* k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		#if TOML_WINDOWS_COMPAT
@@ -4358,19 +4393,19 @@ TOML_IMPL_NAMESPACE_START
 		template <typename V>
 		table_init_pair(std::wstring&& k, V&& v) noexcept
 			: key{ narrow(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(std::wstring_view k, V&& v) noexcept
 			: key{ narrow(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(const wchar_t* k, V&& v) noexcept
 			: key{ narrow(std::wstring_view{ k }) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		#endif
@@ -4920,8 +4955,8 @@ TOML_NAMESPACE_START
 					#if TOML_WINDOWS_COMPAT
 
 					if (node_)
-						return node_->value_or(std::forward<T>(default_value));
-					return std::wstring{ std::forward<T>(default_value) };
+						return node_->value_or(static_cast<T&&>(default_value));
+					return std::wstring{ static_cast<T&&>(default_value) };
 
 					#else
 
@@ -4938,11 +4973,11 @@ TOML_NAMESPACE_START
 					>;
 
 					if (node_)
-						return node_->value_or(std::forward<T>(default_value));
+						return node_->value_or(static_cast<T&&>(default_value));
 					if constexpr (std::is_pointer_v<value_type>)
 						return value_type{ default_value };
 					else
-						return std::forward<T>(default_value);
+						return static_cast<T&&>(default_value);
 				}
 			}
 
@@ -4961,9 +4996,9 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) const
 				noexcept(visit_is_nothrow<Func&&>)
 			{
-				using return_type = decltype(node_->visit(std::forward<Func>(visitor)));
+				using return_type = decltype(node_->visit(static_cast<Func&&>(visitor)));
 				if (node_)
-					return node_->visit(std::forward<Func>(visitor));
+					return node_->visit(static_cast<Func&&>(visitor));
 				if constexpr (!std::is_void_v<return_type>)
 					return return_type{};
 			}
@@ -6685,14 +6720,14 @@ TOML_IMPL_NAMESPACE_START
 			template <typename U, typename String = std::string_view>
 			explicit utf8_reader(U && source, String&& source_path = {})
 				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
-				: stream{ std::forward<U>(source) }
+				: stream{ static_cast<U&&>(source) }
 			{
 				std::memset(codepoints, 0, sizeof(codepoints));
 				codepoints[0].position = { 1, 1 };
 				codepoints[1].position = { 1, 1 };
 
 				if (!source_path.empty())
-					source_path_ = std::make_shared<const std::string>(std::forward<String>(source_path));
+					source_path_ = std::make_shared<const std::string>(static_cast<String&&>(source_path));
 			}
 
 			[[nodiscard]]

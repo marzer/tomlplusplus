@@ -119,6 +119,18 @@
       <Filter>docs</Filter>
     </None>
     <None Include=".runsettings" />
+    <None Include="cmake\install-rules.cmake">
+      <Filter>cmake</Filter>
+    </None>
+    <None Include="cmake\project-is-top-level.cmake">
+      <Filter>cmake</Filter>
+    </None>
+    <None Include="cmake\tomlplusplusConfig.cmake">
+      <Filter>cmake</Filter>
+    </None>
+    <None Include="cmake\variables.cmake">
+      <Filter>cmake</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -135,6 +147,9 @@
     </Filter>
     <Filter Include="docs\pages">
       <UniqueIdentifier>{9bdc71ff-34f1-4312-9f15-1850d4c5908b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="cmake">
+      <UniqueIdentifier>{47351d16-986b-4f4b-bd5e-b7c66a7a68d3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

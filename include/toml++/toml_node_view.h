@@ -396,8 +396,8 @@ TOML_NAMESPACE_START
 					#if TOML_WINDOWS_COMPAT
 
 					if (node_)
-						return node_->value_or(std::forward<T>(default_value));
-					return std::wstring{ std::forward<T>(default_value) };
+						return node_->value_or(static_cast<T&&>(default_value));
+					return std::wstring{ static_cast<T&&>(default_value) };
 
 					#else
 
@@ -414,11 +414,11 @@ TOML_NAMESPACE_START
 					>;
 
 					if (node_)
-						return node_->value_or(std::forward<T>(default_value));
+						return node_->value_or(static_cast<T&&>(default_value));
 					if constexpr (std::is_pointer_v<value_type>)
 						return value_type{ default_value };
 					else
-						return std::forward<T>(default_value);
+						return static_cast<T&&>(default_value);
 				}
 			}
 
@@ -467,9 +467,9 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) const
 				noexcept(visit_is_nothrow<Func&&>)
 			{
-				using return_type = decltype(node_->visit(std::forward<Func>(visitor)));
+				using return_type = decltype(node_->visit(static_cast<Func&&>(visitor)));
 				if (node_)
-					return node_->visit(std::forward<Func>(visitor));
+					return node_->visit(static_cast<Func&&>(visitor));
 				if constexpr (!std::is_void_v<return_type>)
 					return return_type{};
 			}

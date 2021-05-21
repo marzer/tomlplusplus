@@ -79,7 +79,7 @@ TOML_IMPL_NAMESPACE_START
 		[[nodiscard]]
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			return T(std::forward<Args>(args)...);
+			return T(static_cast<Args&&>(args)...);
 		}
 	};
 
@@ -91,7 +91,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_ALWAYS_INLINE
 		static U&& make(U&& val) noexcept
 		{
-			return std::forward<U>(val);
+			return static_cast<U&&>(val);
 		}
 	};
 
@@ -112,7 +112,7 @@ TOML_IMPL_NAMESPACE_START
 
 			#if TOML_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
-				return narrow(std::forward<T>(arg));
+				return narrow(static_cast<T&&>(arg));
 			#endif // TOML_WINDOWS_COMPAT
 		}
 	};
@@ -244,9 +244,9 @@ TOML_NAMESPACE_START
 			TOML_NODISCARD_CTOR
 			explicit value(Args&&... args)
 				noexcept(noexcept(value_type(
-					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...)
+					impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...)
 				)))
-				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(std::forward<Args>(args)...))
+				: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))
 			{
 				#if TOML_LIFETIME_HOOKS
 				lh_ctor();
@@ -406,21 +406,21 @@ TOML_NAMESPACE_START
 			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] value_type& get() & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] value_type&& get() && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& get() && noexcept { return static_cast<value_type&&>(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] const value_type& get() const & noexcept { return val_; }
 
 			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] value_type& operator* () & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] value_type&& operator* () && noexcept { return std::move(val_); }
+			[[nodiscard]] value_type&& operator* () && noexcept { return static_cast<value_type&&>(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] const value_type& operator* () const& noexcept { return val_; }
 
 			/// \brief	Returns a reference to the underlying value.
 			[[nodiscard]] explicit operator value_type& () & noexcept { return val_; }
 			/// \brief	Returns a reference to the underlying value (rvalue overload).
-			[[nodiscard]] explicit operator value_type && () && noexcept { return std::move(val_); }
+			[[nodiscard]] explicit operator value_type && () && noexcept { return static_cast<value_type&&>(val_); }
 			/// \brief	Returns a reference to the underlying value (const overload).
 			[[nodiscard]] explicit operator const value_type& () const& noexcept { return val_; }
 
@@ -843,7 +843,7 @@ TOML_NAMESPACE_START
 
 			if (type() == node_type::string)
 				return widen(*ref_cast<std::string>());
-			return std::wstring{ std::forward<T>(default_value) };
+			return std::wstring{ static_cast<T&&>(default_value) };
 
 			#else
 
@@ -911,7 +911,7 @@ TOML_NAMESPACE_START
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else
-					return std::forward<T>(default_value);
+					return static_cast<T&&>(default_value);
 			}
 		}
 	}

@@ -69,6 +69,10 @@
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include=".runsettings" />
+    <None Include="cmake\install-rules.cmake" />
+    <None Include="cmake\project-is-top-level.cmake" />
+    <None Include="cmake\tomlplusplusConfig.cmake" />
+    <None Include="cmake\variables.cmake" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="cpp.hint" />

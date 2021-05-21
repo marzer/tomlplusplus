@@ -89,9 +89,9 @@ TOML_NAMESPACE_START
 					&& "template type argument T provided to toml::node::ref() didn't match the node's actual type"
 				);
 				if constexpr (impl::is_native<type>)
-					return std::forward<N>(n).template ref_cast<type>().get();
+					return static_cast<N&&>(n).template ref_cast<type>().get();
 				else
-					return std::forward<N>(n).template ref_cast<type>();
+					return static_cast<N&&>(n).template ref_cast<type>();
 			}
 
 			/// \endcond
@@ -737,47 +737,47 @@ TOML_NAMESPACE_START
 				{
 					case node_type::table:
 						if constexpr (can_visit<Func&&, N&&, table>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<table>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<table>());
 						break;
 
 					case node_type::array:
 						if constexpr (can_visit<Func&&, N&&, array>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<array>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<array>());
 						break;
 
 					case node_type::string:
 						if constexpr (can_visit<Func&&, N&&, std::string>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<std::string>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<std::string>());
 						break;
 
 					case node_type::integer:
 						if constexpr (can_visit<Func&&, N&&, int64_t>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<int64_t>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<int64_t>());
 						break;
 
 					case node_type::floating_point:
 						if constexpr (can_visit<Func&&, N&&, double>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<double>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<double>());
 						break;
 
 					case node_type::boolean:
 						if constexpr (can_visit<Func&&, N&&, bool>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<bool>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<bool>());
 						break;
 
 					case node_type::date:
 						if constexpr (can_visit<Func&&, N&&, date>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date>());
 						break;
 
 					case node_type::time:
 						if constexpr (can_visit<Func&&, N&&, time>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<time>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<time>());
 						break;
 
 					case node_type::date_time:
 						if constexpr (can_visit<Func&&, N&&, date_time>)
-							return std::forward<Func>(visitor)(std::forward<N>(n).template ref_cast<date_time>());
+							return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date_time>());
 						break;
 
 					case node_type::none: TOML_UNREACHABLE;
@@ -850,7 +850,7 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) &
 				noexcept(visit_is_nothrow<Func&&, node&>)
 			{
-				return do_visit(*this, std::forward<Func>(visitor));
+				return do_visit(*this, static_cast<Func&&>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
@@ -858,7 +858,7 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) &&
 				noexcept(visit_is_nothrow<Func&&, node&&>)
 			{
-				return do_visit(std::move(*this), std::forward<Func>(visitor));
+				return do_visit(static_cast<node&&>(*this), static_cast<Func&&>(visitor));
 			}
 
 			/// \brief	Invokes a visitor on the node based on the node's concrete type (const lvalue overload).
@@ -866,7 +866,7 @@ TOML_NAMESPACE_START
 			decltype(auto) visit(Func&& visitor) const&
 				noexcept(visit_is_nothrow<Func&&, const node&>)
 			{
-				return do_visit(*this, std::forward<Func>(visitor));
+				return do_visit(*this, static_cast<Func&&>(visitor));
 			}
 
 			/// @}

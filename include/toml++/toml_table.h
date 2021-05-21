@@ -155,19 +155,19 @@ TOML_IMPL_NAMESPACE_START
 		template <typename V>
 		table_init_pair(std::string&& k, V&& v) noexcept
 			: key{ std::move(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(std::string_view k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(const char* k, V&& v) noexcept
 			: key{ k },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		#if TOML_WINDOWS_COMPAT
@@ -175,19 +175,19 @@ TOML_IMPL_NAMESPACE_START
 		template <typename V>
 		table_init_pair(std::wstring&& k, V&& v) noexcept
 			: key{ narrow(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(std::wstring_view k, V&& v) noexcept
 			: key{ narrow(k) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		template <typename V>
 		table_init_pair(const wchar_t* k, V&& v) noexcept
 			: key{ narrow(std::wstring_view{ k }) },
-			value{ make_node(std::forward<V>(v)) }
+			value{ make_node(static_cast<V&&>(v)) }
 		{}
 
 		#endif

@@ -2,26 +2,21 @@
 // Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-/*
 
-	This example is one of diagnostics; it forces a set of specific parsing
-	failures and prints their error messages to stdout so you can see what the
-	default error messages look like.
+// This example shows the error messages the library produces by forcing a set of specific parsing
+// failures and printing their results.
 
-*/
-#include <iostream>
-#include "utf8_console.h"
+#include "examples.h"
 
 #define TOML_EXCEPTIONS 0
 #define TOML_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;
-using toml::operator""_sz;
 
 namespace
 {
-	inline constexpr std::string_view invalid_parses[] =
+	inline constexpr auto invalid_parses = std::array
 	{
 		"########## comments"sv,
 		"# bar\rkek"sv,
@@ -104,44 +99,36 @@ namespace
 		"########## floats"sv,
 		R"(val = 9999999999999999999999999999999999999999999999999999999999999995.0)"sv,
 	};
+
+	inline constexpr auto divider =
+		"################################################################################"sv;
 }
 
-
-int main(int /*argc*/, char** /*argv*/)
+int main()
 {
-	std::ios_base::sync_with_stdio(false);
-	init_utf8_console();
+	examples::init();
 
 	for (auto str : invalid_parses)
 	{
 		if (str.empty())
 			continue;
 
-		if (str.substr(0_sz, 10_sz) == "##########"sv)
+		// section headings
+		if (str.substr(0, 10) == "##########"sv)
 		{
-			const auto substr = str.substr(11_sz);
-			size_t cols = 80_sz;
-			for (size_t i = (cols - substr.length()) / 2_sz - 1_sz; i-- > 0_sz; )
-			{
-				std::cout.put('#');
-				cols--;
-			}
-			std::cout.put(' ');
-			std::cout << substr;
-			std::cout.put(' ');
-			cols -= substr.length() + 2_sz;
-			while (cols--)
-				std::cout.put('#');
-
-			std::cout << "\n\n"sv;
+			std::cout << divider << '\n';
+			std::cout << "#    "sv << str.substr(11) << '\n';
+			std::cout << divider << "\n\n"sv;
 		}
+
+		// error messages
 		else
 		{
 			toml::parse_result result;
 
 			if (str == "PATHOLOGICALLY_NESTED"sv)
 			{
-				std::string s(1000_sz, '[');
+				std::string s(1000u, '[');
 				constexpr auto start = "array = "sv;
 				memcpy(s.data(), start.data(), start.length());
 				result = toml::parse(s);
@@ -150,10 +137,7 @@ int main(int /*argc*/, char** /*argv*/)
 				result = toml::parse(str);
 
 			if (!result)
-			{
-				std::cout << result.error();
-				std::cout << "\n\n"sv;
-			}
+				std::cout << result.error() << "\n\n"sv;
 		}
 	}
 	return 0;

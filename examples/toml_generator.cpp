@@ -2,17 +2,10 @@
 // Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-/*
 
-	This example demonstrates some slightly advanced techniques
-	being used to randomly generate a tree of TOML data.
+// This example demonstrates the use of some more advanced features to generate a tree of random TOML data.
 
-*/
-#include <iostream>
-#include <sstream>
-#include <array>
-#include <ctime>
-#include "utf8_console.h"
+#include "examples.h"
 
 #define TOML_PARSER 0
 #include <toml++/toml.h>
@@ -63,7 +56,7 @@ namespace
 	[[nodiscard]]
 	static T rand(T excl_max) noexcept
 	{
-		return static_cast<T>(static_cast<T>(::rand()) % excl_max);
+		return static_cast<T>(static_cast<T>(std::rand()) % excl_max);
 	}
 
 	template <typename T>
@@ -107,12 +100,9 @@ namespace
 	}
 }
 
-
 int main(int argc, char** argv)
 {
-	std::ios_base::sync_with_stdio(false);
-	init_utf8_console();
-	srand(static_cast<unsigned int>(time(nullptr)));
+	examples::init();
 
 	int node_budget{};
 	for (int i = 1; i < argc; i++)
@@ -132,34 +122,48 @@ int main(int argc, char** argv)
 	int container_min_values = 10;
 	bool in_arr = false;
 
-	const auto add = [&](auto&& obj) noexcept -> toml::node&
+	const auto add = [&](auto&& val) noexcept -> auto&
 	{
+		using value_ref = decltype(val);
+		using value_type = std::remove_reference_t<value_ref>;
+		using node_type = toml::inserted_type_of<value_type>;
+
 		toml::node* new_node{};
 
+		// we're adding an element to an array
 		if (auto arr = tree.back()->as_array())
 		{
-			arr->push_back(std::forward<decltype(obj)>(obj));
+			arr->push_back(std::forward<value_ref>(val));
 			new_node = &arr->back();
 		}
-		else
-			new_node = &(*tree.back()->ref<toml::table>().insert_or_assign(
-				rand_string(rand<size_t>(1u, 4u), '-'),
-				std::forward<decltype(obj)>(obj)
-			).first).second;
 
-		if constexpr (toml::is_array<decltype(obj)> || toml::is_table<decltype(obj)>)
+		// we're adding a new kvp to a table
+		else
+		{
+			auto& table = tree.back()->ref<toml::table>();
+
+			const auto it = table.insert_or_assign(
+				rand_string(rand<size_t>(1u, 4u), '-'),
+				std::forward<value_ref>(val)
+			);
+
+			new_node = &it.first->second;
+		}
+
+		// we added a new array or table, so now we need to step into it
+		if constexpr (toml::is_container<value_type>)
 		{
 			tree.push_back(new_node);
 			container_min_values = rand(1, 4);
-			in_arr = toml::is_array<decltype(obj)>;
-			if constexpr (toml::is_array<decltype(obj)>)
+			in_arr = toml::is_array<value_type>;
+			if constexpr (toml::is_array<value_type>)
 				tree.back()->as_array()->reserve(static_cast<size_t>(container_min_values));
 		}
 		else
 			container_min_values--;
 
 		node_budget--;
-		return *new_node;
+		return *new_node->as<node_type>();
 	};
 
 	while (node_budget)
@@ -167,7 +171,7 @@ int main(int argc, char** argv)
 		if (!in_arr && rand(100) >= 75)
 		{
 			if (container_min_values <= 0 && tree.size() < max_depth)
-				add(toml::table{}).ref<toml::table>().is_inline(tree.size() >= max_depth - 2u && rand(100) >= 85);
+				add(toml::table{}).is_inline(tree.size() >= max_depth - 2u && rand(100) >= 85);
 		}
 		else
 		{
@@ -179,41 +183,41 @@ int main(int argc, char** argv)
 
 			switch (new_node_type)
 			{
-				case toml::node_type::array:
-					if (container_min_values <= 0 && tree.size() < max_depth)
-						add(toml::array{});
-					break;
+			case toml::node_type::array:
+				if (container_min_values <= 0 && tree.size() < max_depth)
+					add(toml::array{});
+				break;
 
-				case toml::node_type::string:
-					add(rand_string(rand<size_t>(8u)));
-					break;
+			case toml::node_type::string:
+				add(rand_string(rand<size_t>(8u)));
+				break;
 
-				case toml::node_type::integer:
-					add(rand());
-					break;
+			case toml::node_type::integer:
+				add(rand());
+				break;
 
-				case toml::node_type::floating_point:
-					add(rand(10001u) / 10000.0);
-					break;
+			case toml::node_type::floating_point:
+				add(rand(10001u) / 10000.0);
+				break;
 
-				case toml::node_type::boolean:
-					add(!rand(2u));
-					break;
+			case toml::node_type::boolean:
+				add(!rand(2u));
+				break;
 
-				case toml::node_type::date:
-					add(rand_date());
-					break;
+			case toml::node_type::date:
+				add(rand_date());
+				break;
 
-				case toml::node_type::time:
-					add(rand_time());
-					break;
+			case toml::node_type::time:
+				add(rand_time());
+				break;
 
-				case toml::node_type::date_time:
-					add(rand(100) >= 75
-						? toml::date_time{ rand_date(), rand_time() }
-						: toml::date_time{ rand_date(), rand_time(), toml::time_offset{ rand<int8_t>(-11, 12), rand<int8_t>(-45, +46) } }
-					);
-					break;
+			case toml::node_type::date_time:
+				add(rand(100) >= 75
+					? toml::date_time{ rand_date(), rand_time() }
+					: toml::date_time{ rand_date(), rand_time(), toml::time_offset{ rand<int8_t>(-11, 12), rand<int8_t>(-45, +46) } }
+				);
+				break;
 			}
 			if (container_min_values <= 0 && tree.size() >= 2u && rand(100) >= 85)
 			{

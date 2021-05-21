@@ -274,6 +274,35 @@ namespace toml
 	CHECK_VALUE_OR(		const std::wstring&&,			std::wstring);
 	#endif
 
+	#define CHECK_INSERTED_AS(T, expected)											\
+		static_assert(std::is_same_v<expected, toml::inserted_type_of<T>>);			\
+		static_assert(std::is_same_v<expected, toml::inserted_type_of<const T>>);	\
+		static_assert(std::is_same_v<expected, toml::inserted_type_of<T&>>);		\
+		static_assert(std::is_same_v<expected, toml::inserted_type_of<const T&>>);	\
+		static_assert(std::is_same_v<expected, toml::inserted_type_of<T&&>>)
+
+	CHECK_INSERTED_AS(table,		table);
+	CHECK_INSERTED_AS(array,		array);
+	CHECK_INSERTED_AS(node,			node);
+	CHECK_INSERTED_AS(time,			value<time>);
+	CHECK_INSERTED_AS(date,			value<date>);
+	CHECK_INSERTED_AS(date_time,	value<date_time>);
+	CHECK_INSERTED_AS(bool,			value<bool>);
+	CHECK_INSERTED_AS(int8_t,		value<int64_t>);
+	CHECK_INSERTED_AS(int16_t,		value<int64_t>);
+	CHECK_INSERTED_AS(int32_t,		value<int64_t>);
+	CHECK_INSERTED_AS(int64_t,		value<int64_t>);
+	CHECK_INSERTED_AS(uint8_t,		value<int64_t>);
+	CHECK_INSERTED_AS(uint16_t,		value<int64_t>);
+	CHECK_INSERTED_AS(uint32_t,		value<int64_t>);
+	CHECK_INSERTED_AS(float,		value<double>);
+	CHECK_INSERTED_AS(double,		value<double>);
+	#ifdef TOML_FP16
+	CHECK_INSERTED_AS(TOML_FP16,	value<double>);
+	#endif
+	#ifdef TOML_FLOAT16
+	CHECK_INSERTED_AS(TOML_FLOAT16,	value<double>);
+	#endif
 
 	static_assert(is_same_v<decltype(declval<node&>().ref<double>()), double&>);
 	static_assert(is_same_v<decltype(declval<node&&>().ref<double>()), double&&>);

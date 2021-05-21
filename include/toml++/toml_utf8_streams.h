@@ -216,14 +216,14 @@ TOML_IMPL_NAMESPACE_START
 			template <typename U, typename String = std::string_view>
 			explicit utf8_reader(U && source, String&& source_path = {})
 				noexcept(std::is_nothrow_constructible_v<utf8_byte_stream<T>, U&&>)
-				: stream{ std::forward<U>(source) }
+				: stream{ static_cast<U&&>(source) }
 			{
 				std::memset(codepoints, 0, sizeof(codepoints));
 				codepoints[0].position = { 1, 1 };
 				codepoints[1].position = { 1, 1 };
 
 				if (!source_path.empty())
-					source_path_ = std::make_shared<const std::string>(std::forward<String>(source_path));
+					source_path_ = std::make_shared<const std::string>(static_cast<String&&>(source_path));
 			}
 
 			[[nodiscard]]
