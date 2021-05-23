@@ -17,7 +17,7 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.3.2" name="generator"/>
+  <meta content="Poxy v0.3.3" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
   <link href="poxy.css" rel="stylesheet"/>
@@ -92,30 +92,9 @@
             </dt>
             <dd>A TOML array.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              struct <a class="m-doc" href="structtoml_1_1inserter.html">inserter</a>
-            </dt>
-            <dd>Helper class for suppressing move-construction in single-argument array constructors.</dd>
-            <dt>
-              struct <a class="m-doc" href="structtoml_1_1source__position.html">source_position</a>
-            </dt>
-            <dd>A source document line-and-column pair.</dd>
-            <dt>
-              struct <a class="m-doc" href="structtoml_1_1source__region.html">source_region</a>
-            </dt>
-            <dd>A source document region.</dd>
-            <dt>
               struct <a class="m-doc" href="structtoml_1_1date.html">date</a>
             </dt>
             <dd>A local date.</dd>
-            <dt>
-              struct <a class="m-doc" href="structtoml_1_1time.html">time</a>
-            </dt>
-            <dd>A local time-of-day.</dd>
-            <dt>
-              struct <a class="m-doc" href="structtoml_1_1time__offset.html">time_offset</a>
-            </dt>
-            <dd>A timezone offset.</dd>
             <dt>
               struct <a class="m-doc" href="structtoml_1_1date__time.html">date_time</a>
             </dt>
@@ -125,6 +104,11 @@
               class <a class="m-doc" href="classtoml_1_1default__formatter.html">default_formatter</a>
             </dt>
             <dd>A wrapper for printing TOML objects out to a stream as formatted TOML.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              struct <a class="m-doc" href="structtoml_1_1inserter.html">inserter</a>
+            </dt>
+            <dd>Helper class for suppressing move-construction in single-argument array constructors.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Char = char&gt;</div>
               class <a class="m-doc" href="classtoml_1_1json__formatter.html">json_formatter</a>
@@ -148,9 +132,25 @@
             </dt>
             <dd>The result of a parsing operation.</dd>
             <dt>
+              struct <a class="m-doc" href="structtoml_1_1source__position.html">source_position</a>
+            </dt>
+            <dd>A source document line-and-column pair.</dd>
+            <dt>
+              struct <a class="m-doc" href="structtoml_1_1source__region.html">source_region</a>
+            </dt>
+            <dd>A source document region.</dd>
+            <dt>
               class <a class="m-doc" href="classtoml_1_1table.html">table</a>
             </dt>
             <dd>A TOML table.</dd>
+            <dt>
+              struct <a class="m-doc" href="structtoml_1_1time.html">time</a>
+            </dt>
+            <dd>A local time-of-day.</dd>
+            <dt>
+              struct <a class="m-doc" href="structtoml_1_1time__offset.html">time_offset</a>
+            </dt>
+            <dd>A timezone offset.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename ValueType&gt;</div>
               class <a class="m-doc" href="classtoml_1_1value.html">value</a>
