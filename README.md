@@ -223,6 +223,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
 - **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
 - **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
+- **[@Ryan-rsm-McKenzie](https://github.com/Ryan-rsm-McKenzie)** - Add natvis file to cmake install script
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@sneves](https://github.com/sneves)** - Helped fix a number of parser bugs
