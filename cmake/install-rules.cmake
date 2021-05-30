@@ -2,7 +2,7 @@ include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
 install(
-    FILES "${PROJECT_SOURCE_DIR}/toml++.natvis"
+    FILES "${PROJECT_SOURCE_DIR}/toml++.natvis" "${PROJECT_SOURCE_DIR}/cpp.hint"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/tomlplusplus"
     COMPONENT tomlplusplus_Development
 )
