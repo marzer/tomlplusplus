@@ -17,12 +17,12 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.3.3" name="generator"/>
+  <meta content="Poxy v0.4.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy.css" rel="stylesheet"/>
-  <script src="poxy.js"></script>
-  <script src="jquery-3.6.0.slim.min.js"></script>
+  <link href="poxy-0.4.1.css" rel="stylesheet"/>
+  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>node <span class="m-thin">class</span>
         </h1>
         <p>A TOML node.</p>
-        <div class="m-block m-default">
+        <div class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -545,7 +545,7 @@
     <span class="p">[</span><span class="o">&amp;</span><span class="p">](</span><span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="n">key</span><span class="p">,</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="n">type_name</span><span class="p">,</span> <span class="k">auto</span><span class="o">*</span> <span class="n">dummy</span><span class="p">)</span>
     <span class="p">{</span>
         <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"- "</span> <span class="o">&lt;&lt;</span> <span class="ns">std</span><span class="o">::</span><span class="n">setw</span><span class="p">(</span><span class="mi">18</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="ns">std</span><span class="o">::</span><span class="n">left</span> <span class="o">&lt;&lt;</span> <span class="n">type_name</span><span class="p">;</span>
-        <span class="k">using</span> <span class="n">type</span> <span class="o">=</span> <span class="ns">std</span><span class="o">::</span><span class="ut">remove_pointer_t</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
+        <span class="k">using</span> <span class="ut">type</span> <span class="o">=</span> <span class="ns">std</span><span class="o">::</span><span class="ut">remove_pointer_t</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">dummy</span><span class="p">)</span><span class="o">&gt;</span><span class="p">;</span>
         <span class="k">if</span> <span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="ut">optional</span><span class="o">&lt;</span><span class="n">type</span><span class="o">&gt;</span> <span class="n">val</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">value</span><span class="o">&lt;</span><span class="n">type</span><span class="o">&gt;</span><span class="p">())</span>
             <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">val</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
         <span class="k">else</span>
@@ -786,33 +786,13 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+    <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
+     • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
+    <br/><br/>
+    Site generated using <a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">Poxy</a>
 
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
-an
-issue</a>
-
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
-
-•
-<a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen
-tagfile</a>
-
-<br/><br/>
-
-Documentation
-created
-using
-
-<a class="poxy-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
-
-+
-<a class="poxy-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
-
-+
-<a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">marzer/poxy</a>
       </div>
     </div>
   </div>

@@ -17,12 +17,12 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.3.3" name="generator"/>
+  <meta content="Poxy v0.4.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy.css" rel="stylesheet"/>
-  <script src="poxy.js"></script>
-  <script src="jquery-3.6.0.slim.min.js"></script>
+  <link href="poxy-0.4.1.css" rel="stylesheet"/>
+  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_result <span class="m-thin">class</span>
         </h1>
         <p>The result of a parsing operation.</p>
-        <div class="m-block m-default">
+        <div class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -84,7 +84,7 @@
 <span class="go">Parse failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
 <span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><p>Getting <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a> (<code>operator[]</code>) and using the iterator accessor functions (<code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a>, <a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> etc.) are unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is also safe since <code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a></code> and <code><a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> return the same iterator and will not lead to any dereferences and iterations.</p><aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
-    <span class="k">using</span> <span class="n">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
+    <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
 <span class="cp">#else</span>
     <span class="k">class</span> <span class="nc">parse_result</span> <span class="k">final</span> <span class="p">{</span> <span class="c1">// ...</span>
 <span class="cp">#endif</span></pre></aside>
@@ -420,33 +420,13 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+    <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
+     • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
+    <br/><br/>
+    Site generated using <a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">Poxy</a>
 
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
-an
-issue</a>
-
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
-
-•
-<a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen
-tagfile</a>
-
-<br/><br/>
-
-Documentation
-created
-using
-
-<a class="poxy-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
-
-+
-<a class="poxy-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
-
-+
-<a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">marzer/poxy</a>
       </div>
     </div>
   </div>

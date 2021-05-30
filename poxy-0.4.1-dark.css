@@ -1,0 +1,151 @@
+/* detail sections */
+article section.m-doc-details > div
+{
+	background-color: rgba(0,0,0,0.07)
+}
+
+/* detail section headers */
+article section.m-doc-details > div > h3:first-child
+{
+	background-color: #22272e;
+}
+
+/* namespace/class/struct etc prefixes in treeviews */
+ul.m-doc > li.m-doc-collapsible,
+ul.m-doc > li.m-doc-collapsible > a:first-child,
+ul.m-doc > li.m-doc-collapsible li
+{
+	color: #CCCCCC !important;
+}
+
+/* "Parameters", "Returns", subheadings inside description blocks, etc */
+.m-doc-details div > h4,
+.m-doc-details div > h5,
+.m-doc-details div > h6,
+.m-doc-details div > table.m-table th,
+.m-doc-details div > table.m-table td > h3,
+.m-doc-details div > table.m-table td > h4,
+.m-doc-details div > table.m-table td > h5,
+.m-doc-details div > table.m-table td > h6,
+.m-doc-details div > table.m-table td > strong > em,
+.m-doc-details div > table.m-table td > p > strong > em
+{
+	color: #a5c9ea;
+}
+
+/* 'dim' blocks and notes */
+.m-block.m-dim code,
+.m-note.m-dim code
+{
+	color: #acacac;
+}
+.m-block.m-dim pre.m-code,
+.m-note.m-dim pre.m-code
+{
+	opacity: 0.85;
+}
+
+/* lists */
+.m-block li,
+.m-note li,
+section > ul li,
+section > ol li
+{
+	margin-bottom: 0.2rem;
+}
+.m-block li:last-child,
+.m-note li:last-child,
+section > ul li:last-child,
+section > ol li:last-child
+{
+	margin-bottom: initial;
+}
+
+/* nested lists */
+.m-block li > ul > li:first-child,
+.m-note li > ul > li:first-child,
+.m-block li > ol > li:first-child,
+.m-note li > ol > li:first-child
+{
+	margin-top: 0.2rem;
+}
+
+/* ====================================================
+  code blocks
+==================================================== */
+
+/* keywords */
+.m-code .k
+{
+	color: rgb(86, 156, 214);
+}
+
+/* identifier names */
+.m-code .n
+{
+	color: rgb(220,220,220);
+}
+
+/* punctuators (brackets etc) */
+.m-code .p
+{
+	color: rgb(120,120,120);
+}
+
+/* user types and typedefs */
+.m-code .ut,
+.m-code .nc
+{
+	color: rgb(78,201,176);
+}
+
+/* int and float literals, enum values */
+.m-code .mb,
+.m-code .mi,
+.m-code .mf,
+.m-code .mh,
+.m-code .ne
+{
+	color: rgb(181,206,168);
+}
+
+/* string literals, "includes" */
+.m-code .s,
+.m-code .sa,
+.m-code .dl,
+.m-code .cpf
+{
+	color: rgb(214,157,133);
+}
+
+/* macros */
+.m-code .m
+{
+	color: rgb(190,183,255);
+}
+
+/* comments */
+.m-code .c1,
+.m-code .cm
+{
+	color: rgb(87,166,74) !important;
+}
+
+/* preprocessor directives */
+.m-code .cp
+{
+	color: rgb(120,120,120);
+}
+
+/* namespace::scopes:: */
+.m-code .ns
+{
+	color: rgb(140,140,140);
+}
+
+/* implementation detail blocks */
+pre.poxy-impl,
+code.poxy-impl
+{
+	color: rgb(87,166,74) !important;
+}

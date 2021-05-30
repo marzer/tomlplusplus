@@ -43,27 +43,12 @@ a
 
 article div > section
 {
-	margin-top: 3rem;
+	margin-top: 4rem;
 }
 
 article div > section > section
 {
 	margin-bottom: 2.25rem;
-}
-
-article section.m-doc-details > div
-{
-	background-color: rgba(0,0,0,0.07)
-}
-
-article section.m-doc-details > div > h3:first-child
-{
-	background-color: #22272e;
-}
-
-pre, code
-{
-	font-family: 'Consolas', 'Source Code Pro', monospace;
 }
 
 a.poxy-external
@@ -82,43 +67,26 @@ pre.m-console a:hover
 	text-decoration: underline !important;
 }
 
-@media screen and (min-width: 576px)
+/* nav bar */
+nav .m-thin
 {
-	nav .m-thin
-	{
-		margin-left: 0.5em;
-	}
-
-	nav .github
-	{
-		padding-left: 44px !important;
-		background-image: url("poxy-github-icon.png");
-		background-repeat: no-repeat;
-		background-size: 25px 25px;
-		background-position: -30px center;
-		background-origin: content-box;
-	}
+	margin-left: 0.5em;
 }
-
+nav .github
+{
+	padding-left: 44px !important;
+	background-image: url("poxy-github.svg");
+	background-repeat: no-repeat;
+	background-size: 25px 25px;
+	background-position: -30px center;
+	background-origin: content-box;
+}
 @media screen and (max-width: 576px)
 {
 	nav .m-thin, nav .github
 	{
 		display: none;
 	}
-}
-
-/* code blocks w/ output examples */
-pre.m-code + pre.m-console
-{
-	margin-top: -1.0rem;
-	border-top: 1px solid #444444;
-	font-size: 0.8rem;
-	background-color: #1a1c1d !important;
-}
-pre.m-code + pre.m-console span
-{
-	color: #bababa; /* is yououou */
 }
 
 /* "Parameters", "Returns", subheadings inside description blocks, etc */
@@ -133,7 +101,6 @@ pre.m-code + pre.m-console span
 .m-doc-details div > table.m-table td > strong > em,
 .m-doc-details div > table.m-table td > p > strong > em
 {
-	color: #a5c9ea;
 	font-style: normal;
 }
 .m-doc-details div > table.m-table td > strong > em,
@@ -145,81 +112,6 @@ pre.m-code + pre.m-console span
 .m-doc-details div > table.m-table td > p:not(:first-child) > strong > em
 {
 	margin-top: 1.0rem;
-}
-
-/* comments */
-.m-code .c1,
-.m-code .cm
-{
-	color: rgb(87,166,74) !important;
-}
-
-/* int and float literals, enum values */
-.m-code .mb,
-.m-code .mi,
-.m-code .mf,
-.m-code .mh,
-.m-code .ne
-{
-	color: rgb(181,206,168);
-}
-
-/* keywords */
-.m-code .k
-{
-	color: rgb(86,156,214);
-}
-.m-code .kt,
-.m-code .k,
-.m-code .nc
-{
-	font-weight: normal;
-}
-
-/* identifier names */
-.m-code .n
-{
-	color: rgb(220,220,220);
-}
-
-/* punctuators (brackets etc) */
-.m-code .p
-{
-	color: rgb(120,120,120);
-}
-
-/* preprocessor directives */
-.m-code .cp
-{
-	color: rgb(120,120,120);
-}
-
-/* macros */
-.m-code .m
-{
-	color: rgb(190,183,255);
-}
-
-/* string literals, "includes" */
-.m-code .s,
-.m-code .sa,
-.m-code .dl,
-.m-code .cpf
-{
-	color: rgb(214,157,133);
-}
-
-/* user types and typedefs */
-.m-code .ut,
-.m-code .nc
-{
-	color: rgb(78,201,176);
-}
-
-/* namespace::scopes:: */
-.m-code .ns
-{
-	color: rgb(140,140,140);
 }
 
 /* github badges (index.html) */
@@ -349,31 +241,6 @@ figure.m-figure::before
 	font-size: 1em;
 }
 
-/* lists inside blocks and notes */
-.m-block li,
-.m-note li
-{
-	margin-bottom: 0.2rem;
-}
-
-.m-block li:last-child,
-.m-note li:last-child
-{
-	margin-bottom: initial;
-}
-
-/* 'dim' blocks and notes */
-.m-block.m-dim code,
-.m-note.m-dim code
-{
-	color: #acacac;
-}
-.m-block.m-dim pre.m-code,
-.m-note.m-dim pre.m-code
-{
-	opacity: 0.85;
-}
-
 /* m-special (purple) */
 .m-note.m-special,
 table.m-table tr.m-special td,
@@ -453,10 +320,64 @@ h6:last-child
 	margin-bottom: 0.0rem;
 }
 
-/* namespace/class/struct etc prefixes in treeviews */
-ul.m-doc > li.m-doc-collapsible,
-ul.m-doc > li.m-doc-collapsible > a:first-child,
-ul.m-doc > li.m-doc-collapsible li
+/* images in detail sections */
+.m-doc-details table img.m-image
 {
-	color: #CCCCCC !important;
+	margin-left: inherit;
+}
+
+/* table of contents */
+@media screen and (min-width: 1350px) and (min-height: 900px)
+{
+	.poxy-toc
+	{
+		position: fixed;
+		top: 9rem;
+		left: calc(50% + 430px);
+		min-width: 200px;
+		z-index: 5;
+		margin: 0px 20px 0px 0px !important;
+	}
+	div.poxy-toc + section
+	{
+		margin-top: 2rem;
+	}
+}
+
+/* ====================================================
+  code blocks
+==================================================== */
+
+pre, code
+{
+	font-family: 'Consolas', 'Source Code Pro', monospace;
+}
+
+/* code blocks w/ output examples */
+pre.m-code + pre.m-console
+{
+	margin-top: -1.0rem;
+	font-size: 0.8rem;
+	/* border-top: 1px solid #444444; */
+}
+pre.m-code + pre.m-console span
+{
+	color: #bababa; /* is yououou */
+}
+
+/* keywords */
+.m-code .kt,
+.m-code .k,
+.m-code .nc
+{
+	font-weight: normal;
+}
+
+/* implementation detail blocks */
+pre.poxy-impl,
+code.poxy-impl
+{
+	padding: 0rem !important;
+	margin: 0rem 0.2rem !important;
+	font-weight: normal;
 }

@@ -17,18 +17,18 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.3.3" name="generator"/>
+  <meta content="Poxy v0.4.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy.css" rel="stylesheet"/>
-  <script src="poxy.js"></script>
-  <script src="jquery-3.6.0.slim.min.js"></script>
   <script type="application/ld+json">{
     "@context": "https://schema.org",
     "@type": "Article",
-    "dateModified": "2021-05-24T07:00:46+00:00",
+    "dateModified": "2021-05-30T15:53:53+00:00",
     "headline": "toml++ TOML for modern C++"
 }</script>
+  <link href="poxy-0.4.1.css" rel="stylesheet"/>
+  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -64,7 +64,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <img alt="Image" class="m-image main_page_banner" src="banner_small.png" style="width: 1280px;"/><div class="gh-badges"><a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank"><img alt="MIT" src="poxy-badge-license-mit.svg"/></a><a class="poxy-external" href="https://github.com/marzer/tomlplusplus/releases" target="_blank"><img alt="Releases" src="https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square"/></a><a class="poxy-external" href="https://en.cppreference.com/w/cpp/compiler_support" target="_blank"><img alt="C++17" src="poxy-badge-c++17.svg"/></a><a class="poxy-external" href="https://en.cppreference.com/w/cpp/compiler_support" target="_blank"><img alt="1. C++20" src="badge-C++20.svg"/></a><a class="poxy-external" href="https://toml.io/en/v1.0.0" target="_blank"><img alt="2. TOML v1.0.0" src="badge-TOML.svg"/></a><a class="poxy-external" href="https://circleci.com/gh/marzer/tomlplusplus" target="_blank"><img alt="3. CircleCI" src="https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&amp;logo=circleci&amp;logoColor=white&amp;style=flat-square"/></a><a class="poxy-external" href="https://github.com/fffaraz/awesome-cpp" target="_blank"><img alt="4. Mentioned in Awesome C++" src="badge-awesome.svg"/></a></div>
-        <div class="m-block m-default">
+        <div class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li><a href="#mainpage-features">Features</a></li>
@@ -125,7 +125,7 @@
 
 <span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-   <span class="k">static</span> <span class="k">constexpr</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="ut">some_toml</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">       [library]</span>
 <span class="s">       name = "toml++"</span>
 <span class="s">       authors = ["Mark Gillard &lt;mark.gillard@outlook.com.au&gt;"]</span>
@@ -197,7 +197,7 @@
 
 <span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-   <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="ut">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">       str = "hello world"</span>
 
 <span class="s">       numbers = [ 1, 2, 3, "four", 5.0 ]</span>
@@ -395,33 +395,13 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+    <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
+     • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
+    <br/><br/>
+    Site generated using <a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">Poxy</a>
 
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report
-an
-issue</a>
-
-•
-<a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
-
-•
-<a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen
-tagfile</a>
-
-<br/><br/>
-
-Documentation
-created
-using
-
-<a class="poxy-external" href="https://www.doxygen.nl/index.html" target="_blank">Doxygen</a>
-
-+
-<a class="poxy-external" href="https://mcss.mosra.cz/documentation/doxygen/" target="_blank">mosra/m.css</a>
-
-+
-<a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">marzer/poxy</a>
       </div>
     </div>
   </div>
