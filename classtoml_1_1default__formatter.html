@@ -17,12 +17,12 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.1" name="generator"/>
+  <meta content="Poxy v0.4.3" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.1.css" rel="stylesheet"/>
-  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.1.js"></script>
+  <link href="poxy-0.4.3.css" rel="stylesheet"/>
+  <link href="poxy-0.4.3-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.3.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -94,8 +94,8 @@
 <span class="p">}};</span>
 
 <span class="c1">// these two lines are equivalent:</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">description = "This is some TOML, yo."</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">description = "This is some TOML, yo."</span>
 <span class="go">fruit = ["apple", "orange", "pear"]</span>
 <span class="go">numbers = [1, 2, 3, 4, 5]</span>
 
@@ -193,7 +193,7 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
           <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
           <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">default_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
           <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 'b'</span>

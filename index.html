@@ -17,18 +17,18 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.1" name="generator"/>
+  <meta content="Poxy v0.4.3" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
   <script type="application/ld+json">{
     "@context": "https://schema.org",
     "@type": "Article",
-    "dateModified": "2021-05-30T15:53:53+00:00",
+    "dateModified": "2021-05-31T23:06:20+00:00",
     "headline": "toml++ TOML for modern C++"
 }</script>
-  <link href="poxy-0.4.1.css" rel="stylesheet"/>
-  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.1.js"></script>
+  <link href="poxy-0.4.3.css" rel="stylesheet"/>
+  <link href="poxy-0.4.3-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.3.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -109,11 +109,11 @@
    <span class="k">try</span>
    <span class="p">{</span>
        <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
-           <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+           <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
    <span class="p">}</span>
    <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
    <span class="p">{</span>
-       <span class="ns">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
    <span class="p">}</span>
 
@@ -125,7 +125,7 @@
 
 <span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-   <span class="k">static</span> <span class="k">constexpr</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="ut">some_toml</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">       [library]</span>
 <span class="s">       name = "toml++"</span>
 <span class="s">       authors = ["Mark Gillard &lt;mark.gillard@outlook.com.au&gt;"]</span>
@@ -137,19 +137,19 @@
        <span class="c1">// parse directly from a string view:</span>
        <span class="p">{</span>
            <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">some_toml</span><span class="p">);</span>
-           <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+           <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
        <span class="p">}</span>
 
        <span class="c1">// parse from a string stream:</span>
        <span class="p">{</span>
            <span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">{</span> <span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="p">};</span>
            <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-           <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+           <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
        <span class="p">}</span>
    <span class="p">}</span>
    <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
    <span class="p">{</span>
-       <span class="ns">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
    <span class="p">}</span>
 
@@ -172,7 +172,7 @@
    <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"configuration.toml"</span><span class="p">);</span>
    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span>
    <span class="p">{</span>
-       <span class="ns">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
    <span class="p">}</span>
 
@@ -186,7 +186,7 @@
 <span class="p">}</span>
 <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
 <span class="p">{</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cerr</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span>
        <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">err</span><span class="p">.</span><span class="n">source</span><span class="p">().</span><span class="n">path</span>
        <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="n">description</span><span class="p">()</span>
        <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
@@ -197,7 +197,7 @@
 
 <span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
 <span class="p">{</span>
-   <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="ut">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">       str = "hello world"</span>
 
 <span class="s">       numbers = [ 1, 2, 3, "four", 5.0 ]</span>
@@ -218,16 +218,16 @@
    <span class="ns">std</span><span class="o">::</span><span class="ut">string_view</span>                <span class="n">str3</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="n">value_or</span><span class="p">(</span><span class="s">""</span><span class="sa">sv</span><span class="p">);</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&amp;</span>                    <span class="n">str4</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="n">ref</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// ~~dangerous~~</span>
 
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str1</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str2</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str3</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str4</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str1</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str2</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str3</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str4</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
    <span class="c1">// get a <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_view</a> of the element 'numbers' using operator[]</span>
    <span class="k">auto</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"numbers"</span><span class="p">];</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"table has 'numbers': "</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers is an: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"table has 'numbers': "</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers is an: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
    <span class="c1">// get the underlying array object to do some more advanced stuff</span>
    <span class="k">if</span> <span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">*</span> <span class="n">arr</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">.</span><span class="n">as_array</span><span class="p">())</span>
@@ -247,15 +247,15 @@
        <span class="c1">// arrays are very similar to <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a></span>
        <span class="n">arr</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
        <span class="n">arr</span><span class="o">-&gt;</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
-       <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
    <span class="p">}</span>
 
    <span class="c1">// node-views can be chained to quickly query deeper</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"cats"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"fish[1]: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"fish"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"cats"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"fish[1]: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"fish"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
    <span class="c1">// ...even if the element doesn't exist</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"dinosaurs: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"dinosaurs"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span> <span class="c1">//no dinosaurs :(</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"dinosaurs: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"dinosaurs"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span> <span class="c1">//no dinosaurs :(</span>
 
    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">hello world</span>
@@ -287,12 +287,12 @@
    <span class="p">}};</span>
 
    <span class="c1">// serializing as TOML</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### TOML ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### TOML ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
 
    <span class="c1">// serializing as JSON using <a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">toml::json_formatter</a>:</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### JSON ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
-   <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a></span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### JSON ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a></span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="gp">#</span><span class="c1">##### TOML ######</span>
 

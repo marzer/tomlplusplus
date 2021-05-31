@@ -17,12 +17,12 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.1" name="generator"/>
+  <meta content="Poxy v0.4.3" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.1.css" rel="stylesheet"/>
-  <link href="poxy-0.4.1-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.1.js"></script>
+  <link href="poxy-0.4.3.css" rel="stylesheet"/>
+  <link href="poxy-0.4.3-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.4.3.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -656,7 +656,7 @@
             <p>Pretty-prints the value of a node_type to a stream.</p>
 <pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
 <span class="k">for</span> <span class="p">(</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
 <span class="go">Element [1] is: floating-point</span>
 <span class="go">Element [2] is: string</span>
 <span class="go">Element [3] is: boolean</span></pre>
@@ -670,7 +670,7 @@
               const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a date out to a stream as <code>YYYY-MM-DD</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date</span><span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">1987-03-16</span></pre>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date</span><span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">1987-03-16</span></pre>
           </div></section>
           <section class="m-doc-details" id="adbd4fa5a540b9013568db5ca31509611"><div>
             <h3>
@@ -681,8 +681,8 @@
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">500000000</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">10:20:34</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">500000000</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">10:20:34</span>
 <span class="go">10:20:34.5</span></pre>
           </div></section>
           <section class="m-doc-details" id="ae806dceb4c37542aef0b1603ecb24f93"><div>
@@ -694,11 +694,11 @@
               const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
 <span class="go">+01:30</span>
 <span class="go">Z</span>
 <span class="go">-01:30</span>
@@ -713,9 +713,9 @@
               const <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a <a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a> out to a stream in RFC 3339 format.</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">1987-03-16T10:20:34</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">date_time</span><span class="p">{</span> <span class="p">{</span> <span class="mi">1987</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">16</span> <span class="p">},</span> <span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">},</span> <span class="p">{}</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">1987-03-16T10:20:34</span>
 <span class="go">1987-03-16T10:20:34-02:30</span>
 <span class="go">1987-03-16T10:20:34Z</span></pre>
           </div></section>
@@ -764,7 +764,7 @@
 <span class="p">}</span>
 <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span> <span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="ns">std</span><span class="o">::</span><span class="n">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">Parsing failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
 <span class="go">    (error occurred at line 1, column 13)</span></pre>
@@ -810,7 +810,7 @@
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="sa">sv</span><span class="p">);</span>
 
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
     <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
     <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7</span></pre>
           </div></section>
@@ -855,7 +855,7 @@
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="p">,</span> <span class="s">"config.toml"</span><span class="p">);</span>
 
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
     <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
     <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7 of 'config.toml'</span></pre>
           </div></section>
@@ -887,7 +887,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a20fa3e08d72759083fb17c772a357043"><div>
             <h3>
@@ -917,7 +917,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a01565f26a7982d162949bac3b554a334"><div>
             <h3>
@@ -947,7 +947,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ae9ee4300ddfbd72b7237283ab8d97618"><div>
             <h3>
@@ -977,7 +977,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a02a2724564149ad8439c0457357308b8"><div>
             <h3>
@@ -1007,7 +1007,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a38852451309f406db281f17334ea8dfe"><div>
             <h3>
@@ -1037,7 +1037,7 @@
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a23fd62ae7ec77404532a589672ae1d0e"><div>
             <h3>
@@ -1082,7 +1082,7 @@
 <span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a64954bc71af181daba9ef3a1d12f05db"><div>
             <h3>
@@ -1127,7 +1127,7 @@
 <span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a2ad07c01e86daea5544e1d92261bab81"><div>
             <h3>
@@ -1172,7 +1172,7 @@
 <span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
 <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="n">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre><aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8dbc58dad43c3b66f4476a7131f5741a"><div>
             <h3>

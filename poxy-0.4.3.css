@@ -222,11 +222,10 @@ pre > p.godbolt
 figure.m-figure > figcaption
 {
 	font-weight: initial !important;
-	font-size: initial !important;
+	font-size: 1rem !important;
 	text-align: center;
 	margin-top: initial;
 }
-
 figure.m-figure::before
 {
 	border-style: none !important;
