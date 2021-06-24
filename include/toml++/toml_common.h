@@ -995,7 +995,7 @@ TOML_NAMESPACE_START
 		/// \brief Format integer values as hexadecimal.
 		format_as_hexadecimal = 3,
 	};
-	TOML_MAKE_BITOPS(value_flags);
+	TOML_MAKE_FLAGS(value_flags);
 
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	enum class format_flags : uint8_t
@@ -1015,7 +1015,7 @@ TOML_NAMESPACE_START
 		/// \brief Values with special format flags will be formatted accordingly.
 		allow_value_format_flags = 8,
 	};
-	TOML_MAKE_BITOPS(format_flags);
+	TOML_MAKE_FLAGS(format_flags);
 
 	/// \brief	Pretty-prints the value of a node_type to a stream.
 	/// 

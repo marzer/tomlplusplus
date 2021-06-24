@@ -26,23 +26,33 @@ fruit = []
   # This table conflicts with the previous table
   [fruit.variety]
     name = "granny smith")"sv;
+
 	static constexpr auto bare_key_1 = R"(bare!key = 123)"sv;
 	static constexpr auto bare_key_2 = R"(barekey
    = 123)"sv;
 	static constexpr auto bare_key_3 = R"(barekey =)"sv;
+
 	static constexpr auto inline_table_imutable_1 = R"([product]
 type = { name = "Nail" }
 type.edible = false  # INVALID)"sv;
 	static constexpr auto inline_table_imutable_2 = R"([product]
 type.name = "Nail"
 type = { edible = false }  # INVALID)"sv;
+
+#if !TOML_LANG_UNRELEASED
+
 	static constexpr auto inline_table_trailing_comma = R"(abc = { abc = 123, })"sv;
+
+#endif // !TOML_LANG_UNRELEASED
+
 	static constexpr auto int_0_padded = R"(int = 0123)"sv;
 	static constexpr auto int_signed_bin = R"(bin = +0b10)"sv;
 	static constexpr auto int_signed_hex = R"(hex = +0xab)"sv;
 	static constexpr auto int_signed_oct = R"(oct = +0o23)"sv;
+
 	static constexpr auto key_value_pair_1 = R"(key = # INVALID)"sv;
 	static constexpr auto key_value_pair_2 = R"(first = "Tom" last = "Preston-Werner" # INVALID)"sv;
+
 	static constexpr auto multiple_dot_key = R"(# THE FOLLOWING IS INVALID
 
 # This defines the value of fruit.apple to be an integer.
@@ -54,7 +64,9 @@ fruit.apple.smooth = true)"sv;
 	static constexpr auto multiple_key = R"(# DO NOT DO THIS
 name = "Tom"
 name = "Pradyun")"sv;
+
 	static constexpr auto no_key_name = R"(= "no key name"  # INVALID)"sv;
+
 	static constexpr auto string_basic_multiline_invalid_backslash = R"(a = """
   foo \ \n
   bar""")"sv;
@@ -66,6 +78,7 @@ name = "Pradyun")"sv;
 	static constexpr auto string_basic_out_of_range_unicode_escape_2 = R"(a = "\U00D80000")"sv;
 	static constexpr auto string_basic_unknown_escape = R"(a = "\@")"sv;
 	static constexpr auto string_literal_multiline_quotes = R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv;
+
 	static constexpr auto table_1 = R"(# DO NOT DO THIS
 
 [fruit]
@@ -136,41 +149,75 @@ TOML_ENABLE_WARNINGS;
 TEST_CASE("conformance - iarna/invalid")
 {
 	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_1);
-	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_2);
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_1);
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_2);
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_3);
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_1);
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_2);
-	parsing_should_fail(FILE_LINE_ARGS, int_0_padded);
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_bin);
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_hex);
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_oct);
-	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_1);
-	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_2);
-	parsing_should_fail(FILE_LINE_ARGS, multiple_dot_key);
-	parsing_should_fail(FILE_LINE_ARGS, multiple_key);
-	parsing_should_fail(FILE_LINE_ARGS, no_key_name);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_invalid_backslash);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_1);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_2);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_unknown_escape);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_1);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_2);
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape);
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes);
-	parsing_should_fail(FILE_LINE_ARGS, table_1);
-	parsing_should_fail(FILE_LINE_ARGS, table_2);
-	parsing_should_fail(FILE_LINE_ARGS, table_3);
-	parsing_should_fail(FILE_LINE_ARGS, table_4);
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_1);
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_2);
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_3);
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_4);
 
-	#if !TOML_LANG_UNRELEASED
+	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, bare_key_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, bare_key_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, bare_key_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_2);
+
+#if !TOML_LANG_UNRELEASED
+
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma);
-	#endif // !TOML_LANG_UNRELEASED
+
+#endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, int_0_padded);
+
+	parsing_should_fail(FILE_LINE_ARGS, int_signed_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, int_signed_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, int_signed_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, multiple_dot_key);
+
+	parsing_should_fail(FILE_LINE_ARGS, multiple_key);
+
+	parsing_should_fail(FILE_LINE_ARGS, no_key_name);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_invalid_backslash);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_unknown_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_4);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_invalid_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_invalid_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_invalid_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_invalid_4);
 }
 

@@ -408,12 +408,21 @@
 #endif
 
 #ifndef DOXYGEN
-	#if defined(_WIN32) && !defined(TOML_WINDOWS_COMPAT)
-		#define TOML_WINDOWS_COMPAT 1
+	#ifdef _WIN32
+		#ifndef TOML_WINDOWS_COMPAT
+			#define TOML_WINDOWS_COMPAT 1
+		#endif
+		#if TOML_WINDOWS_COMPAT && !defined(TOML_INCLUDE_WINDOWS_H)
+			#define TOML_INCLUDE_WINDOWS_H 0
+		#endif
 	#endif
 	#if !defined(_WIN32) || !defined(TOML_WINDOWS_COMPAT)
 		#undef TOML_WINDOWS_COMPAT
-		#define TOML_WINDOWS_COMPAT 0
+		#define TOML_WINDOWS_COMPAT		0
+	#endif
+	#if !TOML_WINDOWS_COMPAT
+		#undef TOML_INCLUDE_WINDOWS_H
+		#define TOML_INCLUDE_WINDOWS_H	0
 	#endif
 #endif
 
@@ -620,24 +629,42 @@ is no longer necessary.
 	#define TOML_ARM 0
 #endif
 
-#define TOML_MAKE_BITOPS(type)																		\
+#define TOML_MAKE_FLAGS_(name, op)																	\
 	[[nodiscard]]																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
-	TOML_ATTR(flatten)																				\
-	constexpr type operator & (type lhs, type rhs) noexcept											\
+	constexpr name operator op(name lhs, name rhs) noexcept											\
 	{																								\
-		return static_cast<type>(::toml::impl::unwrap_enum(lhs) & ::toml::impl::unwrap_enum(rhs));	\
+		using under = std::underlying_type_t<name>;													\
+		return static_cast<name>(static_cast<under>(lhs) op static_cast<under>(rhs));				\
+	}																								\
+	constexpr name& operator TOML_CONCAT(op, =)(name & lhs, name rhs) noexcept						\
+	{																								\
+		return lhs = (lhs op rhs);																	\
+	}																								\
+	static_assert(true, "")
+
+#define TOML_MAKE_FLAGS(name)																		\
+	TOML_MAKE_FLAGS_(name, &);																		\
+	TOML_MAKE_FLAGS_(name, |);																		\
+	TOML_MAKE_FLAGS_(name, ^);																		\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	constexpr name operator~(name val) noexcept														\
+	{																								\
+		using under = std::underlying_type_t<name>;													\
+		return static_cast<name>(~static_cast<under>(val));											\
 	}																								\
 	[[nodiscard]]																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
-	TOML_ATTR(flatten)																				\
-	constexpr type operator | (type lhs, type rhs) noexcept											\
+	constexpr bool operator!(name val) noexcept														\
 	{																								\
-		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
+		using under = std::underlying_type_t<name>;													\
+		return !static_cast<under>(val);															\
 	}																								\
-	static_assert(true)
+	static_assert(true, "")
 
 #ifndef TOML_LIFETIME_HOOKS
 	#define TOML_LIFETIME_HOOKS 0
@@ -1571,7 +1598,7 @@ TOML_NAMESPACE_START
 
 		format_as_hexadecimal = 3,
 	};
-	TOML_MAKE_BITOPS(value_flags);
+	TOML_MAKE_FLAGS(value_flags);
 
 	enum class format_flags : uint8_t
 	{
@@ -1585,7 +1612,7 @@ TOML_NAMESPACE_START
 
 		allow_value_format_flags = 8,
 	};
-	TOML_MAKE_BITOPS(format_flags);
+	TOML_MAKE_FLAGS(format_flags);
 
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator << (std::basic_ostream<Char>& lhs, node_type rhs)
@@ -12098,27 +12125,34 @@ TOML_NAMESPACE_END;
 #if TOML_WINDOWS_COMPAT
 
 #ifndef _WINDOWS_
-extern "C"
-{
-	int __stdcall WideCharToMultiByte(
-		unsigned int CodePage,
-		unsigned long dwFlags,
-		const wchar_t* lpWideCharStr,
-		int cchWideChar,
-		char* lpMultiByteStr,
-		int cbMultiByte,
-		const char* lpDefaultChar,
-		int* lpUsedDefaultChar
-	);
-	int __stdcall MultiByteToWideChar(
-		unsigned int CodePage,
-		unsigned long dwFlags,
-		const char* lpMultiByteStr,
-		int cbMultiByte,
-		wchar_t* lpWideCharStr,
-		int cchWideChar
-	);
-}
+	#if TOML_INCLUDE_WINDOWS_H
+		#include <Windows.h>
+	#else
+		extern "C"
+		{
+			__declspec(dllimport)
+			int __stdcall WideCharToMultiByte(
+				unsigned int CodePage,
+				unsigned long dwFlags,
+				const wchar_t* lpWideCharStr,
+				int cchWideChar,
+				char* lpMultiByteStr,
+				int cbMultiByte,
+				const char* lpDefaultChar,
+				int* lpUsedDefaultChar
+			);
+
+			__declspec(dllimport)
+			int __stdcall MultiByteToWideChar(
+				unsigned int CodePage,
+				unsigned long dwFlags,
+				const char* lpMultiByteStr,
+				int cbMultiByte,
+				wchar_t* lpWideCharStr,
+				int cchWideChar
+			);
+		}
+	#endif
 #endif // _WINDOWS_
 
 TOML_IMPL_NAMESPACE_START
@@ -12130,13 +12164,13 @@ TOML_IMPL_NAMESPACE_START
 			return {};
 
 		std::string s;
-		const auto len = WideCharToMultiByte(
+		const auto len = ::WideCharToMultiByte(
 			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
 		);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
+			::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
 		}
 		return s;
 	}
@@ -12148,11 +12182,11 @@ TOML_IMPL_NAMESPACE_START
 			return {};
 
 		std::wstring s;
-		const auto len = MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
+		const auto len = ::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
+			::MultiByteToWideChar(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len);
 		}
 		return s;
 	}
@@ -12420,6 +12454,7 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_IMPLEMENTATION
 	#undef TOML_IMPL_NAMESPACE_END
 	#undef TOML_IMPL_NAMESPACE_START
+	#undef TOML_INCLUDE_WINDOWS_H
 	#undef TOML_INT128
 	#undef TOML_INTELLISENSE
 	#undef TOML_INTERNAL_LINKAGE
@@ -12431,7 +12466,8 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_LAUNDER
 	#undef TOML_LIFETIME_HOOKS
 	#undef TOML_LIKELY
-	#undef TOML_MAKE_BITOPS
+	#undef TOML_MAKE_FLAGS_
+	#undef TOML_MAKE_FLAGS
 	#undef TOML_MAKE_VERSION
 	#undef TOML_MAY_THROW
 	#undef TOML_MSVC

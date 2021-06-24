@@ -393,12 +393,21 @@
 #endif
 
 #ifndef DOXYGEN
-	#if defined(_WIN32) && !defined(TOML_WINDOWS_COMPAT)
-		#define TOML_WINDOWS_COMPAT 1
+	#ifdef _WIN32
+		#ifndef TOML_WINDOWS_COMPAT
+			#define TOML_WINDOWS_COMPAT 1
+		#endif
+		#if TOML_WINDOWS_COMPAT && !defined(TOML_INCLUDE_WINDOWS_H)
+			#define TOML_INCLUDE_WINDOWS_H 0
+		#endif
 	#endif
 	#if !defined(_WIN32) || !defined(TOML_WINDOWS_COMPAT)
 		#undef TOML_WINDOWS_COMPAT
-		#define TOML_WINDOWS_COMPAT 0
+		#define TOML_WINDOWS_COMPAT		0
+	#endif
+	#if !TOML_WINDOWS_COMPAT
+		#undef TOML_INCLUDE_WINDOWS_H
+		#define TOML_INCLUDE_WINDOWS_H	0
 	#endif
 #endif
 
@@ -609,24 +618,43 @@ is no longer necessary.
 	#define TOML_ARM 0
 #endif
 
-#define TOML_MAKE_BITOPS(type)																		\
+#define TOML_MAKE_FLAGS_(name, op)																	\
 	[[nodiscard]]																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
-	TOML_ATTR(flatten)																				\
-	constexpr type operator & (type lhs, type rhs) noexcept											\
+	constexpr name operator op(name lhs, name rhs) noexcept											\
 	{																								\
-		return static_cast<type>(::toml::impl::unwrap_enum(lhs) & ::toml::impl::unwrap_enum(rhs));	\
+		using under = std::underlying_type_t<name>;													\
+		return static_cast<name>(static_cast<under>(lhs) op static_cast<under>(rhs));				\
+	}																								\
+	constexpr name& operator TOML_CONCAT(op, =)(name & lhs, name rhs) noexcept						\
+	{																								\
+		return lhs = (lhs op rhs);																	\
+	}																								\
+	static_assert(true, "")
+
+#define TOML_MAKE_FLAGS(name)																		\
+	TOML_MAKE_FLAGS_(name, &);																		\
+	TOML_MAKE_FLAGS_(name, |);																		\
+	TOML_MAKE_FLAGS_(name, ^);																		\
+	[[nodiscard]]																					\
+	TOML_ALWAYS_INLINE																				\
+	TOML_ATTR(const)																				\
+	constexpr name operator~(name val) noexcept														\
+	{																								\
+		using under = std::underlying_type_t<name>;													\
+		return static_cast<name>(~static_cast<under>(val));											\
 	}																								\
 	[[nodiscard]]																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
-	TOML_ATTR(flatten)																				\
-	constexpr type operator | (type lhs, type rhs) noexcept											\
+	constexpr bool operator!(name val) noexcept														\
 	{																								\
-		return static_cast<type>(::toml::impl::unwrap_enum(lhs) | ::toml::impl::unwrap_enum(rhs));	\
+		using under = std::underlying_type_t<name>;													\
+		return !static_cast<under>(val);															\
 	}																								\
-	static_assert(true)
+	static_assert(true, "")
+
 
 #ifndef TOML_LIFETIME_HOOKS
 	#define TOML_LIFETIME_HOOKS 0

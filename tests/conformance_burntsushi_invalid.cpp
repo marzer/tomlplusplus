@@ -12,12 +12,42 @@ TOML_DISABLE_WARNINGS; // unused variable spam
 
 namespace
 {
+	static constexpr auto array_missing_separator = R"(wrong = [ 1 2 3 ])"sv;
+	static constexpr auto array_no_close_2 = R"(x = [42 #)"sv;
+	static constexpr auto array_no_close_table_2 = R"(x = [{ key = 42 #)"sv;
+	static constexpr auto array_no_close_table = R"(x = [{ key = 42)"sv;
+	static constexpr auto array_no_close = R"(long_array = [ 1, 2, 3)"sv;
+	static constexpr auto array_of_tables_1 = R"(# INVALID TOML DOC
+fruit = []
+
+[[fruit]] # Not allowed)"sv;
+	static constexpr auto array_of_tables_2 = R"(# INVALID TOML DOC
+[[fruit]]
+  name = "apple"
+
+  [[fruit.variety]]
+    name = "red delicious"
+
+  # This table conflicts with the previous table
+  [fruit.variety]
+    name = "granny smith")"sv;
+
+	static constexpr auto bool_mixed_case = R"(valid = False)"sv;
 	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
 	static constexpr auto bool_wrong_case_true = R"(a = TRUE)"sv;
-	static constexpr auto datetime_malformed_no_leads = R"(no-leads = 1987-7-05T17:45:00Z)"sv;
-	static constexpr auto datetime_malformed_no_secs = R"(no-secs = 1987-07-05T17:45Z)"sv;
-	static constexpr auto datetime_malformed_no_t = R"(no-t = 1987-07-0517:45:00Z)"sv;
-	static constexpr auto datetime_malformed_with_milli = R"(with-milli = 1987-07-5T17:45:00.12Z)"sv;
+
+	static constexpr auto datetime_impossible_date = R"(d = 2006-01-50T00:00:00Z)"sv;
+	static constexpr auto datetime_no_leads_with_milli = R"(with-milli = 1987-07-5T17:45:00.12Z)"sv;
+	static constexpr auto datetime_no_leads = R"(no-leads = 1987-7-05T17:45:00Z)"sv;
+	static constexpr auto datetime_no_t = R"(no-t = 1987-07-0517:45:00Z)"sv;
+	static constexpr auto datetime_trailing_t = R"(d = 2006-01-30T)"sv;
+
+#if !TOML_LANG_UNRELEASED
+
+	static constexpr auto datetime_no_secs = R"(no-secs = 1987-07-05T17:45Z)"sv;
+
+#endif // !TOML_LANG_UNRELEASED
+
 	static constexpr auto duplicate_key_table = R"([fruit]
 type = "apple"
 
@@ -25,58 +55,187 @@ type = "apple"
 apple = "yes")"sv;
 	static constexpr auto duplicate_keys = R"(dupe = false
 dupe = true)"sv;
+	static constexpr auto duplicate_table_array = R"([tbl]
+[[tbl]])"sv;
+	static constexpr auto duplicate_table_array2 = R"([[tbl]]
+[tbl])"sv;
 	static constexpr auto duplicate_tables = R"([a]
 [a])"sv;
+
 	static constexpr auto empty_implicit_table = R"([naughty..naughty])"sv;
 	static constexpr auto empty_table = R"([])"sv;
-	static constexpr auto float_leading_zero_neg = R"(leading-zero = -03.14)"sv;
-	static constexpr auto float_leading_zero_pos = R"(leading-zero = +03.14)"sv;
+
+	static constexpr auto float_double_point_1 = R"(double-point-1 = 0..1)"sv;
+	static constexpr auto float_double_point_2 = R"(double-point-2 = 0.1.2)"sv;
+	static constexpr auto float_exp_double_e_1 = R"(exp-double-e-1 = 1ee2)"sv;
+	static constexpr auto float_exp_double_e_2 = R"(exp-double-e-2 = 1e2e3)"sv;
+	static constexpr auto float_exp_double_us = R"(exp-double-us = 1e__23)"sv;
+	static constexpr auto float_exp_leading_us = R"(exp-leading-us = 1e_23)"sv;
+	static constexpr auto float_exp_point_1 = R"(exp-point-1 = 1e2.3)"sv;
+	static constexpr auto float_exp_point_2 = R"(exp-point-2 = 1.e2)"sv;
+	static constexpr auto float_exp_trailing_us = R"(exp-trailing-us = 1e_23_)"sv;
+	static constexpr auto float_inf_incomplete_1 = R"(inf-incomplete-1 = in)"sv;
+	static constexpr auto float_inf_incomplete_2 = R"(inf-incomplete-2 = +in)"sv;
+	static constexpr auto float_inf_incomplete_3 = R"(inf-incomplete-3 = -in)"sv;
+	static constexpr auto float_inf_underscore = R"(inf_underscore = in_f)"sv;
+	static constexpr auto float_leading_point_neg = R"(leading-point-neg = -.12345)"sv;
+	static constexpr auto float_leading_point_plus = R"(leading-point-plus = +.12345)"sv;
+	static constexpr auto float_leading_point = R"(leading-point = .12345)"sv;
+	static constexpr auto float_leading_us = R"(leading-us = _1.2)"sv;
+	static constexpr auto float_leading_zero_neg = R"(leading-zero-neg = -03.14)"sv;
+	static constexpr auto float_leading_zero_plus = R"(leading-zero-plus = +03.14)"sv;
 	static constexpr auto float_leading_zero = R"(leading-zero = 03.14)"sv;
-	static constexpr auto float_no_leading_zero = R"(answer = .12345
-neganswer = -.12345)"sv;
-	static constexpr auto float_no_trailing_digits = R"(answer = 1.
-neganswer = -1.)"sv;
-	static constexpr auto float_underscore_after_point = R"(bad = 1._2)"sv;
-	static constexpr auto float_underscore_after = R"(bad = 1.2_)"sv;
-	static constexpr auto float_underscore_before_point = R"(bad = 1_.2)"sv;
-	static constexpr auto float_underscore_before = R"(bad = _1.2)"sv;
-	static constexpr auto inline_table_linebreak = R"(simple = { a = 1 
+	static constexpr auto float_nan_incomplete_1 = R"(nan-incomplete-1 = na)"sv;
+	static constexpr auto float_nan_incomplete_2 = R"(nan-incomplete-2 = +na)"sv;
+	static constexpr auto float_nan_incomplete_3 = R"(nan-incomplete-3 = -na)"sv;
+	static constexpr auto float_nan_underscore = R"(nan_underscore = na_n)"sv;
+	static constexpr auto float_trailing_point_min = R"(trailing-point-min = -1.)"sv;
+	static constexpr auto float_trailing_point_plus = R"(trailing-point-plus = +1.)"sv;
+	static constexpr auto float_trailing_point = R"(trailing-point = 1.)"sv;
+	static constexpr auto float_trailing_us = R"(trailing-us = 1.2_)"sv;
+	static constexpr auto float_us_after_point = R"(us-after-point = 1._2)"sv;
+	static constexpr auto float_us_before_point = R"(us-before-point = 1_.2)"sv;
+
+	static constexpr auto inline_table_double_comma = R"(t = {x=3,,y=4})"sv;
+	static constexpr auto inline_table_empty = R"(t = {,})"sv;
+	static constexpr auto inline_table_no_comma = R"(t = {x = 3 y = 4})"sv;
+
+#if !TOML_LANG_UNRELEASED
+
+	static constexpr auto inline_table_linebreak_1 = R"(# No newlines are allowed between the curly braces unless they are valid within
+# a value.
+simple = { a = 1 
 })"sv;
-	static constexpr auto integer_leading_zero_neg = R"(leading-zero = -012)"sv;
-	static constexpr auto integer_leading_zero_pos = R"(leading-zero = +012)"sv;
-	static constexpr auto integer_leading_zero = R"(leading-zero = 012)"sv;
-	static constexpr auto integer_underscore_after = R"(bad = 123_)"sv;
-	static constexpr auto integer_underscore_before = R"(bad = _123)"sv;
-	static constexpr auto integer_underscore_double = R"(bad = 1__23)"sv;
+	static constexpr auto inline_table_linebreak_2 = R"(t = {a=1,
+b=2})"sv;
+	static constexpr auto inline_table_linebreak_3 = R"(t = {a=1
+,b=2})"sv;
+	static constexpr auto inline_table_trailing_comma = R"(# A terminating comma (also called trailing comma) is not permitted after the
+# last key/value pair in an inline table
+abc = { abc = 123, })"sv;
+
+#endif // !TOML_LANG_UNRELEASED
+
+	static constexpr auto integer_capital_bin = R"(capital-bin = 0B0)"sv;
+	static constexpr auto integer_capital_hex = R"(capital-hex = 0X1)"sv;
+	static constexpr auto integer_capital_oct = R"(capital-oct = 0O0)"sv;
+	static constexpr auto integer_double_sign_nex = R"(double-sign-nex = --99)"sv;
+	static constexpr auto integer_double_sign_plus = R"(double-sign-plus = ++99)"sv;
+	static constexpr auto integer_double_us = R"(double-us = 1__23)"sv;
+	static constexpr auto integer_invalid_bin = R"(invalid-bin = 0b0012)"sv;
+	static constexpr auto integer_invalid_hex = R"(invalid-hex = 0xaafz)"sv;
+	static constexpr auto integer_invalid_oct = R"(invalid-oct = 0o778)"sv;
+	static constexpr auto integer_leading_us_bin = R"(leading-us-bin = _0o1)"sv;
+	static constexpr auto integer_leading_us_hex = R"(leading-us-hex = _0o1)"sv;
+	static constexpr auto integer_leading_us_oct = R"(leading-us-oct = _0o1)"sv;
+	static constexpr auto integer_leading_us = R"(leading-us = _123)"sv;
+	static constexpr auto integer_leading_zero_1 = R"(leading-zero-1 = 01)"sv;
+	static constexpr auto integer_leading_zero_2 = R"(leading-zero-2 = 00)"sv;
+	static constexpr auto integer_leading_zero_sign_1 = R"(leading-zero-sign-1 = -01)"sv;
+	static constexpr auto integer_leading_zero_sign_2 = R"(leading-zero-sign-2 = +01)"sv;
+	static constexpr auto integer_negative_bin = R"(negative-bin = -0b11010110)"sv;
+	static constexpr auto integer_negative_hex = R"(negative-hex = -0xff)"sv;
+	static constexpr auto integer_negative_oct = R"(negative-oct = -0o99)"sv;
+	static constexpr auto integer_positive_bin = R"(positive-bin = +0b11010110)"sv;
+	static constexpr auto integer_positive_hex = R"(positive-hex = +0xff)"sv;
+	static constexpr auto integer_positive_oct = R"(positive-oct = +0o99)"sv;
+	static constexpr auto integer_trailing_us_bin = R"(trailing-us-bin = 0b1_)"sv;
+	static constexpr auto integer_trailing_us_hex = R"(trailing-us-hex = 0x1_)"sv;
+	static constexpr auto integer_trailing_us_oct = R"(trailing-us-oct = 0o1_)"sv;
+	static constexpr auto integer_trailing_us = R"(trailing-us = 123_)"sv;
+	static constexpr auto integer_us_after_bin = R"(us-after-bin = 0b_1)"sv;
+	static constexpr auto integer_us_after_hex = R"(us-after-hex = 0x_1)"sv;
+	static constexpr auto integer_us_after_oct = R"(us-after-oct = 0o_1)"sv;
+
 	static constexpr auto key_after_array = R"([[agencies]] owner = "S Cjelli")"sv;
 	static constexpr auto key_after_table = R"([error] this = "should not be here")"sv;
+	static constexpr auto key_after_value = R"(first = "Tom" last = "Preston-Werner" # INVALID)"sv;
+	static constexpr auto key_bare_invalid_character = R"(bare!key = 123)"sv;
+	static constexpr auto key_dotted_redefine_table = R"(# Defined a.b as int
+a.b = 1
+# Tries to access it as table: error
+a.b.c = 2)"sv;
+	static constexpr auto key_duplicate = R"(# DO NOT DO THIS
+name = "Tom"
+name = "Pradyun")"sv;
 	static constexpr auto key_empty = R"(= 1)"sv;
+	static constexpr auto key_escape = R"(\u00c0 = "latin capital letter A with grave")"sv;
 	static constexpr auto key_hash = R"(a# = 1)"sv;
-	static constexpr auto key_newline = R"(a
-= 1)"sv;
+	static constexpr auto key_multiline = R"("""long
+key""" = 1)"sv;
+	static constexpr auto key_newline = R"(barekey
+   = 123)"sv;
 	static constexpr auto key_no_eol = R"(a = 1 b = 2)"sv;
 	static constexpr auto key_open_bracket = R"([abc = 1)"sv;
+	static constexpr auto key_partial_quoted = R"(partial"quoted" = 5)"sv;
 	static constexpr auto key_single_open_bracket = R"([)"sv;
 	static constexpr auto key_space = R"(a b = 1)"sv;
 	static constexpr auto key_start_bracket = R"([a]
 [xyz = 5
 [b])"sv;
 	static constexpr auto key_two_equals = R"(key= = 1)"sv;
+	static constexpr auto key_two_equals2 = R"(a==1)"sv;
+	static constexpr auto key_two_equals3 = R"(a=b=1)"sv;
+	static constexpr auto key_without_value_1 = R"(key)"sv;
+	static constexpr auto key_without_value_2 = R"(key =)"sv;
+
+#if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
+	static constexpr auto key_special_character = R"(μ = "greek small letter mu")"sv;
+
+#endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
 	static constexpr auto llbrace = R"([ [table]])"sv;
+
+#if !TOML_LANG_UNRELEASED
+
 	static constexpr auto multi_line_inline_table = R"(json_like = {
           first = "Tom",
           last = "Preston-Werner"
 })"sv;
+
+#endif // !TOML_LANG_UNRELEASED
+
+	static constexpr auto multi_line_string_no_close_2 = R"(x=""")"sv;
 	static constexpr auto multi_line_string_no_close = R"(invalid = """
     this will fail)"sv;
+
 	static constexpr auto rrbrace = R"([[table] ])"sv;
+
 	static constexpr auto string_bad_byte_escape = R"(naughty = "\xAg")"sv;
 	static constexpr auto string_bad_codepoint = R"(invalid-codepoint = "This string contains a non scalar unicode codepoint \uD801")"sv;
+	static constexpr auto string_bad_concat = R"(no_concat = "first" "second")"sv;
 	static constexpr auto string_bad_escape = R"(invalid-escape = "This string has a bad \a escape character.")"sv;
+	static constexpr auto string_bad_multiline = R"(multi = "first line
+second line")"sv;
 	static constexpr auto string_bad_slash_escape = R"(invalid-escape = "This string has a bad \/ escape character.")"sv;
 	static constexpr auto string_bad_uni_esc = R"(str = "val\ue")"sv;
-	static constexpr auto string_byte_escapes = R"(answer = "\x33")"sv;
+	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_1 = R"(a = """\UFFFFFFFF""")"sv;
+	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_2 = R"(a = """\U00D80000""")"sv;
+	static constexpr auto string_basic_multiline_quotes = R"(str5 = """Here are three quotation marks: """.""")"sv;
+	static constexpr auto string_basic_multiline_unknown_escape = R"(a = """\@""")"sv;
+	static constexpr auto string_basic_out_of_range_unicode_escape_1 = R"(a = "\UFFFFFFFF")"sv;
+	static constexpr auto string_basic_out_of_range_unicode_escape_2 = R"(a = "\U00D80000")"sv;
+	static constexpr auto string_basic_unknown_escape = R"(a = "\@")"sv;
+	static constexpr auto string_literal_multiline_quotes_1 = R"(a = '''6 apostrophes: '''''')"sv;
+	static constexpr auto string_literal_multiline_quotes_2 = R"(a = '''15 apostrophes: '''''''''''''''''')"sv;
+	static constexpr auto string_missing_quotes = R"(name = value)"sv;
+	static constexpr auto string_multiline_escape_space = R"(a = """
+  foo \ \n
+  bar""")"sv;
+	static constexpr auto string_multiline_quotes_1 = R"(a = """6 quotes: """""")"sv;
+	static constexpr auto string_multiline_quotes_2 = R"(a = """6 quotes: """""")"sv;
 	static constexpr auto string_no_close = R"(no-ending-quote = "One time, at band camp)"sv;
+	static constexpr auto string_wrong_close = R"(bad-ending-quote = "double and single')"sv;
+
+#if !TOML_LANG_UNRELEASED
+
+	static constexpr auto string_basic_byte_escapes = R"(answer = "\x33")"sv;
+
+#endif // !TOML_LANG_UNRELEASED
+
+	static constexpr auto table_array_empty = R"([[]]
+name = "Born to Run")"sv;
 	static constexpr auto table_array_implicit = R"(# This test is a bit tricky. It should fail because the first use of
 # `[[albums.songs]]` without first declaring `albums` implies that `albums`
 # must be a table. The alternative would be quite weird. Namely, it wouldn't
@@ -91,18 +250,31 @@ name = "Glory Days"
 
 [[albums]]
 name = "Born in the USA")"sv;
-	static constexpr auto table_array_malformed_bracket = R"([[albums]
+	static constexpr auto table_array_missing_bracket = R"([[albums]
 name = "Born to Run")"sv;
-	static constexpr auto table_array_malformed_empty = R"([[]]
-name = "Born to Run")"sv;
+	static constexpr auto table_duplicate = R"([a]
+b = 1
+
+[a]
+c = 2)"sv;
 	static constexpr auto table_empty = R"([])"sv;
+	static constexpr auto table_equals_sign = R"([name=bad])"sv;
 	static constexpr auto table_nested_brackets_close = R"([a]b]
 zyx = 42)"sv;
 	static constexpr auto table_nested_brackets_open = R"([a[b]
 zyx = 42)"sv;
+	static constexpr auto table_quoted_no_close = R"(["where will it end]
+name = value)"sv;
+	static constexpr auto table_redefine = R"(# Define b as int, and try to use it as a table: error
+[a]
+b = 1
+
+[a.b]
+c = 2)"sv;
 	static constexpr auto table_whitespace = R"([invalid key])"sv;
 	static constexpr auto table_with_pound = R"([key#group]
 answer = 42)"sv;
+
 	static constexpr auto text_after_array_entries = R"(array = [
   "Is there life after an array separator?", No
   "Entry"
@@ -125,71 +297,342 @@ TOML_ENABLE_WARNINGS;
 
 TEST_CASE("conformance - burntsushi/invalid")
 {
-	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false);
-	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true);
-	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_no_leads);
-	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_no_t);
-	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_with_milli);
-	parsing_should_fail(FILE_LINE_ARGS, duplicate_key_table);
-	parsing_should_fail(FILE_LINE_ARGS, duplicate_keys);
-	parsing_should_fail(FILE_LINE_ARGS, duplicate_tables);
-	parsing_should_fail(FILE_LINE_ARGS, empty_implicit_table);
-	parsing_should_fail(FILE_LINE_ARGS, empty_table);
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_neg);
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_pos);
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero);
-	parsing_should_fail(FILE_LINE_ARGS, float_no_leading_zero);
-	parsing_should_fail(FILE_LINE_ARGS, float_no_trailing_digits);
-	parsing_should_fail(FILE_LINE_ARGS, float_underscore_after_point);
-	parsing_should_fail(FILE_LINE_ARGS, float_underscore_after);
-	parsing_should_fail(FILE_LINE_ARGS, float_underscore_before_point);
-	parsing_should_fail(FILE_LINE_ARGS, float_underscore_before);
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_neg);
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_pos);
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero);
-	parsing_should_fail(FILE_LINE_ARGS, integer_underscore_after);
-	parsing_should_fail(FILE_LINE_ARGS, integer_underscore_before);
-	parsing_should_fail(FILE_LINE_ARGS, integer_underscore_double);
-	parsing_should_fail(FILE_LINE_ARGS, key_after_array);
-	parsing_should_fail(FILE_LINE_ARGS, key_after_table);
-	parsing_should_fail(FILE_LINE_ARGS, key_empty);
-	parsing_should_fail(FILE_LINE_ARGS, key_hash);
-	parsing_should_fail(FILE_LINE_ARGS, key_newline);
-	parsing_should_fail(FILE_LINE_ARGS, key_no_eol);
-	parsing_should_fail(FILE_LINE_ARGS, key_open_bracket);
-	parsing_should_fail(FILE_LINE_ARGS, key_single_open_bracket);
-	parsing_should_fail(FILE_LINE_ARGS, key_space);
-	parsing_should_fail(FILE_LINE_ARGS, key_start_bracket);
-	parsing_should_fail(FILE_LINE_ARGS, key_two_equals);
-	parsing_should_fail(FILE_LINE_ARGS, llbrace);
-	parsing_should_fail(FILE_LINE_ARGS, multi_line_string_no_close);
-	parsing_should_fail(FILE_LINE_ARGS, rrbrace);
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_byte_escape);
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_codepoint);
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape);
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_slash_escape);
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc);
-	parsing_should_fail(FILE_LINE_ARGS, string_no_close);
-	parsing_should_fail(FILE_LINE_ARGS, table_array_implicit);
-	parsing_should_fail(FILE_LINE_ARGS, table_array_malformed_bracket);
-	parsing_should_fail(FILE_LINE_ARGS, table_array_malformed_empty);
-	parsing_should_fail(FILE_LINE_ARGS, table_empty);
-	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_close);
-	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_open);
-	parsing_should_fail(FILE_LINE_ARGS, table_whitespace);
-	parsing_should_fail(FILE_LINE_ARGS, table_with_pound);
-	parsing_should_fail(FILE_LINE_ARGS, text_after_array_entries);
-	parsing_should_fail(FILE_LINE_ARGS, text_after_integer);
-	parsing_should_fail(FILE_LINE_ARGS, text_after_string);
-	parsing_should_fail(FILE_LINE_ARGS, text_after_table);
-	parsing_should_fail(FILE_LINE_ARGS, text_before_array_separator);
-	parsing_should_fail(FILE_LINE_ARGS, text_in_array);
+	parsing_should_fail(FILE_LINE_ARGS, array_missing_separator);
 
-	#if !TOML_LANG_UNRELEASED
-	parsing_should_fail(FILE_LINE_ARGS, datetime_malformed_no_secs);
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak);
+	parsing_should_fail(FILE_LINE_ARGS, array_no_close_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, array_no_close_table_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, array_no_close_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, array_no_close);
+
+	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_mixed_case);
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false);
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true);
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_impossible_date);
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_with_milli);
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads);
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_no_t);
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_trailing_t);
+
+#if !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_no_secs);
+
+#endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, duplicate_key_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, duplicate_keys);
+
+	parsing_should_fail(FILE_LINE_ARGS, duplicate_table_array);
+
+	parsing_should_fail(FILE_LINE_ARGS, duplicate_table_array2);
+
+	parsing_should_fail(FILE_LINE_ARGS, duplicate_tables);
+
+	parsing_should_fail(FILE_LINE_ARGS, empty_implicit_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, empty_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_double_point_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_double_point_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_leading_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_point_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_point_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_exp_trailing_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_inf_underscore);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_point_neg);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_point_plus);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_point);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_neg);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_plus);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_nan_underscore);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_min);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_plus);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_trailing_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_us_after_point);
+
+	parsing_should_fail(FILE_LINE_ARGS, float_us_before_point);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_double_comma);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_empty);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_no_comma);
+
+#if !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_3);
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma);
+
+#endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_capital_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_capital_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_capital_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_nex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_plus);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_double_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_negative_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_negative_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_negative_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_positive_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_positive_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_positive_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_bin);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_hex);
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_oct);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_after_array);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_after_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_after_value);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_bare_invalid_character);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_dotted_redefine_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_duplicate);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_empty);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_hash);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_multiline);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_newline);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_no_eol);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_open_bracket);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_partial_quoted);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_single_open_bracket);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_space);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_start_bracket);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_two_equals);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_two_equals2);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_two_equals3);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_without_value_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, key_without_value_2);
+
+#if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
+	parsing_should_fail(FILE_LINE_ARGS, key_special_character);
+
+#endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
+	parsing_should_fail(FILE_LINE_ARGS, llbrace);
+
+#if !TOML_LANG_UNRELEASED
+
 	parsing_should_fail(FILE_LINE_ARGS, multi_line_inline_table);
-	parsing_should_fail(FILE_LINE_ARGS, string_byte_escapes);
-	#endif // !TOML_LANG_UNRELEASED
+
+#endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, multi_line_string_no_close_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, multi_line_string_no_close);
+
+	parsing_should_fail(FILE_LINE_ARGS, rrbrace);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_byte_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_codepoint);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_concat);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_multiline);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_slash_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_out_of_range_unicode_escape_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_unknown_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_out_of_range_unicode_escape_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_missing_quotes);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_escape_space);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_1);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_2);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_no_close);
+
+	parsing_should_fail(FILE_LINE_ARGS, string_wrong_close);
+
+#if !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_byte_escapes);
+
+#endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, table_array_empty);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_array_implicit);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_array_missing_bracket);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_duplicate);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_empty);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_equals_sign);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_close);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_open);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_quoted_no_close);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_redefine);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_whitespace);
+
+	parsing_should_fail(FILE_LINE_ARGS, table_with_pound);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_after_array_entries);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_after_integer);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_after_string);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_after_table);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_before_array_separator);
+
+	parsing_should_fail(FILE_LINE_ARGS, text_in_array);
 }
 
