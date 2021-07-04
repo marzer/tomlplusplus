@@ -15,10 +15,18 @@ namespace
 	static constexpr auto array_bool = R"(a = [true, false])"sv;
 	static constexpr auto array_empty = R"(thevoid = [[[[[]]]]])"sv;
 	static constexpr auto array_hetergeneous = R"(mixed = [[1, 2], ["a", "b"], [1.1, 2.1]])"sv;
-	static constexpr auto array_mix_string_table = R"(numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]
-contributors = [
+	static constexpr auto array_mixed_int_array = R"(arrays-and-ints =  [1, ["Arrays are not integers."]])"sv;
+	static constexpr auto array_mixed_int_float = R"(ints-and-floats = [1, 1.1])"sv;
+	static constexpr auto array_mixed_int_string = R"(strings-and-ints = ["hi", 42])"sv;
+	static constexpr auto array_mixed_string_table = R"(contributors = [
   "Foo Bar <foo@example.com>",
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
+])"sv;
+	static constexpr auto array_nested_double = R"(nest = [
+	[
+		["a"],
+		[1, 2, [3]]
+	]
 ])"sv;
 	static constexpr auto array_nested_inline_table = R"(a = [ { b = {} } ])"sv;
 	static constexpr auto array_nested = R"(nest = [["a"], ["b"]])"sv;
@@ -585,7 +593,48 @@ TEST_CASE("conformance - burntsushi/valid")
 		REQUIRE(tbl == expected);
 	});
 
-	parsing_should_succeed(FILE_LINE_ARGS, array_mix_string_table, [](toml::table&& tbl)
+	parsing_should_succeed(FILE_LINE_ARGS, array_mixed_int_array, [](toml::table&& tbl)
+	{
+		const auto expected = toml::table{{
+			{ 
+				R"(arrays-and-ints)"sv, toml::array{
+					1,
+					toml::array{
+						R"(Arrays are not integers.)"sv,
+					},
+				}
+			},
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, array_mixed_int_float, [](toml::table&& tbl)
+	{
+		const auto expected = toml::table{{
+			{ 
+				R"(ints-and-floats)"sv, toml::array{
+					1,
+					1.1,
+				}
+			},
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, array_mixed_int_string, [](toml::table&& tbl)
+	{
+		const auto expected = toml::table{{
+			{ 
+				R"(strings-and-ints)"sv, toml::array{
+					R"(hi)"sv,
+					42,
+				}
+			},
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, array_mixed_string_table, [](toml::table&& tbl)
 	{
 		const auto expected = toml::table{{
 			{ 
@@ -598,14 +647,27 @@ TEST_CASE("conformance - burntsushi/valid")
 					}},
 				}
 			},
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, array_nested_double, [](toml::table&& tbl)
+	{
+		const auto expected = toml::table{{
 			{ 
-				R"(numbers)"sv, toml::array{
-					0.1,
-					0.2,
-					0.5,
-					1,
-					2,
-					5,
+				R"(nest)"sv, toml::array{
+					toml::inserter{toml::array{
+						toml::array{
+							R"(a)"sv,
+						},
+						toml::array{
+							1,
+							2,
+							toml::array{
+								3,
+							},
+						},
+					}},
 				}
 			},
 		}};

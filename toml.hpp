@@ -10434,7 +10434,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (is_eof()
 						|| is_value_terminator(*cp)
-						|| (part_of_datetime && is_match(*cp, U'+', U'-', U'Z')))
+						|| (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
 						return time;
 				}
 				else
@@ -10456,7 +10456,7 @@ TOML_IMPL_NAMESPACE_START
 				// '.' (early-exiting is allowed; fractional is optional)
 				if (is_eof()
 					|| is_value_terminator(*cp)
-					|| (part_of_datetime && is_match(*cp, U'+', U'-', U'Z')))
+					|| (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
 					return time;
 				if (*cp != U'.')
 					set_error_and_return_default("expected '.', saw '"sv, to_sv(*cp), "'"sv);
@@ -10504,9 +10504,9 @@ TOML_IMPL_NAMESPACE_START
 				auto date = parse_date(true);
 				set_error_and_return_if_eof({});
 
-				// ' ' or 'T'
-				if (!is_match(*cp, U' ', U'T'))
-					set_error_and_return_default("expected space or 'T', saw '"sv, to_sv(*cp), "'"sv);
+				// ' ', 'T' or 't'
+				if (!is_match(*cp, U' ', U'T', U't'))
+					set_error_and_return_default("expected space, 'T' or 't', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
 
 				// "HH:MM:SS.FFFFFFFFF"
@@ -10517,9 +10517,9 @@ TOML_IMPL_NAMESPACE_START
 				if (is_eof() || is_value_terminator(*cp))
 					return { date, time };
 
-				// zero offset ("Z")
+				// zero offset ('Z' or 'z')
 				time_offset offset;
-				if (*cp == U'Z')
+				if (is_match(*cp, U'Z', U'z'))
 					advance_and_return_if_error({});
 
 				// explicit offset ("+/-HH:MM")
@@ -10852,20 +10852,19 @@ TOML_IMPL_NAMESPACE_START
 					// (as opposed to the fallback "could not determine type" message)
 					if (has_any(has_p))
 						val = new value{ parse_hex_float() };
-					else if (has_any(has_x))
+					else if (has_any(has_x | has_o | has_b))
 					{
-						val = new value{ parse_integer<16>() };
+						int64_t i;
+						if (has_any(has_x))
+							i = parse_integer<16>();
+						else if (has_any(has_o))
+							i = parse_integer<8>();
+						else // has_b
+							i = parse_integer<2>();
+						return_if_error({});
+
+						val = new value{ i };
 						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
-					}
-					else if (has_any(has_o))
-					{
-						val = new value{ parse_integer<8>() };
-						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
-					}
-					else if (has_any(has_b))
-					{
-						val = new value{ parse_integer<2>() };
-						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
 					}
 					else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 						val = new value{ parse_float() };

@@ -353,8 +353,6 @@ def load_valid_inputs(tests, extern_root):
 
 def load_invalid_inputs(tests, extern_root):
 	tests['invalid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'invalid'), False, (
-		# false negatives after TOML 0.4.0
-		re.compile('array-mixed.*'),
 		# these break IO/git/visual studio (i test them elsewhere)
 		re.compile('.*(bom|control).*'),
 		'encoding-utf16',

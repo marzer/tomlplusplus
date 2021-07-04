@@ -52,42 +52,56 @@ TEST_CASE("parsing - dates and times")
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, { -9, -30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30-09:30"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30-09:30"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30-09:30"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, { 9, 30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30+09:30"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30+09:30"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30+09:30"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30.04"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30.04"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, { -9, -30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30.04-09:30"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30.04-09:30"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04-09:30"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, { 9, 30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30.04+09:30"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30.04+09:30"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04+09:30"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 }, {} };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30Z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30Z"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30Z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30z"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30, 40000000 }, {} };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30.04Z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30.04Z"sv, val);
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04Z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30.04z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16t10:20:30.04z"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04z"sv, val);
 	}
 
 	// toml/issues/671 (allow omission of seconds)
