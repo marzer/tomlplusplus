@@ -131,6 +131,9 @@
     <None Include="cmake\variables.cmake">
       <Filter>cmake</Filter>
     </None>
+    <None Include="cmake\tomlplusplus.cmake.in">
+      <Filter>cmake</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">

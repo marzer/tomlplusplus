@@ -6,7 +6,7 @@
 #pragma once
 
 #define TOML_LIB_MAJOR		2
-#define TOML_LIB_MINOR		4
+#define TOML_LIB_MINOR		5
 #define TOML_LIB_PATCH		0
 
 #define TOML_LANG_MAJOR		1

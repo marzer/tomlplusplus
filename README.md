@@ -97,13 +97,13 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ### Conan
-Add `tomlplusplus/2.4.0` to your conanfile.
+Add `tomlplusplus/2.5.0` to your conanfile.
 
 ### DDS
 Add `tomlpp` to your `package.json5`, e.g.:
 ```
 depends: [
-    'tomlpp^2.4.0',
+    'tomlpp^2.5.0',
 ]
 ```
 > ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
@@ -114,23 +114,12 @@ vcpkg install tomlplusplus
 ```
 
 ### CMake FetchContent
-Using the tar archive
-```
-include(FetchContent)
-FetchContent_Declare(
-    tomlplusplus
-    URL https://github.com/marzer/tomlplusplus/archive/refs/tags/v2.4.0.tar.gz
-    URL_HASH MD5=546d163e5f37d9bbdc5e19702aaaac8f
-)
-FetchContent_MakeAvailable(tomlplusplus)
-```
-Using the git tag
 ```
 include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        v2.4.0
+    GIT_TAG        v2.5.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 ```
