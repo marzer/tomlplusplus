@@ -211,8 +211,8 @@ def python_to_tomlpp(node):
 
 class TomlTest:
 
-	def __init__(self, file_path, is_valid_case):
-		self.__name = file_path.stem
+	def __init__(self, file_path, name, is_valid_case):
+		self.__name = name
 		self.__identifier = sanitize(self.__name)
 		self.__group = self.__identifier.strip('_').split('_')[0]
 		self.__data = utils.read_all_text_from_file(file_path, logger=True).strip()
@@ -273,26 +273,28 @@ class TomlTest:
 def load_tests(source_folder, is_valid_set, ignore_list):
 	source_folder = source_folder.resolve()
 	utils.assert_existing_directory(source_folder)
-	files = utils.get_all_files(source_folder, all="*.toml")
+	files = utils.get_all_files(source_folder, all="*.toml", recursive=True)
+	strip_source_folder_len = len(str(source_folder))
+	files = [(f, str(f)[strip_source_folder_len+1:-5].replace('\\', '-').replace('/', '-').strip()) for f in files]
 	if ignore_list:
 		files_ = []
-		for f in files:
+		for f,n in files:
 			ignored = False
 			for ignore in ignore_list:
 				if isinstance(ignore, str):
-					if f.stem == ignore:
+					if n == ignore:
 						ignored = True
 						break
-				elif ignore.fullmatch(f.stem) is not None: # regex
+				elif ignore.fullmatch(n) is not None: # regex
 					ignored = True
 					break
 			if not ignored:
-				files_.append(f)
+				files_.append((f, n))
 		files = files_
 	tests = []
-	for f in files:
+	for f,n in files:
 		try:
-			tests.append(TomlTest(f, is_valid_set))
+			tests.append(TomlTest(f, n, is_valid_set))
 		except Exception as e:
 			print(rf'Error reading {f}, skipping...', file=sys.stderr)
 	return tests
@@ -319,13 +321,15 @@ def load_valid_inputs(tests, extern_root):
 	tests['valid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'valid'), True, (
 		# newline/escape handling tests. these get broken by I/O (I test them separately)
 		'string-escapes',
-		# causes MSVC to run out of heap space during compilation O_o
-		'inline-table-key-dotted',
 		# broken by the json reader
 		'key-alphanum',
-		# breaks clang:
-		'multiline-string',
+		# whitespace after trailing slash in raw strings breaks GCC
+		'string-multiline'
 	))
+	add_condition(tests['valid']['burntsushi'], '!TOML_MSVC', (
+		'inline-table-key-dotted', # causes MSVC to run out of heap space during compilation O_o
+	))
+
 	tests['valid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'values'), True, (
 		# these are stress-tests for 'large' datasets. I test these separately. Having them inline in C++ code is insane.
 		'qa-array-inline-1000',
@@ -345,7 +349,7 @@ def load_valid_inputs(tests, extern_root):
 		'spec-date-time-6',
 		'spec-date-time-local-2',
 		'spec-time-2',
-		# breaks gcc:
+		# whitespace after trailing slash in raw strings breaks GCC
 		'spec-string-basic-multiline-4',
 	))
 
@@ -454,12 +458,12 @@ def write_test_file(name, all_tests):
 					expected = test.expected()
 					if isinstance(expected, bool):
 						if expected:
-							write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()});')
+							write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}); // {test.name()}')
 						else:
-							write(f'\tparsing_should_fail(FILE_LINE_ARGS, {test.identifier()});')
+							write(f'\tparsing_should_fail(FILE_LINE_ARGS, {test.identifier()}); // {test.name()}')
 					else:
 						s = expected.render('\t\t')
-						write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}, [](toml::table&& tbl)')
+						write(f'\tparsing_should_succeed(FILE_LINE_ARGS, {test.identifier()}, [](toml::table&& tbl) // {test.name()}')
 						write('\t{')
 						write(f'\t\tconst auto expected = {s};')
 						write('\t\tREQUIRE(tbl == expected);')

@@ -51,7 +51,7 @@ TOML_ANON_NAMESPACE_START
 	}
 
 	template <uint64_t> struct parse_integer_traits;
-	template <> struct parse_integer_traits<2> final
+	template <> struct parse_integer_traits<2>
 	{
 		static constexpr auto scope_qualifier = "binary integer"sv;
 		static constexpr auto is_digit = ::toml::impl::is_binary_digit;
@@ -60,7 +60,7 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto prefix_codepoint = U'b';
 		static constexpr auto prefix = "b"sv;
 	};
-	template <> struct parse_integer_traits<8> final
+	template <> struct parse_integer_traits<8>
 	{
 		static constexpr auto scope_qualifier = "octal integer"sv;
 		static constexpr auto is_digit = ::toml::impl::is_octal_digit;
@@ -69,14 +69,14 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto prefix_codepoint = U'o';
 		static constexpr auto prefix = "o"sv;
 	};
-	template <> struct parse_integer_traits<10> final
+	template <> struct parse_integer_traits<10>
 	{
 		static constexpr auto scope_qualifier = "decimal integer"sv;
 		static constexpr auto is_digit = ::toml::impl::is_decimal_digit;
 		static constexpr auto is_signed = true;
 		static constexpr auto buffer_length = 19; //strlen("9223372036854775807")
 	};
-	template <> struct parse_integer_traits<16> final
+	template <> struct parse_integer_traits<16>
 	{
 		static constexpr auto scope_qualifier = "hexadecimal integer"sv;
 		static constexpr auto is_digit = ::toml::impl::is_hexadecimal_digit;
@@ -198,7 +198,7 @@ TOML_ANON_NAMESPACE_START
 		}
 	}
 
-	struct error_builder final
+	struct error_builder
 	{
 		static constexpr std::size_t buf_size = 512;
 		char buf[buf_size];
@@ -242,7 +242,7 @@ TOML_ANON_NAMESPACE_START
 		error_builder& operator=(error_builder&&) = delete;
 	};
 
-	struct parse_scope final
+	struct parse_scope
 	{
 		std::string_view& storage_;
 		std::string_view parent_;
@@ -330,18 +330,19 @@ TOML_ANON_NAMESPACE_START
 			}
 	};
 
-	struct parsed_key final
+	struct parsed_key
 	{
+		toml::source_position position;
 		std::vector<std::string> segments;
 	};
 
-	struct parsed_key_value_pair final
+	struct parsed_key_value_pair
 	{
 		parsed_key key;
 		node_ptr value;
 	};
 
-	struct parse_depth_counter final
+	struct parse_depth_counter
 	{
 		size_t& depth_;
 
@@ -363,6 +364,11 @@ TOML_ANON_NAMESPACE_START
 		parse_depth_counter& operator=(parse_depth_counter&&) = delete;
 	};
 
+	struct parsed_string
+	{
+		std::string value;
+		bool was_multi_line;
+	};
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -389,8 +395,8 @@ TOML_IMPL_NAMESPACE_START
 	#if TOML_EXCEPTIONS
 		#define is_error()						false
 		#define return_after_error(...)			TOML_UNREACHABLE
-		#define assert_not_error()				(void)0
-		#define return_if_error(...)			(void)0
+		#define assert_not_error()				static_assert(true)
+		#define return_if_error(...)			static_assert(true)
 		#define return_if_error_or_eof(...)		return_if_eof(__VA_ARGS__)
 	#else
 		#define is_error()						!!err
@@ -398,6 +404,25 @@ TOML_IMPL_NAMESPACE_START
 		#define assert_not_error()				TOML_ASSERT(!is_error())
 		#define return_if_error(...)			do { if (is_error()) return __VA_ARGS__; } while(false)
 		#define return_if_error_or_eof(...)		do { if (is_eof() || is_error()) return __VA_ARGS__; } while(false)
+	#endif
+
+	#if defined(TOML_BREAK_AT_PARSE_ERRORS) && TOML_BREAK_AT_PARSE_ERRORS
+		#if defined(__has_builtin)
+			#if __has_builtin(__builtin_debugtrap)
+				#define parse_error_break() __builtin_debugtrap()
+			#elif __has_builtin(__debugbreak)
+				#define parse_error_break() __debugbreak()
+			#endif
+		#endif
+		#ifndef parse_error_break
+			#if TOML_MSVC || TOML_ICC
+				#define parse_error_break() __debugbreak()
+			#else
+				#define parse_error_break() TOML_ASSERT(false)
+			#endif
+		#endif
+	#else
+		#define parse_error_break() static_assert(true)
 	#endif
 
 	#define set_error_and_return(ret, ...)		\
@@ -421,7 +446,7 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-	class parser final
+	class parser
 	{
 		private:
 			static constexpr size_t max_nested_values = TOML_MAX_NESTED_VALUES;
@@ -462,6 +487,8 @@ TOML_IMPL_NAMESPACE_START
 
 				error_builder builder{ current_scope };
 				(builder.append(reason), ...);
+
+				parse_error_break();
 
 				#if TOML_EXCEPTIONS
 					builder.finish(pos, reader.source_path());
@@ -1030,12 +1057,6 @@ TOML_IMPL_NAMESPACE_START
 
 				set_error_and_return_default("encountered end-of-file"sv);
 			}
-
-			struct parsed_string final
-			{
-				std::string value;
-				bool was_multi_line;
-			};
 
 			[[nodiscard]]
 			TOML_NEVER_INLINE
@@ -2427,6 +2448,7 @@ TOML_IMPL_NAMESPACE_START
 				push_parse_scope("key"sv);
 
 				parsed_key key;
+				key.position = current_position();
 				recording_whitespace = false;
 
 				while (!is_error())
@@ -2528,7 +2550,7 @@ TOML_IMPL_NAMESPACE_START
 				assert_or_assume(*cp == U'[');
 				push_parse_scope("table header"sv);
 
-				const auto header_begin_pos = cp->position;
+				const source_position header_begin_pos = cp->position;
 				source_position header_end_pos;
 				parsed_key key;
 				bool is_arr = false;
@@ -2687,7 +2709,7 @@ TOML_IMPL_NAMESPACE_START
 						&& !implicit_tables.empty())
 					{
 						auto tbl = &matching_node->ref_cast<table>();
-						if (auto found = find(implicit_tables, tbl))
+						if (auto found = find(implicit_tables, tbl); found && (tbl->empty() || tbl->is_homogeneous<table>()))
 						{
 							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
 							tbl->source_.begin = header_begin_pos;
@@ -2698,13 +2720,19 @@ TOML_IMPL_NAMESPACE_START
 
 					//if we get here it's a redefinition error.
 					if (!is_arr && matching_node->type() == node_type::table)
-						set_error_and_return_default("cannot redefine existing table '"sv, to_sv(recording_buffer), "'"sv);
+					{
+						set_error_at(header_begin_pos, "cannot redefine existing table '"sv, to_sv(recording_buffer), "'"sv);
+						return_after_error({});
+					}
 					else
-						set_error_and_return_default(
+					{
+						set_error_at(header_begin_pos,
 							"cannot redefine existing "sv, to_sv(matching_node->type()),
 							" '"sv, to_sv(recording_buffer),
 							"' as "sv, is_arr ? "array-of-tables"sv : "table"sv
 						);
+						return_after_error({});
+					}
 				}
 			}
 
@@ -2735,9 +2763,11 @@ TOML_IMPL_NAMESPACE_START
 							dotted_key_tables.push_back(&child->ref_cast<table>());
 							child->source_ = kvp.value.get()->source_;
 						}
-						else if (!child->is_table()
-							|| !(find(dotted_key_tables, &child->ref_cast<table>()) || find(implicit_tables, &child->ref_cast<table>())))
-							set_error("cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
+						else if (!child->is_table() || !(
+							find(dotted_key_tables, &child->ref_cast<table>())
+							|| find(implicit_tables, &child->ref_cast<table>())
+						))
+							set_error_at(kvp.key.position, "cannot redefine existing "sv, to_sv(child->type()), " as dotted key-value pair"sv);
 						else
 							child->source_.end = kvp.value.get()->source_.end;
 
@@ -3135,6 +3165,7 @@ TOML_IMPL_NAMESPACE_START
 	#undef advance_and_return_if_error
 	#undef advance_and_return_if_error_or_eof
 	#undef assert_or_assume
+	#undef parse_error_break
 }
 TOML_IMPL_NAMESPACE_END;
 

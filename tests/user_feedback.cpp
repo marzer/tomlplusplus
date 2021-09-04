@@ -176,5 +176,24 @@ b = []
 		parsing_should_fail(FILE_LINE_ARGS, std::string_view{ s });
 	}
 
+	SECTION("github/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
+	{
+		parsing_should_fail(FILE_LINE_ARGS, R"(
+			[a.b.c.d]
+			  u = 6
+			[a]
+			  b.t = 8
+			[a.b] # should cause redefinition error here
+			  u = 0
+		)", 6);
+
+		parsing_should_fail(FILE_LINE_ARGS, R"(
+			[a]
+			  b.t = 8
+			[a.b] # should cause redefinition error here
+			  u = 0
+		)", 4);
+	}
+
 }
 

@@ -132,7 +132,9 @@ bool parsing_should_succeed(
 bool parsing_should_fail(
 	std::string_view test_file,
 	uint32_t test_line,
-	std::string_view toml_str);
+	std::string_view toml_str,
+	source_index expected_failure_line = static_cast<source_index>(-1),
+	source_index expected_failure_column = static_cast<source_index>(-1));
 
 template <typename T>
 inline bool parse_expected_value(
