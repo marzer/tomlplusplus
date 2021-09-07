@@ -29,8 +29,10 @@ def python_value_to_tomlpp(val):
 	if isinstance(val, str):
 		if re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
 			return str(float(val))
+		elif not val:
+			return r'""sv'
 		else:
-			return 'R"({})"sv'.format(val)
+			return rf'R"({val})"sv'
 	elif isinstance(val, bool):
 		return 'true' if val else 'false'
 	elif isinstance(val, float):
@@ -42,9 +44,9 @@ def python_value_to_tomlpp(val):
 			return str(val)
 	elif isinstance(val, int):
 		if val == 9223372036854775807:
-			return 'INT64_MAX'
+			return 'std::numeric_limits<int64_t>::max()'
 		elif val == -9223372036854775808:
-			return 'INT64_MIN'
+			return 'std::numeric_limits<int64_t>::min()'
 		else:
 			return str(val)
 	elif isinstance(val, (TomlPPArray, TomlPPTable)):
@@ -216,6 +218,7 @@ class TomlTest:
 		self.__identifier = sanitize(self.__name)
 		self.__group = self.__identifier.strip('_').split('_')[0]
 		self.__data = utils.read_all_text_from_file(file_path, logger=True).strip()
+		self.__data = re.sub(r'\\[ \t]+?\n', '\\\n', self.__data, re.S) # C++ compilers don't like whitespace after trailing slashes
 		self.__conditions = []
 		if is_valid_case:
 			self.__expected = True
@@ -323,8 +326,6 @@ def load_valid_inputs(tests, extern_root):
 		'string-escapes',
 		# broken by the json reader
 		'key-alphanum',
-		# whitespace after trailing slash in raw strings breaks GCC
-		'string-multiline'
 	))
 	add_condition(tests['valid']['burntsushi'], '!TOML_MSVC', (
 		'inline-table-key-dotted', # causes MSVC to run out of heap space during compilation O_o
@@ -349,8 +350,6 @@ def load_valid_inputs(tests, extern_root):
 		'spec-date-time-6',
 		'spec-date-time-local-2',
 		'spec-time-2',
-		# whitespace after trailing slash in raw strings breaks GCC
-		'spec-string-basic-multiline-4',
 	))
 
 

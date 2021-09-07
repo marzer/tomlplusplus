@@ -259,6 +259,18 @@ c = 2)"sv;
 	static constexpr auto table_empty_implicit_table = R"([naughty..naughty])"sv;
 	static constexpr auto table_empty = R"([])"sv;
 	static constexpr auto table_equals_sign = R"([name=bad])"sv;
+	static constexpr auto table_injection_1 = R"([a.b.c]
+  z = 9
+[a]
+  b.c.t = "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed"
+  
+# see https://github.com/toml-lang/toml/issues/846)"sv;
+	static constexpr auto table_injection_2 = R"([a.b.c.d]
+  z = 9
+[a]
+  b.c.d.k.t = "Using dotted keys to add to [a.b.c.d] after explicitly defining it above is not allowed"
+  
+# see https://github.com/toml-lang/toml/issues/846)"sv;
 	static constexpr auto table_llbrace = R"([ [table]])"sv;
 	static constexpr auto table_nested_brackets_close = R"([a]b]
 zyx = 42)"sv;
@@ -594,6 +606,10 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, table_empty); // table-empty
 
 	parsing_should_fail(FILE_LINE_ARGS, table_equals_sign); // table-equals-sign
+
+	parsing_should_fail(FILE_LINE_ARGS, table_injection_1); // table-injection-1
+
+	parsing_should_fail(FILE_LINE_ARGS, table_injection_2); // table-injection-2
 
 	parsing_should_fail(FILE_LINE_ARGS, table_llbrace); // table-llbrace
 

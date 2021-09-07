@@ -127,7 +127,7 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 ### Other environments and package managers
 `toml++` is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options
-in the modern C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
+in the C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
 assured that I fully support it being added, and welcome [pull requests](./CONTRIBUTING.md)!
 
 <br>

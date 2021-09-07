@@ -447,6 +447,52 @@ two_space = """ ""two quotes"" """
 
 mismatch1 = """aaa'''bbb"""
 mismatch2 = '''aaa"""bbb''')"sv;
+	static constexpr auto string_multiline = R"(# NOTE: this file includes some literal tab characters.
+
+multiline_empty_one = """"""
+multiline_empty_two = """
+"""
+multiline_empty_three = """\
+    """
+multiline_empty_four = """\
+   \
+   \
+   """
+
+equivalent_one = "The quick brown fox jumps over the lazy dog."
+equivalent_two = """
+The quick brown \
+
+
+  fox jumps over \
+    the lazy dog."""
+
+equivalent_three = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+
+whitespace-after-bs = """\
+       The quick brown \
+       fox jumps over \
+       the lazy dog.\
+       """
+
+no-space = """a\
+    b"""
+
+keep-ws-before = """a   	\
+   b"""
+
+escape-bs-1 = """a \\
+b"""
+
+escape-bs-2 = """a \\\
+b"""
+
+escape-bs-3 = """a \\\\
+  b""")"sv;
 	static constexpr auto string_nl = R"(nl_mid = "val\nue"
 nl_end = """value\n"""
 
@@ -1622,8 +1668,8 @@ another line)"sv },
 	parsing_should_succeed(FILE_LINE_ARGS, integer_long, [](toml::table&& tbl) // integer-long
 	{
 		const auto expected = toml::table{{
-			{ R"(int64-max)"sv, INT64_MAX },
-			{ R"(int64-max-neg)"sv, INT64_MIN },
+			{ R"(int64-max)"sv, std::numeric_limits<int64_t>::max() },
+			{ R"(int64-max-neg)"sv, std::numeric_limits<int64_t>::min() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1817,7 +1863,7 @@ another line)"sv },
 	parsing_should_succeed(FILE_LINE_ARGS, key_empty, [](toml::table&& tbl) // key-empty
 	{
 		const auto expected = toml::table{{
-			{ R"()"sv, R"(blank)"sv },
+			{ ""sv, R"(blank)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -2063,7 +2109,7 @@ another line)"sv },
 	parsing_should_succeed(FILE_LINE_ARGS, string_empty, [](toml::table&& tbl) // string-empty
 	{
 		const auto expected = toml::table{{
-			{ R"(answer)"sv, R"()"sv },
+			{ R"(answer)"sv, ""sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -2089,6 +2135,28 @@ another line)"sv },
 			{ R"(one_space)"sv, R"( "one quote" )"sv },
 			{ R"(two)"sv, R"(""two quotes"")"sv },
 			{ R"(two_space)"sv, R"( ""two quotes"" )"sv },
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, string_multiline, [](toml::table&& tbl) // string-multiline
+	{
+		const auto expected = toml::table{{
+			{ R"(equivalent_one)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+			{ R"(equivalent_three)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+			{ R"(equivalent_two)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+			{ R"(escape-bs-1)"sv, R"(a \
+b)"sv },
+			{ R"(escape-bs-2)"sv, R"(a \b)"sv },
+			{ R"(escape-bs-3)"sv, R"(a \\
+  b)"sv },
+			{ R"(keep-ws-before)"sv, R"(a   	b)"sv },
+			{ R"(multiline_empty_four)"sv, ""sv },
+			{ R"(multiline_empty_one)"sv, ""sv },
+			{ R"(multiline_empty_three)"sv, ""sv },
+			{ R"(multiline_empty_two)"sv, ""sv },
+			{ R"(no-space)"sv, R"(ab)"sv },
+			{ R"(whitespace-after-bs)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});

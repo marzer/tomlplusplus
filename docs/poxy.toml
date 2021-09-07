@@ -3,7 +3,7 @@
 
 name              = 'toml++'
 author            = 'Mark Gillard'
-description       = 'TOML for modern C++'
+description       = 'TOML for C++'
 cpp               = 17
 github            = 'marzer/tomlplusplus'
 license           = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]

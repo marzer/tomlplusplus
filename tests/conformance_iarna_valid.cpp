@@ -204,6 +204,8 @@ The quick brown \
       fox jumps over \
       the lazy dog.\
       """)"sv;
+	static constexpr auto spec_string_basic_multiline_4 = R"(a = """abc\
+def""")"sv;
 	static constexpr auto spec_string_basic_multiline_5 = R"(ml-escaped-nl = """
   foo \
   bar \\
@@ -665,7 +667,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_empty_key_name_1, [](toml::table&& tbl) // spec-empty-key-name-1
 	{
 		const auto expected = toml::table{{
-			{ R"()"sv, R"(blank)"sv },
+			{ ""sv, R"(blank)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -673,7 +675,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_empty_key_name_2, [](toml::table&& tbl) // spec-empty-key-name-2
 	{
 		const auto expected = toml::table{{
-			{ R"()"sv, R"(blank)"sv },
+			{ ""sv, R"(blank)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -964,7 +966,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_max, [](toml::table&& tbl) // spec-int-max
 	{
 		const auto expected = toml::table{{
-			{ R"(max)"sv, INT64_MAX },
+			{ R"(max)"sv, std::numeric_limits<int64_t>::max() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -972,7 +974,7 @@ TEST_CASE("conformance - iarna/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, spec_int_min, [](toml::table&& tbl) // spec-int-min
 	{
 		const auto expected = toml::table{{
-			{ R"(min)"sv, INT64_MIN },
+			{ R"(min)"sv, std::numeric_limits<int64_t>::min() },
 		}};
 		REQUIRE(tbl == expected);
 	});
@@ -1164,6 +1166,14 @@ Violets are blue)"sv },
 	{
 		const auto expected = toml::table{{
 			{ R"(str)"sv, R"(The quick brown fox jumps over the lazy dog.)"sv },
+		}};
+		REQUIRE(tbl == expected);
+	});
+
+	parsing_should_succeed(FILE_LINE_ARGS, spec_string_basic_multiline_4, [](toml::table&& tbl) // spec-string-basic-multiline-4
+	{
+		const auto expected = toml::table{{
+			{ R"(a)"sv, R"(abcdef)"sv },
 		}};
 		REQUIRE(tbl == expected);
 	});

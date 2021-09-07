@@ -514,7 +514,7 @@ pkgc = import('pkgconfig')
 pkgc.generate(
 	name: meson.project_name(),
 	version: meson.project_version(),
-	description: 'Header-only TOML config file parser and serializer for modern C++',
+	description: 'Header-only TOML config file parser and serializer for C++',
 	install_dir: join_paths(get_option('datadir'), 'pkgconfig'),
 )
 
