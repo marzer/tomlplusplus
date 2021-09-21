@@ -496,10 +496,12 @@ if build_examples
 	subdir('examples')
 endif
 
-install_subdir('include/toml++',
-	strip_directory: true,
-	install_dir: 'include/toml++'
-)
+if not is_subproject
+	install_subdir('include/toml++',
+		strip_directory: true,
+		install_dir: 'include/toml++'
+	)
+endif
 
 #######################################################################################################################
 # dependencies, cmake etc.
@@ -510,13 +512,14 @@ tomlplusplus_dep = declare_dependency(
 	version : meson.project_version(),
 )
 
-pkgc = import('pkgconfig')
-pkgc.generate(
-	name: meson.project_name(),
-	version: meson.project_version(),
-	description: 'Header-only TOML config file parser and serializer for C++',
-	install_dir: join_paths(get_option('datadir'), 'pkgconfig'),
-)
+if not is_subproject
+	import('pkgconfig').generate(
+		name: meson.project_name(),
+		version: meson.project_version(),
+		description: 'Header-only TOML config file parser and serializer for C++',
+		install_dir: join_paths(get_option('datadir'), 'pkgconfig'),
+	)
+endif
 
 # cmake
 if get_option('generate_cmake_config') and not is_subproject
