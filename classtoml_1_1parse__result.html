@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.5" name="generator"/>
+  <meta content="Poxy v0.5.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.5.css" rel="stylesheet"/>
-  <link href="poxy-0.4.5-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.5.js"></script>
+  <link href="poxy-0.5.0.css" rel="stylesheet"/>
+  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -83,7 +83,7 @@
 
 <span class="go">Parse failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
-<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><p>Getting <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a> (<code>operator[]</code>) and using the iterator accessor functions (<code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a>, <a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> etc.) are unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is also safe since <code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a></code> and <code><a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> return the same iterator and will not lead to any dereferences and iterations.</p><aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
+<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><p>Getting  (<code>operator[]</code>) and using the iterator accessor functions (<code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a>, <a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> etc.) are unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is also safe since <code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a></code> and <code><a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> return the same iterator and will not lead to any dereferences and iterations.</p><aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
     <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
 <span class="cp">#else</span>
     <span class="k">class</span> <span class="nc">parse_result</span> <span class="k">final</span> <span class="p">{</span> <span class="c1">// ...</span>
@@ -94,11 +94,11 @@
             <dt id="abf92ffb48c1f4d0f129f4032708d4ab0">
               using <a class="m-doc-self" href="#abf92ffb48c1f4d0f129f4032708d4ab0">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a>
             </dt>
-            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A  for iterating over const key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="aae503c11e9f9162de5cbef5e2c9f4863">
               using <a class="m-doc-self" href="#aae503c11e9f9162de5cbef5e2c9f4863">iterator</a> = <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a>
             </dt>
-            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A  for iterating over key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -296,7 +296,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
                 </tr>
               </tfoot>
             </table>
@@ -320,7 +320,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
                 </tr>
               </tfoot>
             </table>
@@ -344,7 +344,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
                 </tr>
               </tfoot>
             </table>
@@ -368,7 +368,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
                 </tr>
               </tfoot>
             </table>

@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.5" name="generator"/>
+  <meta content="Poxy v0.5.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.5.css" rel="stylesheet"/>
-  <link href="poxy-0.4.5-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.5.js"></script>
+  <link href="poxy-0.5.0.css" rel="stylesheet"/>
+  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -108,7 +108,7 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a class="m-doc" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_same.html" target="_blank">std::<wbr/>is_same_v</a>&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
+              using <a class="m-doc" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_same.html" target="_blank">std::<wbr/>is_same_v</a>&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, , bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
             </dt>
             <dd>A type alias for 'value arguments'.</dd>
             <dt id="ad87b8c7ec465c424b861aba2d4cd5526">
@@ -252,7 +252,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aa378fa343dab7d7bdb4073570dba5fdc">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns the <a class="m-doc poxy-injected" href="structtoml_1_1source__region.html">source region</a> responsible for generating this node during parsing.</dd>
+            <dd>Returns the  responsible for generating this node during parsing.</dd>
           </dl>
         </section>
         <section id="node-views">
@@ -302,9 +302,9 @@
             </dt>
             <dd>Returns a pointer to the node as a toml::value&lt;double&gt;, if it is one.</dd>
             <dt id="af4ff7751b5220c599d5dcee7fc44a595">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af4ff7751b5220c599d5dcee7fc44a595">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af4ff7751b5220c599d5dcee7fc44a595">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
+            <dd>Returns a pointer to the node as a toml::value&lt;&gt;, if it is one.</dd>
             <dt id="ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -504,7 +504,7 @@
               <div class="m-doc-template">
                 template&lt;typename ValueType&gt;
               </div>
-              using toml::<wbr/>value&lt;ValueType&gt;::<wbr/><a class="m-doc-self" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_same.html" target="_blank">std::<wbr/>is_same_v</a>&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>, bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
+              using toml::<wbr/>value&lt;ValueType&gt;::<wbr/><a class="m-doc-self" href="#ad31666efce027c28c5383357badfa555">value_arg</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_same.html" target="_blank">std::<wbr/>is_same_v</a>&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/conditional.html" target="_blank">std::<wbr/>conditional_t</a>&lt;impl::is_one_of&lt;<a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, double, , bool&gt;, <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>, const <a class="m-doc" href="classtoml_1_1value.html#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>&amp;&gt;&gt;
             </h3>
             <p>A type alias for 'value arguments'.</p>
 <p>This differs according to the value's type argument:</p><ul><li>ints, floats, booleans: <code>value_type</code></li><li>strings: <code>string_view</code></li><li>everything else: <code>const value_type&amp;</code></li></ul>

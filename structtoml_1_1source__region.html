@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.5" name="generator"/>
+  <meta content="Poxy v0.5.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.5.css" rel="stylesheet"/>
-  <link href="poxy-0.4.5-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.5.js"></script>
+  <link href="poxy-0.5.0.css" rel="stylesheet"/>
+  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -81,7 +81,7 @@
     <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"path: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">path</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">begin: line 3, column 1</span>
 <span class="go">end: line 3, column 22</span>
-<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your <a class="m-doc poxy-injected" href="structtoml_1_1source__position.html">source_positions</a> don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
+<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your  don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">

@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.5" name="generator"/>
+  <meta content="Poxy v0.5.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.5.css" rel="stylesheet"/>
-  <link href="poxy-0.4.5-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.5.js"></script>
+  <link href="poxy-0.5.0.css" rel="stylesheet"/>
+  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -126,7 +126,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
             </dt>
-            <dd>Enables the use of wide strings (<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">wchar_t</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>) in various places throughout the library when building for Windows.</dd>
+            <dd>Enables the use of wide strings (, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>) in various places throughout the library when building for Windows.</dd>
           </dl>
         </section>
         <section>
@@ -225,7 +225,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga0785b375499ea976c627d775f8fc747b">TOML_WINDOWS_COMPAT</a></span>
             </h3>
-            <p>Enables the use of wide strings (<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">wchar_t</a>, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>) in various places throughout the library when building for Windows.</p>
+            <p>Enables the use of wide strings (, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>) in various places throughout the library when building for Windows.</p>
 <p>Defaults to <code>1</code> when building for Windows, <code>0</code> otherwise. Has no effect when building for anything other than Windows.</p><aside class="m-note m-default"><h4>Remark</h4><p>This <strong>does not</strong> change the underlying string type used to represent TOML keys and string values; that will still be <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>. This setting simply enables some narrow &lt;=&gt; wide string conversions when necessary at various interface boundaries.<br/><br/>If you're building for Windows and you have no need for Windows' "Pretends-to-be-unicode" wide strings, you can safely set this to <code>0</code>.</p></aside>
           </div></section>
         </section>

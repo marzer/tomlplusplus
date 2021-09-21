@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.4.5" name="generator"/>
+  <meta content="Poxy v0.5.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.4.5.css" rel="stylesheet"/>
-  <link href="poxy-0.4.5-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.4.5.js"></script>
+  <link href="poxy-0.5.0.css" rel="stylesheet"/>
+  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -81,7 +81,7 @@
             </li>
           </ul>
         </div>
-<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/utility/optional" target="_blank">std::optional</a>&lt;toml::node&amp;&gt; (if such a construct were legal), with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<p>A <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> is like a &lt;toml::node&amp;&gt; (if such a construct were legal), with lots of toml-specific stuff built-in. It <em>may</em> represent a node, and allows you to do many of the same operations that you'd do on nodes directly, as well as easily traversing the node tree by creating subviews (via <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a>).</p><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 
 <span class="s">    title = "my hardware store"</span>
 <span class="s">    </span>
@@ -193,7 +193,7 @@
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5d13b026efcd31812415ead30eeb69db">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5d13b026efcd31812415ead30eeb69db">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the selected subnode.</dd>
           </dl>
@@ -229,7 +229,7 @@
             <dt id="a808722847b84556da8c87dfb46ce3eaf">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a808722847b84556da8c87dfb46ce3eaf">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the viewed node as a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
+            <dd>Returns a pointer to the viewed node as a toml::value&lt;&gt;, if it is one.</dd>
             <dt id="a623c01318fd53c81ec03345343dc6356">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a623c01318fd53c81ec03345343dc6356">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -293,11 +293,11 @@
             <dt id="ab9c835ddf017f250d84fa5d5736e8520">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab9c835ddf017f250d84fa5d5736e8520">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if the viewed node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dd>Returns true if the viewed node is a toml::value&lt;&gt;.</dd>
             <dt id="a107732370c62402b1101a78e7382fd8b">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a107732370c62402b1101a78e7382fd8b">is_number</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if the viewed node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt; or toml::value&lt;double&gt;.</dd>
+            <dd>Returns true if the viewed node is a toml::value&lt;&gt; or toml::value&lt;double&gt;.</dd>
             <dt id="a79b47268155d955b8e2c027b0c2ae983">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a79b47268155d955b8e2c027b0c2ae983">is_string</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -426,7 +426,7 @@
               <div class="m-doc-template">
                 template&lt;typename ViewedType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;ViewedType&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5d13b026efcd31812415ead30eeb69db">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> toml::<wbr/>node_view&lt;ViewedType&gt;::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5d13b026efcd31812415ead30eeb69db">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a><span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the selected subnode.</p>
             <table class="m-table m-fullwidth m-flat">
