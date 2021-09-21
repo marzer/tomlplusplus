@@ -45,8 +45,8 @@ compiler_supports_fast_math = compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports fast-math',
-	args : compiler_supports_fast_math_args
+	name: 'supports fast-math',
+	args: compiler_supports_fast_math_args
 )
 
 #######################################################################################################################
@@ -146,9 +146,9 @@ foreach cpp20 : cpp20_modes
 					executable(
 						test_name,
 						test_sources,
-						include_directories : include_dirs,
-						cpp_args : test_args,
-						override_options : test_overrides
+						include_directories: include_dirs,
+						cpp_args: test_args,
+						override_options: test_overrides
 					)
 				]]
 
@@ -175,8 +175,8 @@ foreach executable : test_executables
 	foreach locale : locales
 		test(
 			executable[0] + ' (' + locale + ')', executable[1],
-			env : ['LC_ALL=' + locale],
-			workdir : meson.source_root() / 'tests'
+			env: ['LC_ALL=' + locale],
+			workdir: meson.source_root()/'tests'
 		)
 	endforeach
 endforeach

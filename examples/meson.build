@@ -15,8 +15,8 @@ foreach example : examples
 	executable(
 		example,
 		[ example+'.cpp' ],
-		include_directories : include_dirs,
-		cpp_args : example_args,
+		include_directories: include_dirs,
+		cpp_args: example_args,
 		override_options: overrides
 	)
 endforeach

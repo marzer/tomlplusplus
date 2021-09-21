@@ -1,15 +1,14 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version : '2.5.0',
-	meson_version : '>=0.53.0',
-	license : 'MIT',
-	default_options : [ # https://mesonbuild.com/Builtin-options.html
+	version: '2.5.0',
+	meson_version: '>=0.53.0',
+	license: 'MIT',
+	default_options: [ # https://mesonbuild.com/Builtin-options.html
 		# core options
 		'buildtype=release',
 		'warning_level=3',
 		'werror=true',
-		'layout=flat',
 
 		# base options
 		'b_lto=true',
@@ -64,7 +63,7 @@ if is_gcc or is_clang
 		'-march=native',
 		'-fvisibility=hidden',
 		'-fvisibility-inlines-hidden',
-		language : 'cpp'
+		language: 'cpp'
 	)
 	if is_release
 		add_project_arguments(
@@ -73,7 +72,7 @@ if is_gcc or is_clang
 			'-Wl,--gc-sections',
 			'-Wl,-s',
 			'-mfma',
-			language : 'cpp'
+			language: 'cpp'
 		)
 	endif
 endif
@@ -84,7 +83,7 @@ if is_gcc
 	add_project_arguments(
 		'-fmax-errors=5',
 		'-Wno-init-list-lifetime',
-		language : 'cpp'
+		language: 'cpp'
 	)
 	if is_pedantic
 		add_project_arguments(
@@ -92,7 +91,6 @@ if is_gcc
 			'-Wcast-qual',
 			'-Wctor-dtor-privacy',
 			'-Wdisabled-optimization',
-			'-Wextra',
 			'-Wfloat-equal',
 			'-Wimport',
 			'-Winit-self',
@@ -107,7 +105,6 @@ if is_gcc
 			'-Woverloaded-virtual',
 			'-Wpacked',
 			'-Wpadded',
-			'-Wpedantic',
 			'-Wpointer-arith',
 			'-Wredundant-decls',
 			'-Wshadow',
@@ -127,13 +124,13 @@ if is_gcc
 			'-Wmissing-noreturn',
 			'-Wsuggest-attribute=const',
 			'-Wsuggest-attribute=pure',
-			language : 'cpp'
+			language: 'cpp'
 		)
 	endif
 	if is_release
 		add_project_arguments(
 			'-fmerge-constants',
-			language : 'cpp'
+			language: 'cpp'
 		)
 	endif
 endif
@@ -141,7 +138,7 @@ endif
 # Clang
 if is_clang
 	if is_pedantic
-		add_project_arguments('-Weverything', language : 'cpp')
+		add_project_arguments('-Weverything', language: 'cpp')
 	endif
 	add_project_arguments(
 		'-ferror-limit=5',
@@ -154,16 +151,15 @@ if is_clang
 		'-Wno-documentation-unknown-command',
 		'-Wno-switch-enum',
 		'-Wno-covered-switch-default',
-		language : 'cpp'
+		language: 'cpp'
 	)
 	if get_option('time_trace')
-		add_project_arguments('-ftime-trace', language : 'cpp')
+		add_project_arguments('-ftime-trace', language: 'cpp')
 	endif
 	if is_release
 		add_project_arguments(
-			'-Oz',
 			'-fmerge-all-constants',
-			language : 'cpp'
+			language: 'cpp'
 		)
 	endif
 endif
@@ -184,9 +180,9 @@ if is_msvc or is_icc_cl
 		'/Zc:inline',
 		'/Zc:throwingNew',
 		'/Zi', # generate debug info (doesn't affect optimization)
-		language : 'cpp'
+		language: 'cpp'
 	)
-	add_project_link_arguments('/DEBUG', language : 'cpp') # generate PDB (doesn't affect optimization)
+	add_project_link_arguments('/DEBUG', language: 'cpp') # generate PDB (doesn't affect optimization)
 	if is_release
 		add_project_arguments(
 			'/GL', # whole program optimization
@@ -194,15 +190,15 @@ if is_msvc or is_icc_cl
 			'/Ob3', # aggressive inlining
 			'/Oy', # omit frame pointers
 			'/Oi', # generate intrinsics
-			language : 'cpp'
+			language: 'cpp'
 		)
-		add_project_link_arguments('/ltcg', language : 'cpp')
+		add_project_link_arguments('/ltcg', language: 'cpp')
 	endif
 	if is_pedantic
-		add_project_arguments('/W4', language : 'cpp')
+		add_project_arguments('/W4', language: 'cpp')
 	endif
 	if is_x64
-		add_project_arguments('/arch:AVX', language : 'cpp')
+		add_project_arguments('/arch:AVX', language: 'cpp')
 	endif
 endif
 
@@ -219,7 +215,7 @@ if is_icc_cl
 		'/wd2261', # assume with side effects discarded
 		'/wd2557', # mismatched sign compare
 		'/wd3280', # declaration hides member (triggered in Catch2)
-		language : 'cpp'
+		language: 'cpp'
 	)
 endif
 
@@ -229,7 +225,7 @@ if is_icc
 		'/Qdiag-error-limit:5',
 		'/Qoption,cpp,--unicode_source_kind,UTF-8',
 		'/D__builtin_bit_cast(T, v)=([&]()noexcept{ T val; memcpy(&val, &v, sizeof(T)); return val; })()', # __builtin_bit_cast workaround
-		language : 'cpp'
+		language: 'cpp'
 	)
 endif
 
@@ -240,9 +236,9 @@ if is_windows
 		'-D_WINSOCK_DEPRECATED_NO_WARNINGS',
 		'-D_SCL_SECURE_NO_WARNINGS',
 		'-D_CRT_SECURE_NO_WARNINGS',
-		language : 'cpp'
+		language: 'cpp'
 	)
-	add_project_arguments(has_exceptions ? '-D_HAS_EXCEPTIONS=1' : '-D_HAS_EXCEPTIONS=0', language : 'cpp')
+	add_project_arguments(has_exceptions ? '-D_HAS_EXCEPTIONS=1' : '-D_HAS_EXCEPTIONS=0', language: 'cpp')
 elif is_release
 	overrides += 'strip=true'
 endif
@@ -277,8 +273,8 @@ compiler_supports_cpp20 = compiler_supports_cpp20_args.length() > 0 and compiler
 		return 0;
 	}
 	''',
-	name : 'supports c++20',
-	args : compiler_supports_cpp20_args
+	name: 'supports c++20',
+	args: compiler_supports_cpp20_args
 )
 
 #######################################################################################################################
@@ -316,8 +312,8 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports char8_t',
-	args : compiler_supports_char8_args_private
+	name: 'supports char8_t',
+	args: compiler_supports_char8_args_private
 )
 
 #######################################################################################################################
@@ -338,8 +334,8 @@ compiler_supports_consteval = compiler_supports_cpp20 and compiler.compiles('''
 		return val;
 	}
 	''',
-	name : 'supports consteval keyword',
-	args : compiler_supports_cpp20_args
+	name: 'supports consteval keyword',
+	args: compiler_supports_cpp20_args
 )
 
 compiler_supports_consteval_properly = compiler_supports_consteval and not compiler.compiles('''
@@ -356,8 +352,8 @@ compiler_supports_consteval_properly = compiler_supports_consteval and not compi
 		return test(get_value()); // test() should not be runtime-callable
 	}
 	''',
-	name : 'consteval is just renamed constexpr',
-	args : compiler_supports_cpp20_args
+	name: 'consteval is just renamed constexpr',
+	args: compiler_supports_cpp20_args
 )
 
 #######################################################################################################################
@@ -399,8 +395,8 @@ compiler_supports_fp16 = compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports __fp16',
-	args : compiler_supports_float16_args
+	name: 'supports __fp16',
+	args: compiler_supports_float16_args
 )
 compiler_supports_float16 = compiler.links('''
 	@0@
@@ -414,8 +410,8 @@ compiler_supports_float16 = compiler.links('''
 		return 0;
 	}
 	'''.format(float_16_preprocessor_checks),
-	name : 'supports _Float16',
-	args : compiler_supports_float16_args
+	name: 'supports _Float16',
+	args: compiler_supports_float16_args
 )
 if compiler_supports_fp16 or compiler_supports_float16
 	additional_arguments += compiler_supports_float16_args
@@ -443,7 +439,7 @@ compiler_supports_int128 = compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports __int128_t'
+	name: 'supports __int128_t'
 )
 
 #######################################################################################################################
@@ -473,11 +469,11 @@ compiler_supports_float128 = compiler.links('''
 		return 0;
 	}
 	''',
-	name : 'supports __float128'
+	name: 'supports __float128'
 )
 
 if compiler_supports_float128 and is_gcc and not is_subproject
-	add_global_arguments('-fext-numeric-literals', language : 'cpp')
+	add_global_arguments('-fext-numeric-literals', language: 'cpp')
 endif
 
 #######################################################################################################################
@@ -497,9 +493,9 @@ if build_examples
 endif
 
 if not is_subproject
-	install_subdir('include/toml++',
+	install_subdir('include'/'toml++',
 		strip_directory: true,
-		install_dir: 'include/toml++'
+		install_dir: get_option('includedir')/'toml++'
 	)
 endif
 
@@ -508,8 +504,8 @@ endif
 #######################################################################################################################
 
 tomlplusplus_dep = declare_dependency(
-	include_directories : include_directories('include'),
-	version : meson.project_version(),
+	include_directories: include_directories('include'),
+	version: meson.project_version(),
 )
 
 if not is_subproject
@@ -517,7 +513,7 @@ if not is_subproject
 		name: meson.project_name(),
 		version: meson.project_version(),
 		description: 'Header-only TOML config file parser and serializer for C++',
-		install_dir: join_paths(get_option('datadir'), 'pkgconfig'),
+		install_dir: get_option('datadir')/'pkgconfig',
 	)
 endif
 
@@ -527,14 +523,14 @@ if get_option('generate_cmake_config') and not is_subproject
 	cmake.write_basic_package_version_file(
 		name: meson.project_name(),
 		version: meson.project_version(),
-		install_dir: join_paths('lib', 'cmake', meson.project_name()),
+		install_dir: 'lib'/'cmake'/meson.project_name(),
 	)
 
 	cmake_conf = configuration_data()
 	cmake.configure_package_config_file(
 		name: meson.project_name(),
-		input: 'cmake/tomlplusplus.cmake.in',
+		input: 'cmake'/'tomlplusplus.cmake.in',
 		configuration: cmake_conf,
-		install_dir: join_paths('lib', 'cmake', meson.project_name()),
+		install_dir: 'lib'/'cmake'/meson.project_name(),
 	)
 endif
