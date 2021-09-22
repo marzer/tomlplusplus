@@ -508,6 +508,10 @@ tomlplusplus_dep = declare_dependency(
 	version: meson.project_version(),
 )
 
+if meson.version().version_compare('>=0.54.0')
+	meson.override_dependency('tomlplusplus', tomlplusplus_dep)
+endif
+
 if not is_subproject
 	import('pkgconfig').generate(
 		name: meson.project_name(),
