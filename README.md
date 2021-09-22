@@ -220,6 +220,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
+- **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build
 
 <br>
 
