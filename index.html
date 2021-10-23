@@ -17,18 +17,18 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.0" name="generator"/>
+  <meta content="Poxy v0.5.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
   <script type="application/ld+json">{
     "@context": "https://schema.org",
     "@type": "Article",
-    "dateModified": "2021-09-22T17:00:48+00:00",
+    "dateModified": "2021-10-23T16:20:22+00:00",
     "headline": "toml++ TOML for C++"
 }</script>
-  <link href="poxy-0.5.0.css" rel="stylesheet"/>
-  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.0.js"></script>
+  <link href="poxy-0.5.1.css" rel="stylesheet"/>
+  <link href="poxy-0.5.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -100,7 +100,7 @@
             <li><a href="#mainpage-contact">Contacting the author</a></li>
           </ul>
         </div>
-<section id="mainpage-features"><h2><a href="#mainpage-features">Features</a></h2><ul><li>Supports the latest <a class="poxy-external" href="https://toml.io/" target="_blank">TOML</a> release (<a class="poxy-external" href="https://toml.io/en/v1.0.0" target="_blank">v1.0.0</a>), plus optional support for some unreleased TOML features</li><li>Supports serializing to JSON</li><li>Proper UTF-8 handling (incl. BOM)</li><li>C++17 (plus some C++20 features where available, e.g. experimental support for  strings)</li><li>Header-only (optional!)</li><li>Doesn't require RTTI</li><li>Works with or without exceptions</li><li>Tested on Clang (6+), GCC (7+) and MSVC (VS2019)</li><li>Tested on x64, x86 and ARM</li></ul></section><section id="mainpage-api-documentation"><h2><a href="#mainpage-api-documentation">API documentation</a></h2><p>You're looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</p></section><section id="mainpage-example"><h2><a href="#mainpage-example">Basic examples</a></h2><section id="mainpage-example-parsing-files"><h3><a href="#mainpage-example-parsing-files">Parsing files</a></h3><p>Call <a class="m-doc" href="namespacetoml.html#a8dbc58dad43c3b66f4476a7131f5741a">toml::<wbr/>parse_file()</a> and work with the <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> you get back, or handle any <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> that gets thrown:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+<section id="mainpage-features"><h2><a href="#mainpage-features">Features</a></h2><ul><li>Supports the latest <a class="poxy-external" href="https://toml.io/" target="_blank">TOML</a> release (<a class="poxy-external" href="https://toml.io/en/v1.0.0" target="_blank">v1.0.0</a>), plus optional support for some unreleased TOML features</li><li>Supports serializing to JSON</li><li>Proper UTF-8 handling (incl. BOM)</li><li>C++17 (plus some C++20 features where available, e.g. experimental support for <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> strings)</li><li>Header-only (optional!)</li><li>Doesn't require RTTI</li><li>Works with or without exceptions</li><li>Tested on Clang (6+), GCC (7+) and MSVC (VS2019)</li><li>Tested on x64, x86 and ARM</li></ul></section><section id="mainpage-api-documentation"><h2><a href="#mainpage-api-documentation">API documentation</a></h2><p>You're looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</p></section><section id="mainpage-example"><h2><a href="#mainpage-example">Basic examples</a></h2><section id="mainpage-example-parsing-files"><h3><a href="#mainpage-example-parsing-files">Parsing files</a></h3><p>Call <a class="m-doc" href="namespacetoml.html#a8dbc58dad43c3b66f4476a7131f5741a">toml::<wbr/>parse_file()</a> and work with the <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> you get back, or handle any <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> that gets thrown:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
 <span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
 
 <span class="k">int</span> <span class="nf">main</span><span class="p">(</span><span class="k">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
@@ -223,7 +223,7 @@
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str3</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str4</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
-   <span class="c1">// get a  of the element 'numbers' using operator[]</span>
+   <span class="c1">// get a <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_view</a> of the element 'numbers' using operator[]</span>
    <span class="k">auto</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"numbers"</span><span class="p">];</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"table has 'numbers': "</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers is an: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span><span class="p">.</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
@@ -244,7 +244,7 @@
            <span class="p">});</span>
        <span class="p">}</span>
 
-       <span class="c1">// arrays are very similar to </span>
+       <span class="c1">// arrays are very similar to <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a></span>
        <span class="n">arr</span><span class="o">-&gt;</span><span class="n">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
        <span class="n">arr</span><span class="o">-&gt;</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
        <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
@@ -290,7 +290,7 @@
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### TOML ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
 
-   <span class="c1">// serializing as JSON using :</span>
+   <span class="c1">// serializing as JSON using <a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">toml::json_formatter</a>:</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### JSON ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a></span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>

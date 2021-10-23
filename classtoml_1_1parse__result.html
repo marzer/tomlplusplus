@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.0" name="generator"/>
+  <meta content="Poxy v0.5.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.0.css" rel="stylesheet"/>
-  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.0.js"></script>
+  <link href="poxy-0.5.1.css" rel="stylesheet"/>
+  <link href="poxy-0.5.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -83,7 +83,7 @@
 
 <span class="go">Parse failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
-<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><p>Getting  (<code>operator[]</code>) and using the iterator accessor functions (<code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a>, <a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> etc.) are unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is also safe since <code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a></code> and <code><a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> return the same iterator and will not lead to any dereferences and iterations.</p><aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
+<span class="go">    (error occurred at line 1, column 13 of 'config.toml')</span></pre><p>Getting <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a> (<code>operator[]</code>) and using the iterator accessor functions (<code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a>, <a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> etc.) are unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is also safe since <code><a class="m-doc" href="classtoml_1_1parse__result.html#a3f641e942f1518dffad6fcc7dc13893d">begin()</a></code> and <code><a class="m-doc" href="classtoml_1_1parse__result.html#a336d398e329f08195d714ff02fdffca6">end()</a></code> return the same iterator and will not lead to any dereferences and iterations.</p><aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
     <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
 <span class="cp">#else</span>
     <span class="k">class</span> <span class="nc">parse_result</span> <span class="k">final</span> <span class="p">{</span> <span class="c1">// ...</span>
@@ -92,13 +92,13 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="abf92ffb48c1f4d0f129f4032708d4ab0">
-              using <a class="m-doc-self" href="#abf92ffb48c1f4d0f129f4032708d4ab0">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a>
+              using <a class="m-doc-self" href="#abf92ffb48c1f4d0f129f4032708d4ab0">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a>
             </dt>
-            <dd>A  for iterating over const key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="aae503c11e9f9162de5cbef5e2c9f4863">
-              using <a class="m-doc-self" href="#aae503c11e9f9162de5cbef5e2c9f4863">iterator</a> = <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a>
+              using <a class="m-doc-self" href="#aae503c11e9f9162de5cbef5e2c9f4863">iterator</a> = <a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a>
             </dt>
-            <dd>A  for iterating over key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a wrapped <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -146,27 +146,27 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair in the wrapped table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair in the wrapped table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first key-value pair in the wrapped table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afa4f821ad60ceb06327cec6b42b05071">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afa4f821ad60ceb06327cec6b42b05071">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a336d398e329f08195d714ff02fdffca6">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a336d398e329f08195d714ff02fdffca6">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a154d32bca3ea50dc5030372675a85a65">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a154d32bca3ea50dc5030372675a85a65">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</dd>
             <dt id="aefbb9aafdf00fa1ac979962d22e12e68">
@@ -238,42 +238,42 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a3f641e942f1518dffad6fcc7dc13893d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a910f13933a0547a2920404287829781f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af58212d8a367e5c1d38eb5d58708754b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="afa4f821ad60ceb06327cec6b42b05071"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afa4f821ad60ceb06327cec6b42b05071">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afa4f821ad60ceb06327cec6b42b05071">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a336d398e329f08195d714ff02fdffca6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a336d398e329f08195d714ff02fdffca6">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a336d398e329f08195d714ff02fdffca6">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a154d32bca3ea50dc5030372675a85a65"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a154d32bca3ea50dc5030372675a85a65">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> toml::<wbr/>parse_result::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a154d32bca3ea50dc5030372675a85a65">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to one-past-the-last key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Returns a default-constructed 'nothing' iterator if the parsing failed.</p></aside>
@@ -296,7 +296,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
@@ -320,7 +320,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
@@ -344,7 +344,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
@@ -368,7 +368,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty .</td>
+                  <td>A view of the value at the given key if parsing was successful and a matching key existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>

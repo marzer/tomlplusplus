@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.0" name="generator"/>
+  <meta content="Poxy v0.5.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.0.css" rel="stylesheet"/>
-  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.0.js"></script>
+  <link href="poxy-0.5.1.css" rel="stylesheet"/>
+  <link href="poxy-0.5.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -103,7 +103,7 @@
             <dt id="aa378fa343dab7d7bdb4073570dba5fdc">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa378fa343dab7d7bdb4073570dba5fdc">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns the  responsible for generating this node during parsing.</dd>
+            <dd>Returns the <a class="m-doc poxy-injected" href="structtoml_1_1source__region.html">source region</a> responsible for generating this node during parsing.</dd>
           </dl>
         </section>
         <section id="node-views">
@@ -153,9 +153,9 @@
             </dt>
             <dd>Returns a pointer to the node as a toml::value&lt;double&gt;, if it is one.</dd>
             <dt id="ac507d02b3b744e0624c504614e91c9e5">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac507d02b3b744e0624c504614e91c9e5">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac507d02b3b744e0624c504614e91c9e5">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;&gt;, if it is one.</dd>
+            <dd>Returns a pointer to the node as a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
             <dt id="ab8f42ecf095260b1d97363949a98267b">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab8f42ecf095260b1d97363949a98267b">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -271,12 +271,12 @@
             <dd>Gets a raw reference to a value node's underlying data (const lvalue overload).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a48098db842e6a202902e6c85326f71b4">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0973c92f88fc3fc5d5264d9daba9f11d">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac1417bb4313b2624e3ea270a487f153b">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a374b939deec83da2a5867d08d0b12549">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
@@ -336,14 +336,14 @@
 <pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;*</span> <span class="n">int_value</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">();</span>
 <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="o">*</span> <span class="n">tbl</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="o">&gt;</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">int_value</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">tbl</span><span class="p">)</span>
     <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a table</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="c1">// fully-qualified value node types also work (useful for template code):</span>
 <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;*</span> <span class="n">int_value2</span> <span class="o">=</span> <span class="n">node</span><span class="o">-&gt;</span><span class="n">as</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;&gt;</span><span class="p">();</span>
 <span class="k">if</span> <span class="p">(</span><span class="n">int_value2</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Node is a value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre>
           </div></section>
           <section class="m-doc-details" id="a03e1bbe1a0640953b7105fe40c733118"><div>
             <h3>
@@ -507,12 +507,12 @@
 <span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&amp;</span> <span class="n">min_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"min"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ref</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// matching type</span>
 <span class="k">double</span><span class="o">&amp;</span> <span class="n">max_ref</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"max"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">ref</span><span class="o">&lt;</span><span class="k">double</span><span class="o">&gt;</span><span class="p">();</span>  <span class="c1">// mismatched type, hits assert()</span></pre></aside>
           </div></section>
-          <section class="m-doc-details" id="a48098db842e6a202902e6c85326f71b4"><div>
+          <section class="m-doc-details" id="a0973c92f88fc3fc5d5264d9daba9f11d"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a48098db842e6a202902e6c85326f71b4">value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0973c92f88fc3fc5d5264d9daba9f11d">value</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the value contained by this node.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -574,8 +574,8 @@
 <span class="go">- long long         -10</span>
 <span class="go">- float             -10</span>
 <span class="go">- double            -10</span>
-<span class="go">-        n/a</span>
-<span class="go">-   n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
 <span class="go">- const char*       n/a</span>
 
 <span class="go">floating-point value 'flt' as:</span>
@@ -585,8 +585,8 @@
 <span class="go">- long long         25</span>
 <span class="go">- float             25</span>
 <span class="go">- double            25</span>
-<span class="go">-        n/a</span>
-<span class="go">-   n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
 <span class="go">- const char*       n/a</span>
 
 <span class="go">floating-point value 'pi' as:</span>
@@ -596,8 +596,8 @@
 <span class="go">- long long         n/a</span>
 <span class="go">- float             3.14159</span>
 <span class="go">- double            3.14159</span>
-<span class="go">-        n/a</span>
-<span class="go">-   n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
 <span class="go">- const char*       n/a</span>
 
 <span class="go">boolean value 'bool' as:</span>
@@ -607,8 +607,8 @@
 <span class="go">- long long         0</span>
 <span class="go">- float             n/a</span>
 <span class="go">- double            n/a</span>
-<span class="go">-        n/a</span>
-<span class="go">-   n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
 <span class="go">- const char*       n/a</span>
 
 <span class="go">integer value 'huge' as:</span>
@@ -618,8 +618,8 @@
 <span class="go">- long long         9223372036854775807</span>
 <span class="go">- float             n/a</span>
 <span class="go">- double            n/a</span>
-<span class="go">-        n/a</span>
-<span class="go">-   n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       n/a</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  n/a</span>
 <span class="go">- const char*       n/a</span>
 
 <span class="go">string value 'str' as:</span>
@@ -629,16 +629,16 @@
 <span class="go">- long long         n/a</span>
 <span class="go">- float             n/a</span>
 <span class="go">- double            n/a</span>
-<span class="go">-        foo</span>
-<span class="go">-   foo</span>
-<span class="go">- const char*       foo</span></pre><aside class="m-note m-info"><h4>Note</h4><p>If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a></p></aside>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>       foo</span>
+<span class="go">- <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string_view" target="_blank">std::string_view</a>  foo</span>
+<span class="go">- const char*       foo</span></pre><aside class="m-note m-info"><h4>Note</h4><p>If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">node::<wbr/>value_exact()</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="ac1417bb4313b2624e3ea270a487f153b"><div>
+          <section class="m-doc-details" id="a374b939deec83da2a5867d08d0b12549"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac1417bb4313b2624e3ea270a487f153b">value_exact</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a374b939deec83da2a5867d08d0b12549">value_exact</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets the value contained by this node.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -658,7 +658,7 @@
                 </tr>
               </tfoot>
             </table>
-<p>This function has 'exact' retrieval semantics; the only return value types allowed are the TOML native value types, or types that can losslessly represent a native value type (e.g. <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a> on Windows).</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a48098db842e6a202902e6c85326f71b4">node::<wbr/>value()</a></p></aside>
+<p>This function has 'exact' retrieval semantics; the only return value types allowed are the TOML native value types, or types that can losslessly represent a native value type (e.g. <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a> on Windows).</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a0973c92f88fc3fc5d5264d9daba9f11d">node::<wbr/>value()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a423ddccc36345545615e20290c9a8a65"><div>
             <h3>
@@ -694,7 +694,7 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-info"><h4>Note</h4><p>This function has the same permissive retrieval semantics as <a class="m-doc" href="classtoml_1_1node.html#a48098db842e6a202902e6c85326f71b4">node::<wbr/>value()</a>. If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1node.html#a48098db842e6a202902e6c85326f71b4">node::<wbr/>value()</a></li><li><a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">node::<wbr/>value_exact()</a></li></ul></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>This function has the same permissive retrieval semantics as <a class="m-doc" href="classtoml_1_1node.html#a0973c92f88fc3fc5d5264d9daba9f11d">node::<wbr/>value()</a>. If you want strict value retrieval semantics that do not allow for any type conversions, use <a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">node::<wbr/>value_exact()</a> instead.</p></aside><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1node.html#a0973c92f88fc3fc5d5264d9daba9f11d">node::<wbr/>value()</a></li><li><a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">node::<wbr/>value_exact()</a></li></ul></aside>
           </div></section>
           <section class="m-doc-details" id="ad47390f3832260db7bf06cd282598240"><div>
             <h3>
@@ -733,9 +733,9 @@
 <p>Visitation is useful when you expect a node to be one of a set number of types and need to handle these types differently. Using <code><a class="m-doc" href="classtoml_1_1node.html#ad47390f3832260db7bf06cd282598240">visit()</a></code> allows you to eliminate some of the casting/conversion boilerplate:</p><pre class="m-code"><span class="n">node</span><span class="p">.</span><span class="n">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">n</span><span class="p">)</span>
 <span class="p">{</span>
     <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
-        <span class="n">do_something_with_a_string</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">));</span> <span class="c1">//n is a toml::value&lt;&gt;</span>
+        <span class="n">do_something_with_a_string</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">));</span> <span class="c1">//n is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;</span>
     <span class="k">else</span> <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="n">is_integer</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
-        <span class="n">do_something_with_an_int</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">);</span> <span class="c1">//n is a toml::value&lt;&gt;</span>
+        <span class="n">do_something_with_an_int</span><span class="p">(</span><span class="o">*</span><span class="n">n</span><span class="p">);</span> <span class="c1">//n is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;</span>
     <span class="k">else</span>
         <span class="k">throw</span> <span class="ns">std</span><span class="o">::</span><span class="ut">exception</span><span class="p">{</span> <span class="s">"Expected string or integer"</span> <span class="p">};</span>
 <span class="p">});</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="poxy-external" href="https://en.wikipedia.org/wiki/Visitor_pattern" target="_blank">https://en.wikipedia.org/wiki/Visitor_<wbr/>pattern</a></p></aside>

@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.0" name="generator"/>
+  <meta content="Poxy v0.5.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.0.css" rel="stylesheet"/>
-  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.0.js"></script>
+  <link href="poxy-0.5.1.css" rel="stylesheet"/>
+  <link href="poxy-0.5.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -162,7 +162,7 @@
           <h2><a href="#enum-members">Enums</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>:  { </span><span class="m-doc-wrap"><a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
               <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</a> = 1,
               <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fa328473763ff1ab919ce0b01d66ad3bf6">allow_literal_strings</a> = 2,
               <a class="m-doc" href="#af1a6761a2f4d80b1a541ba819d9c8e0fad9467c39215be4189dc8395a830f9051">allow_multi_line_strings</a> = 4,
@@ -170,7 +170,7 @@
             </dt>
             <dd>Format flags for modifying how TOML data is printed to streams.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>:  { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a>,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a>,
@@ -183,7 +183,7 @@
             </dt>
             <dd>TOML node type identifiers.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>:  { </span><span class="m-doc-wrap"><a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
               <a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea3d21a9285de175ffffc99cfa13df21df">format_as_binary</a> = 1,
               <a class="m-doc" href="#afb4d25262a72170134337eb67e6793deadfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</a> = 2,
               <a class="m-doc" href="#afb4d25262a72170134337eb67e6793dea4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</a> = 3 }</span>
@@ -194,18 +194,18 @@
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a2b0930b7b75df6f189d9815c000bef8b">
-              using <a class="m-doc-self" href="#a2b0930b7b75df6f189d9815c000bef8b">array_iterator</a> = impl::array_iterator&lt;false&gt;
+            <dt id="ac7e383cde1b8d61dba45292b2b0fcb69">
+              using <a class="m-doc-self" href="#ac7e383cde1b8d61dba45292b2b0fcb69">array_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
-            <dd>A  for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="acc99ae392186dc605aeb233d26f07013">
-              using <a class="m-doc-self" href="#acc99ae392186dc605aeb233d26f07013">const_array_iterator</a> = impl::array_iterator&lt;true&gt;
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="aeba9fe3a193c8b641a1fb3a2096d7c13">
+              using <a class="m-doc-self" href="#aeba9fe3a193c8b641a1fb3a2096d7c13">const_array_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
-            <dd>A  for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="adeb2aa84bcd2bcb46e2cdfaa5dd6572f">
-              using <a class="m-doc-self" href="#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="a4bccd753f54404e0097457514177fcbb">
+              using <a class="m-doc-self" href="#a4bccd753f54404e0097457514177fcbb">const_table_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
-            <dd>A  for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               using <a class="m-doc" href="#a42d815ed50a34bce24289004e57e1ed8">inserted_type_of</a> = typename impl::inserted_type_of_&lt;impl::remove_cvref_t&lt;T&gt;&gt;::type
@@ -217,17 +217,17 @@
             </dt>
             <dd>The 'optional' type used throughout the library.</dd>
             <dt>
-              using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = 
+              using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </dt>
             <dd>The integer type used to tally line numbers and columns.</dd>
             <dt id="ac6cf446b480546ae1f71f5b86442368d">
               using <a class="m-doc-self" href="#ac6cf446b480546ae1f71f5b86442368d">source_path_ptr</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" target="_blank">std::<wbr/>shared_ptr</a>&lt;const <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;
             </dt>
             <dd>A pointer to a shared string resource containing a source path.</dd>
-            <dt id="a57894617837065610e5746a3204fa8e9">
-              using <a class="m-doc-self" href="#a57894617837065610e5746a3204fa8e9">table_iterator</a> = impl::table_iterator&lt;false&gt;
+            <dt id="a19243ec6febf1bb834ea9e366405e317">
+              using <a class="m-doc-self" href="#a19243ec6febf1bb834ea9e366405e317">table_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
-            <dd>A  for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="func-members">
@@ -235,12 +235,12 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
-               len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses TOML data from a string literal.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const * str,
-               len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a>* str,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses TOML data from a UTF-8 string literal.</dd>
             <dt>
@@ -340,17 +340,17 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
-            <dd>Parses a TOML document from a  string view.</dd>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
-            <dd>Parses a TOML document from a  string view.</dd>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a38852451309f406db281f17334ea8dfe">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
-            <dd>Parses a TOML document from a  string view.</dd>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Char&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a23fd62ae7ec77404532a589672ae1d0e">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>basic_istream</a>&lt;Char&gt;&amp; doc,
@@ -425,7 +425,7 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a  or toml::value&lt;&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
             <dt id="a4e4126f63ba560963de095cd9bee0704">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a4e4126f63ba560963de095cd9bee0704">is_node</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -445,7 +445,7 @@
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or toml::value&lt;&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
             <dt id="ad11c8c8a8286d6931e40658679aa7ddb">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -467,7 +467,7 @@
           <h2>Enum documentation</h2>
           <section class="m-doc-details" id="af1a6761a2f4d80b1a541ba819d9c8e0f"><div>
             <h3>
-              enum class toml::<wbr/><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>: 
+              enum class toml::<wbr/><a class="m-doc-self" href="#af1a6761a2f4d80b1a541ba819d9c8e0f">format_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
             </h3>
             <p>Format flags for modifying how TOML data is printed to streams.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -508,7 +508,7 @@
           </div></section>
           <section class="m-doc-details" id="abac3e84bbf1f2c90717fca107055f48d"><div>
             <h3>
-              enum class toml::<wbr/><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: 
+              enum class toml::<wbr/><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
             </h3>
             <p>TOML node type identifiers.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -535,13 +535,13 @@
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21" id="abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;&gt;.</p>
+                  <p>The node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8" id="abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;&gt;.</p>
+                  <p>The node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
                   </td>
                 </tr>
                 <tr>
@@ -579,7 +579,7 @@
           </div></section>
           <section class="m-doc-details" id="afb4d25262a72170134337eb67e6793de"><div>
             <h3>
-              enum class toml::<wbr/><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>: 
+              enum class toml::<wbr/><a class="m-doc-self" href="#afb4d25262a72170134337eb67e6793de">value_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
             </h3>
             <p>Metadata associated with TOML values.</p>
             <table class="m-table m-fullwidth m-flat m-doc">
@@ -623,7 +623,7 @@
               using toml::<wbr/><a class="m-doc-self" href="#a42d815ed50a34bce24289004e57e1ed8">inserted_type_of</a> = typename impl::inserted_type_of_&lt;impl::remove_cvref_t&lt;T&gt;&gt;::type
             </h3>
             <p>Metafunction for determining which node type would be constructed if an object of this type was inserted into a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and , even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
+<aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a>, even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af34a9fb3305e419784104609e6bbb7ac"><div>
             <h3>
@@ -637,10 +637,10 @@
           </div></section>
           <section class="m-doc-details" id="ae845239fd7271e3d8e529302d300ad5b"><div>
             <h3>
-              using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = 
+              using toml::<wbr/><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </h3>
             <p>The integer type used to tally line numbers and columns.</p>
-<aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for  if <a class="m-doc" href="group__configuration.html#ga55379d57f896d97994e0aca167297c7f">TOML_<wbr/>LARGE_<wbr/>FILES</a> is enabled.</p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a> if <a class="m-doc" href="group__configuration.html#ga55379d57f896d97994e0aca167297c7f">TOML_<wbr/>LARGE_<wbr/>FILES</a> is enabled.</p></aside>
           </div></section>
         </section>
         <section>
@@ -954,7 +954,7 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {})</span></span>
             </h3>
-            <p>Parses a TOML document from a  string view.</p>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -984,7 +984,7 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path)</span></span>
             </h3>
-            <p>Parses a TOML document from a  string view.</p>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1014,7 +1014,7 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a38852451309f406db281f17334ea8dfe">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path)</span></span>
             </h3>
-            <p>Parses a TOML document from a  string view.</p>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>

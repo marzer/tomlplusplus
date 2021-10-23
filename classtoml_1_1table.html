@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.0" name="generator"/>
+  <meta content="Poxy v0.5.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.0.css" rel="stylesheet"/>
-  <link href="poxy-0.5.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.0.js"></script>
+  <link href="poxy-0.5.1.css" rel="stylesheet"/>
+  <link href="poxy-0.5.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -97,13 +97,13 @@
           <h2><a href="#pub-types">Public types</a></h2>
           <dl class="m-doc">
             <dt id="a5a6ce59c3fe438ac94eadaa8a2b17957">
-              using <a class="m-doc-self" href="#a5a6ce59c3fe438ac94eadaa8a2b17957">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_<wbr/>table_<wbr/>iterator</a>
+              using <a class="m-doc-self" href="#a5a6ce59c3fe438ac94eadaa8a2b17957">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a>
             </dt>
-            <dd>A  for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="aeecd89b0c0b321a9aff276ff1470f1d7">
-              using <a class="m-doc-self" href="#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> = <a class="m-doc" href="namespacetoml.html#a57894617837065610e5746a3204fa8e9">table_<wbr/>iterator</a>
+              using <a class="m-doc-self" href="#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a> = <a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a>
             </dt>
-            <dd>A  for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
@@ -122,14 +122,10 @@
             </dt>
             <dd>Move constructor.</dd>
             <dt>
-              <div class="m-doc-template">template&lt; N&gt;</div>
+              <div class="m-doc-template">template&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> N&gt;</div>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a58a5d740a7b210b1942915f98fe9d8fe">table</a>(</span><span class="m-doc-wrap">impl::table_init_pair( &amp;&amp; arr)[N]) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs a table with one or more initial key-value pairs.</dd>
-            <dt id="a5d3f92d3964aa9e47433bf7a61cbc0e7">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5d3f92d3964aa9e47433bf7a61cbc0e7">~table</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Destructor.</dd>
           </dl>
         </section>
         <section id="pub-methods">
@@ -180,7 +176,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aa378fa343dab7d7bdb4073570dba5fdc">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns the  responsible for generating this node during parsing.</dd>
+            <dd>Returns the <a class="m-doc poxy-injected" href="structtoml_1_1source__region.html">source region</a> responsible for generating this node during parsing.</dd>
           </dl>
         </section>
         <section id="node-views">
@@ -299,14 +295,14 @@
             </dt>
             <dd>Gets an iterator to the node at a specific key (const overload).</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename KeyType, typename ValueType, typename = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/enable_if.html" target="_blank">std::<wbr/>enable_if_t</a>&lt;				<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_convertible.html" target="_blank">std::<wbr/>is_convertible_v</a>&lt;KeyType &amp;&amp; , <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>&gt;				|| impl::is_wide_string&lt;KeyType&gt;			&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa757797646986f2f2cce0fa84221963e">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              <div class="m-doc-template">template&lt;typename KeyType, typename ValueType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4021a55b1f2e483a075af09c701671fc">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
               ValueType&amp;&amp; val) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a new value at a specific key if one did not already exist.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename Iter, typename = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/enable_if.html" target="_blank">std::<wbr/>enable_if_t</a>&lt;				!<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_convertible.html" target="_blank">std::<wbr/>is_convertible_v</a>&lt;Iter, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter&gt;			&gt;&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
+              <div class="m-doc-template">template&lt;typename Iter&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a5cc4baad77adcc25a5846b1a7b746559">insert</a>(</span><span class="m-doc-wrap">Iter first,
               Iter last) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inserts a series of key-value pairs into the table.</dd>
@@ -317,7 +313,7 @@
             </dt>
             <dd>Inserts or assigns a value at a specific key.</dd>
             <dt id="ad7c4105854cc817bf6e781fa7fb1b6d6">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad7c4105854cc817bf6e781fa7fb1b6d6">size</a>(</span><span class="m-doc-wrap">) const -&gt;  <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad7c4105854cc817bf6e781fa7fb1b6d6">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of key-value pairs in the table.</dd>
           </dl>
@@ -356,9 +352,9 @@
             </dt>
             <dd>Returns a pointer to the node as a toml::value&lt;double&gt;, if it is one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ac507d02b3b744e0624c504614e91c9e5">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ac507d02b3b744e0624c504614e91c9e5">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;&gt;, if it is one.</dd>
+            <dd>Returns a pointer to the node as a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ab8f42ecf095260b1d97363949a98267b">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -505,12 +501,12 @@
             <dd>Gets a raw reference to a value node's underlying data (const lvalue overload).</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a48098db842e6a202902e6c85326f71b4">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a0973c92f88fc3fc5d5264d9daba9f11d">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ac1417bb4313b2624e3ea270a487f153b">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
@@ -544,7 +540,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a58a5d740a7b210b1942915f98fe9d8fe"><div>
             <h3>
-              <div class="m-doc-template"> template&lt; N&gt;
+              <div class="m-doc-template"> template&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> N&gt;
               </div>
               <span class="m-doc-wrap-bumper"> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a58a5d740a7b210b1942915f98fe9d8fe">table</a>(</span><span class="m-doc-wrap">impl::table_init_pair( &amp;&amp; arr)[N]) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
@@ -574,7 +570,7 @@
     <span class="p">{</span> <span class="s">"bar"</span><span class="p">,</span> <span class="mf">2.0</span> <span class="p">},</span>
     <span class="p">{</span> <span class="s">"kek"</span><span class="p">,</span> <span class="s">"three"</span> <span class="p">}</span>
 <span class="p">}};</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++  represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="poxy-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ foo = 1, bar = 2.0, kek = "three" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>C++ <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">std::initializer_lists</a> represent their member elements as const even if the list's value type is non-const. This is great for compiler writers, I guess, but pretty annoying for me since TOML key-value pairs are polymorphic (and thus move-only). This means that for the human-friendly braced init list syntax to work I can't use <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a> and must instead invent an annoying proxy type, which means an extra level of nesting.<br/><br/>See <a class="poxy-external" href="https://en.cppreference.com/w/cpp/utility/initializer_list" target="_blank">https://en.cppreference.com/w/cpp/utility/initializer_<wbr/>list</a> if you'd like to learn more about this.</p></aside>
           </div></section>
           <section class="m-doc-details" id="abdeb5d9d9fc23c031c78e544c6196ea6"><div>
             <h3>
@@ -696,11 +692,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if one existed, or an empty .</td>
+                  <td>A view of the value at the given key if one existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a><strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a9b13a19ddfcd2f76685f57587d28701c"><div>
             <h3>
@@ -720,11 +716,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if one existed, or an empty .</td>
+                  <td>A view of the value at the given key if one existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a><strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
+<aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a06fd3d9032b031b0363818939cd5cf38"><div>
             <h3>
@@ -744,11 +740,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if one existed, or an empty .</td>
+                  <td>A view of the value at the given key if one existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a><strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a404ae83ed52c7b8ce294d3d4925c8a16"><div>
             <h3>
@@ -768,11 +764,11 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A view of the value at the given key if one existed, or an empty .</td>
+                  <td>A view of the value at the given key if one existed, or an empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node view</a>.</td>
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a><strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/container/map" target="_blank">std::map</a>::operator[]'s behaviour of default-constructing a value at a key if it didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it. <strong>This is not an error.</strong></p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a2449e053ad373e82d2500226bf084cb9"><div>
             <h3>
@@ -824,7 +820,7 @@
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td><p>A <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a> containing:<br/></p><ul><li>An iterator to the emplacement position (or the position of the value that prevented emplacement)</li><li>A boolean indicating if the emplacement was successful.<br/></li></ul></td>
+                  <td><p>A <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a> containing:<br/></p><ul><li>An iterator to the emplacement position (or the position of the value that prevented emplacement)</li><li>A boolean indicating if the emplacement was successful.</li></ul></td>
                 </tr>
               </tfoot>
             </table>
@@ -837,14 +833,14 @@
 
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span> <span class="nl">k</span> <span class="p">:</span> <span class="p">{</span> <span class="s">"a"</span><span class="p">,</span> <span class="s">"d"</span> <span class="p">})</span>
 <span class="p">{</span>
-    <span class="c1">// add a string using 's substring constructor</span>
+    <span class="c1">// add a string using <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>'s substring constructor</span>
     <span class="k">auto</span> <span class="n">result</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
     <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"emplaced with key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"': "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">second</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{ a = 1, b = 2, c = 3 }</span>
 <span class="go">emplaced with key 'a': false</span>
 <span class="go">emplaced with key 'd': true</span>
-<span class="go">{ a = 1, b = 2, c = 3, d = "drill" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#aa757797646986f2f2cce0fa84221963e">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a04815da57fe75169ceb1c20946faac6b">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
+<span class="go">{ a = 1, b = 2, c = 3, d = "drill" }</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1table.html#a4021a55b1f2e483a075af09c701671fc">insert()</a> and <a class="m-doc" href="classtoml_1_1table.html#a04815da57fe75169ceb1c20946faac6b">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1a90984876ccdd03aaa9e0f9801a839f"><div>
             <h3>
@@ -1105,12 +1101,12 @@
             </table>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa757797646986f2f2cce0fa84221963e"><div>
+          <section class="m-doc-details" id="a4021a55b1f2e483a075af09c701671fc"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename KeyType, typename ValueType, typename = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/enable_if.html" target="_blank">std::<wbr/>enable_if_t</a>&lt;				<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_convertible.html" target="_blank">std::<wbr/>is_convertible_v</a>&lt;KeyType &amp;&amp; , <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>&gt;				|| impl::is_wide_string&lt;KeyType&gt;			&gt;&gt;
+                template&lt;typename KeyType, typename ValueType&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa757797646986f2f2cce0fa84221963e">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#aeecd89b0c0b321a9aff276ff1470f1d7">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4021a55b1f2e483a075af09c701671fc">insert</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
               ValueType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a new value at a specific key if one did not already exist.</p>
@@ -1172,12 +1168,12 @@
 <span class="go">c = 3</span>
 <span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="acefff2dfe1efb072c9062b8f60146cd9"><div>
+          <section class="m-doc-details" id="a5cc4baad77adcc25a5846b1a7b746559"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename Iter, typename = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/enable_if.html" target="_blank">std::<wbr/>enable_if_t</a>&lt;				!<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/types/is_convertible.html" target="_blank">std::<wbr/>is_convertible_v</a>&lt;Iter, <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>&gt;				&amp;&amp; !impl::is_wide_string&lt;Iter&gt;			&gt;&gt;
+                template&lt;typename Iter&gt;
               </div>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acefff2dfe1efb072c9062b8f60146cd9">insert</a>(</span><span class="m-doc-wrap">Iter first,
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5cc4baad77adcc25a5846b1a7b746559">insert</a>(</span><span class="m-doc-wrap">Iter first,
               Iter last) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inserts a series of key-value pairs into the table.</p>
@@ -1188,7 +1184,7 @@
               <tbody>
                 <tr>
                   <td style="width: 1%">Iter</td>
-                  <td>An  to a collection of key-value pairs.</td>
+                  <td>An <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/InputIterator" target="_blank">InputIterator</a> to a collection of key-value pairs.</td>
                 </tr>
               </tbody>
               <thead>
