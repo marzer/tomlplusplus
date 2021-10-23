@@ -79,6 +79,7 @@
 
 	#define TOML_DISABLE_SHADOW_WARNINGS \
 		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
+		_Pragma("clang diagnostic ignored \"-Wshadow-field\"") \
 		static_assert(true)
 
 	#define TOML_DISABLE_SPAM_WARNINGS \
@@ -371,7 +372,11 @@
 #endif
 
 #ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 0
+	#if TOML_INTELLISENSE
+		#define TOML_UNRELEASED_FEATURES 1
+	#else
+		#define TOML_UNRELEASED_FEATURES 0
+	#endif
 #endif
 
 #ifndef TOML_LARGE_FILES
@@ -392,23 +397,17 @@
 	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
-#ifndef DOXYGEN
-	#ifdef _WIN32
-		#ifndef TOML_WINDOWS_COMPAT
-			#define TOML_WINDOWS_COMPAT 1
-		#endif
-		#if TOML_WINDOWS_COMPAT && !defined(TOML_INCLUDE_WINDOWS_H)
-			#define TOML_INCLUDE_WINDOWS_H 0
-		#endif
-	#endif
-	#if !defined(_WIN32) || !defined(TOML_WINDOWS_COMPAT)
-		#undef TOML_WINDOWS_COMPAT
-		#define TOML_WINDOWS_COMPAT		0
-	#endif
-	#if !TOML_WINDOWS_COMPAT
-		#undef TOML_INCLUDE_WINDOWS_H
-		#define TOML_INCLUDE_WINDOWS_H	0
-	#endif
+#ifndef TOML_WINDOWS_COMPAT
+	#define TOML_WINDOWS_COMPAT 1
+#endif
+/// \cond
+#ifndef _WIN32
+	#undef TOML_WINDOWS_COMPAT
+	#define TOML_WINDOWS_COMPAT 0
+#endif
+/// \endcond
+#ifndef TOML_INCLUDE_WINDOWS_H
+	#define TOML_INCLUDE_WINDOWS_H 0
 #endif
 
 #ifdef TOML_OPTIONAL_TYPE
@@ -419,9 +418,7 @@
 
 #ifdef TOML_CHAR_8_STRINGS
 	#if TOML_CHAR_8_STRINGS
-		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; \
-all value setters and getters can now work with char8_t strings implicitly so changing the underlying string type \
-is no longer necessary.
+		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
 	#endif
 #endif
 
@@ -554,8 +551,6 @@ is no longer necessary.
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 
-#define TOML_NO_DEFAULT_CASE	default: TOML_UNREACHABLE
-
 #if defined(__cpp_consteval) && __cpp_consteval >= 201811 && !defined(_MSC_VER)
 	// https://developercommunity.visualstudio.com/t/Erroneous-C7595-error-with-consteval-in/1404234
 	#define TOML_CONSTEVAL		consteval
@@ -569,25 +564,29 @@ is no longer necessary.
 	#define TOML_HAS_ATTR(...)	0
 #endif
 
-#if !defined(DOXYGEN) && !TOML_INTELLISENSE
-	#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely) >= 201803
-		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
-	#endif
-	#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely) >= 201803
-		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
-	#endif
-	#if TOML_HAS_ATTR(nodiscard) >= 201907
-		#define TOML_NODISCARD_CTOR [[nodiscard]]
-	#endif
+#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely) >= 201803
+	#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
 #endif
-
 #ifndef TOML_LIKELY
 	#define TOML_LIKELY(...)	(__VA_ARGS__)
+#endif
+
+#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely) >= 201803
+	#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
 #endif
 #ifndef TOML_UNLIKELY
 	#define TOML_UNLIKELY(...)	(__VA_ARGS__)
 #endif
-#ifndef TOML_NODISCARD_CTOR
+
+#if TOML_HAS_ATTR(nodiscard)
+	#define TOML_NODISCARD [[nodiscard]]
+#else
+	#define TOML_NODISCARD
+#endif
+
+#if TOML_HAS_ATTR(nodiscard) >= 201907
+	#define TOML_NODISCARD_CTOR [[nodiscard]]
+#else
 	#define TOML_NODISCARD_CTOR
 #endif
 
@@ -595,10 +594,10 @@ is no longer necessary.
 	#define TOML_TRIVIAL_ABI
 #endif
 
-#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)														\
-	__VA_ARGS__ [[nodiscard]] friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }	\
-	__VA_ARGS__ [[nodiscard]] friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-	__VA_ARGS__ [[nodiscard]] friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); } \
+#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)															\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
 	static_assert(true)
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
@@ -619,7 +618,7 @@ is no longer necessary.
 #endif
 
 #define TOML_MAKE_FLAGS_(name, op)																	\
-	[[nodiscard]]																					\
+	TOML_NODISCARD																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
 	constexpr name operator op(name lhs, name rhs) noexcept											\
@@ -637,7 +636,7 @@ is no longer necessary.
 	TOML_MAKE_FLAGS_(name, &);																		\
 	TOML_MAKE_FLAGS_(name, |);																		\
 	TOML_MAKE_FLAGS_(name, ^);																		\
-	[[nodiscard]]																					\
+	TOML_NODISCARD																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
 	constexpr name operator~(name val) noexcept														\
@@ -645,7 +644,7 @@ is no longer necessary.
 		using under = std::underlying_type_t<name>;													\
 		return static_cast<name>(~static_cast<under>(val));											\
 	}																								\
-	[[nodiscard]]																					\
+	TOML_NODISCARD																					\
 	TOML_ALWAYS_INLINE																				\
 	TOML_ATTR(const)																				\
 	constexpr bool operator!(name val) noexcept														\
@@ -658,6 +657,27 @@ is no longer necessary.
 
 #ifndef TOML_LIFETIME_HOOKS
 	#define TOML_LIFETIME_HOOKS 0
+#endif
+
+#if !defined(__POXY__) && !defined(POXY_IMPLEMENTATION_DETAIL)
+	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
+#endif
+
+//======================================================================================================================
+// SFINAE
+//======================================================================================================================
+
+/// \cond
+#if defined(__cpp_concepts) && __cpp_concepts >= 201907
+	#define TOML_REQUIRES(...)	requires(__VA_ARGS__)
+#else
+	#define TOML_REQUIRES(...)
+#endif
+#define TOML_ENABLE_IF(...)	, typename std::enable_if<(__VA_ARGS__), int>::type = 0
+#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__ TOML_ENABLE_IF(condition)> TOML_REQUIRES(condition)
+/// \endcond
+#ifndef TOML_CONSTRAINED_TEMPLATE
+	#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__>
 #endif
 
 //#====================================================================================================================
@@ -697,7 +717,7 @@ is no longer necessary.
 //# VERSIONS AND NAMESPACES
 //#====================================================================================================================
 
-#include "toml_version.h"
+#include "version.h"
 
 #define TOML_LIB_SINGLE_HEADER 0
 
@@ -777,6 +797,63 @@ TOML_DISABLE_WARNINGS;
 	#endif
 #endif
 TOML_ENABLE_WARNINGS;
+
+//#====================================================================================================================
+//# STATIC ASSERT MESSAGE FORMATTING
+//#====================================================================================================================
+
+/// \cond
+
+#if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+
+	#define TOML_SA_NEWLINE		" "
+	#define TOML_SA_LIST_SEP	", "
+	#define TOML_SA_LIST_BEG	" ("
+	#define TOML_SA_LIST_END	")"
+	#define TOML_SA_LIST_NEW	" "
+	#define TOML_SA_LIST_NXT	", "
+
+#else
+
+	#define TOML_SA_NEWLINE			"\n| "
+	#define TOML_SA_LIST_SEP		TOML_SA_NEWLINE "  - "
+	#define TOML_SA_LIST_BEG		TOML_SA_LIST_SEP
+	#define TOML_SA_LIST_END
+	#define TOML_SA_LIST_NEW		TOML_SA_NEWLINE TOML_SA_NEWLINE
+	#define TOML_SA_LIST_NXT		TOML_SA_LIST_NEW
+
+#endif
+
+#define TOML_SA_NATIVE_VALUE_TYPE_LIST							\
+	TOML_SA_LIST_BEG	"std::string"							\
+	TOML_SA_LIST_SEP	"int64_t"								\
+	TOML_SA_LIST_SEP	"double"								\
+	TOML_SA_LIST_SEP	"bool"									\
+	TOML_SA_LIST_SEP	"toml::date"							\
+	TOML_SA_LIST_SEP	"toml::time"							\
+	TOML_SA_LIST_SEP	"toml::date_time"						\
+	TOML_SA_LIST_END
+
+#define TOML_SA_NODE_TYPE_LIST									\
+	TOML_SA_LIST_BEG	"toml::table"							\
+	TOML_SA_LIST_SEP	"toml::array"							\
+	TOML_SA_LIST_SEP	"toml::value<std::string>"				\
+	TOML_SA_LIST_SEP	"toml::value<int64_t>"					\
+	TOML_SA_LIST_SEP	"toml::value<double>"					\
+	TOML_SA_LIST_SEP	"toml::value<bool>"						\
+	TOML_SA_LIST_SEP	"toml::value<toml::date>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::time>"				\
+	TOML_SA_LIST_SEP	"toml::value<toml::date_time>"			\
+	TOML_SA_LIST_END
+
+#define TOML_SA_UNWRAPPED_NODE_TYPE_LIST						\
+	TOML_SA_LIST_NEW	"A native TOML value type"				\
+	TOML_SA_NATIVE_VALUE_TYPE_LIST								\
+																\
+	TOML_SA_LIST_NXT	"A TOML node type"						\
+	TOML_SA_NODE_TYPE_LIST
+
+/// \endcond
 
 //#====================================================================================================================
 //# DOXYGEN SPAM

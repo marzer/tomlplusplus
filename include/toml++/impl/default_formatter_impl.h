@@ -5,16 +5,15 @@
 
 #pragma once
 //# {{
-#include "toml_preprocessor.h"
+#include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
 //# }}
 
-#include "toml_default_formatter.h"
-TOML_DISABLE_WARNINGS;
-#include <cmath>
-TOML_ENABLE_WARNINGS;
+#include "default_formatter.h"
+
+/// \cond
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
@@ -77,7 +76,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				auto& n = *reinterpret_cast<const table*>(&node);
 				if (n.empty())
-					return 2_sz; // "{}"
+					return 2_sz;	  // "{}"
 				size_t weight = 3_sz; // "{ }"
 				for (auto&& [k, v] : n)
 				{
@@ -92,7 +91,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				auto& n = *reinterpret_cast<const array*>(&node);
 				if (n.empty())
-					return 2_sz; // "[]"
+					return 2_sz;	  // "[]"
 				size_t weight = 3_sz; // "[ ]"
 				for (auto& elem : n)
 				{
@@ -112,7 +111,7 @@ TOML_IMPL_NAMESPACE_START
 			case node_type::integer:
 			{
 				auto& n = *reinterpret_cast<const value<int64_t>*>(&node);
-				auto v = n.get();
+				auto v	= n.get();
 				if (!v)
 					return 1_sz;
 				size_t weight = {};
@@ -127,9 +126,9 @@ TOML_IMPL_NAMESPACE_START
 			case node_type::floating_point:
 			{
 				auto& n = *reinterpret_cast<const value<double>*>(&node);
-				auto v = n.get();
+				auto v	= n.get();
 				if (v == 0.0)
-					return 3_sz;  // "0.0"
+					return 3_sz;	  // "0.0"
 				size_t weight = 2_sz; // ".0"
 				if (v < 0.0)
 				{
@@ -145,7 +144,7 @@ TOML_IMPL_NAMESPACE_START
 			case node_type::time: return 10_sz;
 			case node_type::date_time: return 30_sz;
 			case node_type::none: TOML_UNREACHABLE;
-			TOML_NO_DEFAULT_CASE;
+			default: TOML_UNREACHABLE;
 		}
 
 		TOML_UNREACHABLE;
@@ -186,8 +185,7 @@ TOML_NAMESPACE_START
 				{
 					case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default:
-						base::print_value(v, type);
+					default: base::print_value(v, type);
 				}
 			}
 
@@ -201,36 +199,29 @@ TOML_NAMESPACE_END;
 // implementations of windows wide string nonsense
 #if TOML_WINDOWS_COMPAT
 
-#ifndef _WINDOWS_
-	#if TOML_INCLUDE_WINDOWS_H
-		#include <Windows.h>
-	#else
-		extern "C"
-		{
-			__declspec(dllimport)
-			int __stdcall WideCharToMultiByte(
-				unsigned int CodePage,
-				unsigned long dwFlags,
-				const wchar_t* lpWideCharStr,
-				int cchWideChar,
-				char* lpMultiByteStr,
-				int cbMultiByte,
-				const char* lpDefaultChar,
-				int* lpUsedDefaultChar
-			);
- 
-			__declspec(dllimport)
-			int __stdcall MultiByteToWideChar(
-				unsigned int CodePage,
-				unsigned long dwFlags,
-				const char* lpMultiByteStr,
-				int cbMultiByte,
-				wchar_t* lpWideCharStr,
-				int cchWideChar
-			);
-		}
-	#endif
-#endif // _WINDOWS_
+	#ifndef _WINDOWS_
+		#if TOML_INCLUDE_WINDOWS_H
+			#include <Windows.h>
+		#else
+extern "C" {
+	__declspec(dllimport) int __stdcall WideCharToMultiByte(unsigned int CodePage,
+															unsigned long dwFlags,
+															const wchar_t* lpWideCharStr,
+															int cchWideChar,
+															char* lpMultiByteStr,
+															int cbMultiByte,
+															const char* lpDefaultChar,
+															int* lpUsedDefaultChar);
+
+	__declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int CodePage,
+															unsigned long dwFlags,
+															const char* lpMultiByteStr,
+															int cbMultiByte,
+															wchar_t* lpWideCharStr,
+															int cchWideChar);
+}
+		#endif
+	#endif // _WINDOWS_
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -241,13 +232,19 @@ TOML_IMPL_NAMESPACE_START
 			return {};
 
 		std::string s;
-		const auto len = ::WideCharToMultiByte(
-			65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr
-		);
+		const auto len =
+			::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), nullptr, 0, nullptr, nullptr);
 		if (len)
 		{
 			s.resize(static_cast<size_t>(len));
-			::WideCharToMultiByte(65001, 0, str.data(), static_cast<int>(str.length()), s.data(), len, nullptr, nullptr);
+			::WideCharToMultiByte(65001,
+								  0,
+								  str.data(),
+								  static_cast<int>(str.length()),
+								  s.data(),
+								  len,
+								  nullptr,
+								  nullptr);
 		}
 		return s;
 	}
@@ -285,4 +282,6 @@ TOML_IMPL_NAMESPACE_END;
 
 #endif // TOML_WINDOWS_COMPAT
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS, TOML_DISABLE_ARITHMETIC_WARNINGS
+TOML_POP_WARNINGS;
+
+/// \endcond

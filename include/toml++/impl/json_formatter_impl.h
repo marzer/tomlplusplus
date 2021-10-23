@@ -5,13 +5,15 @@
 
 #pragma once
 //# {{
-#include "toml_preprocessor.h"
+#include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
 //# }}
 
-#include "toml_json_formatter.h"
+#include "json_formatter.h"
+
+/// \cond
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
@@ -45,10 +47,8 @@ TOML_NAMESPACE_START
 				{
 					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default:
-						base::print_value(v, type);
+					default: base::print_value(v, type);
 				}
-
 			}
 			base::decrease_indent();
 			base::print_newline(true);
@@ -60,4 +60,6 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+TOML_POP_WARNINGS;
+
+/// \endcond

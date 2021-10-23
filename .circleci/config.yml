@@ -9,6 +9,10 @@ jobs:
         steps:
             - checkout
             - run:
+                name: Installing dependencies
+                command: |
+                    pip3 install --upgrade -r tools/requirements.txt
+            - run:
                 name: Checking toml.hpp
                 command: |
                     cd tools && python3 ci_single_header_check.py
@@ -28,10 +32,6 @@ jobs:
         resource_class: large
         steps:
             - checkout
-            - run:
-                name: Checking toml.hpp
-                command: |
-                    cd tools && python3 ci_single_header_check.py
             - run:
                 name: Pulling submodules
                 command: |
@@ -83,7 +83,7 @@ jobs:
             - run:
                 name: Installing dependencies
                 command: |
-                    pip3 install -r tools/requirements.txt
+                    pip3 install --upgrade -r tools/requirements.txt
             - run:
                 name: Generating documentation
                 command: |

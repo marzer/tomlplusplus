@@ -10,43 +10,51 @@ import re
 from pathlib import Path
 from io import StringIO
 
+
+
+
 class Preprocessor:
 
-	__re_strip_blocks = re.compile(r'//[#!]\s*[{][{].*?//[#!]\s*[}][}]*?\n', re.I | re.S)
 	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)"', re.I | re.M)
 
-	def __preprocess(self, match):
+	def __init__(self, file):
+		self.__processed_includes = []
+		self.__current_level = 0
+		self.__directory_stack = [ Path.cwd() ]
+		self.__entry_root = ''
+		self.__string = self.__preprocess(file)
 
-		raw_incl = match if isinstance(match, str) else match.group(1)
-		incl = raw_incl.strip().lower()
+	def __preprocess(self, incl):
+
+		if not isinstance(incl, (Path, str)): # a regex match object
+			incl = incl.group(1).strip()
+		if isinstance(incl, str):
+			incl = Path(incl.strip().replace('\\',r'/'))
+		if not incl.is_absolute():
+			incl = Path(self.__directory_stack[-1], incl).resolve()
 		if incl in self.__processed_includes:
 			return ''
+		if self.__current_level == 0 and self.__entry_root == '':
+			self.__entry_root = str(incl.parent).replace('\\',r'/')
 
 		self.__processed_includes.append(incl)
-		text = utils.read_all_text_from_file(Path(utils.entry_script_dir(), '..', 'include', 'toml++', incl).resolve(), logger=True).strip() + '\n'
+		self.__directory_stack.append(incl.parent)
+
+		text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
 		text = text.replace('\r\n', '\n') # convert windows newlines
-		text = self.__re_strip_blocks.sub('', text, 0) # strip {{ }} blocks
 		self.__current_level += 1
 		text = self.__re_includes.sub(lambda m : self.__preprocess(m), text, 0)
 		self.__current_level -= 1
 
-		if (self.__current_level == 1):
-			header_text = '↓ ' + raw_incl
-			lpad = 20 + ((25 * (self.__header_indent % 4)) - int((len(header_text) + 4) / 2))
-			self.__header_indent += 1
-			text = '#if 1  {}\n{}\n\n#endif {}\n'.format(
-				utils.make_divider(header_text, lpad, line_length=113),
-				text,
-				utils.make_divider('↑ ' + raw_incl, lpad, line_length=113)
-			)
+		if self.__current_level == 1:
+			header = str(incl).replace('\\',r'/')
+			if header.startswith(self.__entry_root):
+				header = header[len(self.__entry_root):].strip('/')
+			header = utils.make_divider(header, 10, pattern = r'*')
+			text = f'{header}\n\n{text}'
 
-		return '\n\n' + text + '\n\n' # will get merged later
-
-	def __init__(self, file):
-		self.__processed_includes = []
-		self.__header_indent = 0
-		self.__current_level = 0
-		self.__string = self.__preprocess(file)
+		self.__directory_stack.pop()
+		return '\n\n' + text + '\n\n'
 
 	def __str__(self):
 		return self.__string
@@ -55,99 +63,74 @@ class Preprocessor:
 
 def main():
 
+	# establish local directories
+	root_dir = utils.entry_script_dir().parent
+	include_dir = Path(root_dir, 'include', 'toml++')
+
 	# preprocess header(s)
-	source_text = str(Preprocessor('toml.h'))
+	toml_h = str(Preprocessor(Path(include_dir, 'toml.h')))
 
 	# strip various things:
-	# 'pragma once'
-	source_text = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', source_text, 0, re.I | re.M)
-	# clang-format directives
-	source_text = re.sub(r'^\s*//\s*clang-format\s+.+?$', '', source_text, 0, re.I | re.M)
-	# spdx license identifiers
-	source_text = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', source_text, 0, re.I | re.M)
-	# 'magic' comment blocks (incl. doxygen)
-	source_text = re.sub('(?:(?:\n|^)[ \t]*//[/#!<]+[^\n]*)+\n', '\n', source_text, 0, re.I | re.M)
-	# 'magic' comments (incl. doxygen)
-	source_text = re.sub('(?://[/#!<].*?)\n', '\n', source_text, 0, re.I | re.M)
-	# remove trailing whitespace
-	source_text = re.sub('([^ \t])[ \t]+\n', '\\1\n', source_text, 0, re.I | re.M)
-	# bookended namespace blocks
-	source_text = re.sub('}\n+TOML_NAMESPACE_END\n+TOML_NAMESPACE_START\n+{\n+', '\n', source_text, 0, re.I | re.M)
-	source_text = re.sub('}\n+TOML_IMPL_NAMESPACE_END\n+TOML_IMPL_NAMESPACE_START\n+{\n+', '\n', source_text, 0, re.I | re.M)
-	# blank lines before some preprocessor directives
-	#source_text = re.sub('\n+\n(\s*)#\s*(elif|else|endif)(.*?)\n', '\n\\1#\\2\\3\n', source_text, 0, re.I | re.M)
-	# blank lines after some preprocessor directives
-	#source_text = re.sub('#\s*(if|ifn?def|elif|else)(.*?)\n\n+', '#\\1\\2\n', source_text, 0, re.I | re.M)
-	# blank lines after opening braces
-	source_text = re.sub('[{]\s*\n\s*\n+', '{\n', source_text, 0, re.I | re.M)
-	# double newlines
-	source_text = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', source_text, 0, re.I | re.M)
-
-	# source_text = re.sub(  # blank lines between various preprocessor directives
-	# 	'[#](endif(?:\s*//[^\n]*)?)\n{2,}[#](ifn?(?:def)?|define)',
-	# 	'#\\1\n#\\2',
-	# 	source_text, 0, re.I | re.M
-	# )
-	return_type_pattern														\
-		= r'(?:'															\
-		+ r'(?:\[\[nodiscard\]\]\s*)?'										\
-		+ r'(?:(?:friend|explicit|virtual|inline|const|operator)\s+)*'		\
-		+ r'(?:'															\
-			+ r'bool|int64_t|(?:const_)?iterator|double|void'				\
-			+ r'|node(?:_(?:view|of)<.+?>|)?|table|array|value(?:<.+?>)?'	\
-			+ r'|T|U|parse_(?:error|result)'								\
-		+ r')'																\
-		+ r'(?:\s*[&*]+)?'													\
-		+ r'(?:\s*[(]\s*[)])?'												\
-		+ r'\s+'															\
-		+ r')'
-	blank_lines_between_returns_pattern = '({}[^\n]+)\n\n([ \t]*{})'.format(return_type_pattern, return_type_pattern)
-	for i in range(0, 5): # remove blank lines between simple one-liner definitions
-		source_text = re.sub('(using .+?;)\n\n([ \t]*using)', '\\1\n\\2', source_text, 0, re.I | re.M)
-		source_text = re.sub(
-				'([a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)'	\
-				+ '\n\n([ \t]*[a-zA-Z_][a-zA-Z0-9_]*[ \t]+[a-zA-Z_][a-zA-Z0-9_]*[ \t]*;)', '\\1\n\\2',
-				source_text, 0, re.I | re.M)
-		source_text = re.sub(blank_lines_between_returns_pattern, '\\1\n\\2', source_text, 0, re.I | re.M)
-	source_text = source_text.strip() + '\n'
+	if 1:
+		# 'pragma once'
+		toml_h = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', toml_h, 0, re.I | re.M)
+		# trailing whitespace
+		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+		# explicit 'strip this' blocks
+		toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
+		# spdx license identifiers
+		toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, 0, re.I | re.M)
+		# magic comments
+		blank_line = r'(?:[ \t]*\n)'
+		comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
+		toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
+		toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
+		toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
+		# trailing whitespace
+		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+		# double blank lines
+		toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
+		# weird spacing edge case between } and pp directives
+		toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
+		# blank lines following opening brackets or a comma
+		toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
+		# blank lines preceeding closing brackets
+		toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+		toml_h = toml_h.strip() + '\n'
 
 	# change TOML_LIB_SINGLE_HEADER to 1
-	source_text = re.sub(
+	toml_h = re.sub(
 		'#\s*define\s+TOML_LIB_SINGLE_HEADER\s+[0-9]+',
 		'#define	TOML_LIB_SINGLE_HEADER 1',
-		source_text, 0, re.I
+		toml_h, 0, re.I
 	)
 
-	# extract library version
-	library_version = {
-		'major': 0,
-		'minor': 0,
-		'patch': 0
-	}
-	match = re.search(r'^\s*#\s*define\s+TOML_LIB_MAJOR\s+([0-9]+)\s*$', source_text, re.I | re.M)
-	if match is not None:
-		library_version['major'] = match.group(1)
-	match = re.search(r'^\s*#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)\s*$', source_text, re.I | re.M)
-	if match is not None:
-		library_version['minor'] = match.group(1)
-	match = re.search(r'^\s*#\s*define\s+TOML_LIB_(?:REVISION|PATCH)\s+([0-9]+)\s*$', source_text, re.I | re.M)
-	if match is not None:
-		library_version['patch'] = match.group(1)
+	# read version number
+	version_h = utils.read_all_text_from_file(Path(include_dir, 'impl/version.h'), logger=True)
+	match = re.search(
+			r'#\s*define\s+TOML_LIB_MAJOR\s+([0-9]+)[^0-9].*'
+			+ r'#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)[^0-9].*'
+			+ r'#\s*define\s+TOML_LIB_PATCH\s+([0-9]+)[^0-9]',
+			version_h, re.I | re.S)
+	if match is None:
+		raise Exception("could not find TOML_LIB_MAJOR, TOML_LIB_MINOR or TOML_LIB_PATCH impl/version.h")
+	version = rf'{int(match[1])}.{int(match[2])}.{int(match[3])}'
+	print(rf'Library version: {version}')
 
 	# build the preamble (license etc)
 	preamble = []
-	preamble.append('''
-// toml++ v{major}.{minor}.{patch}
+	preamble.append(rf'''
+// toml++ v{version}
 // https://github.com/marzer/tomlplusplus
-// SPDX-License-Identifier: MIT'''.format(**library_version))
-	preamble.append('''
+// SPDX-License-Identifier: MIT''')
+	preamble.append(r'''
 // -         THIS FILE WAS ASSEMBLED FROM MULTIPLE HEADER FILES BY A SCRIPT - PLEASE DON'T EDIT IT DIRECTLY            -
 //
 // If you wish to submit a contribution to toml++, hooray and thanks! Before you crack on, please be aware that this
 // file was assembled from a number of smaller files by a python script, and code contributions should not be made
 // against it directly. You should instead make your changes in the relevant source file(s). The file names of the files
 // that contributed to this header can be found at the beginnings and ends of the corresponding sections of this file.''')
-	preamble.append('''
+	preamble.append(r'''
 // TOML Language Specifications:
 // latest:      https://github.com/toml-lang/toml/blob/master/README.md
 // v1.0.0:      https://toml.io/en/v1.0.0
@@ -173,52 +156,58 @@ def main():
 				write(line)
 			write('//')
 			write(utils.make_divider())
-		write(source_text)
+		write(toml_h)
 		write('')
 
 		output_str = output.getvalue().strip()
 
 		# analyze the output to find any potentially missing #undefs
-		re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
-		re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
-		defines = dict()
-		for output_line in output_str.splitlines():
-			defined = True
-			m = re_define.match(output_line)
-			if not m:
-				defined = False
-				m = re_undef.match(output_line)
-			if m:
-				defines[m.group(1)] = defined
-		ignore_list = ( # macros that are meant to stay public (user configs etc)
-			r'INCLUDE_TOMLPLUSPLUS_H',
-			r'TOML_API',
-			r'TOML_UNRELEASED_FEATURES',
-			r'TOML_LARGE_FILES',
-			r'TOML_PARSER',
-			r'TOML_WINDOWS_COMPAT',
-			r'TOML_EXCEPTIONS',
-			r'TOML_LIB_SINGLE_HEADER',
-			r'TOML_LIB_MAJOR',
-			r'TOML_LIB_MINOR',
-			r'TOML_LIB_PATCH',
-			r'TOML_LANG_MAJOR',
-			r'TOML_LANG_MINOR',
-			r'TOML_LANG_PATCH',
-			r'TOML_UNDEF_MACROS',
-			r'TOML_HEADER_ONLY',
-			r'TOML_ALL_INLINE',
-			r'TOML_MAX_NESTED_VALUES'
-		)
-		set_defines = []
-		for define, currently_set in defines.items():
-			if currently_set and define not in ignore_list:
-				set_defines.append(define)
-		if len(set_defines) > 0:
-			set_defines.sort()
-			print(f"Potentially missing #undefs:")
-			for define in set_defines:
-				print(f"\t#undef {define}")
+		if 1:
+			re_define = re.compile(r'^\s*#\s*define\s+([a-zA-Z0-9_]+)(?:$|\s|\()')
+			re_undef = re.compile(r'^\s*#\s*undef\s+([a-zA-Z0-9_]+)(?:$|\s|//)')
+			defines = dict()
+			for output_line in output_str.splitlines():
+				defined = True
+				m = re_define.match(output_line)
+				if not m:
+					defined = False
+					m = re_undef.match(output_line)
+				if m:
+					defines[m.group(1)] = defined
+			ignore_list = ( # macros that are meant to stay public (user configs etc)
+				r'INCLUDE_TOMLPLUSPLUS_H',
+				r'TOML_ALL_INLINE',
+				r'TOML_API',
+				r'TOML_CONFIG_HEADER',
+				r'TOML_EXCEPTIONS',
+				r'TOML_HEADER_ONLY',
+				r'TOML_LANG_MAJOR',
+				r'TOML_LANG_MINOR',
+				r'TOML_LANG_PATCH',
+				r'TOML_LARGE_FILES',
+				r'TOML_LIB_MAJOR',
+				r'TOML_LIB_MINOR',
+				r'TOML_LIB_PATCH',
+				r'TOML_LIB_SINGLE_HEADER',
+				r'TOML_MAX_NESTED_VALUES',
+				r'TOML_OPTIONAL_TYPE',
+				r'TOML_PARSER',
+				r'TOML_SMALL_FLOAT_TYPE',
+				r'TOML_SMALL_INT_TYPE',
+				r'TOML_UNDEF_MACROS',
+				r'TOML_UNRELEASED_FEATURES',
+				r'TOML_WINDOWS_COMPAT',
+				r'POXY_IMPLEMENTATION_DETAIL',
+			)
+			set_defines = []
+			for define, currently_set in defines.items():
+				if currently_set and define not in ignore_list:
+					set_defines.append(define)
+			if len(set_defines) > 0:
+				set_defines.sort()
+				print(f"Potentially missing #undefs:")
+				for define in set_defines:
+					print(f"\t#undef {define}")
 
 		# write the output file
 		output_file_path = Path(utils.entry_script_dir(), '..', 'toml.hpp').resolve()

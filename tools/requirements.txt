@@ -1,4 +1,4 @@
-misk>=0.4.0
-poxy>=0.4.1
+misk>=0.5.0
+poxy>=0.5.1
 pyyaml
 python-dateutil

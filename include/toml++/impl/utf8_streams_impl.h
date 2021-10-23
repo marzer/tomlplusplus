@@ -5,7 +5,7 @@
 
 #pragma once
 //# {{
-#include "toml_preprocessor.h"
+#include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
 	#error This is an implementation-only header.
 #endif
@@ -14,11 +14,17 @@
 #endif
 //# }}
 
-#include "toml_utf8_streams.h"
+#include "utf8_streams.h"
+
+/// \cond
 
 #if !TOML_EXCEPTIONS
 	#undef TOML_ERROR_CHECK
-	#define TOML_ERROR_CHECK	if (reader.error()) return nullptr
+	#define TOML_ERROR_CHECK                                                                                           \
+		if (reader.error())                                                                                            \
+		return nullptr
+#else
+	#define TOML_ERROR_CHECK (void)0
 #endif
 
 TOML_IMPL_NAMESPACE_START
@@ -26,8 +32,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_EXTERNAL_LINKAGE
-	utf8_buffered_reader::utf8_buffered_reader(utf8_reader_interface& reader_) noexcept
-		: reader{ reader_ }
+	utf8_buffered_reader::utf8_buffered_reader(utf8_reader_interface & reader_) noexcept : reader{ reader_ }
 	{}
 
 	TOML_EXTERNAL_LINKAGE
@@ -84,8 +89,8 @@ TOML_IMPL_NAMESPACE_START
 		negative_offset += count;
 
 		return negative_offset
-			? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
-			: head;
+				 ? history.buffer + ((history.first + history.count - negative_offset) % history_buffer_size)
+				 : head;
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -94,17 +99,18 @@ TOML_IMPL_NAMESPACE_START
 		return reader.peek_eof();
 	}
 
-	#if !TOML_EXCEPTIONS
+#if !TOML_EXCEPTIONS
 	TOML_EXTERNAL_LINKAGE
 	optional<parse_error>&& utf8_buffered_reader::error() noexcept
 	{
 		return reader.error();
 	}
-	#endif
+#endif
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }
 TOML_IMPL_NAMESPACE_END;
 
 #undef TOML_ERROR_CHECK
-#undef TOML_ERROR
+
+/// \endcond

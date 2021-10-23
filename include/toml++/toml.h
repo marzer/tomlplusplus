@@ -10,53 +10,53 @@
 //# they're listed explicitly here because this file
 //# is used as the source for generate_single_header.py.
 
-#include "toml_preprocessor.h"
+#include "impl/preprocessor.h"
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 
-#include "toml_common.h"
-#include "toml_date_time.h"
-#include "toml_print_to_stream.h"
-#include "toml_node.h"
-#include "toml_value.h"
-#include "toml_array.h"
-#include "toml_table.h"
-#include "toml_node_view.h"
-#include "toml_utf8.h"
+#include "impl/common.h"
+#include "impl/date_time.h"
+#include "impl/print_to_stream.h"
+#include "impl/node.h"
+#include "impl/value.h"
+#include "impl/array.h"
+#include "impl/table.h"
+#include "impl/node_view.h"
+#include "impl/utf8.h"
 #if TOML_PARSER
-	#include "toml_parse_error.h"
-	#include "toml_parse_result.h"
-	#include "toml_utf8_streams.h"
-	#include "toml_parser.h"
+	#include "impl/parse_error.h"
+	#include "impl/parse_result.h"
+	#include "impl/utf8_streams.h"
+	#include "impl/parser.h"
 #endif // TOML_PARSER
-#include "toml_formatter.h"
-#include "toml_default_formatter.h"
-#include "toml_json_formatter.h"
+#include "impl/formatter.h"
+#include "impl/default_formatter.h"
+#include "impl/json_formatter.h"
 
 #if TOML_IMPLEMENTATION
-	#include "toml_node.hpp"
-	#include "toml_array.hpp"
-	#include "toml_table.hpp"
+	#include "impl/node_impl.h"
+	#include "impl/array_impl.h"
+	#include "impl/table_impl.h"
 	#if TOML_PARSER
-		#include "toml_utf8_streams.hpp"
-		#include "toml_parser.hpp"
+		#include "impl/utf8_streams_impl.h"
+		#include "impl/parser_impl.h"
 	#endif // TOML_PARSER
-	#include "toml_default_formatter.hpp"
-	#include "toml_json_formatter.hpp"
+	#include "impl/default_formatter_impl.h"
+	#include "impl/json_formatter_impl.h"
 	#if !TOML_HEADER_ONLY
-		#include "toml_instantiations.hpp"
+		#include "impl/template_instantiations.h"
 	#endif // !TOML_HEADER_ONLY
-#endif // TOML_IMPLEMENTATION
+#endif	   // TOML_IMPLEMENTATION
 
 TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
-	#undef TOML_ABI_NAMESPACES
 	#undef TOML_ABI_NAMESPACE_BOOL
 	#undef TOML_ABI_NAMESPACE_END
 	#undef TOML_ABI_NAMESPACE_START
+	#undef TOML_ABI_NAMESPACES
 	#undef TOML_ABSTRACT_BASE
 	#undef TOML_ALWAYS_INLINE
 	#undef TOML_ANON_NAMESPACE
@@ -72,39 +72,41 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_CONCAT
 	#undef TOML_CONCAT_1
 	#undef TOML_CONSTEVAL
+	#undef TOML_CONSTRAINED_TEMPLATE
 	#undef TOML_CPP
 	#undef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 	#undef TOML_DISABLE_INIT_WARNINGS
-	#undef TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_DISABLE_SHADOW_WARNINGS
+	#undef TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_DISABLE_SUGGEST_WARNINGS
 	#undef TOML_DISABLE_SWITCH_WARNINGS
 	#undef TOML_DISABLE_WARNINGS
-	#undef TOML_ENABLE_WARNINGS
 	#undef TOML_EMPTY_BASES
+	#undef TOML_ENABLE_IF
+	#undef TOML_ENABLE_WARNINGS
 	#undef TOML_EVAL_BOOL_0
 	#undef TOML_EVAL_BOOL_1
 	#undef TOML_EXTERNAL_LINKAGE
+	#undef TOML_FLOAT_CHARCONV
 	#undef TOML_FLOAT128
 	#undef TOML_FLOAT16
-	#undef TOML_FLOAT_CHARCONV
 	#undef TOML_FP16
 	#undef TOML_GCC
 	#undef TOML_HAS_ATTR
-	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#undef TOML_HAS_CHAR8
+	#undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 	#undef TOML_HAS_INCLUDE
 	#undef TOML_ICC
 	#undef TOML_ICC_CL
-	#undef TOML_IMPLEMENTATION
 	#undef TOML_IMPL_NAMESPACE_END
 	#undef TOML_IMPL_NAMESPACE_START
+	#undef TOML_IMPLEMENTATION
 	#undef TOML_INCLUDE_WINDOWS_H
+	#undef TOML_INT_CHARCONV
 	#undef TOML_INT128
 	#undef TOML_INTELLISENSE
 	#undef TOML_INTERNAL_LINKAGE
-	#undef TOML_INT_CHARCONV
 	#undef TOML_LANG_AT_LEAST
 	#undef TOML_LANG_EFFECTIVE_VERSION
 	#undef TOML_LANG_HIGHER_THAN
@@ -112,8 +114,8 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_LAUNDER
 	#undef TOML_LIFETIME_HOOKS
 	#undef TOML_LIKELY
-	#undef TOML_MAKE_FLAGS_
 	#undef TOML_MAKE_FLAGS
+	#undef TOML_MAKE_FLAGS_
 	#undef TOML_MAKE_VERSION
 	#undef TOML_MAY_THROW
 	#undef TOML_MSVC
@@ -121,11 +123,12 @@ TOML_POP_WARNINGS; // TOML_DISABLE_SPAM_WARNINGS
 	#undef TOML_NAMESPACE_END
 	#undef TOML_NAMESPACE_START
 	#undef TOML_NEVER_INLINE
+	#undef TOML_NODISCARD
 	#undef TOML_NODISCARD_CTOR
-	#undef TOML_NO_DEFAULT_CASE
 	#undef TOML_PARSER_TYPENAME
 	#undef TOML_POP_WARNINGS
 	#undef TOML_PUSH_WARNINGS
+	#undef TOML_REQUIRES
 	#undef TOML_SA_LIST_BEG
 	#undef TOML_SA_LIST_END
 	#undef TOML_SA_LIST_NEW

@@ -7,8 +7,10 @@
 #define TOML_EMPTY_BASES
 #define TOML_MAY_THROW
 #define TOML_CONSTEVAL			constexpr
-#define TOML_LIKELY(...)				(__VA_ARGS__)
-#define TOML_UNLIKELY(...)				(__VA_ARGS__)
+#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__>
+#define TOML_LIKELY(...)		(__VA_ARGS__)
+#define TOML_UNLIKELY(...)		(__VA_ARGS__)
+#define TOML_NODISCARD
 #define TOML_NODISCARD_CTOR
 #define TOML_EXTERNAL_LINKAGE
 #define TOML_INTERNAL_LINKAGE

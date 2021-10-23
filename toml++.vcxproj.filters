@@ -4,88 +4,87 @@
     <ClInclude Include="include\toml++\toml.h">
       <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_array.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\array.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_array.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\array_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_common.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\common.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_date_time.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\date_time.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_default_formatter.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\default_formatter.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_default_formatter.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\default_formatter_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_formatter.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\formatter.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_instantiations.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\json_formatter.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_json_formatter.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\json_formatter_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_json_formatter.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\node.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_node.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\node_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_node.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\node_view.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_node_view.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\parse_error.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_parse_error.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\parse_result.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_parser.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\parser.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_parser.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\parser_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_preprocessor.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\preprocessor.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_print_to_stream.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\print_to_stream.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_table.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\table.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_table.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\table_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_utf8.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\template_instantiations.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_utf8_streams.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\utf8.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_utf8_streams.hpp">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\utf8_streams.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_value.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\utf8_streams_impl.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_version.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\value.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\toml_parse_result.h">
-      <Filter>include</Filter>
+    <ClInclude Include="include\toml++\impl\version.h">
+      <Filter>include\impl</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />
-    <None Include=".editorconfig" />
     <None Include=".gitattributes" />
     <None Include=".gitignore" />
     <None Include="CODE_OF_CONDUCT.md" />
@@ -134,6 +133,8 @@
     <None Include="cmake\tomlplusplus.cmake.in">
       <Filter>cmake</Filter>
     </None>
+    <None Include=".clang-format" />
+    <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -153,6 +154,9 @@
     </Filter>
     <Filter Include="cmake">
       <UniqueIdentifier>{47351d16-986b-4f4b-bd5e-b7c66a7a68d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\impl">
+      <UniqueIdentifier>{4e42aaa3-98cd-4678-9c1c-ffa3eaf519d7}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
