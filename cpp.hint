@@ -1,16 +1,25 @@
 #define TOML_API
 #define TOML_ATTR(...)
-#define TOML_ALWAYS_INLINE		inline
+#define TOML_ALWAYS_INLINE						inline
 #define TOML_NEVER_INLINE
 #define TOML_TRIVIAL_ABI
 #define TOML_ABSTRACT_BASE
 #define TOML_EMPTY_BASES
 #define TOML_MAY_THROW
-#define TOML_CONSTEVAL			constexpr
-#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__>
-#define TOML_LIKELY(...)		(__VA_ARGS__)
-#define TOML_UNLIKELY(...)		(__VA_ARGS__)
+#define TOML_CONSTEVAL							constexpr
+#define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
+#define TOML_LIKELY(...)						(__VA_ARGS__)
+#define TOML_UNLIKELY(...)						(__VA_ARGS__)
 #define TOML_NODISCARD
 #define TOML_NODISCARD_CTOR
+#define TOML_RETURNS_BY_THROWING
 #define TOML_EXTERNAL_LINKAGE
-#define TOML_INTERNAL_LINKAGE
+#define TOML_INTERNAL_LINKAGE					static
+#define TOML_ANON_NAMESPACE_START				namespace
+#define TOML_ANON_NAMESPACE_END					static_assert(true)
+#define TOML_ABI_NAMESPACE_BOOL(...)			static_assert(true)
+#define TOML_ABI_NAMESPACE_END					static_assert(true)
+#define TOML_NAMESPACE_START					namespace toml
+#define TOML_NAMESPACE_END						static_assert(true)
+#define TOML_IMPL_NAMESPACE_START				namespace toml::impl
+#define TOML_IMPL_NAMESPACE_END					static_assert(true)

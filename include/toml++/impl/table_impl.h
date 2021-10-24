@@ -2,37 +2,62 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+/// \cond
+
 //# {{
 #include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
-	#error This is an implementation-only header.
+#error This is an implementation-only header.
 #endif
 //# }}
 
 #include "table.h"
 #include "node_view.h"
 #include "header_start.h"
-/// \cond
+
+TOML_ANON_NAMESPACE_START
+{
+#if !TOML_HEADER_ONLY
+	using namespace toml;
+#endif
+
+	template <typename T, typename U>
+	TOML_INTERNAL_LINKAGE
+	bool table_is_homogeneous(T & map, node_type ntype, U & first_nonmatch) noexcept
+	{
+		using namespace toml;
+
+		if (map.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = map.cbegin()->second->type();
+		for (const auto& [k, v] : map)
+		{
+			(void)k;
+			if (v->type() != ntype)
+			{
+				first_nonmatch = v.get();
+				return false;
+			}
+		}
+		return true;
+	}
+}
+TOML_ANON_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	TOML_EXTERNAL_LINKAGE
-	table::table() noexcept
-	{
-#if TOML_LIFETIME_HOOKS
-		TOML_TABLE_CREATED;
-#endif
-	}
-
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) noexcept //
 		: node(other),
 		  inline_{ other.inline_ }
 	{
 		for (auto&& [k, v] : other)
-			map.emplace_hint(map.end(), k, impl::make_node(v));
+			map_.emplace_hint(map_.end(), k, impl::make_node(v));
 
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -42,7 +67,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::table(table && other) noexcept //
 		: node(std::move(other)),
-		  map{ std::move(other.map) },
+		  map_{ std::move(other.map_) },
 		  inline_{ other.inline_ }
 	{
 #if TOML_LIFETIME_HOOKS
@@ -56,9 +81,9 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(rhs);
-			map.clear();
+			map_.clear();
 			for (auto&& [k, v] : rhs)
-				map.emplace_hint(map.end(), k, impl::make_node(v));
+				map_.emplace_hint(map_.end(), k, impl::make_node(v));
 			inline_ = rhs.inline_;
 		}
 		return *this;
@@ -70,7 +95,7 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			map			  = std::move(rhs.map);
+			map_		  = std::move(rhs.map_);
 			inline_		  = rhs.inline_;
 		}
 		return *this;
@@ -83,20 +108,20 @@ TOML_NAMESPACE_START
 		{
 			if (!pairs[i].value) // empty node_views
 				continue;
-			map.insert_or_assign(std::move(pairs[i].key), std::move(pairs[i].value));
+			map_.insert_or_assign(std::move(pairs[i].key), std::move(pairs[i].value));
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype) const noexcept
 	{
-		if (map.empty())
+		if (map_.empty())
 			return false;
 
 		if (ntype == node_type::none)
-			ntype = map.cbegin()->second->type();
+			ntype = map_.cbegin()->second->type();
 
-		for (const auto& [k, v] : map)
+		for (const auto& [k, v] : map_)
 		{
 			(void)k;
 			if (v->type() != ntype)
@@ -106,80 +131,27 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	namespace impl
+	TOML_EXTERNAL_LINKAGE
+	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		template <typename T, typename U>
-		TOML_INTERNAL_LINKAGE
-		bool table_is_homogeneous(T& map, node_type ntype, U& first_nonmatch) noexcept
-		{
-			if (map.empty())
-			{
-				first_nonmatch = {};
-				return false;
-			}
-			if (ntype == node_type::none)
-				ntype = map.cbegin()->second->type();
-			for (const auto& [k, v] : map)
-			{
-				(void)k;
-				if (v->type() != ntype)
-				{
-					first_nonmatch = v.get();
-					return false;
-				}
-			}
-			return true;
-		}
+		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::is_homogeneous(node_type ntype, toml::node * &first_nonmatch) noexcept
+	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
+		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
-	{
-		return impl::table_is_homogeneous(map, ntype, first_nonmatch);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	node_view<node> table::operator[](std::string_view key) noexcept
-	{
-		return node_view<node>{ this->get(key) };
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	node_view<const node> table::operator[](std::string_view key) const noexcept
-	{
-		return node_view<const node>{ this->get(key) };
-	}
-
-#if TOML_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	node_view<node> table::operator[](std::wstring_view key) noexcept
-	{
-		return node_view<node>{ this->get(key) };
-	}
-	TOML_EXTERNAL_LINKAGE
-	node_view<const node> table::operator[](std::wstring_view key) const noexcept
-	{
-		return node_view<const node>{ this->get(key) };
-	}
-
-#endif // TOML_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	bool operator==(const table& lhs, const table& rhs) noexcept
+	bool table::equal(const table& lhs, const table& rhs) noexcept
 	{
 		if (&lhs == &rhs)
 			return true;
-		if (lhs.map.size() != rhs.map.size())
+		if (lhs.map_.size() != rhs.map_.size())
 			return false;
 
-		for (auto l = lhs.map.begin(), r = rhs.map.begin(), e = lhs.map.end(); l != e; l++, r++)
+		for (auto l = lhs.map_.begin(), r = rhs.map_.begin(), e = lhs.map_.end(); l != e; l++, r++)
 		{
 			if (l->first != r->first)
 				return false;
@@ -198,14 +170,8 @@ TOML_NAMESPACE_START
 		}
 		return true;
 	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool operator!=(const table& lhs, const table& rhs) noexcept
-	{
-		return !(lhs == rhs);
-	}
 }
 TOML_NAMESPACE_END;
 
-/// \endcond
 #include "header_end.h"
+/// \endcond

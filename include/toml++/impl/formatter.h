@@ -2,23 +2,20 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
+#include "forward_declarations.h"
 #include "print_to_stream.h"
-#if TOML_PARSER && !TOML_EXCEPTIONS
-	#include "parse_result.h"
-#endif
 #include "header_start.h"
 /// \cond
 
 TOML_IMPL_NAMESPACE_START
 {
-	template <typename Char = char>
-	class TOML_API formatter
+	class formatter
 	{
 	  private:
 		const toml::node* source_;
-		std::basic_ostream<Char>* stream_ = {};
+		std::ostream* stream_ = {};
 		format_flags flags_;
 		int indent_;
 		bool naked_newline_;
@@ -28,13 +25,15 @@ TOML_IMPL_NAMESPACE_START
 
 	  protected:
 		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
 		const toml::node& source() const noexcept
 		{
 			return *source_;
 		}
 
 		TOML_NODISCARD
-		std::basic_ostream<Char>& stream() const noexcept
+		TOML_ALWAYS_INLINE
+		std::ostream& stream() const noexcept
 		{
 			return *stream_;
 		}
@@ -66,25 +65,25 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		bool quote_dates_and_times() const noexcept
 		{
-			return (flags_ & format_flags::quote_dates_and_times) != format_flags::none;
+			return !!(flags_ & format_flags::quote_dates_and_times);
 		}
 
 		TOML_NODISCARD
 		bool literal_strings_allowed() const noexcept
 		{
-			return (flags_ & format_flags::allow_literal_strings) != format_flags::none;
+			return !!(flags_ & format_flags::allow_literal_strings);
 		}
 
 		TOML_NODISCARD
 		bool multi_line_strings_allowed() const noexcept
 		{
-			return (flags_ & format_flags::allow_multi_line_strings) != format_flags::none;
+			return !!(flags_ & format_flags::allow_multi_line_strings);
 		}
 
 		TOML_NODISCARD
 		bool value_format_flags_allowed() const noexcept
 		{
-			return (flags_ & format_flags::allow_value_format_flags) != format_flags::none;
+			return !!(flags_ & format_flags::allow_value_format_flags);
 		}
 
 		TOML_NODISCARD
@@ -98,175 +97,50 @@ TOML_IMPL_NAMESPACE_START
 			naked_newline_ = false;
 		}
 
-		void attach(std::basic_ostream<Char>& stream) noexcept
-		{
-			indent_		   = {};
-			naked_newline_ = true;
-			stream_		   = &stream;
-		}
+		TOML_API
+		void attach(std::ostream& stream) noexcept;
 
-		void detach() noexcept
-		{
-			stream_ = nullptr;
-		}
+		TOML_API
+		void detach() noexcept;
 
-		void print_newline(bool force = false)
-		{
-			if (!naked_newline_ || force)
-			{
-				print_to_stream('\n', *stream_);
-				naked_newline_ = true;
-			}
-		}
+		TOML_API
+		void print_newline(bool force = false);
 
-		void print_indent()
-		{
-			for (int i = 0; i < indent_; i++)
-			{
-				print_to_stream(indent_string, *stream_);
-				naked_newline_ = false;
-			}
-		}
+		TOML_API
+		void print_indent();
 
-		void print_quoted_string(std::string_view str, bool allow_multi_line = true)
-		{
-			auto literals = literal_strings_allowed();
-			if (str.empty())
-			{
-				print_to_stream(literals ? "''"sv : "\"\""sv, *stream_);
-				clear_naked_newline();
-				return;
-			}
+		TOML_API
+		void print_quoted_string(std::string_view str, bool allow_multi_line = true);
 
-			auto multi_line = allow_multi_line && multi_line_strings_allowed();
-			if (multi_line || literals)
-			{
-				utf8_decoder decoder;
-				bool has_line_breaks   = false;
-				bool has_control_chars = false;
-				bool has_single_quotes = false;
-				for (size_t i = 0; i < str.length() && !(has_line_breaks && has_control_chars && has_single_quotes);
-					 i++)
-				{
-					decoder(static_cast<uint8_t>(str[i]));
-					if (decoder.error())
-					{
-						has_line_breaks	  = false;
-						has_control_chars = true; // force ""
-						has_single_quotes = true;
-						break;
-					}
-					else if (decoder.has_code_point())
-					{
-						if (is_line_break(decoder.codepoint))
-							has_line_breaks = true;
-						else if (is_nontab_control_character(decoder.codepoint))
-							has_control_chars = true;
-						else if (decoder.codepoint == U'\'')
-							has_single_quotes = true;
-					}
-				}
-				multi_line = multi_line && has_line_breaks;
-				literals   = literals && !has_control_chars && !(!multi_line && has_single_quotes);
-			}
+		TOML_API
+		void print(const value<std::string>&);
 
-			if (literals)
-			{
-				const auto quot = multi_line ? "'''"sv : "'"sv;
-				print_to_stream(quot, *stream_);
-				print_to_stream(str, *stream_);
-				print_to_stream(quot, *stream_);
-			}
-			else
-			{
-				const auto quot = multi_line ? R"(""")"sv : R"(")"sv;
-				print_to_stream(quot, *stream_);
-				print_to_stream_with_escapes(str, *stream_);
-				print_to_stream(quot, *stream_);
-			}
-			clear_naked_newline();
-		}
+		TOML_API
+		void print(const value<int64_t>&);
 
-		template <typename T>
-		void print(const value<T>& val)
-		{
-			if constexpr (std::is_same_v<T, std::string>)
-			{
-				print_quoted_string(val.get());
-			}
-			else
-			{
-				if constexpr (is_one_of<T, date, time, date_time>)
-				{
-					if (quote_dates_and_times())
-					{
-						const auto quot = literal_strings_allowed() ? '\'' : '"';
-						print_to_stream(quot, *stream_);
-						print_to_stream(*val, *stream_);
-						print_to_stream(quot, *stream_);
-					}
-					else
-						print_to_stream(*val, *stream_);
-				}
-				else if constexpr (is_one_of<T, int64_t /*, double*/>)
-				{
-					if (value_format_flags_allowed() && *val >= 0)
-					{
-						const auto fmt = val.flags() & value_flags::format_as_hexadecimal;
-						if (fmt != value_flags::none)
-						{
-							switch (fmt)
-							{
-								case value_flags::format_as_binary: print_to_stream("0b"sv, *stream_); break;
-								case value_flags::format_as_octal: print_to_stream("0o"sv, *stream_); break;
-								case value_flags::format_as_hexadecimal: print_to_stream("0x"sv, *stream_); break;
-								default: TOML_UNREACHABLE;
-							}
-							print_to_stream(*val, *stream_, fmt);
-						}
-						else
-							print_to_stream(*val, *stream_);
-					}
-					else
-						print_to_stream(*val, *stream_);
-				}
-				else
-					print_to_stream(*val, *stream_);
+		TOML_API
+		void print(const value<double>&);
 
-				naked_newline_ = false;
-			}
-		}
+		TOML_API
+		void print(const value<bool>&);
 
-		void print_value(const node& val_node, node_type type)
-		{
-			TOML_ASSUME(type > node_type::array);
-			switch (type)
-			{
-				case node_type::string: print(*reinterpret_cast<const value<std::string>*>(&val_node)); break;
-				case node_type::integer: print(*reinterpret_cast<const value<int64_t>*>(&val_node)); break;
-				case node_type::floating_point: print(*reinterpret_cast<const value<double>*>(&val_node)); break;
-				case node_type::boolean: print(*reinterpret_cast<const value<bool>*>(&val_node)); break;
-				case node_type::date: print(*reinterpret_cast<const value<date>*>(&val_node)); break;
-				case node_type::time: print(*reinterpret_cast<const value<time>*>(&val_node)); break;
-				case node_type::date_time: print(*reinterpret_cast<const value<date_time>*>(&val_node)); break;
-				default: TOML_UNREACHABLE;
-			}
-		}
+		TOML_API
+		void print(const value<date>&);
+
+		TOML_API
+		void print(const value<time>&);
+
+		TOML_API
+		void print(const value<date_time>&);
+
+		TOML_API
+		void print_value(const node&, node_type);
 
 		TOML_NODISCARD
-		bool dump_failed_parse_result()
-		{
-#if TOML_PARSER && !TOML_EXCEPTIONS
-			if (result_ && !(*result_))
-			{
-				stream() << result_->error();
-				return true;
-			}
-#endif
+		TOML_API
+		bool dump_failed_parse_result() noexcept(!TOML_PARSER || TOML_EXCEPTIONS);
 
-			return false;
-		}
-
+		TOML_NODISCARD_CTOR
 		formatter(const toml::node& source, format_flags flags) noexcept //
 			: source_{ &source },
 			  flags_{ flags }
@@ -274,18 +148,12 @@ TOML_IMPL_NAMESPACE_START
 
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
-		formatter(const parse_result& result, format_flags flags) noexcept //
-			: source_{ result ? &result.table() : nullptr },
-			  flags_{ flags },
-			  result_{ &result }
-		{}
+		TOML_NODISCARD_CTOR
+		TOML_API
+		formatter(const parse_result& result, format_flags flags) noexcept;
 
 #endif
 	};
-
-#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
-	extern template class TOML_API formatter<char>;
-#endif
 }
 TOML_IMPL_NAMESPACE_END;
 

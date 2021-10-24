@@ -144,7 +144,6 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                                       |
 | `TOML_EXCEPTIONS`          |     boolean    | per your compiler's settings      | Sets whether the library uses exceptions.                                                                            |
 | `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_HEADER_ONLY` is `1`.          |
-| `TOML_LARGE_FILES`         |     boolean    | `0`                               | Uses 32-bit integers for line and column indices (instead of 16-bit).                                                |
 | `TOML_OPTIONAL_TYPE`       |    type name   | undefined                         | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
 | `TOML_PARSER`              |     boolean    | `1`                               | Disable this to prevent inclusion of the parser-related parts of the library if you don't need them.                 |
 | `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.             |

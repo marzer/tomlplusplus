@@ -379,10 +379,6 @@
 	#endif
 #endif
 
-#ifndef TOML_LARGE_FILES
-	#define TOML_LARGE_FILES 0
-#endif
-
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
@@ -419,6 +415,12 @@
 #ifdef TOML_CHAR_8_STRINGS
 	#if TOML_CHAR_8_STRINGS
 		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
+	#endif
+#endif
+
+#ifdef TOML_LARGE_FILES
+	#if !TOML_LARGE_FILES
+		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
 	#endif
 #endif
 
@@ -661,6 +663,12 @@
 
 #if !defined(__POXY__) && !defined(POXY_IMPLEMENTATION_DETAIL)
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
+#endif
+
+#if (!defined(DOXYGEN) && !TOML_HEADER_ONLY) || TOML_INTELLISENSE
+	#define TOML_EXTERN_TEMPLATES 1
+#else
+	#define TOML_EXTERN_TEMPLATES 0
 #endif
 
 //======================================================================================================================
@@ -912,12 +920,6 @@ TOML_ENABLE_WARNINGS;
 /// \def TOML_IMPLEMENTATION
 /// \brief Enables the library's implementation when #TOML_HEADER_ONLY is disabled.
 /// \detail Not defined by default. Meaningless when #TOML_HEADER_ONLY is enabled.
-
-
-/// \def TOML_LARGE_FILES
-/// \brief Sets whether line and column indices are 32-bit integers.
-/// \detail Defaults to `0`.
-/// \see toml::source_index
 
 
 #define TOML_OPTIONAL_TYPE

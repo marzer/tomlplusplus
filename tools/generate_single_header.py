@@ -181,6 +181,7 @@ def main():
 				if m:
 					defines[m.group(1)] = defined
 			ignore_list = ( # macros that are meant to stay public (user configs etc)
+				r'TOMLPLUSPLUS_H',
 				r'INCLUDE_TOMLPLUSPLUS_H',
 				r'TOML_ALL_INLINE',
 				r'TOML_API',
@@ -190,7 +191,6 @@ def main():
 				r'TOML_LANG_MAJOR',
 				r'TOML_LANG_MINOR',
 				r'TOML_LANG_PATCH',
-				r'TOML_LARGE_FILES',
 				r'TOML_LIB_MAJOR',
 				r'TOML_LIB_MINOR',
 				r'TOML_LIB_PATCH',

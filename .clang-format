@@ -96,7 +96,7 @@ IncludeIsMainSourceRegex: ''
 IndentCaseLabels: true
 IndentCaseBlocks: false
 IndentGotoLabels: true
-IndentPPDirectives: BeforeHash
+IndentPPDirectives: None
 IndentExternBlock: Indent
 IndentRequires:  false
 IndentWidth:     4
@@ -124,6 +124,7 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Left
+ReferenceAlignment: Left
 ReflowComments:  true
 SortIncludes:    false
 SortJavaStaticImport: Before

@@ -2,29 +2,53 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+/// \cond
+
 //# {{
 #include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
-	#error This is an implementation-only header.
+#error This is an implementation-only header.
 #endif
 //# }}
 
 #include "array.h"
 #include "header_start.h"
-/// \cond
+
+TOML_ANON_NAMESPACE_START
+{
+#if !TOML_HEADER_ONLY
+	using namespace toml;
+#endif
+
+	template <typename T, typename U>
+	TOML_INTERNAL_LINKAGE
+	bool array_is_homogeneous(T & elements, node_type ntype, U & first_nonmatch) noexcept
+	{
+		using namespace toml;
+
+		if (elements.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = elements[0]->type();
+		for (const auto& val : elements)
+		{
+			if (val->type() != ntype)
+			{
+				first_nonmatch = val.get();
+				return false;
+			}
+		}
+		return true;
+	}
+}
+TOML_ANON_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
-	TOML_EXTERNAL_LINKAGE
-	array::array() noexcept
-	{
-#if TOML_LIFETIME_HOOKS
-		TOML_ARRAY_CREATED;
-#endif
-	}
-
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) noexcept //
 		: node(other)
@@ -90,20 +114,6 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	TOML_ATTR(pure)
-	const node& array::operator[](size_t index) const noexcept
-	{
-		return *elements[index];
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	TOML_ATTR(pure)
-	node& array::operator[](size_t index) noexcept
-	{
-		return *elements[index];
-	}
-
-	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype) const noexcept
 	{
 		if (elements.empty())
@@ -119,59 +129,20 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	namespace impl
+	TOML_EXTERNAL_LINKAGE
+	bool array::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		template <typename T, typename U>
-		TOML_INTERNAL_LINKAGE
-		bool array_is_homogeneous(T& elements, node_type ntype, U& first_nonmatch) noexcept
-		{
-			if (elements.empty())
-			{
-				first_nonmatch = {};
-				return false;
-			}
-			if (ntype == node_type::none)
-				ntype = elements[0]->type();
-			for (const auto& val : elements)
-			{
-				if (val->type() != ntype)
-				{
-					first_nonmatch = val.get();
-					return false;
-				}
-			}
-			return true;
-		}
+		return TOML_ANON_NAMESPACE::array_is_homogeneous(elements, ntype, first_nonmatch);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool array::is_homogeneous(node_type ntype, toml::node * &first_nonmatch) noexcept
+	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
+		return TOML_ANON_NAMESPACE::array_is_homogeneous(elements, ntype, first_nonmatch);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool array::is_homogeneous(node_type ntype, const toml::node*& first_nonmatch) const noexcept
-	{
-		return impl::array_is_homogeneous(elements, ntype, first_nonmatch);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	TOML_ATTR(pure)
-	node* array::get(size_t index) noexcept
-	{
-		return index < elements.size() ? elements[index].get() : nullptr;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	TOML_ATTR(pure)
-	const node* array::get(size_t index) const noexcept
-	{
-		return index < elements.size() ? elements[index].get() : nullptr;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool operator==(const array& lhs, const array& rhs) noexcept
+	bool array::equal(const array& lhs, const array& rhs) noexcept
 	{
 		if (&lhs == &rhs)
 			return true;
@@ -192,12 +163,6 @@ TOML_NAMESPACE_START
 				return false;
 		}
 		return true;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool operator!=(const array& lhs, const array& rhs) noexcept
-	{
-		return !(lhs == rhs);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -280,5 +245,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-/// \endcond
 #include "header_end.h"
+/// \endcond

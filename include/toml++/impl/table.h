@@ -2,9 +2,12 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
 #include "array.h"
+#include "make_node.h"
+#include "std_map.h"
+#include "node_view.h"
 #include "header_start.h"
 
 /// \cond
@@ -28,8 +31,8 @@ TOML_IMPL_NAMESPACE_START
 		friend class TOML_NAMESPACE::table;
 
 		using proxy_type		   = table_proxy_pair<IsConst>;
-		using raw_mutable_iterator = string_map<std::unique_ptr<node>>::iterator;
-		using raw_const_iterator   = string_map<std::unique_ptr<node>>::const_iterator;
+		using raw_mutable_iterator = std::map<std::string, std::unique_ptr<node>, std::less<>>::iterator;
+		using raw_const_iterator   = std::map<std::string, std::unique_ptr<node>, std::less<>>::const_iterator;
 		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
 		mutable raw_iterator raw_;
@@ -217,16 +220,18 @@ TOML_NAMESPACE_START
 	/// 		additional considerations made for the heterogeneous nature of a
 	/// 		TOML table, and for the removal of some cruft (the public interface of
 	/// 		std::map is, simply, _a hot mess_).
-	class TOML_API table final : public node
+	class table final : public node
 	{
 	  private:
-		friend class TOML_PARSER_TYPENAME;
-
 		/// \cond
 
-		impl::string_map<std::unique_ptr<node>> map;
+		friend class TOML_PARSER_TYPENAME;
+
+		std::map<std::string, std::unique_ptr<node>, std::less<>> map_;
 		bool inline_ = false;
 
+		TOML_NODISCARD_CTOR
+		TOML_API
 		table(impl::table_init_pair*, size_t) noexcept;
 
 		template <typename Map, typename Key>
@@ -275,33 +280,47 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
 		using iterator = table_iterator;
+
 		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
 		using const_iterator = const_table_iterator;
 
+#if TOML_LIFETIME_HOOKS
+
+		TOML_NODISCARD_CTOR
+		table() noexcept
+		{
+			TOML_TABLE_CREATED;
+		}
+
+		~table() noexcept
+		{
+			TOML_TABLE_DESTROYED;
+		}
+#else
+
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
-		table() noexcept;
+		table() noexcept = default;
+
+#endif
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
+		TOML_API
 		table(const table&) noexcept;
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
+		TOML_API
 		table(table&& other) noexcept;
 
 		/// \brief	Copy-assignment operator.
+		TOML_API
 		table& operator=(const table&) noexcept;
 
 		/// \brief	Move-assignment operator.
+		TOML_API
 		table& operator=(table&& rhs) noexcept;
-
-#if TOML_LIFETIME_HOOKS
-		~table() noexcept override
-		{
-			TOML_TABLE_DESTROYED;
-		}
-#endif
 
 		/// \brief	Constructs a table with one or more initial key-value pairs.
 		///
@@ -346,48 +365,38 @@ TOML_NAMESPACE_START
 		/// @{
 
 		TOML_NODISCARD
-		node_type type() const noexcept override
+		node_type type() const noexcept final
 		{
 			return node_type::table;
 		}
 
 		TOML_NODISCARD
-		bool is_table() const noexcept override
+		bool is_table() const noexcept final
 		{
 			return true;
 		}
 
 		TOML_NODISCARD
-		bool is_array() const noexcept override
-		{
-			return false;
-		}
+		bool is_homogeneous(node_type ntype) const noexcept final;
 
 		TOML_NODISCARD
-		bool is_value() const noexcept override
-		{
-			return false;
-		}
+		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
 		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype) const noexcept override;
-
-		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
-
-		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
 		TOML_NODISCARD
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
+
 			static_assert(
 				std::is_void_v<
 					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
 				"The template type argument of table::is_homogeneous() must be void or one "
 				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
 			return is_homogeneous(impl::node_type_of<type>);
 		}
 
@@ -397,13 +406,13 @@ TOML_NAMESPACE_START
 		/// @{
 
 		TOML_NODISCARD
-		table* as_table() noexcept override
+		table* as_table() noexcept final
 		{
 			return this;
 		}
 
 		TOML_NODISCARD
-		const table* as_table() const noexcept override
+		const table* as_table() const noexcept final
 		{
 			return this;
 		}
@@ -484,7 +493,10 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<node> operator[](std::string_view key) noexcept;
+		node_view<node> operator[](std::string_view key) noexcept
+		{
+			return node_view<node>{ this->get(key) };
+		}
 
 		/// \brief	Gets a node_view for the selected key-value pair (const overload).
 		///
@@ -498,7 +510,10 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<const node> operator[](std::string_view key) const noexcept;
+		node_view<const node> operator[](std::string_view key) const noexcept
+		{
+			return node_view<const node>{ this->get(key) };
+		}
 
 #if TOML_WINDOWS_COMPAT
 
@@ -516,7 +531,10 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<node> operator[](std::wstring_view key) noexcept;
+		node_view<node> operator[](std::wstring_view key) noexcept
+		{
+			return node_view<node>{ this->get(key) };
+		}
 
 		/// \brief	Gets a node_view for the selected key-value pair (const overload).
 		///
@@ -532,7 +550,10 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<const node> operator[](std::wstring_view key) const noexcept;
+		node_view<const node> operator[](std::wstring_view key) const noexcept
+		{
+			return node_view<const node>{ this->get(key) };
+		}
 
 #endif // TOML_WINDOWS_COMPAT
 
@@ -545,62 +566,62 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		iterator begin() noexcept
 		{
-			return { map.begin() };
+			return { map_.begin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_NODISCARD
 		const_iterator begin() const noexcept
 		{
-			return { map.cbegin() };
+			return { map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_NODISCARD
 		const_iterator cbegin() const noexcept
 		{
-			return { map.cbegin() };
+			return { map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_NODISCARD
 		iterator end() noexcept
 		{
-			return { map.end() };
+			return { map_.end() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_NODISCARD
 		const_iterator end() const noexcept
 		{
-			return { map.cend() };
+			return { map_.cend() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_NODISCARD
 		const_iterator cend() const noexcept
 		{
-			return { map.cend() };
+			return { map_.cend() };
 		}
 
 		/// \brief	Returns true if the table is empty.
 		TOML_NODISCARD
 		bool empty() const noexcept
 		{
-			return map.empty();
+			return map_.empty();
 		}
 
 		/// \brief	Returns the number of key-value pairs in the table.
 		TOML_NODISCARD
 		size_t size() const noexcept
 		{
-			return map.size();
+			return map_.size();
 		}
 
 		/// \brief	Removes all key-value pairs from the table.
 		void clear() noexcept
 		{
-			map.clear();
+			map_.clear();
 		}
 
 		/// \brief	Inserts a new value at a specific key if one did not already exist.
@@ -679,12 +700,12 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				auto ipos = map.lower_bound(key);
-				if (ipos == map.end() || ipos->first != key)
+				auto ipos = map_.lower_bound(key);
+				if (ipos == map_.end() || ipos->first != key)
 				{
-					ipos = map.emplace_hint(ipos,
-											std::forward<KeyType>(key),
-											impl::make_node(std::forward<ValueType>(val)));
+					ipos = map_.emplace_hint(ipos,
+											 std::forward<KeyType>(key),
+											 impl::make_node(std::forward<ValueType>(val)));
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -820,12 +841,12 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				auto ipos = map.lower_bound(key);
-				if (ipos == map.end() || ipos->first != key)
+				auto ipos = map_.lower_bound(key);
+				if (ipos == map_.end() || ipos->first != key)
 				{
-					ipos = map.emplace_hint(ipos,
-											std::forward<KeyType>(key),
-											impl::make_node(std::forward<ValueType>(val)));
+					ipos = map_.emplace_hint(ipos,
+											 std::forward<KeyType>(key),
+											 impl::make_node(std::forward<ValueType>(val)));
 					return { iterator{ ipos }, true };
 				}
 				else
@@ -896,12 +917,12 @@ TOML_NAMESPACE_START
 							  "The emplacement type argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-				auto ipos = map.lower_bound(key);
-				if (ipos == map.end() || ipos->first != key)
+				auto ipos = map_.lower_bound(key);
+				if (ipos == map_.end() || ipos->first != key)
 				{
-					ipos = map.emplace_hint(ipos,
-											std::forward<KeyType>(key),
-											new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... });
+					ipos = map_.emplace_hint(ipos,
+											 std::forward<KeyType>(key),
+											 new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... });
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -933,7 +954,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(iterator pos) noexcept
 		{
-			return { map.erase(pos.raw_) };
+			return { map_.erase(pos.raw_) };
 		}
 
 		/// \brief	Removes the specified key-value pair from the table (const iterator overload).
@@ -961,7 +982,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(const_iterator pos) noexcept
 		{
-			return { map.erase(pos.raw_) };
+			return { map_.erase(pos.raw_) };
 		}
 
 		/// \brief	Removes the key-value pairs in the range [first, last) from the table.
@@ -991,7 +1012,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the last removed key-value pair.
 		iterator erase(const_iterator first, const_iterator last) noexcept
 		{
-			return { map.erase(first.raw_, last.raw_) };
+			return { map_.erase(first.raw_, last.raw_) };
 		}
 
 		/// \brief	Removes the value with the given key from the table.
@@ -1022,9 +1043,9 @@ TOML_NAMESPACE_START
 		/// \returns True if any values with matching keys were found and erased.
 		bool erase(std::string_view key) noexcept
 		{
-			if (auto it = map.find(key); it != map.end())
+			if (auto it = map_.find(key); it != map_.end())
 			{
-				map.erase(it);
+				map_.erase(it);
 				return true;
 			}
 			return false;
@@ -1054,7 +1075,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		iterator find(std::string_view key) noexcept
 		{
-			return { map.find(key) };
+			return { map_.find(key) };
 		}
 
 		/// \brief	Gets an iterator to the node at a specific key (const overload)
@@ -1065,14 +1086,14 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const_iterator find(std::string_view key) const noexcept
 		{
-			return { map.find(key) };
+			return { map_.find(key) };
 		}
 
 		/// \brief	Returns true if the table contains a node at the given key.
 		TOML_NODISCARD
 		bool contains(std::string_view key) const noexcept
 		{
-			return do_contains(map, key);
+			return do_contains(map_, key);
 		}
 
 #if TOML_WINDOWS_COMPAT
@@ -1147,7 +1168,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		node* get(std::string_view key) noexcept
 		{
-			return do_get(map, key);
+			return do_get(map_, key);
 		}
 
 		/// \brief	Gets the node at a specific key (const overload).
@@ -1158,7 +1179,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const node* get(std::string_view key) const noexcept
 		{
-			return do_get(map, key);
+			return do_get(map_, key);
 		}
 
 #if TOML_WINDOWS_COMPAT
@@ -1215,7 +1236,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
 		{
-			return do_get_as<ValueType>(map, key);
+			return do_get_as<ValueType>(map_, key);
 		}
 
 		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
@@ -1228,7 +1249,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
 		{
-			return do_get_as<ValueType>(map, key);
+			return do_get_as<ValueType>(map_, key);
 		}
 
 #if TOML_WINDOWS_COMPAT
@@ -1267,6 +1288,16 @@ TOML_NAMESPACE_START
 
 		/// @}
 
+	  private:
+		/// \cond
+
+		TOML_NODISCARD
+		TOML_API
+		static bool equal(const table&, const table&) noexcept;
+
+		/// \endcond
+
+	  public:
 		/// \name Equality
 		/// @{
 
@@ -1276,7 +1307,11 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The RHS table.
 		///
 		/// \returns	True if the tables contained the same keys and map.
-		friend bool operator==(const table& lhs, const table& rhs) noexcept;
+		TOML_NODISCARD
+		friend bool operator==(const table& lhs, const table& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
 
 		/// \brief	Inequality operator.
 		///
@@ -1284,52 +1319,54 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The RHS table.
 		///
 		/// \returns	True if the tables did not contain the same keys and map.
-		friend bool operator!=(const table& lhs, const table& rhs) noexcept;
-
-		/// \brief	Prints the table out to a stream as formatted TOML.
-		template <typename Char>
-		friend std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>&, const table&);
-		// implemented in toml_default_formatter.h
+		TOML_NODISCARD
+		friend bool operator!=(const table& lhs, const table& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
 
 		/// @}
+
+		/// \brief	Prints the table out to a stream as formatted TOML.
+		friend std::ostream& operator<<(std::ostream& lhs, const table& rhs)
+		{
+			impl::print_to_stream(lhs, rhs);
+			return lhs;
+		}
 	};
 
-#ifndef DOXYGEN
+	//#  template <typename T>
+	//#  inline std::vector<T> node::select_exact() const noexcept
+	//# {
+	//# 	using namespace impl;
+	//#
+	//# 	static_assert(
+	//# 		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//# 		"Retrieving values as wide-character strings with node::select_exact() is only "
+	//# 		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//# 	);
+	//#
+	//# 	static_assert(
+	//# 		(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
+	//# 		TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::select_exact()")
+	//# 	);
+	//# }
 
-	// template <typename T>
-	// inline std::vector<T> node::select_exact() const noexcept
-	//{
-	//	using namespace impl;
-
-	//	static_assert(
-	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-	//		"Retrieving values as wide-character strings with node::select_exact() is only "
-	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
-	//	);
-
-	//	static_assert(
-	//		(is_native<T> || can_represent_native<T>) && !is_cvref<T>,
-	//		TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::select_exact()")
-	//	);
-	//}
-
-	// template <typename T>
-	// inline std::vector<T> node::select() const noexcept
-	//{
-	//	using namespace impl;
-
-	//	static_assert(
-	//		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-	//		"Retrieving values as wide-character strings with node::select() is only "
-	//		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
-	//	);
-	//	static_assert(
-	//		(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
-	//		TOML_SA_VALUE_FUNC_MESSAGE("return type of node::select()")
-	//	);
-	//}
-
-#endif // !DOXYGEN
+	//#  template <typename T>
+	//#  inline std::vector<T> node::select() const noexcept
+	//# {
+	//# 	using namespace impl;
+	//#
+	//# 	static_assert(
+	//# 		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//# 		"Retrieving values as wide-character strings with node::select() is only "
+	//# 		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//# 	);
+	//# 	static_assert(
+	//# 		(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,
+	//# 		TOML_SA_VALUE_FUNC_MESSAGE("return type of node::select()")
+	//# 	);
+	//# }
 }
 TOML_NAMESPACE_END;
 

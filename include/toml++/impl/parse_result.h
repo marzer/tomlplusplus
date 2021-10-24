@@ -2,19 +2,15 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
-//# {{
+
 #include "preprocessor.h"
-#if !TOML_PARSER
-	#error This header cannot not be included when TOML_PARSER is disabled.
-#endif
-//# }}
+#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+
 #include "table.h"
 #include "parse_error.h"
 #include "header_start.h"
 
-#if defined(DOXYGEN) || !TOML_EXCEPTIONS
 TOML_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_START(noex);
@@ -292,7 +288,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-	#if TOML_WINDOWS_COMPAT
+#if TOML_WINDOWS_COMPAT
 
 		/// \brief	Gets a node_view for the selected key-value pair in the wrapped table.
 		///
@@ -326,7 +322,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-	#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_WINDOWS_COMPAT
 
 		/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
@@ -377,8 +373,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief Prints the held error or table object out to a text stream.
-		template <typename Char>
-		friend std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>& os, const parse_result& result)
+		friend std::ostream& operator<<(std::ostream& os, const parse_result& result)
 		{
 			return result.err_ ? (os << result.error()) : (os << result.table());
 		}
@@ -387,6 +382,6 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_END;
 }
 TOML_NAMESPACE_END;
-#endif // !TOML_EXCEPTIONS
 
 #include "header_end.h"
+#endif // TOML_PARSER && !TOML_EXCEPTIONS

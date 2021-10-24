@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version: '2.6.0',
+	version: '3.0.0',
 	meson_version: '>=0.53.0',
 	license: 'MIT',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
@@ -62,7 +62,7 @@ if is_gcc or is_clang
 	add_project_arguments(
 		'-march=native',
 		'-fvisibility=hidden',
-		'-fvisibility-inlines-hidden',
+		'-fvisility-inlines-hidden',
 		language: 'cpp'
 	)
 	if is_release

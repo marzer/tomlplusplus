@@ -10,9 +10,6 @@
     <ClInclude Include="include\toml++\impl\array_impl.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\common.h">
-      <Filter>include\impl</Filter>
-    </ClInclude>
     <ClInclude Include="include\toml++\impl\date_time.h">
       <Filter>include\impl</Filter>
     </ClInclude>
@@ -64,16 +61,7 @@
     <ClInclude Include="include\toml++\impl\table_impl.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\template_instantiations.h">
-      <Filter>include\impl</Filter>
-    </ClInclude>
     <ClInclude Include="include\toml++\impl\utf8.h">
-      <Filter>include\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\toml++\impl\utf8_streams.h">
-      <Filter>include\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\toml++\impl\utf8_streams_impl.h">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\value.h">
@@ -86,6 +74,48 @@
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\header_end.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\source_region.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_optional.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_vector.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_map.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\make_node.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\forward_declarations.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_except.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_string.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_new.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_string_impl.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\print_to_stream_impl.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\formatter_impl.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\node_view_impl.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\value_impl.h">
       <Filter>include\impl</Filter>
     </ClInclude>
   </ItemGroup>

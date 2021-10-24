@@ -2,9 +2,10 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
-#include "common.h"
+
+#include "forward_declarations.h"
+#include "source_region.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START
@@ -13,13 +14,13 @@ TOML_NAMESPACE_START
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
 	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
-	class TOML_ABSTRACT_BASE TOML_API node
+	class TOML_ABSTRACT_BASE node
 	{
 	  private:
+		/// \cond
+
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
-
-		/// \cond
 
 		template <typename T>
 		TOML_NODISCARD
@@ -42,13 +43,19 @@ TOML_NAMESPACE_START
 				return static_cast<N&&>(n).template ref_cast<type>();
 		}
 
-		/// \endcond
-
 	  protected:
 		node() noexcept = default;
+
+		TOML_API
 		node(const node&) noexcept;
+
+		TOML_API
 		node(node&&) noexcept;
+
+		TOML_API
 		node& operator=(const node&) noexcept;
+
+		TOML_API
 		node& operator=(node&&) noexcept;
 
 		template <typename T>
@@ -81,43 +88,39 @@ TOML_NAMESPACE_START
 		template <typename N, typename T>
 		using ref_cast_type = decltype(std::declval<N>().template ref_cast<T>());
 
+		/// \endcond
+
 	  public:
-		virtual ~node() noexcept = default;
+		TOML_API
+		virtual ~node() noexcept;
 
 		/// \name Type checks
 		/// @{
-
-#if defined(DOXYGEN) || !TOML_ICC || TOML_ICC_CL
 
 		/// \brief	Returns the node's type identifier.
 		TOML_NODISCARD
 		virtual node_type type() const noexcept = 0;
 
-#else
-
-		TOML_NODISCARD
-		virtual node_type type() const noexcept
-		{
-			// Q: "what the fuck?"
-			// A: https://github.com/marzer/tomlplusplus/issues/83
-			//    tl,dr: go home ICC, you're drunk.
-
-			return type();
-		}
-
-#endif
-
 		/// \brief	Returns true if this node is a table.
 		TOML_NODISCARD
-		virtual bool is_table() const noexcept = 0;
+		virtual bool is_table() const noexcept
+		{
+			return false;
+		}
 
 		/// \brief	Returns true if this node is an array.
 		TOML_NODISCARD
-		virtual bool is_array() const noexcept = 0;
+		virtual bool is_array() const noexcept
+		{
+			return false;
+		}
 
 		/// \brief	Returns true if this node is a value.
 		TOML_NODISCARD
-		virtual bool is_value() const noexcept = 0;
+		virtual bool is_value() const noexcept
+		{
+			return false;
+		}
 
 		/// \brief	Returns true if this node is a string value.
 		TOML_NODISCARD
@@ -699,13 +702,13 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		auto value_or(T&& default_value) const noexcept;
 
-		// template <typename T>
-		// TOML_NODISCARD
-		// std::vector<T> select_exact() const noexcept;
+		//# template <typename T>
+		//# TOML_NODISCARD
+		//# std::vector<T> select_exact() const noexcept;
 
-		// template <typename T>
-		// TOML_NODISCARD
-		// std::vector<T> select() const noexcept;
+		//# template <typename T>
+		//# TOML_NODISCARD
+		//# std::vector<T> select() const noexcept;
 
 		/// \brief	Gets a raw reference to a value node's underlying data.
 		///

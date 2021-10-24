@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
-#include "table.h"
-#include "array.h"
-#include "value.h"
+#include "print_to_stream.h"
+#include "node.h"
+#include "std_vector.h"
 #include "header_start.h"
-
-TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -57,12 +55,13 @@ TOML_NAMESPACE_START
 	/// product[2]:
 	/// \eout
 	template <typename ViewedType>
-	class TOML_API TOML_TRIVIAL_ABI node_view
+	class TOML_TRIVIAL_ABI node_view
 	{
 		static_assert(impl::is_one_of<ViewedType, toml::node, const toml::node>,
 					  "A toml::node_view<> must wrap toml::node or const toml::node.");
 
 	  public:
+		/// \brief	The node type being viewed - either `node` or `const node`.
 		using viewed_type = ViewedType;
 
 	  private:
@@ -440,9 +439,6 @@ TOML_NAMESPACE_START
 			return {};
 		}
 
-		TOML_PUSH_WARNINGS;
-		TOML_DISABLE_INIT_WARNINGS;
-
 		/// \brief	Gets the value contained by the referenced node.
 		///
 		/// \detail This function has 'permissive' retrieval semantics; some value types are allowed
@@ -470,8 +466,6 @@ TOML_NAMESPACE_START
 				return node_->template value<T>();
 			return {};
 		}
-
-		TOML_POP_WARNINGS;
 
 		/// \brief	Gets the raw value contained by the referenced node, or a default.
 		///
@@ -721,48 +715,40 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		template <typename Char, typename T>
-		friend std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>&, const node_view<T>&);
+		/// \brief	Prints the viewed node out to a stream.
+		friend std::ostream& operator<<(std::ostream& os, const node_view& nv)
+		{
+			if (nv.node_)
+				nv.node_->visit([&os](const auto& n) { os << n; });
+			return os;
+		}
 	};
+
+	/// \cond
+
 	template <typename T>
-	node_view(const value<T>&) -> node_view<const node>;
-	node_view(const table&)->node_view<const node>;
-	node_view(const array&)->node_view<const node>;
-	template <typename T>
-	node_view(value<T>&) -> node_view<node>;
-	node_view(table&)->node_view<node>;
-	node_view(array&)->node_view<node>;
+	node_view(const T&) -> node_view<const node>;
+
 	template <typename T>
 	node_view(const T*) -> node_view<const node>;
+
+	template <typename T>
+	node_view(T&) -> node_view<node>;
+
 	template <typename T>
 	node_view(T*) -> node_view<node>;
 
-	/// \brief	Prints the viewed node out to a stream.
-	template <typename Char, typename T>
-	inline std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>& os, const node_view<T>& nv)
-	{
-		if (nv.node_)
-		{
-			nv.node_->visit([&os](const auto& n) { os << n; });
-		}
-		return os;
-	}
-
-#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
+#if TOML_EXTERN_TEMPLATES
 
 	extern template class TOML_API node_view<node>;
 	extern template class TOML_API node_view<const node>;
 
-	extern template TOML_API
-	std::ostream& operator<<(std::ostream&, const node_view<node>&);
-	extern template TOML_API
-	std::ostream& operator<<(std::ostream&, const node_view<const node>&);
+#define TOML_EXTERN(name, T)                                                                                           \
+	extern template TOML_API                                                                                           \
+	optional<T> node_view<node>::name<T>() const noexcept;                                                             \
+	extern template TOML_API                                                                                           \
+	optional<T> node_view<const node>::name<T>() const noexcept
 
-	#define TOML_EXTERN(name, T)                                                                                       \
-		extern template TOML_API                                                                                       \
-		optional<T> node_view<node>::name<T>() const noexcept;                                                         \
-		extern template TOML_API                                                                                       \
-		optional<T> node_view<const node>::name<T>() const noexcept
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);
 	TOML_EXTERN(value_exact, const char*);
@@ -792,23 +778,35 @@ TOML_NAMESPACE_START
 	TOML_EXTERN(value, date_time);
 	TOML_EXTERN(value, bool);
 
-	#if TOML_HAS_CHAR8
+#if TOML_HAS_CHAR8
 	TOML_EXTERN(value_exact, std::u8string_view);
 	TOML_EXTERN(value_exact, std::u8string);
 	TOML_EXTERN(value_exact, const char8_t*);
 	TOML_EXTERN(value, std::u8string_view);
 	TOML_EXTERN(value, std::u8string);
 	TOML_EXTERN(value, const char8_t*);
-	#endif
+#endif
 
-	#if TOML_WINDOWS_COMPAT
+#if TOML_WINDOWS_COMPAT
 	TOML_EXTERN(value_exact, std::wstring);
 	TOML_EXTERN(value, std::wstring);
-	#endif
+#endif
 
-	#undef TOML_EXTERN
+#undef TOML_EXTERN
 
-#endif // !TOML_HEADER_ONLY
+#endif // TOML_EXTERN_TEMPLATES
+
+	inline node::operator node_view<node>() noexcept
+	{
+		return node_view<node>(this);
+	}
+
+	inline node::operator node_view<const node>() const noexcept
+	{
+		return node_view<const node>(this);
+	}
+
+	/// \endcond
 }
 TOML_NAMESPACE_END;
 

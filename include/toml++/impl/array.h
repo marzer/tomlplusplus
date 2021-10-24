@@ -2,9 +2,11 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
 #include "value.h"
+#include "std_vector.h"
+#include "make_node.h"
 #include "header_start.h"
 
 /// \cond
@@ -240,7 +242,7 @@ TOML_NAMESPACE_START
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine' ]
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine', 'ten', [ 11, 12.0 ] ]
 	/// \eout
-	class TOML_API array final : public node
+	class array final : public node
 	{
 	  private:
 		/// \cond
@@ -248,6 +250,7 @@ TOML_NAMESPACE_START
 		friend class TOML_PARSER_TYPENAME;
 		std::vector<std::unique_ptr<node>> elements;
 
+		TOML_API
 		void preinsertion_resize(size_t idx, size_t count) noexcept;
 
 		template <typename T>
@@ -262,8 +265,10 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_API
 		size_t total_leaf_count() const noexcept;
 
+		TOML_API
 		void flatten_child(array&& child, size_t& dest_index) noexcept;
 		/// \endcond
 
@@ -279,30 +284,44 @@ TOML_NAMESPACE_START
 		/// \brief A RandomAccessIterator for iterating over const elements in a toml::array.
 		using const_iterator = const_array_iterator;
 
+#if TOML_LIFETIME_HOOKS
+
+		TOML_NODISCARD_CTOR
+		array() noexcept
+		{
+			TOML_ARRAY_CREATED;
+		}
+
+		~array() noexcept
+		{
+			TOML_ARRAY_DESTROYED;
+		}
+
+#else
+
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
-		array() noexcept;
+		array() noexcept = default;
+
+#endif
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
+		TOML_API
 		array(const array&) noexcept;
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
+		TOML_API
 		array(array&& other) noexcept;
 
 		/// \brief	Copy-assignment operator.
+		TOML_API
 		array& operator=(const array&) noexcept;
 
 		/// \brief	Move-assignment operator.
+		TOML_API
 		array& operator=(array&& rhs) noexcept;
-
-#if TOML_LIFETIME_HOOKS
-		~array() noexcept override
-		{
-			TOML_ARRAY_DESTROYED;
-		}
-#endif
 
 		/// \brief	Constructs an array with one or more initial elements.
 		///
@@ -360,47 +379,40 @@ TOML_NAMESPACE_START
 		/// @{
 
 		TOML_NODISCARD
-		node_type type() const noexcept override
+		node_type type() const noexcept final
 		{
 			return node_type::array;
 		}
 
 		TOML_NODISCARD
-		bool is_table() const noexcept override
-		{
-			return false;
-		}
-
-		TOML_NODISCARD
-		bool is_array() const noexcept override
+		bool is_array() const noexcept final
 		{
 			return true;
 		}
 
 		TOML_NODISCARD
-		bool is_value() const noexcept override
-		{
-			return false;
-		}
-
-		TOML_NODISCARD
-		array* as_array() noexcept override
+		array* as_array() noexcept final
 		{
 			return this;
 		}
 
 		TOML_NODISCARD
-		const array* as_array() const noexcept override
+		const array* as_array() const noexcept final
 		{
 			return this;
 		}
 
 		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype) const noexcept override;
+		TOML_API
+		bool is_homogeneous(node_type ntype) const noexcept final;
+
 		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
+		TOML_API
+		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
+
 		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
+		TOML_API
+		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
 		TOML_NODISCARD
@@ -416,7 +428,7 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool is_array_of_tables() const noexcept override
+		bool is_array_of_tables() const noexcept final
 		{
 			return is_homogeneous(node_type::table);
 		}
@@ -428,11 +440,17 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
-		node& operator[](size_t index) noexcept;
+		node& operator[](size_t index) noexcept
+		{
+			return *elements[index];
+		}
 
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
-		const node& operator[](size_t index) const noexcept;
+		const node& operator[](size_t index) const noexcept
+		{
+			return *elements[index];
+		}
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
@@ -961,7 +979,10 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
 		TOML_NODISCARD
-		node* get(size_t index) noexcept;
+		node* get(size_t index) noexcept
+		{
+			return index < elements.size() ? elements[index].get() : nullptr;
+		}
 
 		/// \brief	Gets the element at a specific index (const overload).
 		///
@@ -969,7 +990,10 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
 		TOML_NODISCARD
-		const node* get(size_t index) const noexcept;
+		const node* get(size_t index) const noexcept
+		{
+			return index < elements.size() ? elements[index].get() : nullptr;
+		}
 
 		/// \brief	Gets the element at a specific index if it is a particular type.
 		///
@@ -1032,10 +1056,13 @@ TOML_NAMESPACE_START
 		/// \remarks	Arrays inside child tables are not flattened.
 		///
 		/// \returns A reference to the array.
+		TOML_API
 		array& flatten() &;
 
 		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
+		///
 		/// \returns An rvalue reference to the array.
+		TOML_API
 		array&& flatten() &&
 		{
 			return static_cast<toml::array&&>(this->flatten());
@@ -1043,29 +1070,16 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Equality
-		/// @{
-
-		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS array.
-		/// \param 	rhs	The RHS array.
-		///
-		/// \returns	True if the arrays contained the same elements.
-		friend bool operator==(const array& lhs, const array& rhs) noexcept;
-
-		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS array.
-		/// \param 	rhs	The RHS array.
-		///
-		/// \returns	True if the arrays did not contain the same elements.
-		friend bool operator!=(const array& lhs, const array& rhs) noexcept;
-
 	  private:
+		/// \cond
+
+		TOML_NODISCARD
+		TOML_API
+		static bool equal(const array&, const array&) noexcept;
+
 		template <typename T>
 		TOML_NODISCARD
-		static bool container_equality(const array& lhs, const T& rhs) noexcept
+		static bool equal_to_container(const array& lhs, const T& rhs) noexcept
 		{
 			using element_type = std::remove_const_t<typename T::value_type>;
 			static_assert(impl::is_native<element_type> || impl::is_losslessly_convertible_to_native<element_type>,
@@ -1087,13 +1101,42 @@ TOML_NAMESPACE_START
 			return true;
 		}
 
+		/// \endcond
+
 	  public:
+		/// \name Equality
+		/// @{
+
+		/// \brief	Equality operator.
+		///
+		/// \param 	lhs	The LHS array.
+		/// \param 	rhs	The RHS array.
+		///
+		/// \returns	True if the arrays contained the same elements.
+		TOML_NODISCARD
+		friend bool operator==(const array& lhs, const array& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		/// \brief	Inequality operator.
+		///
+		/// \param 	lhs	The LHS array.
+		/// \param 	rhs	The RHS array.
+		///
+		/// \returns	True if the arrays did not contain the same elements.
+		TOML_NODISCARD
+		friend bool operator!=(const array& lhs, const array& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
+
 		/// \brief	Initializer list equality operator.
 		template <typename T>
 		TOML_NODISCARD
 		friend bool operator==(const array& lhs, const std::initializer_list<T>& rhs) noexcept
 		{
-			return container_equality(lhs, rhs);
+			return equal_to_container(lhs, rhs);
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>);
 
@@ -1102,16 +1145,18 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		friend bool operator==(const array& lhs, const std::vector<T>& rhs) noexcept
 		{
-			return container_equality(lhs, rhs);
+			return equal_to_container(lhs, rhs);
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>);
 
 		/// @}
 
 		/// \brief	Prints the array out to a stream as formatted TOML.
-		template <typename Char>
-		friend std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>&, const array&);
-		// implemented in toml_default_formatter.h
+		friend std::ostream& operator<<(std::ostream& lhs, const array& rhs)
+		{
+			impl::print_to_stream(lhs, rhs);
+			return lhs;
+		}
 	};
 }
 TOML_NAMESPACE_END;

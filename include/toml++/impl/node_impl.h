@@ -2,18 +2,19 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+/// \cond
+
 //# {{
 #include "preprocessor.h"
 #if !TOML_IMPLEMENTATION
-	#error This is an implementation-only header.
+#error This is an implementation-only header.
 #endif
 //# }}
 
 #include "node.h"
+#include "node_view.h"
 #include "header_start.h"
-/// \cond
 
 TOML_NAMESPACE_START
 {
@@ -50,18 +51,9 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node::operator node_view<node>() noexcept
-	{
-		return node_view<node>(this);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	node::operator node_view<const node>() const noexcept
-	{
-		return node_view<const node>(this);
-	}
+	node::~node() noexcept = default;
 }
 TOML_NAMESPACE_END;
 
-/// \endcond
 #include "header_end.h"
+/// \endcond
