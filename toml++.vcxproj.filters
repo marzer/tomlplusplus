@@ -82,6 +82,12 @@
     <ClInclude Include="include\toml++\impl\version.h">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\header_start.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
+    <ClInclude Include="include\toml++\impl\header_end.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />

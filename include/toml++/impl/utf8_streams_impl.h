@@ -15,7 +15,7 @@
 //# }}
 
 #include "utf8_streams.h"
-
+#include "header_start.h"
 /// \cond
 
 #if !TOML_EXCEPTIONS
@@ -114,3 +114,4 @@ TOML_IMPL_NAMESPACE_END;
 #undef TOML_ERROR_CHECK
 
 /// \endcond
+#include "header_end.h"

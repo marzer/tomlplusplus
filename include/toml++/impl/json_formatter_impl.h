@@ -12,11 +12,8 @@
 //# }}
 
 #include "json_formatter.h"
-
+#include "header_start.h"
 /// \cond
-
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -60,6 +57,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
-
 /// \endcond
+#include "header_end.h"

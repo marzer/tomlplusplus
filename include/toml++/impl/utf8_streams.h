@@ -12,7 +12,7 @@
 //# }}
 #include "utf8.h"
 #include "parse_error.h"
-
+#include "header_start.h"
 /// \cond
 
 #if TOML_EXCEPTIONS
@@ -397,3 +397,4 @@ TOML_IMPL_NAMESPACE_END;
 #undef TOML_ERROR
 
 /// \endcond
+#include "header_end.h"

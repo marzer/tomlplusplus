@@ -7,8 +7,8 @@
 #include "table.h"
 #include "array.h"
 #include "value.h"
+#include "header_start.h"
 
-TOML_PUSH_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
@@ -812,4 +812,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_ARITHMETIC_WARNINGS
+#include "header_end.h"

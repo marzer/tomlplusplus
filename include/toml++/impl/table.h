@@ -5,6 +5,7 @@
 
 #pragma once
 #include "array.h"
+#include "header_start.h"
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -1331,3 +1332,5 @@ TOML_NAMESPACE_START
 #endif // !DOXYGEN
 }
 TOML_NAMESPACE_END;
+
+#include "header_end.h"

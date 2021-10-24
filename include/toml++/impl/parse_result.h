@@ -12,6 +12,7 @@
 //# }}
 #include "table.h"
 #include "parse_error.h"
+#include "header_start.h"
 
 #if defined(DOXYGEN) || !TOML_EXCEPTIONS
 TOML_NAMESPACE_START
@@ -387,3 +388,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 #endif // !TOML_EXCEPTIONS
+
+#include "header_end.h"

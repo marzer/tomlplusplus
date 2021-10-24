@@ -21,13 +21,11 @@ TOML_DISABLE_WARNINGS;
 using namespace std::string_view_literals;
 #endif
 TOML_ENABLE_WARNINGS;
-
+#include "header_start.h"
 /// \cond
 
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SPAM_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
 TOML_DISABLE_INIT_WARNINGS;
+
 #if TOML_MSVC
 	#pragma warning(disable : 6001) // using uninitialized memory (false positive)
 #endif
@@ -3186,6 +3184,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
-
 /// \endcond
+#include "header_end.h"

@@ -162,8 +162,8 @@
 		#endif
 
 		#define TOML_DISABLE_SWITCH_WARNINGS \
-			__pragma(warning(disable: 4061)) \
-			__pragma(warning(disable: 4062)) \
+			__pragma(warning(disable: 4061)) /* enumerator 'identifier' is not explicitly handled by a case label */ \
+			__pragma(warning(disable: 4062)) /* enumerator 'identifier' is not handled */ \
 			__pragma(warning(disable: 4063)) \
 			__pragma(warning(disable: 26819)) \
 			static_assert(true)

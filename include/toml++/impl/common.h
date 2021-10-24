@@ -5,6 +5,7 @@
 
 #pragma once
 #include "preprocessor.h"
+#include "header_start.h"
 
 //#====================================================================================================================
 //# INCLUDES
@@ -1287,3 +1288,5 @@ TOML_NAMESPACE_START
 	/// \endcond
 }
 TOML_NAMESPACE_END;
+
+#include "header_end.h"

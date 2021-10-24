@@ -7,9 +7,7 @@
 #include "formatter.h"
 #include "table.h"
 #include "array.h"
-
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
+#include "header_start.h"
 
 TOML_NAMESPACE_START
 {
@@ -192,4 +190,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+#include "header_end.h"

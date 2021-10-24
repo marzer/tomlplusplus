@@ -2,16 +2,14 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-/// \cond
 
 #pragma once
 #include "print_to_stream.h"
 #if TOML_PARSER && !TOML_EXCEPTIONS
 	#include "parse_result.h"
 #endif
-
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
+#include "header_start.h"
+/// \cond
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -34,6 +32,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			return *source_;
 		}
+
 		TOML_NODISCARD
 		std::basic_ostream<Char>& stream() const noexcept
 		{
@@ -290,6 +289,5 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
-
 /// \endcond
+#include "header_end.h"

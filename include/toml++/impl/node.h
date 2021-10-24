@@ -5,6 +5,7 @@
 
 #pragma once
 #include "common.h"
+#include "header_start.h"
 
 TOML_NAMESPACE_START
 {
@@ -995,3 +996,5 @@ TOML_NAMESPACE_START
 	};
 }
 TOML_NAMESPACE_END;
+
+#include "header_end.h"

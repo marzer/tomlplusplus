@@ -1,0 +1,8 @@
+//# {{
+#ifdef __INTELLISENSE__
+	#include "preprocessor.h"
+#endif
+//# }}
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_SPAM_WARNINGS;
+TOML_DISABLE_SWITCH_WARNINGS;

@@ -5,9 +5,8 @@
 
 #pragma once
 #include "date_time.h"
+#include "header_start.h"
 
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
@@ -463,4 +462,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
+#include "header_end.h"

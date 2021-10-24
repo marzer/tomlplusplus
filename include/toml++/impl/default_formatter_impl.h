@@ -12,11 +12,9 @@
 //# }}
 
 #include "default_formatter.h"
-
+#include "header_start.h"
 /// \cond
 
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
@@ -282,6 +280,5 @@ TOML_IMPL_NAMESPACE_END;
 
 #endif // TOML_WINDOWS_COMPAT
 
-TOML_POP_WARNINGS;
-
 /// \endcond
+#include "header_end.h"

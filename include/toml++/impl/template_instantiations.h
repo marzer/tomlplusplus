@@ -25,6 +25,8 @@ TOML_ENABLE_WARNINGS;
 #if TOML_PARSER
 	#include "parser.h"
 #endif
+#include "header_start.h"
+/// \cond
 
 // internal implementation namespace
 TOML_IMPL_NAMESPACE_START
@@ -146,3 +148,6 @@ TOML_NAMESPACE_START
 #endif // TOML_PARSER
 }
 TOML_NAMESPACE_END;
+
+/// \endcond
+#include "header_end.h"

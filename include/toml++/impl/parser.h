@@ -14,6 +14,7 @@
 #include "parse_error.h"
 #include "parse_result.h"
 #include "utf8_streams.h"
+#include "header_start.h"
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -442,3 +443,5 @@ TOML_NAMESPACE_START
 	}
 }
 TOML_NAMESPACE_END;
+
+#include "header_end.h"

@@ -16,9 +16,13 @@ from io import StringIO
 class Preprocessor:
 
 	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)"', re.I | re.M)
+	__multiples_allowed = [
+		r'impl/header_start.h',
+		r'impl/header_end.h'
+	]
 
 	def __init__(self, file):
-		self.__processed_includes = []
+		self.__processed_includes = set()
 		self.__current_level = 0
 		self.__directory_stack = [ Path.cwd() ]
 		self.__entry_root = ''
@@ -32,12 +36,17 @@ class Preprocessor:
 			incl = Path(incl.strip().replace('\\',r'/'))
 		if not incl.is_absolute():
 			incl = Path(self.__directory_stack[-1], incl).resolve()
-		if incl in self.__processed_includes:
-			return ''
 		if self.__current_level == 0 and self.__entry_root == '':
 			self.__entry_root = str(incl.parent).replace('\\',r'/')
 
-		self.__processed_includes.append(incl)
+		relative_path = str(incl).replace('\\',r'/')
+		if relative_path.startswith(self.__entry_root):
+			relative_path = relative_path[len(self.__entry_root):].strip('/')
+
+		if incl in self.__processed_includes and relative_path not in self.__multiples_allowed:
+			return ''
+
+		self.__processed_includes.add(incl)
 		self.__directory_stack.append(incl.parent)
 
 		text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
@@ -47,10 +56,7 @@ class Preprocessor:
 		self.__current_level -= 1
 
 		if self.__current_level == 1:
-			header = str(incl).replace('\\',r'/')
-			if header.startswith(self.__entry_root):
-				header = header[len(self.__entry_root):].strip('/')
-			header = utils.make_divider(header, 10, pattern = r'*')
+			header = utils.make_divider(relative_path, 10, pattern = r'*')
 			text = f'{header}\n\n{text}'
 
 		self.__directory_stack.pop()

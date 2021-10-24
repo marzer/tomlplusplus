@@ -5,9 +5,7 @@
 
 #pragma once
 #include "preprocessor.h"
-
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
+#include "header_start.h"
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -954,4 +952,4 @@ TOML_IMPL_NAMESPACE_START
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+#include "header_end.h"

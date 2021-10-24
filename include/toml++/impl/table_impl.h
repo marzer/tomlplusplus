@@ -13,7 +13,7 @@
 
 #include "table.h"
 #include "node_view.h"
-
+#include "header_start.h"
 /// \cond
 
 TOML_NAMESPACE_START
@@ -208,3 +208,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 /// \endcond
+#include "header_end.h"

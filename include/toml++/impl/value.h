@@ -6,6 +6,7 @@
 #pragma once
 #include "node.h"
 #include "print_to_stream.h"
+#include "header_start.h"
 
 /// \cond
 // clang-format off
@@ -69,10 +70,8 @@
 // clang-format on
 /// \endcond
 
-TOML_PUSH_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 TOML_DISABLE_INIT_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -1161,4 +1160,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
+#include "header_end.h"
