@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 //# {{
 #include "preprocessor.h"
@@ -99,4 +98,3 @@ TOML_IMPL_NAMESPACE_END;
 
 #include "header_end.h"
 #endif // TOML_WINDOWS_COMPAT
-/// \endcond

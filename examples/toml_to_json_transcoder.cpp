@@ -19,7 +19,6 @@ int main(int argc, char** argv)
 	toml::table table;
 	try
 	{
-
 		// read from a file if a path argument is given
 		if (argc > 1)
 			table = toml::parse_file(argv[1]);

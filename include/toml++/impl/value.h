@@ -7,6 +7,7 @@
 #include "node.h"
 #include "print_to_stream.h"
 #include "header_start.h"
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 /// \cond
 // clang-format off

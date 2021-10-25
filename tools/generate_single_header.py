@@ -15,7 +15,7 @@ from io import StringIO
 
 class Preprocessor:
 
-	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)"', re.I | re.M)
+	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)".*?$', re.I | re.M)
 	__multiples_allowed = [
 		r'impl/header_start.h',
 		r'impl/header_end.h'
@@ -57,7 +57,7 @@ class Preprocessor:
 
 		if self.__current_level == 1:
 			header = utils.make_divider(relative_path, 10, pattern = r'*')
-			text = f'{header}\n\n{text}'
+			text = f'\n\n{header}\n\n{text}'
 
 		self.__directory_stack.pop()
 		return '\n\n' + text + '\n\n'
@@ -102,6 +102,9 @@ def main():
 		toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
 		# blank lines preceeding closing brackets
 		toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+		# blank lines between consecutive TOML_DISABLE_XXXXX_WARNINGS statements
+		toml_h = re.sub('(TOML_(?:PUSH|DISABLE_[A-Z_]+?)WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_[A-Z_]+?WARNINGS;)', r'\1\n\2', toml_h)
+		# ensure only one trailing newline
 		toml_h = toml_h.strip() + '\n'
 
 	# change TOML_LIB_SINGLE_HEADER to 1

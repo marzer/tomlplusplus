@@ -12,12 +12,12 @@
 
 #include "impl/preprocessor.h"
 
-//# {{
 TOML_PUSH_WARNINGS;
 #if TOML_MSVC
-#pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch
+#pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch (false-positive)
+#elif TOML_CLANG && !TOML_HEADER_ONLY && TOML_IMPLEMENTATION
+#pragma clang diagnostic ignored "-Wheader-hygiene" // false-positive
 #endif
-//# }}
 
 #include "impl/std_new.h"
 #include "impl/std_string.h"
@@ -41,22 +41,22 @@ TOML_PUSH_WARNINGS;
 #include "impl/json_formatter.h"
 
 #if TOML_IMPLEMENTATION
-#include "impl/std_string_impl.h"
-#include "impl/print_to_stream_impl.h"
-#include "impl/node_impl.h"
-#include "impl/node_view_impl.h"
-#include "impl/value_impl.h"
-#include "impl/array_impl.h"
-#include "impl/table_impl.h"
-#include "impl/parser_impl.h"
-#include "impl/formatter_impl.h"
-#include "impl/default_formatter_impl.h"
-#include "impl/json_formatter_impl.h"
+
+#include "impl/std_string.inl"
+#include "impl/print_to_stream.inl"
+#include "impl/node.inl"
+#include "impl/node_view.inl"
+#include "impl/value.inl"
+#include "impl/array.inl"
+#include "impl/table.inl"
+#include "impl/parser.inl"
+#include "impl/formatter.inl"
+#include "impl/default_formatter.inl"
+#include "impl/json_formatter.inl"
+
 #endif // TOML_IMPLEMENTATION
 
-//# {{
 TOML_POP_WARNINGS;
-//# }}
 
 // macro hygiene
 #if TOML_UNDEF_MACROS
@@ -83,8 +83,6 @@ TOML_POP_WARNINGS;
 #undef TOML_CPP
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
-#undef TOML_DISABLE_INIT_WARNINGS
-#undef TOML_DISABLE_SHADOW_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS
 #undef TOML_DISABLE_SUGGEST_WARNINGS
 #undef TOML_DISABLE_SWITCH_WARNINGS
@@ -156,7 +154,6 @@ TOML_POP_WARNINGS;
 #undef TOML_UINT128
 #undef TOML_UNLIKELY
 #undef TOML_UNREACHABLE
-#undef TOML_USING_ANON_NAMESPACE
 #endif
 
 #endif // TOMLPLUSPLUS_H

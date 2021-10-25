@@ -8,7 +8,7 @@
 
 #include "examples.h"
 
-#define TOML_EXCEPTIONS 0
+#define TOML_EXCEPTIONS			 0
 #define TOML_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
 
@@ -16,8 +16,7 @@ using namespace std::string_view_literals;
 
 namespace
 {
-	inline constexpr auto invalid_parses = std::array
-	{
+	inline constexpr auto invalid_parses = std::array{
 		"########## comments"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
@@ -25,10 +24,10 @@ namespace
 
 		"########## inline tables"sv,
 		"val = {,}"sv,
-		"val = {a='b',}"sv,				// allowed when TOML_UNRELEASED_FEATURES == 1
+		"val = {a='b',}"sv, // allowed when TOML_UNRELEASED_FEATURES == 1
 		"val = {a='b',,}"sv,
 		"val = {a='b',"sv,
-		"val = {a='b',\n c='d'}"sv,		// allowed when TOML_UNRELEASED_FEATURES == 1
+		"val = {a='b',\n c='d'}"sv, // allowed when TOML_UNRELEASED_FEATURES == 1
 		"val = {?='b'}"sv,
 
 		"########## tables"sv,
@@ -69,7 +68,7 @@ namespace
 		"val = \" \r \""sv,
 		R"(val = ")"sv,
 		R"(val = "\g")"sv,
-		R"(val = "\x20")"sv,			// allowed when TOML_UNRELEASED_FEATURES == 1
+		R"(val = "\x20")"sv, // allowed when TOML_UNRELEASED_FEATURES == 1
 		R"(val = "\uFFF")"sv,
 		R"(val = "\uFFFG")"sv,
 		R"(val = "\UFFFFFFF")"sv,

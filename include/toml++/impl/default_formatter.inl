@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 //# {{
 #include "preprocessor.h"
@@ -19,6 +18,7 @@
 #include "table.h"
 #include "array.h"
 #include "header_start.h"
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -451,4 +451,3 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-/// \endcond

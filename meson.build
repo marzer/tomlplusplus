@@ -2,7 +2,7 @@ project(
 	'tomlplusplus',
 	'cpp',
 	version: '3.0.0',
-	meson_version: '>=0.53.0',
+	meson_version: '>=0.54.0',
 	license: 'MIT',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
 		# core options
@@ -62,7 +62,7 @@ if is_gcc or is_clang
 	add_project_arguments(
 		'-march=native',
 		'-fvisibility=hidden',
-		'-fvisility-inlines-hidden',
+		'-fvisibility-inlines-hidden',
 		language: 'cpp'
 	)
 	if is_release
@@ -508,9 +508,7 @@ tomlplusplus_dep = declare_dependency(
 	version: meson.project_version(),
 )
 
-if meson.version().version_compare('>=0.54.0')
-	meson.override_dependency('tomlplusplus', tomlplusplus_dep)
-endif
+meson.override_dependency('tomlplusplus', tomlplusplus_dep)
 
 if not is_subproject
 	import('pkgconfig').generate(

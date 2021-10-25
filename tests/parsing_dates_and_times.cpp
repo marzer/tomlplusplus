@@ -4,8 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "tests.h"
-
-TOML_DISABLE_INIT_WARNINGS;
+TOML_DISABLE_SPAM_WARNINGS;
 
 TEST_CASE("parsing - dates and times")
 {
@@ -42,13 +41,12 @@ TEST_CASE("parsing - dates and times")
 			CHECK(tbl["lt1"] == lt1);
 			static constexpr auto lt2 = toml::time{ 0, 32, 0, 999999000u };
 			CHECK(tbl["lt2"] == lt2);
-		}
-	);
+		});
 
 	// value tests
-	parse_expected_value(FILE_LINE_ARGS,   "1987-03-16"sv,                date{ 1987, 3, 16 } );
-	parse_expected_value(FILE_LINE_ARGS,     "10:20:30"sv,           toml::time{ 10, 20, 30 } );
-	parse_expected_value(FILE_LINE_ARGS,  "10:20:30.04"sv, toml::time{ 10, 20, 30, 40000000 } );
+	parse_expected_value(FILE_LINE_ARGS, "1987-03-16"sv, date{ 1987, 3, 16 });
+	parse_expected_value(FILE_LINE_ARGS, "10:20:30"sv, toml::time{ 10, 20, 30 });
+	parse_expected_value(FILE_LINE_ARGS, "10:20:30.04"sv, toml::time{ 10, 20, 30, 40000000 });
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20, 30 } };
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20:30"sv, val);
@@ -104,14 +102,14 @@ TEST_CASE("parsing - dates and times")
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20:30.04z"sv, val);
 	}
 
-	// toml/issues/671 (allow omission of seconds)
-	#if TOML_LANG_UNRELEASED
+// toml/issues/671 (allow omission of seconds)
+#if TOML_LANG_UNRELEASED
 
-	parse_expected_value(FILE_LINE_ARGS, "10:20"sv, toml::time{ 10, 20 } );
+	parse_expected_value(FILE_LINE_ARGS, "10:20"sv, toml::time{ 10, 20 });
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 } };
-		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20"sv, val );
-		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20"sv, val );
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16T10:20"sv, val);
+		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20"sv, val);
 	}
 	{
 		const auto val = date_time{ { 1987, 3, 16 }, { 10, 20 }, { -9, -30 } };
@@ -129,7 +127,7 @@ TEST_CASE("parsing - dates and times")
 		parse_expected_value(FILE_LINE_ARGS, "1987-03-16 10:20Z"sv, val);
 	}
 
-	#else
+#else
 
 	parsing_should_fail(FILE_LINE_ARGS, "10:20"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "1987-03-16T10:20"sv);
@@ -141,8 +139,7 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "1987-03-16T10:20Z"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "1987-03-16 10:20Z"sv);
 
-
-	#endif
+#endif
 
 	// eof tests
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-1"sv);
@@ -153,9 +150,9 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20:30."sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20:3"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20:"sv);
-	#if !TOML_LANG_UNRELEASED // toml/issues/671 (allow omission of seconds)
-		parsing_should_fail(FILE_LINE_ARGS, "val = 10:20"sv);
-	#endif
+#if !TOML_LANG_UNRELEASED // toml/issues/671 (allow omission of seconds)
+	parsing_should_fail(FILE_LINE_ARGS, "val = 10:20"sv);
+#endif
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:2"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 10:"sv);
 
@@ -167,9 +164,9 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:20:30."sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:20:3"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:20:"sv);
-	#if !TOML_LANG_UNRELEASED // toml/issues/671 (allow omission of seconds)
-		parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:20"sv);
-	#endif
+#if !TOML_LANG_UNRELEASED // toml/issues/671 (allow omission of seconds)
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:20"sv);
+#endif
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:2"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10"sv);

@@ -6,14 +6,14 @@
 // this file is for boilerplate unrelated to the toml++ example learning outcomes.
 
 #ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Weverything"
-#elif defined (__GNUC__)
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wall"
-	#pragma GCC diagnostic ignored "-Wextra"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wextra"
 #elif defined(_MSC_VER)
-	#pragma warning(push, 0)
+#pragma warning(push, 0)
 #endif
 
 #include <cstdlib>
@@ -25,24 +25,24 @@
 #include <vector>
 #include <array>
 #ifdef _WIN32
-	#include <windows.h>
+#include <windows.h>
 #endif
 
 #ifdef __clang__
-	#pragma clang diagnostic pop
+#pragma clang diagnostic pop
 #elif defined(__GNUC__)
-	#pragma GCC diagnostic pop
+#pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
-	#pragma warning(pop)
+#pragma warning(pop)
 #endif
 
 namespace examples
 {
 	inline void init() noexcept
 	{
-		#ifdef _WIN32
-		SetConsoleOutputCP(65001); //CP_UTF8
-		#endif
+#ifdef _WIN32
+		SetConsoleOutputCP(65001); // CP_UTF8
+#endif
 
 		std::ios_base::sync_with_stdio(false);
 		std::cout << std::boolalpha;

@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 //# {{
 #include "preprocessor.h"
@@ -35,10 +34,6 @@ TOML_ENABLE_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T>
 	inline constexpr size_t charconv_buffer_length = 0;
 
@@ -76,8 +71,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {})
 	{
-		using namespace toml;
-
 		if (!val)
 		{
 			stream.put('0');
@@ -138,7 +131,7 @@ TOML_ANON_NAMESPACE_START
 			ss << std::uppercase << std::setbase(base);
 			ss << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
-			impl::print_to_stream(str, stream);
+			impl::print_to_stream(stream, str);
 		}
 
 #endif
@@ -148,8 +141,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_floating_point_to_stream(std::ostream & stream, T val, value_flags format = {})
 	{
-		using namespace toml;
-
 		switch (impl::fpclassify(val))
 		{
 			case impl::fp_class::neg_inf: impl::print_to_stream(stream, "-inf"sv); break;
@@ -204,8 +195,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_leftpad_zeros(std::ostream & stream, T val, size_t min_digits)
 	{
-		using namespace toml;
-
 #if TOML_INT_CHARCONV
 
 		char buf[charconv_buffer_length<T>];
@@ -471,4 +460,3 @@ TOML_IMPL_NAMESPACE_START
 TOML_IMPL_NAMESPACE_END;
 
 #include "header_end.h"
-/// \endcond

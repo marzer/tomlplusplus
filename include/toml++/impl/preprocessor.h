@@ -66,25 +66,18 @@
 		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
 		static_assert(true)
 
-	#define TOML_DISABLE_INIT_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
-		static_assert(true)
-
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
 		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
 		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SHADOW_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
-		_Pragma("clang diagnostic ignored \"-Wshadow-field\"") \
 		static_assert(true)
 
 	#define TOML_DISABLE_SPAM_WARNINGS \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
+		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
+		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
+		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
 		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
 		static_assert(true)
 
@@ -278,23 +271,12 @@
 	#define TOML_DISABLE_SWITCH_WARNINGS \
 		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_INIT_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-		_Pragma("GCC diagnostic ignored \"-Wuninitialized\"") \
+		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")				\
 		static_assert(true)
 
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
 		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
-		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SHADOW_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
 		static_assert(true)
 
 	#define TOML_DISABLE_SPAM_WARNINGS \
@@ -303,8 +285,12 @@
 		_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
 		_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
+		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
+		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"") \
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")		\
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -317,9 +303,7 @@
 		_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
 		TOML_DISABLE_SWITCH_WARNINGS;										\
-		TOML_DISABLE_INIT_WARNINGS;											\
 		TOML_DISABLE_ARITHMETIC_WARNINGS;									\
-		TOML_DISABLE_SHADOW_WARNINGS;										\
 		TOML_DISABLE_SPAM_WARNINGS;											\
 		static_assert(true)
 
@@ -504,17 +488,11 @@
 #ifndef TOML_DISABLE_SWITCH_WARNINGS
 	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
 #endif
-#ifndef TOML_DISABLE_INIT_WARNINGS
-	#define	TOML_DISABLE_INIT_WARNINGS static_assert(true)
-#endif
 #ifndef TOML_DISABLE_SPAM_WARNINGS
 	#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SHADOW_WARNINGS
-	#define TOML_DISABLE_SHADOW_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS static_assert(true)
@@ -774,17 +752,15 @@
 #define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
 #define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
 #if TOML_HEADER_ONLY
-	#define TOML_ANON_NAMESPACE_START			TOML_IMPL_NAMESPACE_START
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START
 	#define TOML_ANON_NAMESPACE_END				TOML_IMPL_NAMESPACE_END
 	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
-	#define TOML_USING_ANON_NAMESPACE			using namespace TOML_ANON_NAMESPACE
 	#define TOML_EXTERNAL_LINKAGE				inline
 	#define TOML_INTERNAL_LINKAGE				inline
 #else
-	#define TOML_ANON_NAMESPACE_START			namespace
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); using namespace toml; namespace
 	#define TOML_ANON_NAMESPACE_END				static_assert(true)
 	#define TOML_ANON_NAMESPACE
-	#define TOML_USING_ANON_NAMESPACE			static_cast<void>(0)
 	#define TOML_EXTERNAL_LINKAGE
 	#define TOML_INTERNAL_LINKAGE				static
 #endif

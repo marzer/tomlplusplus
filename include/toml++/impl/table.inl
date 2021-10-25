@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 //# {{
 #include "preprocessor.h"
@@ -18,16 +17,10 @@
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T, typename U>
 	TOML_INTERNAL_LINKAGE
 	bool table_is_homogeneous(T & map, node_type ntype, U & first_nonmatch) noexcept
 	{
-		using namespace toml;
-
 		if (map.empty())
 		{
 			first_nonmatch = {};
@@ -174,4 +167,3 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-/// \endcond

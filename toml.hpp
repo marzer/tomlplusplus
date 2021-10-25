@@ -102,25 +102,18 @@
 		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
 		static_assert(true)
 
-	#define TOML_DISABLE_INIT_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
-		static_assert(true)
-
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
 		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
 		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SHADOW_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wshadow\"") \
-		_Pragma("clang diagnostic ignored \"-Wshadow-field\"") \
 		static_assert(true)
 
 	#define TOML_DISABLE_SPAM_WARNINGS \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
+		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
+		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
+		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
 		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
 		static_assert(true)
 
@@ -302,23 +295,12 @@
 	#define TOML_DISABLE_SWITCH_WARNINGS \
 		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_INIT_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-		_Pragma("GCC diagnostic ignored \"-Wuninitialized\"") \
+		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")				\
 		static_assert(true)
 
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
 		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
 		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
-		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SHADOW_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wshadow\"") \
 		static_assert(true)
 
 	#define TOML_DISABLE_SPAM_WARNINGS \
@@ -327,8 +309,12 @@
 		_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
 		_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
+		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
+		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
+		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
 		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"") \
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")		\
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -341,9 +327,7 @@
 		_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
 		TOML_DISABLE_SWITCH_WARNINGS;										\
-		TOML_DISABLE_INIT_WARNINGS;											\
 		TOML_DISABLE_ARITHMETIC_WARNINGS;									\
-		TOML_DISABLE_SHADOW_WARNINGS;										\
 		TOML_DISABLE_SPAM_WARNINGS;											\
 		static_assert(true)
 
@@ -519,17 +503,11 @@
 #ifndef TOML_DISABLE_SWITCH_WARNINGS
 	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
 #endif
-#ifndef TOML_DISABLE_INIT_WARNINGS
-	#define	TOML_DISABLE_INIT_WARNINGS static_assert(true)
-#endif
 #ifndef TOML_DISABLE_SPAM_WARNINGS
 	#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
 	#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SHADOW_WARNINGS
-	#define TOML_DISABLE_SHADOW_WARNINGS static_assert(true)
 #endif
 #ifndef TOML_POP_WARNINGS
 	#define TOML_POP_WARNINGS static_assert(true)
@@ -782,17 +760,15 @@
 #define TOML_IMPL_NAMESPACE_START				TOML_NAMESPACE_START { namespace impl
 #define TOML_IMPL_NAMESPACE_END					} TOML_NAMESPACE_END
 #if TOML_HEADER_ONLY
-	#define TOML_ANON_NAMESPACE_START			TOML_IMPL_NAMESPACE_START
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); TOML_IMPL_NAMESPACE_START
 	#define TOML_ANON_NAMESPACE_END				TOML_IMPL_NAMESPACE_END
 	#define TOML_ANON_NAMESPACE					TOML_NAMESPACE::impl
-	#define TOML_USING_ANON_NAMESPACE			using namespace TOML_ANON_NAMESPACE
 	#define TOML_EXTERNAL_LINKAGE				inline
 	#define TOML_INTERNAL_LINKAGE				inline
 #else
-	#define TOML_ANON_NAMESPACE_START			namespace
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); using namespace toml; namespace
 	#define TOML_ANON_NAMESPACE_END				static_assert(true)
 	#define TOML_ANON_NAMESPACE
-	#define TOML_USING_ANON_NAMESPACE			static_cast<void>(0)
 	#define TOML_EXTERNAL_LINKAGE
 	#define TOML_INTERNAL_LINKAGE				static
 #endif
@@ -860,6 +836,13 @@ TOML_ENABLE_WARNINGS;
 	TOML_SA_NODE_TYPE_LIST
 
 // clang-format on
+
+TOML_PUSH_WARNINGS;
+#if TOML_MSVC
+#pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch (false-positive)
+#elif TOML_CLANG && !TOML_HEADER_ONLY && TOML_IMPLEMENTATION
+#pragma clang diagnostic ignored "-Wheader-hygiene" // false-positive
+#endif
 
 //********  impl/std_new.h  ********************************************************************************************
 
@@ -2864,6 +2847,7 @@ TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -3371,6 +3355,7 @@ TOML_POP_WARNINGS;
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 // clang-format off
 
@@ -6891,8 +6876,6 @@ TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
-TOML_DISABLE_INIT_WARNINGS;
-
 #if defined(DOXYGEN) || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
 #else
@@ -7680,7 +7663,7 @@ TOML_POP_WARNINGS;
 
 #if TOML_IMPLEMENTATION
 
-//********  impl/std_string_impl.h  ************************************************************************************
+//********  impl/std_string.inl  ***************************************************************************************
 
 #if TOML_WINDOWS_COMPAT
 
@@ -7773,7 +7756,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_WINDOWS_COMPAT
 
-//********  impl/print_to_stream_impl.h  *******************************************************************************
+//********  impl/print_to_stream.inl  **********************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <ostream>
@@ -7794,10 +7777,6 @@ TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T>
 	inline constexpr size_t charconv_buffer_length = 0;
 
@@ -7835,8 +7814,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {})
 	{
-		using namespace toml;
-
 		if (!val)
 		{
 			stream.put('0');
@@ -7897,7 +7874,7 @@ TOML_ANON_NAMESPACE_START
 			ss << std::uppercase << std::setbase(base);
 			ss << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
-			impl::print_to_stream(str, stream);
+			impl::print_to_stream(stream, str);
 		}
 
 #endif
@@ -7907,8 +7884,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_floating_point_to_stream(std::ostream & stream, T val, value_flags format = {})
 	{
-		using namespace toml;
-
 		switch (impl::fpclassify(val))
 		{
 			case impl::fp_class::neg_inf: impl::print_to_stream(stream, "-inf"sv); break;
@@ -7963,8 +7938,6 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	void print_integer_leftpad_zeros(std::ostream & stream, T val, size_t min_digits)
 	{
-		using namespace toml;
-
 #if TOML_INT_CHARCONV
 
 		char buf[charconv_buffer_length<T>];
@@ -8231,7 +8204,7 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/node_impl.h  ******************************************************************************************
+//********  impl/node.inl  *********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
@@ -8278,7 +8251,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/node_view_impl.h  *************************************************************************************
+//********  impl/node_view.inl  ****************************************************************************************
 
 #if TOML_EXTERN_TEMPLATES
 
@@ -8346,7 +8319,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_EXTERN_TEMPLATES
 
-//********  impl/value_impl.h  *****************************************************************************************
+//********  impl/value.inl  ********************************************************************************************
 
 #if TOML_EXTERN_TEMPLATES
 
@@ -8417,7 +8390,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_EXTERN_TEMPLATES
 
-//********  impl/array_impl.h  *****************************************************************************************
+//********  impl/array.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
@@ -8425,16 +8398,10 @@ TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T, typename U>
 	TOML_INTERNAL_LINKAGE
 	bool array_is_homogeneous(T & elements, node_type ntype, U & first_nonmatch) noexcept
 	{
-		using namespace toml;
-
 		if (elements.empty())
 		{
 			first_nonmatch = {};
@@ -8655,7 +8622,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/table_impl.h  *****************************************************************************************
+//********  impl/table.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
@@ -8663,16 +8630,10 @@ TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T, typename U>
 	TOML_INTERNAL_LINKAGE
 	bool table_is_homogeneous(T & map, node_type ntype, U & first_nonmatch) noexcept
 	{
-		using namespace toml;
-
 		if (map.empty())
 		{
 			first_nonmatch = {};
@@ -8820,7 +8781,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/parser_impl.h  ****************************************************************************************
+//********  impl/parser.inl  *******************************************************************************************
 
 #if TOML_PARSER
 
@@ -8844,10 +8805,6 @@ TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T>
 	class utf8_byte_stream;
 
@@ -8985,13 +8942,6 @@ TOML_ANON_NAMESPACE_START
 		std::string_view as_view() const noexcept
 		{
 			return bytes[3] ? std::string_view{ bytes, 4_sz } : std::string_view{ bytes };
-		}
-
-		TOML_NODISCARD
-		TOML_ATTR(pure)
-		constexpr operator char32_t&() noexcept
-		{
-			return value;
 		}
 
 		TOML_NODISCARD
@@ -12459,7 +12409,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_PARSER
 
-//********  impl/formatter_impl.h  *************************************************************************************
+//********  impl/formatter.inl  ****************************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
@@ -12675,11 +12625,12 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/default_formatter_impl.h  *****************************************************************************
+//********  impl/default_formatter.inl  ********************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {
@@ -13113,7 +13064,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/json_formatter_impl.h  ********************************************************************************
+//********  impl/json_formatter.inl  ***********************************************************************************
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
@@ -13213,6 +13164,8 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_IMPLEMENTATION
 
+TOML_POP_WARNINGS;
+
 // macro hygiene
 #if TOML_UNDEF_MACROS
 #undef TOML_ABI_NAMESPACE_BOOL
@@ -13238,8 +13191,6 @@ TOML_POP_WARNINGS;
 #undef TOML_CPP
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
-#undef TOML_DISABLE_INIT_WARNINGS
-#undef TOML_DISABLE_SHADOW_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS
 #undef TOML_DISABLE_SUGGEST_WARNINGS
 #undef TOML_DISABLE_SWITCH_WARNINGS
@@ -13311,7 +13262,6 @@ TOML_POP_WARNINGS;
 #undef TOML_UINT128
 #undef TOML_UNLIKELY
 #undef TOML_UNREACHABLE
-#undef TOML_USING_ANON_NAMESPACE
 #endif
 
 #endif // TOMLPLUSPLUS_H

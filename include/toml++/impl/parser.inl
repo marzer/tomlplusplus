@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 #include "preprocessor.h"
 //# {{
@@ -43,10 +42,6 @@ TOML_ENABLE_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-#if !TOML_HEADER_ONLY
-	using namespace toml;
-#endif
-
 	template <typename T>
 	class utf8_byte_stream;
 
@@ -184,13 +179,6 @@ TOML_ANON_NAMESPACE_START
 		std::string_view as_view() const noexcept
 		{
 			return bytes[3] ? std::string_view{ bytes, 4_sz } : std::string_view{ bytes };
-		}
-
-		TOML_NODISCARD
-		TOML_ATTR(pure)
-		constexpr operator char32_t&() noexcept
-		{
-			return value;
 		}
 
 		TOML_NODISCARD
@@ -3665,4 +3653,3 @@ TOML_NAMESPACE_END;
 
 #include "header_end.h"
 #endif // TOML_PARSER
-/// \endcond

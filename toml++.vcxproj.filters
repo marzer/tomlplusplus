@@ -7,7 +7,7 @@
     <ClInclude Include="include\toml++\impl\array.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\array_impl.h">
+    <ClInclude Include="include\toml++\impl\array.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\date_time.h">
@@ -16,7 +16,7 @@
     <ClInclude Include="include\toml++\impl\default_formatter.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\default_formatter_impl.h">
+    <ClInclude Include="include\toml++\impl\default_formatter.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\formatter.h">
@@ -25,13 +25,13 @@
     <ClInclude Include="include\toml++\impl\json_formatter.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\json_formatter_impl.h">
+    <ClInclude Include="include\toml++\impl\json_formatter.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\node.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\node_impl.h">
+    <ClInclude Include="include\toml++\impl\node.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\node_view.h">
@@ -46,7 +46,7 @@
     <ClInclude Include="include\toml++\impl\parser.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\parser_impl.h">
+    <ClInclude Include="include\toml++\impl\parser.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\preprocessor.h">
@@ -58,7 +58,7 @@
     <ClInclude Include="include\toml++\impl\table.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\table_impl.h">
+    <ClInclude Include="include\toml++\impl\table.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\utf8.h">
@@ -103,19 +103,19 @@
     <ClInclude Include="include\toml++\impl\std_new.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\std_string_impl.h">
+    <ClInclude Include="include\toml++\impl\std_string.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\print_to_stream_impl.h">
+    <ClInclude Include="include\toml++\impl\print_to_stream.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\formatter_impl.h">
+    <ClInclude Include="include\toml++\impl\formatter.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\node_view_impl.h">
+    <ClInclude Include="include\toml++\impl\node_view.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\value_impl.h">
+    <ClInclude Include="include\toml++\impl\value.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
   </ItemGroup>
@@ -171,6 +171,9 @@
     </None>
     <None Include=".clang-format" />
     <None Include=".editorconfig" />
+    <None Include="tools\clang_format.bat">
+      <Filter>tools</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">

@@ -8,6 +8,7 @@
 #include "node.h"
 #include "std_vector.h"
 #include "header_start.h"
+TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
 {

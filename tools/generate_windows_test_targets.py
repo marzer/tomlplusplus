@@ -119,10 +119,10 @@ def main():
 		<ClCompile Include="..\conformance_burntsushi_valid.cpp" />
 		<ClCompile Include="..\conformance_iarna_invalid.cpp" />
 		<ClCompile Include="..\conformance_iarna_valid.cpp" />
-		<ClCompile Include="..\impl_catch2.cpp">
+		<ClCompile Include="..\impl_toml.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 		</ClCompile>
-		<ClCompile Include="..\impl_toml.cpp">
+		<ClCompile Include="..\main.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 		</ClCompile>
 		<ClCompile Include="..\manipulating_arrays.cpp" />

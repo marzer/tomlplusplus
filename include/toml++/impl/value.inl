@@ -3,7 +3,6 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 #pragma once
-/// \cond
 
 //# {{
 #include "preprocessor.h"
@@ -13,18 +12,21 @@
 //# }}
 
 #if TOML_EXTERN_TEMPLATES
-#include "node_view.h"
+#include "value.h"
 #include "date_time.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START
 {
-	template class node_view<node>;
-	template class node_view<const node>;
+	template class value<std::string>;
+	template class value<int64_t>;
+	template class value<double>;
+	template class value<bool>;
+	template class value<date>;
+	template class value<time>;
+	template class value<date_time>;
 
-#define TOML_EXTERN(name, T)                                                                                           \
-	template optional<T> node_view<node>::name<T>() const noexcept;                                                    \
-	template optional<T> node_view<const node>::name<T>() const noexcept
+#define TOML_EXTERN(name, T) template optional<T> node::name<T>() const noexcept
 
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);
@@ -75,4 +77,3 @@ TOML_NAMESPACE_END;
 
 #include "header_end.h"
 #endif // TOML_EXTERN_TEMPLATES
-/// \endcond

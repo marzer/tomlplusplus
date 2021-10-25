@@ -11,7 +11,6 @@
 #include "source_region.h"
 #include "print_to_stream.h"
 #include "header_start.h"
-TOML_DISABLE_INIT_WARNINGS;
 
 #if defined(DOXYGEN) || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
