@@ -18,73 +18,74 @@ static constexpr T one = static_cast<T>(1);
 
 TEST_CASE("values - construction")
 {
-	#define CHECK_VALUE_INIT2(initializer, target_type, equiv)				\
-	do {																	\
-		auto v = value{ initializer };										\
-		static_assert(std::is_same_v<decltype(v), value<target_type>>);		\
-		CHECK(v == equiv);													\
-		CHECK(equiv == v);													\
-		CHECK(*v == equiv);													\
-		CHECK(v.get() == equiv);											\
-		CHECK(v.is_homogeneous());											\
-		CHECK(v.is_homogeneous<target_type>());								\
-		CHECK(v.is_homogeneous(impl::node_type_of<target_type>));			\
-	} while (false)
+#define CHECK_VALUE_INIT2(initializer, target_type, equiv)                                                             \
+	do                                                                                                                 \
+	{                                                                                                                  \
+		auto v = value{ initializer };                                                                                 \
+		static_assert(std::is_same_v<decltype(v), value<target_type>>);                                                \
+		CHECK(v == equiv);                                                                                             \
+		CHECK(equiv == v);                                                                                             \
+		CHECK(*v == equiv);                                                                                            \
+		CHECK(v.get() == equiv);                                                                                       \
+		CHECK(v.is_homogeneous());                                                                                     \
+		CHECK(v.is_homogeneous<target_type>());                                                                        \
+		CHECK(v.is_homogeneous(impl::node_type_of<target_type>));                                                      \
+	}                                                                                                                  \
+	while (false)
 
-	#define CHECK_VALUE_INIT(initializer, target_type)						\
-		CHECK_VALUE_INIT2(initializer, target_type, initializer)
+#define CHECK_VALUE_INIT(initializer, target_type) CHECK_VALUE_INIT2(initializer, target_type, initializer)
 
-	CHECK_VALUE_INIT(one<signed char>,			int64_t);
-	CHECK_VALUE_INIT(one<signed short>,			int64_t);
-	CHECK_VALUE_INIT(one<signed int>,			int64_t);
-	CHECK_VALUE_INIT(one<signed long>,			int64_t);
-	CHECK_VALUE_INIT(one<signed long long>,		int64_t);
-	CHECK_VALUE_INIT2(one<unsigned char>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned short>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned int>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned long>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned long long>,	int64_t,		1u);
-	CHECK_VALUE_INIT(true,						bool);
-	CHECK_VALUE_INIT(false,						bool);
-	CHECK_VALUE_INIT("kek",						std::string);
-	CHECK_VALUE_INIT("kek"s,					std::string);
-	CHECK_VALUE_INIT("kek"sv,					std::string);
-	CHECK_VALUE_INIT2("kek"sv.data(),			std::string,	"kek"sv);
-	#if TOML_HAS_CHAR8
-	CHECK_VALUE_INIT2(u8"kek",					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"s,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"sv,				std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"sv.data(),			std::string,	"kek"sv);
-	#endif
+	CHECK_VALUE_INIT(one<signed char>, int64_t);
+	CHECK_VALUE_INIT(one<signed short>, int64_t);
+	CHECK_VALUE_INIT(one<signed int>, int64_t);
+	CHECK_VALUE_INIT(one<signed long>, int64_t);
+	CHECK_VALUE_INIT(one<signed long long>, int64_t);
+	CHECK_VALUE_INIT2(one<unsigned char>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<unsigned short>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<unsigned int>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<unsigned long>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<unsigned long long>, int64_t, 1u);
+	CHECK_VALUE_INIT(true, bool);
+	CHECK_VALUE_INIT(false, bool);
+	CHECK_VALUE_INIT("kek", std::string);
+	CHECK_VALUE_INIT("kek"s, std::string);
+	CHECK_VALUE_INIT("kek"sv, std::string);
+	CHECK_VALUE_INIT2("kek"sv.data(), std::string, "kek"sv);
+#if TOML_HAS_CHAR8
+	CHECK_VALUE_INIT2(u8"kek", std::string, "kek"sv);
+	CHECK_VALUE_INIT2(u8"kek"s, std::string, "kek"sv);
+	CHECK_VALUE_INIT2(u8"kek"sv, std::string, "kek"sv);
+	CHECK_VALUE_INIT2(u8"kek"sv.data(), std::string, "kek"sv);
+#endif
 
-	#ifdef _WIN32
-	CHECK_VALUE_INIT(one<BOOL>,					int64_t);
-	CHECK_VALUE_INIT(one<SHORT>,				int64_t);
-	CHECK_VALUE_INIT(one<INT>,					int64_t);
-	CHECK_VALUE_INIT(one<LONG>,					int64_t);
-	CHECK_VALUE_INIT(one<INT_PTR>,				int64_t);
-	CHECK_VALUE_INIT(one<LONG_PTR>,				int64_t);
-	CHECK_VALUE_INIT2(one<USHORT>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<UINT>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<ULONG>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<UINT_PTR>,			int64_t,		1u);
-	CHECK_VALUE_INIT2(one<ULONG_PTR>,			int64_t,		1u);
-	CHECK_VALUE_INIT2(one<WORD>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD32>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD64>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORDLONG>,			int64_t,		1u);
+#ifdef _WIN32
+	CHECK_VALUE_INIT(one<BOOL>, int64_t);
+	CHECK_VALUE_INIT(one<SHORT>, int64_t);
+	CHECK_VALUE_INIT(one<INT>, int64_t);
+	CHECK_VALUE_INIT(one<LONG>, int64_t);
+	CHECK_VALUE_INIT(one<INT_PTR>, int64_t);
+	CHECK_VALUE_INIT(one<LONG_PTR>, int64_t);
+	CHECK_VALUE_INIT2(one<USHORT>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<UINT>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<ULONG>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<UINT_PTR>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<ULONG_PTR>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<WORD>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<DWORD>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<DWORD32>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<DWORD64>, int64_t, 1u);
+	CHECK_VALUE_INIT2(one<DWORDLONG>, int64_t, 1u);
 
-	#if TOML_WINDOWS_COMPAT
- 
-	CHECK_VALUE_INIT2(L"kek",					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"s,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv.data(),			std::string,	"kek"sv);
-	
-	#endif // TOML_WINDOWS_COMPAT
+#if TOML_WINDOWS_COMPAT
 
-	#endif
+	CHECK_VALUE_INIT2(L"kek", std::string, "kek"sv);
+	CHECK_VALUE_INIT2(L"kek"s, std::string, "kek"sv);
+	CHECK_VALUE_INIT2(L"kek"sv, std::string, "kek"sv);
+	CHECK_VALUE_INIT2(L"kek"sv.data(), std::string, "kek"sv);
+
+#endif // TOML_WINDOWS_COMPAT
+
+#endif
 }
 
 TEST_CASE("values - printing")
@@ -132,10 +133,8 @@ TEST_CASE("values - printing")
 
 TEST_CASE("nodes - value() int/float/bool conversions")
 {
-	#define CHECK_VALUE_PASS(type, v) \
-		CHECK(n.value<type>() == static_cast<type>(v))
-	#define CHECK_VALUE_FAIL(type) \
-		CHECK(!n.value<type>())
+#define CHECK_VALUE_PASS(type, v) CHECK(n.value<type>() == static_cast<type>(v))
+#define CHECK_VALUE_FAIL(type)	  CHECK(!n.value<type>())
 
 	// bools
 	{
@@ -327,7 +326,6 @@ TEST_CASE("nodes - value() int/float/bool conversions")
 		CHECK_VALUE_FAIL(toml::date);
 		CHECK_VALUE_FAIL(toml::time);
 		CHECK_VALUE_FAIL(toml::date_time);
-
 
 		*val = 1.0;
 		CHECK_VALUE_FAIL(bool);

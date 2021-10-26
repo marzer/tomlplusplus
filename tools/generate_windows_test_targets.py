@@ -151,11 +151,11 @@ def main():
 		<Natvis Include="..\..\toml++.natvis" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClInclude Include="..\catch2.h" />
 		<ClInclude Include="..\leakproof.h" />
+		<ClInclude Include="..\lib_catch2.h" />
+		<ClInclude Include="..\lib_tloptional.h" />
 		<ClInclude Include="..\settings.h" />
 		<ClInclude Include="..\tests.h" />
-		<ClInclude Include="..\tloptional.h" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\cpp.hint" />

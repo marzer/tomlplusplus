@@ -356,14 +356,13 @@ TOML_NAMESPACE_START
 		/// \tparam	ElemTypes	One of the TOML node or value types (or a type promotable to one).
 		/// \param 	val 	The node or value used to initialize element 0.
 		/// \param 	vals	The nodes or values used to initialize elements 1...N.
-		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0_sz
-								   || !std::is_same_v<impl::remove_cvref_t<ElemType>, array>),
+		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0 || !std::is_same_v<impl::remove_cvref_t<ElemType>, array>),
 								  typename ElemType,
 								  typename... ElemTypes)
 		TOML_NODISCARD_CTOR
 		explicit array(ElemType&& val, ElemTypes&&... vals)
 		{
-			elements.reserve(sizeof...(ElemTypes) + 1_sz);
+			elements.reserve(sizeof...(ElemTypes) + 1u);
 			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 			if constexpr (sizeof...(ElemTypes) > 0)
 			{
@@ -659,7 +658,7 @@ TOML_NAMESPACE_START
 					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
-					for (size_t e = start_idx + count - 1_sz; i < e; i++)
+					for (size_t e = start_idx + count - 1u; i < e; i++)
 						elements[i].reset(impl::make_node(val));
 
 					//# potentially move the initial value into the last element
@@ -1087,7 +1086,7 @@ TOML_NAMESPACE_START
 
 			if (lhs.size() != rhs.size())
 				return false;
-			if (rhs.size() == 0_sz)
+			if (rhs.size() == 0u)
 				return true;
 
 			size_t i{};

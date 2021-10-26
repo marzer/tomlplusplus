@@ -68,7 +68,7 @@ TOML_NAMESPACE_START
 			base::increase_indent();
 			for (size_t i = 0; i < arr.size(); i++)
 			{
-				if (i > 0_sz)
+				if (i > 0u)
 					impl::print_to_stream(base::stream(), ',');
 				base::print_newline(true);
 				base::print_indent();

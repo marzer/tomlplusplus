@@ -314,26 +314,26 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::date& val)
 	{
-		print_integer_leftpad_zeros(stream, val.year, 4_sz);
+		print_integer_leftpad_zeros(stream, val.year, 4u);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.month, 2_sz);
+		print_integer_leftpad_zeros(stream, val.month, 2u);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.day, 2_sz);
+		print_integer_leftpad_zeros(stream, val.day, 2u);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::time& val)
 	{
-		print_integer_leftpad_zeros(stream, val.hour, 2_sz);
+		print_integer_leftpad_zeros(stream, val.hour, 2u);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.minute, 2_sz);
+		print_integer_leftpad_zeros(stream, val.minute, 2u);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.second, 2_sz);
+		print_integer_leftpad_zeros(stream, val.second, 2u);
 		if (val.nanosecond && val.nanosecond <= 999999999u)
 		{
 			stream.put('.');
 			auto ns		  = val.nanosecond;
-			size_t digits = 9_sz;
+			size_t digits = 9u;
 			while (ns % 10u == 0u)
 			{
 				ns /= 10u;
@@ -363,13 +363,13 @@ TOML_IMPL_NAMESPACE_START
 		const auto hours = mins / 60;
 		if (hours)
 		{
-			print_integer_leftpad_zeros(stream, static_cast<unsigned int>(hours), 2_sz);
+			print_integer_leftpad_zeros(stream, static_cast<unsigned int>(hours), 2u);
 			mins -= hours * 60;
 		}
 		else
 			print_to_stream(stream, "00"sv);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, static_cast<unsigned int>(mins), 2_sz);
+		print_integer_leftpad_zeros(stream, static_cast<unsigned int>(mins), 2u);
 	}
 
 	TOML_EXTERNAL_LINKAGE

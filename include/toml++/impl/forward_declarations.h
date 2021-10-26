@@ -110,15 +110,6 @@ TOML_NAMESPACE_START
 	class parse_result;
 #endif
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
-
-	TOML_NODISCARD
-	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
-	TOML_CONSTEVAL
-	size_t operator"" _sz(unsigned long long n) noexcept
-	{
-		return static_cast<size_t>(n);
-	}
 }
 TOML_NAMESPACE_END;
 

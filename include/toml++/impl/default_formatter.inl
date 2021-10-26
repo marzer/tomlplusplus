@@ -45,7 +45,7 @@ TOML_NAMESPACE_START
 			if (requires_quotes)
 			{
 				std::string s;
-				s.reserve(str.length() + 2_sz);
+				s.reserve(str.length() + 2u);
 				s += '"';
 				for (auto c : str)
 				{
@@ -75,11 +75,11 @@ TOML_NAMESPACE_START
 			{
 				auto& n = *reinterpret_cast<const table*>(&node);
 				if (n.empty())
-					return 2_sz;	  // "{}"
-				size_t weight = 3_sz; // "{ }"
+					return 2u;		// "{}"
+				size_t weight = 3u; // "{ }"
 				for (auto&& [k, v] : n)
 				{
-					weight += k.length() + count_inline_columns(v) + 2_sz; // +  ", "
+					weight += k.length() + count_inline_columns(v) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
 						break;
 				}
@@ -90,11 +90,11 @@ TOML_NAMESPACE_START
 			{
 				auto& n = *reinterpret_cast<const array*>(&node);
 				if (n.empty())
-					return 2_sz;	  // "[]"
-				size_t weight = 3_sz; // "[ ]"
+					return 2u;		// "[]"
+				size_t weight = 3u; // "[ ]"
 				for (auto& elem : n)
 				{
-					weight += count_inline_columns(elem) + 2_sz; // +  ", "
+					weight += count_inline_columns(elem) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
 						break;
 				}
@@ -104,7 +104,7 @@ TOML_NAMESPACE_START
 			case node_type::string:
 			{
 				auto& n = *reinterpret_cast<const value<std::string>*>(&node);
-				return n.get().length() + 2_sz; // + ""
+				return n.get().length() + 2u; // + ""
 			}
 
 			case node_type::integer:
@@ -112,14 +112,14 @@ TOML_NAMESPACE_START
 				auto& n = *reinterpret_cast<const value<int64_t>*>(&node);
 				auto v	= n.get();
 				if (!v)
-					return 1_sz;
+					return 1u;
 				size_t weight = {};
 				if (v < 0)
 				{
-					weight += 1;
+					weight += 1u;
 					v *= -1;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1_sz;
+				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1u;
 			}
 
 			case node_type::floating_point:
@@ -127,21 +127,21 @@ TOML_NAMESPACE_START
 				auto& n = *reinterpret_cast<const value<double>*>(&node);
 				auto v	= n.get();
 				if (v == 0.0)
-					return 3_sz;	  // "0.0"
-				size_t weight = 2_sz; // ".0"
+					return 3u;		// "0.0"
+				size_t weight = 2u; // ".0"
 				if (v < 0.0)
 				{
-					weight += 1;
+					weight += 1u;
 					v *= -1.0;
 				}
-				return weight + static_cast<size_t>(log10(v)) + 1_sz;
+				return weight + static_cast<size_t>(log10(v)) + 1u;
 				break;
 			}
 
-			case node_type::boolean: return 5_sz;
+			case node_type::boolean: return 5u;
 			case node_type::date: [[fallthrough]];
-			case node_type::time: return 10_sz;
-			case node_type::date_time: return 30_sz;
+			case node_type::time: return 10u;
+			case node_type::date_time: return 30u;
 			case node_type::none: TOML_UNREACHABLE;
 			default: TOML_UNREACHABLE;
 		}
@@ -267,7 +267,7 @@ TOML_NAMESPACE_START
 
 			for (size_t i = 0; i < arr.size(); i++)
 			{
-				if (i > 0_sz)
+				if (i > 0u)
 				{
 					impl::print_to_stream(base::stream(), ',');
 					if (!multiline)
@@ -309,7 +309,7 @@ TOML_NAMESPACE_START
 		static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
 		{
 			auto arr = nde.as_array();
-			return arr && arr->is_array_of_tables() && !arr->template get_as<table>(0_sz)->is_inline();
+			return arr && arr->is_array_of_tables() && !arr->template get_as<table>(0u)->is_inline();
 		};
 
 		// values, arrays, and inline tables/table arrays
@@ -372,7 +372,7 @@ TOML_NAMESPACE_START
 				}
 			}
 			bool skip_self = false;
-			if (child_value_count == 0_sz && (child_table_count > 0_sz || child_table_array_count > 0_sz))
+			if (child_value_count == 0u && (child_table_count > 0u || child_table_array_count > 0u))
 				skip_self = true;
 
 			key_path_.push_back(make_key_segment(k));

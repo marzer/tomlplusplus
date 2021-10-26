@@ -24,9 +24,9 @@ TEST_CASE("windows compat")
 	)"sv;
 
 	auto res = toml::parse(toml_text, L"kek.toml");
-	#if !TOML_EXCEPTIONS
-		REQUIRE(res.succeeded());
-	#endif
+#if !TOML_EXCEPTIONS
+	REQUIRE(res.succeeded());
+#endif
 	toml::table& tbl = res;
 
 	// source paths

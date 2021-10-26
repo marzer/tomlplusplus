@@ -6,7 +6,6 @@
 #define TOML_ABSTRACT_BASE
 #define TOML_EMPTY_BASES
 #define TOML_MAY_THROW
-#define TOML_CONSTEVAL							constexpr
 #define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
 #define TOML_LIKELY(...)						(__VA_ARGS__)
 #define TOML_UNLIKELY(...)						(__VA_ARGS__)

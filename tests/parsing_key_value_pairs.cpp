@@ -7,50 +7,46 @@
 
 TEST_CASE("parsing - key-value pairs")
 {
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			key = "value"
-			bare_key = "value"
-			bare-key = "value"
-			1234 = "value"
-			"" = "blank"
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl.size() == 5);
-			CHECK(tbl["key"] == "value"sv);
-			CHECK(tbl["bare_key"] == "value"sv);
-			CHECK(tbl["bare-key"] == "value"sv);
-			CHECK(tbl["1234"] == "value"sv);
-			CHECK(tbl[""] == "blank"sv);
-		}
-	);
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								key = "value"
+								bare_key = "value"
+								bare-key = "value"
+								1234 = "value"
+								"" = "blank"
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl.size() == 5);
+							   CHECK(tbl["key"] == "value"sv);
+							   CHECK(tbl["bare_key"] == "value"sv);
+							   CHECK(tbl["bare-key"] == "value"sv);
+							   CHECK(tbl["1234"] == "value"sv);
+							   CHECK(tbl[""] == "blank"sv);
+						   });
 
 	parsing_should_fail(FILE_LINE_ARGS, R"(key = # INVALID)"sv);
 
-	#if UNICODE_LITERALS_OK
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			"127.0.0.1" = "value"
-			"character encoding" = "value"
-			"ʎǝʞ" = "value"
-			'key2' = "value"
-			'quoted "value"' = "value"
-			'' = 'blank'
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl["127.0.0.1"] == "value"sv);
-			CHECK(tbl["character encoding"] == "value"sv);
-			CHECK(tbl["ʎǝʞ"] == "value"sv);
-			CHECK(tbl["key2"] == "value"sv);
-			CHECK(tbl["quoted \"value\""] == "value"sv);
-			CHECK(tbl[""] == "blank"sv);
-		}
-	);
-	#endif // UNICODE_LITERALS_OK
+#if UNICODE_LITERALS_OK
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								"127.0.0.1" = "value"
+								"character encoding" = "value"
+								"ʎǝʞ" = "value"
+								'key2' = "value"
+								'quoted "value"' = "value"
+								'' = 'blank'
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["127.0.0.1"] == "value"sv);
+							   CHECK(tbl["character encoding"] == "value"sv);
+							   CHECK(tbl["ʎǝʞ"] == "value"sv);
+							   CHECK(tbl["key2"] == "value"sv);
+							   CHECK(tbl["quoted \"value\""] == "value"sv);
+							   CHECK(tbl[""] == "blank"sv);
+						   });
+#endif // UNICODE_LITERALS_OK
 
 	parsing_should_fail(FILE_LINE_ARGS, R"(= "no key name")"sv);
 
@@ -63,39 +59,34 @@ TEST_CASE("parsing - key-value pairs")
 
 TEST_CASE("parsing - key-value pairs (dotted)")
 {
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			name = "Orange"
-			physical.color = "orange"
-			physical.shape = "round"
-			site."google.com" = true
-			3.14159 = "pi"
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl.size() == 4);
-			CHECK(tbl["name"] == "Orange"sv);
-			CHECK(tbl["physical"]["color"] == "orange"sv);
-			CHECK(tbl["physical"]["shape"] == "round"sv);
-			CHECK(tbl["site"]["google.com"] == true);
-			CHECK(tbl["3"]["14159"] == "pi"sv);
-		}
-	);
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								name = "Orange"
+								physical.color = "orange"
+								physical.shape = "round"
+								site."google.com" = true
+								3.14159 = "pi"
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl.size() == 4);
+							   CHECK(tbl["name"] == "Orange"sv);
+							   CHECK(tbl["physical"]["color"] == "orange"sv);
+							   CHECK(tbl["physical"]["shape"] == "round"sv);
+							   CHECK(tbl["site"]["google.com"] == true);
+							   CHECK(tbl["3"]["14159"] == "pi"sv);
+						   });
 
-
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			fruit.apple.smooth = true
-			fruit.orange = 2
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl["fruit"]["apple"]["smooth"] == true);
-			CHECK(tbl["fruit"]["orange"] == 2);
-		}
-	);
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								fruit.apple.smooth = true
+								fruit.orange = 2
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["fruit"]["apple"]["smooth"] == true);
+							   CHECK(tbl["fruit"]["orange"] == 2);
+						   });
 
 	parsing_should_fail(FILE_LINE_ARGS, R"(
 		# THIS IS INVALID
@@ -103,83 +94,77 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 		fruit.apple.smooth = true
 	)"sv);
 
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			# VALID BUT DISCOURAGED
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								# VALID BUT DISCOURAGED
 
-			apple.type = "fruit"
-			orange.type = "fruit"
+								apple.type = "fruit"
+								orange.type = "fruit"
 
-			apple.skin = "thin"
-			orange.skin = "thick"
+								apple.skin = "thin"
+								orange.skin = "thick"
 
-			apple.color = "red"
-			orange.color = "orange"
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl["apple"]["type"] == "fruit"sv);
-			CHECK(tbl["apple"]["skin"] == "thin"sv);
-			CHECK(tbl["apple"]["color"] == "red"sv);
-			CHECK(tbl["orange"]["type"] == "fruit"sv);
-			CHECK(tbl["orange"]["skin"] == "thick"sv);
-			CHECK(tbl["orange"]["color"] == "orange"sv);
-		}
-	);
+								apple.color = "red"
+								orange.color = "orange"
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["apple"]["type"] == "fruit"sv);
+							   CHECK(tbl["apple"]["skin"] == "thin"sv);
+							   CHECK(tbl["apple"]["color"] == "red"sv);
+							   CHECK(tbl["orange"]["type"] == "fruit"sv);
+							   CHECK(tbl["orange"]["skin"] == "thick"sv);
+							   CHECK(tbl["orange"]["color"] == "orange"sv);
+						   });
 
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
-			# RECOMMENDED
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								# RECOMMENDED
 
-			apple.type = "fruit"
-			apple.skin = "thin"
-			apple.color = "red"
+								apple.type = "fruit"
+								apple.skin = "thin"
+								apple.color = "red"
 
-			orange.type = "fruit"
-			orange.skin = "thick"
-			orange.color = "orange"
-		)"sv,
-		[](table&& tbl)
-		{
-			CHECK(tbl["apple"]["type"] == "fruit"sv);
-			CHECK(tbl["apple"]["skin"] == "thin"sv);
-			CHECK(tbl["apple"]["color"] == "red"sv);
-			CHECK(tbl["orange"]["type"] == "fruit"sv);
-			CHECK(tbl["orange"]["skin"] == "thick"sv);
-			CHECK(tbl["orange"]["color"] == "orange"sv);
-		}
-	);
+								orange.type = "fruit"
+								orange.skin = "thick"
+								orange.color = "orange"
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["apple"]["type"] == "fruit"sv);
+							   CHECK(tbl["apple"]["skin"] == "thin"sv);
+							   CHECK(tbl["apple"]["color"] == "red"sv);
+							   CHECK(tbl["orange"]["type"] == "fruit"sv);
+							   CHECK(tbl["orange"]["skin"] == "thick"sv);
+							   CHECK(tbl["orange"]["color"] == "orange"sv);
+						   });
 
-	// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
-	#if UNICODE_LITERALS_OK
-	#if TOML_LANG_UNRELEASED
-		parsing_should_succeed(
-			FILE_LINE_ARGS,
-			R"(
-				key+1 = 0
-				ʎǝʞ2 = 0
-			)"sv,
-			[](table&& tbl)
-			{
-				CHECK(tbl.size() == 2);
-				CHECK(tbl["key+1"] == 0);
-				CHECK(tbl["ʎǝʞ2"] == 0);
-			}
-		);
-	#else
-		parsing_should_fail(FILE_LINE_ARGS, R"(key+1 = 0)"sv);
-		parsing_should_fail(FILE_LINE_ARGS, R"(ʎǝʞ2 = 0)"sv);
-	#endif
-	#endif // UNICODE_LITERALS_OK
+// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
+#if UNICODE_LITERALS_OK
+#if TOML_LANG_UNRELEASED
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								key+1 = 0
+								ʎǝʞ2 = 0
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl.size() == 2);
+							   CHECK(tbl["key+1"] == 0);
+							   CHECK(tbl["ʎǝʞ2"] == 0);
+						   });
+#else
+	parsing_should_fail(FILE_LINE_ARGS, R"(key+1 = 0)"sv);
+	parsing_should_fail(FILE_LINE_ARGS, R"(ʎǝʞ2 = 0)"sv);
+#endif
+#endif // UNICODE_LITERALS_OK
 }
 
 TEST_CASE("parsing - key-value pairs (string keys)")
 {
-	// these are all derived from the discussion at 
+	// these are all derived from the discussion at
 	// https://github.com/toml-lang/toml/issues/733.
-	
+
 	// whitespace stripped, fail duplicate keys
 	parsing_should_fail(FILE_LINE_ARGS, R"(
 		a     = 2
@@ -244,14 +229,16 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 	parsing_should_fail(FILE_LINE_ARGS, R"(a."""b""" = 3)"sv);
 
 	// whitespace relevant (success test, values are NOTE equal)
-	parsing_should_succeed(FILE_LINE_ARGS, R"(
-		a = " to do "
-		b = "to do"
-	)"sv, [](table&& tbl)
-	{
-		CHECK(tbl["a"] == " to do "sv);
-		CHECK(tbl["b"] == "to do"sv);
-	});
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								a = " to do "
+								b = "to do"
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["a"] == " to do "sv);
+							   CHECK(tbl["b"] == "to do"sv);
+						   });
 
 	// values must be quoted, syntax error
 	parsing_should_fail(FILE_LINE_ARGS, R"(
@@ -284,14 +271,16 @@ TEST_CASE("parsing - key-value pairs (string keys)")
 	)"sv);
 
 	// inner quotes are not stripped from value, a & b are equal, value surrounded by quotes
-	parsing_should_succeed(FILE_LINE_ARGS, R"(
-		a = "\"quoted\""
-		b = """"quoted""""
-	)"sv, [](table&& tbl)
-	{
-		CHECK(tbl["a"] == "\"quoted\""sv);
-		CHECK(tbl["b"] == "\"quoted\""sv);
-	});
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+								a = "\"quoted\""
+								b = """"quoted""""
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   CHECK(tbl["a"] == "\"quoted\""sv);
+							   CHECK(tbl["b"] == "\"quoted\""sv);
+						   });
 
 	// quote correction is not applied, fail syntax error
 	parsing_should_fail(FILE_LINE_ARGS, R"("a = "test")"sv);

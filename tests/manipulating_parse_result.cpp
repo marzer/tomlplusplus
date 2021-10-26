@@ -25,7 +25,7 @@ TEST_CASE("parse_result - good parse")
 	REQUIRE(!static_cast<table&>(result).empty());
 	REQUIRE(!static_cast<table&&>(result).empty());
 	REQUIRE(!static_cast<const table&>(result).empty());
-	
+
 	auto& tbl = static_cast<table&>(result);
 	CHECK(tbl["key"sv]);
 	CHECK(result["key"sv]);
@@ -38,7 +38,7 @@ TEST_CASE("parse_result - good parse")
 	CHECK(result.cbegin() != tbl.cend());
 
 	auto& cresult = static_cast<const parse_result&>(result);
-	auto& ctbl = static_cast<const table&>(cresult);
+	auto& ctbl	  = static_cast<const table&>(cresult);
 	CHECK(cresult.begin() == ctbl.begin());
 	CHECK(cresult.end() == ctbl.end());
 	CHECK(cresult.begin() != ctbl.end());
@@ -52,26 +52,28 @@ TEST_CASE("parse_result - good parse")
 	size_t tbl_iterations{};
 	for (auto&& [k, v] : tbl)
 	{
-		(void)k; (void)v;
+		(void)k;
+		(void)v;
 		tbl_iterations++;
 	}
 	size_t result_iterations{};
 	for (auto& [k, v] : result)
 	{
-		(void)k; (void)v;
+		(void)k;
+		(void)v;
 		result_iterations++;
 	}
 	size_t cresult_iterations{};
 	for (auto [k, v] : cresult)
 	{
-		(void)k; (void)v;
+		(void)k;
+		(void)v;
 		cresult_iterations++;
 	}
 	CHECK(tbl_iterations == tbl.size());
 	CHECK(tbl_iterations == result_iterations);
 	CHECK(tbl_iterations == cresult_iterations);
 }
-
 
 TEST_CASE("parse_result - bad parse")
 {
@@ -98,15 +100,16 @@ TEST_CASE("parse_result - bad parse")
 
 	for (auto [k, v] : result)
 	{
-		(void)k; (void)v;
+		(void)k;
+		(void)v;
 		FAIL("This code should not run");
 	}
 	for (auto [k, v] : cresult)
 	{
-		(void)k; (void)v;
+		(void)k;
+		(void)v;
 		FAIL("This code should not run");
 	}
 }
-
 
 #endif //!TOML_EXCEPTIONS

@@ -64,8 +64,7 @@ TEST_CASE("arrays - moving")
 			CHECK(!arr2.source().path);
 			CHECK(arr2.size() == 0u);
 		},
-		filename
-	);
+		filename);
 }
 
 TEST_CASE("arrays - copying")
@@ -116,8 +115,7 @@ TEST_CASE("arrays - copying")
 			CHECK(arr3 == *arr1);
 			CHECK(arr3 == arr2);
 		},
-		filename
-	);
+		filename);
 }
 
 TEST_CASE("arrays - construction")
@@ -133,7 +131,7 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.source().path);
 		CHECK(!arr.is_homogeneous());
 	}
-	
+
 	{
 		array arr{ 42 };
 		CHECK(arr.size() == 1u);
@@ -163,7 +161,7 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.is_homogeneous());
 	}
 
-	#if TOML_WINDOWS_COMPAT
+#if TOML_WINDOWS_COMPAT
 	{
 		array arr{ "mixed", "string"sv, L"test", L"kek"sv };
 		CHECK(arr.size() == 4u);
@@ -174,7 +172,7 @@ TEST_CASE("arrays - construction")
 		CHECK(*arr.get_as<std::string>(2) == "test"sv);
 		CHECK(*arr.get_as<std::string>(3) == "kek"sv);
 	}
-	#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - equality")
@@ -373,12 +371,12 @@ TEST_CASE("arrays - insertion and erasure")
 		CHECK(*arr.get_as<double>(5u) == 3.0);
 	}
 
-	#if TOML_WINDOWS_COMPAT
+#if TOML_WINDOWS_COMPAT
 
 	arr.clear();
 	it = arr.insert(arr.cbegin(), L"test");
 	REQUIRE(*arr.get_as<std::string>(0u) == "test"sv);
-	
+
 	it = arr.emplace<std::string>(arr.cbegin(), L"test2"sv);
 	REQUIRE(*arr.get_as<std::string>(0u) == "test2"sv);
 
@@ -388,30 +386,37 @@ TEST_CASE("arrays - insertion and erasure")
 	arr.emplace_back<std::string>(L"test4");
 	REQUIRE(*arr.back().as_string() == "test4"sv);
 
-	#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - flattening")
 {
 	{
 		array arr{
-			1, 2, 3,
+			1,
+			2,
+			3,
 			array{ 4, 5 },
 			6,
 			array{},
-			array{ 7, array{ 8, array{ 9 }, 10, array{}, }, 11 },
+			array{ 7,
+				   array{
+					   8,
+					   array{ 9 },
+					   10,
+					   array{},
+				   },
+				   11 },
 		};
 		arr.flatten();
 		REQUIRE(arr == array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
 	}
 
 	{
-		array arr{
-			array{},
-			array{inserter{array{}}},
-			array{array{},array{array{},array{}},array{}},
-			array{array{array{array{array{array{ 1 }}}}}}
-		};
+		array arr{ array{},
+				   array{ inserter{ array{} } },
+				   array{ array{}, array{ array{}, array{} }, array{} },
+				   array{ array{ array{ array{ array{ array{ 1 } } } } } } };
 		arr.flatten();
 		REQUIRE(arr == array{ 1 });
 	}
@@ -442,7 +447,7 @@ TEST_CASE("arrays - resizing and truncation")
 	REQUIRE(arr.size() == 2u);
 	REQUIRE(arr == array{ 1, 2 });
 
-	//resize up to six elements
+	// resize up to six elements
 	arr.resize(6u, 42);
 	REQUIRE(arr.size() == 6u);
 	REQUIRE(arr == array{ 1, 2, 42, 42, 42, 42 });

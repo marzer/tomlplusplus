@@ -94,14 +94,14 @@ TOML_NAMESPACE_START
 	void array::preinsertion_resize(size_t idx, size_t count) noexcept
 	{
 		TOML_ASSERT(idx <= elements.size());
-		TOML_ASSERT(count >= 1_sz);
+		TOML_ASSERT(count >= 1u);
 		const auto old_size			= elements.size();
 		const auto new_size			= old_size + count;
 		const auto inserting_at_end = idx == old_size;
 		elements.resize(new_size);
 		if (!inserting_at_end)
 		{
-			for (size_t left = old_size, right = new_size - 1_sz; left-- > idx; right--)
+			for (size_t left = old_size, right = new_size - 1u; left-- > idx; right--)
 				elements[right] = std::move(elements[left]);
 		}
 	}
@@ -165,7 +165,7 @@ TOML_NAMESPACE_START
 		for (size_t i = 0, e = elements.size(); i < e; i++)
 		{
 			auto arr = elements[i]->as_array();
-			leaves += arr ? arr->total_leaf_count() : 1_sz;
+			leaves += arr ? arr->total_leaf_count() : size_t{ 1 };
 		}
 		return leaves;
 	}
@@ -195,14 +195,14 @@ TOML_NAMESPACE_START
 
 		bool requires_flattening	 = false;
 		size_t size_after_flattening = elements.size();
-		for (size_t i = elements.size(); i-- > 0_sz;)
+		for (size_t i = elements.size(); i-- > 0u;)
 		{
 			auto arr = elements[i]->as_array();
 			if (!arr)
 				continue;
 			size_after_flattening--; // discount the array itself
 			const auto leaf_count = arr->total_leaf_count();
-			if (leaf_count > 0_sz)
+			if (leaf_count > 0u)
 			{
 				requires_flattening = true;
 				size_after_flattening += leaf_count;
@@ -228,8 +228,8 @@ TOML_NAMESPACE_START
 
 			std::unique_ptr<node> arr_storage = std::move(elements[i]);
 			const auto leaf_count			  = arr->total_leaf_count();
-			if (leaf_count > 1_sz)
-				preinsertion_resize(i + 1_sz, leaf_count - 1_sz);
+			if (leaf_count > 1u)
+				preinsertion_resize(i + 1u, leaf_count - 1u);
 			flatten_child(std::move(*arr), i); // increments i
 		}
 

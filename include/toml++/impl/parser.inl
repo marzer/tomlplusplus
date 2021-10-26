@@ -51,7 +51,7 @@ TOML_ANON_NAMESPACE_START
 	template <typename Char>
 	class utf8_byte_stream<std::basic_string_view<Char>>
 	{
-		static_assert(sizeof(Char) == 1_sz);
+		static_assert(sizeof(Char) == 1);
 
 	  private:
 		std::basic_string_view<Char> source_;
@@ -65,20 +65,20 @@ TOML_ANON_NAMESPACE_START
 			// trim trailing nulls
 			const size_t initial_len = source_.length();
 			size_t actual_len		 = initial_len;
-			for (size_t i = actual_len; i-- > 0_sz;)
+			for (size_t i = actual_len; i-- > 0u;)
 			{
 				if (source_[i] != Char{}) // not '\0'
 				{
-					actual_len = i + 1_sz;
+					actual_len = i + 1u;
 					break;
 				}
 			}
 			if (initial_len != actual_len)
-				source_ = source_.substr(0_sz, actual_len);
+				source_ = source_.substr(0u, actual_len);
 
 			// skip bom
-			if (actual_len >= 3_sz && memcmp(utf8_byte_order_mark.data(), source_.data(), 3_sz) == 0)
-				position_ += 3_sz;
+			if (actual_len >= 3u && memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
+				position_ += 3u;
 		}
 
 		TOML_NODISCARD
@@ -114,7 +114,7 @@ TOML_ANON_NAMESPACE_START
 	template <typename Char>
 	class utf8_byte_stream<std::basic_istream<Char>>
 	{
-		static_assert(sizeof(Char) == 1_sz);
+		static_assert(sizeof(Char) == 1);
 
 	  private:
 		std::basic_istream<Char>* source_;
@@ -130,7 +130,7 @@ TOML_ANON_NAMESPACE_START
 			const auto initial_pos = source_->tellg();
 			Char bom[3];
 			source_->read(bom, 3);
-			if (source_->bad() || (source_->gcount() == 3 && memcmp(utf8_byte_order_mark.data(), bom, 3_sz) == 0))
+			if (source_->bad() || (source_->gcount() == 3 && memcmp(utf8_byte_order_mark.data(), bom, 3u) == 0))
 				return;
 
 			source_->clear();
@@ -178,7 +178,7 @@ TOML_ANON_NAMESPACE_START
 		TOML_NODISCARD
 		std::string_view as_view() const noexcept
 		{
-			return bytes[3] ? std::string_view{ bytes, 4_sz } : std::string_view{ bytes };
+			return bytes[3] ? std::string_view{ bytes, 4u } : std::string_view{ bytes };
 		}
 
 		TOML_NODISCARD
@@ -269,7 +269,7 @@ TOML_ANON_NAMESPACE_START
 		{
 			TOML_ERROR_CHECK;
 
-			auto& prev = codepoints_[(cp_idx_ - 1_sz) % 2_sz];
+			auto& prev = codepoints_[(cp_idx_ - 1u) % 2u];
 
 			if (stream_.eof())
 				return nullptr;
@@ -333,7 +333,7 @@ TOML_ANON_NAMESPACE_START
 
 				TOML_ERROR_CHECK;
 
-				auto& current						 = codepoints_[cp_idx_ % 2_sz];
+				auto& current						 = codepoints_[cp_idx_ % 2u];
 				current.bytes[current_byte_count_++] = static_cast<char>(next_byte);
 				if (decoder_.has_code_point())
 				{
@@ -966,7 +966,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NEVER_INLINE
 		void set_error_at(source_position pos, const T&... reason) const TOML_MAY_THROW
 		{
-			static_assert(sizeof...(T) > 0_sz);
+			static_assert(sizeof...(T) > 0);
 #if !TOML_EXCEPTIONS
 			if (err)
 				return;
@@ -991,7 +991,7 @@ TOML_IMPL_NAMESPACE_START
 			set_error_at(current_position(1), reason...);
 		}
 
-		void go_back(size_t count = 1_sz) noexcept
+		void go_back(size_t count = 1) noexcept
 		{
 			return_if_error();
 			assert_or_assume(count);
@@ -1034,7 +1034,7 @@ TOML_IMPL_NAMESPACE_START
 				recording_buffer.append(cp->as_view());
 		}
 
-		void stop_recording(size_t pop_bytes = 0_sz) noexcept
+		void stop_recording(size_t pop_bytes = 0) noexcept
 		{
 			return_if_error();
 
@@ -1043,7 +1043,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				if (pop_bytes >= recording_buffer.length())
 					recording_buffer.clear();
-				else if (pop_bytes == 1_sz)
+				else if (pop_bytes == 1u)
 					recording_buffer.pop_back();
 				else
 					recording_buffer.erase(recording_buffer.begin()
@@ -1322,7 +1322,7 @@ TOML_IMPL_NAMESPACE_START
 						if (multi_line)
 						{
 							size_t lookaheads			  = {};
-							size_t consecutive_delimiters = 1_sz;
+							size_t consecutive_delimiters = 1;
 							do
 							{
 								advance_and_return_if_error({});
@@ -1332,30 +1332,30 @@ TOML_IMPL_NAMESPACE_START
 								else
 									break;
 							}
-							while (lookaheads < 4_sz);
+							while (lookaheads < 4u);
 
 							switch (consecutive_delimiters)
 							{
 								// """ " (one quote somewhere in a ML string)
-								case 1_sz:
+								case 1:
 									str += '"';
 									skipping_whitespace = false;
 									continue;
 
 								// """ "" (two quotes somewhere in a ML string)
-								case 2_sz:
+								case 2:
 									str.append("\"\""sv);
 									skipping_whitespace = false;
 									continue;
 
 								// """ """ (the end of the string)
-								case 3_sz: return str;
+								case 3: return str;
 
 								// """ """" (one at the end of the string)
-								case 4_sz: str += '"'; return str;
+								case 4: str += '"'; return str;
 
 								// """ """"" (two quotes at the end of the string)
-								case 5_sz:
+								case 5:
 									str.append("\"\""sv);
 									advance_and_return_if_error({}); // skip the last '"'
 									return str;
@@ -1451,7 +1451,7 @@ TOML_IMPL_NAMESPACE_START
 					if (multi_line)
 					{
 						size_t lookaheads			  = {};
-						size_t consecutive_delimiters = 1_sz;
+						size_t consecutive_delimiters = 1;
 						do
 						{
 							advance_and_return_if_error({});
@@ -1461,24 +1461,24 @@ TOML_IMPL_NAMESPACE_START
 							else
 								break;
 						}
-						while (lookaheads < 4_sz);
+						while (lookaheads < 4u);
 
 						switch (consecutive_delimiters)
 						{
 							// ''' ' (one quote somewhere in a ML string)
-							case 1_sz: str += '\''; continue;
+							case 1: str += '\''; continue;
 
 							// ''' '' (two quotes somewhere in a ML string)
-							case 2_sz: str.append("''"sv); continue;
+							case 2: str.append("''"sv); continue;
 
 							// ''' ''' (the end of the string)
-							case 3_sz: return str;
+							case 3: return str;
 
 							// ''' '''' (one at the end of the string)
-							case 4_sz: str += '\''; return str;
+							case 4: str += '\''; return str;
 
 							// ''' ''''' (two quotes at the end of the string)
-							case 5_sz:
+							case 5:
 								str.append("''"sv);
 								advance_and_return_if_error({}); // skip the last '
 								return str;
@@ -1561,7 +1561,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				// step back two characters so that the current
 				// character is the string delimiter
-				go_back(2_sz);
+				go_back(2u);
 
 				return { first == U'\'' ? parse_literal_string(false) : parse_basic_string(false), false };
 			}
@@ -1871,7 +1871,7 @@ TOML_IMPL_NAMESPACE_START
 						set_error_and_return_default("expected exponent digit or sign, saw '"sv, to_sv(*cp), "'"sv);
 
 					// 0x.p-0 (mantissa is just '.')
-					else if (fragments[0].length == 0_sz && fragments[1].length == 0_sz)
+					else if (fragments[0].length == 0u && fragments[1].length == 0u)
 						set_error_and_return_default("expected hexadecimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
 					else
@@ -1906,7 +1906,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			// sanity-check ending state
-			if (current_fragment != fragments + 2 || current_fragment->length == 0_sz)
+			if (current_fragment != fragments + 2 || current_fragment->length == 0u)
 			{
 				set_error_and_return_if_eof({});
 				set_error_and_return_default("missing exponent"sv);
@@ -1937,7 +1937,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// calculate value
 				auto place = 1u;
-				for (size_t i = 0; i < f.length - 1_sz; i++)
+				for (size_t i = 0; i < f.length - 1u; i++)
 					place *= base;
 				uint32_t val{};
 				while (place)
@@ -2051,7 +2051,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			// single digits can be converted trivially
-			if (length == 1_sz)
+			if (length == 1u)
 			{
 				if constexpr (base == 16)
 					return static_cast<int64_t>(hex_to_dec(chars[0]));
@@ -2101,7 +2101,7 @@ TOML_IMPL_NAMESPACE_START
 
 			// "YYYY"
 			uint32_t digits[4];
-			if (!consume_digit_sequence(digits, 4_sz))
+			if (!consume_digit_sequence(digits, 4u))
 				set_error_and_return_default("expected 4-digit year, saw '"sv, to_sv(cp), "'"sv);
 			const auto year			= digits[3] + digits[2] * 10u + digits[1] * 100u + digits[0] * 1000u;
 			const auto is_leap_year = (year % 4u == 0u) && ((year % 100u != 0u) || (year % 400u == 0u));
@@ -2113,7 +2113,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
-			if (!consume_digit_sequence(digits, 2_sz))
+			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
 			const auto month = digits[1] + digits[0] * 10u;
 			if (month == 0u || month > 12u)
@@ -2130,7 +2130,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "DD"
-			if (!consume_digit_sequence(digits, 2_sz))
+			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit day, saw '"sv, to_sv(cp), "'"sv);
 			const auto day = digits[1] + digits[0] * 10u;
 			if (day == 0u || day > max_days_in_month)
@@ -2153,11 +2153,11 @@ TOML_IMPL_NAMESPACE_START
 			assert_or_assume(is_decimal_digit(*cp));
 			push_parse_scope("time"sv);
 
-			static constexpr auto max_digits = 9_sz;
+			static constexpr size_t max_digits = 9;
 			uint32_t digits[max_digits];
 
 			// "HH"
-			if (!consume_digit_sequence(digits, 2_sz))
+			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 			const auto hour = digits[1] + digits[0] * 10u;
 			if (hour > 23u)
@@ -2171,7 +2171,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "MM"
-			if (!consume_digit_sequence(digits, 2_sz))
+			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 			const auto minute = digits[1] + digits[0] * 10u;
 			if (minute > 59u)
@@ -2195,7 +2195,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "SS"
-			if (!consume_digit_sequence(digits, 2_sz))
+			if (!consume_digit_sequence(digits, 2u))
 				set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
 			const auto second = digits[1] + digits[0] * 10u;
 			if (second > 59u)
@@ -2211,7 +2211,7 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "FFFFFFFFF"
-			auto digit_count = consume_variable_length_digit_sequence(digits, max_digits);
+			size_t digit_count = consume_variable_length_digit_sequence(digits, max_digits);
 			if (!digit_count)
 			{
 				set_error_and_return_if_eof({});
@@ -2228,7 +2228,7 @@ TOML_IMPL_NAMESPACE_START
 
 			uint32_t value = 0u;
 			uint32_t place = 1u;
-			for (auto i = digit_count; i-- > 0_sz;)
+			for (auto i = digit_count; i-- > 0u;)
 			{
 				value += digits[i] * place;
 				place *= 10u;
@@ -2280,7 +2280,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// "HH"
 				int digits[2];
-				if (!consume_digit_sequence(digits, 2_sz))
+				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 				const auto hour = digits[1] + digits[0] * 10;
 				if (hour > 23)
@@ -2294,7 +2294,7 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error_or_eof({});
 
 				// "MM"
-				if (!consume_digit_sequence(digits, 2_sz))
+				if (!consume_digit_sequence(digits, 2u))
 					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 				const auto minute = digits[1] + digits[0] * 10;
 				if (minute > 59)
@@ -2464,19 +2464,19 @@ TOML_IMPL_NAMESPACE_START
 								switch (static_cast<char32_t>(c | 32u))
 								{
 									case U'b':
-										if (char_count == 2_sz && has_any(begins_zero))
+										if (char_count == 2u && has_any(begins_zero))
 											add_trait(has_b);
 										break;
 
 									case U'e':
-										if (char_count > 1_sz
+										if (char_count > 1u
 											&& has_none(has_b | has_o | has_p | has_t | has_x | has_z | has_colon)
 											&& (has_none(has_plus | has_minus) || has_any(begins_sign)))
 											add_trait(has_e);
 										break;
 
 									case U'o':
-										if (char_count == 2_sz && has_any(begins_zero))
+										if (char_count == 2u && has_any(begins_zero))
 											add_trait(has_o);
 										break;
 
@@ -2486,8 +2486,8 @@ TOML_IMPL_NAMESPACE_START
 										break;
 
 									case U'x':
-										if ((char_count == 2_sz && has_any(begins_zero))
-											|| (char_count == 3_sz && has_any(begins_sign) && chars[1] == U'0'))
+										if ((char_count == 2u && has_any(begins_zero))
+											|| (char_count == 3u && has_any(begins_sign) && chars[1] == U'0'))
 											add_trait(has_x);
 										break;
 
@@ -2519,7 +2519,7 @@ TOML_IMPL_NAMESPACE_START
 				return_if_error({});
 
 				// force further scanning if this could have been a date-time with a space instead of a T
-				if (char_count == 10_sz && traits == (bdigit_msk | has_minus) && chars[4] == U'-' && chars[7] == U'-'
+				if (char_count == 10u && traits == (bdigit_msk | has_minus) && chars[4] == U'-' && chars[7] == U'-'
 					&& !is_eof() && *cp == U' ')
 				{
 					const auto pre_advance_count = advance_count;
@@ -2532,7 +2532,7 @@ TOML_IMPL_NAMESPACE_START
 						go_back(advance_count - pre_advance_count);
 						advance_count = pre_advance_count;
 						traits		  = pre_scan_traits;
-						char_count	  = 10_sz;
+						char_count	  = 10u;
 					};
 
 					advance_and_return_if_error({});
@@ -2550,19 +2550,19 @@ TOML_IMPL_NAMESPACE_START
 						scan();
 						return_if_error({});
 
-						if (char_count == 12_sz)
+						if (char_count == 12u)
 							backpedal();
 					}
 				}
 
 				// set the reader back to where we started
 				go_back(advance_count);
-				if (char_count < utf8_buffered_reader::max_history_length - 1_sz)
+				if (char_count < utf8_buffered_reader::max_history_length - 1u)
 					chars[char_count] = U'\0';
 
 				// if after scanning ahead we still only have one value character,
 				// the only valid value type is an integer.
-				if (char_count == 1_sz)
+				if (char_count == 1u)
 				{
 					if (has_any(begins_zero | begins_digit))
 					{
@@ -2579,7 +2579,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// now things that can be identified from two or more characters
 				return_if_error({});
-				assert_or_assume(char_count >= 2_sz);
+				assert_or_assume(char_count >= 2u);
 
 				// do some 'fuzzy matching' where there's no ambiguity, since that allows the specific
 				// typed parse functions to take over and show better diagnostics if there's an issue
@@ -2605,7 +2605,7 @@ TOML_IMPL_NAMESPACE_START
 				else if (has_any(begins_sign))
 				{
 					// single-digit signed integers
-					if (char_count == 2_sz && has_any(has_digits))
+					if (char_count == 2u && has_any(has_digits))
 					{
 						val = new value{ static_cast<int64_t>(chars[1] - U'0') * (chars[0] == U'-' ? -1LL : 1LL) };
 						advance(); // skip the sign
@@ -2911,7 +2911,7 @@ TOML_IMPL_NAMESPACE_START
 			// get the key
 			start_recording();
 			auto key = parse_key();
-			stop_recording(1_sz);
+			stop_recording(1u);
 
 			// skip past any whitespace that followed the key
 			consume_leading_whitespace();
@@ -2977,7 +2977,7 @@ TOML_IMPL_NAMESPACE_START
 				// get the actual key
 				start_recording();
 				key = parse_key();
-				stop_recording(1_sz);
+				stop_recording(1u);
 				return_if_error({});
 
 				// skip past any whitespace that followed the key
@@ -3006,7 +3006,7 @@ TOML_IMPL_NAMESPACE_START
 
 			// check if each parent is a table/table array, or can be created implicitly as a table.
 			auto parent = &root;
-			for (size_t i = 0; i < key.segments.size() - 1_sz; i++)
+			for (size_t i = 0; i < key.segments.size() - 1u; i++)
 			{
 				auto child = parent->get(key.segments[i]);
 				if (!child)
@@ -3134,13 +3134,13 @@ TOML_IMPL_NAMESPACE_START
 			auto kvp = parse_key_value_pair();
 			return_if_error();
 
-			TOML_ASSERT(kvp.key.segments.size() >= 1_sz);
+			TOML_ASSERT(kvp.key.segments.size() >= 1u);
 
 			// if it's a dotted kvp we need to spawn the sub-tables if necessary,
 			// and set the target table to the second-to-last one in the chain
-			if (kvp.key.segments.size() > 1_sz)
+			if (kvp.key.segments.size() > 1u)
 			{
-				for (size_t i = 0; i < kvp.key.segments.size() - 1_sz; i++)
+				for (size_t i = 0; i < kvp.key.segments.size() - 1u; i++)
 				{
 					auto child = tab->get(kvp.key.segments[i]);
 					if (!child)
@@ -3525,7 +3525,7 @@ TOML_ANON_NAMESPACE_START
 
 		// open file with a custom-sized stack buffer
 		std::ifstream file;
-		char file_buffer[sizeof(void*) * 1024_sz];
+		char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 		if (!file.is_open())

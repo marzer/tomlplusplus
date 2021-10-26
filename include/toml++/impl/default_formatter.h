@@ -46,7 +46,7 @@ TOML_NAMESPACE_START
 		std::vector<std::string> key_path_;
 		bool pending_table_separator_ = false;
 
-		static constexpr size_t line_wrap_cols = 120_sz;
+		static constexpr size_t line_wrap_cols = 120;
 
 		TOML_NODISCARD
 		TOML_API

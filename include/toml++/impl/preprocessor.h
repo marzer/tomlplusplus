@@ -531,13 +531,6 @@
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 
-#if defined(__cpp_consteval) && __cpp_consteval >= 201811 && !defined(_MSC_VER)
-	// https://developercommunity.visualstudio.com/t/Erroneous-C7595-error-with-consteval-in/1404234
-	#define TOML_CONSTEVAL		consteval
-#else
-	#define TOML_CONSTEVAL		constexpr
-#endif
-
 #ifdef __has_cpp_attribute
 	#define TOML_HAS_ATTR(...)	__has_cpp_attribute(__VA_ARGS__)
 #else
@@ -758,7 +751,9 @@
 	#define TOML_EXTERNAL_LINKAGE				inline
 	#define TOML_INTERNAL_LINKAGE				inline
 #else
-	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION); using namespace toml; namespace
+	#define TOML_ANON_NAMESPACE_START			static_assert(TOML_IMPLEMENTATION);	\
+												using namespace toml;				\
+												namespace
 	#define TOML_ANON_NAMESPACE_END				static_assert(true)
 	#define TOML_ANON_NAMESPACE
 	#define TOML_EXTERNAL_LINKAGE

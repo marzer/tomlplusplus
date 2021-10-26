@@ -10,6 +10,7 @@ REM ----------------------------------------------------------------------------
 CALL :RunClangFormatOnDirectories ^
 	include\toml++ ^
 	include\toml++\impl ^
+	tests ^
 	examples
 
 GOTO FINISH
