@@ -26,7 +26,8 @@ TOML_NAMESPACE_START
 	template class value<time>;
 	template class value<date_time>;
 
-#define TOML_EXTERN(name, T) template optional<T> node::name<T>() const noexcept
+#define TOML_EXTERN(name, T)                                                                                           \
+	template optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);

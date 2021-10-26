@@ -169,7 +169,7 @@ TOML_ANON_NAMESPACE_START
 		}
 	};
 
-	struct utf8_codepoint final
+	struct utf8_codepoint
 	{
 		char32_t value;
 		char bytes[4];
@@ -603,14 +603,14 @@ TOML_ANON_NAMESPACE_START
 	TOML_NEVER_INLINE
 	void concatenate(char*& write_pos, char* const buf_end, const T& arg) noexcept
 	{
-		static_assert(impl::is_one_of<impl::remove_cvref_t<T>, std::string_view, int64_t, uint64_t, double>,
+		static_assert(impl::is_one_of<impl::remove_cvref<T>, std::string_view, int64_t, uint64_t, double>,
 					  "concatenate inputs are limited to std::string_view, int64_t, uint64_t and double to keep "
 					  "instantiations to a minimum as an anti-bloat measure (hint: to_sv will probably help)");
 
 		if (write_pos >= buf_end)
 			return;
 
-		using arg_t = impl::remove_cvref_t<T>;
+		using arg_t = impl::remove_cvref<T>;
 		if constexpr (std::is_same_v<arg_t, std::string_view>)
 		{
 			const auto max_chars = static_cast<size_t>(buf_end - write_pos);
@@ -668,7 +668,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_RETURNS_BY_THROWING
-		auto finish(const source_position& pos, const source_path_ptr& source_path) const TOML_MAY_THROW
+		auto finish(const source_position& pos, const source_path_ptr& source_path) const
 		{
 			*write_pos = '\0';
 
@@ -964,7 +964,7 @@ TOML_IMPL_NAMESPACE_START
 		template <typename... T>
 		TOML_RETURNS_BY_THROWING
 		TOML_NEVER_INLINE
-		void set_error_at(source_position pos, const T&... reason) const TOML_MAY_THROW
+		void set_error_at(source_position pos, const T&... reason) const
 		{
 			static_assert(sizeof...(T) > 0);
 #if !TOML_EXCEPTIONS
@@ -986,7 +986,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename... T>
 		TOML_RETURNS_BY_THROWING
-		void set_error(const T&... reason) const TOML_MAY_THROW
+		void set_error(const T&... reason) const
 		{
 			set_error_at(current_position(1), reason...);
 		}
@@ -1000,7 +1000,7 @@ TOML_IMPL_NAMESPACE_START
 			prev_pos = cp->position;
 		}
 
-		void advance() TOML_MAY_THROW
+		void advance()
 		{
 			return_if_error();
 			assert_not_eof();
@@ -1052,7 +1052,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 		}
 
-		bool consume_leading_whitespace() TOML_MAY_THROW
+		bool consume_leading_whitespace()
 		{
 			return_if_error_or_eof({});
 
@@ -1065,7 +1065,7 @@ TOML_IMPL_NAMESPACE_START
 			return consumed;
 		}
 
-		bool consume_line_break() TOML_MAY_THROW
+		bool consume_line_break()
 		{
 			return_if_error_or_eof({});
 
@@ -1085,7 +1085,7 @@ TOML_IMPL_NAMESPACE_START
 			return true;
 		}
 
-		bool consume_rest_of_line() TOML_MAY_THROW
+		bool consume_rest_of_line()
 		{
 			return_if_error_or_eof({});
 
@@ -1102,7 +1102,7 @@ TOML_IMPL_NAMESPACE_START
 			return true;
 		}
 
-		bool consume_comment() TOML_MAY_THROW
+		bool consume_comment()
 		{
 			return_if_error_or_eof({});
 
@@ -1138,7 +1138,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool consume_expected_sequence(std::u32string_view seq) TOML_MAY_THROW
+		bool consume_expected_sequence(std::u32string_view seq)
 		{
 			return_if_error({});
 			TOML_ASSERT(!seq.empty());
@@ -1155,7 +1155,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename T>
 		TOML_NODISCARD
-		bool consume_digit_sequence(T* digits, size_t len) TOML_MAY_THROW
+		bool consume_digit_sequence(T* digits, size_t len)
 		{
 			return_if_error({});
 			assert_or_assume(digits);
@@ -1175,7 +1175,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename T>
 		TOML_NODISCARD
-		size_t consume_variable_length_digit_sequence(T* buffer, size_t max_len) TOML_MAY_THROW
+		size_t consume_variable_length_digit_sequence(T* buffer, size_t max_len)
 		{
 			return_if_error({});
 			assert_or_assume(buffer);
@@ -1195,7 +1195,7 @@ TOML_IMPL_NAMESPACE_START
 
 		// template <bool MultiLine>
 		TOML_NODISCARD
-		std::string parse_basic_string(bool multi_line) TOML_MAY_THROW
+		std::string parse_basic_string(bool multi_line)
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1422,7 +1422,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		std::string parse_literal_string(bool multi_line) TOML_MAY_THROW
+		std::string parse_literal_string(bool multi_line)
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1525,7 +1525,7 @@ TOML_IMPL_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_NEVER_INLINE
-		parsed_string parse_string() TOML_MAY_THROW
+		parsed_string parse_string()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1568,7 +1568,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		std::string parse_bare_key_segment() TOML_MAY_THROW
+		std::string parse_bare_key_segment()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1589,7 +1589,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool parse_boolean() TOML_MAY_THROW
+		bool parse_boolean()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1613,7 +1613,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		double parse_inf_or_nan() TOML_MAY_THROW
+		double parse_inf_or_nan()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1642,7 +1642,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		double parse_float() TOML_MAY_THROW
+		double parse_float()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1797,7 +1797,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		double parse_hex_float() TOML_MAY_THROW
+		double parse_hex_float()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -1973,7 +1973,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <uint64_t base>
 		TOML_NODISCARD
-		int64_t parse_integer() TOML_MAY_THROW
+		int64_t parse_integer()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2092,7 +2092,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		date parse_date(bool part_of_datetime = false) TOML_MAY_THROW
+		date parse_date(bool part_of_datetime = false)
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2146,7 +2146,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		time parse_time(bool part_of_datetime = false) TOML_MAY_THROW
+		time parse_time(bool part_of_datetime = false)
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2240,7 +2240,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		date_time parse_date_time() TOML_MAY_THROW
+		date_time parse_date_time()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2310,13 +2310,13 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		array* parse_array() TOML_MAY_THROW;
+		array* parse_array();
 
 		TOML_NODISCARD
-		table* parse_inline_table() TOML_MAY_THROW;
+		table* parse_inline_table();
 
 		TOML_NODISCARD
-		node* parse_value_known_prefixes() TOML_MAY_THROW
+		node* parse_value_known_prefixes()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2358,7 +2358,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		node* parse_value() TOML_MAY_THROW
+		node* parse_value()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2444,7 +2444,7 @@ TOML_IMPL_NAMESPACE_START
 				char32_t chars[utf8_buffered_reader::max_history_length];
 				size_t char_count = {}, advance_count = {};
 				bool eof_while_scanning = false;
-				const auto scan			= [&]() TOML_MAY_THROW
+				const auto scan			= [&]()
 				{
 					if (is_eof())
 						return;
@@ -2832,7 +2832,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		parsed_key parse_key() TOML_MAY_THROW
+		parsed_key parse_key()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2901,7 +2901,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		parsed_key_value_pair parse_key_value_pair() TOML_MAY_THROW
+		parsed_key_value_pair parse_key_value_pair()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2934,7 +2934,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		table* parse_table_header() TOML_MAY_THROW
+		table* parse_table_header()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -3125,7 +3125,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 		}
 
-		void parse_key_value_pair_and_insert(table* tab) TOML_MAY_THROW
+		void parse_key_value_pair_and_insert(table* tab)
 		{
 			return_if_error();
 			assert_not_eof();
@@ -3189,7 +3189,7 @@ TOML_IMPL_NAMESPACE_START
 			tab->map_.emplace(std::move(kvp.key.segments.back()), std::unique_ptr<node>{ kvp.value.release() });
 		}
 
-		void parse_document() TOML_MAY_THROW
+		void parse_document()
 		{
 			assert_not_error();
 			assert_not_eof();
@@ -3275,7 +3275,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 	  public:
-		parser(utf8_reader_interface&& reader_) TOML_MAY_THROW : reader{ reader_ }
+		parser(utf8_reader_interface&& reader_) : reader{ reader_ }
 		{
 			root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
@@ -3317,7 +3317,7 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	TOML_EXTERNAL_LINKAGE
-	array* parser::parse_array() TOML_MAY_THROW
+	array* parser::parse_array()
 	{
 		return_if_error({});
 		assert_not_eof();
@@ -3380,7 +3380,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table* parser::parse_inline_table() TOML_MAY_THROW
+	table* parser::parse_inline_table()
 	{
 		return_if_error({});
 		assert_not_eof();
@@ -3495,14 +3495,14 @@ TOML_ANON_NAMESPACE_START
 {
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result do_parse(utf8_reader_interface && reader) TOML_MAY_THROW
+	parse_result do_parse(utf8_reader_interface && reader)
 	{
 		return impl::parser{ std::move(reader) };
 	}
 
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result do_parse_file(std::string_view file_path) TOML_MAY_THROW
+	parse_result do_parse_file(std::string_view file_path)
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
@@ -3561,31 +3561,31 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::string_view source_path) TOML_MAY_THROW
+	parse_result parse(std::string_view doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::string && source_path) TOML_MAY_THROW
+	parse_result parse(std::string_view doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::string_view source_path) TOML_MAY_THROW
+	parse_result parse(std::istream & doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::string && source_path) TOML_MAY_THROW
+	parse_result parse(std::istream & doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW
+	parse_result parse_file(std::string_view file_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse_file(file_path);
 	}
@@ -3593,19 +3593,19 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::string_view source_path) TOML_MAY_THROW
+	parse_result parse(std::u8string_view doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::string && source_path) TOML_MAY_THROW
+	parse_result parse(std::u8string_view doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW
+	parse_result parse_file(std::u8string_view file_path)
 	{
 		std::string file_path_str;
 		file_path_str.resize(file_path.length());
@@ -3618,19 +3618,19 @@ TOML_NAMESPACE_START
 #if TOML_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	parse_result parse(std::string_view doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::wstring_view source_path) TOML_MAY_THROW
+	parse_result parse(std::istream & doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW
+	parse_result parse_file(std::wstring_view file_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path));
 	}
@@ -3640,7 +3640,7 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW
+	parse_result parse(std::u8string_view doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}

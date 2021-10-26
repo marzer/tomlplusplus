@@ -118,6 +118,9 @@
     <ClInclude Include="include\toml++\impl\value.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\std_initializer_list.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />

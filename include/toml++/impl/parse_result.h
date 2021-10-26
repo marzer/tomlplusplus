@@ -47,7 +47,7 @@ TOML_NAMESPACE_START
 	/// #if TOML_EXCEPTIONS
 	///		using parse_result = table;
 	/// #else
-	///		class parse_result final { // ...
+	///		class parse_result { // ...
 	///	#endif
 	/// \ecpp
 	class parse_result

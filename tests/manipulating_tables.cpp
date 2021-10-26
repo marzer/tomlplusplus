@@ -130,7 +130,7 @@ TEST_CASE("tables - construction")
 	}
 
 	{
-		table tbl{ { { "foo"sv, 42 } } };
+		table tbl{ { "foo"sv, 42 } };
 		CHECK(tbl.size() == 1u);
 		CHECK(!tbl.empty());
 		CHECK(tbl.begin() != tbl.end());
@@ -140,7 +140,7 @@ TEST_CASE("tables - construction")
 	}
 
 	{
-		table tbl{ { { "foo"sv, 42 }, { "bar"sv, 10.0 }, { "kek"sv, false }, { "qux"sv, array{ 1 } } } };
+		table tbl{ { "foo"sv, 42 }, { "bar"sv, 10.0 }, { "kek"sv, false }, { "qux"sv, array{ 1 } } };
 		CHECK(tbl.size() == 4u);
 		CHECK(!tbl.empty());
 		REQUIRE(tbl.get_as<int64_t>("foo"sv));
@@ -155,10 +155,10 @@ TEST_CASE("tables - construction")
 
 #if TOML_WINDOWS_COMPAT
 	{
-		table tbl{ { { L"foo", L"test1" },
-					 { L"bar"sv, L"test2"sv },
-					 { L"kek"s, L"test3"sv },
-					 { L"qux"sv.data(), L"test4"sv.data() } } };
+		table tbl{ { L"foo", L"test1" },
+				   { L"bar"sv, L"test2"sv },
+				   { L"kek"s, L"test3"sv },
+				   { L"qux"sv.data(), L"test4"sv.data() } };
 		CHECK(tbl.size() == 4u);
 		CHECK(!tbl.empty());
 		REQUIRE(tbl.get_as<std::string>("foo"sv));
@@ -177,26 +177,26 @@ TEST_CASE("tables - equality")
 {
 	static constexpr const char* one = "one";
 
-	table tbl1{ { { one, 1 }, { "two", 2 }, { "three", 3 } } };
+	table tbl1{ { one, 1 }, { "two", 2 }, { "three", 3 } };
 	CHECK(tbl1 == tbl1);
 
-	table tbl2{ { { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3 } } };
+	table tbl2{ { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3 } };
 	CHECK(tbl1 == tbl2);
 
-	table tbl3{ { { "one"sv, 1 }, { "two"sv, 2 } } };
+	table tbl3{ { "one"sv, 1 }, { "two"sv, 2 } };
 	CHECK(tbl1 != tbl3);
 
-	table tbl4{ { { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3 }, { "four"sv, 4 } } };
+	table tbl4{ { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3 }, { "four"sv, 4 } };
 	CHECK(tbl1 != tbl4);
 
-	table tbl5{ { { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3.0 } } };
+	table tbl5{ { "one"sv, 1 }, { "two"sv, 2 }, { "three"sv, 3.0 } };
 	CHECK(tbl1 != tbl5);
 
-	table tbl6{};
+	table tbl6;
 	CHECK(tbl1 != tbl6);
 	CHECK(tbl6 == tbl6);
 
-	table tbl7{};
+	table tbl7;
 	CHECK(tbl6 == tbl7);
 }
 
@@ -229,7 +229,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(!tbl.empty());
 	REQUIRE(tbl.get_as<int64_t>("a"sv));
 	CHECK(*tbl.get_as<int64_t>("a"sv) == 42);
-	REQUIRE(tbl == table{ { { "a"sv, 42 } } });
+	REQUIRE(tbl == table{ { "a"sv, 42 } });
 
 	res = tbl.insert("a", 69);
 	CHECK(res.first == tbl.begin());
@@ -237,7 +237,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 1u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 42);
-	REQUIRE(tbl == table{ { { "a"sv, 42 } } });
+	REQUIRE(tbl == table{ { "a"sv, 42 } });
 
 	static constexpr const char* a = "a";
 	res							   = tbl.insert_or_assign(a, 69);
@@ -246,7 +246,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 1u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 69);
-	REQUIRE(tbl == table{ { { "a"sv, 69 } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 } });
 
 	res = tbl.insert_or_assign("b", "kek");
 	CHECK(res.first == advance(tbl.begin(), 1));
@@ -254,7 +254,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 2u);
 	REQUIRE(tbl.get_as<std::string>("b"));
 	CHECK(*tbl.get_as<std::string>("b") == "kek"sv);
-	REQUIRE(tbl == table{ { { "a"sv, 69 }, { "b"sv, "kek" } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 }, { "b"sv, "kek" } });
 
 	res = tbl.emplace<array>("c", 1, 2, 3);
 	CHECK(res.first == advance(tbl.begin(), 2));
@@ -262,7 +262,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 3u);
 	REQUIRE(tbl.get_as<array>("c"));
 	CHECK(*tbl.get_as<array>("c") == array{ 1, 2, 3 });
-	REQUIRE(tbl == table{ { { "a"sv, 69 }, { "b"sv, "kek"sv }, { "c"sv, array{ 1, 2, 3 } } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 }, { "b"sv, "kek"sv }, { "c"sv, array{ 1, 2, 3 } } });
 
 	res = tbl.emplace<int64_t>("c", 1);
 	CHECK(res.first == advance(tbl.begin(), 2));
@@ -270,7 +270,7 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 3u);
 	REQUIRE(!tbl.get_as<int64_t>("c"));
 	REQUIRE(tbl.get_as<array>("c"));
-	REQUIRE(tbl == table{ { { "a"sv, 69 }, { "b"sv, "kek"s }, { "c"sv, array{ 1, 2, 3 } } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 }, { "b"sv, "kek"s }, { "c"sv, array{ 1, 2, 3 } } });
 
 	auto it = tbl.erase(tbl.cbegin());
 	REQUIRE(tbl == table{ { { "b"sv, "kek" }, { "c"sv, array{ 1, 2, 3 } } } });
@@ -283,10 +283,10 @@ TEST_CASE("tables - insertion and erasure")
 	CHECK(tbl.size() == 3u);
 	REQUIRE(tbl.get_as<int64_t>("a"));
 	CHECK(*tbl.get_as<int64_t>("a") == 69);
-	REQUIRE(tbl == table{ { { "a"sv, 69 }, { "b"sv, "kek" }, { "c"sv, array{ 1, 2, 3 } } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 }, { "b"sv, "kek" }, { "c"sv, array{ 1, 2, 3 } } });
 
 	it = tbl.erase(advance(tbl.cbegin(), 1), advance(tbl.cbegin(), 3));
-	REQUIRE(tbl == table{ { { "a"sv, 69 } } });
+	REQUIRE(tbl == table{ { "a"sv, 69 } });
 	CHECK(it == tbl.end());
 	CHECK(tbl.size() == 1u);
 

@@ -27,7 +27,7 @@ TEST_CASE("windows compat")
 #if !TOML_EXCEPTIONS
 	REQUIRE(res.succeeded());
 #endif
-	toml::table& tbl = res;
+	table& tbl = res;
 
 	// source paths
 	REQUIRE(tbl.source().path != nullptr);

@@ -303,18 +303,18 @@
 
  int main()
  {
- 	auto tbl = toml::table{{
+ 	auto tbl = toml::table{
  		{ "lib", "toml++" },
  		{ "cpp", toml::array{ 17, 20, "and beyond" } },
  		{ "toml", toml::array{ "1.0.0", "and beyond" } },
  		{ "repo", "https://github.com/marzer/tomlplusplus/" },
- 		{ "author", toml::table{{
+ 		{ "author", toml::table{
  				{ "name", "Mark Gillard" },
  				{ "github", "https://github.com/marzer" },
  				{ "twitter", "https://twitter.com/marzer8789" }
- 			}}
+ 			}
  		},
- 	}};
+ 	};
 
  	// serializing as TOML
  	std::cout << "###### TOML ######" << "\n\n";

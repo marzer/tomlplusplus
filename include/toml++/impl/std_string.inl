@@ -42,7 +42,7 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	std::string narrow(std::wstring_view str) noexcept
+	std::string narrow(std::wstring_view str)
 	{
 		if (str.empty())
 			return {};
@@ -66,7 +66,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	std::wstring widen(std::string_view str) noexcept
+	std::wstring widen(std::string_view str)
 	{
 		if (str.empty())
 			return {};
@@ -84,7 +84,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_HAS_CHAR8
 
 	TOML_EXTERNAL_LINKAGE
-	std::wstring widen(std::u8string_view str) noexcept
+	std::wstring widen(std::u8string_view str)
 	{
 		if (str.empty())
 			return {};

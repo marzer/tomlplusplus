@@ -24,7 +24,7 @@ TOML_NAMESPACE_START
 
 		template <typename T>
 		TOML_NODISCARD
-		decltype(auto) get_value_exact() const noexcept;
+		decltype(auto) get_value_exact() const noexcept(impl::value_retrieval_is_nothrow<T>);
 
 		template <typename T, typename N>
 		TOML_NODISCARD
@@ -549,7 +549,7 @@ TOML_NAMESPACE_START
 		/// \see node::value()
 		template <typename T>
 		TOML_NODISCARD
-		optional<T> value_exact() const noexcept;
+		optional<T> value_exact() const noexcept(impl::value_retrieval_is_nothrow<T>);
 
 		/// \brief	Gets the value contained by this node.
 		///
@@ -679,7 +679,7 @@ TOML_NAMESPACE_START
 		/// \see node::value_exact()
 		template <typename T>
 		TOML_NODISCARD
-		optional<T> value() const noexcept;
+		optional<T> value() const noexcept(impl::value_retrieval_is_nothrow<T>);
 
 		/// \brief	Gets the raw value contained by this node, or a default.
 		///
@@ -700,7 +700,7 @@ TOML_NAMESPACE_START
 		///		- node::value_exact()
 		template <typename T>
 		TOML_NODISCARD
-		auto value_or(T&& default_value) const noexcept;
+		auto value_or(T&& default_value) const noexcept(impl::value_retrieval_is_nothrow<T>);
 
 		//# template <typename T>
 		//# TOML_NODISCARD

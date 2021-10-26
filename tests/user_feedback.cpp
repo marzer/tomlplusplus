@@ -13,10 +13,10 @@ TEST_CASE("user feedback")
 	{
 		toml::table t1;
 		t1.insert_or_assign("bar1", toml::array{ 1, 2, 3 });
-		CHECK(t1 == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } } } });
+		CHECK(t1 == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } } });
 
 		t1.insert_or_assign("foo1", *t1.get("bar1"));
-		CHECK(t1 == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } }, { "foo1"sv, toml::array{ 1, 2, 3 } } } });
+		CHECK(t1 == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } }, { "foo1"sv, toml::array{ 1, 2, 3 } } });
 
 		// t1["foo1"] = t1["bar1"]; // does nothing, should this fail to compile?
 		//  - yes -
@@ -26,28 +26,28 @@ TEST_CASE("user feedback")
 
 		toml::array* array1 = t1["foo1"].node()->as_array();
 		array1->push_back(4);
-		CHECK(t1 == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } }, { "foo1"sv, toml::array{ 1, 2, 3, 4 } } } });
+		CHECK(t1 == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } }, { "foo1"sv, toml::array{ 1, 2, 3, 4 } } });
 
 		t1.insert_or_assign("foo3", t1["foo1"]);
 		CHECK(t1
-			  == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } },
-								{ "foo1"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo3"sv, toml::array{ 1, 2, 3, 4 } } } });
+			  == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } },
+							  { "foo1"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 
 		t1.insert_or_assign("foo2", *t1["foo1"].node());
 		CHECK(t1
-			  == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } },
-								{ "foo1"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo2"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo3"sv, toml::array{ 1, 2, 3, 4 } } } });
+			  == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } },
+							  { "foo1"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo2"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 
 		toml::array* array2 = t1["foo2"].node()->as_array();
 		array2->push_back("wrench");
 		CHECK(t1
-			  == toml::table{ { { "bar1"sv, toml::array{ 1, 2, 3 } },
-								{ "foo1"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
-								{ "foo3"sv, toml::array{ 1, 2, 3, 4 } } } });
+			  == toml::table{ { "bar1"sv, toml::array{ 1, 2, 3 } },
+							  { "foo1"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
+							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 
 		toml::table t2 = t1;
 		CHECK(t2 == t1);
@@ -57,20 +57,20 @@ TEST_CASE("user feedback")
 		//  - it should be this: -
 		t2.emplace<toml::array>("bar", 6, 7);
 		CHECK(t2
-			  == toml::table{ { { "bar"sv, toml::array{ 6, 7 } },
-								{ "bar1"sv, toml::array{ 1, 2, 3 } },
-								{ "foo1"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
-								{ "foo3"sv, toml::array{ 1, 2, 3, 4 } } } });
+			  == toml::table{ { "bar"sv, toml::array{ 6, 7 } },
+							  { "bar1"sv, toml::array{ 1, 2, 3 } },
+							  { "foo1"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
+							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 
 		t2.insert_or_assign("bar2", toml::array{ 6, 7 });
 		CHECK(t2
-			  == toml::table{ { { "bar"sv, toml::array{ 6, 7 } },
-								{ "bar1"sv, toml::array{ 1, 2, 3 } },
-								{ "bar2"sv, toml::array{ 6, 7 } },
-								{ "foo1"sv, toml::array{ 1, 2, 3, 4 } },
-								{ "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
-								{ "foo3"sv, toml::array{ 1, 2, 3, 4 } } } });
+			  == toml::table{ { "bar"sv, toml::array{ 6, 7 } },
+							  { "bar1"sv, toml::array{ 1, 2, 3 } },
+							  { "bar2"sv, toml::array{ 6, 7 } },
+							  { "foo1"sv, toml::array{ 1, 2, 3, 4 } },
+							  { "foo2"sv, toml::array{ 1, 2, 3, 4, "wrench" } },
+							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 	}
 
 	SECTION("github/issues/65") // https://github.com/marzer/tomlplusplus/issues/65

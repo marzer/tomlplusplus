@@ -132,7 +132,7 @@ class TomlPPTable:
 		if len(self.values) == 0:
 			s += 'toml::table{}'
 		else:
-			s += 'toml::table{{'
+			s += 'toml::table{'
 			for key, val in self.values.items():
 				s += '\n' + indent + '\t{ '
 				if isinstance(val, (TomlPPTable, TomlPPArray)) and len(val) > 0:
@@ -142,7 +142,7 @@ class TomlPPTable:
 				else:
 					s += '{}, {} '.format(python_value_to_tomlpp(str(key)), python_value_to_tomlpp(val))
 				s += '},'
-			s += '\n' + indent + '}}'
+			s += '\n' + indent + '}'
 		return s
 
 	def __str__(self):

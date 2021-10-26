@@ -43,7 +43,7 @@ TOML_ANON_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	array::array(const array& other) noexcept //
+	array::array(const array& other) //
 		: node(other)
 	{
 		elements.reserve(other.elements.size());
@@ -66,7 +66,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	array& array::operator=(const array& rhs) noexcept
+	array& array::operator=(const array& rhs)
 	{
 		if (&rhs != this)
 		{
@@ -91,7 +91,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void array::preinsertion_resize(size_t idx, size_t count) noexcept
+	void array::preinsertion_resize(size_t idx, size_t count)
 	{
 		TOML_ASSERT(idx <= elements.size());
 		TOML_ASSERT(count >= 1u);

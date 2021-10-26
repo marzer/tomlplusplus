@@ -52,7 +52,9 @@ struct codepoint_range
 
 	template <typename T>
 	TOML_NODISCARD_CTOR
-	constexpr codepoint_range(T first_) noexcept : first{ static_cast<char32_t>(first_) }, last{ first }
+	constexpr codepoint_range(T first_) noexcept //
+		: first{ static_cast<char32_t>(first_) },
+		  last{ first }
 	{}
 };
 

@@ -37,17 +37,17 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_NODISCARD
 	TOML_API
-	std::string narrow(std::wstring_view) noexcept;
+	std::string narrow(std::wstring_view);
 
 	TOML_NODISCARD
 	TOML_API
-	std::wstring widen(std::string_view) noexcept;
+	std::wstring widen(std::string_view);
 
 #if TOML_HAS_CHAR8
 
 	TOML_NODISCARD
 	TOML_API
-	std::wstring widen(std::u8string_view) noexcept;
+	std::wstring widen(std::u8string_view);
 
 #endif
 }

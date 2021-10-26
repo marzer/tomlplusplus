@@ -61,6 +61,7 @@
     <ClInclude Include="include\toml++\impl\print_to_stream.inl" />
     <ClInclude Include="include\toml++\impl\source_region.h" />
     <ClInclude Include="include\toml++\impl\std_except.h" />
+    <ClInclude Include="include\toml++\impl\std_initializer_list.h" />
     <ClInclude Include="include\toml++\impl\std_map.h" />
     <ClInclude Include="include\toml++\impl\std_new.h" />
     <ClInclude Include="include\toml++\impl\std_optional.h" />

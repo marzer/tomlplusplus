@@ -7,6 +7,7 @@
 #include "print_to_stream.h"
 #include "node.h"
 #include "std_vector.h"
+#include "std_initializer_list.h"
 #include "header_start.h"
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
@@ -433,7 +434,7 @@ TOML_NAMESPACE_START
 		/// \see node_view::value()
 		template <typename T>
 		TOML_NODISCARD
-		optional<T> value_exact() const noexcept
+		optional<T> value_exact() const noexcept(impl::value_retrieval_is_nothrow<T>)
 		{
 			if (node_)
 				return node_->template value_exact<T>();
@@ -461,7 +462,7 @@ TOML_NAMESPACE_START
 		///		- node_view::value_exact()
 		template <typename T>
 		TOML_NODISCARD
-		optional<T> value() const noexcept
+		optional<T> value() const noexcept(impl::value_retrieval_is_nothrow<T>)
 		{
 			if (node_)
 				return node_->template value<T>();
@@ -487,7 +488,7 @@ TOML_NAMESPACE_START
 		///		- node_view::value_exact()
 		template <typename T>
 		TOML_NODISCARD
-		auto value_or(T&& default_value) const noexcept
+		auto value_or(T&& default_value) const noexcept(impl::value_retrieval_is_nothrow<T>)
 		{
 			using namespace ::toml::impl;
 
@@ -615,7 +616,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 		TOML_CONSTRAINED_TEMPLATE((impl::is_native<T> || impl::is_losslessly_convertible_to_native<T>), typename T)
 		TOML_NODISCARD
-		friend bool operator==(const node_view& lhs, const T& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			static_assert(!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
 						  "Comparison with wide-character strings is only "
@@ -644,7 +645,8 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator==(const node_view& lhs, const std::initializer_list<T>& rhs) noexcept
+		friend bool operator==(const node_view& lhs,
+							   const std::initializer_list<T>& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			const auto arr = lhs.as<array>();
 			return arr && *arr == rhs;
@@ -654,7 +656,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is an array with the same contents as the RHS vector.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator==(const node_view& lhs, const std::vector<T>& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const std::vector<T>& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			const auto arr = lhs.as<array>();
 			return arr && *arr == rhs;
@@ -691,7 +693,7 @@ TOML_NAMESPACE_START
 		/// \returns	A view of the selected node if this node represented a table and it contained a
 		/// 			value at the given key, or an empty view.
 		TOML_NODISCARD
-		node_view operator[](std::wstring_view key) const noexcept
+		node_view operator[](std::wstring_view key) const
 		{
 			if (auto tbl = this->as_table())
 				return node_view{ tbl->get(key) };
@@ -746,9 +748,9 @@ TOML_NAMESPACE_START
 
 #define TOML_EXTERN(name, T)                                                                                           \
 	extern template TOML_API                                                                                           \
-	optional<T> node_view<node>::name<T>() const noexcept;                                                             \
+	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
 	extern template TOML_API                                                                                           \
-	optional<T> node_view<const node>::name<T>() const noexcept
+	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);

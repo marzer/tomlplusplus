@@ -117,7 +117,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_ATTR(const)
 	constexpr uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
-		if constexpr (std::is_same_v<remove_cvref_t<T>, uint_least32_t>)
+		if constexpr (std::is_same_v<remove_cvref<T>, uint_least32_t>)
 			return codepoint >= 0x41u					 // >= 'A'
 					 ? 10u + (codepoint | 0x20u) - 0x61u // - 'a'
 					 : codepoint - 0x30u				 // - '0'
@@ -891,7 +891,7 @@ TOML_IMPL_NAMESPACE_START
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
 	}
 
-	struct utf8_decoder final
+	struct utf8_decoder
 	{
 		// utf8_decoder based on this: https://bjoern.hoehrmann.de/utf-8/decoder/dfa/
 		// Copyright (c) 2008-2009 Bjoern Hoehrmann <bjoern@hoehrmann.de>

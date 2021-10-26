@@ -331,17 +331,25 @@
 #endif
  
 #ifdef DOXYGEN
-	#define TOML_HEADER_ONLY 0
+	#undef TOML_WINDOWS_COMPAT
 	#define TOML_WINDOWS_COMPAT 1
-#endif
-
-#if defined(TOML_ALL_INLINE) && !defined(TOML_HEADER_ONLY)
-	#define TOML_HEADER_ONLY	TOML_ALL_INLINE
 #endif
 
 #if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 1
+#endif
+#ifdef DOXYGEN
+	#undef TOML_HEADER_ONLY
+	#define TOML_HEADER_ONLY 0
+#endif
+
+#ifndef TOML_EXTERN_TEMPLATES
+	#define TOML_EXTERN_TEMPLATES 1
+#endif
+#if (defined(DOXYGEN) || TOML_HEADER_ONLY) && !TOML_INTELLISENSE
+	#undef TOML_EXTERN_TEMPLATES
+	#define TOML_EXTERN_TEMPLATES 0
 #endif
 
 #if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
@@ -367,7 +375,8 @@
 	#define TOML_UNDEF_MACROS 1
 #endif
 
-#ifndef TOML_PARSER
+#if !defined(TOML_PARSER) || (defined(TOML_PARSER) && TOML_PARSER) || TOML_INTELLISENSE
+	#undef TOML_PARSER
 	#define TOML_PARSER 1
 #endif
 
@@ -377,7 +386,8 @@
 	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
-#ifndef TOML_WINDOWS_COMPAT
+#if !defined(TOML_WINDOWS_COMPAT) || (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT) || TOML_INTELLISENSE
+	#undef TOML_WINDOWS_COMPAT
 	#define TOML_WINDOWS_COMPAT 1
 #endif
 /// \cond
@@ -406,6 +416,10 @@
 	#if !TOML_LARGE_FILES
 		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
 	#endif
+#endif
+
+#ifdef TOML_ALL_INLINE
+	#error Support for TOML_ALL_INLINE was deprecated in toml++ 2.0.0 and removed in 3.0.0. Use TOML_HEADER_ONLY instead.
 #endif
 
 //#====================================================================================================================
@@ -448,12 +462,6 @@
 	#endif
 	#undef TOML_EXCEPTIONS
 	#define TOML_EXCEPTIONS	0
-#endif
-
-#if defined(DOXYGEN) || TOML_EXCEPTIONS
-	#define TOML_MAY_THROW
-#else
-	#define TOML_MAY_THROW				noexcept
 #endif
 
 #if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
@@ -636,10 +644,10 @@
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
-#if (!defined(DOXYGEN) && !TOML_HEADER_ONLY) || TOML_INTELLISENSE
-	#define TOML_EXTERN_TEMPLATES 1
+#if TOML_CLANG
+	#define TOML_EXTERN_NOEXCEPT(...)
 #else
-	#define TOML_EXTERN_TEMPLATES 0
+	#define TOML_EXTERN_NOEXCEPT(...) noexcept(__VA_ARGS__)
 #endif
 
 //======================================================================================================================

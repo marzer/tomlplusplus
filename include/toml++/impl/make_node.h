@@ -13,9 +13,9 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T && val) noexcept
+	auto* make_node_specialized(T && val)
 	{
-		using type = unwrap_node<remove_cvref_t<T>>;
+		using type = unwrap_node<remove_cvref<T>>;
 		static_assert(!std::is_same_v<type, node>);
 		static_assert(!is_node_view<type>);
 
@@ -23,7 +23,7 @@ TOML_IMPL_NAMESPACE_START
 		{
 			return new type{ static_cast<T&&>(val) };
 		}
-		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref_t<T>, type>)
+		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref<T>, type>)
 		{
 			return new value<type>{ static_cast<T&&>(val) };
 		}
@@ -35,7 +35,7 @@ TOML_IMPL_NAMESPACE_START
 			static_assert(is_native<type> || is_losslessly_convertible_to_native<type>,
 						  "Value initializers must be (or be promotable to) one of the TOML value types");
 
-			using value_type = native_type_of<remove_cvref_t<T>>;
+			using value_type = native_type_of<remove_cvref<T>>;
 			if constexpr (is_wide_string<T>)
 			{
 #if TOML_WINDOWS_COMPAT
@@ -51,9 +51,9 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(T && val) noexcept
+	auto* make_node(T && val)
 	{
-		using type = unwrap_node<remove_cvref_t<T>>;
+		using type = unwrap_node<remove_cvref<T>>;
 		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
 		{
 			if constexpr (is_node_view<type>)
@@ -63,7 +63,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			return static_cast<T&&>(val).visit(
-				[](auto&& concrete) noexcept {
+				[](auto&& concrete) {
 					return static_cast<toml::node*>(make_node_specialized(static_cast<decltype(concrete)&&>(concrete)));
 				});
 		}
@@ -73,7 +73,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(inserter<T> && val) noexcept
+	auto* make_node(inserter<T> && val)
 	{
 		return make_node(static_cast<T&&>(val.value));
 	}
@@ -114,8 +114,7 @@ TOML_NAMESPACE_START
 	/// \note	This will return toml::node for nodes and node_views, even though a more specific node subclass
 	///			would actually be inserted. There is no way around this in a compile-time metafunction.
 	template <typename T>
-	using inserted_type_of =
-		POXY_IMPLEMENTATION_DETAIL(typename impl::inserted_type_of_<impl::remove_cvref_t<T>>::type);
+	using inserted_type_of = POXY_IMPLEMENTATION_DETAIL(typename impl::inserted_type_of_<impl::remove_cvref<T>>::type);
 }
 TOML_NAMESPACE_END;
 

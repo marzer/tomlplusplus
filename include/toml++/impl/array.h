@@ -6,6 +6,7 @@
 
 #include "value.h"
 #include "std_vector.h"
+#include "std_initializer_list.h"
 #include "make_node.h"
 #include "header_start.h"
 
@@ -13,10 +14,10 @@
 TOML_IMPL_NAMESPACE_START
 {
 	template <bool IsConst>
-	class TOML_TRIVIAL_ABI array_iterator final
+	class TOML_TRIVIAL_ABI array_iterator
 	{
 	  private:
-		template <bool C>
+		template <bool>
 		friend class array_iterator;
 		friend class TOML_NAMESPACE::array;
 
@@ -251,10 +252,10 @@ TOML_NAMESPACE_START
 		std::vector<std::unique_ptr<node>> elements;
 
 		TOML_API
-		void preinsertion_resize(size_t idx, size_t count) noexcept;
+		void preinsertion_resize(size_t idx, size_t count);
 
 		template <typename T>
-		void emplace_back_if_not_empty_view(T&& val) noexcept
+		void emplace_back_if_not_empty_view(T&& val)
 		{
 			if constexpr (is_node_view<T>)
 			{
@@ -308,7 +309,7 @@ TOML_NAMESPACE_START
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
 		TOML_API
-		array(const array&) noexcept;
+		array(const array&);
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
@@ -317,7 +318,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Copy-assignment operator.
 		TOML_API
-		array& operator=(const array&) noexcept;
+		array& operator=(const array&);
 
 		/// \brief	Move-assignment operator.
 		TOML_API
@@ -356,7 +357,7 @@ TOML_NAMESPACE_START
 		/// \tparam	ElemTypes	One of the TOML node or value types (or a type promotable to one).
 		/// \param 	val 	The node or value used to initialize element 0.
 		/// \param 	vals	The nodes or values used to initialize elements 1...N.
-		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0 || !std::is_same_v<impl::remove_cvref_t<ElemType>, array>),
+		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0 || !std::is_same_v<impl::remove_cvref<ElemType>, array>),
 								  typename ElemType,
 								  typename... ElemTypes)
 		TOML_NODISCARD_CTOR
@@ -594,7 +595,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, ElemType&& val) noexcept
+		iterator insert(const_iterator pos, ElemType&& val)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -642,7 +643,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
+		iterator insert(const_iterator pos, size_t count, ElemType&& val)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -682,7 +683,7 @@ TOML_NAMESPACE_START
 		/// 		 \conditional_return{All objects in the range were empty toml::node_views}
 		/// 		 A copy of pos
 		template <typename Iter>
-		iterator insert(const_iterator pos, Iter first, Iter last) noexcept
+		iterator insert(const_iterator pos, Iter first, Iter last)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
@@ -732,7 +733,7 @@ TOML_NAMESPACE_START
 		/// 		 \conditional_return{All objects in the list were empty toml::node_views}
 		///			 A copy of pos
 		template <typename ElemType>
-		iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
+		iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist)
 		{
 			return insert(pos, ilist.begin(), ilist.end());
 		}
@@ -762,7 +763,7 @@ TOML_NAMESPACE_START
 		/// \remarks There is no difference between insert() and emplace()
 		/// 		 for trivial value types (floats, ints, bools).
 		template <typename ElemType, typename... Args>
-		iterator emplace(const_iterator pos, Args&&... args) noexcept
+		iterator emplace(const_iterator pos, Args&&... args)
 		{
 			using type = impl::unwrap_node<ElemType>;
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
@@ -848,7 +849,7 @@ TOML_NAMESPACE_START
 		/// \param 	new_size			The number of elements the array will have after resizing.
 		/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
 		template <typename ElemType>
-		void resize(size_t new_size, ElemType&& default_init_val) noexcept
+		void resize(size_t new_size, ElemType&& default_init_val)
 		{
 			static_assert(!is_node_view<ElemType>,
 						  "The default element type argument to toml::array::resize may not be toml::node_view.");
@@ -911,7 +912,7 @@ TOML_NAMESPACE_START
 		/// \attention	No insertion takes place if the input value is an empty toml::node_view.
 		/// 			This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		void push_back(ElemType&& val) noexcept
+		void push_back(ElemType&& val)
 		{
 			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
 		}
@@ -938,7 +939,7 @@ TOML_NAMESPACE_START
 		/// \remarks There is no difference between push_back() and emplace_back()
 		/// 		 For trivial value types (floats, ints, bools).
 		template <typename ElemType, typename... Args>
-		decltype(auto) emplace_back(Args&&... args) noexcept
+		decltype(auto) emplace_back(Args&&... args)
 		{
 			using type = impl::unwrap_node<ElemType>;
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,

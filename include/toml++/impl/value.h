@@ -108,7 +108,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_HAS_CHAR8
 			if constexpr (is_one_of<std::decay_t<T>, char8_t*, const char8_t*>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg)));
-			else if constexpr (is_one_of<remove_cvref_t<T>, std::u8string, std::u8string_view>)
+			else if constexpr (is_one_of<remove_cvref<T>, std::u8string, std::u8string_view>)
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg.data())),
 								   arg.length());
 #endif // TOML_HAS_CHAR8
@@ -817,11 +817,11 @@ TOML_NAMESPACE_START
 	/// \cond
 
 	template <typename T>
-	value(T) -> value<impl::native_type_of<impl::remove_cvref_t<T>>>;
+	value(T) -> value<impl::native_type_of<impl::remove_cvref<T>>>;
 
 	template <typename T>
 	TOML_NODISCARD
-	inline decltype(auto) node::get_value_exact() const noexcept
+	inline decltype(auto) node::get_value_exact() const noexcept(impl::value_retrieval_is_nothrow<T>)
 	{
 		using namespace impl;
 
@@ -869,7 +869,7 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	inline optional<T> node::value_exact() const noexcept
+	inline optional<T> node::value_exact() const noexcept(impl::value_retrieval_is_nothrow<T>)
 	{
 		using namespace impl;
 
@@ -892,7 +892,7 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	inline optional<T> node::value() const noexcept
+	inline optional<T> node::value() const noexcept(impl::value_retrieval_is_nothrow<T>)
 	{
 		using namespace impl;
 
@@ -1009,7 +1009,7 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	inline auto node::value_or(T && default_value) const noexcept
+	inline auto node::value_or(T && default_value) const noexcept(impl::value_retrieval_is_nothrow<T>)
 	{
 		using namespace impl;
 
@@ -1111,7 +1111,7 @@ TOML_NAMESPACE_START
 
 #define TOML_EXTERN(name, T)                                                                                           \
 	extern template TOML_API                                                                                           \
-	optional<T> node::name<T>() const noexcept
+	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);

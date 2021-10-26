@@ -22,8 +22,9 @@ TOML_NAMESPACE_START
 	template class node_view<const node>;
 
 #define TOML_EXTERN(name, T)                                                                                           \
-	template optional<T> node_view<node>::name<T>() const noexcept;                                                    \
-	template optional<T> node_view<const node>::name<T>() const noexcept
+	template optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);   \
+	template optional<T> node_view<const node>::name<T>()                                                              \
+		const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
 	TOML_EXTERN(value_exact, std::string_view);
 	TOML_EXTERN(value_exact, std::string);

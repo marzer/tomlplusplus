@@ -24,14 +24,14 @@ TEST_CASE("parsing - tables")
 	//  Key/value pairs within tables are not guaranteed to be in any specific order."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			[table-1]
-			key1 = "some string"
-			key2 = 123
+								[table-1]
+								key1 = "some string"
+								key2 = 123
 
-			[table-2]
-			key1 = "another string"
-			key2 = 456
-		)"sv,
+								[table-2]
+								key1 = "another string"
+								key2 = 456
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   REQUIRE(tbl["table-1"].as_table());
@@ -48,9 +48,9 @@ TEST_CASE("parsing - tables")
 	// "Naming rules for tables are the same as for keys." (i.e. can be quoted)
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			[dog."tater.man"]
-			type.name = "pug"
-		)"sv,
+								[dog."tater.man"]
+								type.name = "pug"
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   REQUIRE(tbl["dog"].as_table());
@@ -64,11 +64,11 @@ TEST_CASE("parsing - tables")
 	// "Whitespace around the key is ignored. However, best practice is to not use any extraneous whitespace."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			[a.b.c]            # this is best practice
-			[ d.e.f ]          # same as [d.e.f]
-			[ g .  h  . i ]    # same as [g.h.i]
-			[ j . "k" . 'l' ]  # same as [j."k".'l']
-		)"sv,
+								[a.b.c]            # this is best practice
+								[ d.e.f ]          # same as [d.e.f]
+								[ g .  h  . i ]    # same as [g.h.i]
+								[ j . "k" . 'l' ]  # same as [j."k".'l']
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["a"].as_table());
@@ -91,13 +91,13 @@ TEST_CASE("parsing - tables")
 	// "You don't need to specify all the super-tables if you don't want to. TOML knows how to do it for you."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			# [x] you
-			# [x.y] don't
-			# [x.y.z] need these
-			[x.y.z.w] # for this to work
+								# [x] you
+								# [x.y] don't
+								# [x.y.z] need these
+								[x.y.z.w] # for this to work
 
-			[x] # defining a super-table afterwards is ok
-		)"sv,
+								[x] # defining a super-table afterwards is ok
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["x"].as_table());
@@ -129,11 +129,11 @@ TEST_CASE("parsing - tables")
 	// "Defining tables out-of-order is discouraged."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			# VALID BUT DISCOURAGED
-			[fruit.apple]
-			[animal]
-			[fruit.orange]
-		)"sv,
+								# VALID BUT DISCOURAGED
+								[fruit.apple]
+								[animal]
+								[fruit.orange]
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["fruit"].as_table());
@@ -143,11 +143,11 @@ TEST_CASE("parsing - tables")
 						   });
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			# RECOMMENDED
-			[fruit.apple]
-			[fruit.orange]
-			[animal]
-		)"sv,
+								# RECOMMENDED
+								[fruit.apple]
+								[fruit.orange]
+								[animal]
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["fruit"].as_table());
@@ -160,15 +160,15 @@ TEST_CASE("parsing - tables")
 	//  and ends just before the first table header (or EOF)."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			# Top-level table begins.
-			name = "Fido"
-			breed = "pug"
+								# Top-level table begins.
+								name = "Fido"
+								breed = "pug"
 
-			# Top-level table ends.
-			[owner]
-			name = "Regina Dogman"
-			member_since = 1999-08-04
-		)"sv,
+								# Top-level table ends.
+								[owner]
+								name = "Regina Dogman"
+								member_since = 1999-08-04
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["name"].as_string());
@@ -187,14 +187,14 @@ TEST_CASE("parsing - tables")
 	//  provided that such tables were not previously created."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			fruit.apple.color = "red"
-			# Defines a table named fruit
-			# Defines a table named fruit.apple
+								fruit.apple.color = "red"
+								# Defines a table named fruit
+								# Defines a table named fruit.apple
 
-			fruit.apple.taste.sweet = true
-			# Defines a table named fruit.apple.taste
-			# fruit and fruit.apple were already created
-		)"sv,
+								fruit.apple.taste.sweet = true
+								# Defines a table named fruit.apple.taste
+								# fruit and fruit.apple were already created
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["fruit"].as_table());
@@ -242,13 +242,13 @@ TEST_CASE("parsing - tables")
 	// "The [table] form can, however, be used to define sub-tables within tables defined via dotted keys."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			[fruit]
-			apple.color = "red"
-			apple.taste.sweet = true
+								[fruit]
+								apple.color = "red"
+								apple.taste.sweet = true
 
-			[fruit.apple.texture]  # you can add sub-tables
-			smooth = true
-		)"sv,
+								[fruit.apple.texture]  # you can add sub-tables
+								smooth = true
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["fruit"].as_table());
@@ -276,13 +276,13 @@ TEST_CASE("parsing - tables")
 	// see: https://github.com/toml-lang/toml/issues/769
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			[fruit.apple.texture]
-			smooth = true
+								[fruit.apple.texture]
+								smooth = true
 
-			[fruit]
-			apple.color = "red"
-			apple.taste.sweet = true
-		)"sv,
+								[fruit]
+								apple.color = "red"
+								apple.taste.sweet = true
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   CHECK(tbl["fruit"].as_table());
@@ -302,10 +302,10 @@ TEST_CASE("parsing - inline tables")
 
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-			name = { first = "Tom", last = "Preston-Werner" }
-			point = { x = 1, y = 2 }
-			animal = { type.name = "pug" }
-		)"sv,
+								name = { first = "Tom", last = "Preston-Werner" }
+								point = { x = 1, y = 2 }
+								animal = { type.name = "pug" }
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   REQUIRE(tbl["name"].as_table());
@@ -346,11 +346,11 @@ TEST_CASE("parsing - inline tables")
 	// "newlines are allowed between the curly braces [if] they are valid within a value."
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   R"(
-test = { val1 = "foo", val2 = [
-	1, 2,
-	3
-], val3 = "bar" }
-)"sv,
+								test = { val1 = "foo", val2 = [
+									1, 2,
+									3
+								], val3 = "bar" }
+							)"sv,
 						   [](table&& tbl)
 						   {
 							   REQUIRE(tbl["test"].as_table());
@@ -369,11 +369,11 @@ test = { val1 = "foo", val2 = [
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   R"(
-			name = {
-				first = "Tom",
-				last = "Preston-Werner",
-			}
-			)"sv,
+									name = {
+										first = "Tom",
+										last = "Preston-Werner",
+									}
+								)"sv,
 							   [](table&& tbl)
 							   {
 								   REQUIRE(tbl["name"].as_table());

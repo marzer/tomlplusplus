@@ -38,7 +38,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
+	parse_result parse(std::string_view doc, std::string_view source_path = {});
 
 	/// \brief	Parses a TOML document from a string view.
 	///
@@ -63,7 +63,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::string_view doc, std::string && source_path) TOML_MAY_THROW;
+	parse_result parse(std::string_view doc, std::string && source_path);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -82,7 +82,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse_file(std::string_view file_path) TOML_MAY_THROW;
+	parse_result parse_file(std::string_view file_path);
 
 #if TOML_HAS_CHAR8
 
@@ -109,7 +109,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::u8string_view doc, std::string_view source_path = {}) TOML_MAY_THROW;
+	parse_result parse(std::u8string_view doc, std::string_view source_path = {});
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
@@ -134,7 +134,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::u8string_view doc, std::string && source_path) TOML_MAY_THROW;
+	parse_result parse(std::u8string_view doc, std::string && source_path);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -153,7 +153,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse_file(std::u8string_view file_path) TOML_MAY_THROW;
+	parse_result parse_file(std::u8string_view file_path);
 
 #endif // TOML_HAS_CHAR8
 
@@ -184,7 +184,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
+	parse_result parse(std::string_view doc, std::wstring_view source_path);
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -214,7 +214,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::istream & doc, std::wstring_view source_path) TOML_MAY_THROW;
+	parse_result parse(std::istream & doc, std::wstring_view source_path);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -235,7 +235,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse_file(std::wstring_view file_path) TOML_MAY_THROW;
+	parse_result parse_file(std::wstring_view file_path);
 
 #endif // TOML_WINDOWS_COMPAT
 
@@ -265,7 +265,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::u8string_view doc, std::wstring_view source_path) TOML_MAY_THROW;
+	parse_result parse(std::u8string_view doc, std::wstring_view source_path);
 
 #endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
 
@@ -295,7 +295,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::istream & doc, std::string_view source_path = {}) TOML_MAY_THROW;
+	parse_result parse(std::istream & doc, std::string_view source_path = {});
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -323,7 +323,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_API
-	parse_result parse(std::istream & doc, std::string && source_path) TOML_MAY_THROW;
+	parse_result parse(std::istream & doc, std::string && source_path);
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -353,7 +353,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Without exceptions}
 		///				A toml::parse_result.
 		TOML_NODISCARD
-		inline parse_result operator"" _toml(const char* str, size_t len) TOML_MAY_THROW
+		inline parse_result operator"" _toml(const char* str, size_t len)
 		{
 			return parse(std::string_view{ str, len });
 		}
@@ -382,7 +382,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Without exceptions}
 		///				A toml::parse_result.
 		TOML_NODISCARD
-		inline parse_result operator"" _toml(const char8_t* str, size_t len) TOML_MAY_THROW
+		inline parse_result operator"" _toml(const char8_t* str, size_t len)
 		{
 			return parse(std::u8string_view{ str, len });
 		}

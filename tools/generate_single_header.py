@@ -94,6 +94,12 @@ def main():
 		toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
 		# trailing whitespace
 		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+		# enable warnings -> disable warnings
+		toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
+		# blank lines between consecutive TOML_DISABLE_XXXXX_WARNINGS statements
+		toml_h = re.sub('(TOML_(?:PUSH|DISABLE_[A-Z_]+?)WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_[A-Z_]+?WARNINGS;)', r'\1\n\2', toml_h)
+		# blank lines between consecutive #includes
+		toml_h = re.sub('[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
 		# double blank lines
 		toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
 		# weird spacing edge case between } and pp directives
@@ -102,8 +108,6 @@ def main():
 		toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
 		# blank lines preceeding closing brackets
 		toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
-		# blank lines between consecutive TOML_DISABLE_XXXXX_WARNINGS statements
-		toml_h = re.sub('(TOML_(?:PUSH|DISABLE_[A-Z_]+?)WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_[A-Z_]+?WARNINGS;)', r'\1\n\2', toml_h)
 		# ensure only one trailing newline
 		toml_h = toml_h.strip() + '\n'
 

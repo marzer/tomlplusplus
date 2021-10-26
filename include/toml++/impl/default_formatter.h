@@ -16,12 +16,12 @@ TOML_NAMESPACE_START
 	/// 		 operators of the TOML node types already print themselves out using this formatter.
 	///
 	/// \detail \cpp
-	/// auto tbl = toml::table{{
+	/// auto tbl = toml::table{
 	///		{ "description", "This is some TOML, yo." },
 	///		{ "fruit", toml::array{ "apple", "orange", "pear" } },
 	///		{ "numbers", toml::array{ 1, 2, 3, 4, 5 } },
-	///		{ "table", toml::table{{ { "foo", "bar" } }} }
-	/// }};
+	///		{ "table", toml::table{ { "foo", "bar" } } }
+	/// };
 	///
 	/// // these two lines are equivalent:
 	///	std::cout << toml::default_formatter{ tbl } << "\n";

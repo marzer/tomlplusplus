@@ -201,7 +201,7 @@ inline bool parse_expected_value(std::string_view test_file,
 		end.column++;
 	}
 
-	using value_type = impl::native_type_of<impl::remove_cvref_t<T>>;
+	using value_type = impl::native_type_of<impl::remove_cvref<T>>;
 	value<value_type> val_parsed;
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
