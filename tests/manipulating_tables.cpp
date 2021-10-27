@@ -358,13 +358,15 @@ TEST_CASE("tables - insertion and erasure")
 #endif // TOML_WINDOWS_COMPAT
 }
 
-TEST_CASE("tables - printing")
+TEST_CASE("tables - default_formatter")
 {
-	static constexpr auto to_string = [](std::string_view some_toml)
+	static constexpr auto to_string = [](std::string_view some_toml,
+										 format_flags flags			= default_formatter::default_flags,
+										 format_flags exclude_flags = format_flags::none)
 	{
 		auto val = toml::parse(some_toml);
 		std::stringstream ss;
-		ss << val;
+		ss << default_formatter{ val, flags & ~(exclude_flags) };
 		return ss.str();
 	};
 
@@ -416,5 +418,137 @@ c = 3)"sv;
 	{
 		static constexpr auto some_toml = "key = 1\n\n[a]\nkey = 1\n\n[b]\n\n[[c]]\n\n[[c]]"sv;
 		CHECK(to_string(some_toml) == some_toml);
+	}
+
+	{
+		constexpr auto input = R"(key1 = 'val1'
+key2 = [ 1, 2, 3, 4, '5' ]
+key3 = [ 'this is a really long array', 'and should be split over multiple lines', 'by the formatter', 'unless i dun goofed', 'i guess thats what tests are for' ]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+    [sub2.sub3]
+    key6 = 'val'
+    key7 = [ 1, 2, 3, 4, '5' ]
+    key8 = [ 'this is a really long array', 'and should be split over multiple lines', 'by the formatter', 'unless i dun goofed', 'i guess thats what tests are for' ])"sv;
+
+		constexpr auto expected_default = R"(key1 = 'val1'
+key2 = [ 1, 2, 3, 4, '5' ]
+key3 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+    [sub2.sub3]
+    key6 = 'val'
+    key7 = [ 1, 2, 3, 4, '5' ]
+    key8 = [
+        'this is a really long array',
+        'and should be split over multiple lines',
+        'by the formatter',
+        'unless i dun goofed',
+        'i guess thats what tests are for'
+    ])"sv;
+		CHECK(to_string(input) == expected_default);
+
+		constexpr auto expected_without_indented_subtables = R"(key1 = 'val1'
+key2 = [ 1, 2, 3, 4, '5' ]
+key3 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+[sub2.sub3]
+key6 = 'val'
+key7 = [ 1, 2, 3, 4, '5' ]
+key8 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+])"sv;
+		CHECK(to_string(input, default_formatter::default_flags, format_flags::indent_sub_tables)
+			  == expected_without_indented_subtables);
+
+		constexpr auto expected_without_indented_arrays = R"(key1 = 'val1'
+key2 = [ 1, 2, 3, 4, '5' ]
+key3 = [
+'this is a really long array',
+'and should be split over multiple lines',
+'by the formatter',
+'unless i dun goofed',
+'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+    [sub2.sub3]
+    key6 = 'val'
+    key7 = [ 1, 2, 3, 4, '5' ]
+    key8 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+    ])"sv;
+		CHECK(to_string(input, default_formatter::default_flags, format_flags::indent_array_elements)
+			  == expected_without_indented_arrays);
+
+		constexpr auto expected_without_indentation = R"(key1 = 'val1'
+key2 = [ 1, 2, 3, 4, '5' ]
+key3 = [
+'this is a really long array',
+'and should be split over multiple lines',
+'by the formatter',
+'unless i dun goofed',
+'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+[sub2.sub3]
+key6 = 'val'
+key7 = [ 1, 2, 3, 4, '5' ]
+key8 = [
+'this is a really long array',
+'and should be split over multiple lines',
+'by the formatter',
+'unless i dun goofed',
+'i guess thats what tests are for'
+])"sv;
+		CHECK(to_string(input, default_formatter::default_flags, format_flags::indentation)
+			  == expected_without_indentation);
 	}
 }

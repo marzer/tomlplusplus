@@ -279,6 +279,11 @@
 		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
 		static_assert(true)
 
+	#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS \
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
+		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")		\
+		static_assert(true)
+
 	#define TOML_DISABLE_SPAM_WARNINGS \
 		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
 		_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
@@ -289,8 +294,6 @@
 		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
 		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")		\
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -305,6 +308,7 @@
 		TOML_DISABLE_SWITCH_WARNINGS;										\
 		TOML_DISABLE_ARITHMETIC_WARNINGS;									\
 		TOML_DISABLE_SPAM_WARNINGS;											\
+		TOML_DISABLE_SUGGEST_ATTR_WARNINGS;									\
 		static_assert(true)
 
 
@@ -496,6 +500,9 @@
 #ifndef TOML_DISABLE_SWITCH_WARNINGS
 	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
 #endif
+#ifndef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
+	#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS static_assert(true)
+#endif
 #ifndef TOML_DISABLE_SPAM_WARNINGS
 	#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
 #endif
@@ -649,6 +656,24 @@
 #else
 	#define TOML_EXTERN_NOEXCEPT(...) noexcept(__VA_ARGS__)
 #endif
+
+#define TOML_PURE_GETTER			\
+	TOML_NODISCARD					\
+	TOML_ATTR(pure)
+
+#define TOML_PURE_INLINE_GETTER		\
+	TOML_NODISCARD					\
+	TOML_ALWAYS_INLINE				\
+	TOML_ATTR(pure)
+
+#define TOML_CONST_GETTER			\
+	TOML_NODISCARD					\
+	TOML_ATTR(const)
+
+#define TOML_CONST_INLINE_GETTER	\
+	TOML_NODISCARD					\
+	TOML_ALWAYS_INLINE				\
+	TOML_ATTR(const)
 
 //======================================================================================================================
 // SFINAE

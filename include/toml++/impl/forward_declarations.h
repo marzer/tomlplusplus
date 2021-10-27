@@ -267,7 +267,7 @@ TOML_NAMESPACE_START // abi namespace
 	}
 
 	/// \brief Metadata associated with TOML values.
-	enum class value_flags : uint8_t
+	enum class value_flags : uint16_t
 	{
 		/// \brief None.
 		none,
@@ -284,7 +284,10 @@ TOML_NAMESPACE_START // abi namespace
 	TOML_MAKE_FLAGS(value_flags);
 
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
-	enum class format_flags : uint8_t
+	///
+	/// \note	Formatters may disregard/override any of these flags according to the requirements of their
+	///			output target (e.g. #toml::json_formatter JSON always apply quotes to dates and times).
+	enum class format_flags : uint64_t
 	{
 		/// \brief None.
 		none,
@@ -300,6 +303,15 @@ TOML_NAMESPACE_START // abi namespace
 
 		/// \brief Values with special format flags will be formatted accordingly.
 		allow_value_format_flags = 8,
+
+		/// \brief Apply indentation to tables nested within other tables/arrays.
+		indent_sub_tables = 16,
+
+		/// \brief Apply indentation to array elements when the array is forced to wrap over multiple lines.
+		indent_array_elements = 32,
+
+		/// \brief Combination mask of all indentation-enabling flags.
+		indentation = indent_sub_tables | indent_array_elements,
 	};
 	TOML_MAKE_FLAGS(format_flags);
 

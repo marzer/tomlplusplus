@@ -30,14 +30,17 @@
 #if defined(TOML_INT128) ^ defined(TOML_UINT128)
 #error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
 #endif
-#if TOML_COMPILER_EXCEPTIONS != SHOULD_HAVE_EXCEPTIONS
+#if TOML_COMPILER_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
 #error TOML_COMPILER_EXCEPTIONS was not deduced correctly
 #endif
-#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
+#if TOML_COMPILER_EXCEPTIONS ^ TOML_EXCEPTIONS
 #error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
-#if (defined(_WIN32) && !TOML_WINDOWS_COMPAT) || (!defined(_WIN32) && TOML_WINDOWS_COMPAT)
+#if defined(_WIN32) ^ TOML_WINDOWS_COMPAT
 #error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#endif
+#if !(TOML_HEADER_ONLY ^ TOML_EXTERN_TEMPLATES) && !TOML_INTELLISENSE
+#error TOML_EXTERN_TEMPLATES should hold the opposite value to TOML_HEADER_ONLY by default
 #endif
 
 #if TOML_ICC
@@ -130,7 +133,7 @@ class function_view<R(P...)> final
 	}
 };
 
-using pss_func = function_view<void(toml::table&&)>;
+using pss_func = function_view<void(table&&)>;
 
 bool parsing_should_succeed(std::string_view test_file,
 							uint32_t test_line,

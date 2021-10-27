@@ -16,32 +16,30 @@ TOML_IMPL_NAMESPACE_START
 	  private:
 		const toml::node* source_;
 		std::ostream* stream_ = {};
-		format_flags flags_;
-		int indent_;
-		bool naked_newline_;
+		format_flags flags_; //
+		int indent_;		 // these are set in attach()
+		bool naked_newline_; //
 #if TOML_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_ = {};
 #endif
 
 	  protected:
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		static constexpr size_t indent_columns			= 4;
+		static constexpr std::string_view indent_string = "    "sv;
+
+		TOML_PURE_INLINE_GETTER
 		const toml::node& source() const noexcept
 		{
 			return *source_;
 		}
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		std::ostream& stream() const noexcept
 		{
 			return *stream_;
 		}
 
-		static constexpr size_t indent_columns			= 4;
-		static constexpr std::string_view indent_string = "    "sv;
-
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		int indent() const noexcept
 		{
 			return indent_;
@@ -62,31 +60,43 @@ TOML_IMPL_NAMESPACE_START
 			indent_--;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
+		bool indent_array_elements() const noexcept
+		{
+			return !!(flags_ & format_flags::indent_array_elements);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool indent_sub_tables() const noexcept
+		{
+			return !!(flags_ & format_flags::indent_sub_tables);
+		}
+
+		TOML_PURE_INLINE_GETTER
 		bool quote_dates_and_times() const noexcept
 		{
 			return !!(flags_ & format_flags::quote_dates_and_times);
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool literal_strings_allowed() const noexcept
 		{
 			return !!(flags_ & format_flags::allow_literal_strings);
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool multi_line_strings_allowed() const noexcept
 		{
 			return !!(flags_ & format_flags::allow_multi_line_strings);
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool value_format_flags_allowed() const noexcept
 		{
 			return !!(flags_ & format_flags::allow_value_format_flags);
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool naked_newline() const noexcept
 		{
 			return naked_newline_;

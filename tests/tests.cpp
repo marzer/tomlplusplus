@@ -220,8 +220,8 @@ namespace Catch
 {
 	template struct StringMaker<node_view<node>>;
 	template struct StringMaker<node_view<const node>>;
-	template ReusableStringStream& ReusableStringStream::operator<<(toml::node_view<toml::node> const&);
-	template ReusableStringStream& ReusableStringStream::operator<<(toml::node_view<const toml::node> const&);
+	template ReusableStringStream& ReusableStringStream::operator<<(node_view<node> const&);
+	template ReusableStringStream& ReusableStringStream::operator<<(node_view<const node> const&);
 	namespace Detail
 	{
 		template std::string stringify(const node_view<node>&);

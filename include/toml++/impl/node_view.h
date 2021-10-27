@@ -96,25 +96,25 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		node_view(const node_view&) noexcept = default;
 
-		/// \brief	Copy-assignment operator.
-		node_view& operator=(const node_view&) & noexcept = default;
-
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
 		node_view(node_view&&) noexcept = default;
+
+		/// \brief	Copy-assignment operator.
+		node_view& operator=(const node_view&) & noexcept = default;
 
 		/// \brief	Move-assignment operator.
 		node_view& operator=(node_view&&) & noexcept = default;
 
 		/// \brief	Returns true if the view references a node.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator bool() const noexcept
 		{
 			return node_ != nullptr;
 		}
 
 		/// \brief	Returns the node that's being referenced by the view.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		viewed_type* node() const noexcept
 		{
 			return node_;
@@ -124,91 +124,91 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Returns the type identifier for the viewed node.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		node_type type() const noexcept
 		{
 			return node_ ? node_->type() : node_type::none;
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::table.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_table() const noexcept
 		{
 			return node_ && node_->is_table();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::array.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_array() const noexcept
 		{
 			return node_ && node_->is_array();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_value() const noexcept
 		{
 			return node_ && node_->is_value();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<string>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_string() const noexcept
 		{
 			return node_ && node_->is_string();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<int64_t>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_integer() const noexcept
 		{
 			return node_ && node_->is_integer();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<double>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_floating_point() const noexcept
 		{
 			return node_ && node_->is_floating_point();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<int64_t> or toml::value<double>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_number() const noexcept
 		{
 			return node_ && node_->is_number();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<bool>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_boolean() const noexcept
 		{
 			return node_ && node_->is_boolean();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<date>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_date() const noexcept
 		{
 			return node_ && node_->is_date();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<time>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_time() const noexcept
 		{
 			return node_ && node_->is_time();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::value<date_time>.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_date_time() const noexcept
 		{
 			return node_ && node_->is_date_time();
 		}
 
 		/// \brief	Returns true if the viewed node is a toml::array that contains only tables.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_array_of_tables() const noexcept
 		{
 			return node_ && node_->is_array_of_tables();
@@ -222,7 +222,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node::is()
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is() const noexcept
 		{
 			return node_ ? node_->template is<T>() : false;
@@ -327,7 +327,7 @@ TOML_NAMESPACE_START
 		/// \remarks	Always returns `false` if the view does not reference a node, or if the viewed node is
 		/// 			an empty table or array.
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			return node_ ? node_->template is_homogeneous<impl::unwrap_node<ElemType>>() : false;
@@ -338,69 +338,6 @@ TOML_NAMESPACE_START
 		/// \name Type casts
 		/// @{
 
-		/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
-		TOML_NODISCARD
-		auto as_table() const noexcept
-		{
-			return as<table>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one.
-		TOML_NODISCARD
-		auto as_array() const noexcept
-		{
-			return as<array>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one.
-		TOML_NODISCARD
-		auto as_string() const noexcept
-		{
-			return as<std::string>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one.
-		TOML_NODISCARD
-		auto as_integer() const noexcept
-		{
-			return as<int64_t>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one.
-		TOML_NODISCARD
-		auto as_floating_point() const noexcept
-		{
-			return as<double>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one.
-		TOML_NODISCARD
-		auto as_boolean() const noexcept
-		{
-			return as<bool>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one.
-		TOML_NODISCARD
-		auto as_date() const noexcept
-		{
-			return as<date>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one.
-		TOML_NODISCARD
-		auto as_time() const noexcept
-		{
-			return as<time>();
-		}
-
-		/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
-		TOML_NODISCARD
-		auto as_date_time() const noexcept
-		{
-			return as<date_time>();
-		}
-
 		/// \brief	Gets a pointer to the viewed node as a more specific node type.
 		///
 		/// \tparam	T	The node type or TOML value type to cast to.
@@ -409,10 +346,73 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node::as()
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		auto as() const noexcept
 		{
 			return node_ ? node_->template as<T>() : nullptr;
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
+		TOML_PURE_GETTER
+		auto as_table() const noexcept
+		{
+			return as<table>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one.
+		TOML_PURE_GETTER
+		auto as_array() const noexcept
+		{
+			return as<array>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one.
+		TOML_PURE_GETTER
+		auto as_string() const noexcept
+		{
+			return as<std::string>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one.
+		TOML_PURE_GETTER
+		auto as_integer() const noexcept
+		{
+			return as<int64_t>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one.
+		TOML_PURE_GETTER
+		auto as_floating_point() const noexcept
+		{
+			return as<double>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one.
+		TOML_PURE_GETTER
+		auto as_boolean() const noexcept
+		{
+			return as<bool>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one.
+		TOML_PURE_GETTER
+		auto as_date() const noexcept
+		{
+			return as<date>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one.
+		TOML_PURE_GETTER
+		auto as_time() const noexcept
+		{
+			return as<time>();
+		}
+
+		/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
+		TOML_PURE_GETTER
+		auto as_date_time() const noexcept
+		{
+			return as<date_time>();
 		}
 
 		/// @}
@@ -547,7 +547,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A reference to the underlying data.
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() const noexcept
 		{
 			TOML_ASSERT(node_ && "toml::node_view::ref() called on a node_view that did not reference a node");

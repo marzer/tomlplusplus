@@ -81,13 +81,17 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
+		static constexpr format_flags mandatory_flags = format_flags::none;
+		static constexpr format_flags ignored_flags	  = format_flags::none;
+
 		/// \endcond
 
 	  public:
 		/// \brief	The default flags for a default_formatter.
-		static constexpr format_flags default_flags = format_flags::allow_literal_strings
-													| format_flags::allow_multi_line_strings
-													| format_flags::allow_value_format_flags;
+		static constexpr format_flags default_flags = format_flags::allow_literal_strings	 //
+													| format_flags::allow_multi_line_strings //
+													| format_flags::allow_value_format_flags //
+													| format_flags::indentation;
 
 		/// \brief	Constructs a default formatter and binds it to a TOML object.
 		///
@@ -95,7 +99,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, flags }
+			: base{ source, (flags | mandatory_flags) & ~ignored_flags }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
@@ -124,7 +128,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, flags }
+			: base{ result, (flags | mandatory_flags) & ~ignored_flags }
 		{}
 
 #endif

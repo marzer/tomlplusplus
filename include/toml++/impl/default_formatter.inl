@@ -260,7 +260,8 @@ TOML_NAMESPACE_START
 			{
 				if (original_indent < 0)
 					base::indent(0);
-				base::increase_indent();
+				if (base::indent_array_elements())
+					base::increase_indent();
 			}
 			else
 				impl::print_to_stream(base::stream(), ' ');
@@ -380,7 +381,8 @@ TOML_NAMESPACE_START
 			if (!skip_self)
 			{
 				print_pending_table_separator();
-				base::increase_indent();
+				if (base::indent_sub_tables())
+					base::increase_indent();
 				base::print_indent();
 				impl::print_to_stream(base::stream(), "["sv);
 				print_key_path();
@@ -391,7 +393,7 @@ TOML_NAMESPACE_START
 			print(child_tbl);
 
 			key_path_.pop_back();
-			if (!skip_self)
+			if (!skip_self && base::indent_sub_tables())
 				base::decrease_indent();
 		}
 
@@ -402,7 +404,8 @@ TOML_NAMESPACE_START
 				continue;
 			auto& arr = *reinterpret_cast<const array*>(&v);
 
-			base::increase_indent();
+			if (base::indent_sub_tables())
+				base::increase_indent();
 			key_path_.push_back(make_key_segment(k));
 
 			for (size_t i = 0; i < arr.size(); i++)
@@ -417,7 +420,8 @@ TOML_NAMESPACE_START
 			}
 
 			key_path_.pop_back();
-			base::decrease_indent();
+			if (base::indent_sub_tables())
+				base::decrease_indent();
 		}
 	}
 

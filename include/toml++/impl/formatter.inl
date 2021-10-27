@@ -213,18 +213,29 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-	TOML_EXTERNAL_LINKAGE
-	bool formatter::dump_failed_parse_result() noexcept(!TOML_PARSER || TOML_EXCEPTIONS)
-	{
 #if TOML_PARSER && !TOML_EXCEPTIONS
+
+	TOML_EXTERNAL_LINKAGE
+	bool formatter::dump_failed_parse_result() noexcept(false)
+	{
 		if (result_ && !(*result_))
 		{
 			stream() << result_->error();
 			return true;
 		}
-#endif
 		return false;
 	}
+
+#else
+
+	TOML_EXTERNAL_LINKAGE
+	TOML_ATTR(const)
+	bool formatter::dump_failed_parse_result() noexcept(true)
+	{
+		return false;
+	}
+
+#endif
 }
 TOML_IMPL_NAMESPACE_END;
 

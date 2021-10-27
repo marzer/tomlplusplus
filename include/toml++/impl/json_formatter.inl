@@ -27,7 +27,8 @@ TOML_NAMESPACE_START
 		else
 		{
 			impl::print_to_stream(base::stream(), '{');
-			base::increase_indent();
+			if (base::indent_sub_tables())
+				base::increase_indent();
 			bool first = false;
 			for (auto&& [k, v] : tbl)
 			{
@@ -49,7 +50,8 @@ TOML_NAMESPACE_START
 					default: base::print_value(v, type);
 				}
 			}
-			base::decrease_indent();
+			if (base::indent_sub_tables())
+				base::decrease_indent();
 			base::print_newline(true);
 			base::print_indent();
 			impl::print_to_stream(base::stream(), '}');
@@ -65,7 +67,8 @@ TOML_NAMESPACE_START
 		else
 		{
 			impl::print_to_stream(base::stream(), '[');
-			base::increase_indent();
+			if (base::indent_array_elements())
+				base::increase_indent();
 			for (size_t i = 0; i < arr.size(); i++)
 			{
 				if (i > 0u)
@@ -83,7 +86,8 @@ TOML_NAMESPACE_START
 					default: base::print_value(v, type);
 				}
 			}
-			base::decrease_indent();
+			if (base::indent_array_elements())
+				base::decrease_indent();
 			base::print_newline(true);
 			base::print_indent();
 			impl::print_to_stream(base::stream(), ']');
