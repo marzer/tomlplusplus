@@ -10,6 +10,7 @@
 #define TOML_CONST_INLINE_GETTER				inline
 #define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
 #define TOML_EMPTY_BASES
+#define TOML_EXTERN
 #define TOML_EXTERN_NOEXCEPT(...)
 #define TOML_EXTERNAL_LINKAGE
 #define TOML_IMPL_NAMESPACE_END					static_assert(true)

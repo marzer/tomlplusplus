@@ -741,64 +741,17 @@ TOML_NAMESPACE_START
 	template <typename T>
 	node_view(T*) -> node_view<node>;
 
-#if TOML_EXTERN_TEMPLATES
+	/// \endcond
+}
+TOML_NAMESPACE_END;
 
-	extern template class TOML_API node_view<node>;
-	extern template class TOML_API node_view<const node>;
-
-#define TOML_EXTERN(name, T)                                                                                           \
-	extern template TOML_API                                                                                           \
-	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
-	extern template TOML_API                                                                                           \
-	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
-
-#if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
+/// \cond
+#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#include "node_view_extern.inl"
 #endif
 
-#if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN
-
-#endif // TOML_EXTERN_TEMPLATES
-
+TOML_NAMESPACE_START
+{
 	inline node::operator node_view<node>() noexcept
 	{
 		return node_view<node>(this);
@@ -808,9 +761,8 @@ TOML_NAMESPACE_START
 	{
 		return node_view<const node>(this);
 	}
-
-	/// \endcond
 }
 TOML_NAMESPACE_END;
+/// \endcond
 
 #include "header_end.h"

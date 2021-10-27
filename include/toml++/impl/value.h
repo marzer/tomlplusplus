@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #pragma once
+#include "date_time.h"
 #include "node.h"
 #include "print_to_stream.h"
 #include "header_start.h"
@@ -1099,69 +1100,14 @@ TOML_NAMESPACE_START
 		}
 	}
 
-#if TOML_EXTERN_TEMPLATES
-
-	extern template class TOML_API value<std::string>;
-	extern template class TOML_API value<int64_t>;
-	extern template class TOML_API value<double>;
-	extern template class TOML_API value<bool>;
-	extern template class TOML_API value<date>;
-	extern template class TOML_API value<time>;
-	extern template class TOML_API value<date_time>;
-
-#define TOML_EXTERN(name, T)                                                                                           \
-	extern template TOML_API                                                                                           \
-	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
-
-#if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
-#endif
-
-#if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN
-
-#endif // TOML_EXTERN_TEMPLATES
-
 	/// \endcond
 }
 TOML_NAMESPACE_END;
+
+/// \cond
+#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#include "value_extern.inl"
+#endif
+/// \endcond
 
 #include "header_end.h"

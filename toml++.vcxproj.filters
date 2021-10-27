@@ -121,6 +121,9 @@
     <ClInclude Include="include\toml++\impl\std_initializer_list.h">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\value_extern.inl">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />
@@ -176,6 +179,9 @@
     <None Include=".editorconfig" />
     <None Include="tools\clang_format.bat">
       <Filter>tools</Filter>
+    </None>
+    <None Include="include\toml++\impl\node_view_extern.inl">
+      <Filter>include\impl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

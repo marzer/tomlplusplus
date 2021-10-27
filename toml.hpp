@@ -370,7 +370,7 @@
 #ifndef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 1
 #endif
-#if (defined(DOXYGEN) || TOML_HEADER_ONLY) && !TOML_INTELLISENSE
+#if (defined(DOXYGEN) || TOML_HEADER_ONLY)
 	#undef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 0
 #endif
@@ -665,6 +665,11 @@
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
+#if TOML_IMPLEMENTATION
+	#define TOML_EXTERN
+#else
+	#define TOML_EXTERN extern
+#endif
 #if TOML_CLANG
 	#define TOML_EXTERN_NOEXCEPT(...)
 #else
@@ -3294,65 +3299,77 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	node_view(T*) -> node_view<node>;
+}
+TOML_NAMESPACE_END;
 
-#if TOML_EXTERN_TEMPLATES
+#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
 
-	extern template class TOML_API node_view<node>;
-	extern template class TOML_API node_view<const node>;
+TOML_NAMESPACE_START
+{
+	TOML_EXTERN
+	template class TOML_API node_view<node>;
+	TOML_EXTERN
+	template class TOML_API node_view<const node>;
 
-#define TOML_EXTERN(name, T)                                                                                           \
-	extern template TOML_API                                                                                           \
+#define TOML_EXTERN_FUNC(name, T)                                                                                      \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
 	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
-	extern template TOML_API                                                                                           \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
 	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
+	TOML_EXTERN_FUNC(value_exact, std::string_view);
+	TOML_EXTERN_FUNC(value_exact, std::string);
+	TOML_EXTERN_FUNC(value_exact, const char*);
+	TOML_EXTERN_FUNC(value_exact, int64_t);
+	TOML_EXTERN_FUNC(value_exact, double);
+	TOML_EXTERN_FUNC(value_exact, date);
+	TOML_EXTERN_FUNC(value_exact, time);
+	TOML_EXTERN_FUNC(value_exact, date_time);
+	TOML_EXTERN_FUNC(value_exact, bool);
+	TOML_EXTERN_FUNC(value, std::string_view);
+	TOML_EXTERN_FUNC(value, std::string);
+	TOML_EXTERN_FUNC(value, const char*);
+	TOML_EXTERN_FUNC(value, signed char);
+	TOML_EXTERN_FUNC(value, signed short);
+	TOML_EXTERN_FUNC(value, signed int);
+	TOML_EXTERN_FUNC(value, signed long);
+	TOML_EXTERN_FUNC(value, signed long long);
+	TOML_EXTERN_FUNC(value, unsigned char);
+	TOML_EXTERN_FUNC(value, unsigned short);
+	TOML_EXTERN_FUNC(value, unsigned int);
+	TOML_EXTERN_FUNC(value, unsigned long);
+	TOML_EXTERN_FUNC(value, unsigned long long);
+	TOML_EXTERN_FUNC(value, double);
+	TOML_EXTERN_FUNC(value, float);
+	TOML_EXTERN_FUNC(value, date);
+	TOML_EXTERN_FUNC(value, time);
+	TOML_EXTERN_FUNC(value, date_time);
+	TOML_EXTERN_FUNC(value, bool);
 
 #if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
+	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
+	TOML_EXTERN_FUNC(value_exact, std::u8string);
+	TOML_EXTERN_FUNC(value_exact, const char8_t*);
+	TOML_EXTERN_FUNC(value, std::u8string_view);
+	TOML_EXTERN_FUNC(value, std::u8string);
+	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
 
 #if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
+	TOML_EXTERN_FUNC(value_exact, std::wstring);
+	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
 
-#undef TOML_EXTERN
+#undef TOML_EXTERN_FUNC
+}
+TOML_NAMESPACE_END;
 
-#endif // TOML_EXTERN_TEMPLATES
+#endif
 
+TOML_NAMESPACE_START
+{
 	inline node::operator node_view<node>() noexcept
 	{
 		return node_view<node>(this);
@@ -4324,69 +4341,79 @@ TOML_NAMESPACE_START
 			}
 		}
 	}
-
-#if TOML_EXTERN_TEMPLATES
-
-	extern template class TOML_API value<std::string>;
-	extern template class TOML_API value<int64_t>;
-	extern template class TOML_API value<double>;
-	extern template class TOML_API value<bool>;
-	extern template class TOML_API value<date>;
-	extern template class TOML_API value<time>;
-	extern template class TOML_API value<date_time>;
-
-#define TOML_EXTERN(name, T)                                                                                           \
-	extern template TOML_API                                                                                           \
-	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
-
-#if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
-#endif
-
-#if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN
-
-#endif // TOML_EXTERN_TEMPLATES
 }
 TOML_NAMESPACE_END;
+
+#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+
+TOML_NAMESPACE_START
+{
+	TOML_EXTERN
+	template class TOML_API value<std::string>;
+	TOML_EXTERN
+	template class TOML_API value<int64_t>;
+	TOML_EXTERN
+	template class TOML_API value<double>;
+	TOML_EXTERN
+	template class TOML_API value<bool>;
+	TOML_EXTERN
+	template class TOML_API value<date>;
+	TOML_EXTERN
+	template class TOML_API value<time>;
+	TOML_EXTERN
+	template class TOML_API value<date_time>;
+
+#define TOML_EXTERN_FUNC(name, T)                                                                                      \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
+	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
+
+	TOML_EXTERN_FUNC(value_exact, std::string_view);
+	TOML_EXTERN_FUNC(value_exact, std::string);
+	TOML_EXTERN_FUNC(value_exact, const char*);
+	TOML_EXTERN_FUNC(value_exact, int64_t);
+	TOML_EXTERN_FUNC(value_exact, double);
+	TOML_EXTERN_FUNC(value_exact, date);
+	TOML_EXTERN_FUNC(value_exact, time);
+	TOML_EXTERN_FUNC(value_exact, date_time);
+	TOML_EXTERN_FUNC(value_exact, bool);
+	TOML_EXTERN_FUNC(value, std::string_view);
+	TOML_EXTERN_FUNC(value, std::string);
+	TOML_EXTERN_FUNC(value, const char*);
+	TOML_EXTERN_FUNC(value, signed char);
+	TOML_EXTERN_FUNC(value, signed short);
+	TOML_EXTERN_FUNC(value, signed int);
+	TOML_EXTERN_FUNC(value, signed long);
+	TOML_EXTERN_FUNC(value, signed long long);
+	TOML_EXTERN_FUNC(value, unsigned char);
+	TOML_EXTERN_FUNC(value, unsigned short);
+	TOML_EXTERN_FUNC(value, unsigned int);
+	TOML_EXTERN_FUNC(value, unsigned long);
+	TOML_EXTERN_FUNC(value, unsigned long long);
+	TOML_EXTERN_FUNC(value, double);
+	TOML_EXTERN_FUNC(value, float);
+	TOML_EXTERN_FUNC(value, date);
+	TOML_EXTERN_FUNC(value, time);
+	TOML_EXTERN_FUNC(value, date_time);
+	TOML_EXTERN_FUNC(value, bool);
+#if TOML_HAS_CHAR8
+	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
+	TOML_EXTERN_FUNC(value_exact, std::u8string);
+	TOML_EXTERN_FUNC(value_exact, const char8_t*);
+	TOML_EXTERN_FUNC(value, std::u8string_view);
+	TOML_EXTERN_FUNC(value, std::u8string);
+	TOML_EXTERN_FUNC(value, const char8_t*);
+#endif
+#if TOML_WINDOWS_COMPAT
+	TOML_EXTERN_FUNC(value_exact, std::wstring);
+	TOML_EXTERN_FUNC(value, std::wstring);
+#endif
+
+#undef TOML_EXTERN_FUNC
+}
+TOML_NAMESPACE_END;
+
+#endif
 
 TOML_POP_WARNINGS;
 
@@ -8285,144 +8312,156 @@ TOML_POP_WARNINGS;
 
 //********  impl/node_view.inl  ****************************************************************************************
 
-#if TOML_EXTERN_TEMPLATES
-
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
+#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+
 TOML_NAMESPACE_START
 {
-	template class node_view<node>;
-	template class node_view<const node>;
+	TOML_EXTERN
+	template class TOML_API node_view<node>;
+	TOML_EXTERN
+	template class TOML_API node_view<const node>;
 
-#define TOML_EXTERN(name, T)                                                                                           \
-	template optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);   \
-	template optional<T> node_view<const node>::name<T>()                                                              \
-		const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
+#define TOML_EXTERN_FUNC(name, T)                                                                                      \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
+	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
+	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
+	TOML_EXTERN_FUNC(value_exact, std::string_view);
+	TOML_EXTERN_FUNC(value_exact, std::string);
+	TOML_EXTERN_FUNC(value_exact, const char*);
+	TOML_EXTERN_FUNC(value_exact, int64_t);
+	TOML_EXTERN_FUNC(value_exact, double);
+	TOML_EXTERN_FUNC(value_exact, date);
+	TOML_EXTERN_FUNC(value_exact, time);
+	TOML_EXTERN_FUNC(value_exact, date_time);
+	TOML_EXTERN_FUNC(value_exact, bool);
+	TOML_EXTERN_FUNC(value, std::string_view);
+	TOML_EXTERN_FUNC(value, std::string);
+	TOML_EXTERN_FUNC(value, const char*);
+	TOML_EXTERN_FUNC(value, signed char);
+	TOML_EXTERN_FUNC(value, signed short);
+	TOML_EXTERN_FUNC(value, signed int);
+	TOML_EXTERN_FUNC(value, signed long);
+	TOML_EXTERN_FUNC(value, signed long long);
+	TOML_EXTERN_FUNC(value, unsigned char);
+	TOML_EXTERN_FUNC(value, unsigned short);
+	TOML_EXTERN_FUNC(value, unsigned int);
+	TOML_EXTERN_FUNC(value, unsigned long);
+	TOML_EXTERN_FUNC(value, unsigned long long);
+	TOML_EXTERN_FUNC(value, double);
+	TOML_EXTERN_FUNC(value, float);
+	TOML_EXTERN_FUNC(value, date);
+	TOML_EXTERN_FUNC(value, time);
+	TOML_EXTERN_FUNC(value, date_time);
+	TOML_EXTERN_FUNC(value, bool);
 
 #if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
+	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
+	TOML_EXTERN_FUNC(value_exact, std::u8string);
+	TOML_EXTERN_FUNC(value_exact, const char8_t*);
+	TOML_EXTERN_FUNC(value, std::u8string_view);
+	TOML_EXTERN_FUNC(value, std::u8string);
+	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
 
 #if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
+	TOML_EXTERN_FUNC(value_exact, std::wstring);
+	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
 
-#undef TOML_EXTERN
+#undef TOML_EXTERN_FUNC
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
-
 #endif // TOML_EXTERN_TEMPLATES
+
+TOML_POP_WARNINGS;
 
 //********  impl/value.inl  ********************************************************************************************
 
-#if TOML_EXTERN_TEMPLATES
-
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
+#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+
 TOML_NAMESPACE_START
 {
-	template class value<std::string>;
-	template class value<int64_t>;
-	template class value<double>;
-	template class value<bool>;
-	template class value<date>;
-	template class value<time>;
-	template class value<date_time>;
+	TOML_EXTERN
+	template class TOML_API value<std::string>;
+	TOML_EXTERN
+	template class TOML_API value<int64_t>;
+	TOML_EXTERN
+	template class TOML_API value<double>;
+	TOML_EXTERN
+	template class TOML_API value<bool>;
+	TOML_EXTERN
+	template class TOML_API value<date>;
+	TOML_EXTERN
+	template class TOML_API value<time>;
+	TOML_EXTERN
+	template class TOML_API value<date_time>;
 
-#define TOML_EXTERN(name, T)                                                                                           \
-	template optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
+#define TOML_EXTERN_FUNC(name, T)                                                                                      \
+	TOML_EXTERN                                                                                                        \
+	template TOML_API                                                                                                  \
+	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
 
-	TOML_EXTERN(value_exact, std::string_view);
-	TOML_EXTERN(value_exact, std::string);
-	TOML_EXTERN(value_exact, const char*);
-	TOML_EXTERN(value_exact, int64_t);
-	TOML_EXTERN(value_exact, double);
-	TOML_EXTERN(value_exact, date);
-	TOML_EXTERN(value_exact, time);
-	TOML_EXTERN(value_exact, date_time);
-	TOML_EXTERN(value_exact, bool);
-	TOML_EXTERN(value, std::string_view);
-	TOML_EXTERN(value, std::string);
-	TOML_EXTERN(value, const char*);
-	TOML_EXTERN(value, signed char);
-	TOML_EXTERN(value, signed short);
-	TOML_EXTERN(value, signed int);
-	TOML_EXTERN(value, signed long);
-	TOML_EXTERN(value, signed long long);
-	TOML_EXTERN(value, unsigned char);
-	TOML_EXTERN(value, unsigned short);
-	TOML_EXTERN(value, unsigned int);
-	TOML_EXTERN(value, unsigned long);
-	TOML_EXTERN(value, unsigned long long);
-	TOML_EXTERN(value, double);
-	TOML_EXTERN(value, float);
-	TOML_EXTERN(value, date);
-	TOML_EXTERN(value, time);
-	TOML_EXTERN(value, date_time);
-	TOML_EXTERN(value, bool);
-
+	TOML_EXTERN_FUNC(value_exact, std::string_view);
+	TOML_EXTERN_FUNC(value_exact, std::string);
+	TOML_EXTERN_FUNC(value_exact, const char*);
+	TOML_EXTERN_FUNC(value_exact, int64_t);
+	TOML_EXTERN_FUNC(value_exact, double);
+	TOML_EXTERN_FUNC(value_exact, date);
+	TOML_EXTERN_FUNC(value_exact, time);
+	TOML_EXTERN_FUNC(value_exact, date_time);
+	TOML_EXTERN_FUNC(value_exact, bool);
+	TOML_EXTERN_FUNC(value, std::string_view);
+	TOML_EXTERN_FUNC(value, std::string);
+	TOML_EXTERN_FUNC(value, const char*);
+	TOML_EXTERN_FUNC(value, signed char);
+	TOML_EXTERN_FUNC(value, signed short);
+	TOML_EXTERN_FUNC(value, signed int);
+	TOML_EXTERN_FUNC(value, signed long);
+	TOML_EXTERN_FUNC(value, signed long long);
+	TOML_EXTERN_FUNC(value, unsigned char);
+	TOML_EXTERN_FUNC(value, unsigned short);
+	TOML_EXTERN_FUNC(value, unsigned int);
+	TOML_EXTERN_FUNC(value, unsigned long);
+	TOML_EXTERN_FUNC(value, unsigned long long);
+	TOML_EXTERN_FUNC(value, double);
+	TOML_EXTERN_FUNC(value, float);
+	TOML_EXTERN_FUNC(value, date);
+	TOML_EXTERN_FUNC(value, time);
+	TOML_EXTERN_FUNC(value, date_time);
+	TOML_EXTERN_FUNC(value, bool);
 #if TOML_HAS_CHAR8
-	TOML_EXTERN(value_exact, std::u8string_view);
-	TOML_EXTERN(value_exact, std::u8string);
-	TOML_EXTERN(value_exact, const char8_t*);
-	TOML_EXTERN(value, std::u8string_view);
-	TOML_EXTERN(value, std::u8string);
-	TOML_EXTERN(value, const char8_t*);
+	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
+	TOML_EXTERN_FUNC(value_exact, std::u8string);
+	TOML_EXTERN_FUNC(value_exact, const char8_t*);
+	TOML_EXTERN_FUNC(value, std::u8string_view);
+	TOML_EXTERN_FUNC(value, std::u8string);
+	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
-
 #if TOML_WINDOWS_COMPAT
-	TOML_EXTERN(value_exact, std::wstring);
-	TOML_EXTERN(value, std::wstring);
+	TOML_EXTERN_FUNC(value_exact, std::wstring);
+	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
 
-#undef TOML_EXTERN
+#undef TOML_EXTERN_FUNC
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS;
-
 #endif // TOML_EXTERN_TEMPLATES
+
+TOML_POP_WARNINGS;
 
 //********  impl/array.inl  ********************************************************************************************
 
@@ -13259,8 +13298,8 @@ TOML_POP_WARNINGS;
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
+#undef TOML_EXTERN
 #undef TOML_EXTERN_NOEXCEPT
-#undef TOML_EXTERN_TEMPLATES
 #undef TOML_EXTERNAL_LINKAGE
 #undef TOML_FLOAT_CHARCONV
 #undef TOML_FLOAT128

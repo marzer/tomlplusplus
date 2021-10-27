@@ -18,7 +18,9 @@ class Preprocessor:
 	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)".*?$', re.I | re.M)
 	__multiples_allowed = [
 		r'impl/header_start.h',
-		r'impl/header_end.h'
+		r'impl/header_end.h',
+		r'impl/value_extern.inl',
+		r'impl/node_view_extern.inl',
 	]
 
 	def __init__(self, file):
@@ -194,6 +196,7 @@ def main():
 				r'TOML_API',
 				r'TOML_CONFIG_HEADER',
 				r'TOML_EXCEPTIONS',
+				r'TOML_EXTERN_TEMPLATES',
 				r'TOML_HEADER_ONLY',
 				r'TOML_LANG_MAJOR',
 				r'TOML_LANG_MINOR',

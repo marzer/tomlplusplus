@@ -351,7 +351,7 @@
 #ifndef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 1
 #endif
-#if (defined(DOXYGEN) || TOML_HEADER_ONLY) && !TOML_INTELLISENSE
+#if (defined(DOXYGEN) || TOML_HEADER_ONLY)
 	#undef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 0
 #endif
@@ -651,6 +651,11 @@
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
+#if TOML_IMPLEMENTATION
+	#define TOML_EXTERN
+#else
+	#define TOML_EXTERN extern
+#endif
 #if TOML_CLANG
 	#define TOML_EXTERN_NOEXCEPT(...)
 #else
