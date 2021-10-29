@@ -93,8 +93,6 @@ namespace
 
 int main(int argc, char** argv)
 {
-	examples::init();
-
 	int node_budget{};
 	for (int i = 1; i < argc; i++)
 	{

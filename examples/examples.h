@@ -28,17 +28,9 @@
 #include <windows.h>
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-#pragma warning(pop)
-#endif
-
-namespace examples
+namespace
 {
-	inline void init() noexcept
+	static const auto initialize_environment_automagically = []() noexcept
 	{
 #ifdef _WIN32
 		SetConsoleOutputCP(65001); // CP_UTF8
@@ -48,5 +40,15 @@ namespace examples
 		std::cout << std::boolalpha;
 
 		srand(static_cast<unsigned int>(time(nullptr)));
-	}
+
+		return true;
+	}();
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

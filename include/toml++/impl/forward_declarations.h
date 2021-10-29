@@ -298,22 +298,25 @@ TOML_NAMESPACE_START // abi namespace
 		none,
 
 		/// \brief Dates and times will be emitted as quoted strings.
-		quote_dates_and_times = 1,
+		quote_dates_and_times = 1ull,
+
+		/// \brief Infinities and NaNs will be emitted as quoted strings.
+		quote_infinities_and_nans = (1ull << 1),
 
 		/// \brief Strings will be emitted as single-quoted literal strings where possible.
-		allow_literal_strings = 2,
+		allow_literal_strings = (1ull << 2),
 
 		/// \brief Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.
-		allow_multi_line_strings = 4,
+		allow_multi_line_strings = (1ull << 3),
 
 		/// \brief Values with special format flags will be formatted accordingly.
-		allow_value_format_flags = 8,
+		allow_value_format_flags = (1ull << 4),
 
 		/// \brief Apply indentation to tables nested within other tables/arrays.
-		indent_sub_tables = 16,
+		indent_sub_tables = (1ull << 5),
 
 		/// \brief Apply indentation to array elements when the array is forced to wrap over multiple lines.
-		indent_array_elements = 32,
+		indent_array_elements = (1ull << 6),
 
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,
@@ -358,8 +361,14 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	using remove_cvref = std::remove_cv_t<std::remove_reference_t<T>>;
 
+	template <typename... T>
+	using common_signed_type = std::common_type_t<std::make_signed_t<T>...>;
+
 	template <typename T, typename... U>
 	inline constexpr bool is_one_of = (false || ... || std::is_same_v<T, U>);
+
+	template <typename... T>
+	inline constexpr bool all_integral = (std::is_integral_v<T> && ...);
 
 	template <typename T>
 	inline constexpr bool is_cvref = std::is_reference_v<T> || std::is_const_v<T> || std::is_volatile_v<T>;

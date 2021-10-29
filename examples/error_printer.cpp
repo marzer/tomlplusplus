@@ -105,8 +105,6 @@ namespace
 
 int main()
 {
-	examples::init();
-
 	for (auto str : invalid_parses)
 	{
 		if (str.empty())

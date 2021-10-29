@@ -43,14 +43,10 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		using base = impl::formatter;
-		std::vector<std::string> key_path_;
+		std::vector<std::string_view> key_path_;
 		bool pending_table_separator_ = false;
 
 		static constexpr size_t line_wrap_cols = 120;
-
-		TOML_NODISCARD
-		TOML_API
-		static std::string make_key_segment(const std::string&) noexcept;
 
 		TOML_NODISCARD
 		TOML_API
@@ -64,7 +60,7 @@ TOML_NAMESPACE_START
 		void print_pending_table_separator();
 
 		TOML_API
-		void print_key_segment(const std::string&);
+		void print_key_segment(std::string_view);
 
 		TOML_API
 		void print_key_path();
@@ -81,8 +77,9 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr format_flags mandatory_flags = format_flags::none;
-		static constexpr format_flags ignored_flags	  = format_flags::none;
+		static constexpr impl::formatter_constants constants = { "inf"sv, "-inf"sv, "nan"sv };
+		static constexpr format_flags mandatory_flags		 = format_flags::none;
+		static constexpr format_flags ignored_flags			 = format_flags::none;
 
 		/// \endcond
 
@@ -99,7 +96,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
+			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
@@ -128,7 +125,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
+			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #endif

@@ -22,25 +22,24 @@
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_EXTERNAL_LINKAGE
+	formatter::formatter(const node* source_node,
+						 const parse_result* source_pr,
+						 const formatter_constants& constants,
+						 const formatter_config& config) noexcept //
 #if TOML_PARSER && !TOML_EXCEPTIONS
-
-	TOML_EXTERNAL_LINKAGE
-	formatter::formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept //
-		: source_{ result ? &result.table() : nullptr },
-		  flags_{ flags },
-		  result_{ &result }
-	{
-		set_indent_string(indent);
-	}
-
+		: source_{ source_pr && *source_pr ? &source_pr->table() : source_node },
+		  result_{ source_pr },
+#else
+		: source_{ source_pr ? source_pr : source_node },
 #endif
-
-	TOML_EXTERNAL_LINKAGE
-	void formatter::set_indent_string(std::string_view str) noexcept
+		  constants_{ &constants },
+		  config_{ config }
 	{
-		indent_string_	= str.data() ? str : "    "sv;
+		TOML_ASSERT(source_ != nullptr);
+
 		indent_columns_ = {};
-		for (auto c : indent_string_)
+		for (auto c : config_.indent)
 			indent_columns_ += c == '\t' ? 4u : 1u;
 	}
 
@@ -73,13 +72,13 @@ TOML_IMPL_NAMESPACE_START
 	{
 		for (int i = 0; i < indent_; i++)
 		{
-			print_to_stream(*stream_, indent_string_);
+			print_to_stream(*stream_, config_.indent);
 			naked_newline_ = false;
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void formatter::print_quoted_string(std::string_view str, bool allow_multi_line)
+	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
 		auto literals = literal_strings_allowed();
 		if (str.empty())
@@ -90,13 +89,13 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		auto multi_line = allow_multi_line && multi_line_strings_allowed();
-		if (multi_line || literals)
+		if (multi_line || literals || allow_bare)
 		{
 			utf8_decoder decoder;
 			bool has_line_breaks   = false;
 			bool has_control_chars = false;
 			bool has_single_quotes = false;
-			for (size_t i = 0; i < str.length() && !(has_line_breaks && has_control_chars && has_single_quotes); i++)
+			for (size_t i = 0; i < str.length(); i++)
 			{
 				decoder(static_cast<uint8_t>(str[i]));
 				if (decoder.error())
@@ -104,6 +103,7 @@ TOML_IMPL_NAMESPACE_START
 					has_line_breaks	  = false;
 					has_control_chars = true; // force ""
 					has_single_quotes = true;
+					allow_bare		  = false;
 					break;
 				}
 				else if (decoder.has_code_point())
@@ -114,13 +114,20 @@ TOML_IMPL_NAMESPACE_START
 						has_control_chars = true;
 					else if (decoder.codepoint == U'\'')
 						has_single_quotes = true;
+					if (allow_bare)
+						allow_bare = is_bare_key_character(decoder.codepoint);
 				}
+
+				if (has_line_breaks && has_control_chars && has_single_quotes && !allow_bare)
+					break;
 			}
 			multi_line = multi_line && has_line_breaks;
 			literals   = literals && !has_control_chars && !(!multi_line && has_single_quotes);
 		}
 
-		if (literals)
+		if (allow_bare)
+			print_to_stream(*stream_, str);
+		else if (literals)
 			print_to_stream_bookended(*stream_, str, multi_line ? "'''"sv : "'"sv);
 		else
 		{
@@ -135,7 +142,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<std::string>& val)
 	{
-		print_quoted_string(val.get());
+		print_string(val.get());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -166,7 +173,24 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<double>& val)
 	{
-		print_to_stream(*stream_, *val);
+		const std::string_view* inf_nan = nullptr;
+		switch (fpclassify(*val))
+		{
+			case fp_class::neg_inf: inf_nan = &constants_->neg_inf; break;
+			case fp_class::pos_inf: inf_nan = &constants_->pos_inf; break;
+			case fp_class::nan: inf_nan = &constants_->nan; break;
+			case fp_class::ok: print_to_stream(*stream_, *val); break;
+			default: TOML_UNREACHABLE;
+		}
+
+		if (inf_nan)
+		{
+			if (quote_infinities_and_nans())
+				print_to_stream_bookended(*stream_, *inf_nan, '"');
+			else
+				print_to_stream(*stream_, *inf_nan);
+		}
+
 		naked_newline_ = false;
 	}
 

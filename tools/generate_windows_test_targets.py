@@ -53,6 +53,7 @@ def main():
 		<VCProjectVersion>16.0</VCProjectVersion>
 		<ProjectGuid>{{{uuid}}}</ProjectGuid>
 		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+		<PreferredToolArchitecture>x64</PreferredToolArchitecture>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|{platform}'" Label="Configuration">
@@ -119,6 +120,7 @@ def main():
 		<ClCompile Include="..\conformance_burntsushi_valid.cpp" />
 		<ClCompile Include="..\conformance_iarna_invalid.cpp" />
 		<ClCompile Include="..\conformance_iarna_valid.cpp" />
+		<ClCompile Include="..\formatters.cpp" />
 		<ClCompile Include="..\impl_toml.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 		</ClCompile>

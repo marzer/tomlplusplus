@@ -22,6 +22,19 @@ TOML_NAMESPACE_START
 		/// \brief	The day component, from 1 - 31.
 		uint8_t day;
 
+		/// \brief Default constructor. Does not initialize the members.
+		TOML_NODISCARD_CTOR
+		date() noexcept = default;
+
+		/// \brief Constructs a date from individual date component values.
+		TOML_CONSTRAINED_TEMPLATE((impl::all_integral<Y, M, D>), typename Y, typename M, typename D)
+		TOML_NODISCARD_CTOR
+		constexpr date(Y y, M m, D d) noexcept //
+			: year{ static_cast<uint16_t>(y) },
+			  month{ static_cast<uint8_t>(m) },
+			  day{ static_cast<uint8_t>(d) }
+		{}
+
 		/// \brief	Equality operator.
 		TOML_NODISCARD
 		friend constexpr bool operator==(const date& lhs, const date& rhs) noexcept
@@ -105,6 +118,24 @@ TOML_NAMESPACE_START
 		/// \brief	The fractional nanoseconds component, from 0 - 999999999.
 		uint32_t nanosecond;
 
+		/// \brief Default constructor. Does not initialize the members.
+		TOML_NODISCARD_CTOR
+		time() noexcept = default;
+
+		/// \brief Constructs a time from individual time component values.
+		TOML_CONSTRAINED_TEMPLATE((impl::all_integral<H, M, S, NS>),
+								  typename H,
+								  typename M,
+								  typename S  = uint8_t,
+								  typename NS = uint32_t)
+		TOML_NODISCARD_CTOR
+		constexpr time(H h, M m, S s = S{}, NS ns = NS{}) noexcept //
+			: hour{ static_cast<uint8_t>(h) },
+			  minute{ static_cast<uint8_t>(m) },
+			  second{ static_cast<uint8_t>(s) },
+			  nanosecond{ static_cast<uint32_t>(ns) }
+		{}
+
 		/// \brief	Equality operator.
 		TOML_NODISCARD
 		friend constexpr bool operator==(const time& lhs, const time& rhs) noexcept
@@ -181,13 +212,11 @@ TOML_NAMESPACE_START
 		/// \brief	Offset from UTC+0, in minutes.
 		int16_t minutes;
 
-		/// \brief	Default-constructs a zero time-offset.
+		/// \brief	Default constructor. Does not initialize the members.
 		TOML_NODISCARD_CTOR
-		constexpr time_offset() noexcept //
-			: minutes{}
-		{}
+		time_offset() noexcept = default;
 
-		/// \brief	Constructs a timezone offset from separate hour and minute totals.
+		/// \brief	Constructs a timezone offset from individual hour and minute totals.
 		///
 		/// \detail \cpp
 		/// std::cout << toml::time_offset{ 2, 30 } << "\n";
@@ -204,11 +233,17 @@ TOML_NAMESPACE_START
 		/// Z
 		/// \eout
 		///
+		/// \tparam H	An integral type.
+		/// \tparam M	An integral type.
+		///
 		/// \param 	h  	The total hours.
 		/// \param 	m	The total minutes.
+		TOML_CONSTRAINED_TEMPLATE((impl::all_integral<H, M>), typename H, typename M)
 		TOML_NODISCARD_CTOR
-		constexpr time_offset(int8_t h, int8_t m) noexcept //
-			: minutes{ static_cast<int16_t>(h * 60 + m) }
+		constexpr time_offset(H h, M m) noexcept //
+			: minutes{ static_cast<int16_t>(static_cast<impl::common_signed_type<H, M>>(h)
+												* impl::common_signed_type<H, M>{ 60 }
+											+ static_cast<impl::common_signed_type<H, M>>(m)) }
 		{}
 
 		/// \brief	Equality operator.
@@ -292,13 +327,9 @@ TOML_NAMESPACE_START
 		/// \remarks The date_time is said to be 'local' if the offset is empty.
 		optional<toml::time_offset> offset;
 
-		/// \brief	Default-constructs a zero date-time.
+		/// \brief	Default constructor. Does not initialize the members.
 		TOML_NODISCARD_CTOR
-		constexpr date_time() noexcept //
-			: date{},
-			  time{},
-			  offset{} // TINAE - icc bugfix
-		{}
+		date_time() noexcept = default;
 
 		/// \brief	Constructs a local date-time.
 		///

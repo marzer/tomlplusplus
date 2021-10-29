@@ -23,50 +23,6 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	std::string default_formatter::make_key_segment(const std::string& str) noexcept
-	{
-		if (str.empty())
-			return "''"s;
-		else
-		{
-			bool requires_quotes = false;
-			{
-				impl::utf8_decoder decoder;
-				for (size_t i = 0; i < str.length() && !requires_quotes; i++)
-				{
-					decoder(static_cast<uint8_t>(str[i]));
-					if (decoder.error())
-						requires_quotes = true;
-					else if (decoder.has_code_point())
-						requires_quotes = !impl::is_bare_key_character(decoder.codepoint);
-				}
-			}
-
-			if (requires_quotes)
-			{
-				std::string s;
-				s.reserve(str.length() + 2u);
-				s += '"';
-				for (auto c : str)
-				{
-					if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
-						s.append(impl::low_character_escape_table[c]);
-					else if TOML_UNLIKELY(c == '\x7F')
-						s.append("\\u007F"sv);
-					else if TOML_UNLIKELY(c == '"')
-						s.append("\\\""sv);
-					else
-						s += c;
-				}
-				s += '"';
-				return s;
-			}
-			else
-				return str;
-		}
-	}
-
-	TOML_EXTERNAL_LINKAGE
 	size_t default_formatter::count_inline_columns(const node& node) noexcept
 	{
 		switch (node.type())
@@ -167,35 +123,9 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_key_segment(const std::string& str)
+	void default_formatter::print_key_segment(std::string_view str)
 	{
-		if (str.empty())
-			impl::print_to_stream(base::stream(), "''"sv);
-		else
-		{
-			bool requires_quotes = false;
-			{
-				impl::utf8_decoder decoder;
-				for (size_t i = 0; i < str.length() && !requires_quotes; i++)
-				{
-					decoder(static_cast<uint8_t>(str[i]));
-					if (decoder.error())
-						requires_quotes = true;
-					else if (decoder.has_code_point())
-						requires_quotes = !impl::is_bare_key_character(decoder.codepoint);
-				}
-			}
-
-			if (requires_quotes)
-			{
-				impl::print_to_stream(base::stream(), '"');
-				impl::print_to_stream_with_escapes(base::stream(), str);
-				impl::print_to_stream(base::stream(), '"');
-			}
-			else
-				impl::print_to_stream(base::stream(), str);
-		}
-		base::clear_naked_newline();
+		base::print_string(str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -205,7 +135,7 @@ TOML_NAMESPACE_START
 		{
 			if (std::addressof(segment) > key_path_.data())
 				impl::print_to_stream(base::stream(), '.');
-			impl::print_to_stream(base::stream(), segment);
+			print_key_segment(segment);
 		}
 		base::clear_naked_newline();
 	}
@@ -376,7 +306,7 @@ TOML_NAMESPACE_START
 			if (child_value_count == 0u && (child_table_count > 0u || child_table_array_count > 0u))
 				skip_self = true;
 
-			key_path_.push_back(make_key_segment(k));
+			key_path_.push_back(std::string_view{ k });
 
 			if (!skip_self)
 			{
@@ -406,7 +336,7 @@ TOML_NAMESPACE_START
 
 			if (base::indent_sub_tables())
 				base::increase_indent();
-			key_path_.push_back(make_key_segment(k));
+			key_path_.push_back(std::string_view{ k });
 
 			for (size_t i = 0; i < arr.size(); i++)
 			{

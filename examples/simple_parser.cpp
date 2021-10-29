@@ -14,8 +14,6 @@ using namespace std::string_view_literals;
 
 int main(int argc, char** argv)
 {
-	examples::init();
-
 	const auto path = argc > 1 ? std::string_view{ argv[1] } : "example.toml"sv;
 	try
 	{

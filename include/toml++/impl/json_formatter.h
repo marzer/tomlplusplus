@@ -55,7 +55,8 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr format_flags mandatory_flags = format_flags::quote_dates_and_times;
+		static constexpr impl::formatter_constants constants = { "Infinity"sv, "-Infinity"sv, "NaN"sv };
+		static constexpr format_flags mandatory_flags		 = format_flags::quote_dates_and_times;
 		static constexpr format_flags ignored_flags =
 			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings;
 
@@ -63,7 +64,8 @@ TOML_NAMESPACE_START
 
 	  public:
 		/// \brief	The default flags for a json_formatter.
-		static constexpr format_flags default_flags = format_flags::quote_dates_and_times //
+		static constexpr format_flags default_flags = format_flags::quote_dates_and_times	  //
+													| format_flags::quote_infinities_and_nans //
 													| format_flags::indentation;
 
 		/// \brief	Constructs a JSON formatter and binds it to a TOML object.
@@ -72,7 +74,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
+			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
@@ -103,7 +105,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
+			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #endif

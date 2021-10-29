@@ -494,8 +494,7 @@ TOML_ANON_NAMESPACE_END;
 TOML_ANON_NAMESPACE_START
 {
 	template <typename... T>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	TOML_INTERNAL_LINKAGE
 	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
 	{
@@ -544,22 +543,21 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto prefix		   = "x"sv;
 	};
 
-	TOML_NODISCARD
+	TOML_PURE_GETTER
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(node_type val) noexcept
 	{
 		return impl::node_type_friendly_names[impl::unwrap_enum(val)];
 	}
 
-	TOML_NODISCARD
+	TOML_PURE_GETTER
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(const std::string& str) noexcept
 	{
 		return std::string_view{ str };
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(bool val) noexcept
 	{
@@ -568,7 +566,7 @@ TOML_ANON_NAMESPACE_START
 		return val ? "true"sv : "false"sv;
 	}
 
-	TOML_NODISCARD
+	TOML_PURE_GETTER
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(const utf8_codepoint& cp) noexcept
 	{
@@ -580,7 +578,7 @@ TOML_ANON_NAMESPACE_START
 			return cp.as_view();
 	}
 
-	TOML_NODISCARD
+	TOML_PURE_GETTER
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(const utf8_codepoint* cp) noexcept
 	{
@@ -2134,7 +2132,7 @@ TOML_IMPL_NAMESPACE_START
 			if (!part_of_datetime && !is_eof() && !is_value_terminator(*cp))
 				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 
-			return { static_cast<uint16_t>(year), static_cast<uint8_t>(month), static_cast<uint8_t>(day) };
+			return { year, month, day };
 		}
 
 		TOML_NODISCARD
@@ -2169,10 +2167,7 @@ TOML_IMPL_NAMESPACE_START
 			if (minute > 59u)
 				set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv,
 											 static_cast<uint64_t>(minute));
-			auto time = toml::time{
-				static_cast<uint8_t>(hour),
-				static_cast<uint8_t>(minute),
-			};
+			auto time = toml::time{ hour, minute };
 
 			// ':'
 			if constexpr (TOML_LANG_UNRELEASED) // toml/issues/671 (allow omission of seconds)
@@ -2193,7 +2188,7 @@ TOML_IMPL_NAMESPACE_START
 			if (second > 59u)
 				set_error_and_return_default("expected second between 0 and 59 (inclusive), saw "sv,
 											 static_cast<uint64_t>(second));
-			time.second = static_cast<uint8_t>(second);
+			time.second = static_cast<decltype(time.second)>(second);
 
 			// '.' (early-exiting is allowed; fractional is optional)
 			if (is_eof() || is_value_terminator(*cp) || (part_of_datetime && is_match(*cp, U'+', U'-', U'Z', U'z')))
@@ -2257,7 +2252,7 @@ TOML_IMPL_NAMESPACE_START
 				return { date, time };
 
 			// zero offset ('Z' or 'z')
-			time_offset offset;
+			time_offset offset{};
 			if (is_match(*cp, U'Z', U'z'))
 				advance_and_return_if_error({});
 
@@ -2292,7 +2287,7 @@ TOML_IMPL_NAMESPACE_START
 				if (minute > 59)
 					set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv,
 												 static_cast<int64_t>(minute));
-				offset.minutes = static_cast<int16_t>((hour * 60 + minute) * sign);
+				offset.minutes = static_cast<decltype(offset.minutes)>((hour * 60 + minute) * sign);
 			}
 
 			if (!is_eof() && !is_value_terminator(*cp))

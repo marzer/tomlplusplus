@@ -3,6 +3,7 @@ test_sources = [
 	'conformance_burntsushi_valid.cpp',
 	'conformance_iarna_invalid.cpp',
 	'conformance_iarna_valid.cpp',
+	'formatters.cpp',
 	'impl_toml.cpp',
 	'tests.cpp',
 	'parsing_floats.cpp',

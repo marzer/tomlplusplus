@@ -10,6 +10,7 @@
 		<VCProjectVersion>16.0</VCProjectVersion>
 		<ProjectGuid>{413BDA52-0A9D-56B8-9AF3-A65019F42831}</ProjectGuid>
 		<WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+		<PreferredToolArchitecture>x64</PreferredToolArchitecture>
 	</PropertyGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -76,6 +77,7 @@
 		<ClCompile Include="..\conformance_burntsushi_valid.cpp" />
 		<ClCompile Include="..\conformance_iarna_invalid.cpp" />
 		<ClCompile Include="..\conformance_iarna_valid.cpp" />
+		<ClCompile Include="..\formatters.cpp" />
 		<ClCompile Include="..\impl_toml.cpp">
 			<PrecompiledHeader>NotUsing</PrecompiledHeader>
 		</ClCompile>

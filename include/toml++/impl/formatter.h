@@ -11,26 +11,36 @@
 
 TOML_IMPL_NAMESPACE_START
 {
+	struct formatter_constants
+	{
+		std::string_view pos_inf;
+		std::string_view neg_inf;
+		std::string_view nan;
+	};
+
+	struct formatter_config
+	{
+		format_flags flags;
+		std::string_view indent;
+	};
+
 	class formatter
 	{
 	  private:
-		const toml::node* source_;
-		std::ostream* stream_ = {};
-		format_flags flags_; //
-		int indent_;		 // these are set in attach()
-		bool naked_newline_; //
-		std::string_view indent_string_;
-		size_t indent_columns_;
+		const node* source_;
 #if TOML_PARSER && !TOML_EXCEPTIONS
-		const parse_result* result_ = {};
+		const parse_result* result_;
 #endif
-
-		TOML_API
-		void set_indent_string(std::string_view str) noexcept;
+		const formatter_constants* constants_;
+		formatter_config config_;
+		size_t indent_columns_;
+		std::ostream* stream_; //
+		int indent_;		   // these are set in attach()
+		bool naked_newline_;   //
 
 	  protected:
 		TOML_PURE_INLINE_GETTER
-		const toml::node& source() const noexcept
+		const node& source() const noexcept
 		{
 			return *source_;
 		}
@@ -71,37 +81,43 @@ TOML_IMPL_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		bool indent_array_elements() const noexcept
 		{
-			return !!(flags_ & format_flags::indent_array_elements);
+			return !!(config_.flags & format_flags::indent_array_elements);
 		}
 
 		TOML_PURE_INLINE_GETTER
 		bool indent_sub_tables() const noexcept
 		{
-			return !!(flags_ & format_flags::indent_sub_tables);
+			return !!(config_.flags & format_flags::indent_sub_tables);
 		}
 
 		TOML_PURE_INLINE_GETTER
 		bool quote_dates_and_times() const noexcept
 		{
-			return !!(flags_ & format_flags::quote_dates_and_times);
+			return !!(config_.flags & format_flags::quote_dates_and_times);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool quote_infinities_and_nans() const noexcept
+		{
+			return !!(config_.flags & format_flags::quote_infinities_and_nans);
 		}
 
 		TOML_PURE_INLINE_GETTER
 		bool literal_strings_allowed() const noexcept
 		{
-			return !!(flags_ & format_flags::allow_literal_strings);
+			return !!(config_.flags & format_flags::allow_literal_strings);
 		}
 
 		TOML_PURE_INLINE_GETTER
 		bool multi_line_strings_allowed() const noexcept
 		{
-			return !!(flags_ & format_flags::allow_multi_line_strings);
+			return !!(config_.flags & format_flags::allow_multi_line_strings);
 		}
 
 		TOML_PURE_INLINE_GETTER
 		bool value_format_flags_allowed() const noexcept
 		{
-			return !!(flags_ & format_flags::allow_value_format_flags);
+			return !!(config_.flags & format_flags::allow_value_format_flags);
 		}
 
 		TOML_PURE_INLINE_GETTER
@@ -128,7 +144,7 @@ TOML_IMPL_NAMESPACE_START
 		void print_indent();
 
 		TOML_API
-		void print_quoted_string(std::string_view str, bool allow_multi_line = true);
+		void print_string(std::string_view str, bool allow_multi_line = true, bool allow_bare = false);
 
 		TOML_API
 		void print(const value<std::string>&);
@@ -159,20 +175,8 @@ TOML_IMPL_NAMESPACE_START
 		bool dump_failed_parse_result();
 
 		TOML_NODISCARD_CTOR
-		formatter(const toml::node& source, format_flags flags, std::string_view indent) noexcept //
-			: source_{ &source },
-			  flags_{ flags }
-		{
-			set_indent_string(indent);
-		}
-
-#if TOML_PARSER && !TOML_EXCEPTIONS
-
-		TOML_NODISCARD_CTOR
 		TOML_API
-		formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept;
-
-#endif
+		formatter(const node*, const parse_result*, const formatter_constants&, const formatter_config&) noexcept;
 	};
 }
 TOML_IMPL_NAMESPACE_END;

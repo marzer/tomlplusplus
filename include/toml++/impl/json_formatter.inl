@@ -33,12 +33,12 @@ TOML_NAMESPACE_START
 			for (auto&& [k, v] : tbl)
 			{
 				if (first)
-					impl::print_to_stream(base::stream(), ", "sv);
+					impl::print_to_stream(base::stream(), ',');
 				first = true;
 				base::print_newline(true);
 				base::print_indent();
 
-				base::print_quoted_string(k, false);
+				base::print_string(k, false);
 				impl::print_to_stream(base::stream(), " : "sv);
 
 				const auto type = v.type();

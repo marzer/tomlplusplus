@@ -908,7 +908,7 @@ TOML_IMPL_NAMESPACE_START
 			return state == uint_least32_t{};
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		constexpr bool needs_more_input() const noexcept
 		{
 			return state > uint_least32_t{} && state != uint_least32_t{ 12u };
