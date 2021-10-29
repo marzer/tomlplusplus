@@ -73,11 +73,11 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 			{
-				auto& n = *reinterpret_cast<const table*>(&node);
-				if (n.empty())
+				auto& tbl = *reinterpret_cast<const table*>(&node);
+				if (tbl.empty())
 					return 2u;		// "{}"
 				size_t weight = 3u; // "{ }"
-				for (auto&& [k, v] : n)
+				for (auto&& [k, v] : tbl)
 				{
 					weight += k.length() + count_inline_columns(v) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
@@ -88,11 +88,11 @@ TOML_NAMESPACE_START
 
 			case node_type::array:
 			{
-				auto& n = *reinterpret_cast<const array*>(&node);
-				if (n.empty())
+				auto& arr = *reinterpret_cast<const array*>(&node);
+				if (arr.empty())
 					return 2u;		// "[]"
 				size_t weight = 3u; // "[ ]"
-				for (auto& elem : n)
+				for (auto& elem : arr)
 				{
 					weight += count_inline_columns(elem) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
@@ -103,38 +103,38 @@ TOML_NAMESPACE_START
 
 			case node_type::string:
 			{
-				auto& n = *reinterpret_cast<const value<std::string>*>(&node);
-				return n.get().length() + 2u; // + ""
+				// todo: proper utf8 decoding?
+				// todo: tab awareness?
+				auto& str = (*reinterpret_cast<const value<std::string>*>(&node)).get();
+				return str.length() + 2u; // + ""
 			}
 
 			case node_type::integer:
 			{
-				auto& n = *reinterpret_cast<const value<int64_t>*>(&node);
-				auto v	= n.get();
-				if (!v)
+				auto val = (*reinterpret_cast<const value<int64_t>*>(&node)).get();
+				if (!val)
 					return 1u;
 				size_t weight = {};
-				if (v < 0)
+				if (val < 0)
 				{
 					weight += 1u;
-					v *= -1;
+					val *= -1;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1u;
+				return weight + static_cast<size_t>(log10(static_cast<double>(val))) + 1u;
 			}
 
 			case node_type::floating_point:
 			{
-				auto& n = *reinterpret_cast<const value<double>*>(&node);
-				auto v	= n.get();
-				if (v == 0.0)
+				auto val = (*reinterpret_cast<const value<double>*>(&node)).get();
+				if (val == 0.0)
 					return 3u;		// "0.0"
 				size_t weight = 2u; // ".0"
-				if (v < 0.0)
+				if (val < 0.0)
 				{
 					weight += 1u;
-					v *= -1.0;
+					val *= -1.0;
 				}
-				return weight + static_cast<size_t>(log10(v)) + 1u;
+				return weight + static_cast<size_t>(log10(val)) + 1u;
 				break;
 			}
 
@@ -252,9 +252,9 @@ TOML_NAMESPACE_START
 		else
 		{
 			const auto original_indent = base::indent();
-			const auto multiline =
-				forces_multiline(arr,
-								 base::indent_columns * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+			const auto multiline	   = forces_multiline(
+				  arr,
+				  base::indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 			impl::print_to_stream(base::stream(), "["sv);
 			if (multiline)
 			{

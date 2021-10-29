@@ -333,10 +333,14 @@ TOML_NAMESPACE_START // abi namespace
 	template <typename T>
 	struct TOML_TRIVIAL_ABI inserter
 	{
-		T&& value;
+		static_assert(std::is_reference_v<T>);
+
+		T value;
 	};
 	template <typename T>
-	inserter(T &&) -> inserter<T>;
+	inserter(T &&) -> inserter<T&&>;
+	template <typename T>
+	inserter(T&) -> inserter<T&>;
 }
 TOML_NAMESPACE_END;
 

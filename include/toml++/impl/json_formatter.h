@@ -72,7 +72,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ source, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
@@ -103,7 +103,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ result, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #endif

@@ -159,46 +159,46 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string&& k, V&& v) //
+		table_init_pair(std::string&& k, V&& v, value_flags flags = value_flags::none) //
 			: key{ std::move(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string_view k, V&& v) //
+		table_init_pair(std::string_view k, V&& v, value_flags flags = value_flags::none) //
 			: key{ k },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const char* k, V&& v) //
+		table_init_pair(const char* k, V&& v, value_flags flags = value_flags::none) //
 			: key{ k },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 #if TOML_WINDOWS_COMPAT
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring&& k, V&& v) //
+		table_init_pair(std::wstring&& k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring_view k, V&& v) //
+		table_init_pair(std::wstring_view k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const wchar_t* k, V&& v) //
+		table_init_pair(const wchar_t* k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(std::wstring_view{ k }) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 #endif
@@ -650,6 +650,10 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	key			The key at which to insert the new value.
 		/// \param 	val			The new value to insert.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns	\conditional_return{Valid input}
 		/// 			<ul>
@@ -665,7 +669,7 @@ TOML_NAMESPACE_START
 		TOML_CONSTRAINED_TEMPLATE((std::is_convertible_v<KeyType&&, std::string_view> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
-		std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val)
+		std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val, value_flags flags = value_flags::none)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
@@ -680,7 +684,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_WINDOWS_COMPAT
-				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
+				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -692,7 +696,7 @@ TOML_NAMESPACE_START
 				{
 					ipos = map_.emplace_hint(ipos,
 											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val)));
+											 impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -734,22 +738,26 @@ TOML_NAMESPACE_START
 		/// \tparam Iter	An InputIterator to a collection of key-value pairs.
 		/// \param 	first	An iterator to the first value in the input collection.
 		/// \param 	last	An iterator to one-past-the-last value in the input collection.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 		/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 		/// 		 table will not be replaced.
 		TOML_CONSTRAINED_TEMPLATE((!std::is_convertible_v<Iter, std::string_view> && !impl::is_wide_string<Iter>),
 								  typename Iter)
-		void insert(Iter first, Iter last)
+		void insert(Iter first, Iter last, value_flags flags = value_flags::none)
 		{
 			if (first == last)
 				return;
 			for (auto it = first; it != last; it++)
 			{
 				if constexpr (std::is_rvalue_reference_v<decltype(*it)>)
-					insert(std::move((*it).first), std::move((*it).second));
+					insert(std::move((*it).first), std::move((*it).second), flags);
 				else
-					insert((*it).first, (*it).second);
+					insert((*it).first, (*it).second, flags);
 			}
 		}
 
@@ -793,6 +801,10 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	key			The key at which to insert or assign the value.
 		/// \param 	val			The value to insert/assign.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns	\conditional_return{Valid input}
 		/// 			<ul>
@@ -806,7 +818,9 @@ TOML_NAMESPACE_START
 		/// 		   an empty toml::node_view, because no insertion or assignment can take place.
 		/// 		   This is the only circumstance in which this can occur.
 		template <typename KeyType, typename ValueType>
-		std::pair<iterator, bool> insert_or_assign(KeyType&& key, ValueType&& val)
+		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
+												   ValueType&& val,
+												   value_flags flags = value_flags::none)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
@@ -821,7 +835,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_WINDOWS_COMPAT
-				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
+				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -833,12 +847,12 @@ TOML_NAMESPACE_START
 				{
 					ipos = map_.emplace_hint(ipos,
 											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val)));
+											 impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				else
 				{
-					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val)));
+					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, false };
 				}
 			}

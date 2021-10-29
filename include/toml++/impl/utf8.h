@@ -10,15 +10,13 @@
 /// \cond
 TOML_IMPL_NAMESPACE_START
 {
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		return codepoint == U'\t' || codepoint == U' ';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -33,24 +31,21 @@ TOML_IMPL_NAMESPACE_START
 			;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
 		return is_ascii_whitespace(codepoint) || is_non_ascii_whitespace(codepoint);
 	}
 
 	template <bool IncludeCarriageReturn = true>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
 		constexpr auto low_range_end = IncludeCarriageReturn ? U'\r' : U'\f';
 		return (codepoint >= U'\n' && codepoint <= low_range_end);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -63,58 +58,50 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	template <bool IncludeCarriageReturn = true>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_non_ascii_line_break(codepoint);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
 		return codepoint == U'"' || codepoint == U'\'';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_letter(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'a' && codepoint <= U'z') || (codepoint >= U'A' && codepoint <= U'Z');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
 		return codepoint == U'0' || codepoint == U'1';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_octal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'7');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_decimal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'9');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_hexadecimal_digit(char32_t c) noexcept
 	{
 		return U'0' <= c && c <= U'f' && (1ull << (static_cast<uint_least64_t>(c) - 0x30u)) & 0x7E0000007E03FFull;
 	}
 
 	template <typename T>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
 		if constexpr (std::is_same_v<remove_cvref<T>, uint_least32_t>)
@@ -130,8 +117,7 @@ TOML_IMPL_NAMESPACE_START
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Ll, Lm, Lo, Lt, Lu
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_letter(char32_t c) noexcept
 	{
 		if (U'\xAA' > c || c > U'\U0003134A')
@@ -484,8 +470,7 @@ TOML_IMPL_NAMESPACE_START
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Nd, Nl
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_number(char32_t c) noexcept
 	{
 		if (U'\u0660' > c || c > U'\U0001FBF9')
@@ -638,8 +623,7 @@ TOML_IMPL_NAMESPACE_START
 
 	//# Returns true if a codepoint belongs to any of these categories:
 	//# 	Mn, Mc
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_combining_mark(char32_t c) noexcept
 	{
 		if (U'\u0300' > c || c > U'\U000E01EF')
@@ -849,8 +833,7 @@ TOML_IMPL_NAMESPACE_START
 
 #endif // TOML_LANG_UNRELEASED
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint) || is_decimal_digit(codepoint) || codepoint == U'-' || codepoint == U'_'
@@ -861,8 +844,7 @@ TOML_IMPL_NAMESPACE_START
 			;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break(codepoint) || is_ascii_whitespace(codepoint) || codepoint == U']'
@@ -870,22 +852,19 @@ TOML_IMPL_NAMESPACE_START
 			|| is_non_ascii_whitespace(codepoint);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u001F' || codepoint == U'\u007F';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u0008' || (codepoint >= U'\u000A' && codepoint <= U'\u001F') || codepoint == U'\u007F';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
 	{
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
@@ -917,13 +896,13 @@ TOML_IMPL_NAMESPACE_START
 			36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12
 		};
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		constexpr bool error() const noexcept
 		{
 			return state == uint_least32_t{ 12u };
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		constexpr bool has_code_point() const noexcept
 		{
 			return state == uint_least32_t{};
@@ -946,6 +925,12 @@ TOML_IMPL_NAMESPACE_START
 																	 | (static_cast<uint_least32_t>(codepoint) << 6));
 
 			state = state_table[state + uint_least32_t{ 256u } + type];
+		}
+
+		TOML_ALWAYS_INLINE
+		constexpr void reset() noexcept
+		{
+			state = {};
 		}
 	};
 }

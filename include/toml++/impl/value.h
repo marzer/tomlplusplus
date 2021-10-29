@@ -2,8 +2,8 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
 #include "date_time.h"
 #include "node.h"
 #include "print_to_stream.h"
@@ -1105,7 +1105,7 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 /// \cond
-#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
 #include "value_extern.inl"
 #endif
 /// \endcond

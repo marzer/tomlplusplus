@@ -19,14 +19,16 @@ TOML_IMPL_NAMESPACE_START
 		format_flags flags_; //
 		int indent_;		 // these are set in attach()
 		bool naked_newline_; //
+		std::string_view indent_string_;
+		size_t indent_columns_;
 #if TOML_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_ = {};
 #endif
 
-	  protected:
-		static constexpr size_t indent_columns			= 4;
-		static constexpr std::string_view indent_string = "    "sv;
+		TOML_API
+		void set_indent_string(std::string_view str) noexcept;
 
+	  protected:
 		TOML_PURE_INLINE_GETTER
 		const toml::node& source() const noexcept
 		{
@@ -58,6 +60,12 @@ TOML_IMPL_NAMESPACE_START
 		void decrease_indent() noexcept
 		{
 			indent_--;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		size_t indent_columns() const noexcept
+		{
+			return indent_columns_;
 		}
 
 		TOML_PURE_INLINE_GETTER
@@ -148,19 +156,21 @@ TOML_IMPL_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_API
-		bool dump_failed_parse_result() noexcept(!TOML_PARSER || TOML_EXCEPTIONS);
+		bool dump_failed_parse_result();
 
 		TOML_NODISCARD_CTOR
-		formatter(const toml::node& source, format_flags flags) noexcept //
+		formatter(const toml::node& source, format_flags flags, std::string_view indent) noexcept //
 			: source_{ &source },
 			  flags_{ flags }
-		{}
+		{
+			set_indent_string(indent);
+		}
 
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 		TOML_NODISCARD_CTOR
 		TOML_API
-		formatter(const parse_result& result, format_flags flags) noexcept;
+		formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept;
 
 #endif
 	};

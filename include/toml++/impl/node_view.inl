@@ -14,7 +14,7 @@
 #include "node_view.h"
 #include "header_start.h"
 
-#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 #include "node_view_extern.inl"
 #endif // TOML_EXTERN_TEMPLATES
 

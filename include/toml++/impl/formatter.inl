@@ -25,13 +25,24 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
-	formatter::formatter(const parse_result& result, format_flags flags) noexcept //
+	formatter::formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept //
 		: source_{ result ? &result.table() : nullptr },
 		  flags_{ flags },
 		  result_{ &result }
-	{}
+	{
+		set_indent_string(indent);
+	}
 
 #endif
+
+	TOML_EXTERNAL_LINKAGE
+	void formatter::set_indent_string(std::string_view str) noexcept
+	{
+		indent_string_	= str.data() ? str : "    "sv;
+		indent_columns_ = {};
+		for (auto c : indent_string_)
+			indent_columns_ += c == '\t' ? 4u : 1u;
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	void formatter::attach(std::ostream & stream) noexcept
@@ -62,7 +73,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		for (int i = 0; i < indent_; i++)
 		{
-			print_to_stream(*stream_, indent_string);
+			print_to_stream(*stream_, indent_string_);
 			naked_newline_ = false;
 		}
 	}
@@ -216,7 +227,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
-	bool formatter::dump_failed_parse_result() noexcept(false)
+	bool formatter::dump_failed_parse_result()
 	{
 		if (result_ && !(*result_))
 		{
@@ -230,7 +241,7 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	TOML_ATTR(const)
-	bool formatter::dump_failed_parse_result() noexcept(true)
+	bool formatter::dump_failed_parse_result()
 	{
 		return false;
 	}

@@ -14,7 +14,7 @@
 #include "value.h"
 #include "header_start.h"
 
-#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 #include "value_extern.inl"
 #endif // TOML_EXTERN_TEMPLATES
 

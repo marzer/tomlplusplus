@@ -16,15 +16,10 @@ from io import StringIO
 class Preprocessor:
 
 	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)".*?$', re.I | re.M)
-	__multiples_allowed = [
-		r'impl/header_start.h',
-		r'impl/header_end.h',
-		r'impl/value_extern.inl',
-		r'impl/node_view_extern.inl',
-	]
+	__re_pragma_once = re.compile(r'^\s*#\s*pragma\s+once\s*$', re.M)
 
 	def __init__(self, file):
-		self.__processed_includes = set()
+		self.__once_only = set()
 		self.__current_level = 0
 		self.__directory_stack = [ Path.cwd() ]
 		self.__entry_root = ''
@@ -38,27 +33,30 @@ class Preprocessor:
 			incl = Path(incl.strip().replace('\\',r'/'))
 		if not incl.is_absolute():
 			incl = Path(self.__directory_stack[-1], incl).resolve()
-		if self.__current_level == 0 and self.__entry_root == '':
-			self.__entry_root = str(incl.parent).replace('\\',r'/')
-
-		relative_path = str(incl).replace('\\',r'/')
-		if relative_path.startswith(self.__entry_root):
-			relative_path = relative_path[len(self.__entry_root):].strip('/')
-
-		if incl in self.__processed_includes and relative_path not in self.__multiples_allowed:
+		if incl in self.__once_only:
 			return ''
 
-		self.__processed_includes.add(incl)
-		self.__directory_stack.append(incl.parent)
 
 		text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
 		text = text.replace('\r\n', '\n') # convert windows newlines
+
+		self.__directory_stack.append(incl.parent)
+		if self.__re_pragma_once.search(text):
+			self.__once_only.add(incl)
+		if self.__current_level == 0 and self.__entry_root == '':
+			self.__entry_root = str(incl.parent).replace('\\',r'/')
+		if self.__current_level > 0:
+			text = self.__re_pragma_once.sub('', text)
+
 		self.__current_level += 1
 		text = self.__re_includes.sub(lambda m : self.__preprocess(m), text, 0)
 		self.__current_level -= 1
 
 		if self.__current_level == 1:
-			header = utils.make_divider(relative_path, 10, pattern = r'*')
+			header = str(incl).replace('\\',r'/')
+			if header.startswith(self.__entry_root):
+				header = header[len(self.__entry_root):].strip('/')
+			header = utils.make_divider(header, 10, pattern = r'*')
 			text = f'\n\n{header}\n\n{text}'
 
 		self.__directory_stack.pop()
@@ -80,8 +78,6 @@ def main():
 
 	# strip various things:
 	if 1:
-		# 'pragma once'
-		toml_h = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', toml_h, 0, re.I | re.M)
 		# trailing whitespace
 		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
 		# explicit 'strip this' blocks

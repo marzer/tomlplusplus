@@ -255,14 +255,14 @@ TOML_NAMESPACE_START
 		void preinsertion_resize(size_t idx, size_t count);
 
 		template <typename T>
-		void emplace_back_if_not_empty_view(T&& val)
+		void emplace_back_if_not_empty_view(T&& val, value_flags flags)
 		{
 			if constexpr (is_node_view<T>)
 			{
 				if (!val)
 					return;
 			}
-			elements.emplace_back(impl::make_node(static_cast<T&&>(val)));
+			elements.emplace_back(impl::make_node(static_cast<T&&>(val), flags));
 		}
 
 		TOML_NODISCARD
@@ -364,10 +364,10 @@ TOML_NAMESPACE_START
 		explicit array(ElemType&& val, ElemTypes&&... vals)
 		{
 			elements.reserve(sizeof...(ElemTypes) + 1u);
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), value_flags::none);
 			if constexpr (sizeof...(ElemTypes) > 0)
 			{
-				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals)), ...);
+				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals), value_flags::none), ...);
 			}
 
 #if TOML_LIFETIME_HOOKS
@@ -586,6 +586,10 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	pos			The insertion position.
 		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the newly-inserted element.
@@ -595,14 +599,14 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, ElemType&& val)
+		iterator insert(const_iterator pos, ElemType&& val, value_flags flags = value_flags::none)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
 				if (!val)
 					return end();
 			}
-			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val))) };
+			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val), flags)) };
 		}
 
 		/// \brief	Repeatedly inserts a new element starting at a specific position in the array.
@@ -632,6 +636,10 @@ TOML_NAMESPACE_START
 		/// \param 	pos			The insertion position.
 		/// \param 	count		The number of times the node or value should be inserted.
 		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the newly-inserted element.
@@ -643,7 +651,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, size_t count, ElemType&& val)
+		iterator insert(const_iterator pos, size_t count, ElemType&& val, value_flags flags = value_flags::none)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -653,17 +661,17 @@ TOML_NAMESPACE_START
 			switch (count)
 			{
 				case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-				case 1: return insert(pos, static_cast<ElemType&&>(val));
+				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
 					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
 					for (size_t e = start_idx + count - 1u; i < e; i++)
-						elements[i].reset(impl::make_node(val));
+						elements[i].reset(impl::make_node(val, flags));
 
 					//# potentially move the initial value into the last element
-					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val)));
+					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val), flags));
 					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
@@ -675,6 +683,10 @@ TOML_NAMESPACE_START
 		/// \param 	pos		The insertion position.
 		/// \param 	first	Iterator to the first node or value being inserted.
 		/// \param 	last	Iterator to the one-past-the-last node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the first newly-inserted element.
@@ -683,7 +695,7 @@ TOML_NAMESPACE_START
 		/// 		 \conditional_return{All objects in the range were empty toml::node_views}
 		/// 		 A copy of pos
 		template <typename Iter>
-		iterator insert(const_iterator pos, Iter first, Iter last)
+		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = value_flags::none)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
@@ -711,9 +723,9 @@ TOML_NAMESPACE_START
 							continue;
 					}
 					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elements[i++].reset(impl::make_node(std::move(*it)));
+						elements[i++].reset(impl::make_node(std::move(*it), flags));
 					else
-						elements[i++].reset(impl::make_node(*it));
+						elements[i++].reset(impl::make_node(*it, flags));
 				}
 				return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 			}
@@ -725,6 +737,10 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	pos			The insertion position.
 		/// \param 	ilist		An initializer list containing the values to be inserted.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the first newly-inserted element.
@@ -733,9 +749,11 @@ TOML_NAMESPACE_START
 		/// 		 \conditional_return{All objects in the list were empty toml::node_views}
 		///			 A copy of pos
 		template <typename ElemType>
-		iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist)
+		iterator insert(const_iterator pos,
+						std::initializer_list<ElemType> ilist,
+						value_flags flags = value_flags::none)
 		{
-			return insert(pos, ilist.begin(), ilist.end());
+			return insert(pos, ilist.begin(), ilist.end(), flags);
 		}
 
 		/// \brief	Emplaces a new element at a specific position in the array.
@@ -908,13 +926,17 @@ TOML_NAMESPACE_START
 		///
 		/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 		/// \param 	val			The node or value being added.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
+		///			flags will be copied, _not_ set to none.
 		///
 		/// \attention	No insertion takes place if the input value is an empty toml::node_view.
 		/// 			This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		void push_back(ElemType&& val)
+		void push_back(ElemType&& val, value_flags flags = value_flags::none)
 		{
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), flags);
 		}
 
 		/// \brief	Emplaces a new element at the end of the array.

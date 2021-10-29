@@ -1197,10 +1197,14 @@ TOML_NAMESPACE_START // abi namespace
 	template <typename T>
 	struct TOML_TRIVIAL_ABI inserter
 	{
-		T&& value;
+		static_assert(std::is_reference_v<T>);
+
+		T value;
 	};
 	template <typename T>
-	inserter(T &&) -> inserter<T>;
+	inserter(T &&) -> inserter<T&&>;
+	template <typename T>
+	inserter(T&) -> inserter<T&>;
 }
 TOML_NAMESPACE_END;
 
@@ -3302,7 +3306,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
 
 TOML_NAMESPACE_START
 {
@@ -4344,7 +4348,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#if (TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
 
 TOML_NAMESPACE_START
 {
@@ -4428,45 +4432,67 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T && val)
+	auto* make_node_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
-		using type = unwrap_node<remove_cvref<T>>;
-		static_assert(!std::is_same_v<type, node>);
-		static_assert(!is_node_view<type>);
+		using unwrapped_type = unwrap_node<remove_cvref<T>>;
+		static_assert(!std::is_same_v<unwrapped_type, node>);
+		static_assert(!is_node_view<unwrapped_type>);
 
-		if constexpr (is_one_of<type, array, table>)
+		// arrays + tables - invoke copy/move ctor
+		if constexpr (is_one_of<unwrapped_type, array, table>)
 		{
-			return new type{ static_cast<T&&>(val) };
+			return new unwrapped_type{ static_cast<T&&>(val) };
 		}
-		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref<T>, type>)
-		{
-			return new value<type>{ static_cast<T&&>(val) };
-		}
+
+		// values
 		else
 		{
-			static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-						  "Instantiating values from wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
-			static_assert(is_native<type> || is_losslessly_convertible_to_native<type>,
-						  "Value initializers must be (or be promotable to) one of the TOML value types");
+			using native_type = native_type_of<unwrapped_type>;
+			using value_type  = value<native_type>;
 
-			using value_type = native_type_of<remove_cvref<T>>;
-			if constexpr (is_wide_string<T>)
+			value_type* out;
+
+			// copy/move ctor
+			if constexpr (std::is_same_v<remove_cvref<T>, value_type>)
 			{
-#if TOML_WINDOWS_COMPAT
-				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
-#else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
-#endif
+				out = new value_type{ static_cast<T&&>(val) };
+
+				// only override the flags if the new ones are nonzero
+				// (so the copy/move ctor does the right thing in the general case)
+				if (flags != value_flags::none)
+					out->flags(flags);
 			}
+
+			// creating from raw value
 			else
-				return new value<value_type>{ static_cast<T&&>(val) };
+			{
+				static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+							  "Instantiating values from wide-character strings is only "
+							  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+				static_assert(is_native<unwrapped_type> || is_losslessly_convertible_to_native<unwrapped_type>,
+							  "Value initializers must be (or be promotable to) one of the TOML value types");
+
+				if constexpr (is_wide_string<T>)
+				{
+#if TOML_WINDOWS_COMPAT
+					out = new value_type{ narrow(static_cast<T&&>(val)) };
+#else
+					static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+#endif
+				}
+				else
+					out = new value_type{ static_cast<T&&>(val) };
+
+				out->flags(flags);
+			}
+
+			return out;
 		}
 	}
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(T && val)
+	auto* make_node(T && val, value_flags flags = value_flags::none)
 	{
 		using type = unwrap_node<remove_cvref<T>>;
 		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
@@ -4478,19 +4504,20 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			return static_cast<T&&>(val).visit(
-				[](auto&& concrete) {
-					return static_cast<toml::node*>(make_node_specialized(static_cast<decltype(concrete)&&>(concrete)));
+				[flags](auto&& concrete) {
+					return static_cast<toml::node*>(
+						make_node_specialized(static_cast<decltype(concrete)&&>(concrete), flags));
 				});
 		}
 		else
-			return make_node_specialized(static_cast<T&&>(val));
+			return make_node_specialized(static_cast<T&&>(val), flags);
 	}
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(inserter<T> && val)
+	auto* make_node(inserter<T> && val, value_flags flags = value_flags::none)
 	{
-		return make_node(static_cast<T&&>(val.value));
+		return make_node(static_cast<T&&>(val.value), flags);
 	}
 
 	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
@@ -4717,14 +4744,14 @@ TOML_NAMESPACE_START
 		void preinsertion_resize(size_t idx, size_t count);
 
 		template <typename T>
-		void emplace_back_if_not_empty_view(T&& val)
+		void emplace_back_if_not_empty_view(T&& val, value_flags flags)
 		{
 			if constexpr (is_node_view<T>)
 			{
 				if (!val)
 					return;
 			}
-			elements.emplace_back(impl::make_node(static_cast<T&&>(val)));
+			elements.emplace_back(impl::make_node(static_cast<T&&>(val), flags));
 		}
 
 		TOML_NODISCARD
@@ -4786,10 +4813,10 @@ TOML_NAMESPACE_START
 		explicit array(ElemType&& val, ElemTypes&&... vals)
 		{
 			elements.reserve(sizeof...(ElemTypes) + 1u);
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), value_flags::none);
 			if constexpr (sizeof...(ElemTypes) > 0)
 			{
-				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals)), ...);
+				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals), value_flags::none), ...);
 			}
 
 #if TOML_LIFETIME_HOOKS
@@ -4964,18 +4991,18 @@ TOML_NAMESPACE_START
 		}
 
 		template <typename ElemType>
-		iterator insert(const_iterator pos, ElemType&& val)
+		iterator insert(const_iterator pos, ElemType&& val, value_flags flags = value_flags::none)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
 				if (!val)
 					return end();
 			}
-			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val))) };
+			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val), flags)) };
 		}
 
 		template <typename ElemType>
-		iterator insert(const_iterator pos, size_t count, ElemType&& val)
+		iterator insert(const_iterator pos, size_t count, ElemType&& val, value_flags flags = value_flags::none)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -4985,23 +5012,23 @@ TOML_NAMESPACE_START
 			switch (count)
 			{
 				case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-				case 1: return insert(pos, static_cast<ElemType&&>(val));
+				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
 					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
 					for (size_t e = start_idx + count - 1u; i < e; i++)
-						elements[i].reset(impl::make_node(val));
+						elements[i].reset(impl::make_node(val, flags));
 
-					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val)));
+					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val), flags));
 					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
 		}
 
 		template <typename Iter>
-		iterator insert(const_iterator pos, Iter first, Iter last)
+		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = value_flags::none)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
@@ -5029,18 +5056,20 @@ TOML_NAMESPACE_START
 							continue;
 					}
 					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elements[i++].reset(impl::make_node(std::move(*it)));
+						elements[i++].reset(impl::make_node(std::move(*it), flags));
 					else
-						elements[i++].reset(impl::make_node(*it));
+						elements[i++].reset(impl::make_node(*it, flags));
 				}
 				return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
 			}
 		}
 
 		template <typename ElemType>
-		iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist)
+		iterator insert(const_iterator pos,
+						std::initializer_list<ElemType> ilist,
+						value_flags flags = value_flags::none)
 		{
-			return insert(pos, ilist.begin(), ilist.end());
+			return insert(pos, ilist.begin(), ilist.end(), flags);
 		}
 
 		template <typename ElemType, typename... Args>
@@ -5084,9 +5113,9 @@ TOML_NAMESPACE_START
 		}
 
 		template <typename ElemType>
-		void push_back(ElemType&& val)
+		void push_back(ElemType&& val, value_flags flags = value_flags::none)
 		{
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), flags);
 		}
 
 		template <typename ElemType, typename... Args>
@@ -5374,46 +5403,46 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string&& k, V&& v) //
+		table_init_pair(std::string&& k, V&& v, value_flags flags = value_flags::none) //
 			: key{ std::move(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string_view k, V&& v) //
+		table_init_pair(std::string_view k, V&& v, value_flags flags = value_flags::none) //
 			: key{ k },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const char* k, V&& v) //
+		table_init_pair(const char* k, V&& v, value_flags flags = value_flags::none) //
 			: key{ k },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 #if TOML_WINDOWS_COMPAT
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring&& k, V&& v) //
+		table_init_pair(std::wstring&& k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring_view k, V&& v) //
+		table_init_pair(std::wstring_view k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const wchar_t* k, V&& v) //
+		table_init_pair(const wchar_t* k, V&& v, value_flags flags = value_flags::none) //
 			: key{ narrow(std::wstring_view{ k }) },
-			  value{ make_node(static_cast<V&&>(v)) }
+			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 #endif
@@ -5671,7 +5700,7 @@ TOML_NAMESPACE_START
 		TOML_CONSTRAINED_TEMPLATE((std::is_convertible_v<KeyType&&, std::string_view> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
-		std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val)
+		std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val, value_flags flags = value_flags::none)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
@@ -5686,7 +5715,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_WINDOWS_COMPAT
-				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
+				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -5698,7 +5727,7 @@ TOML_NAMESPACE_START
 				{
 					ipos = map_.emplace_hint(ipos,
 											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val)));
+											 impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -5707,21 +5736,23 @@ TOML_NAMESPACE_START
 
 		TOML_CONSTRAINED_TEMPLATE((!std::is_convertible_v<Iter, std::string_view> && !impl::is_wide_string<Iter>),
 								  typename Iter)
-		void insert(Iter first, Iter last)
+		void insert(Iter first, Iter last, value_flags flags = value_flags::none)
 		{
 			if (first == last)
 				return;
 			for (auto it = first; it != last; it++)
 			{
 				if constexpr (std::is_rvalue_reference_v<decltype(*it)>)
-					insert(std::move((*it).first), std::move((*it).second));
+					insert(std::move((*it).first), std::move((*it).second), flags);
 				else
-					insert((*it).first, (*it).second);
+					insert((*it).first, (*it).second, flags);
 			}
 		}
 
 		template <typename KeyType, typename ValueType>
-		std::pair<iterator, bool> insert_or_assign(KeyType&& key, ValueType&& val)
+		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
+												   ValueType&& val,
+												   value_flags flags = value_flags::none)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
@@ -5736,7 +5767,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_WINDOWS_COMPAT
-				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val));
+				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -5748,12 +5779,12 @@ TOML_NAMESPACE_START
 				{
 					ipos = map_.emplace_hint(ipos,
 											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val)));
+											 impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				else
 				{
-					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val)));
+					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val), flags));
 					return { iterator{ ipos }, false };
 				}
 			}
@@ -5966,15 +5997,13 @@ TOML_DISABLE_SWITCH_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
 {
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		return codepoint == U'\t' || codepoint == U' ';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_whitespace(char32_t codepoint) noexcept
 	{
 		// see: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -5989,24 +6018,21 @@ TOML_IMPL_NAMESPACE_START
 			;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_whitespace(char32_t codepoint) noexcept
 	{
 		return is_ascii_whitespace(codepoint) || is_non_ascii_whitespace(codepoint);
 	}
 
 	template <bool IncludeCarriageReturn = true>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_line_break(char32_t codepoint) noexcept
 	{
 		constexpr auto low_range_end = IncludeCarriageReturn ? U'\r' : U'\f';
 		return (codepoint >= U'\n' && codepoint <= low_range_end);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_line_break(char32_t codepoint) noexcept
 	{
 		// see https://en.wikipedia.org/wiki/Whitespace_character#Unicode
@@ -6019,58 +6045,50 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	template <bool IncludeCarriageReturn = true>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_line_break(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break<IncludeCarriageReturn>(codepoint) || is_non_ascii_line_break(codepoint);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_string_delimiter(char32_t codepoint) noexcept
 	{
 		return codepoint == U'"' || codepoint == U'\'';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_ascii_letter(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'a' && codepoint <= U'z') || (codepoint >= U'A' && codepoint <= U'Z');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_binary_digit(char32_t codepoint) noexcept
 	{
 		return codepoint == U'0' || codepoint == U'1';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_octal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'7');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_decimal_digit(char32_t codepoint) noexcept
 	{
 		return (codepoint >= U'0' && codepoint <= U'9');
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_hexadecimal_digit(char32_t c) noexcept
 	{
 		return U'0' <= c && c <= U'f' && (1ull << (static_cast<uint_least64_t>(c) - 0x30u)) & 0x7E0000007E03FFull;
 	}
 
 	template <typename T>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr uint_least32_t hex_to_dec(const T codepoint) noexcept
 	{
 		if constexpr (std::is_same_v<remove_cvref<T>, uint_least32_t>)
@@ -6084,8 +6102,7 @@ TOML_IMPL_NAMESPACE_START
 
 #if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_letter(char32_t c) noexcept
 	{
 		if (U'\xAA' > c || c > U'\U0003134A')
@@ -6436,8 +6453,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_UNREACHABLE;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_non_ascii_number(char32_t c) noexcept
 	{
 		if (U'\u0660' > c || c > U'\U0001FBF9')
@@ -6588,8 +6604,7 @@ TOML_IMPL_NAMESPACE_START
 		TOML_UNREACHABLE;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_combining_mark(char32_t c) noexcept
 	{
 		if (U'\u0300' > c || c > U'\U000E01EF')
@@ -6799,8 +6814,7 @@ TOML_IMPL_NAMESPACE_START
 
 #endif // TOML_LANG_UNRELEASED
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_bare_key_character(char32_t codepoint) noexcept
 	{
 		return is_ascii_letter(codepoint) || is_decimal_digit(codepoint) || codepoint == U'-' || codepoint == U'_'
@@ -6811,8 +6825,7 @@ TOML_IMPL_NAMESPACE_START
 			;
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_value_terminator(char32_t codepoint) noexcept
 	{
 		return is_ascii_line_break(codepoint) || is_ascii_whitespace(codepoint) || codepoint == U']'
@@ -6820,22 +6833,19 @@ TOML_IMPL_NAMESPACE_START
 			|| is_non_ascii_whitespace(codepoint);
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u001F' || codepoint == U'\u007F';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_nontab_control_character(char32_t codepoint) noexcept
 	{
 		return codepoint <= U'\u0008' || (codepoint >= U'\u000A' && codepoint <= U'\u001F') || codepoint == U'\u007F';
 	}
 
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	constexpr bool is_unicode_surrogate(char32_t codepoint) noexcept
 	{
 		return codepoint >= 0xD800u && codepoint <= 0xDFFF;
@@ -6866,13 +6876,13 @@ TOML_IMPL_NAMESPACE_START
 			36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 36, 12, 36, 12, 12, 12, 36, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12
 		};
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		constexpr bool error() const noexcept
 		{
 			return state == uint_least32_t{ 12u };
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		constexpr bool has_code_point() const noexcept
 		{
 			return state == uint_least32_t{};
@@ -6895,6 +6905,12 @@ TOML_IMPL_NAMESPACE_START
 																	 | (static_cast<uint_least32_t>(codepoint) << 6));
 
 			state = state_table[state + uint_least32_t{ 256u } + type];
+		}
+
+		TOML_ALWAYS_INLINE
+		constexpr void reset() noexcept
+		{
+			state = {};
 		}
 	};
 }
@@ -7412,14 +7428,16 @@ TOML_IMPL_NAMESPACE_START
 		format_flags flags_; //
 		int indent_;		 // these are set in attach()
 		bool naked_newline_; //
+		std::string_view indent_string_;
+		size_t indent_columns_;
 #if TOML_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_ = {};
 #endif
 
-	  protected:
-		static constexpr size_t indent_columns			= 4;
-		static constexpr std::string_view indent_string = "    "sv;
+		TOML_API
+		void set_indent_string(std::string_view str) noexcept;
 
+	  protected:
 		TOML_PURE_INLINE_GETTER
 		const toml::node& source() const noexcept
 		{
@@ -7451,6 +7469,12 @@ TOML_IMPL_NAMESPACE_START
 		void decrease_indent() noexcept
 		{
 			indent_--;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		size_t indent_columns() const noexcept
+		{
+			return indent_columns_;
 		}
 
 		TOML_PURE_INLINE_GETTER
@@ -7541,19 +7565,21 @@ TOML_IMPL_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_API
-		bool dump_failed_parse_result() noexcept(!TOML_PARSER || TOML_EXCEPTIONS);
+		bool dump_failed_parse_result();
 
 		TOML_NODISCARD_CTOR
-		formatter(const toml::node& source, format_flags flags) noexcept //
+		formatter(const toml::node& source, format_flags flags, std::string_view indent) noexcept //
 			: source_{ &source },
 			  flags_{ flags }
-		{}
+		{
+			set_indent_string(indent);
+		}
 
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 		TOML_NODISCARD_CTOR
 		TOML_API
-		formatter(const parse_result& result, format_flags flags) noexcept;
+		formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept;
 
 #endif
 	};
@@ -7625,14 +7651,14 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ source, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ result, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #endif
@@ -7690,14 +7716,14 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ source, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, (flags | mandatory_flags) & ~ignored_flags }
+			: base{ result, (flags | mandatory_flags) & ~ignored_flags, "    "sv }
 		{}
 
 #endif
@@ -8316,7 +8342,7 @@ TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
-#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 
 TOML_NAMESPACE_START
 {
@@ -8390,7 +8416,7 @@ TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
 
-#if (TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION) || TOML_INTELLISENSE
+#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 
 TOML_NAMESPACE_START
 {
@@ -12498,13 +12524,24 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
-	formatter::formatter(const parse_result& result, format_flags flags) noexcept //
+	formatter::formatter(const parse_result& result, format_flags flags, std::string_view indent) noexcept //
 		: source_{ result ? &result.table() : nullptr },
 		  flags_{ flags },
 		  result_{ &result }
-	{}
+	{
+		set_indent_string(indent);
+	}
 
 #endif
+
+	TOML_EXTERNAL_LINKAGE
+	void formatter::set_indent_string(std::string_view str) noexcept
+	{
+		indent_string_	= str.data() ? str : "    "sv;
+		indent_columns_ = {};
+		for (auto c : indent_string_)
+			indent_columns_ += c == '\t' ? 4u : 1u;
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	void formatter::attach(std::ostream & stream) noexcept
@@ -12535,7 +12572,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		for (int i = 0; i < indent_; i++)
 		{
-			print_to_stream(*stream_, indent_string);
+			print_to_stream(*stream_, indent_string_);
 			naked_newline_ = false;
 		}
 	}
@@ -12689,7 +12726,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
-	bool formatter::dump_failed_parse_result() noexcept(false)
+	bool formatter::dump_failed_parse_result()
 	{
 		if (result_ && !(*result_))
 		{
@@ -12703,7 +12740,7 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	TOML_ATTR(const)
-	bool formatter::dump_failed_parse_result() noexcept(true)
+	bool formatter::dump_failed_parse_result()
 	{
 		return false;
 	}
@@ -12774,11 +12811,11 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 			{
-				auto& n = *reinterpret_cast<const table*>(&node);
-				if (n.empty())
+				auto& tbl = *reinterpret_cast<const table*>(&node);
+				if (tbl.empty())
 					return 2u;		// "{}"
 				size_t weight = 3u; // "{ }"
-				for (auto&& [k, v] : n)
+				for (auto&& [k, v] : tbl)
 				{
 					weight += k.length() + count_inline_columns(v) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
@@ -12789,11 +12826,11 @@ TOML_NAMESPACE_START
 
 			case node_type::array:
 			{
-				auto& n = *reinterpret_cast<const array*>(&node);
-				if (n.empty())
+				auto& arr = *reinterpret_cast<const array*>(&node);
+				if (arr.empty())
 					return 2u;		// "[]"
 				size_t weight = 3u; // "[ ]"
-				for (auto& elem : n)
+				for (auto& elem : arr)
 				{
 					weight += count_inline_columns(elem) + 2u; // +  ", "
 					if (weight >= line_wrap_cols)
@@ -12804,38 +12841,38 @@ TOML_NAMESPACE_START
 
 			case node_type::string:
 			{
-				auto& n = *reinterpret_cast<const value<std::string>*>(&node);
-				return n.get().length() + 2u; // + ""
+				// todo: proper utf8 decoding?
+				// todo: tab awareness?
+				auto& str = (*reinterpret_cast<const value<std::string>*>(&node)).get();
+				return str.length() + 2u; // + ""
 			}
 
 			case node_type::integer:
 			{
-				auto& n = *reinterpret_cast<const value<int64_t>*>(&node);
-				auto v	= n.get();
-				if (!v)
+				auto val = (*reinterpret_cast<const value<int64_t>*>(&node)).get();
+				if (!val)
 					return 1u;
 				size_t weight = {};
-				if (v < 0)
+				if (val < 0)
 				{
 					weight += 1u;
-					v *= -1;
+					val *= -1;
 				}
-				return weight + static_cast<size_t>(log10(static_cast<double>(v))) + 1u;
+				return weight + static_cast<size_t>(log10(static_cast<double>(val))) + 1u;
 			}
 
 			case node_type::floating_point:
 			{
-				auto& n = *reinterpret_cast<const value<double>*>(&node);
-				auto v	= n.get();
-				if (v == 0.0)
+				auto val = (*reinterpret_cast<const value<double>*>(&node)).get();
+				if (val == 0.0)
 					return 3u;		// "0.0"
 				size_t weight = 2u; // ".0"
-				if (v < 0.0)
+				if (val < 0.0)
 				{
 					weight += 1u;
-					v *= -1.0;
+					val *= -1.0;
 				}
-				return weight + static_cast<size_t>(log10(v)) + 1u;
+				return weight + static_cast<size_t>(log10(val)) + 1u;
 				break;
 			}
 
@@ -12953,9 +12990,9 @@ TOML_NAMESPACE_START
 		else
 		{
 			const auto original_indent = base::indent();
-			const auto multiline =
-				forces_multiline(arr,
-								 base::indent_columns * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+			const auto multiline	   = forces_multiline(
+				  arr,
+				  base::indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 			impl::print_to_stream(base::stream(), "["sv);
 			if (multiline)
 			{

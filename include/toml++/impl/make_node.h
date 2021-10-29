@@ -13,45 +13,67 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T && val)
+	auto* make_node_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
-		using type = unwrap_node<remove_cvref<T>>;
-		static_assert(!std::is_same_v<type, node>);
-		static_assert(!is_node_view<type>);
+		using unwrapped_type = unwrap_node<remove_cvref<T>>;
+		static_assert(!std::is_same_v<unwrapped_type, node>);
+		static_assert(!is_node_view<unwrapped_type>);
 
-		if constexpr (is_one_of<type, array, table>)
+		// arrays + tables - invoke copy/move ctor
+		if constexpr (is_one_of<unwrapped_type, array, table>)
 		{
-			return new type{ static_cast<T&&>(val) };
+			return new unwrapped_type{ static_cast<T&&>(val) };
 		}
-		else if constexpr (is_native<type> && !std::is_same_v<remove_cvref<T>, type>)
-		{
-			return new value<type>{ static_cast<T&&>(val) };
-		}
+
+		// values
 		else
 		{
-			static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
-						  "Instantiating values from wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
-			static_assert(is_native<type> || is_losslessly_convertible_to_native<type>,
-						  "Value initializers must be (or be promotable to) one of the TOML value types");
+			using native_type = native_type_of<unwrapped_type>;
+			using value_type  = value<native_type>;
 
-			using value_type = native_type_of<remove_cvref<T>>;
-			if constexpr (is_wide_string<T>)
+			value_type* out;
+
+			// copy/move ctor
+			if constexpr (std::is_same_v<remove_cvref<T>, value_type>)
 			{
-#if TOML_WINDOWS_COMPAT
-				return new value<value_type>{ narrow(static_cast<T&&>(val)) };
-#else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
-#endif
+				out = new value_type{ static_cast<T&&>(val) };
+
+				// only override the flags if the new ones are nonzero
+				// (so the copy/move ctor does the right thing in the general case)
+				if (flags != value_flags::none)
+					out->flags(flags);
 			}
+
+			// creating from raw value
 			else
-				return new value<value_type>{ static_cast<T&&>(val) };
+			{
+				static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+							  "Instantiating values from wide-character strings is only "
+							  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+				static_assert(is_native<unwrapped_type> || is_losslessly_convertible_to_native<unwrapped_type>,
+							  "Value initializers must be (or be promotable to) one of the TOML value types");
+
+				if constexpr (is_wide_string<T>)
+				{
+#if TOML_WINDOWS_COMPAT
+					out = new value_type{ narrow(static_cast<T&&>(val)) };
+#else
+					static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+#endif
+				}
+				else
+					out = new value_type{ static_cast<T&&>(val) };
+
+				out->flags(flags);
+			}
+
+			return out;
 		}
 	}
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(T && val)
+	auto* make_node(T && val, value_flags flags = value_flags::none)
 	{
 		using type = unwrap_node<remove_cvref<T>>;
 		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
@@ -63,19 +85,20 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			return static_cast<T&&>(val).visit(
-				[](auto&& concrete) {
-					return static_cast<toml::node*>(make_node_specialized(static_cast<decltype(concrete)&&>(concrete)));
+				[flags](auto&& concrete) {
+					return static_cast<toml::node*>(
+						make_node_specialized(static_cast<decltype(concrete)&&>(concrete), flags));
 				});
 		}
 		else
-			return make_node_specialized(static_cast<T&&>(val));
+			return make_node_specialized(static_cast<T&&>(val), flags);
 	}
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(inserter<T> && val)
+	auto* make_node(inserter<T> && val, value_flags flags = value_flags::none)
 	{
-		return make_node(static_cast<T&&>(val.value));
+		return make_node(static_cast<T&&>(val.value), flags);
 	}
 
 	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
