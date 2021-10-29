@@ -9,7 +9,7 @@ assignees: marzer
 
 <!--
     Replace the HTML comments below with the requested information.
-    Please DO NOT delete this template and roll your own!
+    Please don't delete this template and roll your own!
 
     Thanks for contributing!
 -->

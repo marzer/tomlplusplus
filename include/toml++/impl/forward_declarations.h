@@ -283,6 +283,11 @@ TOML_NAMESPACE_START // abi namespace
 	};
 	TOML_MAKE_FLAGS(value_flags);
 
+	/// \brief Special #toml::value_flags constant used for array + table insert functions to specify that any value
+	/// nodes being copied should not have their flags property overridden by the inserting function's `flags` argument.
+	inline constexpr value_flags preserve_source_value_flags =
+		POXY_IMPLEMENTATION_DETAIL(value_flags{ static_cast<std::underlying_type_t<value_flags>>(-1) });
+
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	///
 	/// \note	Formatters may disregard/override any of these flags according to the requirements of their
@@ -868,9 +873,7 @@ TOML_NAMESPACE_END;
 TOML_IMPL_NAMESPACE_START
 {
 	template <typename T>
-	TOML_NODISCARD
-	TOML_ATTR(const)
-	TOML_ALWAYS_INLINE
+	TOML_CONST_INLINE_GETTER
 	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
@@ -886,8 +889,7 @@ TOML_IMPL_NAMESPACE_START
 		nan
 	};
 
-	TOML_NODISCARD
-	TOML_ATTR(pure)
+	TOML_PURE_GETTER
 	inline fp_class fpclassify(const double& val) noexcept
 	{
 		static_assert(sizeof(uint64_t) == sizeof(double));
@@ -897,7 +899,7 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr uint64_t mantissa = 0b0000000000001111111111111111111111111111111111111111111111111111ull;
 
 		uint64_t val_bits;
-		memcpy(&val_bits, &val, sizeof(val));
+		std::memcpy(&val_bits, &val, sizeof(val));
 		if ((val_bits & exponent) != exponent)
 			return fp_class::ok;
 		if ((val_bits & mantissa))
@@ -909,7 +911,7 @@ TOML_IMPL_NAMESPACE_START
 	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
 	template <typename Iterator, typename T>
-	TOML_NODISCARD
+	TOML_PURE_GETTER
 	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
 		->decltype(&(*start))
 	{

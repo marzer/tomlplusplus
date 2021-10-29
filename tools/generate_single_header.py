@@ -78,34 +78,33 @@ def main():
 
 	# strip various things:
 	if 1:
-		# trailing whitespace
-		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
-		# explicit 'strip this' blocks
-		toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
-		# spdx license identifiers
-		toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, 0, re.I | re.M)
-		# magic comments
-		blank_line = r'(?:[ \t]*\n)'
-		comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
-		toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
-		toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
-		toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
-		# trailing whitespace
-		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
-		# enable warnings -> disable warnings
-		toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
-		# blank lines between consecutive TOML_DISABLE_XXXXX_WARNINGS statements
-		toml_h = re.sub('(TOML_(?:PUSH|DISABLE_[A-Z_]+?)WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_[A-Z_]+?WARNINGS;)', r'\1\n\2', toml_h)
-		# blank lines between consecutive #includes
-		toml_h = re.sub('[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
-		# double blank lines
-		toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
-		# weird spacing edge case between } and pp directives
-		toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
-		# blank lines following opening brackets or a comma
-		toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
-		# blank lines preceeding closing brackets
-		toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+		for i in range(3):
+			# trailing whitespace
+			toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+			# explicit 'strip this' blocks
+			toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
+			# spdx license identifiers
+			toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, 0, re.I | re.M)
+			# double blank lines
+			toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
+			# magic comments
+			blank_line = r'(?:[ \t]*\n)'
+			comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
+			toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
+			toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
+			toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
+			# weird spacing edge case between } and pp directives
+			toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
+			# enable warnings -> disable warnings
+			toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
+			# blank lines between consecutive TOML_XXXXX_WARNINGS statements
+			toml_h = re.sub('(TOML_[A-Z_]+?_WARNINGS;)\n[ \t\n]*\n(TOML_[A-Z_]+?_WARNINGS;)', r'\1\n\2', toml_h)
+			# blank lines between consecutive #includes
+			toml_h = re.sub('[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
+			# blank lines following opening brackets or a comma
+			toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
+			# blank lines preceeding closing brackets
+			toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
 		# ensure only one trailing newline
 		toml_h = toml_h.strip() + '\n'
 

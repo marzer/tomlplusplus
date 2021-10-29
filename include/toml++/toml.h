@@ -13,6 +13,8 @@
 #include "impl/preprocessor.h"
 
 TOML_PUSH_WARNINGS;
+TOML_DISABLE_SPAM_WARNINGS;
+TOML_DISABLE_SWITCH_WARNINGS;
 #if TOML_MSVC
 #pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch (false-positive)
 #elif TOML_CLANG && !TOML_HEADER_ONLY && TOML_IMPLEMENTATION

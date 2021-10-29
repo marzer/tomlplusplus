@@ -82,6 +82,10 @@
     <None Include=".clang-format" />
     <None Include=".editorconfig" />
     <None Include=".gitattributes" />
+    <None Include=".github\ISSUE_TEMPLATE\bug_report.md" />
+    <None Include=".github\ISSUE_TEMPLATE\config.yml" />
+    <None Include=".github\ISSUE_TEMPLATE\feature_request.md" />
+    <None Include=".github\pull_request_template.md" />
     <None Include=".gitignore" />
     <None Include=".runsettings" />
     <None Include="CODE_OF_CONDUCT.md" />

@@ -159,21 +159,21 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string&& k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(std::string&& k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ std::move(k) },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string_view k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(std::string_view k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ k },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const char* k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(const char* k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ k },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
@@ -182,21 +182,21 @@ TOML_IMPL_NAMESPACE_START
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring&& k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(std::wstring&& k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ narrow(k) },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring_view k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(std::wstring_view k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ narrow(k) },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(const wchar_t* k, V&& v, value_flags flags = value_flags::none) //
+		table_init_pair(const wchar_t* k, V&& v, value_flags flags = preserve_source_value_flags) //
 			: key{ narrow(std::wstring_view{ k }) },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
@@ -652,9 +652,6 @@ TOML_NAMESPACE_START
 		/// \param 	val			The new value to insert.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns	\conditional_return{Valid input}
 		/// 			<ul>
 		/// 				<li>An iterator to the insertion position (or the position of the value that prevented insertion)
@@ -669,7 +666,9 @@ TOML_NAMESPACE_START
 		TOML_CONSTRAINED_TEMPLATE((std::is_convertible_v<KeyType&&, std::string_view> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
-		std::pair<iterator, bool> insert(KeyType&& key, ValueType&& val, value_flags flags = value_flags::none)
+		std::pair<iterator, bool> insert(KeyType&& key,
+										 ValueType&& val,
+										 value_flags flags = preserve_source_value_flags)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
@@ -740,15 +739,12 @@ TOML_NAMESPACE_START
 		/// \param 	last	An iterator to one-past-the-last value in the input collection.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 		/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 		/// 		 table will not be replaced.
 		TOML_CONSTRAINED_TEMPLATE((!std::is_convertible_v<Iter, std::string_view> && !impl::is_wide_string<Iter>),
 								  typename Iter)
-		void insert(Iter first, Iter last, value_flags flags = value_flags::none)
+		void insert(Iter first, Iter last, value_flags flags = preserve_source_value_flags)
 		{
 			if (first == last)
 				return;
@@ -803,9 +799,6 @@ TOML_NAMESPACE_START
 		/// \param 	val			The value to insert/assign.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns	\conditional_return{Valid input}
 		/// 			<ul>
 		/// 				<li>An iterator to the value's position
@@ -820,7 +813,7 @@ TOML_NAMESPACE_START
 		template <typename KeyType, typename ValueType>
 		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
 												   ValueType&& val,
-												   value_flags flags = value_flags::none)
+												   value_flags flags = preserve_source_value_flags)
 		{
 			static_assert(
 				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,

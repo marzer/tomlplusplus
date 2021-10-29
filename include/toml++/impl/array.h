@@ -249,7 +249,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		friend class TOML_PARSER_TYPENAME;
-		std::vector<std::unique_ptr<node>> elements;
+		std::vector<std::unique_ptr<node>> elems_;
 
 		TOML_API
 		void preinsertion_resize(size_t idx, size_t count);
@@ -262,7 +262,7 @@ TOML_NAMESPACE_START
 				if (!val)
 					return;
 			}
-			elements.emplace_back(impl::make_node(static_cast<T&&>(val), flags));
+			elems_.emplace_back(impl::make_node(static_cast<T&&>(val), flags));
 		}
 
 		TOML_NODISCARD
@@ -363,11 +363,11 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		explicit array(ElemType&& val, ElemTypes&&... vals)
 		{
-			elements.reserve(sizeof...(ElemTypes) + 1u);
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), value_flags::none);
+			elems_.reserve(sizeof...(ElemTypes) + 1u);
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), preserve_source_value_flags);
 			if constexpr (sizeof...(ElemTypes) > 0)
 			{
-				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals), value_flags::none), ...);
+				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals), preserve_source_value_flags), ...);
 			}
 
 #if TOML_LIFETIME_HOOKS
@@ -442,130 +442,130 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		node& operator[](size_t index) noexcept
 		{
-			return *elements[index];
+			return *elems_[index];
 		}
 
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
 		const node& operator[](size_t index) const noexcept
 		{
-			return *elements[index];
+			return *elems_[index];
 		}
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
 		node& front() noexcept
 		{
-			return *elements.front();
+			return *elems_.front();
 		}
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
 		const node& front() const noexcept
 		{
-			return *elements.front();
+			return *elems_.front();
 		}
 
 		/// \brief	Returns a reference to the last element in the array.
 		TOML_NODISCARD
 		node& back() noexcept
 		{
-			return *elements.back();
+			return *elems_.back();
 		}
 
 		/// \brief	Returns a reference to the last element in the array.
 		TOML_NODISCARD
 		const node& back() const noexcept
 		{
-			return *elements.back();
+			return *elems_.back();
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		iterator begin() noexcept
 		{
-			return { elements.begin() };
+			return { elems_.begin() };
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator begin() const noexcept
 		{
-			return { elements.cbegin() };
+			return { elems_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator cbegin() const noexcept
 		{
-			return { elements.cbegin() };
+			return { elems_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		iterator end() noexcept
 		{
-			return { elements.end() };
+			return { elems_.end() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator end() const noexcept
 		{
-			return { elements.cend() };
+			return { elems_.cend() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator cend() const noexcept
 		{
-			return { elements.cend() };
+			return { elems_.cend() };
 		}
 
 		/// \brief	Returns true if the array is empty.
 		TOML_NODISCARD
 		bool empty() const noexcept
 		{
-			return elements.empty();
+			return elems_.empty();
 		}
 
 		/// \brief	Returns the number of elements in the array.
 		TOML_NODISCARD
 		size_t size() const noexcept
 		{
-			return elements.size();
+			return elems_.size();
 		}
 
 		/// \brief	Reserves internal storage capacity up to a pre-determined number of elements.
 		void reserve(size_t new_capacity)
 		{
-			elements.reserve(new_capacity);
+			elems_.reserve(new_capacity);
 		}
 
 		/// \brief	Removes all elements from the array.
 		void clear() noexcept
 		{
-			elements.clear();
+			elems_.clear();
 		}
 
 		/// \brief	Returns the maximum number of elements that can be stored in an array on the current platform.
 		TOML_NODISCARD
 		size_t max_size() const noexcept
 		{
-			return elements.max_size();
+			return elems_.max_size();
 		}
 
 		/// \brief	Returns the current max number of elements that may be held in the array's internal storage.
 		TOML_NODISCARD
 		size_t capacity() const noexcept
 		{
-			return elements.capacity();
+			return elems_.capacity();
 		}
 
 		/// \brief	Requests the removal of any unused internal storage capacity.
 		void shrink_to_fit()
 		{
-			elements.shrink_to_fit();
+			elems_.shrink_to_fit();
 		}
 
 		/// \brief	Inserts a new element at a specific position in the array.
@@ -588,9 +588,6 @@ TOML_NAMESPACE_START
 		/// \param 	val			The node or value being inserted.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the newly-inserted element.
 		///			 \conditional_return{Input is an empty toml::node_view}
@@ -599,14 +596,14 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, ElemType&& val, value_flags flags = value_flags::none)
+		iterator insert(const_iterator pos, ElemType&& val, value_flags flags = preserve_source_value_flags)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
 				if (!val)
 					return end();
 			}
-			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val), flags)) };
+			return { elems_.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val), flags)) };
 		}
 
 		/// \brief	Repeatedly inserts a new element starting at a specific position in the array.
@@ -638,9 +635,6 @@ TOML_NAMESPACE_START
 		/// \param 	val			The node or value being inserted.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the newly-inserted element.
 		/// 		 \conditional_return{count == 0}
@@ -651,7 +645,10 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, size_t count, ElemType&& val, value_flags flags = value_flags::none)
+		iterator insert(const_iterator pos,
+						size_t count,
+						ElemType&& val,
+						value_flags flags = preserve_source_value_flags)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -660,19 +657,19 @@ TOML_NAMESPACE_START
 			}
 			switch (count)
 			{
-				case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+				case 0: return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
 				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
-					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
+					const auto start_idx = static_cast<size_t>(pos.raw_ - elems_.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
 					for (size_t e = start_idx + count - 1u; i < e; i++)
-						elements[i].reset(impl::make_node(val, flags));
+						elems_[i].reset(impl::make_node(val, flags));
 
 					//# potentially move the initial value into the last element
-					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val), flags));
-					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
+					elems_[i].reset(impl::make_node(static_cast<ElemType&&>(val), flags));
+					return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
 		}
@@ -685,9 +682,6 @@ TOML_NAMESPACE_START
 		/// \param 	last	Iterator to the one-past-the-last node or value being inserted.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the first newly-inserted element.
 		/// 		 \conditional_return{first >= last}
@@ -695,11 +689,11 @@ TOML_NAMESPACE_START
 		/// 		 \conditional_return{All objects in the range were empty toml::node_views}
 		/// 		 A copy of pos
 		template <typename Iter>
-		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = value_flags::none)
+		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = preserve_source_value_flags)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
-				return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+				return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
 			else
 			{
 				auto count		 = distance;
@@ -710,9 +704,9 @@ TOML_NAMESPACE_START
 						if (!(*it))
 							count--;
 					if (!count)
-						return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+						return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
 				}
-				const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
+				const auto start_idx = static_cast<size_t>(pos.raw_ - elems_.cbegin());
 				preinsertion_resize(start_idx, static_cast<size_t>(count));
 				size_t i = start_idx;
 				for (auto it = first; it != last; it++)
@@ -723,11 +717,11 @@ TOML_NAMESPACE_START
 							continue;
 					}
 					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elements[i++].reset(impl::make_node(std::move(*it), flags));
+						elems_[i++].reset(impl::make_node(std::move(*it), flags));
 					else
-						elements[i++].reset(impl::make_node(*it, flags));
+						elems_[i++].reset(impl::make_node(*it, flags));
 				}
-				return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
+				return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 			}
 		}
 
@@ -739,9 +733,6 @@ TOML_NAMESPACE_START
 		/// \param 	ilist		An initializer list containing the values to be inserted.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and a source value is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the first newly-inserted element.
 		/// 		 \conditional_return{Input list is empty}
@@ -751,7 +742,7 @@ TOML_NAMESPACE_START
 		template <typename ElemType>
 		iterator insert(const_iterator pos,
 						std::initializer_list<ElemType> ilist,
-						value_flags flags = value_flags::none)
+						value_flags flags = preserve_source_value_flags)
 		{
 			return insert(pos, ilist.begin(), ilist.end(), flags);
 		}
@@ -787,7 +778,7 @@ TOML_NAMESPACE_START
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
+			return { elems_.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
 		}
 
 		/// \brief	Removes the specified element from the array.
@@ -811,7 +802,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first element immediately following the removed element.
 		iterator erase(const_iterator pos) noexcept
 		{
-			return { elements.erase(pos.raw_) };
+			return { elems_.erase(pos.raw_) };
 		}
 
 		/// \brief	Removes the elements in the range [first, last) from the array.
@@ -836,7 +827,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first element immediately following the last removed element.
 		iterator erase(const_iterator first, const_iterator last) noexcept
 		{
-			return { elements.erase(first.raw_, last.raw_) };
+			return { elems_.erase(first.raw_, last.raw_) };
 		}
 
 		/// \brief	Resizes the array.
@@ -873,11 +864,11 @@ TOML_NAMESPACE_START
 						  "The default element type argument to toml::array::resize may not be toml::node_view.");
 
 			if (!new_size)
-				elements.clear();
-			else if (new_size < elements.size())
-				elements.resize(new_size);
-			else if (new_size > elements.size())
-				insert(cend(), new_size - elements.size(), static_cast<ElemType&&>(default_init_val));
+				elems_.clear();
+			else if (new_size < elems_.size())
+				elems_.resize(new_size);
+			else if (new_size > elems_.size())
+				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val));
 		}
 
 		/// \brief	Shrinks the array to the given size.
@@ -905,8 +896,8 @@ TOML_NAMESPACE_START
 		/// \remarks	Does nothing if the requested size is larger than or equal to the current size.
 		void truncate(size_t new_size)
 		{
-			if (new_size < elements.size())
-				elements.resize(new_size);
+			if (new_size < elems_.size())
+				elems_.resize(new_size);
 		}
 
 		/// \brief	Appends a new element to the end of the array.
@@ -928,13 +919,10 @@ TOML_NAMESPACE_START
 		/// \param 	val			The node or value being added.
 		/// \param	flags		Value flags to apply to new values.
 		///
-		///	\note	When `flags == value_flags::none` and `val` is a value node or node_view, any existing value
-		///			flags will be copied, _not_ set to none.
-		///
 		/// \attention	No insertion takes place if the input value is an empty toml::node_view.
 		/// 			This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		void push_back(ElemType&& val, value_flags flags = value_flags::none)
+		void push_back(ElemType&& val, value_flags flags = preserve_source_value_flags)
 		{
 			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), flags);
 		}
@@ -968,14 +956,14 @@ TOML_NAMESPACE_START
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
 			auto nde = new impl::wrap_node<type>{ static_cast<Args&&>(args)... };
-			elements.emplace_back(nde);
+			elems_.emplace_back(nde);
 			return *nde;
 		}
 
 		/// \brief	Removes the last element from the array.
 		void pop_back() noexcept
 		{
-			elements.pop_back();
+			elems_.pop_back();
 		}
 
 		/// \brief	Gets the element at a specific index.
@@ -1003,7 +991,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		node* get(size_t index) noexcept
 		{
-			return index < elements.size() ? elements[index].get() : nullptr;
+			return index < elems_.size() ? elems_[index].get() : nullptr;
 		}
 
 		/// \brief	Gets the element at a specific index (const overload).
@@ -1014,7 +1002,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const node* get(size_t index) const noexcept
 		{
-			return index < elements.size() ? elements[index].get() : nullptr;
+			return index < elems_.size() ? elems_[index].get() : nullptr;
 		}
 
 		/// \brief	Gets the element at a specific index if it is a particular type.

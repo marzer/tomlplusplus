@@ -81,22 +81,19 @@ TOML_ANON_NAMESPACE_START
 				position_ += 3u;
 		}
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		constexpr bool eof() const noexcept
 		{
 			return position_ >= source_.length();
 		}
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		constexpr bool peek_eof() const noexcept
 		{
 			return eof();
 		}
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_CONST_INLINE_GETTER
 		constexpr bool error() const noexcept
 		{
 			return false;
@@ -138,14 +135,12 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
 		bool eof() const noexcept
 		{
 			return source_->eof();
 		}
 
 		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
 		bool peek_eof() const
 		{
 			using stream_traits = typename std::remove_pointer_t<decltype(source_)>::traits_type;
@@ -153,7 +148,6 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
 		bool error() const noexcept
 		{
 			return !(*source_);
@@ -175,21 +169,19 @@ TOML_ANON_NAMESPACE_START
 		char bytes[4];
 		source_position position;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		std::string_view as_view() const noexcept
 		{
 			return bytes[3] ? std::string_view{ bytes, 4u } : std::string_view{ bytes };
 		}
 
-		TOML_NODISCARD
-		TOML_ATTR(pure)
+		TOML_PURE_GETTER
 		constexpr operator const char32_t&() const noexcept
 		{
 			return value;
 		}
 
-		TOML_NODISCARD
-		TOML_ATTR(pure)
+		TOML_PURE_GETTER
 		constexpr const char32_t& operator*() const noexcept
 		{
 			return value;
@@ -3025,9 +3017,9 @@ TOML_IMPL_NAMESPACE_START
 				{
 					// table arrays are a special case;
 					// the spec dictates we select the most recently declared element in the array.
-					TOML_ASSERT(!child->ref_cast<array>().elements.empty());
-					TOML_ASSERT(child->ref_cast<array>().elements.back()->is_table());
-					parent = &child->ref_cast<array>().elements.back()->ref_cast<table>();
+					TOML_ASSERT(!child->ref_cast<array>().elems_.empty());
+					TOML_ASSERT(child->ref_cast<array>().elems_.back()->is_table());
+					parent = &child->ref_cast<array>().elems_.back()->ref_cast<table>();
 				}
 				else
 				{
@@ -3060,9 +3052,9 @@ TOML_IMPL_NAMESPACE_START
 					table_arrays.push_back(tab_arr);
 					tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
-					tab_arr->elements.emplace_back(new table{});
-					tab_arr->elements.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tab_arr->elements.back()->ref_cast<table>();
+					tab_arr->elems_.emplace_back(new table{});
+					tab_arr->elems_.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tab_arr->elems_.back()->ref_cast<table>();
 				}
 
 				// otherwise we're just making a table
@@ -3084,9 +3076,9 @@ TOML_IMPL_NAMESPACE_START
 					&& impl::find(table_arrays.begin(), table_arrays.end(), &matching_node->ref_cast<array>()))
 				{
 					auto tab_arr = &matching_node->ref_cast<array>();
-					tab_arr->elements.emplace_back(new table{});
-					tab_arr->elements.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tab_arr->elements.back()->ref_cast<table>();
+					tab_arr->elems_.emplace_back(new table{});
+					tab_arr->elems_.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tab_arr->elems_.back()->ref_cast<table>();
 				}
 
 				else if (!is_arr && matching_node->is_table() && !implicit_tables.empty())
@@ -3264,7 +3256,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				auto& arr = nde.ref_cast<array>();
 				auto end  = nde.source_.end;
-				for (auto& v : arr.elements)
+				for (auto& v : arr.elems_)
 				{
 					update_region_ends(*v);
 					if (end < v->source_.end)
@@ -3328,7 +3320,7 @@ TOML_IMPL_NAMESPACE_START
 		advance_and_return_if_error_or_eof({});
 
 		node_ptr arr{ new array{} };
-		auto& vals = reinterpret_cast<array*>(arr.get())->elements;
+		auto& vals = reinterpret_cast<array*>(arr.get())->elems_;
 		enum parse_elem : int
 		{
 			none,

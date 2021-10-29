@@ -183,6 +183,18 @@
     <None Include="include\toml++\impl\node_view_extern.inl">
       <Filter>include\impl</Filter>
     </None>
+    <None Include=".github\pull_request_template.md">
+      <Filter>.github</Filter>
+    </None>
+    <None Include=".github\ISSUE_TEMPLATE\bug_report.md">
+      <Filter>.github</Filter>
+    </None>
+    <None Include=".github\ISSUE_TEMPLATE\config.yml">
+      <Filter>.github</Filter>
+    </None>
+    <None Include=".github\ISSUE_TEMPLATE\feature_request.md">
+      <Filter>.github</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -205,6 +217,9 @@
     </Filter>
     <Filter Include="include\impl">
       <UniqueIdentifier>{4e42aaa3-98cd-4678-9c1c-ffa3eaf519d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".github">
+      <UniqueIdentifier>{e3ab5e86-e053-48a6-9fee-f6442a63aaa6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

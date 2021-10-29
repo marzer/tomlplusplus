@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?> 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
 
-	<Type Name="toml::v2::date">
+	<Type Name="toml::v3::date">
 		<Intrinsic Name="y" Expression="(int)year" />
 		<Intrinsic Name="m" Expression="(int)month" />
 		<Intrinsic Name="d" Expression="(int)day" />
@@ -20,7 +20,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::time">
+	<Type Name="toml::v3::time">
 		<Intrinsic Name="h" Expression="(int)hour" />
 		<Intrinsic Name="m" Expression="(int)minute" />
 		<Intrinsic Name="s" Expression="(int)(second + (int)(nanosecond / 1000000000.0))" />
@@ -40,7 +40,7 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::time_offset">
+	<Type Name="toml::v3::time_offset">
 		<Intrinsic Name="absmin" Expression="((int)minutes ^ ((int)minutes >> 31)) - ((int)minutes >> 31)" />
 		<Intrinsic Name="h" Expression="absmin() / 60u" />
 		<Intrinsic Name="m" Expression="absmin() % 60u" />
@@ -58,7 +58,8 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::stdopt::date_time">
+	<Type Name="toml::v3::stdopt::date_time">
+		<AlternativeType Name="toml::v3::custopt::date_time" />
 		<DisplayString Condition="offset._Has_value">{date}T{time}{offset}</DisplayString>
 		<DisplayString>{date}T{time}</DisplayString>
 		<Expand>
@@ -68,21 +69,21 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::value&lt;*&gt;" Priority="MediumLow">
+	<Type Name="toml::v3::value&lt;*&gt;" Priority="MediumLow">
 		<DisplayString>{{ {val_} }}</DisplayString>
 		<Expand>
 			<Item Name="val_" ExcludeView="simple">val_</Item>
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::value&lt;std::basic_string&lt;char,*&gt;&gt;">
+	<Type Name="toml::v3::value&lt;std::basic_string&lt;char,*&gt;&gt;">
 		<DisplayString>{{ {val_,s8} }}</DisplayString>
 		<Expand>
 			<Item Name="val_" ExcludeView="simple">val_,s8</Item>
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::source_position">
+	<Type Name="toml::v3::source_position">
 		<DisplayString>line {line}, column {column}</DisplayString>
 		<Expand>
 			<Item Name="line" ExcludeView="simple">line</Item>
@@ -90,17 +91,13 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::impl::utf8_codepoint">
-		<DisplayString>{&amp;bytes,s8} ({position})</DisplayString>
-	</Type>
-
-	<Type Name="toml::v2::table">
-		<DisplayString>{map}</DisplayString>
+	<Type Name="toml::v3::table">
+		<DisplayString>{map_}</DisplayString>
 		<Expand>
 			<!-- Modified from std::map visualizer in VS 2019 stl.natvis -->
 			<TreeItems>
-				<Size>map._Mypair._Myval2._Myval2._Mysize</Size>
-				<HeadPointer>map._Mypair._Myval2._Myval2._Myhead-&gt;_Parent</HeadPointer>
+				<Size>map_._Mypair._Myval2._Myval2._Mysize</Size>
+				<HeadPointer>map_._Mypair._Myval2._Myval2._Myhead-&gt;_Parent</HeadPointer>
 				<LeftPointer>_Left</LeftPointer>
 				<RightPointer>_Right</RightPointer>
 				<ValueNode Condition="_Isnil == 0" Name="[{_Myval.first,s8}]">*_Myval.second</ValueNode>
@@ -108,31 +105,31 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::array">
-		<DisplayString>{elements}</DisplayString>
+	<Type Name="toml::v3::array">
+		<DisplayString>{elems_}</DisplayString>
 		<Expand>
 			<!-- Modified from std::vector visualizer in VS 2019 stl.natvis -->
 			<IndexListItems>
-				<Size>elements._Mypair._Myval2._Mylast - elements._Mypair._Myval2._Myfirst</Size>
-				<ValueNode>*elements._Mypair._Myval2._Myfirst[$i]</ValueNode>
+				<Size>elems_._Mypair._Myval2._Mylast - elems_._Mypair._Myval2._Myfirst</Size>
+				<ValueNode>*elems_._Mypair._Myval2._Myfirst[$i]</ValueNode>
 			</IndexListItems>
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v2::noex::parse_error">
+	<Type Name="toml::v3::noex::parse_error">
 		<DisplayString>line {source_.begin.line}: {description_,s8b}</DisplayString>
 	</Type>
 
-	<Type Name="toml::v2::ex::parse_error">
+	<Type Name="toml::v3::ex::parse_error">
 		<DisplayString>line {source_.begin.line}: {_Data._What,s8b}</DisplayString>
 	</Type>
 	
-	<Type Name="toml::v2::noex::parse_result">
-		<DisplayString Condition="!err_">{*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage_.bytes)}</DisplayString>
-		<DisplayString Condition="err_">{*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage_.bytes)}</DisplayString>
+	<Type Name="toml::v3::noex::parse_result">
+		<DisplayString Condition="!err_">{*reinterpret_cast&lt;toml::v3::table*&gt;(&amp;storage_.bytes)}</DisplayString>
+		<DisplayString Condition="err_">{*reinterpret_cast&lt;toml::v3::noex::parse_error*&gt;(&amp;storage_.bytes)}</DisplayString>
 		<Expand>
-			<Item Name="[table]" Condition="!err_">*reinterpret_cast&lt;toml::v2::table*&gt;(&amp;storage_.bytes)</Item>
-			<Item Name="[error]" Condition="err_">*reinterpret_cast&lt;toml::v2::noex::parse_error*&gt;(&amp;storage_.bytes)</Item>
+			<Item Name="[table]" Condition="!err_">*reinterpret_cast&lt;toml::v3::table*&gt;(&amp;storage_.bytes)</Item>
+			<Item Name="[error]" Condition="err_">*reinterpret_cast&lt;toml::v3::noex::parse_error*&gt;(&amp;storage_.bytes)</Item>
 		</Expand>
 	</Type>
 

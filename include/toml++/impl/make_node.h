@@ -37,11 +37,6 @@ TOML_IMPL_NAMESPACE_START
 			if constexpr (std::is_same_v<remove_cvref<T>, value_type>)
 			{
 				out = new value_type{ static_cast<T&&>(val) };
-
-				// only override the flags if the new ones are nonzero
-				// (so the copy/move ctor does the right thing in the general case)
-				if (flags != value_flags::none)
-					out->flags(flags);
 			}
 
 			// creating from raw value
@@ -63,9 +58,10 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else
 					out = new value_type{ static_cast<T&&>(val) };
-
-				out->flags(flags);
 			}
+
+			if (flags != preserve_source_value_flags)
+				out->flags(flags);
 
 			return out;
 		}
@@ -73,7 +69,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(T && val, value_flags flags = value_flags::none)
+	auto* make_node(T && val, value_flags flags = preserve_source_value_flags)
 	{
 		using type = unwrap_node<remove_cvref<T>>;
 		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
@@ -96,7 +92,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(inserter<T> && val, value_flags flags = value_flags::none)
+	auto* make_node(inserter<T> && val, value_flags flags = preserve_source_value_flags)
 	{
 		return make_node(static_cast<T&&>(val.value), flags);
 	}
