@@ -358,15 +358,15 @@ TEST_CASE("tables - insertion and erasure")
 #endif // TOML_WINDOWS_COMPAT
 }
 
-TEST_CASE("tables - default_formatter")
+TEST_CASE("tables - toml_formatter")
 {
 	static constexpr auto to_string = [](std::string_view some_toml,
-										 format_flags flags			= default_formatter::default_flags,
+										 format_flags flags			= toml_formatter::default_flags,
 										 format_flags exclude_flags = format_flags::none)
 	{
 		auto val = toml::parse(some_toml);
 		std::stringstream ss;
-		ss << default_formatter{ val, flags & ~(exclude_flags) };
+		ss << toml_formatter{ val, flags & ~(exclude_flags) };
 		return ss.str();
 	};
 
@@ -490,7 +490,7 @@ key8 = [
     'unless i dun goofed',
     'i guess thats what tests are for'
 ])"sv;
-		CHECK(to_string(input, default_formatter::default_flags, format_flags::indent_sub_tables)
+		CHECK(to_string(input, toml_formatter::default_flags, format_flags::indent_sub_tables)
 			  == expected_without_indented_subtables);
 
 		constexpr auto expected_without_indented_arrays = R"(key1 = 'val1'
@@ -519,7 +519,7 @@ key5 = 'val'
     'unless i dun goofed',
     'i guess thats what tests are for'
     ])"sv;
-		CHECK(to_string(input, default_formatter::default_flags, format_flags::indent_array_elements)
+		CHECK(to_string(input, toml_formatter::default_flags, format_flags::indent_array_elements)
 			  == expected_without_indented_arrays);
 
 		constexpr auto expected_without_indentation = R"(key1 = 'val1'
@@ -548,7 +548,7 @@ key8 = [
 'unless i dun goofed',
 'i guess thats what tests are for'
 ])"sv;
-		CHECK(to_string(input, default_formatter::default_flags, format_flags::indentation)
+		CHECK(to_string(input, toml_formatter::default_flags, format_flags::indentation)
 			  == expected_without_indentation);
 	}
 }

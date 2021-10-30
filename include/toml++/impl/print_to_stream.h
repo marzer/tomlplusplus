@@ -80,6 +80,8 @@ TOML_IMPL_NAMESPACE_START
 	TOML_API
 	void print_to_stream(std::ostream&, const source_region&);
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 	TOML_API
 	void print_to_stream(std::ostream&, const array&);
 
@@ -106,6 +108,8 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_API
 	void print_to_stream(std::ostream&, const value<date_time>&);
+
+#endif
 
 	template <typename T>
 	inline void print_to_stream_with_escapes(std::ostream & stream, const T& str)

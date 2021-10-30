@@ -14,7 +14,7 @@
 #include "print_to_stream.h"
 #include "source_region.h"
 #include "date_time.h"
-#include "default_formatter.h"
+#include "toml_formatter.h"
 #include "value.h"
 #include "array.h"
 #include "table.h"
@@ -403,59 +403,63 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const array& arr)
 	{
-		stream << default_formatter{ arr };
+		stream << toml_formatter{ arr };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const table& tbl)
 	{
-		stream << default_formatter{ tbl };
+		stream << toml_formatter{ tbl };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<std::string>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<int64_t>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<double>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<bool>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<date>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<time>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<date_time>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
+
+#endif
 }
 TOML_IMPL_NAMESPACE_END;
 

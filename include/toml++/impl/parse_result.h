@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.h"
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 #include "table.h"
 #include "parse_error.h"
@@ -16,6 +16,15 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_START(noex);
 
 	/// \brief	The result of a parsing operation.
+	///
+	/// \availability <strong>This type only exists when exceptions are disabled.</strong>
+	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
+	/// #if TOML_EXCEPTIONS
+	///		using parse_result = table;
+	/// #else
+	///		class parse_result { // ...
+	///	#endif
+	/// \ecpp
 	///
 	/// \detail A parse_result is effectively a discriminated union containing either a toml::table
 	/// 		or a toml::parse_error. Most member functions assume a particular one of these two states,
@@ -41,15 +50,6 @@ TOML_NAMESPACE_START
 	/// unconditionally safe; when parsing fails these just return 'empty' values. A ranged-for loop on a failed
 	/// parse_result is also safe since `begin()` and `end()` return the same iterator and will not lead to any
 	/// dereferences and iterations.
-	///
-	/// \availability <strong>This type only exists when exceptions are disabled.</strong>
-	/// 		 Otherwise parse_result is just an alias for toml::table: \cpp
-	/// #if TOML_EXCEPTIONS
-	///		using parse_result = table;
-	/// #else
-	///		class parse_result { // ...
-	///	#endif
-	/// \ecpp
 	class parse_result
 	{
 	  private:
@@ -384,4 +384,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_PARSER && !TOML_EXCEPTIONS
+#endif // TOML_ENABLE_PARSER && !TOML_EXCEPTIONS

@@ -25,7 +25,12 @@
 #include <vector>
 #include <array>
 #ifdef _WIN32
-#include <windows.h>
+#ifdef _MSC_VER
+extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);
+#pragma comment(lib, "Kernel32.lib")
+#else
+#include <Windows.h>
+#endif
 #endif
 
 namespace

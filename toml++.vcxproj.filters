@@ -13,10 +13,10 @@
     <ClInclude Include="include\toml++\impl\date_time.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\default_formatter.h">
+    <ClInclude Include="include\toml++\impl\toml_formatter.h">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\default_formatter.inl">
+    <ClInclude Include="include\toml++\impl\toml_formatter.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\formatter.h">

@@ -4,12 +4,17 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "preprocessor.h"
+#if TOML_ENABLE_JSON_FORMATTER
+
 #include "formatter.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
+	///
+	/// \availability This class is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
 	///
 	/// \detail \cpp
 	/// auto some_toml = toml::parse(R"(
@@ -77,7 +82,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		/// \brief	Constructs a JSON formatter and binds it to a toml::parse_result.
 		///
@@ -129,3 +134,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
+#endif // TOML_ENABLE_JSON_FORMATTER

@@ -27,7 +27,7 @@ TOML_IMPL_NAMESPACE_START
 						 const parse_result* source_pr,
 						 const formatter_constants& constants,
 						 const formatter_config& config) noexcept //
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		: source_{ source_pr && *source_pr ? &source_pr->table() : source_node },
 		  result_{ source_pr },
 #else
@@ -248,7 +248,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool formatter::dump_failed_parse_result()

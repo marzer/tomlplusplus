@@ -38,8 +38,8 @@
     <ClInclude Include="include\toml++\impl\array.h" />
     <ClInclude Include="include\toml++\impl\array.inl" />
     <ClInclude Include="include\toml++\impl\date_time.h" />
-    <ClInclude Include="include\toml++\impl\default_formatter.h" />
-    <ClInclude Include="include\toml++\impl\default_formatter.inl" />
+    <ClInclude Include="include\toml++\impl\toml_formatter.h" />
+    <ClInclude Include="include\toml++\impl\toml_formatter.inl" />
     <ClInclude Include="include\toml++\impl\formatter.h" />
     <ClInclude Include="include\toml++\impl\formatter.inl" />
     <ClInclude Include="include\toml++\impl\forward_declarations.h" />

@@ -28,7 +28,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 	  private:
 		const node* source_;
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_;
 #endif
 		const formatter_constants* constants_;

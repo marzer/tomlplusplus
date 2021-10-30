@@ -100,7 +100,7 @@ TOML_NAMESPACE_START
 	template <typename>
 	class value;
 
-	class default_formatter;
+	class toml_formatter;
 	class json_formatter;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
@@ -349,6 +349,10 @@ TOML_NAMESPACE_START // abi namespace
 	inserter(T &&) -> inserter<T&&>;
 	template <typename T>
 	inserter(T&) -> inserter<T&>;
+
+	/// \brief The 'default' formatter used by TOML objects when they are printed to a stream.
+	/// \detail This is an alias for #toml::toml_formatter.
+	using default_formatter = toml_formatter;
 }
 TOML_NAMESPACE_END;
 

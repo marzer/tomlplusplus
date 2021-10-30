@@ -39,7 +39,7 @@ TOML_DISABLE_SWITCH_WARNINGS;
 #include "impl/parse_result.h"
 #include "impl/parser.h"
 #include "impl/formatter.h"
-#include "impl/default_formatter.h"
+#include "impl/toml_formatter.h"
 #include "impl/json_formatter.h"
 
 #if TOML_IMPLEMENTATION
@@ -53,7 +53,7 @@ TOML_DISABLE_SWITCH_WARNINGS;
 #include "impl/table.inl"
 #include "impl/parser.inl"
 #include "impl/formatter.inl"
-#include "impl/default_formatter.inl"
+#include "impl/toml_formatter.inl"
 #include "impl/json_formatter.inl"
 
 #endif // TOML_IMPLEMENTATION

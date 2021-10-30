@@ -857,8 +857,11 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	new_size			The number of elements the array will have after resizing.
 		/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
+		/// \param	flags				Value flags to apply to new values created if new elements are created by growing.
 		template <typename ElemType>
-		void resize(size_t new_size, ElemType&& default_init_val)
+		void resize(size_t new_size,
+					ElemType&& default_init_val,
+					value_flags default_init_flags = preserve_source_value_flags)
 		{
 			static_assert(!is_node_view<ElemType>,
 						  "The default element type argument to toml::array::resize may not be toml::node_view.");
@@ -868,7 +871,7 @@ TOML_NAMESPACE_START
 			else if (new_size < elems_.size())
 				elems_.resize(new_size);
 			else if (new_size > elems_.size())
-				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val));
+				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val), default_init_flags);
 		}
 
 		/// \brief	Shrinks the array to the given size.
@@ -1161,12 +1164,18 @@ TOML_NAMESPACE_START
 
 		/// @}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		/// \brief	Prints the array out to a stream as formatted TOML.
+		///
+		/// \availability This operator is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
 		friend std::ostream& operator<<(std::ostream& lhs, const array& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
 		}
+
+#endif
 	};
 }
 TOML_NAMESPACE_END;

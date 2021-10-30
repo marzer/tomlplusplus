@@ -334,11 +334,10 @@
 	#include TOML_CONFIG_HEADER
 #endif
  
-#ifdef DOXYGEN
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 1
+// header-only mode
+#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // TOML_HEADER_ONLY was TOML_ALL_INLINE pre-2.0
+	#define TOML_HEADER_ONLY TOML_ALL_INLINE
 #endif
-
 #if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 1
@@ -348,6 +347,7 @@
 	#define TOML_HEADER_ONLY 0
 #endif
 
+// extern templates (for !TOML_HEADER_ONLY)
 #ifndef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 1
 #endif
@@ -356,6 +356,7 @@
 	#define TOML_EXTERN_TEMPLATES 0
 #endif
 
+// internal implementation switch
 #if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
@@ -363,34 +364,49 @@
 	#define TOML_IMPLEMENTATION 0
 #endif
 
+// dllexport etc
 #ifndef TOML_API
 	#define TOML_API
 #endif
 
+// experimental language features
+#if (defined(TOML_UNRELEASED_FEATURES) && TOML_UNRELEASED_FEATURES) || TOML_INTELLISENSE
+	#undef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 1
+#endif
 #ifndef TOML_UNRELEASED_FEATURES
-	#if TOML_INTELLISENSE
-		#define TOML_UNRELEASED_FEATURES 1
-	#else
-		#define TOML_UNRELEASED_FEATURES 0
-	#endif
+	#define TOML_UNRELEASED_FEATURES 0
 #endif
 
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
+// parser
+#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // TOML_ENABLE_PARSER was TOML_PARSER pre-3.0
+	#define TOML_ENABLE_PARSER TOML_PARSER
+#endif
+#if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
+	#undef TOML_ENABLE_PARSER
+	#define TOML_ENABLE_PARSER 1
 #endif
 
-#if !defined(TOML_PARSER) || (defined(TOML_PARSER) && TOML_PARSER) || TOML_INTELLISENSE
-	#undef TOML_PARSER
-	#define TOML_PARSER 1
+// toml formatter
+#if !defined(TOML_ENABLE_TOML_FORMATTER)												\
+		|| (defined(TOML_ENABLE_TOML_FORMATTER) && TOML_ENABLE_TOML_FORMATTER)	\
+		|| TOML_INTELLISENSE
+	#undef TOML_ENABLE_TOML_FORMATTER
+	#define TOML_ENABLE_TOML_FORMATTER 1
 #endif
 
-#ifndef TOML_MAX_NESTED_VALUES
-	#define TOML_MAX_NESTED_VALUES 256
-	// this refers to the depth of nested values, e.g. inline tables and arrays.
-	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
+// json formatter
+#if !defined(TOML_ENABLE_JSON_FORMATTER)										\
+		|| (defined(TOML_ENABLE_JSON_FORMATTER) && TOML_ENABLE_JSON_FORMATTER)	\
+		|| TOML_INTELLISENSE
+	#undef TOML_ENABLE_JSON_FORMATTER
+	#define TOML_ENABLE_JSON_FORMATTER 1
 #endif
 
-#if !defined(TOML_WINDOWS_COMPAT) || (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT) || TOML_INTELLISENSE
+// windows compat
+#if !defined(TOML_WINDOWS_COMPAT)									\
+		|| (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT)	\
+		|| TOML_INTELLISENSE
 	#undef TOML_WINDOWS_COMPAT
 	#define TOML_WINDOWS_COMPAT 1
 #endif
@@ -404,10 +420,21 @@
 	#define TOML_INCLUDE_WINDOWS_H 0
 #endif
 
+// custom optional
 #ifdef TOML_OPTIONAL_TYPE
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
 #else
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
+#ifndef TOML_UNDEF_MACROS
+	#define TOML_UNDEF_MACROS 1
+#endif
+
+#ifndef TOML_MAX_NESTED_VALUES
+	#define TOML_MAX_NESTED_VALUES 256
+	// this refers to the depth of nested values, e.g. inline tables and arrays.
+	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
 #ifdef TOML_CHAR_8_STRINGS
@@ -420,10 +447,6 @@
 	#if !TOML_LARGE_FILES
 		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
 	#endif
-#endif
-
-#ifdef TOML_ALL_INLINE
-	#error Support for TOML_ALL_INLINE was deprecated in toml++ 2.0.0 and removed in 3.0.0. Use TOML_HEADER_ONLY instead.
 #endif
 
 //#====================================================================================================================
@@ -940,11 +963,24 @@ TOML_ENABLE_WARNINGS;
 /// 		 (e.g. [tl::optional](https://github.com/TartanLlama/optional)).
 
 
-/// \def TOML_PARSER
-/// \brief Sets whether the parser-related parts of the library are included.
-/// \detail Defaults to `1`.
-/// \remarks If you don't need to parse TOML data from any strings or files (e.g. you're only using the library to
-/// 		 serialize data as TOML), setting `TOML_PARSER` to `0` can yield decent compilation speed improvements.
+/// \def		TOML_ENABLE_PARSER
+/// \brief		Sets whether the parser-related parts of the library are included.
+/// \detail		Defaults to `1`.
+/// \remarks	If you don't parse any TOML from files or strings, setting `TOML_ENABLE_PARSER`
+///				to `0` can improve compilation speed and reduce binary size.
+
+
+/// \def		TOML_ENABLE_TOML_FORMATTER
+/// \brief		Sets whether the #toml::toml_formatter is enabled.
+/// \detail		Defaults to `1`.
+/// \remarks	If you don't need to re-serialize TOML data, setting `TOML_ENABLE_TOML_FORMATTER`
+///				to `0` can improve compilation speed and reduce binary size.
+
+/// \def		TOML_ENABLE_JSON_FORMATTER
+/// \brief		Sets whether the #toml::json_formatter is enabled.
+/// \detail		Defaults to `1`.
+/// \remarks	If you don't need to re-serialize TOML data as JSON, setting `TOML_ENABLE_JSON_FORMATTER`
+///				to `0` can improve compilation speed and reduce binary size.
 
 
 #define TOML_SMALL_FLOAT_TYPE

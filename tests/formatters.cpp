@@ -154,7 +154,7 @@ TEST_CASE("formatters")
 
 	};
 
-	SECTION("default_formatter")
+	SECTION("toml_formatter")
 	{
 		static constexpr auto expected = R"(*****
 strings = [
@@ -209,7 +209,7 @@ one = 1
 zero = 0
 *****)"sv;
 
-		CHECK_FORMATTER(default_formatter, data, expected);
+		CHECK_FORMATTER(toml_formatter, data, expected);
 	}
 
 	SECTION("json_formatter")

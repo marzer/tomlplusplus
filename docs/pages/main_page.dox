@@ -362,7 +362,7 @@
  }
  \eout
  \see
- 	- toml::default_formatter
+ 	- toml::toml_formatter
  	- toml::json_formatter
 
 
@@ -393,10 +393,11 @@
  #include "global_header_that_includes_toml++.h"
  \ecpp
 
- <strong>Bonus Step: Disable the parser if you don't need it</strong>
+ <strong>Bonus Step: Disable any library features you don't need</strong>
 
- If all you need to do is serialize some code-generated TOML and don't actually need the parser at all you can
- set \ref TOML_PARSER to `0` to disable the parser altogether. This can yield fairly significant compilation
+ Some library features can be disabled wholesale so you can avoid paying their the compilation cost if you don't need them.
+ For example, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all you, can
+ set \ref TOML_ENABLE_PARSER to `0` to disable the parser altogether. This can yield fairly significant compilation
  speedups since the parser accounts for a good chunk of the library's code.
 
 

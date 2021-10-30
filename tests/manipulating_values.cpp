@@ -88,7 +88,7 @@ TEST_CASE("values - construction")
 #endif
 }
 
-TEST_CASE("values - default_formatter")
+TEST_CASE("values - toml_formatter")
 {
 	static constexpr auto print_value = [](auto&& raw)
 	{

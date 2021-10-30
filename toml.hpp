@@ -353,11 +353,10 @@
 	#include TOML_CONFIG_HEADER
 #endif
 
-#ifdef DOXYGEN
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 1
+// header-only mode
+#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // TOML_HEADER_ONLY was TOML_ALL_INLINE pre-2.0
+	#define TOML_HEADER_ONLY TOML_ALL_INLINE
 #endif
-
 #if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 1
@@ -367,6 +366,7 @@
 	#define TOML_HEADER_ONLY 0
 #endif
 
+// extern templates (for !TOML_HEADER_ONLY)
 #ifndef TOML_EXTERN_TEMPLATES
 	#define TOML_EXTERN_TEMPLATES 1
 #endif
@@ -375,6 +375,7 @@
 	#define TOML_EXTERN_TEMPLATES 0
 #endif
 
+// internal implementation switch
 #if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
 	#undef TOML_IMPLEMENTATION
 	#define TOML_IMPLEMENTATION 1
@@ -382,34 +383,49 @@
 	#define TOML_IMPLEMENTATION 0
 #endif
 
+// dllexport etc
 #ifndef TOML_API
 	#define TOML_API
 #endif
 
+// experimental language features
+#if (defined(TOML_UNRELEASED_FEATURES) && TOML_UNRELEASED_FEATURES) || TOML_INTELLISENSE
+	#undef TOML_UNRELEASED_FEATURES
+	#define TOML_UNRELEASED_FEATURES 1
+#endif
 #ifndef TOML_UNRELEASED_FEATURES
-	#if TOML_INTELLISENSE
-		#define TOML_UNRELEASED_FEATURES 1
-	#else
-		#define TOML_UNRELEASED_FEATURES 0
-	#endif
+	#define TOML_UNRELEASED_FEATURES 0
 #endif
 
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
+// parser
+#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // TOML_ENABLE_PARSER was TOML_PARSER pre-3.0
+	#define TOML_ENABLE_PARSER TOML_PARSER
+#endif
+#if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
+	#undef TOML_ENABLE_PARSER
+	#define TOML_ENABLE_PARSER 1
 #endif
 
-#if !defined(TOML_PARSER) || (defined(TOML_PARSER) && TOML_PARSER) || TOML_INTELLISENSE
-	#undef TOML_PARSER
-	#define TOML_PARSER 1
+// toml formatter
+#if !defined(TOML_ENABLE_TOML_FORMATTER)												\
+		|| (defined(TOML_ENABLE_TOML_FORMATTER) && TOML_ENABLE_TOML_FORMATTER)	\
+		|| TOML_INTELLISENSE
+	#undef TOML_ENABLE_TOML_FORMATTER
+	#define TOML_ENABLE_TOML_FORMATTER 1
 #endif
 
-#ifndef TOML_MAX_NESTED_VALUES
-	#define TOML_MAX_NESTED_VALUES 256
-	// this refers to the depth of nested values, e.g. inline tables and arrays.
-	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
+// json formatter
+#if !defined(TOML_ENABLE_JSON_FORMATTER)										\
+		|| (defined(TOML_ENABLE_JSON_FORMATTER) && TOML_ENABLE_JSON_FORMATTER)	\
+		|| TOML_INTELLISENSE
+	#undef TOML_ENABLE_JSON_FORMATTER
+	#define TOML_ENABLE_JSON_FORMATTER 1
 #endif
 
-#if !defined(TOML_WINDOWS_COMPAT) || (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT) || TOML_INTELLISENSE
+// windows compat
+#if !defined(TOML_WINDOWS_COMPAT)									\
+		|| (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT)	\
+		|| TOML_INTELLISENSE
 	#undef TOML_WINDOWS_COMPAT
 	#define TOML_WINDOWS_COMPAT 1
 #endif
@@ -423,10 +439,21 @@
 	#define TOML_INCLUDE_WINDOWS_H 0
 #endif
 
+// custom optional
 #ifdef TOML_OPTIONAL_TYPE
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
 #else
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
+#ifndef TOML_UNDEF_MACROS
+	#define TOML_UNDEF_MACROS 1
+#endif
+
+#ifndef TOML_MAX_NESTED_VALUES
+	#define TOML_MAX_NESTED_VALUES 256
+	// this refers to the depth of nested values, e.g. inline tables and arrays.
+	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
 #ifdef TOML_CHAR_8_STRINGS
@@ -439,10 +466,6 @@
 	#if !TOML_LARGE_FILES
 		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
 	#endif
-#endif
-
-#ifdef TOML_ALL_INLINE
-	#error Support for TOML_ALL_INLINE was deprecated in toml++ 2.0.0 and removed in 3.0.0. Use TOML_HEADER_ONLY instead.
 #endif
 
 #ifndef TOML_CPP_VERSION
@@ -1046,7 +1069,7 @@ TOML_NAMESPACE_START
 	template <typename>
 	class value;
 
-	class default_formatter;
+	class toml_formatter;
 	class json_formatter;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
@@ -1208,6 +1231,8 @@ TOML_NAMESPACE_START // abi namespace
 	inserter(T &&) -> inserter<T&&>;
 	template <typename T>
 	inserter(T&) -> inserter<T&>;
+
+	using default_formatter = toml_formatter;
 }
 TOML_NAMESPACE_END;
 
@@ -1845,6 +1870,8 @@ TOML_IMPL_NAMESPACE_START
 	TOML_API
 	void print_to_stream(std::ostream&, const source_region&);
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 	TOML_API
 	void print_to_stream(std::ostream&, const array&);
 
@@ -1871,6 +1898,8 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_API
 	void print_to_stream(std::ostream&, const value<date_time>&);
+
+#endif
 
 	template <typename T>
 	inline void print_to_stream_with_escapes(std::ostream & stream, const T& str)
@@ -3303,12 +3332,16 @@ TOML_NAMESPACE_START
 			return node_view{ nullptr };
 		}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		friend std::ostream& operator<<(std::ostream& os, const node_view& nv)
 		{
 			if (nv.node_)
 				nv.node_->visit([&os](const auto& n) { os << n; });
 			return os;
 		}
+
+#endif
 	};
 
 	template <typename T>
@@ -4073,11 +4106,15 @@ TOML_NAMESPACE_START
 				return impl::node_type_of<value_type> >= impl::node_type_of<T>;
 		}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		friend std::ostream& operator<<(std::ostream& lhs, const value& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
 		}
+
+#endif
 	};
 
 	template <typename T>
@@ -5105,7 +5142,9 @@ TOML_NAMESPACE_START
 		}
 
 		template <typename ElemType>
-		void resize(size_t new_size, ElemType&& default_init_val)
+		void resize(size_t new_size,
+					ElemType&& default_init_val,
+					value_flags default_init_flags = preserve_source_value_flags)
 		{
 			static_assert(!is_node_view<ElemType>,
 						  "The default element type argument to toml::array::resize may not be toml::node_view.");
@@ -5115,7 +5154,7 @@ TOML_NAMESPACE_START
 			else if (new_size < elems_.size())
 				elems_.resize(new_size);
 			else if (new_size > elems_.size())
-				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val));
+				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val), default_init_flags);
 		}
 
 		void truncate(size_t new_size)
@@ -5246,11 +5285,15 @@ TOML_NAMESPACE_START
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>);
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		friend std::ostream& operator<<(std::ostream& lhs, const array& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
 		}
+
+#endif
 	};
 }
 TOML_NAMESPACE_END;
@@ -5989,11 +6032,15 @@ TOML_NAMESPACE_START
 			return !equal(lhs, rhs);
 		}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		friend std::ostream& operator<<(std::ostream& lhs, const table& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
 		}
+
+#endif
 	};
 }
 TOML_NAMESPACE_END;
@@ -6929,7 +6976,7 @@ TOML_POP_WARNINGS;
 
 //********  impl/parse_error.h  ****************************************************************************************
 
-#if defined(DOXYGEN) || TOML_PARSER
+#if TOML_ENABLE_PARSER
 
 TOML_DISABLE_WARNINGS;
 #if TOML_EXCEPTIONS
@@ -7032,11 +7079,11 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-#endif // TOML_PARSER
+#endif // TOML_ENABLE_PARSER
 
 //********  impl/parse_result.h  ***************************************************************************************
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 TOML_PUSH_WARNINGS;
 
@@ -7311,11 +7358,11 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-#endif // TOML_PARSER && !TOML_EXCEPTIONS
+#endif // TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 
 //********  impl/parser.h  *********************************************************************************************
 
-#if defined(DOXYGEN) || TOML_PARSER
+#if TOML_ENABLE_PARSER
 
 TOML_PUSH_WARNINGS;
 
@@ -7412,7 +7459,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-#endif // TOML_PARSER
+#endif // TOML_ENABLE_PARSER
 
 //********  impl/formatter.h  ******************************************************************************************
 
@@ -7437,7 +7484,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 	  private:
 		const node* source_;
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		const parse_result* result_;
 #endif
 		const formatter_constants* constants_;
@@ -7592,13 +7639,15 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/default_formatter.h  **********************************************************************************
+//********  impl/toml_formatter.h  *************************************************************************************
+
+#if TOML_ENABLE_TOML_FORMATTER
 
 TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class default_formatter : impl::formatter
+	class toml_formatter : impl::formatter
 	{
 	  private:
 
@@ -7649,20 +7698,20 @@ TOML_NAMESPACE_START
 													| format_flags::indentation;
 
 		TOML_NODISCARD_CTOR
-		explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
+		explicit toml_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
 			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
-		explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
+		explicit toml_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
 			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #endif
 
-		friend std::ostream& operator<<(std::ostream& lhs, default_formatter& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter& rhs)
 		{
 			rhs.attach(lhs);
 			rhs.key_path_.clear();
@@ -7671,7 +7720,7 @@ TOML_NAMESPACE_START
 			return lhs;
 		}
 
-		friend std::ostream& operator<<(std::ostream& lhs, default_formatter&& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter&& rhs)
 		{
 			return lhs << rhs; // as lvalue
 		}
@@ -7681,7 +7730,11 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
+#endif // TOML_ENABLE_TOML_FORMATTER
+
 //********  impl/json_formatter.h  *************************************************************************************
+
+#if TOML_ENABLE_JSON_FORMATTER
 
 TOML_PUSH_WARNINGS;
 
@@ -7718,7 +7771,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
@@ -7744,6 +7797,8 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
+
+#endif // TOML_ENABLE_JSON_FORMATTER
 
 #if TOML_IMPLEMENTATION
 
@@ -8225,59 +8280,63 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const array& arr)
 	{
-		stream << default_formatter{ arr };
+		stream << toml_formatter{ arr };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const table& tbl)
 	{
-		stream << default_formatter{ tbl };
+		stream << toml_formatter{ tbl };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<std::string>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<int64_t>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<double>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<bool>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<date>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<time>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const value<date_time>& val)
 	{
-		stream << default_formatter{ val };
+		stream << toml_formatter{ val };
 	}
+
+#endif
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -8871,7 +8930,7 @@ TOML_POP_WARNINGS;
 
 //********  impl/parser.inl  *******************************************************************************************
 
-#if TOML_PARSER
+#if TOML_ENABLE_PARSER
 
 TOML_DISABLE_WARNINGS;
 #include <istream>
@@ -12479,7 +12538,7 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-#endif // TOML_PARSER
+#endif // TOML_ENABLE_PARSER
 
 //********  impl/formatter.inl  ****************************************************************************************
 
@@ -12492,7 +12551,7 @@ TOML_IMPL_NAMESPACE_START
 						 const parse_result* source_pr,
 						 const formatter_constants& constants,
 						 const formatter_config& config) noexcept //
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 		: source_{ source_pr && *source_pr ? &source_pr->table() : source_node },
 		  result_{ source_pr },
 #else
@@ -12713,7 +12772,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-#if TOML_PARSER && !TOML_EXCEPTIONS
+#if TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool formatter::dump_failed_parse_result()
@@ -12741,7 +12800,9 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-//********  impl/default_formatter.inl  ********************************************************************************
+//********  impl/toml_formatter.inl  ***********************************************************************************
+
+#if TOML_ENABLE_TOML_FORMATTER
 
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
@@ -12749,7 +12810,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	size_t default_formatter::count_inline_columns(const node& node) noexcept
+	size_t toml_formatter::count_inline_columns(const node& node) noexcept
 	{
 		switch (node.type())
 		{
@@ -12832,13 +12893,13 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool default_formatter::forces_multiline(const node& node, size_t starting_column_bias) noexcept
+	bool toml_formatter::forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
 		return (count_inline_columns(node) + starting_column_bias) >= line_wrap_cols;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_pending_table_separator()
+	void toml_formatter::print_pending_table_separator()
 	{
 		if (pending_table_separator_)
 		{
@@ -12849,13 +12910,13 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_key_segment(std::string_view str)
+	void toml_formatter::print_key_segment(std::string_view str)
 	{
 		base::print_string(str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_key_path()
+	void toml_formatter::print_key_path()
 	{
 		for (const auto& segment : key_path_)
 		{
@@ -12867,7 +12928,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_inline(const table& tbl)
+	void toml_formatter::print_inline(const table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream(base::stream(), "{}"sv);
@@ -12901,7 +12962,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print(const array& arr)
+	void toml_formatter::print(const array& arr)
 	{
 		if (arr.empty())
 			impl::print_to_stream(base::stream(), "[]"sv);
@@ -12961,7 +13022,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print(const table& tbl)
+	void toml_formatter::print(const table& tbl)
 	{
 		static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
 		{
@@ -13082,7 +13143,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print()
+	void toml_formatter::print()
 	{
 		if (base::dump_failed_parse_result())
 			return;
@@ -13112,7 +13173,11 @@ TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
+#endif // TOML_ENABLE_TOML_FORMATTER
+
 //********  impl/json_formatter.inl  ***********************************************************************************
+
+#if TOML_ENABLE_JSON_FORMATTER
 
 TOML_PUSH_WARNINGS;
 
@@ -13211,6 +13276,8 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
+
+#endif // TOML_ENABLE_JSON_FORMATTER
 
 #endif // TOML_IMPLEMENTATION
 

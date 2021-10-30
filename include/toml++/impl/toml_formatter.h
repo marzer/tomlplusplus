@@ -4,6 +4,9 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "preprocessor.h"
+#if TOML_ENABLE_TOML_FORMATTER
+
 #include "formatter.h"
 #include "std_vector.h"
 #include "header_start.h"
@@ -11,6 +14,8 @@
 TOML_NAMESPACE_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
+	///
+	/// \availability This class is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
 	///
 	/// \remarks You generally don't need to create an instance of this class explicitly; the stream
 	/// 		 operators of the TOML node types already print themselves out using this formatter.
@@ -24,7 +29,7 @@ TOML_NAMESPACE_START
 	/// };
 	///
 	/// // these two lines are equivalent:
-	///	std::cout << toml::default_formatter{ tbl } << "\n";
+	///	std::cout << toml::toml_formatter{ tbl } << "\n";
 	///	std::cout << tbl << "\n";
 	///
 	/// \ecpp
@@ -37,7 +42,7 @@ TOML_NAMESPACE_START
 	/// [table]
 	/// foo = "bar"
 	/// \eout
-	class default_formatter : impl::formatter
+	class toml_formatter : impl::formatter
 	{
 	  private:
 		/// \cond
@@ -84,33 +89,33 @@ TOML_NAMESPACE_START
 		/// \endcond
 
 	  public:
-		/// \brief	The default flags for a default_formatter.
+		/// \brief	The default flags for a toml_formatter.
 		static constexpr format_flags default_flags = format_flags::allow_literal_strings	 //
 													| format_flags::allow_multi_line_strings //
 													| format_flags::allow_value_format_flags //
 													| format_flags::indentation;
 
-		/// \brief	Constructs a default formatter and binds it to a TOML object.
+		/// \brief	Constructs a TOML formatter and binds it to a TOML object.
 		///
 		/// \param 	source	The source TOML object.
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
-		explicit default_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
+		explicit toml_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
 			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
-		/// \brief	Constructs a default TOML formatter and binds it to a toml::parse_result.
+		/// \brief	Constructs a TOML formatter and binds it to a toml::parse_result.
 		///
 		/// \availability This constructor is only available when exceptions are disabled.
 		///
 		/// \attention Formatting a failed parse result will simply dump the error message out as-is.
 		///		This will not be valid TOML, but at least gives you something to log or show up in diagnostics:
 		/// \cpp
-		/// std::cout << toml::default_formatter{ toml::parse("a = 'b'"sv) } // ok
+		/// std::cout << toml::toml_formatter{ toml::parse("a = 'b'"sv) } // ok
 		///           << "\n\n"
-		///           << toml::default_formatter{ toml::parse("a = "sv) } // malformed
+		///           << toml::toml_formatter{ toml::parse("a = "sv) } // malformed
 		///           << "\n";
 		/// \ecpp
 		/// \out
@@ -124,14 +129,14 @@ TOML_NAMESPACE_START
 		/// \param 	result	The parse result.
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
-		explicit default_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
+		explicit toml_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
 			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
 		{}
 
 #endif
 
 		/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
-		friend std::ostream& operator<<(std::ostream& lhs, default_formatter& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter& rhs)
 		{
 			rhs.attach(lhs);
 			rhs.key_path_.clear();
@@ -141,7 +146,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
-		friend std::ostream& operator<<(std::ostream& lhs, default_formatter&& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter&& rhs)
 		{
 			return lhs << rhs; // as lvalue
 		}
@@ -150,3 +155,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
+#endif // TOML_ENABLE_TOML_FORMATTER

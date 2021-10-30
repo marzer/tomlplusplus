@@ -4,14 +4,15 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-//# {{
 #include "preprocessor.h"
+//# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
+#if TOML_ENABLE_TOML_FORMATTER
 
-#include "default_formatter.h"
+#include "toml_formatter.h"
 #include "print_to_stream.h"
 #include "utf8.h"
 #include "value.h"
@@ -23,7 +24,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	size_t default_formatter::count_inline_columns(const node& node) noexcept
+	size_t toml_formatter::count_inline_columns(const node& node) noexcept
 	{
 		switch (node.type())
 		{
@@ -106,13 +107,13 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool default_formatter::forces_multiline(const node& node, size_t starting_column_bias) noexcept
+	bool toml_formatter::forces_multiline(const node& node, size_t starting_column_bias) noexcept
 	{
 		return (count_inline_columns(node) + starting_column_bias) >= line_wrap_cols;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_pending_table_separator()
+	void toml_formatter::print_pending_table_separator()
 	{
 		if (pending_table_separator_)
 		{
@@ -123,13 +124,13 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_key_segment(std::string_view str)
+	void toml_formatter::print_key_segment(std::string_view str)
 	{
 		base::print_string(str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_key_path()
+	void toml_formatter::print_key_path()
 	{
 		for (const auto& segment : key_path_)
 		{
@@ -141,7 +142,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print_inline(const table& tbl)
+	void toml_formatter::print_inline(const table& tbl)
 	{
 		if (tbl.empty())
 			impl::print_to_stream(base::stream(), "{}"sv);
@@ -175,7 +176,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print(const array& arr)
+	void toml_formatter::print(const array& arr)
 	{
 		if (arr.empty())
 			impl::print_to_stream(base::stream(), "[]"sv);
@@ -235,7 +236,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print(const table& tbl)
+	void toml_formatter::print(const table& tbl)
 	{
 		static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
 		{
@@ -356,7 +357,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void default_formatter::print()
+	void toml_formatter::print()
 	{
 		if (base::dump_failed_parse_result())
 			return;
@@ -385,3 +386,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
+#endif // TOML_ENABLE_TOML_FORMATTER

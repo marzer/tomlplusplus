@@ -92,3 +92,5 @@ string_literals   = [ '_toml' ]
 'toml::times?'                      = 'structtoml_1_1time.html'
 '(?:toml::)?time[_ ]offsets?'       = 'structtoml_1_1time__offset.html'
 '(?:toml::)?date_times?'            = 'structtoml_1_1date__time.html'
+'(?:toml::)?toml_formatters?'       = 'classtoml_1_1toml__formatter.html'
+'(?:toml::)?json_formatters?'       = 'classtoml_1_1json__formatter.html'

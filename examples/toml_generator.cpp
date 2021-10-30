@@ -7,7 +7,7 @@
 
 #include "examples.h"
 
-#define TOML_PARSER 0
+#define TOML_ENABLE_PARSER 0
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;

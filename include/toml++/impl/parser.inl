@@ -10,7 +10,7 @@
 #error This is an implementation-only header.
 #endif
 //# }}
-#if TOML_PARSER
+#if TOML_ENABLE_PARSER
 
 #include "parser.h"
 #include "std_optional.h"
@@ -3639,4 +3639,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_PARSER
+#endif // TOML_ENABLE_PARSER

@@ -133,23 +133,25 @@ assured that I fully support it being added, and welcome [pull requests](./CONTR
 <br>
 
 # Configuration
-A number of configurable options are exposed in the form of preprocessor `#defines`. Most likely you
+A number of configurable options are exposed in the form of preprocessor `#defines` Most likely you
 won't need to mess with these at all, but if you do, set them before including toml++.
 
-| Option                     |      Type      | Default                           | Description                                                                                                          |
-|----------------------------|:--------------:|-----------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `TOML_HEADER_ONLY`          |     boolean    | `1`                               | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
-| `TOML_API`                 |     define     | undefined                         | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
-| `TOML_ASSERT(expr)`        | function macro | `assert(expr)`<br>(or undefined)  | Sets the assert function used by the library.                                                                        |
-| `TOML_CONFIG_HEADER`       | string literal | undefined                         | Includes the given header file before the rest of the library.                                                       |
-| `TOML_EXCEPTIONS`          |     boolean    | per your compiler's settings      | Sets whether the library uses exceptions.                                                                            |
-| `TOML_IMPLEMENTATION`      |     define     | undefined                         | Define this to enable compilation of the library's implementation. Meaningless if `TOML_HEADER_ONLY` is `1`.          |
-| `TOML_OPTIONAL_TYPE`       |    type name   | undefined                         | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
-| `TOML_PARSER`              |     boolean    | `1`                               | Disable this to prevent inclusion of the parser-related parts of the library if you don't need them.                 |
-| `TOML_SMALL_FLOAT_TYPE`    |    type name   | undefined                         | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.             |
-| `TOML_SMALL_INT_TYPE`      |    type name   | undefined                         | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.                  |
-| `TOML_UNRELEASED_FEATURES` |     boolean    | `0`                               | Enables support for [unreleased TOML language features] not yet part of a [numbered version].                        |
-| `TOML_WINDOWS_COMPAT`      |     boolean    | `1` on Windows                    | Enables support for transparent conversion between wide and narrow strings in some places when building for Windows. |
+| Option                         |      Type      | Default                  | Description                                                                                                          |
+|--------------------------------|:--------------:|--------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `TOML_API`                     |     define     | undefined                | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
+| `TOML_ASSERT(expr)`            | function macro | `assert()`               | Sets the assert function used by the library.                                                                        |
+| `TOML_CONFIG_HEADER`           | string literal | undefined                | Includes the given header file before the rest of the library.                                                       |
+| `TOML_ENABLE_PARSER`           |     boolean    | `1`                      | Inclusion of the parser. Set to `0` if you don't need it to improve compile times and binary size.                   |
+| `TOML_ENABLE_TOML_FORMATTER`   |     boolean    | `1`                      | Inclusion of the TOML formatter. Set to `0` if you don't need it to improve compile times and binary size.           |
+| `TOML_ENABLE_JSON_FORMATTER`   |     boolean    | `1`                      | Inclusion of the JSON formatter. Set to `0` if you don't need it to improve compile times and binary size.           |
+| `TOML_EXCEPTIONS`              |     boolean    | your compiler's settings | Sets whether the library uses exceptions.                                                                            |
+| `TOML_HEADER_ONLY`             |     boolean    | `1`                      | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
+| `TOML_IMPLEMENTATION`          |     define     | undefined                | Define this to enable compilation of the library's implementation. Meaningless if `TOML_HEADER_ONLY` is `1`.         |
+| `TOML_OPTIONAL_TYPE`           |    type name   | undefined                | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
+| `TOML_SMALL_FLOAT_TYPE`        |    type name   | undefined                | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.             |
+| `TOML_SMALL_INT_TYPE`          |    type name   | undefined                | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.                  |
+| `TOML_UNRELEASED_FEATURES`     |     boolean    | `0`                      | Enables support for [unreleased TOML language features] not yet part of a [numbered version].                        |
+| `TOML_WINDOWS_COMPAT`          |     boolean    | `1` on Windows           | Enables support for transparent conversion between wide and narrow strings.                                          |
 
 > ℹ&#xFE0F; _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
 linking incompatible combinations together._

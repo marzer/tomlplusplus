@@ -1321,12 +1321,18 @@ TOML_NAMESPACE_START
 
 		/// @}
 
+#if TOML_ENABLE_TOML_FORMATTER
+
 		/// \brief	Prints the table out to a stream as formatted TOML.
+		///
+		/// \availability This operator is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
 		friend std::ostream& operator<<(std::ostream& lhs, const table& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
 		}
+
+#endif
 	};
 
 	//#  template <typename T>

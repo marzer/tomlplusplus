@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.h"
-#if defined(DOXYGEN) || TOML_PARSER
+#if TOML_ENABLE_PARSER
 
 #include "table.h"
 #include "parse_result.h"
@@ -161,6 +161,8 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a string view.
 	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse("a = 3"sv, L"foo.toml");
 	/// std::cout << tbl["a"] << "\n";
@@ -170,8 +172,6 @@ TOML_NAMESPACE_START
 	/// \out
 	/// 3
 	/// \eout
-	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
@@ -188,6 +188,8 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a stream.
 	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	///
 	/// \detail \cpp
 	/// std::stringstream ss;
 	/// ss << "a = 3"sv;
@@ -200,8 +202,6 @@ TOML_NAMESPACE_START
 	/// \out
 	/// 3
 	/// \eout
-	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
@@ -218,14 +218,14 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a file.
 	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	///
 	/// \detail \cpp
 	/// toml::parse_result get_foo_toml()
 	/// {
 	///		return toml::parse_file(L"foo.toml");
 	/// }
 	/// \ecpp
-	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	///
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
 	///
@@ -243,6 +243,8 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
+	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse(u8"a = 3"sv, L"foo.toml");
 	/// std::cout << tbl["a"] << "\n";
@@ -251,8 +253,6 @@ TOML_NAMESPACE_START
 	/// \out
 	/// 3
 	/// \eout
-	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
 	///
 	/// \param 	doc				The TOML document to parse. Must be valid UTF-8.
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
@@ -395,4 +395,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_PARSER
+#endif // TOML_ENABLE_PARSER

@@ -4,12 +4,13 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-//# {{
 #include "preprocessor.h"
+//# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
+#if TOML_ENABLE_JSON_FORMATTER
 
 #include "json_formatter.h"
 #include "print_to_stream.h"
@@ -112,3 +113,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
+#endif // TOML_ENABLE_JSON_FORMATTER
