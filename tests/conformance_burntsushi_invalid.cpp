@@ -89,6 +89,10 @@ fruit = []
 	static constexpr auto float_trailing_point_min = R"(trailing-point-min = -1.)"sv;
 	static constexpr auto float_trailing_point_plus = R"(trailing-point-plus = +1.)"sv;
 	static constexpr auto float_trailing_point = R"(trailing-point = 1.)"sv;
+	static constexpr auto float_trailing_us_exp = R"(# trailing underscore in integer part is not allowed
+trailing-us-exp = 1_e2
+# trailing underscore in float part is not allowed
+trailing-us-exp2 = 1.2_e2)"sv;
 	static constexpr auto float_trailing_us = R"(trailing-us = 1.2_)"sv;
 	static constexpr auto float_us_after_point = R"(us-after-point = 1._2)"sv;
 	static constexpr auto float_us_before_point = R"(us-before-point = 1_.2)"sv;
@@ -391,6 +395,8 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_plus); // float-trailing-point-plus
 
 	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point); // float-trailing-point
+
+	parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp); // float-trailing-us-exp
 
 	parsing_should_fail(FILE_LINE_ARGS, float_trailing_us); // float-trailing-us
 

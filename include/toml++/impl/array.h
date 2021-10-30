@@ -243,7 +243,7 @@ TOML_NAMESPACE_START
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine' ]
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine', 'ten', [ 11, 12.0 ] ]
 	/// \eout
-	class array final : public node
+	class array : public node
 	{
 	  private:
 		/// \cond
@@ -378,44 +378,28 @@ TOML_NAMESPACE_START
 		/// \name Type checks
 		/// @{
 
-		TOML_NODISCARD
+		/// \brief Returns #toml::node_type::array.
+		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
 		{
 			return node_type::array;
 		}
 
-		TOML_NODISCARD
-		bool is_array() const noexcept final
-		{
-			return true;
-		}
-
-		TOML_NODISCARD
-		array* as_array() noexcept final
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
-		const array* as_array() const noexcept final
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
+		/// \cond
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
@@ -426,11 +410,221 @@ TOML_NAMESPACE_START
 				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 			return is_homogeneous(impl::node_type_of<type>);
 		}
+		/// \endcond
 
-		TOML_NODISCARD
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `true`.
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
+		{
+			return true;
+		}
+
+		/// \brief Returns `true` if the array contains only tables.
+		TOML_PURE_GETTER
 		bool is_array_of_tables() const noexcept final
 		{
 			return is_homogeneous(node_type::table);
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return false;
+		}
+
+		/// @}
+
+		/// \name Type casts
+		/// @{
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		table* as_table() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns a pointer to the array.
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return this;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<std::string>* as_string() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<int64_t>* as_integer() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<double>* as_floating_point() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<bool>* as_boolean() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date>* as_date() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<time>* as_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date_time>* as_date_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const table* as_table() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns a const-qualified pointer to the array.
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return this;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<std::string>* as_string() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<int64_t>* as_integer() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<double>* as_floating_point() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<bool>* as_boolean() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date>* as_date() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<time>* as_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date_time>* as_date_time() const noexcept final
+		{
+			return nullptr;
 		}
 
 		/// @}
@@ -857,7 +1051,7 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	new_size			The number of elements the array will have after resizing.
 		/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
-		/// \param	flags				Value flags to apply to new values created if new elements are created by growing.
+		/// \param	default_init_flags	Value flags to apply to new values created if new elements are created by growing.
 		template <typename ElemType>
 		void resize(size_t new_size,
 					ElemType&& default_init_val,

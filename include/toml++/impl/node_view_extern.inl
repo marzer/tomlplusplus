@@ -59,7 +59,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	TOML_EXTERN_FUNC(value_exact, std::wstring);
 	TOML_EXTERN_FUNC(value, std::wstring);
 #endif

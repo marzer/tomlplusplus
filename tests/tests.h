@@ -36,8 +36,8 @@
 #if TOML_COMPILER_EXCEPTIONS ^ TOML_EXCEPTIONS
 #error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
-#if defined(_WIN32) ^ TOML_WINDOWS_COMPAT
-#error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#if defined(_WIN32) ^ TOML_ENABLE_WINDOWS_COMPAT
+#error TOML_ENABLE_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
 #endif
 #if !(TOML_HEADER_ONLY ^ TOML_EXTERN_TEMPLATES) && !TOML_INTELLISENSE
 #error TOML_EXTERN_TEMPLATES should hold the opposite value to TOML_HEADER_ONLY by default
@@ -97,6 +97,12 @@ constexpr size_t operator"" _sz(unsigned long long n) noexcept
 #define CHECK_SYMMETRIC_INEQUAL(lhs, rhs)                                                                              \
 	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, false);                                                                        \
 	CHECK_SYMMETRIC_RELOP(lhs, !=, rhs, true)
+
+template <typename T>
+struct type_tag
+{
+	using type = T;
+};
 
 // function_view - adapted from here: https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
 template <typename Func>

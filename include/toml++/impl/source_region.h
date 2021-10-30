@@ -151,11 +151,11 @@ TOML_NAMESPACE_START
 		/// \remarks This will be `nullptr` if no path was provided to toml::parse().
 		source_path_ptr path;
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	The path to the corresponding source document as a wide-string.
 		///
-		/// \availability This function is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This function is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \remarks This will return an empty optional if no path was provided to toml::parse().
 		TOML_NODISCARD

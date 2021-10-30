@@ -42,15 +42,15 @@ TOML_IMPL_NAMESPACE_START
 			// creating from raw value
 			else
 			{
-				static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+				static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 							  "Instantiating values from wide-character strings is only "
-							  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+							  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 				static_assert(is_native<unwrapped_type> || is_losslessly_convertible_to_native<unwrapped_type>,
 							  "Value initializers must be (or be promotable to) one of the TOML value types");
 
 				if constexpr (is_wide_string<T>)
 				{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 					out = new value_type{ narrow(static_cast<T&&>(val)) };
 #else
 					static_assert(dependent_false<T>, "Evaluated unreachable branch!");

@@ -31,7 +31,7 @@ namespace toml // non-abi namespace; this is not an error
 	using string_view = std::string_view;
 }
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -53,6 +53,6 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 /// \endcond

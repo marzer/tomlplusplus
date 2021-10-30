@@ -114,7 +114,7 @@ namespace toml
 	CHECK_CAN_REPRESENT_NATIVE(const wchar_t(&&)[2], false);
 	CHECK_CAN_REPRESENT_NATIVE(const wchar_t*, false);
 	CHECK_CAN_REPRESENT_NATIVE(const wchar_t* const, false);
-	CHECK_CAN_REPRESENT_NATIVE(std::wstring, !!TOML_WINDOWS_COMPAT);
+	CHECK_CAN_REPRESENT_NATIVE(std::wstring, !!TOML_ENABLE_WINDOWS_COMPAT);
 	CHECK_CAN_REPRESENT_NATIVE(std::wstring_view, false);
 
 #define CHECK_VALUE_EXACT(T, expected)                                                                                 \
@@ -244,7 +244,7 @@ namespace toml
 	CHECK_VALUE_OR(const std::u8string&, std::u8string);
 	CHECK_VALUE_OR(const std::u8string&&, std::u8string);
 #endif
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	CHECK_VALUE_OR(wchar_t*, std::wstring);
 	CHECK_VALUE_OR(wchar_t*&, std::wstring);
 	CHECK_VALUE_OR(wchar_t*&&, std::wstring);

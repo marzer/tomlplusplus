@@ -241,7 +241,6 @@ TOML_NAMESPACE_START // abi namespace
 	/// auto arr = toml::array{ 1, 2.0, "3", false };
 	/// for (size_t i = 0; i < arr.size() i++)
 	/// 	std::cout << "Element ["sv << i << "] is: "sv << arr[i].type() << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -661,7 +660,7 @@ TOML_IMPL_NAMESPACE_START
 #endif
 
 	// string value_traits specializations - wchar_t-based strings on Windows
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	template <typename T>
 	struct wstring_value_traits
 	{

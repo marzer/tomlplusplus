@@ -157,11 +157,11 @@ TOML_NAMESPACE_START
 
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	/// \brief	Parses a TOML document from a string view.
 	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse("a = 3"sv, L"foo.toml");
@@ -188,7 +188,7 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a stream.
 	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 	///
 	/// \detail \cpp
 	/// std::stringstream ss;
@@ -218,7 +218,7 @@ TOML_NAMESPACE_START
 
 	/// \brief	Parses a TOML document from a file.
 	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 	///
 	/// \detail \cpp
 	/// toml::parse_result get_foo_toml()
@@ -237,13 +237,13 @@ TOML_NAMESPACE_START
 	TOML_API
 	parse_result parse_file(std::wstring_view file_path);
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
-	/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+	/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 	///
 	/// \detail \cpp
 	/// auto tbl = toml::parse(u8"a = 3"sv, L"foo.toml");
@@ -267,7 +267,7 @@ TOML_NAMESPACE_START
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path);
 
-#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	/// \brief	Parses a TOML document from a stream.
 	///

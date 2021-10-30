@@ -170,13 +170,13 @@ neglongpi = -3.141592653589793)"sv;
 	static constexpr auto float_underscore = R"(before = 3_141.5927
 after = 3141.592_7
 exponent = 3e1_4)"sv;
-	static constexpr auto float_zero = R"(f1 = 0.0
-f2 = +0.0
-f3 = -0.0
-f4 = 0e0
-f5 = 0e00
-f6 = +0e0
-f7 = -0e0)"sv;
+	static constexpr auto float_zero = R"(zero = 0.0
+signed-pos = +0.0
+signed-neg = -0.0
+exponent = 0e0
+exponent-two-0 = 0e00
+exponent-signed-pos = +0e0
+exponent-signed-neg = -0e0)"sv;
 
 	static constexpr auto implicit_and_explicit_after = R"([a.b.c]
 answer = 42
@@ -1167,13 +1167,13 @@ TEST_CASE("conformance - burntsushi/valid")
 	parsing_should_succeed(FILE_LINE_ARGS, float_zero, [](toml::table&& tbl) // float-zero
 	{
 		const auto expected = toml::table{
-			{ R"(f1)"sv, 0.0 },
-			{ R"(f2)"sv, 0.0 },
-			{ R"(f3)"sv, 0.0 },
-			{ R"(f4)"sv, 0.0 },
-			{ R"(f5)"sv, 0.0 },
-			{ R"(f6)"sv, 0.0 },
-			{ R"(f7)"sv, 0.0 },
+			{ R"(zero)"sv, 0.0 },
+			{ R"(signed-pos)"sv, 0.0 },
+			{ R"(signed-neg)"sv, 0.0 },
+			{ R"(exponent)"sv, 0.0 },
+			{ R"(exponent-two-0)"sv, 0.0 },
+			{ R"(exponent-signed-pos)"sv, 0.0 },
+			{ R"(exponent-signed-neg)"sv, 0.0 },
 		};
 		REQUIRE(tbl == expected);
 	});

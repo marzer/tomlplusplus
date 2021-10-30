@@ -11,7 +11,7 @@
 #endif
 //# }}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 #include "std_string.h"
 #include "header_start.h"
 
@@ -97,4 +97,4 @@ TOML_IMPL_NAMESPACE_START
 TOML_IMPL_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT

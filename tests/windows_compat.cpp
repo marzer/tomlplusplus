@@ -5,7 +5,7 @@
 
 #include "tests.h"
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 TOML_DISABLE_WARNINGS;
 #include <windows.h>
@@ -94,4 +94,4 @@ TEST_CASE("windows compat")
 	CHECK(tbl[L"dependencies"][L"cpp"].value<DWORDLONG>() == 17u);
 }
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT

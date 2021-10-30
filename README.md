@@ -136,22 +136,22 @@ assured that I fully support it being added, and welcome [pull requests](./CONTR
 A number of configurable options are exposed in the form of preprocessor `#defines` Most likely you
 won't need to mess with these at all, but if you do, set them before including toml++.
 
-| Option                         |      Type      | Default                  | Description                                                                                                          |
-|--------------------------------|:--------------:|--------------------------|----------------------------------------------------------------------------------------------------------------------|
-| `TOML_API`                     |     define     | undefined                | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
-| `TOML_ASSERT(expr)`            | function macro | `assert()`               | Sets the assert function used by the library.                                                                        |
-| `TOML_CONFIG_HEADER`           | string literal | undefined                | Includes the given header file before the rest of the library.                                                       |
-| `TOML_ENABLE_PARSER`           |     boolean    | `1`                      | Inclusion of the parser. Set to `0` if you don't need it to improve compile times and binary size.                   |
-| `TOML_ENABLE_TOML_FORMATTER`   |     boolean    | `1`                      | Inclusion of the TOML formatter. Set to `0` if you don't need it to improve compile times and binary size.           |
-| `TOML_ENABLE_JSON_FORMATTER`   |     boolean    | `1`                      | Inclusion of the JSON formatter. Set to `0` if you don't need it to improve compile times and binary size.           |
-| `TOML_EXCEPTIONS`              |     boolean    | your compiler's settings | Sets whether the library uses exceptions.                                                                            |
-| `TOML_HEADER_ONLY`             |     boolean    | `1`                      | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
-| `TOML_IMPLEMENTATION`          |     define     | undefined                | Define this to enable compilation of the library's implementation. Meaningless if `TOML_HEADER_ONLY` is `1`.         |
-| `TOML_OPTIONAL_TYPE`           |    type name   | undefined                | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
-| `TOML_SMALL_FLOAT_TYPE`        |    type name   | undefined                | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.             |
-| `TOML_SMALL_INT_TYPE`          |    type name   | undefined                | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.                  |
-| `TOML_UNRELEASED_FEATURES`     |     boolean    | `0`                      | Enables support for [unreleased TOML language features] not yet part of a [numbered version].                        |
-| `TOML_WINDOWS_COMPAT`          |     boolean    | `1` on Windows           | Enables support for transparent conversion between wide and narrow strings.                                          |
+| Option                            |      Type      | Default                  | Description                                                                                                          |
+|-----------------------------------|:--------------:|--------------------------|----------------------------------------------------------------------------------------------------------------------|
+| `TOML_API`                        |     define     | undefined                | API annotation to add to public symbols (e.g. `__declspec(dllexport)` on Windows).                                   |
+| `TOML_ASSERT(expr)`               | function macro | `assert()`               | Sets the assert function used by the library.                                                                        |
+| `TOML_CONFIG_HEADER`              | string literal | undefined                | Includes the given header file before the rest of the library.                                                       |
+| `TOML_ENABLE_JSON_FORMATTER`      |     boolean    | `1`                      | Enables the JSON formatter. Set to `0` if you don't need it to improve compile times and binary size.                |
+| `TOML_ENABLE_TOML_FORMATTER`      |     boolean    | `1`                      | Enables the TOML formatter. Set to `0` if you don't need it to improve compile times and binary size.                |
+| `TOML_ENABLE_PARSER`              |     boolean    | `1`                      | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.                        |
+| `TOML_ENABLE_UNRELEASED_FEATURES` |     boolean    | `0`                      | Enables support for [unreleased TOML language features.                                                              |
+| `TOML_ENABLE_WINDOWS_COMPAT`      |     boolean    | `1` on Windows           | Enables support for transparent conversion between wide and narrow strings.                                          |
+| `TOML_EXCEPTIONS`                 |     boolean    | your compiler's settings | Sets whether the library uses exceptions.                                                                            |
+| `TOML_HEADER_ONLY`                |     boolean    | `1`                      | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).            |
+| `TOML_IMPLEMENTATION`             |     define     | undefined                | Define this to enable compilation of the library's implementation when `TOML_HEADER_ONLY` == `0`.                    |
+| `TOML_OPTIONAL_TYPE`              |    type name   | undefined                | Overrides the `optional<T>` type used by the library if you need [something better than std::optional].              |
+| `TOML_SMALL_FLOAT_TYPE`           |    type name   | undefined                | If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.             |
+| `TOML_SMALL_INT_TYPE`             |    type name   | undefined                | If your codebase has an additional 'small' integer type (e.g. 24-bits), this tells toml++ about it.                  |
 
 > ℹ&#xFE0F; _A number of these have ABI implications; the library uses inline namespaces to prevent you from accidentally
 linking incompatible combinations together._
@@ -174,7 +174,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#687]: Relax bare key restrictions to allow additional unicode characters
 - [#709]: Include an \xHH escape code sequence
 
-> ℹ&#xFE0F; _`#define TOML_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
+> ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
 ### 🔹&#xFE0F; **TOML v1.0.0:**
 All features supported, including:
@@ -215,13 +215,13 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers
 - **[@Ryan-rsm-McKenzie](https://github.com/Ryan-rsm-McKenzie)** - Add natvis file to cmake install script
 - **[@shdnx](https://github.com/shdnx)** - Fixed a bug on GCC 8.2.0 and some meson config issues
-- **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@sneves](https://github.com/sneves)** - Helped fix a number of parser bugs
+- **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
-- **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
-- **[@ximion](https://github.com/ximion)** - Added support for installation with meson
-- **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 - **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build
+- **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
+- **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
+- **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 
 <br>
 

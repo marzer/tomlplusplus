@@ -25,6 +25,44 @@ TEST_CASE("arrays - moving")
 			REQUIRE(arr1->get_as<std::string>(0u));
 			CHECK(*arr1->get_as<std::string>(0u) == "foo"sv);
 
+			// sanity check the virtual type checks
+			CHECK(arr1->type() == node_type::array);
+			CHECK(!arr1->is_table());
+			CHECK(arr1->is_array());
+			CHECK(!arr1->is_array_of_tables());
+			CHECK(!arr1->is_value());
+			CHECK(!arr1->is_string());
+			CHECK(!arr1->is_integer());
+			CHECK(!arr1->is_floating_point());
+			CHECK(!arr1->is_number());
+			CHECK(!arr1->is_boolean());
+			CHECK(!arr1->is_date());
+			CHECK(!arr1->is_time());
+			CHECK(!arr1->is_date_time());
+
+			// sanity check the virtual type casts (non-const)
+			CHECK(!arr1->as_table());
+			CHECK(arr1->as_array() == arr1);
+			CHECK(!arr1->as_string());
+			CHECK(!arr1->as_integer());
+			CHECK(!arr1->as_floating_point());
+			CHECK(!arr1->as_boolean());
+			CHECK(!arr1->as_date());
+			CHECK(!arr1->as_time());
+			CHECK(!arr1->as_date_time());
+
+			// sanity check the virtual type casts (const)
+			const auto carr1 = &std::as_const(*arr1);
+			CHECK(!carr1->as_table());
+			CHECK(carr1->as_array() == carr1);
+			CHECK(!carr1->as_string());
+			CHECK(!carr1->as_integer());
+			CHECK(!carr1->as_floating_point());
+			CHECK(!carr1->as_boolean());
+			CHECK(!carr1->as_date());
+			CHECK(!carr1->as_time());
+			CHECK(!carr1->as_date_time());
+
 			// sanity-check initial state of default-constructed array
 			array arr2;
 			CHECK(arr2.source().begin == source_position{});
@@ -161,7 +199,7 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.is_homogeneous());
 	}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	{
 		array arr{ "mixed", "string"sv, L"test", L"kek"sv };
 		CHECK(arr.size() == 4u);
@@ -172,7 +210,7 @@ TEST_CASE("arrays - construction")
 		CHECK(*arr.get_as<std::string>(2) == "test"sv);
 		CHECK(*arr.get_as<std::string>(3) == "kek"sv);
 	}
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - equality")
@@ -371,7 +409,7 @@ TEST_CASE("arrays - insertion and erasure")
 		CHECK(*arr.get_as<double>(5u) == 3.0);
 	}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	arr.clear();
 	it = arr.insert(arr.cbegin(), L"test");
@@ -386,7 +424,7 @@ TEST_CASE("arrays - insertion and erasure")
 	arr.emplace_back<std::string>(L"test4");
 	REQUIRE(*arr.back().as_string() == "test4"sv);
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - flattening")

@@ -7,7 +7,7 @@
 
 #include "examples.h"
 
-#define TOML_UNRELEASED_FEATURES 1
+#define TOML_ENABLE_UNRELEASED_FEATURES 1
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;

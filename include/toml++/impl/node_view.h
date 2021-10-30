@@ -492,13 +492,13 @@ TOML_NAMESPACE_START
 		{
 			using namespace ::toml::impl;
 
-			static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Retrieving values as wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+						  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_wide_string<T>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 				if (node_)
 					return node_->value_or(static_cast<T&&>(default_value));
@@ -618,13 +618,13 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		friend bool operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
 		{
-			static_assert(!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			static_assert(!impl::is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Comparison with wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+						  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<T>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return lhs == impl::narrow(rhs);
 #else
 				static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
@@ -682,11 +682,11 @@ TOML_NAMESPACE_START
 			return node_view{ nullptr };
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Returns a view of the selected subnode.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key	The key of the node to retrieve
 		///
@@ -700,7 +700,7 @@ TOML_NAMESPACE_START
 			return node_view{ nullptr };
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Returns a view of the selected subnode.
 		///

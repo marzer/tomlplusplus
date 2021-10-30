@@ -288,11 +288,11 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets a node_view for the selected key-value pair in the wrapped table.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key The key used for the lookup.
 		///
@@ -308,7 +308,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a node_view for the selected key-value pair in the wrapped table (const overload).
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key The key used for the lookup.
 		///
@@ -322,7 +322,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
 		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.

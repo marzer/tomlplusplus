@@ -21,6 +21,44 @@ TEST_CASE("tables - moving")
 			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
 			CHECK(tbl["test"]["val1"] == "foo");
 
+			// sanity check the virtual type checks
+			CHECK(tbl.type() == node_type::table);
+			CHECK(tbl.is_table());
+			CHECK(!tbl.is_array());
+			CHECK(!tbl.is_array_of_tables());
+			CHECK(!tbl.is_value());
+			CHECK(!tbl.is_string());
+			CHECK(!tbl.is_integer());
+			CHECK(!tbl.is_floating_point());
+			CHECK(!tbl.is_number());
+			CHECK(!tbl.is_boolean());
+			CHECK(!tbl.is_date());
+			CHECK(!tbl.is_time());
+			CHECK(!tbl.is_date_time());
+
+			// sanity check the virtual type casts (non-const)
+			CHECK(tbl.as_table() == &tbl);
+			CHECK(!tbl.as_array());
+			CHECK(!tbl.as_string());
+			CHECK(!tbl.as_integer());
+			CHECK(!tbl.as_floating_point());
+			CHECK(!tbl.as_boolean());
+			CHECK(!tbl.as_date());
+			CHECK(!tbl.as_time());
+			CHECK(!tbl.as_date_time());
+
+			// sanity check the virtual type casts (const)
+			const auto& ctbl = std::as_const(tbl);
+			CHECK(ctbl.as_table() == &ctbl);
+			CHECK(!ctbl.as_array());
+			CHECK(!ctbl.as_string());
+			CHECK(!ctbl.as_integer());
+			CHECK(!ctbl.as_floating_point());
+			CHECK(!ctbl.as_boolean());
+			CHECK(!ctbl.as_date());
+			CHECK(!ctbl.as_time());
+			CHECK(!ctbl.as_date_time());
+
 			// sanity-check initial state of default-constructed table
 			table tbl2;
 			CHECK(tbl2.source().begin == source_position{});
@@ -153,7 +191,7 @@ TEST_CASE("tables - construction")
 		CHECK(*tbl.get_as<array>("qux"sv) == array{ 1 });
 	}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	{
 		table tbl{ { L"foo", L"test1" },
 				   { L"bar"sv, L"test2"sv },
@@ -170,7 +208,7 @@ TEST_CASE("tables - construction")
 		REQUIRE(tbl.get_as<std::string>("qux"sv));
 		CHECK(*tbl.get_as<std::string>("qux"sv) == "test4"sv);
 	}
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("tables - equality")
@@ -341,7 +379,7 @@ TEST_CASE("tables - insertion and erasure")
 		tbl.clear();
 	}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	tbl.insert(L"a", L"test1");
 	REQUIRE(*tbl.get_as<std::string>(L"a"sv) == "test1"sv);
@@ -355,7 +393,7 @@ TEST_CASE("tables - insertion and erasure")
 	tbl.erase(L"a"s);
 	CHECK(tbl.size() == 0u);
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("tables - toml_formatter")

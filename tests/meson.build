@@ -126,9 +126,9 @@ foreach cpp20 : cpp20_modes
 
 				if unrel
 					test_name = test_name + '_unrel'
-					test_args += '-DTOML_UNRELEASED_FEATURES=1'
+					test_args += '-DTOML_ENABLE_UNRELEASED_FEATURES=1'
 				else
-					test_args += '-DTOML_UNRELEASED_FEATURES=0'
+					test_args += '-DTOML_ENABLE_UNRELEASED_FEATURES=0'
 				endif
 
 				if counter % 6 == 3

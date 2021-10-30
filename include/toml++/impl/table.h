@@ -178,7 +178,7 @@ TOML_IMPL_NAMESPACE_START
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
@@ -221,7 +221,7 @@ TOML_NAMESPACE_START
 	/// 		additional considerations made for the heterogeneous nature of a
 	/// 		TOML table, and for the removal of some cruft (the public interface of
 	/// 		std::map is, simply, _a hot mess_).
-	class table final : public node
+	class table : public node
 	{
 	  private:
 		/// \cond
@@ -240,13 +240,13 @@ TOML_NAMESPACE_START
 		static auto do_get(Map& vals, const Key& key) noexcept(!impl::is_wide_string<Key>)
 			-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
 		{
-			static_assert(
-				!impl::is_wide_string<Key> || TOML_WINDOWS_COMPAT,
-				"Retrieval using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<Key> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Retrieval using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<Key>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return do_get(vals, impl::narrow(key));
 #else
 				static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
@@ -348,32 +348,28 @@ TOML_NAMESPACE_START
 		/// \name Type checks
 		/// @{
 
-		TOML_NODISCARD
+		/// \brief Returns #toml::node_type::table.
+		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
 		{
 			return node_type::table;
 		}
 
-		TOML_NODISCARD
-		bool is_table() const noexcept final
-		{
-			return true;
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
+		/// \cond
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
@@ -386,22 +382,221 @@ TOML_NAMESPACE_START
 
 			return is_homogeneous(impl::node_type_of<type>);
 		}
+		/// \endcond
+
+		/// \brief Returns `true`.
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
+		{
+			return true;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_PURE_GETTER
+		bool is_array_of_tables() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return false;
+		}
 
 		/// @}
 
 		/// \name Type casts
 		/// @{
 
-		TOML_NODISCARD
+		/// \brief Returns a pointer to the table.
+		TOML_CONST_INLINE_GETTER
 		table* as_table() noexcept final
 		{
 			return this;
 		}
 
-		TOML_NODISCARD
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<std::string>* as_string() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<int64_t>* as_integer() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<double>* as_floating_point() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<bool>* as_boolean() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date>* as_date() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<time>* as_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date_time>* as_date_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns a const-qualified pointer to the table.
+		TOML_CONST_INLINE_GETTER
 		const table* as_table() const noexcept final
 		{
 			return this;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<std::string>* as_string() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<int64_t>* as_integer() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<double>* as_floating_point() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<bool>* as_boolean() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date>* as_date() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<time>* as_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date_time>* as_date_time() const noexcept final
+		{
+			return nullptr;
 		}
 
 		/// @}
@@ -502,11 +697,11 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ this->get(key) };
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets a node_view for the selected key-value pair.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key The key used for the lookup.
 		///
@@ -525,7 +720,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a node_view for the selected key-value pair (const overload).
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key The key used for the lookup.
 		///
@@ -542,7 +737,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ this->get(key) };
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
@@ -670,9 +865,9 @@ TOML_NAMESPACE_START
 										 ValueType&& val,
 										 value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Insertion using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_node_view<ValueType>)
 			{
@@ -682,7 +877,7 @@ TOML_NAMESPACE_START
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -815,9 +1010,9 @@ TOML_NAMESPACE_START
 												   ValueType&& val,
 												   value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Insertion using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_node_view<ValueType>)
 			{
@@ -827,7 +1022,7 @@ TOML_NAMESPACE_START
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -892,13 +1087,13 @@ TOML_NAMESPACE_START
 		template <typename ValueType, typename KeyType, typename... ValueArgs>
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Emplacement using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return emplace<ValueType>(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueArgs>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -1045,11 +1240,11 @@ TOML_NAMESPACE_START
 			return false;
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Removes the value with the given key from the table.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key		Key to erase.
 		///
@@ -1059,7 +1254,7 @@ TOML_NAMESPACE_START
 			return erase(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets an iterator to the node at a specific key.
 		///
@@ -1090,11 +1285,11 @@ TOML_NAMESPACE_START
 			return do_contains(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets an iterator to the node at a specific key.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key	The node's key.
 		///
@@ -1107,7 +1302,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets an iterator to the node at a specific key (const overload).
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key	The node's key.
 		///
@@ -1120,14 +1315,14 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns true if the table contains a node at the given key.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		bool contains(std::wstring_view key) const
 		{
 			return contains(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
@@ -1176,11 +1371,11 @@ TOML_NAMESPACE_START
 			return do_get(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets the node at a specific key.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key	The node's key.
 		///
@@ -1193,7 +1388,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets the node at a specific key (const overload).
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \param 	key	The node's key.
 		///
@@ -1204,7 +1399,7 @@ TOML_NAMESPACE_START
 			return get(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets the node at a specific key if it is a particular type.
 		///
@@ -1246,11 +1441,11 @@ TOML_NAMESPACE_START
 			return do_get_as<ValueType>(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets the node at a specific key if it is a particular type.
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \tparam	ValueType	One of the TOML node or value types.
 		/// \param 	key			The node's key.
@@ -1265,7 +1460,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
 		///
-		/// \availability This overload is only available when #TOML_WINDOWS_COMPAT is enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
 		/// \tparam	ValueType	One of the TOML node or value types.
 		/// \param 	key			The node's key.
@@ -1278,7 +1473,7 @@ TOML_NAMESPACE_START
 			return get_as<ValueType>(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
@@ -1341,9 +1536,9 @@ TOML_NAMESPACE_START
 	//# 	using namespace impl;
 	//#
 	//# 	static_assert(
-	//# 		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//# 		!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 	//# 		"Retrieving values as wide-character strings with node::select_exact() is only "
-	//# 		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//# 		"supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled."
 	//# 	);
 	//#
 	//# 	static_assert(
@@ -1358,9 +1553,9 @@ TOML_NAMESPACE_START
 	//# 	using namespace impl;
 	//#
 	//# 	static_assert(
-	//# 		!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+	//# 		!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 	//# 		"Retrieving values as wide-character strings with node::select() is only "
-	//# 		"supported on Windows with TOML_WINDOWS_COMPAT enabled."
+	//# 		"supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled."
 	//# 	);
 	//# 	static_assert(
 	//# 		(is_native<T> || can_represent_native<T> || can_partially_represent_native<T>) && !is_cvref<T>,

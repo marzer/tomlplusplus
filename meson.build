@@ -265,6 +265,16 @@ compiler_supports_cpp20 = compiler_supports_cpp20_args.length() > 0 and compiler
 	#include <version>
 	#include <string>
 	#include <iostream>
+	#include <cstdint>
+	#include <cstddef>
+	#include <cstring>
+	#include <cfloat>
+	#include <climits>
+	#include <cmath>
+	#include <limits>
+	#include <memory>
+	#include <iosfwd>
+	#include <type_traits>
 
 	int main()
 	{

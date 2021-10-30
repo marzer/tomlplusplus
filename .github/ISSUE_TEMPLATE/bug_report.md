@@ -53,7 +53,7 @@ assignees: marzer
 **Library configuration overrides:**  
 <!--
     If you've explicitly set any of the library configuration macros,
-    list them here (e.g. TOML_EXCEPTIONS=0, TOML_UNRELEASED_FEATURES=1, etc.)
+    list them here (e.g. TOML_EXCEPTIONS=0, TOML_ENABLE_UNRELEASED_FEATURES=1, etc.)
 -->
 
 

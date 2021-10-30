@@ -354,7 +354,7 @@
 #endif
 
 // header-only mode
-#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // TOML_HEADER_ONLY was TOML_ALL_INLINE pre-2.0
+#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
 	#define TOML_HEADER_ONLY TOML_ALL_INLINE
 #endif
 #if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
@@ -389,16 +389,19 @@
 #endif
 
 // experimental language features
-#if (defined(TOML_UNRELEASED_FEATURES) && TOML_UNRELEASED_FEATURES) || TOML_INTELLISENSE
-	#undef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 1
+#if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES pre-3.0
+	#define TOML_ENABLE_UNRELEASED_FEATURES TOML_UNRELEASED_FEATURES
 #endif
-#ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 0
+#if (defined(TOML_ENABLE_UNRELEASED_FEATURES) && TOML_ENABLE_UNRELEASED_FEATURES) || TOML_INTELLISENSE
+	#undef TOML_ENABLE_UNRELEASED_FEATURES
+	#define TOML_ENABLE_UNRELEASED_FEATURES 1
+#endif
+#ifndef TOML_ENABLE_UNRELEASED_FEATURES
+	#define TOML_ENABLE_UNRELEASED_FEATURES 0
 #endif
 
 // parser
-#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // TOML_ENABLE_PARSER was TOML_PARSER pre-3.0
+#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // was TOML_PARSER pre-3.0
 	#define TOML_ENABLE_PARSER TOML_PARSER
 #endif
 #if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
@@ -407,7 +410,7 @@
 #endif
 
 // toml formatter
-#if !defined(TOML_ENABLE_TOML_FORMATTER)												\
+#if !defined(TOML_ENABLE_TOML_FORMATTER)										\
 		|| (defined(TOML_ENABLE_TOML_FORMATTER) && TOML_ENABLE_TOML_FORMATTER)	\
 		|| TOML_INTELLISENSE
 	#undef TOML_ENABLE_TOML_FORMATTER
@@ -423,16 +426,19 @@
 #endif
 
 // windows compat
-#if !defined(TOML_WINDOWS_COMPAT)									\
-		|| (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT)	\
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
+	#define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
+#endif
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT)										\
+		|| (defined(TOML_ENABLE_WINDOWS_COMPAT) && TOML_ENABLE_WINDOWS_COMPAT)	\
 		|| TOML_INTELLISENSE
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 1
+	#undef TOML_ENABLE_WINDOWS_COMPAT
+	#define TOML_ENABLE_WINDOWS_COMPAT 1
 #endif
 
 #ifndef _WIN32
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 0
+	#undef TOML_ENABLE_WINDOWS_COMPAT
+	#define TOML_ENABLE_WINDOWS_COMPAT 0
 #endif
 
 #ifndef TOML_INCLUDE_WINDOWS_H
@@ -772,7 +778,7 @@
 #define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))
 
-#if TOML_UNRELEASED_FEATURES
+#if TOML_ENABLE_UNRELEASED_FEATURES
 	#define TOML_LANG_EFFECTIVE_VERSION												\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH+1)
 #else
@@ -942,7 +948,7 @@ namespace toml // non-abi namespace; this is not an error
 	using string_view = std::string_view;
 }
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -964,7 +970,7 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 //********  impl/std_optional.h  ***************************************************************************************
 
@@ -1537,7 +1543,7 @@ TOML_IMPL_NAMESPACE_START
 #endif
 
 	// string value_traits specializations - wchar_t-based strings on Windows
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	template <typename T>
 	struct wstring_value_traits
 	{
@@ -1992,7 +1998,7 @@ TOML_NAMESPACE_START
 
 		source_path_ptr path;
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		optional<std::wstring> wide_path() const noexcept
@@ -2399,80 +2405,66 @@ TOML_NAMESPACE_START
 		TOML_API
 		virtual ~node() noexcept;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
+		virtual bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept = 0;
+
+		TOML_PURE_GETTER
+		virtual bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept = 0;
+
+		TOML_PURE_GETTER
+		virtual bool is_homogeneous(node_type ntype) const noexcept = 0;
+
+		template <typename ElemType = void>
+		TOML_PURE_GETTER
+		bool is_homogeneous() const noexcept
+		{
+			using type = impl::unwrap_node<ElemType>;
+			static_assert(
+				std::is_void_v<
+					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
+				"The template type argument of node::is_homogeneous() must be void or one "
+				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+			return is_homogeneous(impl::node_type_of<type>);
+		}
+
+		TOML_PURE_GETTER
 		virtual node_type type() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_table() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_table() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_array() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_array() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_value() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_array_of_tables() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_string() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_value() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_integer() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_string() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_floating_point() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_integer() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_number() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_floating_point() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_boolean() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_number() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_date() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_boolean() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_time() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_date() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_date_time() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_time() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual bool is_array_of_tables() const noexcept
-		{
-			return false;
-		}
+		TOML_PURE_GETTER
+		virtual bool is_date_time() const noexcept = 0;
 
 		template <typename T>
 		TOML_PURE_INLINE_GETTER
@@ -2502,135 +2494,59 @@ TOML_NAMESPACE_START
 				return is_date_time();
 		}
 
-		TOML_NODISCARD
-		virtual bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept = 0;
-
-		TOML_NODISCARD
-		virtual bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept = 0;
-
-		TOML_NODISCARD
-		virtual bool is_homogeneous(node_type ntype) const noexcept = 0;
-
-		template <typename ElemType = void>
 		TOML_PURE_GETTER
-		bool is_homogeneous() const noexcept
-		{
-			using type = impl::unwrap_node<ElemType>;
-			static_assert(
-				std::is_void_v<
-					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
-				"The template type argument of node::is_homogeneous() must be void or one "
-				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-			return is_homogeneous(impl::node_type_of<type>);
-		}
+		virtual table* as_table() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual table* as_table() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual array* as_array() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual array* as_array() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<std::string>* as_string() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<std::string>* as_string() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<int64_t>* as_integer() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<int64_t>* as_integer() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<double>* as_floating_point() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<double>* as_floating_point() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<bool>* as_boolean() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<bool>* as_boolean() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<date>* as_date() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<date>* as_date() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<time>* as_time() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<time>* as_time() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual toml::value<date_time>* as_date_time() noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual toml::value<date_time>* as_date_time() noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const table* as_table() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const table* as_table() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const array* as_array() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const array* as_array() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<std::string>* as_string() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<std::string>* as_string() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<int64_t>* as_integer() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<int64_t>* as_integer() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<double>* as_floating_point() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<double>* as_floating_point() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<bool>* as_boolean() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<bool>* as_boolean() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<date>* as_date() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<date>* as_date() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<time>* as_time() const noexcept = 0;
 
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<time>* as_time() const noexcept
-		{
-			return nullptr;
-		}
-
-		TOML_PURE_INLINE_GETTER
-		virtual const toml::value<date_time>* as_date_time() const noexcept
-		{
-			return nullptr;
-		}
+		TOML_PURE_GETTER
+		virtual const toml::value<date_time>* as_date_time() const noexcept = 0;
 
 		template <typename T>
 		TOML_PURE_INLINE_GETTER
@@ -3174,13 +3090,13 @@ TOML_NAMESPACE_START
 		{
 			using namespace ::toml::impl;
 
-			static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Retrieving values as wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+						  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_wide_string<T>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 				if (node_)
 					return node_->value_or(static_cast<T&&>(default_value));
@@ -3261,13 +3177,13 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		friend bool operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
 		{
-			static_assert(!impl::is_wide_string<T> || TOML_WINDOWS_COMPAT,
+			static_assert(!impl::is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Comparison with wide-character strings is only "
-						  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+						  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<T>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return lhs == impl::narrow(rhs);
 #else
 				static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
@@ -3312,7 +3228,7 @@ TOML_NAMESPACE_START
 			return node_view{ nullptr };
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node_view operator[](std::wstring_view key) const
@@ -3322,7 +3238,7 @@ TOML_NAMESPACE_START
 			return node_view{ nullptr };
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node_view operator[](size_t index) const noexcept
@@ -3413,7 +3329,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	TOML_EXTERN_FUNC(value_exact, std::wstring);
 	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
@@ -3447,7 +3363,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 // clang-format off
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	#define TOML_SA_VALUE_MESSAGE_WSTRING			TOML_SA_LIST_SEP "std::wstring"
 #else
 	#define TOML_SA_VALUE_MESSAGE_WSTRING
@@ -3529,7 +3445,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	};
 
-#if TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
+#if TOML_HAS_CHAR8 || TOML_ENABLE_WINDOWS_COMPAT
 
 	struct string_maker
 	{
@@ -3545,10 +3461,10 @@ TOML_IMPL_NAMESPACE_START
 								   arg.length());
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 			if constexpr (is_wide_string<T>)
 				return narrow(static_cast<T&&>(arg));
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 		}
 	};
 
@@ -3567,7 +3483,7 @@ TOML_IMPL_NAMESPACE_START
 	{};
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	template <>
 	struct native_value_maker<std::string, wchar_t*> : string_maker
 	{};
@@ -3580,9 +3496,9 @@ TOML_IMPL_NAMESPACE_START
 	template <>
 	struct native_value_maker<std::string, std::wstring_view> : string_maker
 	{};
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#endif // TOML_HAS_CHAR8 || TOML_WINDOWS_COMPAT
+#endif // TOML_HAS_CHAR8 || TOML_ENABLE_WINDOWS_COMPAT
 
 	template <typename T>
 	TOML_NODISCARD
@@ -3620,7 +3536,7 @@ TOML_IMPL_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	template <typename ValueType>
-	class value final : public node
+	class value : public node
 	{
 		static_assert(impl::is_native<ValueType> && !impl::is_cvref<ValueType>,
 					  "A toml::value<> must model one of the native TOML value types:" TOML_SA_NATIVE_VALUE_TYPE_LIST);
@@ -3630,9 +3546,7 @@ TOML_NAMESPACE_START
 		friend class TOML_PARSER_TYPENAME;
 
 		template <typename T, typename U>
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
-		TOML_ATTR(const)
+		TOML_CONST_INLINE_GETTER
 		static auto as_value([[maybe_unused]] U* ptr) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
@@ -3713,73 +3627,19 @@ TOML_NAMESPACE_START
 		}
 #endif
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
 		{
 			return impl::node_type_of<value_type>;
 		}
 
-		TOML_NODISCARD
-		bool is_value() const noexcept final
-		{
-			return true;
-		}
-
-		TOML_NODISCARD
-		bool is_string() const noexcept final
-		{
-			return std::is_same_v<value_type, std::string>;
-		}
-
-		TOML_NODISCARD
-		bool is_integer() const noexcept final
-		{
-			return std::is_same_v<value_type, int64_t>;
-		}
-
-		TOML_NODISCARD
-		bool is_floating_point() const noexcept final
-		{
-			return std::is_same_v<value_type, double>;
-		}
-
-		TOML_NODISCARD
-		bool is_number() const noexcept final
-		{
-			return impl::is_one_of<value_type, int64_t, double>;
-		}
-
-		TOML_NODISCARD
-		bool is_boolean() const noexcept final
-		{
-			return std::is_same_v<value_type, bool>;
-		}
-
-		TOML_NODISCARD
-		bool is_date() const noexcept final
-		{
-			return std::is_same_v<value_type, date>;
-		}
-
-		TOML_NODISCARD
-		bool is_time() const noexcept final
-		{
-			return std::is_same_v<value_type, time>;
-		}
-
-		TOML_NODISCARD
-		bool is_date_time() const noexcept final
-		{
-			return std::is_same_v<value_type, date_time>;
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous(node_type ntype) const noexcept final
 		{
 			return ntype == node_type::none || ntype == impl::node_type_of<value_type>;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final
 		{
 			if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
@@ -3790,7 +3650,7 @@ TOML_NAMESPACE_START
 			return true;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final
 		{
 			if (ntype != node_type::none && ntype != impl::node_type_of<value_type>)
@@ -3802,7 +3662,7 @@ TOML_NAMESPACE_START
 		}
 
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
@@ -3818,86 +3678,181 @@ TOML_NAMESPACE_START
 			else
 				return impl::node_type_of<type> == impl::node_type_of<value_type>;
 		}
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
+		{
+			return false;
+		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_array_of_tables() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return true;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return std::is_same_v<value_type, std::string>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return std::is_same_v<value_type, int64_t>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return std::is_same_v<value_type, double>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return impl::is_one_of<value_type, int64_t, double>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return std::is_same_v<value_type, bool>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return std::is_same_v<value_type, date>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return std::is_same_v<value_type, time>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return std::is_same_v<value_type, date_time>;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		table* as_table() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
 		value<std::string>* as_string() noexcept final
 		{
 			return as_value<std::string>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<int64_t>* as_integer() noexcept final
 		{
 			return as_value<int64_t>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<double>* as_floating_point() noexcept final
 		{
 			return as_value<double>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<bool>* as_boolean() noexcept final
 		{
 			return as_value<bool>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<date>* as_date() noexcept final
 		{
 			return as_value<date>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<time>* as_time() noexcept final
 		{
 			return as_value<time>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		value<date_time>* as_date_time() noexcept final
 		{
 			return as_value<date_time>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
+		const table* as_table() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
 		const value<std::string>* as_string() const noexcept final
 		{
 			return as_value<std::string>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<int64_t>* as_integer() const noexcept final
 		{
 			return as_value<int64_t>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<double>* as_floating_point() const noexcept final
 		{
 			return as_value<double>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<bool>* as_boolean() const noexcept final
 		{
 			return as_value<bool>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<date>* as_date() const noexcept final
 		{
 			return as_value<date>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<time>* as_time() const noexcept final
 		{
 			return as_value<time>(this);
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		const value<date_time>* as_date_time() const noexcept final
 		{
 			return as_value<date_time>(this);
@@ -4145,7 +4100,7 @@ TOML_NAMESPACE_START
 
 			else if constexpr (std::is_same_v<T, std::wstring>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return widen(str);
 #else
 				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
@@ -4174,9 +4129,9 @@ TOML_NAMESPACE_START
 	{
 		using namespace impl;
 
-		static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value_exact() is only "
-					  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 		static_assert((is_native<T> || can_represent_native<T>)&&!is_cvref<T>,
 					  TOML_SA_VALUE_EXACT_FUNC_MESSAGE("return type of node::value_exact()"));
@@ -4197,9 +4152,9 @@ TOML_NAMESPACE_START
 	{
 		using namespace impl;
 
-		static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value() is only "
-					  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 		static_assert((is_native<T> || can_represent_native<T> || can_partially_represent_native<T>)&&!is_cvref<T>,
 					  TOML_SA_VALUE_FUNC_MESSAGE("return type of node::value()"));
 
@@ -4314,13 +4269,13 @@ TOML_NAMESPACE_START
 	{
 		using namespace impl;
 
-		static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+		static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 					  "Retrieving values as wide-character strings with node::value_or() is only "
-					  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+					  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 		if constexpr (is_wide_string<T>)
 		{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 			if (type() == node_type::string)
 				return widen(*ref_cast<std::string>());
@@ -4350,7 +4305,7 @@ TOML_NAMESPACE_START
 
 				TOML_SA_LIST_NXT "A non-view type capable of losslessly representing a native TOML value type"
 				TOML_SA_LIST_BEG "std::string"
-				#if TOML_WINDOWS_COMPAT
+				#if TOML_ENABLE_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "std::wstring"
 				#endif
 				TOML_SA_LIST_SEP "any signed integer type >= 64 bits"
@@ -4367,14 +4322,14 @@ TOML_NAMESPACE_START
 				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "std::u8string_view"
 				#endif
-				#if TOML_WINDOWS_COMPAT
+				#if TOML_ENABLE_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "std::wstring_view"
 				#endif
 				TOML_SA_LIST_SEP "const char*"
 				#if TOML_HAS_CHAR8
 				TOML_SA_LIST_SEP "const char8_t*"
 				#endif
-				#if TOML_WINDOWS_COMPAT
+				#if TOML_ENABLE_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
 				TOML_SA_LIST_END
@@ -4462,7 +4417,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN_FUNC(value, std::u8string);
 	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	TOML_EXTERN_FUNC(value_exact, std::wstring);
 	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
@@ -4513,15 +4468,15 @@ TOML_IMPL_NAMESPACE_START
 			// creating from raw value
 			else
 			{
-				static_assert(!is_wide_string<T> || TOML_WINDOWS_COMPAT,
+				static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 							  "Instantiating values from wide-character strings is only "
-							  "supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+							  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
 				static_assert(is_native<unwrapped_type> || is_losslessly_convertible_to_native<unwrapped_type>,
 							  "Value initializers must be (or be promotable to) one of the TOML value types");
 
 				if constexpr (is_wide_string<T>)
 				{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 					out = new value_type{ narrow(static_cast<T&&>(val)) };
 #else
 					static_assert(dependent_false<T>, "Evaluated unreachable branch!");
@@ -4779,7 +4734,7 @@ TOML_NAMESPACE_START
 
 	using const_array_iterator = POXY_IMPLEMENTATION_DETAIL(impl::array_iterator<true>);
 
-	class array final : public node
+	class array : public node
 	{
 	  private:
 
@@ -4870,44 +4825,26 @@ TOML_NAMESPACE_START
 #endif
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
 		{
 			return node_type::array;
 		}
 
-		TOML_NODISCARD
-		bool is_array() const noexcept final
-		{
-			return true;
-		}
-
-		TOML_NODISCARD
-		array* as_array() noexcept final
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
-		const array* as_array() const noexcept final
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
@@ -4918,11 +4855,184 @@ TOML_NAMESPACE_START
 				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 			return is_homogeneous(impl::node_type_of<type>);
 		}
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
+		{
+			return false;
+		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
+		{
+			return true;
+		}
+
+		TOML_PURE_GETTER
 		bool is_array_of_tables() const noexcept final
 		{
 			return is_homogeneous(node_type::table);
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		table* as_table() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return this;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<std::string>* as_string() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<int64_t>* as_integer() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<double>* as_floating_point() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<bool>* as_boolean() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<date>* as_date() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<time>* as_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<date_time>* as_date_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const table* as_table() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return this;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<std::string>* as_string() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<int64_t>* as_integer() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<double>* as_floating_point() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<bool>* as_boolean() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date>* as_date() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<time>* as_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date_time>* as_date_time() const noexcept final
+		{
+			return nullptr;
 		}
 
 		TOML_NODISCARD
@@ -5474,7 +5584,7 @@ TOML_IMPL_NAMESPACE_START
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		template <typename V>
 		TOML_NODISCARD_CTOR
@@ -5508,7 +5618,7 @@ TOML_NAMESPACE_START
 
 	using const_table_iterator = POXY_IMPLEMENTATION_DETAIL(impl::table_iterator<true>);
 
-	class table final : public node
+	class table : public node
 	{
 	  private:
 
@@ -5526,13 +5636,13 @@ TOML_NAMESPACE_START
 		static auto do_get(Map& vals, const Key& key) noexcept(!impl::is_wide_string<Key>)
 			-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
 		{
-			static_assert(
-				!impl::is_wide_string<Key> || TOML_WINDOWS_COMPAT,
-				"Retrieval using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<Key> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Retrieval using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<Key>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return do_get(vals, impl::narrow(key));
 #else
 				static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
@@ -5606,32 +5716,26 @@ TOML_NAMESPACE_START
 		TOML_API
 		table& operator=(table&& rhs) noexcept;
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
 		{
 			return node_type::table;
 		}
 
-		TOML_NODISCARD
-		bool is_table() const noexcept final
-		{
-			return true;
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		TOML_API
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
 			using type = impl::unwrap_node<ElemType>;
@@ -5644,17 +5748,184 @@ TOML_NAMESPACE_START
 
 			return is_homogeneous(impl::node_type_of<type>);
 		}
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
+		{
+			return true;
+		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_PURE_GETTER
+		bool is_array_of_tables() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return false;
+		}
+
+		TOML_CONST_INLINE_GETTER
 		table* as_table() noexcept final
 		{
 			return this;
 		}
 
-		TOML_NODISCARD
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<std::string>* as_string() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<int64_t>* as_integer() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<double>* as_floating_point() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<bool>* as_boolean() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<date>* as_date() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<time>* as_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		toml::value<date_time>* as_date_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
 		const table* as_table() const noexcept final
 		{
 			return this;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<std::string>* as_string() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<int64_t>* as_integer() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<double>* as_floating_point() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<bool>* as_boolean() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date>* as_date() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<time>* as_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date_time>* as_date_time() const noexcept final
+		{
+			return nullptr;
 		}
 
 		TOML_NODISCARD
@@ -5680,7 +5951,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ this->get(key) };
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node_view<node> operator[](std::wstring_view key) noexcept
@@ -5694,7 +5965,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ this->get(key) };
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		iterator begin() noexcept
@@ -5756,9 +6027,9 @@ TOML_NAMESPACE_START
 										 ValueType&& val,
 										 value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Insertion using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_node_view<ValueType>)
 			{
@@ -5768,7 +6039,7 @@ TOML_NAMESPACE_START
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -5808,9 +6079,9 @@ TOML_NAMESPACE_START
 												   ValueType&& val,
 												   value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Insertion using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Insertion using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (is_node_view<ValueType>)
 			{
@@ -5820,7 +6091,7 @@ TOML_NAMESPACE_START
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -5847,13 +6118,13 @@ TOML_NAMESPACE_START
 		template <typename ValueType, typename KeyType, typename... ValueArgs>
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
 		{
-			static_assert(
-				!impl::is_wide_string<KeyType> || TOML_WINDOWS_COMPAT,
-				"Emplacement using wide-character keys is only supported on Windows with TOML_WINDOWS_COMPAT enabled.");
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Emplacement using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 				return emplace<ValueType>(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueArgs>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
@@ -5903,14 +6174,14 @@ TOML_NAMESPACE_START
 			return false;
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		bool erase(std::wstring_view key)
 		{
 			return erase(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		iterator find(std::string_view key) noexcept
@@ -5930,7 +6201,7 @@ TOML_NAMESPACE_START
 			return do_contains(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		iterator find(std::wstring_view key)
@@ -5950,7 +6221,7 @@ TOML_NAMESPACE_START
 			return contains(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node* get(std::string_view key) noexcept
@@ -5964,7 +6235,7 @@ TOML_NAMESPACE_START
 			return do_get(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node* get(std::wstring_view key)
@@ -5978,7 +6249,7 @@ TOML_NAMESPACE_START
 			return get(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		template <typename ValueType>
 		TOML_NODISCARD
@@ -5994,7 +6265,7 @@ TOML_NAMESPACE_START
 			return do_get_as<ValueType>(map_, key);
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		template <typename ValueType>
 		TOML_NODISCARD
@@ -6010,7 +6281,7 @@ TOML_NAMESPACE_START
 			return get_as<ValueType>(impl::narrow(key));
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 	  private:
 
@@ -7294,7 +7565,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		node_view<node> operator[](std::wstring_view key) noexcept
@@ -7308,7 +7579,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
 		table_iterator begin() noexcept
@@ -7398,7 +7669,7 @@ TOML_NAMESPACE_START
 
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
 	TOML_API
@@ -7412,15 +7683,15 @@ TOML_NAMESPACE_START
 	TOML_API
 	parse_result parse_file(std::wstring_view file_path);
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
 	TOML_API
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path);
 
-#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
 	TOML_API
@@ -7804,7 +8075,7 @@ TOML_POP_WARNINGS;
 
 //********  impl/std_string.inl  ***************************************************************************************
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 TOML_PUSH_WARNINGS;
 
@@ -7891,7 +8162,7 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_POP_WARNINGS;
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 //********  impl/print_to_stream.inl  **********************************************************************************
 
@@ -8446,7 +8717,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	TOML_EXTERN_FUNC(value_exact, std::wstring);
 	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
@@ -8523,7 +8794,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERN_FUNC(value, std::u8string);
 	TOML_EXTERN_FUNC(value, const char8_t*);
 #endif
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	TOML_EXTERN_FUNC(value_exact, std::wstring);
 	TOML_EXTERN_FUNC(value, std::wstring);
 #endif
@@ -12500,7 +12771,7 @@ TOML_NAMESPACE_START
 
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::wstring_view source_path)
@@ -12520,9 +12791,9 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path));
 	}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path)
@@ -12530,7 +12801,7 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }

@@ -3602,7 +3602,7 @@ TOML_NAMESPACE_START
 
 #endif // TOML_HAS_CHAR8
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::string_view doc, std::wstring_view source_path)
@@ -3622,9 +3622,9 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path));
 	}
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path)
@@ -3632,7 +3632,7 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-#endif // TOML_HAS_CHAR8 && TOML_WINDOWS_COMPAT
+#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }

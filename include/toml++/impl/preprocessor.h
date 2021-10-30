@@ -335,7 +335,7 @@
 #endif
  
 // header-only mode
-#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // TOML_HEADER_ONLY was TOML_ALL_INLINE pre-2.0
+#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
 	#define TOML_HEADER_ONLY TOML_ALL_INLINE
 #endif
 #if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
@@ -370,16 +370,19 @@
 #endif
 
 // experimental language features
-#if (defined(TOML_UNRELEASED_FEATURES) && TOML_UNRELEASED_FEATURES) || TOML_INTELLISENSE
-	#undef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 1
+#if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES pre-3.0
+	#define TOML_ENABLE_UNRELEASED_FEATURES TOML_UNRELEASED_FEATURES
 #endif
-#ifndef TOML_UNRELEASED_FEATURES
-	#define TOML_UNRELEASED_FEATURES 0
+#if (defined(TOML_ENABLE_UNRELEASED_FEATURES) && TOML_ENABLE_UNRELEASED_FEATURES) || TOML_INTELLISENSE
+	#undef TOML_ENABLE_UNRELEASED_FEATURES
+	#define TOML_ENABLE_UNRELEASED_FEATURES 1
+#endif
+#ifndef TOML_ENABLE_UNRELEASED_FEATURES
+	#define TOML_ENABLE_UNRELEASED_FEATURES 0
 #endif
 
 // parser
-#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // TOML_ENABLE_PARSER was TOML_PARSER pre-3.0
+#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // was TOML_PARSER pre-3.0
 	#define TOML_ENABLE_PARSER TOML_PARSER
 #endif
 #if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
@@ -388,7 +391,7 @@
 #endif
 
 // toml formatter
-#if !defined(TOML_ENABLE_TOML_FORMATTER)												\
+#if !defined(TOML_ENABLE_TOML_FORMATTER)										\
 		|| (defined(TOML_ENABLE_TOML_FORMATTER) && TOML_ENABLE_TOML_FORMATTER)	\
 		|| TOML_INTELLISENSE
 	#undef TOML_ENABLE_TOML_FORMATTER
@@ -404,16 +407,19 @@
 #endif
 
 // windows compat
-#if !defined(TOML_WINDOWS_COMPAT)									\
-		|| (defined(TOML_WINDOWS_COMPAT) && TOML_WINDOWS_COMPAT)	\
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
+	#define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
+#endif
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT)										\
+		|| (defined(TOML_ENABLE_WINDOWS_COMPAT) && TOML_ENABLE_WINDOWS_COMPAT)	\
 		|| TOML_INTELLISENSE
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 1
+	#undef TOML_ENABLE_WINDOWS_COMPAT
+	#define TOML_ENABLE_WINDOWS_COMPAT 1
 #endif
 /// \cond
 #ifndef _WIN32
-	#undef TOML_WINDOWS_COMPAT
-	#define TOML_WINDOWS_COMPAT 0
+	#undef TOML_ENABLE_WINDOWS_COMPAT
+	#define TOML_ENABLE_WINDOWS_COMPAT 0
 #endif
 /// \endcond
 #ifndef TOML_INCLUDE_WINDOWS_H
@@ -764,7 +770,7 @@
 #define TOML_MAKE_VERSION(maj, min, rev)											\
 		((maj) * 1000 + (min) * 25 + (rev))
 
-#if TOML_UNRELEASED_FEATURES
+#if TOML_ENABLE_UNRELEASED_FEATURES
 	#define TOML_LANG_EFFECTIVE_VERSION												\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH+1)
 #else
@@ -996,14 +1002,14 @@ TOML_ENABLE_WARNINGS;
 /// \detail Not defined by default.
 
 
-/// \def TOML_UNRELEASED_FEATURES
+/// \def TOML_ENABLE_UNRELEASED_FEATURES
 /// \brief Enables support for unreleased TOML language features not yet part of a
 ///		[numbered version](https://github.com/toml-lang/toml/releases).
 /// \detail Defaults to `0`.
 /// \see [TOML Language Support](https://github.com/marzer/tomlplusplus/blob/master/README.md#toml-language-support)
 
 
-/// \def TOML_WINDOWS_COMPAT
+/// \def TOML_ENABLE_WINDOWS_COMPAT
 /// \brief Enables the use of wide strings (wchar_t, std::wstring) in various places throughout the library
 /// 	   when building for Windows.
 /// \detail Defaults to `1` when building for Windows, `0` otherwise. Has no effect when building for anything other
