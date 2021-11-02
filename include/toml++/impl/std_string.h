@@ -24,11 +24,6 @@ namespace toml // non-abi namespace; this is not an error
 {
 	using namespace std::string_literals;
 	using namespace std::string_view_literals;
-
-	// legacy typedefs
-	using string_char = char;
-	using string	  = std::string;
-	using string_view = std::string_view;
 }
 
 #if TOML_ENABLE_WINDOWS_COMPAT

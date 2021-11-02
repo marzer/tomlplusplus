@@ -154,8 +154,7 @@ TOML_IMPL_NAMESPACE_START
 #endif // TOML_HAS_CHAR8 || TOML_ENABLE_WINDOWS_COMPAT
 
 	template <typename T>
-	TOML_NODISCARD
-	TOML_ATTR(const)
+	TOML_CONST_GETTER
 	inline optional<T> node_integer_cast(int64_t val) noexcept
 	{
 		static_assert(node_type_of<T> == node_type::integer);
@@ -595,66 +594,86 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Returns a reference to the underlying value.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		value_type& get() & noexcept
 		{
 			return val_;
 		}
 
 		/// \brief	Returns a reference to the underlying value (rvalue overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		value_type&& get() && noexcept
 		{
 			return static_cast<value_type&&>(val_);
 		}
 
 		/// \brief	Returns a reference to the underlying value (const overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const value_type& get() const& noexcept
 		{
 			return val_;
 		}
 
 		/// \brief	Returns a reference to the underlying value.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		value_type& operator*() & noexcept
 		{
 			return val_;
 		}
 
 		/// \brief	Returns a reference to the underlying value (rvalue overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		value_type&& operator*() && noexcept
 		{
 			return static_cast<value_type&&>(val_);
 		}
 
 		/// \brief	Returns a reference to the underlying value (const overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const value_type& operator*() const& noexcept
 		{
 			return val_;
 		}
 
 		/// \brief	Returns a reference to the underlying value.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator value_type&() & noexcept
 		{
 			return val_;
 		}
 
 		/// \brief	Returns a reference to the underlying value (rvalue overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator value_type&&() && noexcept
 		{
 			return static_cast<value_type&&>(val_);
 		}
 
 		/// \brief	Returns a reference to the underlying value (const overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator const value_type&() const& noexcept
 		{
 			return val_;
+		}
+
+		/// \brief	Returns a pointer to the underlying value.
+		///
+		/// \availability This operator is only available when #value_type is a class/struct.
+		TOML_HIDDEN_CONSTRAINT(std::is_class_v<T>, typename T = value_type)
+		TOML_PURE_INLINE_GETTER
+		value_type* operator->() noexcept
+		{
+			return &val_;
+		}
+
+		/// \brief	Returns a pointer to the underlying value (const overload).
+		///
+		/// \availability This operator is only available when #value_type is a class/struct.
+		TOML_HIDDEN_CONSTRAINT(std::is_class_v<T>, typename T = value_type)
+		TOML_PURE_INLINE_GETTER
+		const value_type* operator->() const noexcept
+		{
+			return &val_;
 		}
 
 		/// @}
@@ -879,11 +898,11 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-#if TOML_ENABLE_TOML_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 		/// \brief	Prints the value out to a stream as formatted TOML.
 		///
-		/// \availability This operator is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
+		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
 		friend std::ostream& operator<<(std::ostream& lhs, const value& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);

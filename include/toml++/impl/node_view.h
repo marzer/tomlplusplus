@@ -718,11 +718,11 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-#if TOML_ENABLE_TOML_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 		/// \brief	Prints the viewed node out to a stream.
 		///
-		/// \availability This operator is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
+		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
 		friend std::ostream& operator<<(std::ostream& os, const node_view& nv)
 		{
 			if (nv.node_)

@@ -9,6 +9,7 @@
 #define TOML_CONST_GETTER
 #define TOML_CONST_INLINE_GETTER				inline
 #define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
+#define TOML_HIDDEN_CONSTRAINT(cond, ...)		template <__VA_ARGS__>
 #define TOML_EMPTY_BASES
 #define TOML_EXTERN
 #define TOML_EXTERN_NOEXCEPT(...)

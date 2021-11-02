@@ -41,6 +41,7 @@ TOML_DISABLE_SWITCH_WARNINGS;
 #include "impl/formatter.h"
 #include "impl/toml_formatter.h"
 #include "impl/json_formatter.h"
+#include "impl/yaml_formatter.h"
 
 #if TOML_IMPLEMENTATION
 
@@ -55,6 +56,7 @@ TOML_DISABLE_SWITCH_WARNINGS;
 #include "impl/formatter.inl"
 #include "impl/toml_formatter.inl"
 #include "impl/json_formatter.inl"
+#include "impl/yaml_formatter.inl"
 
 #endif // TOML_IMPLEMENTATION
 
@@ -107,6 +109,7 @@ TOML_POP_WARNINGS;
 #undef TOML_HAS_CHAR8
 #undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
 #undef TOML_HAS_INCLUDE
+#undef TOML_HIDDEN_CONSTRAINT
 #undef TOML_ICC
 #undef TOML_ICC_CL
 #undef TOML_IMPL_NAMESPACE_END

@@ -77,6 +77,10 @@ TOML_ANON_NAMESPACE_START
 			return;
 		}
 
+		static constexpr auto value_flags_mask =
+			value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
+		format &= value_flags_mask;
+
 		int base = 10;
 		if (format != value_flags::none && val >= T{})
 		{
@@ -403,7 +407,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 	}
 
-#if TOML_ENABLE_TOML_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const array& arr)

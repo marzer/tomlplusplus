@@ -80,7 +80,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_API
 	void print_to_stream(std::ostream&, const source_region&);
 
-#if TOML_ENABLE_TOML_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 	TOML_API
 	void print_to_stream(std::ostream&, const array&);

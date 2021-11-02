@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.h"
-#if TOML_ENABLE_JSON_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 #include "formatter.h"
 #include "header_start.h"
@@ -14,7 +14,7 @@ TOML_NAMESPACE_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
 	///
-	/// \availability This class is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
+	/// \availability This class is only available when #TOML_ENABLE_FORMATTERS is enabled.
 	///
 	/// \detail \cpp
 	/// auto some_toml = toml::parse(R"(
@@ -26,7 +26,6 @@ TOML_NAMESPACE_START
 	///		smooth = true
 	/// )"sv);
 	///	std::cout << toml::json_formatter{ some_toml } << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -60,16 +59,21 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr impl::formatter_constants constants = { "Infinity"sv, "-Infinity"sv, "NaN"sv };
-		static constexpr format_flags mandatory_flags		 = format_flags::quote_dates_and_times;
-		static constexpr format_flags ignored_flags =
-			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings;
+		static constexpr impl::formatter_constants constants = {
+			format_flags::quote_dates_and_times,										  // mandatory
+			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings, // ignored
+			"Infinity"sv,
+			"-Infinity"sv,
+			"NaN"sv,
+			"true"sv,
+			"false"sv
+		};
 
 		/// \endcond
 
 	  public:
 		/// \brief	The default flags for a json_formatter.
-		static constexpr format_flags default_flags = format_flags::quote_dates_and_times	  //
+		static constexpr format_flags default_flags = constants.mandatory_flags				  //
 													| format_flags::quote_infinities_and_nans //
 													| format_flags::indentation;
 
@@ -79,7 +83,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
+			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
 #if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
@@ -110,7 +114,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
+			: base{ nullptr, &result, constants, { flags, "    "sv } }
 		{}
 
 #endif
@@ -134,4 +138,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_ENABLE_JSON_FORMATTER
+#endif // TOML_ENABLE_FORMATTERS

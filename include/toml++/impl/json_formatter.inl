@@ -10,7 +10,7 @@
 #error This is an implementation-only header.
 #endif
 //# }}
-#if TOML_ENABLE_JSON_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 #include "json_formatter.h"
 #include "print_to_stream.h"
@@ -24,76 +24,78 @@ TOML_NAMESPACE_START
 	void json_formatter::print(const toml::table& tbl)
 	{
 		if (tbl.empty())
-			impl::print_to_stream(base::stream(), "{}"sv);
-		else
 		{
-			impl::print_to_stream(base::stream(), '{');
-			if (base::indent_sub_tables())
-				base::increase_indent();
-			bool first = false;
-			for (auto&& [k, v] : tbl)
-			{
-				if (first)
-					impl::print_to_stream(base::stream(), ',');
-				first = true;
-				base::print_newline(true);
-				base::print_indent();
+			base::print_unformatted("{}"sv);
+			return;
+		}
 
-				base::print_string(k, false);
-				impl::print_to_stream(base::stream(), " : "sv);
+		base::print_unformatted('{');
 
-				const auto type = v.type();
-				TOML_ASSUME(type != node_type::none);
-				switch (type)
-				{
-					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default: base::print_value(v, type);
-				}
-			}
-			if (base::indent_sub_tables())
-				base::decrease_indent();
+		if (base::indent_sub_tables())
+			base::increase_indent();
+		bool first = false;
+		for (auto&& [k, v] : tbl)
+		{
+			if (first)
+				base::print_unformatted(',');
+			first = true;
 			base::print_newline(true);
 			base::print_indent();
-			impl::print_to_stream(base::stream(), '}');
+
+			base::print_string(k, false);
+			base::print_unformatted(" : "sv);
+
+			const auto type = v.type();
+			TOML_ASSUME(type != node_type::none);
+			switch (type)
+			{
+				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
+				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				default: base::print_value(v, type);
+			}
 		}
-		base::clear_naked_newline();
+		if (base::indent_sub_tables())
+			base::decrease_indent();
+		base::print_newline(true);
+		base::print_indent();
+
+		base::print_unformatted('}');
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void json_formatter::print(const toml::array& arr)
 	{
 		if (arr.empty())
-			impl::print_to_stream(base::stream(), "[]"sv);
-		else
 		{
-			impl::print_to_stream(base::stream(), '[');
-			if (base::indent_array_elements())
-				base::increase_indent();
-			for (size_t i = 0; i < arr.size(); i++)
-			{
-				if (i > 0u)
-					impl::print_to_stream(base::stream(), ',');
-				base::print_newline(true);
-				base::print_indent();
+			base::print_unformatted("[]"sv);
+			return;
+		}
 
-				auto& v			= arr[i];
-				const auto type = v.type();
-				TOML_ASSUME(type != node_type::none);
-				switch (type)
-				{
-					case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-					case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-					default: base::print_value(v, type);
-				}
-			}
-			if (base::indent_array_elements())
-				base::decrease_indent();
+		base::print_unformatted('[');
+		if (base::indent_array_elements())
+			base::increase_indent();
+		for (size_t i = 0; i < arr.size(); i++)
+		{
+			if (i > 0u)
+				base::print_unformatted(',');
 			base::print_newline(true);
 			base::print_indent();
-			impl::print_to_stream(base::stream(), ']');
+
+			auto& v			= arr[i];
+			const auto type = v.type();
+			TOML_ASSUME(type != node_type::none);
+			switch (type)
+			{
+				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
+				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				default: base::print_value(v, type);
+			}
 		}
-		base::clear_naked_newline();
+		if (base::indent_array_elements())
+			base::decrease_indent();
+		base::print_newline(true);
+		base::print_indent();
+		base::print_unformatted(']');
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -113,4 +115,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_ENABLE_JSON_FORMATTER
+#endif // TOML_ENABLE_FORMATTERS

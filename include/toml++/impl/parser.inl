@@ -742,17 +742,13 @@ TOML_ANON_NAMESPACE_START
 		node_ptr(node_ptr&&)				 = delete;
 		node_ptr& operator=(node_ptr&&) = delete;
 
-		TOML_NODISCARD
-		TOML_ATTR(pure)
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		operator bool() const noexcept
 		{
 			return node_ != nullptr;
 		}
 
-		TOML_NODISCARD
-		TOML_ATTR(pure)
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		node* get() const noexcept
 		{
 			return node_;
@@ -818,7 +814,7 @@ TOML_ANON_NAMESPACE_END;
 //    They're all #undef'd at the bottom of the parser's implementation so they should be harmless outside
 //    of toml++.
 
-#if defined(NDEBUG) || !defined(_DEBUG)
+#ifdef NDEBUG
 #define assert_or_assume(cond) TOML_ASSUME(cond)
 #else
 #define assert_or_assume(cond) TOML_ASSERT(cond)
@@ -2576,16 +2572,26 @@ TOML_IMPL_NAMESPACE_START
 				else if (has_any(has_x | has_o | has_b))
 				{
 					int64_t i;
+					value_flags flags;
 					if (has_any(has_x))
-						i = parse_integer<16>();
+					{
+						i	  = parse_integer<16>();
+						flags = value_flags::format_as_hexadecimal;
+					}
 					else if (has_any(has_o))
-						i = parse_integer<8>();
+					{
+						i	  = parse_integer<8>();
+						flags = value_flags::format_as_octal;
+					}
 					else // has_b
-						i = parse_integer<2>();
+					{
+						i	  = parse_integer<2>();
+						flags = value_flags::format_as_binary;
+					}
 					return_if_error({});
 
 					val = new value{ i };
-					reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
+					reinterpret_cast<value<int64_t>*>(val.get())->flags(flags);
 				}
 				else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 					val = new value{ parse_float() };

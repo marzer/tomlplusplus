@@ -102,55 +102,59 @@ namespace
 
 TEST_CASE("formatters")
 {
-	const auto data = toml::table{
-		{ "integers"sv,
-		  toml::table{ { "zero"sv, 0 },
-					   { "one"sv, 1 },
-					   { "dec"sv, 10 },
-					   { "bin"sv, 10, toml::value_flags::format_as_binary },
-					   { "oct"sv, 10, toml::value_flags::format_as_octal },
-					   { "hex"sv, 10, toml::value_flags::format_as_hexadecimal } } },
-		{ "floats"sv,
-		  toml::table{ { "pos_zero"sv, +0.0 },
-					   { "neg_zero"sv, -0.0 },
-					   { "one"sv, 1.0 },
-					   { "pos_inf"sv, +std::numeric_limits<double>::infinity() },
-					   { "neg_inf"sv, -std::numeric_limits<double>::infinity() },
-					   { "pos_nan"sv, +std::numeric_limits<double>::quiet_NaN() },
-					   { "neg_nan"sv, -std::numeric_limits<double>::quiet_NaN() }
+	const auto data_date = toml::date{ 2021, 11, 2 };
+	const auto data_time = toml::time{ 20, 33, 0 };
+	const auto data		 = toml::table{
+		 { "integers"sv,
+		   toml::table{ { "zero"sv, 0 },
+						{ "one"sv, 1 },
+						{ "dec"sv, 10 },
+						{ "bin"sv, 10, toml::value_flags::format_as_binary },
+						{ "oct"sv, 10, toml::value_flags::format_as_octal },
+						{ "hex"sv, 10, toml::value_flags::format_as_hexadecimal } } },
+		 { "floats"sv,
+		   toml::table{ { "pos_zero"sv, +0.0 },
+						{ "neg_zero"sv, -0.0 },
+						{ "one"sv, 1.0 },
+						{ "pos_inf"sv, +std::numeric_limits<double>::infinity() },
+						{ "neg_inf"sv, -std::numeric_limits<double>::infinity() },
+						{ "pos_nan"sv, +std::numeric_limits<double>::quiet_NaN() },
+						{ "neg_nan"sv, -std::numeric_limits<double>::quiet_NaN() }
 
-		  } },
+		   } },
 
-		{ "dates and times"sv,
-		  toml::table{
+		 { "dates and times"sv,
+		   toml::table{
 
-			  { "dates"sv, toml::table{ { "zero"sv, toml::date{} } } },
+			   { "dates"sv, toml::table{ { "val"sv, data_date } } },
 
-			  { "times"sv, toml::table{ { "zero"sv, toml::time{} } } },
+			   { "times"sv, toml::table{ { "val"sv, data_time } } },
 
-			  { "date-times"sv,
-				toml::table{
+			   { "date-times"sv,
+				 toml::table{
 
-					{ "local"sv, toml::table{ { "zero"sv, toml::date_time{} } } },
-					{ "offset"sv, toml::table{ { "zero"sv, toml::date_time{ {}, {}, toml::time_offset{} } } } } } } } },
+					 { "local"sv, toml::table{ { "val"sv, toml::date_time{ data_date, data_time } } } },
+					 { "offset"sv,
+					   toml::table{
+						   { "val"sv, toml::date_time{ data_date, data_time, toml::time_offset{} } } } } } } } },
 
-		{ "bools"sv,
-		  toml::table{ { "true"sv, true }, //
-					   { "false"sv, false } } },
+		 { "bools"sv,
+		   toml::table{ { "true"sv, true }, //
+						{ "false"sv, false } } },
 
-		{
-			"strings"sv,
-			toml::array{ R"()"sv,
-						 R"(string)"sv,
-						 R"(string with a single quote in it: ')"sv,
-						 R"(string with a double quote in it: ")"sv,
-						 "string with a tab: \t"sv,
-						 R"(a long string to force the array over multiple lines)"sv },
-		},
+		 {
+			 "strings"sv,
+			 toml::array{ R"()"sv,
+						  R"(string)"sv,
+						  R"(string with a single quote in it: ')"sv,
+						  R"(string with a double quote in it: ")"sv,
+						  "string with a tab: \t"sv,
+						  R"(a long string to force the array over multiple lines)"sv },
+		 },
 
-		{ "a"sv,
-		  toml::table{ { "val", true },
-					   { "b"sv, toml::table{ { "val", true }, { "c"sv, toml::table{ { "val", true } } } } } } }
+		 { "a"sv,
+		   toml::table{ { "val", true },
+						{ "b"sv, toml::table{ { "val", true }, { "c"sv, toml::table{ { "val", true } } } } } } }
 
 	};
 
@@ -180,16 +184,16 @@ false = false
 true = true
 
 ['dates and times'.date-times.local]
-zero = 0000-00-00T00:00:00
+val = 2021-11-02T20:33:00
 
 ['dates and times'.date-times.offset]
-zero = 0000-00-00T00:00:00Z
+val = 2021-11-02T20:33:00Z
 
 ['dates and times'.dates]
-zero = 0000-00-00
+val = 2021-11-02
 
 ['dates and times'.times]
-zero = 00:00:00
+val = 20:33:00
 
 [floats]
 neg_inf = -inf
@@ -232,17 +236,17 @@ zero = 0
     "dates and times" : {
         "date-times" : {
             "local" : {
-                "zero" : "0000-00-00T00:00:00"
+                "val" : "2021-11-02T20:33:00"
             },
             "offset" : {
-                "zero" : "0000-00-00T00:00:00Z"
+                "val" : "2021-11-02T20:33:00Z"
             }
         },
         "dates" : {
-            "zero" : "0000-00-00"
+            "val" : "2021-11-02"
         },
         "times" : {
-            "zero" : "00:00:00"
+            "val" : "20:33:00"
         }
     },
     "floats" : {

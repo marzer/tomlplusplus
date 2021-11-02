@@ -122,14 +122,14 @@ if is_gcc
 			'-Wvariadic-macros',
 			'-Wwrite-strings',
 			'-Wmissing-noreturn',
-			'-Wsuggest-attribute=const',
-			'-Wsuggest-attribute=pure',
 			language: 'cpp'
 		)
 	endif
 	if is_release
 		add_project_arguments(
 			'-fmerge-constants',
+			'-Wsuggest-attribute=const',
+			'-Wsuggest-attribute=pure',
 			language: 'cpp'
 		)
 	endif

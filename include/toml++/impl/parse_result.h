@@ -269,7 +269,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<node> operator[](string_view key) noexcept
+		node_view<node> operator[](std::string_view key) noexcept
 		{
 			return err_ ? node_view<node>{} : table()[key];
 		}
@@ -283,7 +283,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<const node> operator[](string_view key) const noexcept
+		node_view<const node> operator[](std::string_view key) const noexcept
 		{
 			return err_ ? node_view<const node>{} : table()[key];
 		}
@@ -372,11 +372,17 @@ TOML_NAMESPACE_START
 			return err_ ? const_table_iterator{} : table().cend();
 		}
 
+#if TOML_ENABLE_FORMATTERS
+
 		/// \brief Prints the held error or table object out to a text stream.
+		///
+		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
 		friend std::ostream& operator<<(std::ostream& os, const parse_result& result)
 		{
 			return result.err_ ? (os << result.error()) : (os << result.table());
 		}
+
+#endif
 	};
 
 	TOML_ABI_NAMESPACE_END;

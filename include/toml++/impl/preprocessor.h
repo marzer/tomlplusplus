@@ -390,20 +390,12 @@
 	#define TOML_ENABLE_PARSER 1
 #endif
 
-// toml formatter
-#if !defined(TOML_ENABLE_TOML_FORMATTER)										\
-		|| (defined(TOML_ENABLE_TOML_FORMATTER) && TOML_ENABLE_TOML_FORMATTER)	\
+// formatters
+#if !defined(TOML_ENABLE_FORMATTERS)									\
+		|| (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS)	\
 		|| TOML_INTELLISENSE
-	#undef TOML_ENABLE_TOML_FORMATTER
-	#define TOML_ENABLE_TOML_FORMATTER 1
-#endif
-
-// json formatter
-#if !defined(TOML_ENABLE_JSON_FORMATTER)										\
-		|| (defined(TOML_ENABLE_JSON_FORMATTER) && TOML_ENABLE_JSON_FORMATTER)	\
-		|| TOML_INTELLISENSE
-	#undef TOML_ENABLE_JSON_FORMATTER
-	#define TOML_ENABLE_JSON_FORMATTER 1
+	#undef TOML_ENABLE_FORMATTERS
+	#define TOML_ENABLE_FORMATTERS 1
 #endif
 
 // windows compat
@@ -691,23 +683,17 @@
 	#define TOML_EXTERN_NOEXCEPT(...) noexcept(__VA_ARGS__)
 #endif
 
-#define TOML_PURE_GETTER			\
-	TOML_NODISCARD					\
-	TOML_ATTR(pure)
-
-#define TOML_PURE_INLINE_GETTER		\
-	TOML_NODISCARD					\
-	TOML_ALWAYS_INLINE				\
-	TOML_ATTR(pure)
-
-#define TOML_CONST_GETTER			\
-	TOML_NODISCARD					\
-	TOML_ATTR(const)
-
-#define TOML_CONST_INLINE_GETTER	\
-	TOML_NODISCARD					\
-	TOML_ALWAYS_INLINE				\
-	TOML_ATTR(const)
+#ifdef NDEBUG
+	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_ATTR(pure)
+	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_ATTR(const)
+	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_ATTR(pure)
+	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_ATTR(const)
+#else
+	#define TOML_PURE_GETTER			TOML_NODISCARD	
+	#define TOML_CONST_GETTER			TOML_NODISCARD	
+	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE
+	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE
+#endif
 
 //======================================================================================================================
 // SFINAE
@@ -721,10 +707,16 @@
 #endif
 #define TOML_ENABLE_IF(...)	, typename std::enable_if<(__VA_ARGS__), int>::type = 0
 #define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__ TOML_ENABLE_IF(condition)> TOML_REQUIRES(condition)
+#define TOML_HIDDEN_CONSTRAINT(condition, ...)	TOML_CONSTRAINED_TEMPLATE(condition, __VA_ARGS__)
 /// \endcond
+//# {{
 #ifndef TOML_CONSTRAINED_TEMPLATE
 	#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__>
 #endif
+#ifndef TOML_HIDDEN_CONSTRAINT
+	#define TOML_HIDDEN_CONSTRAINT(condition, ...)
+#endif
+//# }}
 
 //#====================================================================================================================
 //# EXTENDED INT AND FLOAT TYPES
@@ -833,7 +825,7 @@
 
 TOML_DISABLE_WARNINGS;
 #ifndef TOML_ASSERT
-	#if defined(NDEBUG) || !defined(_DEBUG)
+	#ifdef NDEBUG
 		#define TOML_ASSERT(expr)	static_cast<void>(0)
 	#else
 		#ifndef assert
@@ -976,17 +968,15 @@ TOML_ENABLE_WARNINGS;
 ///				to `0` can improve compilation speed and reduce binary size.
 
 
-/// \def		TOML_ENABLE_TOML_FORMATTER
-/// \brief		Sets whether the #toml::toml_formatter is enabled.
+/// \def		TOML_ENABLE_FORMATTERS
+/// \brief		Sets whether the various formatter classes are enabled.
 /// \detail		Defaults to `1`.
-/// \remarks	If you don't need to re-serialize TOML data, setting `TOML_ENABLE_TOML_FORMATTER`
+/// \remarks	If you don't need to re-serialize TOML data, setting `TOML_ENABLE_FORMATTERS`
 ///				to `0` can improve compilation speed and reduce binary size.
-
-/// \def		TOML_ENABLE_JSON_FORMATTER
-/// \brief		Sets whether the #toml::json_formatter is enabled.
-/// \detail		Defaults to `1`.
-/// \remarks	If you don't need to re-serialize TOML data as JSON, setting `TOML_ENABLE_JSON_FORMATTER`
-///				to `0` can improve compilation speed and reduce binary size.
+/// \see
+///  - toml::toml_formatter
+///  - toml::json_formatter
+///  - toml::yaml_formatter
 
 
 #define TOML_SMALL_FLOAT_TYPE

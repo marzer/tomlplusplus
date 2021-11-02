@@ -75,6 +75,7 @@
     <ClInclude Include="include\toml++\impl\value_extern.inl" />
     <ClInclude Include="include\toml++\impl\version.h" />
     <ClInclude Include="include\toml++\impl\std_string.inl" />
+    <ClInclude Include="include\toml++\impl\yaml_formatter.h" />
     <ClInclude Include="include\toml++\toml.h" />
   </ItemGroup>
   <ItemGroup>
@@ -91,6 +92,7 @@
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="include\toml++\impl\node_view_extern.inl" />
+    <None Include="include\toml++\impl\yaml_formatter.inl" />
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include="cmake\install-rules.cmake" />

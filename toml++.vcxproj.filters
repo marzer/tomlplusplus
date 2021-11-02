@@ -124,6 +124,9 @@
     <ClInclude Include="include\toml++\impl\value_extern.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\yaml_formatter.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />
@@ -194,6 +197,9 @@
     </None>
     <None Include=".github\ISSUE_TEMPLATE\feature_request.md">
       <Filter>.github</Filter>
+    </None>
+    <None Include="include\toml++\impl\yaml_formatter.inl">
+      <Filter>include\impl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

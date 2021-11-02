@@ -102,6 +102,8 @@ TOML_NAMESPACE_START
 
 	class toml_formatter;
 	class json_formatter;
+	class yaml_formatter;
+	class xml_formatter;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 #if TOML_EXCEPTIONS
@@ -297,7 +299,7 @@ TOML_NAMESPACE_START // abi namespace
 		none,
 
 		/// \brief Dates and times will be emitted as quoted strings.
-		quote_dates_and_times = 1ull,
+		quote_dates_and_times = (1ull << 0),
 
 		/// \brief Infinities and NaNs will be emitted as quoted strings.
 		quote_infinities_and_nans = (1ull << 1),
@@ -308,14 +310,20 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.
 		allow_multi_line_strings = (1ull << 3),
 
-		/// \brief Values with special format flags will be formatted accordingly.
-		allow_value_format_flags = (1ull << 4),
+		/// \brief Allow integers with #value_flags::format_as_binary to be emitted as binary.
+		allow_binary_integers = (1ull << 4),
+
+		/// \brief Allow integers with #value_flags::format_as_octal to be emitted as octal.
+		allow_octal_integers = (1ull << 5),
+
+		/// \brief Allow integers with #value_flags::format_as_hexadecimal to be emitted as hexadecimal.
+		allow_hexadecimal_integers = (1ull << 6),
 
 		/// \brief Apply indentation to tables nested within other tables/arrays.
-		indent_sub_tables = (1ull << 5),
+		indent_sub_tables = (1ull << 7),
 
 		/// \brief Apply indentation to array elements when the array is forced to wrap over multiple lines.
-		indent_array_elements = (1ull << 6),
+		indent_array_elements = (1ull << 8),
 
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,

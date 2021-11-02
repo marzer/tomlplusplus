@@ -4,12 +4,13 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-//# {{
 #include "preprocessor.h"
+//# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
+#if TOML_ENABLE_FORMATTERS
 
 #include "formatter.h"
 #include "print_to_stream.h"
@@ -38,9 +39,15 @@ TOML_IMPL_NAMESPACE_START
 	{
 		TOML_ASSERT(source_ != nullptr);
 
+		config_.flags = (config_.flags | constants_->mandatory_flags) & ~constants_->ignored_flags;
+
 		indent_columns_ = {};
 		for (auto c : config_.indent)
 			indent_columns_ += c == '\t' ? 4u : 1u;
+
+		int_format_mask_ = config_.flags
+						 & (format_flags::allow_binary_integers | format_flags::allow_octal_integers
+							| format_flags::allow_hexadecimal_integers);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -78,6 +85,20 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	void formatter::print_unformatted(char c)
+	{
+		print_to_stream(*stream_, c);
+		naked_newline_ = false;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void formatter::print_unformatted(std::string_view str)
+	{
+		print_to_stream(*stream_, str);
+		naked_newline_ = false;
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
 		auto literals = literal_strings_allowed();
@@ -88,7 +109,7 @@ TOML_IMPL_NAMESPACE_START
 			return;
 		}
 
-		auto multi_line = allow_multi_line && multi_line_strings_allowed();
+		auto multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
 		if (multi_line || literals || allow_bare)
 		{
 			utf8_decoder decoder;
@@ -148,26 +169,49 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<int64_t>& val)
 	{
-		if (value_format_flags_allowed() && *val >= 0)
-		{
-			static constexpr auto value_format_flags =
-				value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
-			const auto fmt = val.flags() & value_format_flags;
-			if (fmt != value_flags::none)
-			{
-				switch (fmt)
-				{
-					case value_flags::format_as_binary: print_to_stream(*stream_, "0b"sv); break;
-					case value_flags::format_as_octal: print_to_stream(*stream_, "0o"sv); break;
-					case value_flags::format_as_hexadecimal: print_to_stream(*stream_, "0x"sv); break;
-					default: TOML_UNREACHABLE;
-				}
-			}
-			print_to_stream(*stream_, *val, fmt);
-		}
-		else
-			print_to_stream(*stream_, *val);
 		naked_newline_ = false;
+
+		if (*val >= 0 && !!int_format_mask_)
+		{
+			static constexpr auto value_flags_mask =
+				value_flags::format_as_binary | value_flags::format_as_octal | value_flags::format_as_hexadecimal;
+
+			const auto fmt = val.flags() & value_flags_mask;
+			switch (fmt)
+			{
+				case value_flags::format_as_binary:
+					if (!!(int_format_mask_ & format_flags::allow_binary_integers))
+					{
+						print_to_stream(*stream_, "0b"sv);
+						print_to_stream(*stream_, *val, fmt);
+						return;
+					}
+					break;
+
+				case value_flags::format_as_octal:
+					if (!!(int_format_mask_ & format_flags::allow_octal_integers))
+					{
+						print_to_stream(*stream_, "0o"sv);
+						print_to_stream(*stream_, *val, fmt);
+						return;
+					}
+					break;
+
+				case value_flags::format_as_hexadecimal:
+					if (!!(int_format_mask_ & format_flags::allow_hexadecimal_integers))
+					{
+						print_to_stream(*stream_, "0x"sv);
+						print_to_stream(*stream_, *val, fmt);
+						return;
+					}
+					break;
+
+				default: break;
+			}
+		}
+
+		// fallback to decimal
+		print_to_stream(*stream_, *val);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -176,16 +220,16 @@ TOML_IMPL_NAMESPACE_START
 		const std::string_view* inf_nan = nullptr;
 		switch (fpclassify(*val))
 		{
-			case fp_class::neg_inf: inf_nan = &constants_->neg_inf; break;
-			case fp_class::pos_inf: inf_nan = &constants_->pos_inf; break;
-			case fp_class::nan: inf_nan = &constants_->nan; break;
+			case fp_class::neg_inf: inf_nan = &constants_->float_neg_inf; break;
+			case fp_class::pos_inf: inf_nan = &constants_->float_pos_inf; break;
+			case fp_class::nan: inf_nan = &constants_->float_nan; break;
 			case fp_class::ok: print_to_stream(*stream_, *val); break;
 			default: TOML_UNREACHABLE;
 		}
 
 		if (inf_nan)
 		{
-			if (quote_infinities_and_nans())
+			if (!!(config_.flags & format_flags::quote_infinities_and_nans))
 				print_to_stream_bookended(*stream_, *inf_nan, '"');
 			else
 				print_to_stream(*stream_, *inf_nan);
@@ -197,14 +241,13 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<bool>& val)
 	{
-		print_to_stream(*stream_, *val);
-		naked_newline_ = false;
+		print_unformatted(*val ? constants_->bool_true : constants_->bool_false);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<date>& val)
 	{
-		if (quote_dates_and_times())
+		if (!!(config_.flags & format_flags::quote_dates_and_times))
 			print_to_stream_bookended(*stream_, *val, literal_strings_allowed() ? '\'' : '"');
 		else
 			print_to_stream(*stream_, *val);
@@ -214,7 +257,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<time>& val)
 	{
-		if (quote_dates_and_times())
+		if (!!(config_.flags & format_flags::quote_dates_and_times))
 			print_to_stream_bookended(*stream_, *val, literal_strings_allowed() ? '\'' : '"');
 		else
 			print_to_stream(*stream_, *val);
@@ -224,7 +267,7 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print(const value<date_time>& val)
 	{
-		if (quote_dates_and_times())
+		if (!!(config_.flags & format_flags::quote_dates_and_times))
 			print_to_stream_bookended(*stream_, *val, literal_strings_allowed() ? '\'' : '"');
 		else
 			print_to_stream(*stream_, *val);
@@ -275,3 +318,4 @@ TOML_IMPL_NAMESPACE_START
 TOML_IMPL_NAMESPACE_END;
 
 #include "header_end.h"
+#endif // TOML_ENABLE_FORMATTERS

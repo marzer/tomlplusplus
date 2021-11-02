@@ -2,12 +2,12 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
 #include "preprocessor.h"
 #include "header_start.h"
-
 /// \cond
+
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_CONST_GETTER
@@ -935,6 +935,6 @@ TOML_IMPL_NAMESPACE_START
 	};
 }
 TOML_IMPL_NAMESPACE_END;
-/// \endcond
 
+/// \endcond
 #include "header_end.h"

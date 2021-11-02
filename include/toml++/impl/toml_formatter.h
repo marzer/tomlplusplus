@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.h"
-#if TOML_ENABLE_TOML_FORMATTER
+#if TOML_ENABLE_FORMATTERS
 
 #include "formatter.h"
 #include "std_vector.h"
@@ -15,7 +15,7 @@ TOML_NAMESPACE_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted TOML.
 	///
-	/// \availability This class is only available when #TOML_ENABLE_TOML_FORMATTER is enabled.
+	/// \availability This class is only available when #TOML_ENABLE_FORMATTERS is enabled.
 	///
 	/// \remarks You generally don't need to create an instance of this class explicitly; the stream
 	/// 		 operators of the TOML node types already print themselves out using this formatter.
@@ -31,7 +31,6 @@ TOML_NAMESPACE_START
 	/// // these two lines are equivalent:
 	///	std::cout << toml::toml_formatter{ tbl } << "\n";
 	///	std::cout << tbl << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -50,16 +49,6 @@ TOML_NAMESPACE_START
 		using base = impl::formatter;
 		std::vector<std::string_view> key_path_;
 		bool pending_table_separator_ = false;
-
-		static constexpr size_t line_wrap_cols = 120;
-
-		TOML_NODISCARD
-		TOML_API
-		static size_t count_inline_columns(const node&) noexcept;
-
-		TOML_NODISCARD
-		TOML_API
-		static bool forces_multiline(const node&, size_t = 0) noexcept;
 
 		TOML_API
 		void print_pending_table_separator();
@@ -82,17 +71,24 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr impl::formatter_constants constants = { "inf"sv, "-inf"sv, "nan"sv };
-		static constexpr format_flags mandatory_flags		 = format_flags::none;
-		static constexpr format_flags ignored_flags			 = format_flags::none;
+		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory flags
+																 format_flags::none, // ignored flags
+																 "inf"sv,
+																 "-inf"sv,
+																 "nan"sv,
+																 "true"sv,
+																 "false"sv };
 
 		/// \endcond
 
 	  public:
 		/// \brief	The default flags for a toml_formatter.
-		static constexpr format_flags default_flags = format_flags::allow_literal_strings	 //
-													| format_flags::allow_multi_line_strings //
-													| format_flags::allow_value_format_flags //
+		static constexpr format_flags default_flags = constants.mandatory_flags				   //
+													| format_flags::allow_literal_strings	   //
+													| format_flags::allow_multi_line_strings   //
+													| format_flags::allow_binary_integers	   //
+													| format_flags::allow_octal_integers	   //
+													| format_flags::allow_hexadecimal_integers //
 													| format_flags::indentation;
 
 		/// \brief	Constructs a TOML formatter and binds it to a TOML object.
@@ -101,7 +97,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit toml_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ &source, nullptr, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
+			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
 #if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
@@ -130,7 +126,7 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit toml_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ nullptr, &result, constants, { (flags | mandatory_flags) & ~ignored_flags, "    "sv } }
+			: base{ nullptr, &result, constants, { flags, "    "sv } }
 		{}
 
 #endif
@@ -155,4 +151,4 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #include "header_end.h"
-#endif // TOML_ENABLE_TOML_FORMATTER
+#endif // TOML_ENABLE_FORMATTERS
