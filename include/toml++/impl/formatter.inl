@@ -101,16 +101,17 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
-		auto literals = literal_strings_allowed();
+		auto literal = literal_strings_allowed();
 		if (str.empty())
 		{
-			print_to_stream(*stream_, literals ? "''"sv : "\"\""sv);
+			print_to_stream(*stream_, literal ? "''"sv : "\"\""sv);
 			naked_newline_ = false;
 			return;
 		}
 
-		auto multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
-		if (multi_line || literals || allow_bare)
+		bool multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
+		const bool treat_raw_tab_as_control_char = !(config_.flags & format_flags::allow_real_tabs_in_strings);
+		if (multi_line || literal || treat_raw_tab_as_control_char || allow_bare)
 		{
 			utf8_decoder decoder;
 			bool has_line_breaks   = false;
@@ -131,7 +132,8 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (is_line_break(decoder.codepoint))
 						has_line_breaks = true;
-					else if (is_nontab_control_character(decoder.codepoint))
+					else if (is_nontab_control_character(decoder.codepoint)
+							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t'))
 						has_control_chars = true;
 					else if (decoder.codepoint == U'\'')
 						has_single_quotes = true;
@@ -143,12 +145,12 @@ TOML_IMPL_NAMESPACE_START
 					break;
 			}
 			multi_line = multi_line && has_line_breaks;
-			literals   = literals && !has_control_chars && !(!multi_line && has_single_quotes);
+			literal	   = literal && !has_control_chars && !(!multi_line && has_single_quotes);
 		}
 
 		if (allow_bare)
 			print_to_stream(*stream_, str);
-		else if (literals)
+		else if (literal)
 			print_to_stream_bookended(*stream_, str, multi_line ? "'''"sv : "'"sv);
 		else
 		{

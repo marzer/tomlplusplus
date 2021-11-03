@@ -86,6 +86,7 @@ TOML_NAMESPACE_START
 		static constexpr format_flags default_flags = constants.mandatory_flags				   //
 													| format_flags::allow_literal_strings	   //
 													| format_flags::allow_multi_line_strings   //
+													| format_flags::allow_real_tabs_in_strings //
 													| format_flags::allow_binary_integers	   //
 													| format_flags::allow_octal_integers	   //
 													| format_flags::allow_hexadecimal_integers //

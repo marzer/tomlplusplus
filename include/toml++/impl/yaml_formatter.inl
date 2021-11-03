@@ -35,9 +35,9 @@ TOML_NAMESPACE_START
 
 		if (contains_newline)
 		{
-			base::print_unformatted("|-"sv);
+			print_unformatted("|-"sv);
 
-			base::increase_indent();
+			increase_indent();
 
 			auto line_end  = str->c_str() - 1u;
 			const auto end = str->c_str() + str->length();
@@ -50,16 +50,16 @@ TOML_NAMESPACE_START
 
 				if TOML_LIKELY(line_start != line_end || line_end != end)
 				{
-					base::print_newline();
-					base::print_indent();
-					base::print_unformatted(std::string_view{ line_start, static_cast<size_t>(line_end - line_start) });
+					print_newline();
+					print_indent();
+					print_unformatted(std::string_view{ line_start, static_cast<size_t>(line_end - line_start) });
 				}
 			}
 
-			base::decrease_indent();
+			decrease_indent();
 		}
 		else
-			base::print_string(*str, false, true);
+			print_string(*str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -67,23 +67,23 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::increase_indent();
+		increase_indent();
 
 		for (auto&& [k, v] : tbl)
 		{
 			if (!parent_is_array)
 			{
-				base::print_newline();
-				base::print_indent();
+				print_newline();
+				print_indent();
 			}
 			parent_is_array = false;
 
-			base::print_string(k, false, true);
-			base::print_unformatted(": "sv);
+			print_string(k, false, true);
+			print_unformatted(": "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -92,11 +92,11 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
-		base::decrease_indent();
+		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -104,22 +104,22 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		base::increase_indent();
+		increase_indent();
 
 		for (auto&& v : arr)
 		{
 			if (!parent_is_array)
 			{
-				base::print_newline();
-				base::print_indent();
+				print_newline();
+				print_indent();
 			}
 			parent_is_array = false;
 
-			base::print_unformatted("- "sv);
+			print_unformatted("- "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -128,35 +128,31 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*reinterpret_cast<const table*>(&v), true); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v), true); break;
 				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
-
-			base::print_newline();
 		}
 
-		base::decrease_indent();
+		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
 			case node_type::table:
-				base::decrease_indent(); // so root kvps and tables have the same indent
-				print(*reinterpret_cast<const table*>(&base::source()));
+				decrease_indent(); // so root kvps and tables have the same indent
+				print(*reinterpret_cast<const table*>(&source()));
 				break;
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
 
-			case node_type::string:
-				print_yaml_string(*reinterpret_cast<const value<std::string>*>(&base::source()));
-				break;
+			case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&source())); break;
 
-			default: base::print_value(base::source(), source_type);
+			default: print_value(source(), source_type);
 		}
 	}
 }

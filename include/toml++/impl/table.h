@@ -878,7 +878,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
+				return insert(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueType&&>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -889,8 +889,8 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val), flags));
+											 static_cast<KeyType&&>(key),
+											 impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -1023,7 +1023,9 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
+				return insert_or_assign(impl::narrow(static_cast<KeyType&&>(key)),
+										static_cast<ValueType&&>(val),
+										flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -1034,13 +1036,13 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val), flags));
+											 static_cast<KeyType&&>(key),
+											 impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				else
 				{
-					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val), flags));
+					(*ipos).second.reset(impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, false };
 				}
 			}
@@ -1094,7 +1096,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace<ValueType>(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueArgs>(args)...);
+				return emplace<ValueType>(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -1110,8 +1112,8 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... });
+											 static_cast<KeyType&&>(key),
+											 new impl::wrap_node<type>{ static_cast<ValueArgs&&>(args)... });
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };

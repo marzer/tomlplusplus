@@ -295,7 +295,7 @@
  TOML is done just by printing it to an ostream. Converting it to JSON and YAML is done in much the same way,
  but via a toml::json_formatter and toml::yaml_formatter.
 
- \godbolt{MMNoW4}
+ \godbolt{srdfoWMq6}
 
  \cpp
  #include <iostream>
@@ -327,6 +327,7 @@
 	// serializing as YAML using toml::yaml_formatter:
 	std::cout << "###### YAML ######" << "\n\n";
 	std::cout << toml::yaml_formatter{ tbl } << "\n\n";
+
  	return 0;
  }
  \ecpp
@@ -367,7 +368,21 @@
 
  ###### YAML ######
 
+ author:
+   github: 'https://github.com/marzer'
+   name: 'Mark Gillard'
+   twitter: 'https://twitter.com/marzer8789'
+ cpp:
+   - 17
+   - 20
+   - 'and beyond'
+ lib: toml++
+ repo: 'https://github.com/marzer/tomlplusplus/'
+ toml:
+   - '1.0.0'
+   - 'and beyond'
  \eout
+
  \see
  	- toml::toml_formatter
  	- toml::json_formatter

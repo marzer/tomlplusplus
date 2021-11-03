@@ -25,25 +25,25 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::print_unformatted('{');
+		print_unformatted('{');
 
-		if (base::indent_sub_tables())
-			base::increase_indent();
+		if (indent_sub_tables())
+			increase_indent();
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				base::print_unformatted(',');
+				print_unformatted(',');
 			first = true;
-			base::print_newline(true);
-			base::print_indent();
+			print_newline(true);
+			print_indent();
 
-			base::print_string(k, false);
-			base::print_unformatted(" : "sv);
+			print_string(k, false);
+			print_unformatted(" : "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -51,15 +51,15 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
-		if (base::indent_sub_tables())
-			base::decrease_indent();
-		base::print_newline(true);
-		base::print_indent();
+		if (indent_sub_tables())
+			decrease_indent();
+		print_newline(true);
+		print_indent();
 
-		base::print_unformatted('}');
+		print_unformatted('}');
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -67,19 +67,19 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		base::print_unformatted('[');
-		if (base::indent_array_elements())
-			base::increase_indent();
+		print_unformatted('[');
+		if (indent_array_elements())
+			increase_indent();
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
-				base::print_unformatted(',');
-			base::print_newline(true);
-			base::print_indent();
+				print_unformatted(',');
+			print_newline(true);
+			print_indent();
 
 			auto& v			= arr[i];
 			const auto type = v.type();
@@ -88,27 +88,27 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
-		if (base::indent_array_elements())
-			base::decrease_indent();
-		base::print_newline(true);
-		base::print_indent();
-		base::print_unformatted(']');
+		if (indent_array_elements())
+			decrease_indent();
+		print_newline(true);
+		print_indent();
+		print_unformatted(']');
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void json_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
-			case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-			default: base::print_value(base::source(), source_type);
+			case node_type::table: print(*reinterpret_cast<const table*>(&source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			default: print_value(source(), source_type);
 		}
 	}
 }

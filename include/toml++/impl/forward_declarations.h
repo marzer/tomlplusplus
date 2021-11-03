@@ -292,7 +292,7 @@ TOML_NAMESPACE_START // abi namespace
 	/// \brief	Format flags for modifying how TOML data is printed to streams.
 	///
 	/// \note	Formatters may disregard/override any of these flags according to the requirements of their
-	///			output target (e.g. #toml::json_formatter JSON always apply quotes to dates and times).
+	///			output target (e.g. #toml::json_formatter will always apply quotes to dates and times).
 	enum class format_flags : uint64_t
 	{
 		/// \brief None.
@@ -310,20 +310,23 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.
 		allow_multi_line_strings = (1ull << 3),
 
+		/// \brief Allow real tab characters in string literals (as opposed to the escaped form `\t`).
+		allow_real_tabs_in_strings = (1ull << 4),
+
 		/// \brief Allow integers with #value_flags::format_as_binary to be emitted as binary.
-		allow_binary_integers = (1ull << 4),
+		allow_binary_integers = (1ull << 5),
 
 		/// \brief Allow integers with #value_flags::format_as_octal to be emitted as octal.
-		allow_octal_integers = (1ull << 5),
+		allow_octal_integers = (1ull << 6),
 
 		/// \brief Allow integers with #value_flags::format_as_hexadecimal to be emitted as hexadecimal.
-		allow_hexadecimal_integers = (1ull << 6),
+		allow_hexadecimal_integers = (1ull << 7),
 
 		/// \brief Apply indentation to tables nested within other tables/arrays.
-		indent_sub_tables = (1ull << 7),
+		indent_sub_tables = (1ull << 8),
 
 		/// \brief Apply indentation to array elements when the array is forced to wrap over multiple lines.
-		indent_array_elements = (1ull << 8),
+		indent_array_elements = (1ull << 9),
 
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,

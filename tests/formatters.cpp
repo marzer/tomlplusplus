@@ -281,5 +281,51 @@ zero = 0
 	}
 
 	SECTION("yaml_formatter")
-	{}
+	{
+		static constexpr auto expected = R"(*****
+a: 
+  b: 
+    c: 
+      val: true
+    val: true
+  val: true
+bools: 
+  false: false
+  true: true
+'dates and times': 
+  date-times: 
+    local: 
+      val: '2021-11-02T20:33:00'
+    offset: 
+      val: '2021-11-02T20:33:00Z'
+  dates: 
+    val: '2021-11-02'
+  times: 
+    val: '20:33:00'
+floats: 
+  neg_inf: -.inf
+  neg_nan: .NAN
+  neg_zero: -0.0
+  one: 1.0
+  pos_inf: .inf
+  pos_nan: .NAN
+  pos_zero: 0.0
+integers: 
+  bin: 10
+  dec: 10
+  hex: 0xA
+  oct: 0o12
+  one: 1
+  zero: 0
+strings: 
+  - ''
+  - string
+  - "string with a single quote in it: '"
+  - 'string with a double quote in it: "'
+  - "string with a tab: \t"
+  - 'a long string to force the array over multiple lines'
+*****)"sv;
+
+		CHECK_FORMATTER(yaml_formatter, data, expected);
+	}
 }

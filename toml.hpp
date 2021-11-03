@@ -1199,11 +1199,12 @@ TOML_NAMESPACE_START // abi namespace
 		quote_infinities_and_nans = (1ull << 1),
 		allow_literal_strings = (1ull << 2),
 		allow_multi_line_strings = (1ull << 3),
-		allow_binary_integers = (1ull << 4),
-		allow_octal_integers = (1ull << 5),
-		allow_hexadecimal_integers = (1ull << 6),
-		indent_sub_tables = (1ull << 7),
-		indent_array_elements = (1ull << 8),
+		allow_real_tabs_in_strings = (1ull << 4),
+		allow_binary_integers = (1ull << 5),
+		allow_octal_integers = (1ull << 6),
+		allow_hexadecimal_integers = (1ull << 7),
+		indent_sub_tables = (1ull << 8),
+		indent_array_elements = (1ull << 9),
 		indentation = indent_sub_tables | indent_array_elements,
 	};
 	TOML_MAKE_FLAGS(format_flags);
@@ -2313,6 +2314,9 @@ TOML_POP_WARNINGS;
 
 //********  impl/node.h  ***********************************************************************************************
 
+TOML_DISABLE_WARNINGS;
+#include <utility>
+TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
@@ -6035,7 +6039,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return insert(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
+				return insert(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueType&&>(val), flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -6046,8 +6050,8 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val), flags));
+											 static_cast<KeyType&&>(key),
+											 impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -6087,7 +6091,9 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return insert_or_assign(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueType>(val), flags);
+				return insert_or_assign(impl::narrow(static_cast<KeyType&&>(key)),
+										static_cast<ValueType&&>(val),
+										flags);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -6098,13 +6104,13 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 impl::make_node(std::forward<ValueType>(val), flags));
+											 static_cast<KeyType&&>(key),
+											 impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
 				}
 				else
 				{
-					(*ipos).second.reset(impl::make_node(std::forward<ValueType>(val), flags));
+					(*ipos).second.reset(impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, false };
 				}
 			}
@@ -6120,7 +6126,7 @@ TOML_NAMESPACE_START
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace<ValueType>(impl::narrow(std::forward<KeyType>(key)), std::forward<ValueArgs>(args)...);
+				return emplace<ValueType>(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
@@ -6136,8 +6142,8 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key)
 				{
 					ipos = map_.emplace_hint(ipos,
-											 std::forward<KeyType>(key),
-											 new impl::wrap_node<type>{ std::forward<ValueArgs>(args)... });
+											 static_cast<KeyType&&>(key),
+											 new impl::wrap_node<type>{ static_cast<ValueArgs&&>(args)... });
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
@@ -7941,6 +7947,7 @@ TOML_NAMESPACE_START
 		static constexpr format_flags default_flags = constants.mandatory_flags				   //
 													| format_flags::allow_literal_strings	   //
 													| format_flags::allow_multi_line_strings   //
+													| format_flags::allow_real_tabs_in_strings //
 													| format_flags::allow_binary_integers	   //
 													| format_flags::allow_octal_integers	   //
 													| format_flags::allow_hexadecimal_integers //
@@ -12968,16 +12975,17 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
-		auto literals = literal_strings_allowed();
+		auto literal = literal_strings_allowed();
 		if (str.empty())
 		{
-			print_to_stream(*stream_, literals ? "''"sv : "\"\""sv);
+			print_to_stream(*stream_, literal ? "''"sv : "\"\""sv);
 			naked_newline_ = false;
 			return;
 		}
 
-		auto multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
-		if (multi_line || literals || allow_bare)
+		bool multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
+		const bool treat_raw_tab_as_control_char = !(config_.flags & format_flags::allow_real_tabs_in_strings);
+		if (multi_line || literal || treat_raw_tab_as_control_char || allow_bare)
 		{
 			utf8_decoder decoder;
 			bool has_line_breaks   = false;
@@ -12998,7 +13006,8 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (is_line_break(decoder.codepoint))
 						has_line_breaks = true;
-					else if (is_nontab_control_character(decoder.codepoint))
+					else if (is_nontab_control_character(decoder.codepoint)
+							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t'))
 						has_control_chars = true;
 					else if (decoder.codepoint == U'\'')
 						has_single_quotes = true;
@@ -13010,12 +13019,12 @@ TOML_IMPL_NAMESPACE_START
 					break;
 			}
 			multi_line = multi_line && has_line_breaks;
-			literals   = literals && !has_control_chars && !(!multi_line && has_single_quotes);
+			literal	   = literal && !has_control_chars && !(!multi_line && has_single_quotes);
 		}
 
 		if (allow_bare)
 			print_to_stream(*stream_, str);
-		else if (literals)
+		else if (literal)
 			print_to_stream_bookended(*stream_, str, multi_line ? "'''"sv : "'"sv);
 		else
 		{
@@ -13295,8 +13304,8 @@ TOML_NAMESPACE_START
 	{
 		if (pending_table_separator_)
 		{
-			base::print_newline(true);
-			base::print_newline(true);
+			print_newline(true);
+			print_newline(true);
 			pending_table_separator_ = false;
 		}
 	}
@@ -13304,7 +13313,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print_key_segment(std::string_view str)
 	{
-		base::print_string(str, false, true);
+		print_string(str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13313,7 +13322,7 @@ TOML_NAMESPACE_START
 		for (const auto& segment : key_path_)
 		{
 			if (std::addressof(segment) > key_path_.data())
-				base::print_unformatted('.');
+				print_unformatted('.');
 			print_key_segment(segment);
 		}
 	}
@@ -13323,21 +13332,21 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::print_unformatted("{ "sv);
+		print_unformatted("{ "sv);
 
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				base::print_unformatted(", "sv);
+				print_unformatted(", "sv);
 			first = true;
 
 			print_key_segment(k);
-			base::print_unformatted(" = "sv);
+			print_unformatted(" = "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -13345,11 +13354,11 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
-		base::print_unformatted(" }"sv);
+		print_unformatted(" }"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13357,41 +13366,41 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		const auto original_indent = base::indent();
+		const auto original_indent = indent();
 		const auto multiline	   = TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
 			  arr,
 			  120u,
-			  base::indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+			  indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 
-		base::print_unformatted("["sv);
+		print_unformatted("["sv);
 
 		if (multiline)
 		{
 			if (original_indent < 0)
-				base::indent(0);
-			if (base::indent_array_elements())
-				base::increase_indent();
+				indent(0);
+			if (indent_array_elements())
+				increase_indent();
 		}
 		else
-			base::print_unformatted(' ');
+			print_unformatted(' ');
 
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
 			{
-				base::print_unformatted(',');
+				print_unformatted(',');
 				if (!multiline)
-					base::print_unformatted(' ');
+					print_unformatted(' ');
 			}
 
 			if (multiline)
 			{
-				base::print_newline(true);
-				base::print_indent();
+				print_newline(true);
+				print_indent();
 			}
 
 			auto& v			= arr[i];
@@ -13401,19 +13410,19 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 		if (multiline)
 		{
-			base::indent(original_indent);
-			base::print_newline(true);
-			base::print_indent();
+			indent(original_indent);
+			print_newline(true);
+			print_indent();
 		}
 		else
-			base::print_unformatted(' ');
+			print_unformatted(' ');
 
-		base::print_unformatted("]"sv);
+		print_unformatted("]"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13434,16 +13443,16 @@ TOML_NAMESPACE_START
 				continue;
 
 			pending_table_separator_ = true;
-			base::print_newline();
-			base::print_indent();
+			print_newline();
+			print_indent();
 			print_key_segment(k);
-			base::print_unformatted(" = "sv);
+			print_unformatted(" = "sv);
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
@@ -13493,20 +13502,20 @@ TOML_NAMESPACE_START
 			if (!skip_self)
 			{
 				print_pending_table_separator();
-				if (base::indent_sub_tables())
-					base::increase_indent();
-				base::print_indent();
-				base::print_unformatted("["sv);
+				if (indent_sub_tables())
+					increase_indent();
+				print_indent();
+				print_unformatted("["sv);
 				print_key_path();
-				base::print_unformatted("]"sv);
+				print_unformatted("]"sv);
 				pending_table_separator_ = true;
 			}
 
 			print(child_tbl);
 
 			key_path_.pop_back();
-			if (!skip_self && base::indent_sub_tables())
-				base::decrease_indent();
+			if (!skip_self && indent_sub_tables())
+				decrease_indent();
 		}
 
 		// table arrays
@@ -13516,51 +13525,51 @@ TOML_NAMESPACE_START
 				continue;
 			auto& arr = *reinterpret_cast<const array*>(&v);
 
-			if (base::indent_sub_tables())
-				base::increase_indent();
+			if (indent_sub_tables())
+				increase_indent();
 			key_path_.push_back(std::string_view{ k });
 
 			for (size_t i = 0; i < arr.size(); i++)
 			{
 				print_pending_table_separator();
-				base::print_indent();
-				base::print_unformatted("[["sv);
+				print_indent();
+				print_unformatted("[["sv);
 				print_key_path();
-				base::print_unformatted("]]"sv);
+				print_unformatted("]]"sv);
 				pending_table_separator_ = true;
 				print(*reinterpret_cast<const table*>(&arr[i]));
 			}
 
 			key_path_.pop_back();
-			if (base::indent_sub_tables())
-				base::decrease_indent();
+			if (indent_sub_tables())
+				decrease_indent();
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
 			case node_type::table:
 			{
-				auto& tbl = *reinterpret_cast<const table*>(&base::source());
+				auto& tbl = *reinterpret_cast<const table*>(&source());
 				if (tbl.is_inline())
 					print_inline(tbl);
 				else
 				{
-					base::decrease_indent(); // so root kvps and tables have the same indent
+					decrease_indent(); // so root kvps and tables have the same indent
 					print(tbl);
 				}
 				break;
 			}
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
 
-			default: base::print_value(base::source(), source_type);
+			default: print_value(source(), source_type);
 		}
 	}
 }
@@ -13583,25 +13592,25 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::print_unformatted('{');
+		print_unformatted('{');
 
-		if (base::indent_sub_tables())
-			base::increase_indent();
+		if (indent_sub_tables())
+			increase_indent();
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				base::print_unformatted(',');
+				print_unformatted(',');
 			first = true;
-			base::print_newline(true);
-			base::print_indent();
+			print_newline(true);
+			print_indent();
 
-			base::print_string(k, false);
-			base::print_unformatted(" : "sv);
+			print_string(k, false);
+			print_unformatted(" : "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -13609,15 +13618,15 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
-		if (base::indent_sub_tables())
-			base::decrease_indent();
-		base::print_newline(true);
-		base::print_indent();
+		if (indent_sub_tables())
+			decrease_indent();
+		print_newline(true);
+		print_indent();
 
-		base::print_unformatted('}');
+		print_unformatted('}');
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13625,19 +13634,19 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		base::print_unformatted('[');
-		if (base::indent_array_elements())
-			base::increase_indent();
+		print_unformatted('[');
+		if (indent_array_elements())
+			increase_indent();
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
-				base::print_unformatted(',');
-			base::print_newline(true);
-			base::print_indent();
+				print_unformatted(',');
+			print_newline(true);
+			print_indent();
 
 			auto& v			= arr[i];
 			const auto type = v.type();
@@ -13646,27 +13655,27 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
-		if (base::indent_array_elements())
-			base::decrease_indent();
-		base::print_newline(true);
-		base::print_indent();
-		base::print_unformatted(']');
+		if (indent_array_elements())
+			decrease_indent();
+		print_newline(true);
+		print_indent();
+		print_unformatted(']');
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void json_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
-			case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-			default: base::print_value(base::source(), source_type);
+			case node_type::table: print(*reinterpret_cast<const table*>(&source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			default: print_value(source(), source_type);
 		}
 	}
 }
@@ -13699,9 +13708,9 @@ TOML_NAMESPACE_START
 
 		if (contains_newline)
 		{
-			base::print_unformatted("|-"sv);
+			print_unformatted("|-"sv);
 
-			base::increase_indent();
+			increase_indent();
 
 			auto line_end  = str->c_str() - 1u;
 			const auto end = str->c_str() + str->length();
@@ -13714,16 +13723,16 @@ TOML_NAMESPACE_START
 
 				if TOML_LIKELY(line_start != line_end || line_end != end)
 				{
-					base::print_newline();
-					base::print_indent();
-					base::print_unformatted(std::string_view{ line_start, static_cast<size_t>(line_end - line_start) });
+					print_newline();
+					print_indent();
+					print_unformatted(std::string_view{ line_start, static_cast<size_t>(line_end - line_start) });
 				}
 			}
 
-			base::decrease_indent();
+			decrease_indent();
 		}
 		else
-			base::print_string(*str, false, true);
+			print_string(*str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13731,23 +13740,23 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::increase_indent();
+		increase_indent();
 
 		for (auto&& [k, v] : tbl)
 		{
 			if (!parent_is_array)
 			{
-				base::print_newline();
-				base::print_indent();
+				print_newline();
+				print_indent();
 			}
 			parent_is_array = false;
 
-			base::print_string(k, false, true);
-			base::print_unformatted(": "sv);
+			print_string(k, false, true);
+			print_unformatted(": "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -13756,11 +13765,11 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
 				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
-		base::decrease_indent();
+		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13768,22 +13777,22 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		base::increase_indent();
+		increase_indent();
 
 		for (auto&& v : arr)
 		{
 			if (!parent_is_array)
 			{
-				base::print_newline();
-				base::print_indent();
+				print_newline();
+				print_indent();
 			}
 			parent_is_array = false;
 
-			base::print_unformatted("- "sv);
+			print_unformatted("- "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -13792,35 +13801,31 @@ TOML_NAMESPACE_START
 				case node_type::table: print(*reinterpret_cast<const table*>(&v), true); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v), true); break;
 				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
-
-			base::print_newline();
 		}
 
-		base::decrease_indent();
+		decrease_indent();
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void yaml_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
 			case node_type::table:
-				base::decrease_indent(); // so root kvps and tables have the same indent
-				print(*reinterpret_cast<const table*>(&base::source()));
+				decrease_indent(); // so root kvps and tables have the same indent
+				print(*reinterpret_cast<const table*>(&source()));
 				break;
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
 
-			case node_type::string:
-				print_yaml_string(*reinterpret_cast<const value<std::string>*>(&base::source()));
-				break;
+			case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&source())); break;
 
-			default: base::print_value(base::source(), source_type);
+			default: print_value(source(), source_type);
 		}
 	}
 }

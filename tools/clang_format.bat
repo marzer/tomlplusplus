@@ -4,8 +4,17 @@ PUSHD .
 CD /d "%~dp0\.."
 
 REM --------------------------------------------------------------------------------------
-REM 	Runs clang format on all the non-test C++ files in the project
+REM 	Runs clang format on all the C++ files in the project
 REM --------------------------------------------------------------------------------------
+
+WHERE /Q clang-format
+IF %ERRORLEVEL% NEQ 0 (
+	ECHO Could not find clang-format
+	PAUSE
+	POPD
+	ENDLOCAL
+	EXIT /B %ERRORLEVEL%
+)
 
 CALL :RunClangFormatOnDirectories ^
 	include\toml++ ^
@@ -13,7 +22,9 @@ CALL :RunClangFormatOnDirectories ^
 	tests ^
 	examples
 
-GOTO FINISH
+POPD
+@ENDLOCAL
+EXIT /B 0
 
 :RunClangFormatOnDirectories
 (
@@ -27,8 +38,3 @@ GOTO FINISH
 	)
 	EXIT /B
 )
-
-:FINISH
-POPD
-@ENDLOCAL
-EXIT /B 0

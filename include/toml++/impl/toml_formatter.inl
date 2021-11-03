@@ -121,8 +121,8 @@ TOML_NAMESPACE_START
 	{
 		if (pending_table_separator_)
 		{
-			base::print_newline(true);
-			base::print_newline(true);
+			print_newline(true);
+			print_newline(true);
 			pending_table_separator_ = false;
 		}
 	}
@@ -130,7 +130,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print_key_segment(std::string_view str)
 	{
-		base::print_string(str, false, true);
+		print_string(str, false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -139,7 +139,7 @@ TOML_NAMESPACE_START
 		for (const auto& segment : key_path_)
 		{
 			if (std::addressof(segment) > key_path_.data())
-				base::print_unformatted('.');
+				print_unformatted('.');
 			print_key_segment(segment);
 		}
 	}
@@ -149,21 +149,21 @@ TOML_NAMESPACE_START
 	{
 		if (tbl.empty())
 		{
-			base::print_unformatted("{}"sv);
+			print_unformatted("{}"sv);
 			return;
 		}
 
-		base::print_unformatted("{ "sv);
+		print_unformatted("{ "sv);
 
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				base::print_unformatted(", "sv);
+				print_unformatted(", "sv);
 			first = true;
 
 			print_key_segment(k);
-			base::print_unformatted(" = "sv);
+			print_unformatted(" = "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -171,11 +171,11 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
-		base::print_unformatted(" }"sv);
+		print_unformatted(" }"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -183,41 +183,41 @@ TOML_NAMESPACE_START
 	{
 		if (arr.empty())
 		{
-			base::print_unformatted("[]"sv);
+			print_unformatted("[]"sv);
 			return;
 		}
 
-		const auto original_indent = base::indent();
+		const auto original_indent = indent();
 		const auto multiline	   = TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
 			  arr,
 			  120u,
-			  base::indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+			  indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 
-		base::print_unformatted("["sv);
+		print_unformatted("["sv);
 
 		if (multiline)
 		{
 			if (original_indent < 0)
-				base::indent(0);
-			if (base::indent_array_elements())
-				base::increase_indent();
+				indent(0);
+			if (indent_array_elements())
+				increase_indent();
 		}
 		else
-			base::print_unformatted(' ');
+			print_unformatted(' ');
 
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
 			{
-				base::print_unformatted(',');
+				print_unformatted(',');
 				if (!multiline)
-					base::print_unformatted(' ');
+					print_unformatted(' ');
 			}
 
 			if (multiline)
 			{
-				base::print_newline(true);
-				base::print_indent();
+				print_newline(true);
+				print_indent();
 			}
 
 			auto& v			= arr[i];
@@ -227,19 +227,19 @@ TOML_NAMESPACE_START
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 		if (multiline)
 		{
-			base::indent(original_indent);
-			base::print_newline(true);
-			base::print_indent();
+			indent(original_indent);
+			print_newline(true);
+			print_indent();
 		}
 		else
-			base::print_unformatted(' ');
+			print_unformatted(' ');
 
-		base::print_unformatted("]"sv);
+		print_unformatted("]"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -260,16 +260,16 @@ TOML_NAMESPACE_START
 				continue;
 
 			pending_table_separator_ = true;
-			base::print_newline();
-			base::print_indent();
+			print_newline();
+			print_indent();
 			print_key_segment(k);
-			base::print_unformatted(" = "sv);
+			print_unformatted(" = "sv);
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
 				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
 				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: base::print_value(v, type);
+				default: print_value(v, type);
 			}
 		}
 
@@ -319,20 +319,20 @@ TOML_NAMESPACE_START
 			if (!skip_self)
 			{
 				print_pending_table_separator();
-				if (base::indent_sub_tables())
-					base::increase_indent();
-				base::print_indent();
-				base::print_unformatted("["sv);
+				if (indent_sub_tables())
+					increase_indent();
+				print_indent();
+				print_unformatted("["sv);
 				print_key_path();
-				base::print_unformatted("]"sv);
+				print_unformatted("]"sv);
 				pending_table_separator_ = true;
 			}
 
 			print(child_tbl);
 
 			key_path_.pop_back();
-			if (!skip_self && base::indent_sub_tables())
-				base::decrease_indent();
+			if (!skip_self && indent_sub_tables())
+				decrease_indent();
 		}
 
 		// table arrays
@@ -342,51 +342,51 @@ TOML_NAMESPACE_START
 				continue;
 			auto& arr = *reinterpret_cast<const array*>(&v);
 
-			if (base::indent_sub_tables())
-				base::increase_indent();
+			if (indent_sub_tables())
+				increase_indent();
 			key_path_.push_back(std::string_view{ k });
 
 			for (size_t i = 0; i < arr.size(); i++)
 			{
 				print_pending_table_separator();
-				base::print_indent();
-				base::print_unformatted("[["sv);
+				print_indent();
+				print_unformatted("[["sv);
 				print_key_path();
-				base::print_unformatted("]]"sv);
+				print_unformatted("]]"sv);
 				pending_table_separator_ = true;
 				print(*reinterpret_cast<const table*>(&arr[i]));
 			}
 
 			key_path_.pop_back();
-			if (base::indent_sub_tables())
-				base::decrease_indent();
+			if (indent_sub_tables())
+				decrease_indent();
 		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print()
 	{
-		if (base::dump_failed_parse_result())
+		if (dump_failed_parse_result())
 			return;
 
-		switch (auto source_type = base::source().type())
+		switch (auto source_type = source().type())
 		{
 			case node_type::table:
 			{
-				auto& tbl = *reinterpret_cast<const table*>(&base::source());
+				auto& tbl = *reinterpret_cast<const table*>(&source());
 				if (tbl.is_inline())
 					print_inline(tbl);
 				else
 				{
-					base::decrease_indent(); // so root kvps and tables have the same indent
+					decrease_indent(); // so root kvps and tables have the same indent
 					print(tbl);
 				}
 				break;
 			}
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
 
-			default: base::print_value(base::source(), source_type);
+			default: print_value(source(), source_type);
 		}
 	}
 }
