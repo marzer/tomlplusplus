@@ -8,7 +8,8 @@ examples = [
 	'simple_parser',
 	'toml_to_json_transcoder',
 	'toml_generator',
-	'error_printer'
+	'error_printer',
+	'parse_benchmark',
 ]
 
 foreach example : examples

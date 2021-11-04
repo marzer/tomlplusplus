@@ -976,7 +976,6 @@ TOML_NAMESPACE_END;
 
 //********  impl/forward_declarations.h  *******************************************************************************
 
-TOML_PUSH_WARNINGS;
 TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
@@ -989,6 +988,13 @@ TOML_DISABLE_WARNINGS;
 #include <iosfwd>
 #include <type_traits>
 TOML_ENABLE_WARNINGS;
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 #ifndef TOML_DISABLE_ENVIRONMENT_CHECKS
 #define TOML_ENV_MESSAGE                                                                                               \
@@ -1737,7 +1743,7 @@ TOML_IMPL_NAMESPACE_START
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
 
-	// Q: "why not use the built-in fpclassify?"
+	// Q: "why not use std::fpclassify?"
 	// A: Because it gets broken by -ffast-math and friends
 	enum class fp_class : unsigned
 	{
@@ -1765,9 +1771,10 @@ TOML_IMPL_NAMESPACE_START
 		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
 	}
 
-	// Q: "why not use std::find??"
-	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
+	// Q: "why not use std::find and std::min?"
+	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
+
 	template <typename Iterator, typename T>
 	TOML_PURE_GETTER
 	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
@@ -1778,14 +1785,31 @@ TOML_IMPL_NAMESPACE_START
 				return &(*start);
 		return nullptr;
 	}
+
+	template <typename T>
+	TOML_PURE_GETTER
+	inline T& min(T & a, T & b) noexcept //
+	{
+		return a < b ? a : b;
+	}
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/print_to_stream.h  ************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -1918,11 +1942,21 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/source_region.h  **************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -2002,11 +2036,21 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/date_time.h  ******************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -2310,6 +2354,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/node.h  ***********************************************************************************************
@@ -2318,6 +2366,12 @@ TOML_DISABLE_WARNINGS;
 #include <utility>
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -2812,6 +2866,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/node_view.h  ******************************************************************************************
@@ -2822,6 +2880,13 @@ TOML_DISABLE_WARNINGS;
 #include <initializer_list>
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_NAMESPACE_START
@@ -3340,11 +3405,22 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/value.h  **********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 // clang-format off
@@ -4427,11 +4503,21 @@ TOML_NAMESPACE_END;
 
 #endif
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/make_node.h  ******************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -4549,11 +4635,21 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/array.h  **********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -5407,6 +5503,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/table.h  **********************************************************************************************
@@ -5416,6 +5516,12 @@ TOML_DISABLE_WARNINGS;
 #include <iterator>
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -6317,14 +6423,34 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/utf8.h  ***********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
+	TOML_ATTR(nonnull)
+	constexpr bool is_ascii(const char* str, size_t size) noexcept
+	{
+		for (const char* const e = str + size; str < e; str++)
+			if (static_cast<unsigned char>(*str) > 127u)
+				return false;
+		return true;
+	}
+
 	TOML_CONST_GETTER
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
@@ -7244,6 +7370,10 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/parse_error.h  ****************************************************************************************
@@ -7256,6 +7386,12 @@ TOML_DISABLE_WARNINGS;
 #endif
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 #if defined(DOXYGEN) || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
@@ -7349,6 +7485,10 @@ TOML_NAMESPACE_END;
 
 #undef TOML_PARSE_ERROR_BASE
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER
@@ -7358,6 +7498,12 @@ TOML_POP_WARNINGS;
 #if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -7632,6 +7778,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
@@ -7641,6 +7791,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_PARSER
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -7733,6 +7889,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER
@@ -7742,6 +7902,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -7893,6 +8059,10 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -7902,6 +8072,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -7984,6 +8160,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -7993,6 +8173,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -8057,6 +8243,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -8066,6 +8256,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -8135,6 +8331,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -8144,8 +8344,6 @@ TOML_POP_WARNINGS;
 //********  impl/std_string.inl  ***************************************************************************************
 
 #if TOML_ENABLE_WINDOWS_COMPAT
-
-TOML_PUSH_WARNINGS;
 
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
@@ -8170,6 +8368,14 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 
 #endif // TOML_INCLUDE_WINDOWS_H
 #endif // _WINDOWS_
+
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -8228,6 +8434,10 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -8247,6 +8457,12 @@ TOML_DISABLE_WARNINGS;
 #endif
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_ANON_NAMESPACE_START
 {
@@ -8683,11 +8899,21 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/node.inl  *********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -8728,11 +8954,21 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/node_view.inl  ****************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 #if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 
@@ -8800,11 +9036,21 @@ TOML_NAMESPACE_END;
 
 #endif // TOML_EXTERN_TEMPLATES
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/value.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 #if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
 
@@ -8877,11 +9123,21 @@ TOML_NAMESPACE_END;
 
 #endif // TOML_EXTERN_TEMPLATES
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/array.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_ANON_NAMESPACE_START
 {
@@ -9107,11 +9363,21 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/table.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_ANON_NAMESPACE_START
 {
@@ -9269,6 +9535,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 //********  impl/parser.inl  *******************************************************************************************
@@ -9289,6 +9559,12 @@ TOML_DISABLE_WARNINGS;
 #endif
 TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_ANON_NAMESPACE_START
 {
@@ -9356,6 +9632,18 @@ TOML_ANON_NAMESPACE_START
 				return 0xFFFFFFFFu;
 			return static_cast<unsigned int>(static_cast<uint8_t>(source_[position_++]));
 		}
+
+		[[maybe_unused]] TOML_NODISCARD
+		TOML_ATTR(nonnull)
+		constexpr size_t operator()(char* dest, size_t num) noexcept
+		{
+			TOML_ASSERT(!eof());
+
+			num = source_.length() - min(position_ + num, source_.length());
+			std::memcpy(dest, source_.data() + position_, num);
+			position_ += num;
+			return num;
+		}
 	};
 
 	template <typename Char>
@@ -9368,7 +9656,7 @@ TOML_ANON_NAMESPACE_START
 
 	  public:
 		TOML_NODISCARD_CTOR
-		explicit utf8_byte_stream(std::basic_istream<Char>& stream) //
+		explicit utf8_byte_stream(std::basic_istream<Char>& stream) noexcept(!TOML_COMPILER_EXCEPTIONS) //
 			: source_{ &stream }
 		{
 			if (!source_->good()) // eof, fail, bad
@@ -9391,7 +9679,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const
+		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS)
 		{
 			using stream_traits = typename std::remove_pointer_t<decltype(source_)>::traits_type;
 			return eof() || source_->peek() == stream_traits::eof();
@@ -9404,12 +9692,22 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		unsigned int operator()()
+		unsigned int operator()() noexcept(!TOML_COMPILER_EXCEPTIONS)
 		{
 			auto val = source_->get();
 			if (val == std::basic_istream<Char>::traits_type::eof())
 				return 0xFFFFFFFFu;
 			return static_cast<unsigned int>(val);
+		}
+
+		[[maybe_unused]] TOML_NODISCARD
+		TOML_ATTR(nonnull)
+		constexpr size_t operator()(char* dest, size_t num) noexcept(!TOML_COMPILER_EXCEPTIONS)
+		{
+			TOML_ASSERT(!error() && !eof());
+
+			source_->read(dest, static_cast<std::streamsize>(num));
+			return static_cast<size_t>(source_->gcount());
 		}
 	};
 
@@ -9446,10 +9744,10 @@ TOML_ANON_NAMESPACE_START
 		virtual const source_path_ptr& source_path() const noexcept = 0;
 
 		TOML_NODISCARD
-		virtual const utf8_codepoint* read_next() = 0;
+		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
 
 		TOML_NODISCARD
-		virtual bool peek_eof() const = 0;
+		virtual bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
 
 #if !TOML_EXCEPTIONS
 
@@ -9475,11 +9773,17 @@ TOML_ANON_NAMESPACE_START
 	class TOML_EMPTY_BASES utf8_reader final : public utf8_reader_interface
 	{
 	  private:
+		static constexpr size_t block_capacity = 32;
 		utf8_byte_stream<T> stream_;
+		char block_[block_capacity];
+		size_t block_size_ = {};
+		size_t block_end_  = {};
+
 		impl::utf8_decoder decoder_;
 		utf8_codepoint codepoints_[2];
 		size_t cp_idx_				= 1;
 		uint8_t current_byte_count_ = {};
+
 		source_path_ptr source_path_;
 #if !TOML_EXCEPTIONS
 		optional<parse_error> err_;
@@ -9507,7 +9811,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		const utf8_codepoint* read_next() final
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) final
 		{
 			TOML_ERROR_CHECK;
 
@@ -9547,9 +9851,9 @@ TOML_ANON_NAMESPACE_START
 							throw parse_error{ "An unspecified error occurred", prev.position, source_path_ };
 						}
 					}
-#endif
+#endif // TOML_EXCEPTIONS
 
-					if (next_byte_raw >= 256u)
+					if TOML_UNLIKELY(next_byte_raw >= 256u)
 					{
 						if (stream_.eof())
 						{
@@ -9599,7 +9903,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const final
+		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) final
 		{
 			return stream_.peek_eof();
 		}
@@ -9662,7 +9966,7 @@ TOML_ANON_NAMESPACE_START
 			return reader_.source_path();
 		}
 
-		const utf8_codepoint* read_next() final
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) final
 		{
 			TOML_ERROR_CHECK;
 
@@ -9713,7 +10017,7 @@ TOML_ANON_NAMESPACE_START
 					 : head_;
 		}
 
-		bool peek_eof() const final
+		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) final
 		{
 			return reader_.peek_eof();
 		}
@@ -12759,7 +13063,7 @@ TOML_ANON_NAMESPACE_START
 
 		// open file with a custom-sized stack buffer
 		std::ifstream file;
-		char file_buffer[sizeof(void*) * 1024u];
+		alignas(32) char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 		if (!file.is_open())
@@ -12885,6 +13189,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER
@@ -12894,6 +13202,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -13193,6 +13507,10 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -13202,6 +13520,13 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
@@ -13575,6 +13900,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -13584,6 +13913,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -13681,6 +14016,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
@@ -13690,6 +14029,12 @@ TOML_POP_WARNINGS;
 #if TOML_ENABLE_FORMATTERS
 
 TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
 
 TOML_NAMESPACE_START
 {
@@ -13831,6 +14176,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
 TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS

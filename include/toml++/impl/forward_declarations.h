@@ -7,12 +7,6 @@
 #include "preprocessor.h"
 #include "std_string.h"
 #include "std_new.h"
-#include "header_start.h"
-
-//#---------------------------------------------------------------------------------------------------------------------
-//# INCLUDES
-//#---------------------------------------------------------------------------------------------------------------------
-
 TOML_DISABLE_WARNINGS;
 #include <cstdint>
 #include <cstddef>
@@ -25,6 +19,7 @@ TOML_DISABLE_WARNINGS;
 #include <iosfwd>
 #include <type_traits>
 TOML_ENABLE_WARNINGS;
+#include "header_start.h"
 
 //#---------------------------------------------------------------------------------------------------------------------
 //# ENVIRONMENT GROUND-TRUTHS
@@ -902,7 +897,7 @@ TOML_IMPL_NAMESPACE_START
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
 
-	// Q: "why not use the built-in fpclassify?"
+	// Q: "why not use std::fpclassify?"
 	// A: Because it gets broken by -ffast-math and friends
 	enum class fp_class : unsigned
 	{
@@ -930,9 +925,10 @@ TOML_IMPL_NAMESPACE_START
 		return (val_bits & sign) ? fp_class::neg_inf : fp_class::pos_inf;
 	}
 
-	// Q: "why not use std::find??"
-	// A: Because <algorithm> is _huge_ and std::find would be the only thing I used from it.
+	// Q: "why not use std::find and std::min?"
+	// A: Because <algorithm> is _huge_ and these would be the only things I used from it.
 	//    I don't want to impose such a heavy compile-time burden on users.
+
 	template <typename Iterator, typename T>
 	TOML_PURE_GETTER
 	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
@@ -942,6 +938,13 @@ TOML_IMPL_NAMESPACE_START
 			if (*start == needle)
 				return &(*start);
 		return nullptr;
+	}
+
+	template <typename T>
+	TOML_PURE_GETTER
+	inline T& min(T & a, T & b) noexcept //
+	{
+		return a < b ? a : b;
 	}
 }
 TOML_IMPL_NAMESPACE_END;

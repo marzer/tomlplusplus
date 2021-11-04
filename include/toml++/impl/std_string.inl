@@ -13,8 +13,6 @@
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 #include "std_string.h"
-#include "header_start.h"
-
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
 #include <Windows.h>
@@ -38,6 +36,7 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 
 #endif // TOML_INCLUDE_WINDOWS_H
 #endif // _WINDOWS_
+#include "header_start.h"
 
 TOML_IMPL_NAMESPACE_START
 {

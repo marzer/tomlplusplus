@@ -24,6 +24,7 @@
 #include <string_view>
 #include <vector>
 #include <array>
+#include <chrono>
 #ifdef _WIN32
 #ifdef _MSC_VER
 extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);

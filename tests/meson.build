@@ -131,9 +131,6 @@ foreach cpp20 : cpp20_modes
 					test_args += '-DTOML_ENABLE_UNRELEASED_FEATURES=0'
 				endif
 
-				if counter % 6 == 3
-					test_args += '-DTOML_HEADER_ONLY=1'
-				endif
 				if counter % 2 == 1
 					test_args += '-DUSE_SINGLE_HEADER=1'
 				endif

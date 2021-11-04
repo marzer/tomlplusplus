@@ -10,6 +10,16 @@
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
+	TOML_ATTR(nonnull)
+	constexpr bool is_ascii(const char* str, size_t size) noexcept
+	{
+		for (const char* const e = str + size; str < e; str++)
+			if (static_cast<unsigned char>(*str) > 127u)
+				return false;
+		return true;
+	}
+
 	TOML_CONST_GETTER
 	constexpr bool is_ascii_whitespace(char32_t codepoint) noexcept
 	{
