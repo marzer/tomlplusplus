@@ -20,7 +20,6 @@ test_sources = [
 	'manipulating_arrays.cpp',
 	'manipulating_tables.cpp',
 	'manipulating_values.cpp',
-	'unicode.cpp',
 	'user_feedback.cpp',
 	'using_iterators.cpp',
 	'windows_compat.cpp'

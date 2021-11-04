@@ -130,6 +130,9 @@
     <ClInclude Include="include\toml++\impl\std_utility.h">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\simd.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />

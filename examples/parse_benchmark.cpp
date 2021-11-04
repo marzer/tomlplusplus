@@ -10,16 +10,9 @@
 #define TOML_ENABLE_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
 
-namespace
-{
-	using namespace std::string_view_literals;
-	using namespace std::chrono_literals;
-	using clock = std::chrono::steady_clock;
-	using std::chrono::nanoseconds;
-	using std::chrono::duration;
+using namespace std::string_view_literals;
 
-	static constexpr size_t iterations = 10000;
-}
+static constexpr size_t iterations = 10000;
 
 int main(int argc, char** argv)
 {
@@ -74,16 +67,14 @@ int main(int argc, char** argv)
 
 	// run the benchmark
 	std::cout << "Parsing '"sv << file_path << "' "sv << iterations << " times...\n"sv;
-	nanoseconds cumulative;
+	std::chrono::nanoseconds cumulative;
 	for (size_t i = 0; i < iterations; i++)
 	{
-		{
-			const auto start  = clock::now();
-			const auto result = toml::parse(file_content);
-			cumulative += clock::now() - start;
-		}
+		const auto start  = std::chrono::steady_clock::now();
+		const auto result = toml::parse(file_content);
+		cumulative += std::chrono::steady_clock::now() - start;
 	}
-	const auto cumulative_sec = std::chrono::duration_cast<duration<double>>(cumulative).count();
+	const auto cumulative_sec = std::chrono::duration_cast<std::chrono::duration<double>>(cumulative).count();
 	const auto mean_sec		  = cumulative_sec / static_cast<double>(iterations);
 	std::cout << "  total: "sv << cumulative_sec << " s\n"sv
 			  << "   mean: "sv << mean_sec << " s\n"sv;

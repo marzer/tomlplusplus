@@ -942,7 +942,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_PURE_GETTER
-	inline T& min(T & a, T & b) noexcept //
+	inline const T& min(const T& a, const T& b) noexcept //
 	{
 		return a < b ? a : b;
 	}

@@ -187,9 +187,15 @@ def main():
 			ignore_list = ( # macros that are meant to stay public (user configs etc)
 				r'TOMLPLUSPLUS_H',
 				r'INCLUDE_TOMLPLUSPLUS_H',
+				r'POXY_IMPLEMENTATION_DETAIL',
 				r'TOML_ALL_INLINE',
 				r'TOML_API',
 				r'TOML_CONFIG_HEADER',
+				r'TOML_ENABLE_FORMATTERS',
+				r'TOML_ENABLE_PARSER',
+				r'TOML_ENABLE_SIMD',
+				r'TOML_ENABLE_UNRELEASED_FEATURES',
+				r'TOML_ENABLE_WINDOWS_COMPAT',
 				r'TOML_EXCEPTIONS',
 				r'TOML_EXTERN_TEMPLATES',
 				r'TOML_HEADER_ONLY',
@@ -202,14 +208,9 @@ def main():
 				r'TOML_LIB_SINGLE_HEADER',
 				r'TOML_MAX_NESTED_VALUES',
 				r'TOML_OPTIONAL_TYPE',
-				r'TOML_ENABLE_PARSER',
-				r'TOML_ENABLE_FORMATTERS',
 				r'TOML_SMALL_FLOAT_TYPE',
 				r'TOML_SMALL_INT_TYPE',
 				r'TOML_UNDEF_MACROS',
-				r'TOML_ENABLE_UNRELEASED_FEATURES',
-				r'TOML_ENABLE_WINDOWS_COMPAT',
-				r'POXY_IMPLEMENTATION_DETAIL',
 			)
 			set_defines = []
 			for define, currently_set in defines.items():

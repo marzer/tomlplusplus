@@ -186,7 +186,7 @@ inline bool parse_expected_value(std::string_view test_file,
 			if (!decoder.has_code_point())
 				continue;
 
-			if (impl::is_line_break(decoder.codepoint))
+			if (impl::is_vertical_whitespace_excl_cr(decoder.codepoint))
 			{
 				if (decoder.codepoint != U'\r')
 				{

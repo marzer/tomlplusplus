@@ -398,6 +398,14 @@
 	#define TOML_ENABLE_FORMATTERS 1
 #endif
 
+// SIMD
+#if !defined(TOML_ENABLE_SIMD)									\
+		|| (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD)	\
+		|| TOML_INTELLISENSE
+	#undef TOML_ENABLE_SIMD
+	#define TOML_ENABLE_SIMD 1
+#endif
+
 // windows compat
 #if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
 	#define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT

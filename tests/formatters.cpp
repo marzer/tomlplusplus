@@ -76,7 +76,7 @@ namespace
 				return diff;
 			}
 
-			if (impl::is_line_break(a.codepoint))
+			if (impl::is_vertical_whitespace_excl_cr(a.codepoint))
 			{
 				diff.position.line++;
 				diff.position.column = 1u;

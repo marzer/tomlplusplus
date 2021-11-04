@@ -101,7 +101,6 @@
 		<ClCompile Include="..\tests.cpp">
 			<PrecompiledHeader>Create</PrecompiledHeader>
 		</ClCompile>
-		<ClCompile Include="..\unicode.cpp" />
 		<ClCompile Include="..\user_feedback.cpp" />
 		<ClCompile Include="..\using_iterators.cpp" />
 		<ClCompile Include="..\windows_compat.cpp" />

@@ -130,7 +130,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (decoder.has_code_point())
 				{
-					if (is_line_break(decoder.codepoint))
+					if (is_vertical_whitespace(decoder.codepoint))
 						has_line_breaks = true;
 					else if (is_nontab_control_character(decoder.codepoint)
 							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t'))
