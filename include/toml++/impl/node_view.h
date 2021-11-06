@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "print_to_stream.h"
-#include "node.h"
 #include "std_vector.h"
 #include "std_initializer_list.h"
+#include "print_to_stream.h"
+#include "node.h"
 #include "header_start.h"
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 

@@ -72,7 +72,16 @@
 		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
 		static_assert(true)
 
+	#if TOML_CLANG >= 10
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
+			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
+			static_assert(true)
+	#else
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
+	#endif
+
 	#define TOML_DISABLE_SPAM_WARNINGS \
+		TOML_DISABLE_SPAM_WARNINGS_CLANG_10; \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \

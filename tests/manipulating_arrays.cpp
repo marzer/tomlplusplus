@@ -409,6 +409,15 @@ TEST_CASE("arrays - insertion and erasure")
 		CHECK(*arr.get_as<double>(5u) == 3.0);
 	}
 
+	// iterator replace(const_iterator pos, ElemType&& elem) noexcept
+	{
+		arr.clear();
+		arr.insert(arr.begin(), { 1, 2, 3 });
+		CHECK(arr == array{ 1, 2, 3 });
+		arr.replace(arr.begin() + 1u, "two"sv);
+		CHECK(arr == array{ 1, "two"sv, 3 });
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	arr.clear();

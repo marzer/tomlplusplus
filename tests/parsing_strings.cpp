@@ -155,7 +155,7 @@ str = ''''That's still pointless', she said.'''
 
 	parse_expected_value(FILE_LINE_ARGS, R"("\"\u03B1\u03B2\u03B3\"")"sv, "\"\u03B1\u03B2\u03B3\""sv);
 
-// toml/pull/709 (\xHH unicode scalars)
+// toml/pull/796 (\xHH unicode scalars)
 #if TOML_LANG_UNRELEASED
 	parse_expected_value(FILE_LINE_ARGS,
 						 R"("\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv,

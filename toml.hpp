@@ -108,7 +108,16 @@
 		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
 		static_assert(true)
 
+	#if TOML_CLANG >= 10
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
+			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
+			static_assert(true)
+	#else
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
+	#endif
+
 	#define TOML_DISABLE_SPAM_WARNINGS \
+		TOML_DISABLE_SPAM_WARNINGS_CLANG_10; \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
@@ -4727,13 +4736,13 @@ TOML_IMPL_NAMESPACE_START
 			return out;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
 			return *raw_->get();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
 			return raw_->get();
@@ -4769,49 +4778,49 @@ TOML_IMPL_NAMESPACE_START
 			return { lhs.raw_ - rhs };
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend ptrdiff_t operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ - rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ == rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ != rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ < rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ <= rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ > rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ >= rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator[](ptrdiff_t idx) const noexcept
 		{
 			return *(raw_ + idx)->get();
@@ -5344,6 +5353,22 @@ TOML_NAMESPACE_START
 			return { elems_.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
 		}
 
+		template <typename ElemType>
+		iterator replace(const_iterator pos, ElemType&& val, value_flags flags = preserve_source_value_flags)
+		{
+			TOML_ASSERT(pos >= cbegin() && pos < cend());
+
+			if constexpr (is_node_view<ElemType>)
+			{
+				if (!val)
+					return end();
+			}
+
+			const auto it = elems_.begin() + (pos.raw_ - elems_.cbegin());
+			it->reset(impl::make_node(static_cast<ElemType&&>(val), flags));
+			return iterator{ it };
+		}
+
 		iterator erase(const_iterator pos) noexcept
 		{
 			return { elems_.erase(pos.raw_) };
@@ -5635,25 +5660,25 @@ TOML_IMPL_NAMESPACE_START
 			return out;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
 			return *get_proxy();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
 			return get_proxy();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.raw_ == rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.raw_ != rhs.raw_;
@@ -10492,7 +10517,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		node* get() const noexcept
+		node* operator->() noexcept
 		{
 			return node_;
 		}
@@ -10916,7 +10941,6 @@ TOML_IMPL_NAMESPACE_START
 			return i;
 		}
 
-		// template <bool MultiLine>
 		TOML_NODISCARD
 		std::string parse_basic_string(bool multi_line)
 		{
@@ -10928,7 +10952,7 @@ TOML_IMPL_NAMESPACE_START
 			// skip the '"'
 			advance_and_return_if_error_or_eof({});
 
-			// multiline strings ignore a single line ending right at the beginning
+			// multi-line strings ignore a single line ending right at the beginning
 			if (multi_line)
 			{
 				consume_line_break();
@@ -10937,8 +10961,8 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			std::string str;
-			bool escaped							  = false;
-			[[maybe_unused]] bool skipping_whitespace = false;
+			bool escaped			 = false;
+			bool skipping_whitespace = false;
 			do
 			{
 				if (escaped)
@@ -10972,7 +10996,7 @@ TOML_IMPL_NAMESPACE_START
 
 						// unicode scalar sequences
 						case U'x':
-#if TOML_LANG_UNRELEASED // toml/pull/709 (\xHH unicode scalar sequences)
+#if TOML_LANG_UNRELEASED // toml/pull/796 (\xHH unicode scalar sequences)
 							[[fallthrough]];
 #else
 							set_error_and_return_default(
@@ -11152,7 +11176,7 @@ TOML_IMPL_NAMESPACE_START
 			// skip the delimiter
 			advance_and_return_if_error_or_eof({});
 
-			// multiline strings ignore a single line ending right at the beginning
+			// multi-line strings ignore a single line ending right at the beginning
 			if (multi_line)
 			{
 				consume_line_break();
@@ -12329,7 +12353,7 @@ TOML_IMPL_NAMESPACE_START
 					return_if_error({});
 
 					val = new value{ i };
-					reinterpret_cast<value<int64_t>*>(val.get())->flags(flags);
+					val->ref_cast<int64_t>().flags(flags);
 				}
 				else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
 					val = new value{ parse_float() };
@@ -12367,14 +12391,14 @@ TOML_IMPL_NAMESPACE_START
 					// 0b10
 					case bzero_msk | has_b:
 						val = new value{ parse_integer<2>() };
-						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_binary);
+						val->ref_cast<int64_t>().flags(value_flags::format_as_binary);
 						break;
 
 					// octal integers
 					// 0o10
 					case bzero_msk | has_o:
 						val = new value{ parse_integer<8>() };
-						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_octal);
+						val->ref_cast<int64_t>().flags(value_flags::format_as_octal);
 						break;
 
 					// decimal integers
@@ -12391,7 +12415,7 @@ TOML_IMPL_NAMESPACE_START
 					// 0x10
 					case bzero_msk | has_x:
 						val = new value{ parse_integer<16>() };
-						reinterpret_cast<value<int64_t>*>(val.get())->flags(value_flags::format_as_hexadecimal);
+						val->ref_cast<int64_t>().flags(value_flags::format_as_hexadecimal);
 						break;
 
 					// decimal floats
@@ -12554,7 +12578,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 #endif
 
-			val.get()->source_ = { begin_pos, current_position(1), reader.source_path() };
+			val->source_ = { begin_pos, current_position(1), reader.source_path() };
 			return val.release();
 		}
 
@@ -12761,7 +12785,7 @@ TOML_IMPL_NAMESPACE_START
 					// the spec dictates we select the most recently declared element in the array.
 					TOML_ASSERT(!child->ref_cast<array>().elems_.empty());
 					TOML_ASSERT(child->ref_cast<array>().elems_.back()->is_table());
-					parent = &child->ref_cast<array>().elems_.back()->ref_cast<table>();
+					parent = &child->ref_cast<array>().back().ref_cast<table>();
 				}
 				else
 				{
@@ -12789,22 +12813,21 @@ TOML_IMPL_NAMESPACE_START
 				// set the starting regions, and return the table element
 				if (is_arr)
 				{
-					auto tab_arr =
-						&parent->map_.emplace(key.segments.back(), new array{}).first->second->ref_cast<array>();
-					table_arrays.push_back(tab_arr);
-					tab_arr->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					array& tbl_arr = parent->emplace<array>(key.segments.back()).first->second.ref_cast<array>();
+					table_arrays.push_back(&tbl_arr);
+					tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
-					tab_arr->elems_.emplace_back(new table{});
-					tab_arr->elems_.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tab_arr->elems_.back()->ref_cast<table>();
+					table& tbl	= tbl_arr.emplace_back<table>();
+					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tbl;
 				}
 
 				// otherwise we're just making a table
 				else
 				{
-					auto tab = &parent->map_.emplace(key.segments.back(), new table{}).first->second->ref_cast<table>();
-					tab->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return tab;
+					table& tbl	= parent->emplace<table>(key.segments.back()).first->second.ref_cast<table>();
+					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tbl;
 				}
 			}
 
@@ -12817,22 +12840,21 @@ TOML_IMPL_NAMESPACE_START
 				if (is_arr && matching_node->is_array()
 					&& impl::find(table_arrays.begin(), table_arrays.end(), &matching_node->ref_cast<array>()))
 				{
-					auto tab_arr = &matching_node->ref_cast<array>();
-					tab_arr->elems_.emplace_back(new table{});
-					tab_arr->elems_.back()->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tab_arr->elems_.back()->ref_cast<table>();
+					table& tbl	= matching_node->ref_cast<array>().emplace_back<table>();
+					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tbl;
 				}
 
 				else if (!is_arr && matching_node->is_table() && !implicit_tables.empty())
 				{
-					auto tbl = &matching_node->ref_cast<table>();
-					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl);
-						found && (tbl->empty() || tbl->is_homogeneous<table>()))
+					table& tbl = matching_node->ref_cast<table>();
+					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), &tbl);
+						found && (tbl.empty() || tbl.is_homogeneous<table>()))
 					{
 						implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
-						tbl->source_.begin = header_begin_pos;
-						tbl->source_.end   = header_end_pos;
-						return tbl;
+						tbl.source_.begin = header_begin_pos;
+						tbl.source_.end	  = header_end_pos;
+						return &tbl;
 					}
 				}
 
@@ -12881,7 +12903,7 @@ TOML_IMPL_NAMESPACE_START
 					{
 						child = tab->map_.emplace(std::move(kvp.key.segments[i]), new table{}).first->second.get();
 						dotted_key_tables.push_back(&child->ref_cast<table>());
-						child->source_ = kvp.value.get()->source_;
+						child->source_ = kvp.value->source_;
 					}
 					else if (!child->is_table()
 							 || !(impl::find(dotted_key_tables.begin(),
@@ -12895,7 +12917,7 @@ TOML_IMPL_NAMESPACE_START
 									 to_sv(child->type()),
 									 " as dotted key-value pair"sv);
 					else
-						child->source_.end = kvp.value.get()->source_.end;
+						child->source_.end = kvp.value->source_.end;
 
 					return_if_error();
 					tab = &child->ref_cast<table>();
@@ -12904,7 +12926,7 @@ TOML_IMPL_NAMESPACE_START
 
 			if (auto conflicting_node = tab->get(kvp.key.segments.back()))
 			{
-				if (conflicting_node->type() == kvp.value.get()->type())
+				if (conflicting_node->type() == kvp.value->type())
 					set_error("cannot redefine existing "sv,
 							  to_sv(conflicting_node->type()),
 							  " '"sv,
@@ -12916,7 +12938,7 @@ TOML_IMPL_NAMESPACE_START
 							  " '"sv,
 							  to_sv(recording_buffer),
 							  "' as "sv,
-							  to_sv(kvp.value.get()->type()));
+							  to_sv(kvp.value->type()));
 			}
 
 			return_if_error();
@@ -12982,8 +13004,7 @@ TOML_IMPL_NAMESPACE_START
 			if (type == node_type::table)
 			{
 				auto& tbl = nde.ref_cast<table>();
-				if (tbl.inline_) // inline tables (and all their inline descendants) are already correctly
-								 // terminated
+				if (tbl.inline_) // inline tables (and all their inline descendants) are already correctly terminated
 					return;
 
 				auto end = nde.source_.end;
@@ -12999,11 +13020,11 @@ TOML_IMPL_NAMESPACE_START
 			{
 				auto& arr = nde.ref_cast<array>();
 				auto end  = nde.source_.end;
-				for (auto& v : arr.elems_)
+				for (auto& v : arr)
 				{
-					update_region_ends(*v);
-					if (end < v->source_.end)
-						end = v->source_.end;
+					update_region_ends(v);
+					if (end < v.source_.end)
+						end = v.source_.end;
 				}
 				nde.source_.end = end;
 			}
@@ -13062,8 +13083,8 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '['
 		advance_and_return_if_error_or_eof({});
 
-		node_ptr arr{ new array{} };
-		auto& vals = reinterpret_cast<array*>(arr.get())->elems_;
+		node_ptr arr_ptr{ new array{} };
+		array& arr = arr_ptr->ref_cast<array>();
 		enum parse_elem : int
 		{
 			none,
@@ -13106,14 +13127,14 @@ TOML_IMPL_NAMESPACE_START
 					continue;
 				}
 				prev = val;
-				if (!vals.capacity())
-					vals.reserve(4u);
-				vals.emplace_back(parse_value());
+				if (!arr.capacity())
+					arr.reserve(4u);
+				arr.elems_.emplace_back(parse_value());
 			}
 		}
 
 		return_if_error({});
-		return reinterpret_cast<array*>(arr.release());
+		return reinterpret_cast<array*>(arr_ptr.release());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -13127,8 +13148,9 @@ TOML_IMPL_NAMESPACE_START
 		// skip opening '{'
 		advance_and_return_if_error_or_eof({});
 
-		node_ptr tab{ new table{} };
-		reinterpret_cast<table*>(tab.get())->inline_ = true;
+		node_ptr tbl_ptr{ new table{} };
+		table& tbl	= tbl_ptr->ref_cast<table>();
+		tbl.inline_ = true;
 		enum parse_elem : int
 		{
 			none,
@@ -13187,7 +13209,7 @@ TOML_IMPL_NAMESPACE_START
 				else
 				{
 					prev = kvp;
-					parse_key_value_pair_and_insert(reinterpret_cast<table*>(tab.get()));
+					parse_key_value_pair_and_insert(&tbl);
 				}
 			}
 
@@ -13196,7 +13218,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return reinterpret_cast<table*>(tab.release());
+		return reinterpret_cast<table*>(tbl_ptr.release());
 	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
@@ -14416,6 +14438,7 @@ TOML_POP_WARNINGS;
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS
+#undef TOML_DISABLE_SPAM_WARNINGS_CLANG_10
 #undef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
 #undef TOML_DISABLE_SWITCH_WARNINGS
 #undef TOML_DISABLE_WARNINGS

@@ -6,8 +6,6 @@
 // This example is just a short-n-shiny benchmark.
 
 #include "examples.h"
-
-#define TOML_ENABLE_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;
@@ -50,7 +48,7 @@ int main(int argc, char** argv)
 #if TOML_EXCEPTIONS
 		try
 		{
-			const auto result = toml::parse(file_content);
+			const auto result = toml::parse(file_content, file_path);
 		}
 		catch (const toml::parse_error& err)
 		{
@@ -58,7 +56,7 @@ int main(int argc, char** argv)
 			return 1;
 		}
 #else
-		const auto result = toml::parse(file_content);
+		const auto result = toml::parse(file_content, file_path);
 		if (!result)
 			std::cerr << result.error() << "\n";
 		return 1;
@@ -67,15 +65,13 @@ int main(int argc, char** argv)
 
 	// run the benchmark
 	std::cout << "Parsing '"sv << file_path << "' "sv << iterations << " times...\n"sv;
-	std::chrono::nanoseconds cumulative;
+
+	const auto start = std::chrono::steady_clock::now();
 	for (size_t i = 0; i < iterations; i++)
-	{
-		const auto start  = std::chrono::steady_clock::now();
-		const auto result = toml::parse(file_content);
-		cumulative += std::chrono::steady_clock::now() - start;
-	}
-	const auto cumulative_sec = std::chrono::duration_cast<std::chrono::duration<double>>(cumulative).count();
-	const auto mean_sec		  = cumulative_sec / static_cast<double>(iterations);
+		std::ignore = toml::parse_file(file_path);
+	const auto cumulative_sec =
+		std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - start).count();
+	const auto mean_sec = cumulative_sec / static_cast<double>(iterations);
 	std::cout << "  total: "sv << cumulative_sec << " s\n"sv
 			  << "   mean: "sv << mean_sec << " s\n"sv;
 

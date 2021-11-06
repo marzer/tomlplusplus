@@ -4,9 +4,9 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "forward_declarations.h"
 #include "std_optional.h"
 #include "std_string.h"
+#include "forward_declarations.h"
 #include "print_to_stream.h"
 #include "header_start.h"
 

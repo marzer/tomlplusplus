@@ -7,8 +7,8 @@
 #include "preprocessor.h"
 #if TOML_ENABLE_FORMATTERS
 
-#include "formatter.h"
 #include "std_vector.h"
+#include "formatter.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START

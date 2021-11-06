@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "array.h"
-#include "make_node.h"
 #include "std_map.h"
 #include "std_initializer_list.h"
+#include "array.h"
+#include "make_node.h"
 #include "node_view.h"
 #include "header_start.h"
 
@@ -116,25 +116,25 @@ TOML_IMPL_NAMESPACE_START
 			return out;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
 			return *get_proxy();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
 			return get_proxy();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.raw_ == rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.raw_ != rhs.raw_;

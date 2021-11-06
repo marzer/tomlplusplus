@@ -4,7 +4,6 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "preprocessor.h"
 #include "std_string.h"
 #include "std_new.h"
 TOML_DISABLE_WARNINGS;

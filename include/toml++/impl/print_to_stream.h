@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "forward_declarations.h"
 #include "std_string.h"
+#include "forward_declarations.h"
 #include "header_start.h"
 
 TOML_IMPL_NAMESPACE_START

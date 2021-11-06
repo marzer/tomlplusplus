@@ -4,10 +4,10 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "value.h"
 #include "std_utility.h"
 #include "std_vector.h"
 #include "std_initializer_list.h"
+#include "value.h"
 #include "make_node.h"
 #include "header_start.h"
 
@@ -80,13 +80,13 @@ TOML_IMPL_NAMESPACE_START
 			return out;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
 			return *raw_->get();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
 			return raw_->get();
@@ -122,49 +122,49 @@ TOML_IMPL_NAMESPACE_START
 			return { lhs.raw_ - rhs };
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend ptrdiff_t operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ - rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ == rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ != rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ < rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ <= rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ > rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.raw_ >= rhs.raw_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator[](ptrdiff_t idx) const noexcept
 		{
 			return *(raw_ + idx)->get();
@@ -330,7 +330,6 @@ TOML_NAMESPACE_START
 		/// \detail \cpp
 		/// auto arr = toml::array{ 1, 2.0, "three"sv, toml::array{ 4, 5 } };
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -974,6 +973,49 @@ TOML_NAMESPACE_START
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
 			return { elems_.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
+		}
+
+		/// \brief	Replaces the element at a specific position in the array with a different value.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 1, 2, 3 };
+		/// std::cout << arr << "\n";
+		///	arr.replace(arr.cbegin() + 1, "two");
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, 3 ]
+		/// [ 1, 'two', 3 ]
+		/// \eout
+		///
+		/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
+		/// 					(or a type promotable to one).
+		/// \param 	pos			The insertion position.
+		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
+		///
+		/// \returns \conditional_return{Valid input}
+		///			 An iterator to the replaced element.
+		///			 \conditional_return{Input is an empty toml::node_view}
+		/// 		 end()
+		///
+		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
+		/// 		   because no replacement can take place. This is the only circumstance in which this can occur.
+		template <typename ElemType>
+		iterator replace(const_iterator pos, ElemType&& val, value_flags flags = preserve_source_value_flags)
+		{
+			TOML_ASSERT(pos >= cbegin() && pos < cend());
+
+			if constexpr (is_node_view<ElemType>)
+			{
+				if (!val)
+					return end();
+			}
+
+			const auto it = elems_.begin() + (pos.raw_ - elems_.cbegin());
+			it->reset(impl::make_node(static_cast<ElemType&&>(val), flags));
+			return iterator{ it };
 		}
 
 		/// \brief	Removes the specified element from the array.
