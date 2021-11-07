@@ -19,7 +19,21 @@ TEST_CASE("tables - moving")
 			CHECK(tbl["test"].as<table>()->size() == 1u);
 			CHECK(tbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
 			CHECK(tbl["test"].as<table>()->source().end == source_position{ 1, 24 });
-			CHECK(tbl["test"]["val1"] == "foo");
+			CHECK(tbl["test"].node() == tbl.get("test"sv));
+#if TOML_COMPILER_EXCEPTIONS
+			CHECK(tbl["test"].node() == &tbl.at("test"sv));
+#endif
+
+			// sanity-check initial state of a freshly-parsed table (const)
+			const table& ctbl = tbl;
+			REQUIRE(ctbl["test"].as<table>());
+			CHECK(ctbl["test"].as<table>()->size() == 1u);
+			CHECK(ctbl["test"].as<table>()->source().begin == source_position{ 1, 8 });
+			CHECK(ctbl["test"].as<table>()->source().end == source_position{ 1, 24 });
+			CHECK(ctbl["test"].node() == ctbl.get("test"sv));
+#if TOML_COMPILER_EXCEPTIONS
+			CHECK(ctbl["test"].node() == &ctbl.at("test"sv));
+#endif
 
 			// sanity check the virtual type checks
 			CHECK(tbl.type() == node_type::table);
@@ -48,7 +62,6 @@ TEST_CASE("tables - moving")
 			CHECK(!tbl.as_date_time());
 
 			// sanity check the virtual type casts (const)
-			const auto& ctbl = std::as_const(tbl);
 			CHECK(ctbl.as_table() == &ctbl);
 			CHECK(!ctbl.as_array());
 			CHECK(!ctbl.as_string());

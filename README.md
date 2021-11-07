@@ -145,7 +145,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | `TOML_CONFIG_HEADER`              | string literal | Includes the given header file before the rest of the library.                                           | undefined              |
 | `TOML_ENABLE_FORMATTERS`          |     boolean    | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.      | `1`                    |
 | `TOML_ENABLE_PARSER`              |     boolean    | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.            | `1`                    |
-| `TOML_ENABLE_UNRELEASED_FEATURES` |     boolean    | Enables support for [unreleased TOML language features.                                                  | `0`                    |
+| `TOML_ENABLE_UNRELEASED_FEATURES` |     boolean    | Enables support for [unreleased TOML language features].                                                 | `0`                    |
 | `TOML_ENABLE_WINDOWS_COMPAT`      |     boolean    | Enables support for transparent conversion between wide and narrow strings.                              | `1` on Windows         |
 | `TOML_EXCEPTIONS`                 |     boolean    | Sets whether the library uses exceptions.                                                                | per compiler settings  |
 | `TOML_HEADER_ONLY`                |     boolean    | Disable this to explicitly control where toml++'s implementation is compiled (e.g. as part of a library).| `1`                    |
@@ -167,7 +167,7 @@ support for a number of unreleased features from the [TOML master] and some sane
 The library advertises the most recent numbered language version it fully supports via the preprocessor
 defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 
-### 🔸&#xFE0F; **Unreleased language features:**
+### **Unreleased language features:**
 - [#516]: Allow newlines and trailing commas in inline tables
 - [#562]: Allow hex floating-point values
 - [#644]: Support `+` in key names
@@ -238,7 +238,7 @@ though you're welcome to reach out via other means. In order of likely response 
 
 [API documentation]: https://marzer.github.io/tomlplusplus/
 [homepage]: https://marzer.github.io/tomlplusplus/
-[unreleased TOML language features]: #-unreleased-language-features
+[unreleased TOML language features]: #unreleased-language-features
 [most recently-released version]: https://github.com/toml-lang/toml/releases
 [numbered version]: https://github.com/toml-lang/toml/releases
 [char8_t]: https://en.cppreference.com/w/cpp/keyword/char8_t

@@ -17,53 +17,56 @@ template:
 ## Unreleased
 
 This release will be a major version bump, so it's ABI breaks all around. Any API changes that might necessitate
-code changes at callsites or in build systems are indicated with '⚠&#xFE0F;'.
+code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 
 #### Fixes:
+- fixed `json_formatter` not formatting inf and nan incorrectly
+- fixed `table` init-list constructor requiring double-brackets
+- fixed `TOML_API` + extern templates causing linker errors in some circumstances
 - fixed an illegal table redefinition edge case (#112) (@python36)
-- fixed incorrect source position in redefinition error messages
 - fixed documentation issues
-- fixed some interfaces missing `TOML_API`
-- fixed `toml::table` init-list constructor requiring double-brackets
+- fixed incorrect `noexcept` specifications on many functions ⚠&#xFE0F;
+- fixed incorrect source position in redefinition error messages
 - fixed missing `#include <initializer_list>`
 - fixed missing `#include <utility>`
-- fixed incorrect `noexcept` specifications on many functions ⚠&#xFE0F;
-- fixed `TOML_API` + extern templates causing linker errors in some circumstances
-- fixed inf and nan being formatted incorrectly by the `json_formatter`
+- fixed missing `TOML_API` on interfaces
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
 
 #### Additions:
-- added support for Unicode 14.0
-- added formatter indentation flags (#120) (@W4RH4WK)
-- added value flags to array + table insert methods (#44) (@levicki)
-- added magic `value_flags` constant `preserve_source_value_flags`
-- added clang's enum annotation attributes to all enums
-- added `formatter_flags::quote_infinities_and_nans`
-- added `TOML_ENABLE_FORMATTERS` option
-- added `default_init_flags` param to `array::resize()`
-- added `toml::yaml_formatter`
-- added `operator->` to `toml::value` for class types
-- added `parse_benchmark` example
+- added `array::at()` and `table::at()`
 - added `array::replace()` (#109) (#LebJe)
+- added `default_init_flags` param to `array::resize()`
+- added `formatter_flags::quote_infinities_and_nans`
+- added `operator->` to `value` for class types
+- added `parse_benchmark` example
+- added `TOML_ENABLE_FORMATTERS` option
+- added `yaml_formatter`
+- added clang's enum annotation attributes to all enums
+- added formatter indentation flags (#120) (@W4RH4WK)
+- added magic `value_flags` constant `preserve_source_value_flags`
+- added support for Unicode 14.0
+- added value flags to array + table insert methods (#44) (@levicki)
 
 #### Changes:
-- moved all implementation headers to `/impl`
-- improved performance of parser's internal UTF-8 stream decoder
-- made date/time constructors accept any integral types
-- made all overloaded operators 'hidden friends' where possible
-- renamed all implementation headers to `.h` and 'source' headers to `.inl`
-- renamed `default_formatter` to `toml_formatter` (`default_formatter` is now an alias)
+- `format_flags` is now backed by `uint64_t` (was previously `uint8_t`) ⚠&#xFE0F;
+- `source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`) ⚠&#xFE0F;
+- `value_flags` is now backed by `uint16_t` (was previously `uint8_t`) ⚠&#xFE0F;
 - applied clang-format to all the things 🎉&#xFE0F;
+- improved performance of parser's internal UTF-8 stream decoder
+- made all overloaded operators 'hidden friends' where possible ⚠&#xFE0F;
+- made date/time constructors accept any integral types
+- moved all implementation headers to `/impl`
+- renamed `default_formatter` to `toml_formatter` (`default_formatter` is now an alias)
+- renamed all implementation headers to `.h` and 'source' headers to `.inl`
 - updated conformance tests
 
-
 #### Removals and Deprecations:
-- removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_PARSER` to `0` will invoke an `#error`) ⚠&#xFE0F;
-- renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated) ⚠&#xFE0F;
-- renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated) ⚠&#xFE0F;
-- renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated) ⚠&#xFE0F;
+- removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`) ⚠&#xFE0F;
 - removed unnecessary template machinery (esp. where ostreams were involved)
 - removed unnecessary uses of `final`
+- renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated) ⚠&#xFE0F;
+- renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated) ⚠&#xFE0F;
+- renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated) ⚠&#xFE0F;
 
 #### Build system:
 - disabled 'install' path when being used as a meson subproject (#114) (@Tachi107)

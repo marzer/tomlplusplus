@@ -178,9 +178,28 @@ TEST_CASE("arrays - construction")
 		CHECK(arr.cbegin() != arr.cend());
 		REQUIRE(arr.get_as<int64_t>(0u));
 		CHECK(*arr.get_as<int64_t>(0u) == 42);
+		CHECK(arr.get(0u) == &arr[0u]);
 		CHECK(arr.is_homogeneous());
 		CHECK(arr.is_homogeneous<int64_t>());
 		CHECK(!arr.is_homogeneous<double>());
+#if TOML_COMPILER_EXCEPTIONS
+		CHECK(arr.get(0u) == &arr.at(0u));
+#endif
+
+		const array& carr = arr;
+		CHECK(carr.size() == 1u);
+		CHECK(!carr.empty());
+		CHECK(carr.begin() != carr.end());
+		CHECK(carr.cbegin() != carr.cend());
+		REQUIRE(carr.get_as<int64_t>(0u));
+		CHECK(*carr.get_as<int64_t>(0u) == 42);
+		CHECK(carr.get(0u) == &carr[0u]);
+		CHECK(carr.is_homogeneous());
+		CHECK(carr.is_homogeneous<int64_t>());
+		CHECK(!carr.is_homogeneous<double>());
+#if TOML_COMPILER_EXCEPTIONS
+		CHECK(carr.get(0u) == &carr.at(0u));
+#endif
 	}
 
 	{
@@ -189,14 +208,20 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.empty());
 		REQUIRE(arr.get_as<int64_t>(0u));
 		CHECK(*arr.get_as<int64_t>(0u) == 42);
+		CHECK(arr.get(0u) == &arr[0u]);
 		REQUIRE(arr.get_as<std::string>(1u));
 		CHECK(*arr.get_as<std::string>(1u) == "test"sv);
+		CHECK(arr.get(1u) == &arr[1u]);
 		REQUIRE(arr.get_as<double>(2u));
 		CHECK(*arr.get_as<double>(2u) == 10.0);
 		REQUIRE(arr.get_as<array>(3u));
 		REQUIRE(arr.get_as<int64_t>(4u));
 		CHECK(*arr.get_as<int64_t>(4u) == 3);
 		CHECK(!arr.is_homogeneous());
+#if TOML_COMPILER_EXCEPTIONS
+		CHECK(arr.get(0u) == &arr.at(0u));
+		CHECK(arr.get(1u) == &arr.at(1u));
+#endif
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT

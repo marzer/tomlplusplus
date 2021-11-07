@@ -15,33 +15,6 @@
 #include "node_view.h"
 #include "header_start.h"
 
-TOML_ANON_NAMESPACE_START
-{
-	template <typename T, typename U>
-	TOML_INTERNAL_LINKAGE
-	bool table_is_homogeneous(T & map, node_type ntype, U & first_nonmatch) noexcept
-	{
-		if (map.empty())
-		{
-			first_nonmatch = {};
-			return false;
-		}
-		if (ntype == node_type::none)
-			ntype = map.cbegin()->second->type();
-		for (const auto& [k, v] : map)
-		{
-			(void)k;
-			if (v->type() != ntype)
-			{
-				first_nonmatch = v.get();
-				return false;
-			}
-		}
-		return true;
-	}
-}
-TOML_ANON_NAMESPACE_END;
-
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
@@ -132,14 +105,78 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
+		if (map_.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = map_.cbegin()->second->type();
+		for (const auto& [k, v] : map_)
+		{
+			(void)k;
+			if (v->type() != ntype)
+			{
+				first_nonmatch = v.get();
+				return false;
+			}
+		}
+		return true;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
+		node* fnm		  = nullptr;
+		const auto result = const_cast<table&>(*this).is_homogeneous(ntype, fnm);
+		first_nonmatch	  = fnm;
+		return result;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	node* table::get(std::string_view key) noexcept
+	{
+		if (auto it = map_.find(key); it != map_.end())
+			return it->second.get();
+		return nullptr;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node* table::get(std::wstring_view key)
+	{
+		return get(impl::narrow(key));
+	}
+
+#endif
+
+#if TOML_COMPILER_EXCEPTIONS
+
+	TOML_EXTERNAL_LINKAGE
+	node& table::at(std::string_view key)
+	{
+		auto n = get(key);
+		if (!n)
+		{
+			auto err = "key '"s;
+			err.append(key);
+			err.append("' not found in table"sv);
+			throw std::out_of_range{ err };
+		}
+		return *n;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node& table::at(std::wstring_view key)
+	{
+		return at(impl::narrow(key));
+	}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_COMPILER_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::equal(const table& lhs, const table& rhs) noexcept

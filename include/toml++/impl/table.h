@@ -235,47 +235,6 @@ TOML_NAMESPACE_START
 		TOML_API
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
 
-		template <typename Map, typename Key>
-		TOML_NODISCARD
-		static auto do_get(Map& vals, const Key& key) noexcept(!impl::is_wide_string<Key>)
-			-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
-		{
-			static_assert(!impl::is_wide_string<Key> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Retrieval using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
-
-			if constexpr (impl::is_wide_string<Key>)
-			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return do_get(vals, impl::narrow(key));
-#else
-				static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				if (auto it = vals.find(key); it != vals.end())
-					return { it->second.get() };
-				return {};
-			}
-		}
-
-		template <typename T, typename Map, typename Key>
-		TOML_NODISCARD
-		static auto do_get_as(Map& vals, const Key& key) noexcept
-		{
-			const auto node = do_get(vals, key);
-			return node ? node->template as<T>() : nullptr;
-		}
-
-		template <typename Map, typename Key>
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
-		static bool do_contains(Map& vals, const Key& key) noexcept
-		{
-			return do_get(vals, key) != nullptr;
-		}
-
 		/// \endcond
 
 	  public:
@@ -608,7 +567,7 @@ TOML_NAMESPACE_START
 		///
 		/// \remarks Runtime-constructed tables (i.e. those not created during
 		/// 		 parsing) are not inline by default.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool is_inline() const noexcept
 		{
 			return inline_;
@@ -660,84 +619,190 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Node views
+		/// \name Value retrieval
 		/// @{
 
-		/// \brief	Gets a node_view for the selected key-value pair.
+		/// \brief	Gets the node at a specific key.
 		///
-		/// \param 	key The key used for the lookup.
+		/// \detail \cpp
+		/// auto tbl = toml::table{
+		///		{ "a", 42, },
+		///		{ "b", "is the meaning of life, apparently." }
+		///	};
+		///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << "\n";
+		///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << "\n";
+		///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << "\n";
+		/// if (auto val = arr.get("a"))
+		///		std::cout << R"(node ["a"] was an )"sv << val->type() << "\n";
 		///
-		/// \returns	A view of the value at the given key if one existed, or an empty node view.
+		/// \ecpp
 		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
+		/// \out
+		/// node ["a"] exists: true
+		/// node ["b"] exists: true
+		/// node ["c"] exists: false
+		/// node ["a"] was an integer
+		/// \eout
 		///
-		/// \see toml::node_view
-		TOML_NODISCARD
-		node_view<node> operator[](std::string_view key) noexcept
-		{
-			return node_view<node>{ this->get(key) };
-		}
+		/// \param 	key	The node's key.
+		///
+		/// \returns	A pointer to the node at the specified key, or nullptr.
+		TOML_PURE_GETTER
+		TOML_API
+		node* get(std::string_view key) noexcept;
 
-		/// \brief	Gets a node_view for the selected key-value pair (const overload).
+		/// \brief	Gets the node at a specific key (const overload).
 		///
-		/// \param 	key The key used for the lookup.
+		/// \param 	key	The node's key.
 		///
-		/// \returns	A view of the value at the given key if one existed, or an empty node view.
-		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
-		///
-		/// \see toml::node_view
-		TOML_NODISCARD
-		node_view<const node> operator[](std::string_view key) const noexcept
+		/// \returns	A pointer to the node at the specified key, or nullptr.
+		TOML_PURE_INLINE_GETTER
+		const node* get(std::string_view key) const noexcept
 		{
-			return node_view<const node>{ this->get(key) };
+			return const_cast<table&>(*this).get(key);
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-		/// \brief	Gets a node_view for the selected key-value pair.
+		/// \brief	Gets the node at a specific key.
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \param 	key The key used for the lookup.
+		/// \param 	key	The node's key.
 		///
-		/// \returns	A view of the value at the given key if one existed, or an empty node view.
-		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
-		///
-		/// \see toml::node_view
+		/// \returns	A pointer to the node at the specified key, or nullptr.
 		TOML_NODISCARD
-		node_view<node> operator[](std::wstring_view key) noexcept
-		{
-			return node_view<node>{ this->get(key) };
-		}
+		TOML_API
+		node* get(std::wstring_view key);
 
-		/// \brief	Gets a node_view for the selected key-value pair (const overload).
+		/// \brief	Gets the node at a specific key (const overload).
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \param 	key The key used for the lookup.
+		/// \param 	key	The node's key.
 		///
-		/// \returns	A view of the value at the given key if one existed, or an empty node view.
-		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
-		///
-		/// \see toml::node_view
+		/// \returns	A pointer to the node at the specified key, or nullptr.
 		TOML_NODISCARD
-		node_view<const node> operator[](std::wstring_view key) const noexcept
+		const node* get(std::wstring_view key) const
 		{
-			return node_view<const node>{ this->get(key) };
+			return const_cast<table&>(*this).get(key);
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Gets the node at a specific key if it is a particular type.
+		///
+		/// \detail \cpp
+		/// auto tbl = toml::table{
+		///		{ "a", 42, },
+		///		{ "b", "is the meaning of life, apparently." }
+		///	};
+		/// if (auto val = arr.get_as<int64_t>("a"))
+		///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << "\n";
+		///
+		/// \ecpp
+		///
+		/// \out
+		/// node ["a"] was an integer with value 42
+		/// \eout
+		///
+		/// \tparam	ValueType	One of the TOML node or value types.
+		/// \param 	key			The node's key.
+		///
+		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+		template <typename ValueType>
+		TOML_PURE_GETTER
+		impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
+		{
+			const auto n = this->get(key);
+			return n ? n->template as<ValueType>() : nullptr;
+		}
+
+		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
+		///
+		/// \tparam	ValueType	One of the TOML node or value types.
+		/// \param 	key			The node's key.
+		///
+		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+		template <typename ValueType>
+		TOML_PURE_GETTER
+		const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
+		{
+			return const_cast<table&>(*this).template get_as<ValueType>(key);
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Gets the node at a specific key if it is a particular type.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \tparam	ValueType	One of the TOML node or value types.
+		/// \param 	key			The node's key.
+		///
+		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+		template <typename ValueType>
+		TOML_NODISCARD
+		impl::wrap_node<ValueType>* get_as(std::wstring_view key)
+		{
+			return get_as<ValueType>(impl::narrow(key));
+		}
+
+		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \tparam	ValueType	One of the TOML node or value types.
+		/// \param 	key			The node's key.
+		///
+		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
+		template <typename ValueType>
+		TOML_NODISCARD
+		const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const
+		{
+			return const_cast<table&>(*this).template get_as<ValueType>(key);
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
+#if TOML_COMPILER_EXCEPTIONS
+
+		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions enabled.
+		TOML_NODISCARD
+		TOML_API
+		node& at(std::string_view key);
+
+		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions enabled.
+		TOML_NODISCARD
+		const node& at(std::string_view key) const
+		{
+			return const_cast<table&>(*this).at(key);
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions and #TOML_ENABLE_WINDOWS_COMPAT enabled.
+		TOML_NODISCARD
+		TOML_API
+		node& at(std::wstring_view key);
+
+		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions and #TOML_ENABLE_WINDOWS_COMPAT enabled.
+		TOML_NODISCARD
+		const node& at(std::wstring_view key) const
+		{
+			return const_cast<table&>(*this).at(key);
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_COMPILER_EXCEPTIONS
 
 		/// @}
 
@@ -1284,7 +1349,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		bool contains(std::string_view key) const noexcept
 		{
-			return do_contains(map_, key);
+			return get(key) != nullptr;
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -1328,151 +1393,81 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Value retrieval
+		/// \name Node views
 		/// @{
 
-		/// \brief	Gets the node at a specific key.
+		/// \brief	Gets a node_view for the selected key-value pair.
 		///
-		/// \detail \cpp
-		/// auto tbl = toml::table{
-		///		{ "a", 42, },
-		///		{ "b", "is the meaning of life, apparently." }
-		///	};
-		///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << "\n";
-		///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << "\n";
-		///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << "\n";
-		/// if (auto val = arr.get("a"))
-		///		std::cout << R"(node ["a"] was an )"sv << val->type() << "\n";
+		/// \param 	key The key used for the lookup.
 		///
-		/// \ecpp
+		/// \returns	A view of the value at the given key if one existed, or an empty node view.
 		///
-		/// \out
-		/// node ["a"] exists: true
-		/// node ["b"] exists: true
-		/// node ["c"] exists: false
-		/// node ["a"] was an integer
-		/// \eout
+		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+		/// 		 <strong>This is not an error.</strong>
 		///
-		/// \param 	key	The node's key.
-		///
-		/// \returns	A pointer to the node at the specified key, or nullptr.
+		/// \see toml::node_view
 		TOML_NODISCARD
-		node* get(std::string_view key) noexcept
+		node_view<node> operator[](std::string_view key) noexcept
 		{
-			return do_get(map_, key);
+			return node_view<node>{ get(key) };
 		}
 
-		/// \brief	Gets the node at a specific key (const overload).
+		/// \brief	Gets a node_view for the selected key-value pair (const overload).
 		///
-		/// \param 	key	The node's key.
+		/// \param 	key The key used for the lookup.
 		///
-		/// \returns	A pointer to the node at the specified key, or nullptr.
+		/// \returns	A view of the value at the given key if one existed, or an empty node view.
+		///
+		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+		/// 		 <strong>This is not an error.</strong>
+		///
+		/// \see toml::node_view
 		TOML_NODISCARD
-		const node* get(std::string_view key) const noexcept
+		node_view<const node> operator[](std::string_view key) const noexcept
 		{
-			return do_get(map_, key);
+			return node_view<const node>{ get(key) };
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-		/// \brief	Gets the node at a specific key.
+		/// \brief	Gets a node_view for the selected key-value pair.
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \param 	key	The node's key.
+		/// \param 	key The key used for the lookup.
 		///
-		/// \returns	A pointer to the node at the specified key, or nullptr.
+		/// \returns	A view of the value at the given key if one existed, or an empty node view.
+		///
+		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+		/// 		 <strong>This is not an error.</strong>
+		///
+		/// \see toml::node_view
 		TOML_NODISCARD
-		node* get(std::wstring_view key)
+		node_view<node> operator[](std::wstring_view key) noexcept
 		{
-			return get(impl::narrow(key));
+			return node_view<node>{ get(key) };
 		}
 
-		/// \brief	Gets the node at a specific key (const overload).
+		/// \brief	Gets a node_view for the selected key-value pair (const overload).
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \param 	key	The node's key.
+		/// \param 	key The key used for the lookup.
 		///
-		/// \returns	A pointer to the node at the specified key, or nullptr.
+		/// \returns	A view of the value at the given key if one existed, or an empty node view.
+		///
+		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+		/// 		 <strong>This is not an error.</strong>
+		///
+		/// \see toml::node_view
 		TOML_NODISCARD
-		const node* get(std::wstring_view key) const
+		node_view<const node> operator[](std::wstring_view key) const noexcept
 		{
-			return get(impl::narrow(key));
-		}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
-		/// \brief	Gets the node at a specific key if it is a particular type.
-		///
-		/// \detail \cpp
-		/// auto tbl = toml::table{
-		///		{ "a", 42, },
-		///		{ "b", "is the meaning of life, apparently." }
-		///	};
-		/// if (auto val = arr.get_as<int64_t>("a"))
-		///		std::cout << R"(node ["a"] was an integer with value )"sv << **val << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// node ["a"] was an integer with value 42
-		/// \eout
-		///
-		/// \tparam	ValueType	One of the TOML node or value types.
-		/// \param 	key			The node's key.
-		///
-		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-		template <typename ValueType>
-		TOML_NODISCARD
-		impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
-		{
-			return do_get_as<ValueType>(map_, key);
-		}
-
-		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
-		///
-		/// \tparam	ValueType	One of the TOML node or value types.
-		/// \param 	key			The node's key.
-		///
-		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-		template <typename ValueType>
-		TOML_NODISCARD
-		const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
-		{
-			return do_get_as<ValueType>(map_, key);
-		}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		/// \brief	Gets the node at a specific key if it is a particular type.
-		///
-		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
-		///
-		/// \tparam	ValueType	One of the TOML node or value types.
-		/// \param 	key			The node's key.
-		///
-		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-		template <typename ValueType>
-		TOML_NODISCARD
-		impl::wrap_node<ValueType>* get_as(std::wstring_view key)
-		{
-			return get_as<ValueType>(impl::narrow(key));
-		}
-
-		/// \brief	Gets the node at a specific key if it is a particular type (const overload).
-		///
-		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
-		///
-		/// \tparam	ValueType	One of the TOML node or value types.
-		/// \param 	key			The node's key.
-		///
-		/// \returns	A pointer to the node at the specified key if it was of the given type, or nullptr.
-		template <typename ValueType>
-		TOML_NODISCARD
-		const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const
-		{
-			return get_as<ValueType>(impl::narrow(key));
+			return node_view<const node>{ get(key) };
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT

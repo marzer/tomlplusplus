@@ -646,6 +646,28 @@ TOML_NAMESPACE_START
 			return *elems_[index];
 		}
 
+#if TOML_COMPILER_EXCEPTIONS
+
+		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions enabled.
+		TOML_NODISCARD
+		node& at(size_t index)
+		{
+			return *elems_.at(index);
+		}
+
+		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
+		///
+		/// \availability This function is only available if you compile with exceptions enabled.
+		TOML_NODISCARD
+		const node& at(size_t index) const
+		{
+			return *elems_.at(index);
+		}
+
+#endif // TOML_COMPILER_EXCEPTIONS
+
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
 		node& front() noexcept

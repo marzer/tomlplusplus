@@ -25,7 +25,6 @@ TOML_NAMESPACE_START
 	/// std::cout << "The node 'description' was defined at "sv
 	///		<< table.get("description")->source().begin()
 	///		<< "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -33,8 +32,8 @@ TOML_NAMESPACE_START
 	/// \eout
 	///
 	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
-	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
-	/// 		 much thought to combining marks, grapheme clusters vs. characters, et cetera.
+	/// 		 non-ASCII whitespace and newline characters, but it doesn't give much thought
+	///			 to combining marks, grapheme clusters vs. characters, et cetera.
 	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
 	/// 		 you may find that your source_positions don't match those given by a text editor
 	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
@@ -93,7 +92,6 @@ TOML_NAMESPACE_START
 		/// std::cout << "The value for 'bar' was found on "sv
 		///		<< tbl.get("bar")->source().begin()
 		///		<< "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -121,7 +119,6 @@ TOML_NAMESPACE_START
 	///		std::cout << "end: "sv << server->source().end << "\n";
 	///		std::cout << "path: "sv << *server->source().path << "\n";
 	///	}
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -131,8 +128,8 @@ TOML_NAMESPACE_START
 	/// \eout
 	///
 	/// \remarks toml++'s parser is unicode-aware insofar as it knows how to handle
-	/// 		 various non-conventional whitespace and newline characters, but it doesn't give
-	/// 		 much thought to combining marks, grapheme clusters vs. characters, et cetera.
+	/// 		 non-ASCII whitespace and newline characters, but it doesn't give much thought
+	///			 to combining marks, grapheme clusters vs. characters, et cetera.
 	/// 		 If a TOML document contains lots of codepoints outside of the ASCII range
 	/// 		 you may find that your source_positions don't match those given by a text editor
 	/// 		 (typically the line numbers will be accurate but column numbers will be too high).
@@ -159,7 +156,7 @@ TOML_NAMESPACE_START
 		///
 		/// \remarks This will return an empty optional if no path was provided to toml::parse().
 		TOML_NODISCARD
-		optional<std::wstring> wide_path() const noexcept
+		optional<std::wstring> wide_path() const
 		{
 			if (!path || path->empty())
 				return {};
@@ -176,7 +173,6 @@ TOML_NAMESPACE_START
 		/// std::cout << "The value for 'bar' was found on "sv
 		///		<< tbl.get("bar")->source()
 		///		<< "\n";
-		///
 		/// \ecpp
 		///
 		/// \out

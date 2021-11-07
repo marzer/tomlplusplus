@@ -2066,7 +2066,7 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		optional<std::wstring> wide_path() const noexcept
+		optional<std::wstring> wide_path() const
 		{
 			if (!path || path->empty())
 				return {};
@@ -5190,6 +5190,22 @@ TOML_NAMESPACE_START
 			return *elems_[index];
 		}
 
+#if TOML_COMPILER_EXCEPTIONS
+
+		TOML_NODISCARD
+		node& at(size_t index)
+		{
+			return *elems_.at(index);
+		}
+
+		TOML_NODISCARD
+		const node& at(size_t index) const
+		{
+			return *elems_.at(index);
+		}
+
+#endif // TOML_COMPILER_EXCEPTIONS
+
 		TOML_NODISCARD
 		node& front() noexcept
 		{
@@ -5800,47 +5816,6 @@ TOML_NAMESPACE_START
 		TOML_API
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
 
-		template <typename Map, typename Key>
-		TOML_NODISCARD
-		static auto do_get(Map& vals, const Key& key) noexcept(!impl::is_wide_string<Key>)
-			-> std::conditional_t<std::is_const_v<Map>, const node*, node*>
-		{
-			static_assert(!impl::is_wide_string<Key> || TOML_ENABLE_WINDOWS_COMPAT,
-						  "Retrieval using wide-character keys is only supported on Windows with "
-						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
-
-			if constexpr (impl::is_wide_string<Key>)
-			{
-#if TOML_ENABLE_WINDOWS_COMPAT
-				return do_get(vals, impl::narrow(key));
-#else
-				static_assert(impl::dependent_false<Key>, "Evaluated unreachable branch!");
-#endif
-			}
-			else
-			{
-				if (auto it = vals.find(key); it != vals.end())
-					return { it->second.get() };
-				return {};
-			}
-		}
-
-		template <typename T, typename Map, typename Key>
-		TOML_NODISCARD
-		static auto do_get_as(Map& vals, const Key& key) noexcept
-		{
-			const auto node = do_get(vals, key);
-			return node ? node->template as<T>() : nullptr;
-		}
-
-		template <typename Map, typename Key>
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
-		static bool do_contains(Map& vals, const Key& key) noexcept
-		{
-			return do_get(vals, key) != nullptr;
-		}
-
 	  public:
 
 		using iterator = table_iterator;
@@ -6097,7 +6072,7 @@ TOML_NAMESPACE_START
 			return nullptr;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool is_inline() const noexcept
 		{
 			return inline_;
@@ -6108,33 +6083,89 @@ TOML_NAMESPACE_START
 			inline_ = val;
 		}
 
-		TOML_NODISCARD
-		node_view<node> operator[](std::string_view key) noexcept
-		{
-			return node_view<node>{ this->get(key) };
-		}
+		TOML_PURE_GETTER
+		TOML_API
+		node* get(std::string_view key) noexcept;
 
-		TOML_NODISCARD
-		node_view<const node> operator[](std::string_view key) const noexcept
+		TOML_PURE_INLINE_GETTER
+		const node* get(std::string_view key) const noexcept
 		{
-			return node_view<const node>{ this->get(key) };
+			return const_cast<table&>(*this).get(key);
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		node_view<node> operator[](std::wstring_view key) noexcept
-		{
-			return node_view<node>{ this->get(key) };
-		}
+		TOML_API
+		node* get(std::wstring_view key);
 
 		TOML_NODISCARD
-		node_view<const node> operator[](std::wstring_view key) const noexcept
+		const node* get(std::wstring_view key) const
 		{
-			return node_view<const node>{ this->get(key) };
+			return const_cast<table&>(*this).get(key);
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+		template <typename ValueType>
+		TOML_PURE_GETTER
+		impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
+		{
+			const auto n = this->get(key);
+			return n ? n->template as<ValueType>() : nullptr;
+		}
+
+		template <typename ValueType>
+		TOML_PURE_GETTER
+		const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
+		{
+			return const_cast<table&>(*this).template get_as<ValueType>(key);
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		template <typename ValueType>
+		TOML_NODISCARD
+		impl::wrap_node<ValueType>* get_as(std::wstring_view key)
+		{
+			return get_as<ValueType>(impl::narrow(key));
+		}
+
+		template <typename ValueType>
+		TOML_NODISCARD
+		const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const
+		{
+			return const_cast<table&>(*this).template get_as<ValueType>(key);
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
+#if TOML_COMPILER_EXCEPTIONS
+
+		TOML_NODISCARD
+		TOML_API
+		node& at(std::string_view key);
+
+		TOML_NODISCARD
+		const node& at(std::string_view key) const
+		{
+			return const_cast<table&>(*this).at(key);
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_NODISCARD
+		TOML_API
+		node& at(std::wstring_view key);
+
+		TOML_NODISCARD
+		const node& at(std::wstring_view key) const
+		{
+			return const_cast<table&>(*this).at(key);
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_COMPILER_EXCEPTIONS
 
 		TOML_NODISCARD
 		iterator begin() noexcept
@@ -6369,7 +6400,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		bool contains(std::string_view key) const noexcept
 		{
-			return do_contains(map_, key);
+			return get(key) != nullptr;
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -6395,61 +6426,29 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		node* get(std::string_view key) noexcept
+		node_view<node> operator[](std::string_view key) noexcept
 		{
-			return do_get(map_, key);
+			return node_view<node>{ get(key) };
 		}
 
 		TOML_NODISCARD
-		const node* get(std::string_view key) const noexcept
+		node_view<const node> operator[](std::string_view key) const noexcept
 		{
-			return do_get(map_, key);
-		}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		TOML_NODISCARD
-		node* get(std::wstring_view key)
-		{
-			return get(impl::narrow(key));
-		}
-
-		TOML_NODISCARD
-		const node* get(std::wstring_view key) const
-		{
-			return get(impl::narrow(key));
-		}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
-		template <typename ValueType>
-		TOML_NODISCARD
-		impl::wrap_node<ValueType>* get_as(std::string_view key) noexcept
-		{
-			return do_get_as<ValueType>(map_, key);
-		}
-
-		template <typename ValueType>
-		TOML_NODISCARD
-		const impl::wrap_node<ValueType>* get_as(std::string_view key) const noexcept
-		{
-			return do_get_as<ValueType>(map_, key);
+			return node_view<const node>{ get(key) };
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-		template <typename ValueType>
 		TOML_NODISCARD
-		impl::wrap_node<ValueType>* get_as(std::wstring_view key)
+		node_view<node> operator[](std::wstring_view key) noexcept
 		{
-			return get_as<ValueType>(impl::narrow(key));
+			return node_view<node>{ get(key) };
 		}
 
-		template <typename ValueType>
 		TOML_NODISCARD
-		const impl::wrap_node<ValueType>* get_as(std::wstring_view key) const
+		node_view<const node> operator[](std::wstring_view key) const noexcept
 		{
-			return get_as<ValueType>(impl::narrow(key));
+			return node_view<const node>{ get(key) };
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -9459,33 +9458,6 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
-TOML_ANON_NAMESPACE_START
-{
-	template <typename T, typename U>
-	TOML_INTERNAL_LINKAGE
-	bool table_is_homogeneous(T & map, node_type ntype, U & first_nonmatch) noexcept
-	{
-		if (map.empty())
-		{
-			first_nonmatch = {};
-			return false;
-		}
-		if (ntype == node_type::none)
-			ntype = map.cbegin()->second->type();
-		for (const auto& [k, v] : map)
-		{
-			(void)k;
-			if (v->type() != ntype)
-			{
-				first_nonmatch = v.get();
-				return false;
-			}
-		}
-		return true;
-	}
-}
-TOML_ANON_NAMESPACE_END;
-
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
@@ -9576,14 +9548,78 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
+		if (map_.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = map_.cbegin()->second->type();
+		for (const auto& [k, v] : map_)
+		{
+			(void)k;
+			if (v->type() != ntype)
+			{
+				first_nonmatch = v.get();
+				return false;
+			}
+		}
+		return true;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return TOML_ANON_NAMESPACE::table_is_homogeneous(map_, ntype, first_nonmatch);
+		node* fnm		  = nullptr;
+		const auto result = const_cast<table&>(*this).is_homogeneous(ntype, fnm);
+		first_nonmatch	  = fnm;
+		return result;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	node* table::get(std::string_view key) noexcept
+	{
+		if (auto it = map_.find(key); it != map_.end())
+			return it->second.get();
+		return nullptr;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node* table::get(std::wstring_view key)
+	{
+		return get(impl::narrow(key));
+	}
+
+#endif
+
+#if TOML_COMPILER_EXCEPTIONS
+
+	TOML_EXTERNAL_LINKAGE
+	node& table::at(std::string_view key)
+	{
+		auto n = get(key);
+		if (!n)
+		{
+			auto err = "key '"s;
+			err.append(key);
+			err.append("' not found in table"sv);
+			throw std::out_of_range{ err };
+		}
+		return *n;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node& table::at(std::wstring_view key)
+	{
+		return at(impl::narrow(key));
+	}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_COMPILER_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::equal(const table& lhs, const table& rhs) noexcept
