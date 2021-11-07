@@ -632,6 +632,84 @@ TOML_NAMESPACE_START
 		/// \name Array operations
 		/// @{
 
+		/// \brief	Gets a pointer to the element at a specific index.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
+		///	std::cout << "element [0] exists: "sv << !!arr.get(0) << "\n";
+		///	std::cout << "element [1] exists: "sv << !!arr.get(1) << "\n";
+		///	std::cout << "element [2] exists: "sv << !!arr.get(2) << "\n";
+		/// if (toml::node* val = arr.get(0))
+		///		std::cout << "element [0] is an "sv << val->type() << "\n";
+		///
+		/// \ecpp
+		///
+		/// \out
+		/// element [0] exists: true
+		/// element [1] exists: true
+		/// element [2] exists: false
+		/// element [0] is an integer
+		/// \eout
+		///
+		/// \param 	index	The element's index.
+		///
+		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
+		TOML_PURE_INLINE_GETTER
+		node* get(size_t index) noexcept
+		{
+			return index < elems_.size() ? elems_[index].get() : nullptr;
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index (const overload).
+		///
+		/// \param 	index	The element's index.
+		///
+		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
+		TOML_PURE_INLINE_GETTER
+		const node* get(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).get(index);
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index if it is a particular type.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 42, "is the meaning of life, apparently."sv };
+		/// if (toml::value<int64_t>* val = arr.get_as<int64_t>(0))
+		///		std::cout << "element [0] is an integer with value "sv << *val << "\n";
+		///
+		/// \ecpp
+		///
+		/// \out
+		/// element [0] is an integer with value 42
+		/// \eout
+		///
+		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
+		/// \param 	index		The element's index.
+		///
+		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
+		template <typename ElemType>
+		TOML_NODISCARD
+		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
+		{
+			if (auto val = get(index))
+				return val->template as<ElemType>();
+			return nullptr;
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index if it is a particular type (const overload).
+		///
+		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
+		/// \param 	index		The element's index.
+		///
+		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
+		template <typename ElemType>
+		TOML_NODISCARD
+		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).template get_as<ElemType>(index);
+		}
+
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
 		node& operator[](size_t index) noexcept
@@ -646,27 +724,17 @@ TOML_NAMESPACE_START
 			return *elems_[index];
 		}
 
-#if TOML_COMPILER_EXCEPTIONS
-
 		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
-		///
-		/// \availability This function is only available if you compile with exceptions enabled.
 		TOML_NODISCARD
-		node& at(size_t index)
-		{
-			return *elems_.at(index);
-		}
+		TOML_API
+		node& at(size_t index);
 
 		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
-		///
-		/// \availability This function is only available if you compile with exceptions enabled.
 		TOML_NODISCARD
 		const node& at(size_t index) const
 		{
-			return *elems_.at(index);
+			return const_cast<array&>(*this).at(index);
 		}
-
-#endif // TOML_COMPILER_EXCEPTIONS
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
@@ -1226,86 +1294,6 @@ TOML_NAMESPACE_START
 		void pop_back() noexcept
 		{
 			elems_.pop_back();
-		}
-
-		/// \brief	Gets the element at a specific index.
-		///
-		/// \detail \cpp
-		/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
-		///	std::cout << "element [0] exists: "sv << !!arr.get(0) << "\n";
-		///	std::cout << "element [1] exists: "sv << !!arr.get(1) << "\n";
-		///	std::cout << "element [2] exists: "sv << !!arr.get(2) << "\n";
-		/// if (toml::node* val = arr.get(0))
-		///		std::cout << "element [0] is an "sv << val->type() << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// element [0] exists: true
-		/// element [1] exists: true
-		/// element [2] exists: false
-		/// element [0] is an integer
-		/// \eout
-		///
-		/// \param 	index	The element's index.
-		///
-		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
-		TOML_NODISCARD
-		node* get(size_t index) noexcept
-		{
-			return index < elems_.size() ? elems_[index].get() : nullptr;
-		}
-
-		/// \brief	Gets the element at a specific index (const overload).
-		///
-		/// \param 	index	The element's index.
-		///
-		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
-		TOML_NODISCARD
-		const node* get(size_t index) const noexcept
-		{
-			return index < elems_.size() ? elems_[index].get() : nullptr;
-		}
-
-		/// \brief	Gets the element at a specific index if it is a particular type.
-		///
-		/// \detail \cpp
-		/// auto arr = toml::array{ 42, "is the meaning of life, apparently."sv };
-		/// if (toml::value<int64_t>* val = arr.get_as<int64_t>(0))
-		///		std::cout << "element [0] is an integer with value "sv << *val << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// element [0] is an integer with value 42
-		/// \eout
-		///
-		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \param 	index		The element's index.
-		///
-		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
-		template <typename ElemType>
-		TOML_NODISCARD
-		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
-		}
-
-		/// \brief	Gets the element at a specific index if it is a particular type (const overload).
-		///
-		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \param 	index		The element's index.
-		///
-		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
-		template <typename ElemType>
-		TOML_NODISCARD
-		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
 		}
 
 		/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.

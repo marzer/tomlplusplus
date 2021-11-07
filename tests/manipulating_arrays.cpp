@@ -182,9 +182,7 @@ TEST_CASE("arrays - construction")
 		CHECK(arr.is_homogeneous());
 		CHECK(arr.is_homogeneous<int64_t>());
 		CHECK(!arr.is_homogeneous<double>());
-#if TOML_COMPILER_EXCEPTIONS
 		CHECK(arr.get(0u) == &arr.at(0u));
-#endif
 
 		const array& carr = arr;
 		CHECK(carr.size() == 1u);
@@ -197,9 +195,7 @@ TEST_CASE("arrays - construction")
 		CHECK(carr.is_homogeneous());
 		CHECK(carr.is_homogeneous<int64_t>());
 		CHECK(!carr.is_homogeneous<double>());
-#if TOML_COMPILER_EXCEPTIONS
 		CHECK(carr.get(0u) == &carr.at(0u));
-#endif
 	}
 
 	{
@@ -218,10 +214,8 @@ TEST_CASE("arrays - construction")
 		REQUIRE(arr.get_as<int64_t>(4u));
 		CHECK(*arr.get_as<int64_t>(4u) == 3);
 		CHECK(!arr.is_homogeneous());
-#if TOML_COMPILER_EXCEPTIONS
 		CHECK(arr.get(0u) == &arr.at(0u));
 		CHECK(arr.get(1u) == &arr.at(1u));
-#endif
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT

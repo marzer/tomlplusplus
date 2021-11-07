@@ -141,22 +141,13 @@ TOML_NAMESPACE_START
 		return nullptr;
 	}
 
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	node* table::get(std::wstring_view key)
-	{
-		return get(impl::narrow(key));
-	}
-
-#endif
-
-#if TOML_COMPILER_EXCEPTIONS
-
 	TOML_EXTERNAL_LINKAGE
 	node& table::at(std::string_view key)
 	{
 		auto n = get(key);
+
+#if TOML_COMPILER_EXCEPTIONS
+
 		if (!n)
 		{
 			auto err = "key '"s;
@@ -164,19 +155,15 @@ TOML_NAMESPACE_START
 			err.append("' not found in table"sv);
 			throw std::out_of_range{ err };
 		}
+
+#else
+
+		TOML_ASSERT(n && "key not found in table!");
+
+#endif
+
 		return *n;
 	}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	node& table::at(std::wstring_view key)
-	{
-		return at(impl::narrow(key));
-	}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-#endif // TOML_COMPILER_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::equal(const table& lhs, const table& rhs) noexcept

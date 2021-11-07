@@ -933,6 +933,7 @@ TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_SWITCH_WARNINGS;
+TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #if TOML_MSVC
 #pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch (false-positive)
 #elif TOML_CLANG && !TOML_HEADER_ONLY && TOML_IMPLEMENTATION
@@ -5178,6 +5179,34 @@ TOML_NAMESPACE_START
 			return nullptr;
 		}
 
+		TOML_PURE_INLINE_GETTER
+		node* get(size_t index) noexcept
+		{
+			return index < elems_.size() ? elems_[index].get() : nullptr;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const node* get(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).get(index);
+		}
+
+		template <typename ElemType>
+		TOML_NODISCARD
+		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
+		{
+			if (auto val = get(index))
+				return val->template as<ElemType>();
+			return nullptr;
+		}
+
+		template <typename ElemType>
+		TOML_NODISCARD
+		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).template get_as<ElemType>(index);
+		}
+
 		TOML_NODISCARD
 		node& operator[](size_t index) noexcept
 		{
@@ -5190,21 +5219,15 @@ TOML_NAMESPACE_START
 			return *elems_[index];
 		}
 
-#if TOML_COMPILER_EXCEPTIONS
-
 		TOML_NODISCARD
-		node& at(size_t index)
-		{
-			return *elems_.at(index);
-		}
+		TOML_API
+		node& at(size_t index);
 
 		TOML_NODISCARD
 		const node& at(size_t index) const
 		{
-			return *elems_.at(index);
+			return const_cast<array&>(*this).at(index);
 		}
-
-#endif // TOML_COMPILER_EXCEPTIONS
 
 		TOML_NODISCARD
 		node& front() noexcept
@@ -5469,36 +5492,6 @@ TOML_NAMESPACE_START
 		void pop_back() noexcept
 		{
 			elems_.pop_back();
-		}
-
-		TOML_NODISCARD
-		node* get(size_t index) noexcept
-		{
-			return index < elems_.size() ? elems_[index].get() : nullptr;
-		}
-
-		TOML_NODISCARD
-		const node* get(size_t index) const noexcept
-		{
-			return index < elems_.size() ? elems_[index].get() : nullptr;
-		}
-
-		template <typename ElemType>
-		TOML_NODISCARD
-		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
-		}
-
-		template <typename ElemType>
-		TOML_NODISCARD
-		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
 		}
 
 		TOML_API
@@ -6096,8 +6089,10 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		TOML_API
-		node* get(std::wstring_view key);
+		node* get(std::wstring_view key)
+		{
+			return get(impl::narrow(key));
+		}
 
 		TOML_NODISCARD
 		const node* get(std::wstring_view key) const
@@ -6140,8 +6135,6 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_COMPILER_EXCEPTIONS
-
 		TOML_NODISCARD
 		TOML_API
 		node& at(std::string_view key);
@@ -6155,8 +6148,10 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		TOML_API
-		node& at(std::wstring_view key);
+		node& at(std::wstring_view key)
+		{
+			return at(impl::narrow(key));
+		}
 
 		TOML_NODISCARD
 		const node& at(std::wstring_view key) const
@@ -6165,7 +6160,6 @@ TOML_NAMESPACE_START
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
-#endif // TOML_COMPILER_EXCEPTIONS
 
 		TOML_NODISCARD
 		iterator begin() noexcept
@@ -9218,32 +9212,6 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
-TOML_ANON_NAMESPACE_START
-{
-	template <typename T, typename U>
-	TOML_INTERNAL_LINKAGE
-	bool array_is_homogeneous(T & elements, node_type ntype, U & first_nonmatch) noexcept
-	{
-		if (elements.empty())
-		{
-			first_nonmatch = {};
-			return false;
-		}
-		if (ntype == node_type::none)
-			ntype = elements[0]->type();
-		for (const auto& val : elements)
-		{
-			if (val->type() != ntype)
-			{
-				first_nonmatch = val.get();
-				return false;
-			}
-		}
-		return true;
-	}
-}
-TOML_ANON_NAMESPACE_END;
-
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
@@ -9329,13 +9297,47 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		return TOML_ANON_NAMESPACE::array_is_homogeneous(elems_, ntype, first_nonmatch);
+		if (elems_.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = elems_[0]->type();
+		for (const auto& val : elems_)
+		{
+			if (val->type() != ntype)
+			{
+				first_nonmatch = val.get();
+				return false;
+			}
+		}
+		return true;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return TOML_ANON_NAMESPACE::array_is_homogeneous(elems_, ntype, first_nonmatch);
+		node* fnm		  = nullptr;
+		const auto result = const_cast<array&>(*this).is_homogeneous(ntype, fnm);
+		first_nonmatch	  = fnm;
+		return result;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node& array::at(size_t index)
+	{
+#if TOML_COMPILER_EXCEPTIONS
+
+		return *elems_.at(index);
+
+#else
+
+		auto n = get(index);
+		TOML_ASSERT(n && "element index not found in array!");
+		return *n;
+
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -9584,22 +9586,13 @@ TOML_NAMESPACE_START
 		return nullptr;
 	}
 
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	node* table::get(std::wstring_view key)
-	{
-		return get(impl::narrow(key));
-	}
-
-#endif
-
-#if TOML_COMPILER_EXCEPTIONS
-
 	TOML_EXTERNAL_LINKAGE
 	node& table::at(std::string_view key)
 	{
 		auto n = get(key);
+
+#if TOML_COMPILER_EXCEPTIONS
+
 		if (!n)
 		{
 			auto err = "key '"s;
@@ -9607,19 +9600,15 @@ TOML_NAMESPACE_START
 			err.append("' not found in table"sv);
 			throw std::out_of_range{ err };
 		}
+
+#else
+
+		TOML_ASSERT(n && "key not found in table!");
+
+#endif
+
 		return *n;
 	}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	node& table::at(std::wstring_view key)
-	{
-		return at(impl::narrow(key));
-	}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-#endif // TOML_COMPILER_EXCEPTIONS
 
 	TOML_EXTERNAL_LINKAGE
 	bool table::equal(const table& lhs, const table& rhs) noexcept

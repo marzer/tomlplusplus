@@ -672,8 +672,10 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A pointer to the node at the specified key, or nullptr.
 		TOML_NODISCARD
-		TOML_API
-		node* get(std::wstring_view key);
+		node* get(std::wstring_view key)
+		{
+			return get(impl::narrow(key));
+		}
 
 		/// \brief	Gets the node at a specific key (const overload).
 		///
@@ -765,18 +767,12 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-#if TOML_COMPILER_EXCEPTIONS
-
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
-		///
-		/// \availability This function is only available if you compile with exceptions enabled.
 		TOML_NODISCARD
 		TOML_API
 		node& at(std::string_view key);
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
-		///
-		/// \availability This function is only available if you compile with exceptions enabled.
 		TOML_NODISCARD
 		const node& at(std::string_view key) const
 		{
@@ -787,14 +783,16 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
 		///
-		/// \availability This function is only available if you compile with exceptions and #TOML_ENABLE_WINDOWS_COMPAT enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
-		TOML_API
-		node& at(std::wstring_view key);
+		node& at(std::wstring_view key)
+		{
+			return at(impl::narrow(key));
+		}
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
 		///
-		/// \availability This function is only available if you compile with exceptions and #TOML_ENABLE_WINDOWS_COMPAT enabled.
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		const node& at(std::wstring_view key) const
 		{
@@ -802,7 +800,6 @@ TOML_NAMESPACE_START
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
-#endif // TOML_COMPILER_EXCEPTIONS
 
 		/// @}
 

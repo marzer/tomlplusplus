@@ -14,32 +14,6 @@
 #include "array.h"
 #include "header_start.h"
 
-TOML_ANON_NAMESPACE_START
-{
-	template <typename T, typename U>
-	TOML_INTERNAL_LINKAGE
-	bool array_is_homogeneous(T & elements, node_type ntype, U & first_nonmatch) noexcept
-	{
-		if (elements.empty())
-		{
-			first_nonmatch = {};
-			return false;
-		}
-		if (ntype == node_type::none)
-			ntype = elements[0]->type();
-		for (const auto& val : elements)
-		{
-			if (val->type() != ntype)
-			{
-				first_nonmatch = val.get();
-				return false;
-			}
-		}
-		return true;
-	}
-}
-TOML_ANON_NAMESPACE_END;
-
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
@@ -125,13 +99,47 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
-		return TOML_ANON_NAMESPACE::array_is_homogeneous(elems_, ntype, first_nonmatch);
+		if (elems_.empty())
+		{
+			first_nonmatch = {};
+			return false;
+		}
+		if (ntype == node_type::none)
+			ntype = elems_[0]->type();
+		for (const auto& val : elems_)
+		{
+			if (val->type() != ntype)
+			{
+				first_nonmatch = val.get();
+				return false;
+			}
+		}
+		return true;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
-		return TOML_ANON_NAMESPACE::array_is_homogeneous(elems_, ntype, first_nonmatch);
+		node* fnm		  = nullptr;
+		const auto result = const_cast<array&>(*this).is_homogeneous(ntype, fnm);
+		first_nonmatch	  = fnm;
+		return result;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node& array::at(size_t index)
+	{
+#if TOML_COMPILER_EXCEPTIONS
+
+		return *elems_.at(index);
+
+#else
+
+		auto n = get(index);
+		TOML_ASSERT(n && "element index not found in array!");
+		return *n;
+
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
