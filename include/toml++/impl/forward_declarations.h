@@ -217,7 +217,7 @@ TOML_NAMESPACE_START // abi namespace
 	}
 
 	/// \brief	TOML node type identifiers.
-	enum class node_type : uint8_t
+	enum class TOML_CLOSED_ENUM node_type : uint8_t
 	{
 		none,			///< Not-a-node.
 		table,			///< The node is a toml::table.
@@ -262,7 +262,7 @@ TOML_NAMESPACE_START // abi namespace
 	}
 
 	/// \brief Metadata associated with TOML values.
-	enum class value_flags : uint16_t
+	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t
 	{
 		/// \brief None.
 		none,
@@ -287,7 +287,7 @@ TOML_NAMESPACE_START // abi namespace
 	///
 	/// \note	Formatters may disregard/override any of these flags according to the requirements of their
 	///			output target (e.g. #toml::json_formatter will always apply quotes to dates and times).
-	enum class format_flags : uint64_t
+	enum class TOML_CLOSED_FLAGS_ENUM format_flags : uint64_t
 	{
 		/// \brief None.
 		none,
@@ -898,7 +898,7 @@ TOML_IMPL_NAMESPACE_START
 
 	// Q: "why not use std::fpclassify?"
 	// A: Because it gets broken by -ffast-math and friends
-	enum class fp_class : unsigned
+	enum class TOML_CLOSED_ENUM fp_class : unsigned
 	{
 		ok,
 		neg_inf,

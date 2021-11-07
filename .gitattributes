@@ -1,5 +1,6 @@
 *                  text=auto                encoding=UTF-8
 
+*.bat              text         eol=lf      encoding=UTF-8
 *.c                text         eol=lf      encoding=UTF-8
 *.cpp              text         eol=lf      encoding=UTF-8
 *.css              text         eol=lf      encoding=UTF-8

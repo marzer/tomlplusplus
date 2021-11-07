@@ -207,6 +207,10 @@
     <None Include="include\toml++\impl\yaml_formatter.inl">
       <Filter>include\impl</Filter>
     </None>
+    <None Include="CHANGELOG.md" />
+    <None Include="tools\generate_single_header.bat">
+      <Filter>tools</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">

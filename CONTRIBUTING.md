@@ -29,7 +29,7 @@ git submodule update --init --depth 1 external/Catch2 external/tloptional
 
 ### Testing on Windows with Visual Studio
 
-Install [Visual Studio 2019] and [Test Adapter for Catch2], then open `vs/toml++.sln` and build the
+Install [Visual Studio] and [Test Adapter for Catch2], then open `vs/toml++.sln` and build the
 projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
 allow you to run the tests directly.
 
@@ -65,7 +65,7 @@ cd build-gcc-debug && ninja && ninja test               \
 ```
 
 
-[Visual Studio 2019]: https://visualstudio.microsoft.com/vs/
+[Visual Studio]: https://visualstudio.microsoft.com/vs/
 [Test Adapter for Catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01
 [reporting issues]: https://github.com/marzer/tomlplusplus/issues
 [Catch2]: https://github.com/catchorg/Catch2

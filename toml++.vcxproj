@@ -91,6 +91,7 @@
     <None Include=".github\pull_request_template.md" />
     <None Include=".gitignore" />
     <None Include=".runsettings" />
+    <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="include\toml++\impl\node_view_extern.inl" />
@@ -110,6 +111,7 @@
     <None Include="tools\ci_single_header_check.py" />
     <None Include="tools\clang_format.bat" />
     <None Include="tools\generate_conformance_tests.py" />
+    <None Include="tools\generate_single_header.bat" />
     <None Include="tools\generate_single_header.py" />
     <None Include="tools\generate_windows_test_targets.py" />
     <None Include="tools\utils.py" />

@@ -6,14 +6,17 @@
 #define TOML_ANON_NAMESPACE_START				namespace
 #define TOML_API
 #define TOML_ATTR(...)
+#define TOML_CLOSED_ENUM
+#define TOML_CLOSED_FLAGS_ENUM
 #define TOML_CONST_GETTER
 #define TOML_CONST_INLINE_GETTER				inline
 #define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
-#define TOML_HIDDEN_CONSTRAINT(cond, ...)		template <__VA_ARGS__>
 #define TOML_EMPTY_BASES
 #define TOML_EXTERN
 #define TOML_EXTERN_NOEXCEPT(...)
 #define TOML_EXTERNAL_LINKAGE
+#define TOML_FLAGS_ENUM
+#define TOML_HIDDEN_CONSTRAINT(cond, ...)		template <__VA_ARGS__>
 #define TOML_IMPL_NAMESPACE_END					static_assert(true)
 #define TOML_IMPL_NAMESPACE_START				namespace toml::impl
 #define TOML_INTERNAL_LINKAGE					static
@@ -23,6 +26,8 @@
 #define TOML_NEVER_INLINE
 #define TOML_NODISCARD
 #define TOML_NODISCARD_CTOR
+#define TOML_OPEN_ENUM
+#define TOML_OPEN_FLAGS_ENUM
 #define TOML_PURE_GETTER
 #define TOML_PURE_INLINE_GETTER					inline
 #define TOML_RETURNS_BY_THROWING

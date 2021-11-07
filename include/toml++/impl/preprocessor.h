@@ -130,6 +130,17 @@
 		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
 			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
 		#endif
+		#if !defined(TOML_FLAGS_ENUM) && __has_attribute(flag_enum)
+			#define TOML_FLAGS_ENUM		__attribute__((__flag_enum__))
+		#endif
+		#if __has_attribute(enum_extensibility)
+			#ifndef TOML_OPEN_ENUM
+				#define TOML_OPEN_ENUM		__attribute__((enum_extensibility(open)))
+			#endif
+			#ifndef TOML_CLOSED_ENUM
+				#define TOML_CLOSED_ENUM	__attribute__((enum_extensibility(closed)))
+			#endif
+		#endif
 	#endif
 	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
@@ -584,6 +595,26 @@
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
 #endif
 
+#ifndef TOML_FLAGS_ENUM
+	#define TOML_FLAGS_ENUM
+#endif
+
+#ifndef TOML_OPEN_ENUM
+	#define TOML_OPEN_ENUM
+#endif
+
+#ifndef TOML_CLOSED_ENUM
+	#define TOML_CLOSED_ENUM
+#endif
+
+#ifndef TOML_OPEN_FLAGS_ENUM
+	#define TOML_OPEN_FLAGS_ENUM TOML_OPEN_ENUM TOML_FLAGS_ENUM
+#endif
+
+#ifndef TOML_CLOSED_FLAGS_ENUM
+	#define TOML_CLOSED_FLAGS_ENUM TOML_CLOSED_ENUM TOML_FLAGS_ENUM
+#endif
+
 #ifdef __has_cpp_attribute
 	#define TOML_HAS_ATTR(...)	__has_cpp_attribute(__VA_ARGS__)
 #else
@@ -1002,6 +1033,7 @@ TOML_ENABLE_WARNINGS;
 /// \detail Not defined by default.
 /// \remark	If you're building for a platform that has a built-in half precision float (e.g. `_Float16`), you don't
 /// 		need to use this configuration option to make toml++ aware of it; the library comes with that built-in.
+
 
 #define TOML_SMALL_INT_TYPE
 /// \def TOML_SMALL_INT_TYPE

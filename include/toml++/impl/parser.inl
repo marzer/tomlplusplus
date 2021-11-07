@@ -2546,7 +2546,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// value types from here down require more than one character to unambiguously identify
 				// so scan ahead and collect a set of value 'traits'.
-				enum value_traits : int
+				enum TOML_CLOSED_FLAGS_ENUM value_traits : int
 				{
 					has_nothing	 = 0,
 					has_digits	 = 1,
@@ -2563,14 +2563,11 @@ TOML_IMPL_NAMESPACE_START
 					has_dot		 = 1 << 11,
 					begins_sign	 = 1 << 12,
 					begins_digit = 1 << 13,
-					begins_zero	 = 1 << 14
+					begins_zero	 = 1 << 14,
 
-// Q: "why not make these real values in the enum??"
-// A: because the visual studio debugger stops treating them as a set of flags if you add
-// non-pow2 values, making them much harder to debug.
-#define signs_msk  (has_plus | has_minus)
-#define bzero_msk  (begins_zero | has_digits)
-#define bdigit_msk (begins_digit | has_digits)
+					signs_msk  = has_plus | has_minus,
+					bzero_msk  = begins_zero | has_digits,
+					bdigit_msk = begins_digit | has_digits,
 				};
 				value_traits traits	 = has_nothing;
 				const auto has_any	 = [&](auto t) noexcept { return (traits & t) != has_nothing; };
@@ -3432,7 +3429,8 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 	  public:
-		parser(utf8_reader_interface&& reader_) : reader{ reader_ }
+		parser(utf8_reader_interface&& reader_) //
+			: reader{ reader_ }
 		{
 			root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
@@ -3486,7 +3484,7 @@ TOML_IMPL_NAMESPACE_START
 
 		node_ptr arr_ptr{ new array{} };
 		array& arr = arr_ptr->ref_cast<array>();
-		enum parse_elem : int
+		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,
 			comma,
@@ -3552,7 +3550,7 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr tbl_ptr{ new table{} };
 		table& tbl	= tbl_ptr->ref_cast<table>();
 		tbl.inline_ = true;
-		enum parse_elem : int
+		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,
 			comma,

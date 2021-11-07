@@ -166,6 +166,17 @@
 		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
 			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
 		#endif
+		#if !defined(TOML_FLAGS_ENUM) && __has_attribute(flag_enum)
+			#define TOML_FLAGS_ENUM		__attribute__((__flag_enum__))
+		#endif
+		#if __has_attribute(enum_extensibility)
+			#ifndef TOML_OPEN_ENUM
+				#define TOML_OPEN_ENUM		__attribute__((enum_extensibility(open)))
+			#endif
+			#ifndef TOML_CLOSED_ENUM
+				#define TOML_CLOSED_ENUM	__attribute__((enum_extensibility(closed)))
+			#endif
+		#endif
 	#endif
 	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
 	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
@@ -597,6 +608,26 @@
 
 #ifndef TOML_UNREACHABLE
 	#define TOML_UNREACHABLE	TOML_ASSERT(false)
+#endif
+
+#ifndef TOML_FLAGS_ENUM
+	#define TOML_FLAGS_ENUM
+#endif
+
+#ifndef TOML_OPEN_ENUM
+	#define TOML_OPEN_ENUM
+#endif
+
+#ifndef TOML_CLOSED_ENUM
+	#define TOML_CLOSED_ENUM
+#endif
+
+#ifndef TOML_OPEN_FLAGS_ENUM
+	#define TOML_OPEN_FLAGS_ENUM TOML_OPEN_ENUM TOML_FLAGS_ENUM
+#endif
+
+#ifndef TOML_CLOSED_FLAGS_ENUM
+	#define TOML_CLOSED_FLAGS_ENUM TOML_CLOSED_ENUM TOML_FLAGS_ENUM
 #endif
 
 #ifdef __has_cpp_attribute
@@ -1173,7 +1204,7 @@ TOML_NAMESPACE_START // abi namespace
 	{
 	}
 
-	enum class node_type : uint8_t
+	enum class TOML_CLOSED_ENUM node_type : uint8_t
 	{
 		none,
 		table,
@@ -1203,7 +1234,7 @@ TOML_NAMESPACE_START // abi namespace
 		}
 	}
 
-	enum class value_flags : uint16_t
+	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t
 	{
 		none,
 		format_as_binary = 1,
@@ -1215,7 +1246,7 @@ TOML_NAMESPACE_START // abi namespace
 	inline constexpr value_flags preserve_source_value_flags =
 		POXY_IMPLEMENTATION_DETAIL(value_flags{ static_cast<std::underlying_type_t<value_flags>>(-1) });
 
-	enum class format_flags : uint64_t
+	enum class TOML_CLOSED_FLAGS_ENUM format_flags : uint64_t
 	{
 		none,
 		quote_dates_and_times = (1ull << 0),
@@ -1762,7 +1793,7 @@ TOML_IMPL_NAMESPACE_START
 
 	// Q: "why not use std::fpclassify?"
 	// A: Because it gets broken by -ffast-math and friends
-	enum class fp_class : unsigned
+	enum class TOML_CLOSED_ENUM fp_class : unsigned
 	{
 		ok,
 		neg_inf,
@@ -12145,7 +12176,7 @@ TOML_IMPL_NAMESPACE_START
 
 				// value types from here down require more than one character to unambiguously identify
 				// so scan ahead and collect a set of value 'traits'.
-				enum value_traits : int
+				enum TOML_CLOSED_FLAGS_ENUM value_traits : int
 				{
 					has_nothing	 = 0,
 					has_digits	 = 1,
@@ -12162,14 +12193,10 @@ TOML_IMPL_NAMESPACE_START
 					has_dot		 = 1 << 11,
 					begins_sign	 = 1 << 12,
 					begins_digit = 1 << 13,
-					begins_zero	 = 1 << 14
-
-// Q: "why not make these real values in the enum??"
-// A: because the visual studio debugger stops treating them as a set of flags if you add
-// non-pow2 values, making them much harder to debug.
-#define signs_msk  (has_plus | has_minus)
-#define bzero_msk  (begins_zero | has_digits)
-#define bdigit_msk (begins_digit | has_digits)
+					begins_zero	 = 1 << 14,
+					signs_msk  = has_plus | has_minus,
+					bzero_msk  = begins_zero | has_digits,
+					bdigit_msk = begins_digit | has_digits,
 				};
 				value_traits traits	 = has_nothing;
 				const auto has_any	 = [&](auto t) noexcept { return (traits & t) != has_nothing; };
@@ -13031,7 +13058,8 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 	  public:
-		parser(utf8_reader_interface&& reader_) : reader{ reader_ }
+		parser(utf8_reader_interface&& reader_) //
+			: reader{ reader_ }
 		{
 			root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
@@ -13085,7 +13113,7 @@ TOML_IMPL_NAMESPACE_START
 
 		node_ptr arr_ptr{ new array{} };
 		array& arr = arr_ptr->ref_cast<array>();
-		enum parse_elem : int
+		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,
 			comma,
@@ -13151,7 +13179,7 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr tbl_ptr{ new table{} };
 		table& tbl	= tbl_ptr->ref_cast<table>();
 		tbl.inline_ = true;
-		enum parse_elem : int
+		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,
 			comma,
@@ -14428,6 +14456,8 @@ TOML_POP_WARNINGS;
 #undef TOML_ASYMMETRICAL_EQUALITY_OPS
 #undef TOML_ATTR
 #undef TOML_CLANG
+#undef TOML_CLOSED_ENUM
+#undef TOML_CLOSED_FLAGS_ENUM
 #undef TOML_COMPILER_EXCEPTIONS
 #undef TOML_CONCAT
 #undef TOML_CONCAT_1
@@ -14450,6 +14480,7 @@ TOML_POP_WARNINGS;
 #undef TOML_EXTERN
 #undef TOML_EXTERN_NOEXCEPT
 #undef TOML_EXTERNAL_LINKAGE
+#undef TOML_FLAGS_ENUM
 #undef TOML_FLOAT_CHARCONV
 #undef TOML_FLOAT128
 #undef TOML_FLOAT16
@@ -14489,6 +14520,8 @@ TOML_POP_WARNINGS;
 #undef TOML_NEVER_INLINE
 #undef TOML_NODISCARD
 #undef TOML_NODISCARD_CTOR
+#undef TOML_OPEN_ENUM
+#undef TOML_OPEN_FLAGS_ENUM
 #undef TOML_PARSER_TYPENAME
 #undef TOML_POP_WARNINGS
 #undef TOML_PURE_GETTER
