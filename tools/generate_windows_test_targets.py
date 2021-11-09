@@ -59,13 +59,13 @@ def main():
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|{platform}'" Label="Configuration">
 		<ConfigurationType>Application</ConfigurationType>
 		<UseDebugLibraries>true</UseDebugLibraries>
-		<PlatformToolset>v142</PlatformToolset>
+		<PlatformToolset>v143</PlatformToolset>
 		<CharacterSet>MultiByte</CharacterSet>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|{platform}'" Label="Configuration">
 		<ConfigurationType>Application</ConfigurationType>
 		<UseDebugLibraries>false</UseDebugLibraries>
-		<PlatformToolset>v142</PlatformToolset>
+		<PlatformToolset>v143</PlatformToolset>
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 		<CharacterSet>MultiByte</CharacterSet>
 	</PropertyGroup>

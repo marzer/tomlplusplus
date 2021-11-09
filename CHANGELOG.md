@@ -8,7 +8,8 @@ template:
 #### Fixes:
 #### Additions:
 #### Changes:
-#### Removals and Deprecations:
+#### Removals:
+#### Build system:
 
 -->
 
@@ -20,12 +21,12 @@ This release will be a major version bump, so it's ABI breaks all around. Any AP
 code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 
 #### Fixes:
+- ⚠&#xFE0F; fixed incorrect `noexcept` specifications on many functions
 - fixed `json_formatter` not formatting inf and nan incorrectly
 - fixed `table` init-list constructor requiring double-brackets
 - fixed `TOML_API` + extern templates causing linker errors in some circumstances
 - fixed an illegal table redefinition edge case (#112) (@python36)
 - fixed documentation issues
-- fixed incorrect `noexcept` specifications on many functions ⚠&#xFE0F;
 - fixed incorrect source position in redefinition error messages
 - fixed missing `#include <initializer_list>`
 - fixed missing `#include <utility>`
@@ -34,9 +35,15 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 
 #### Additions:
 - added `array::at()` and `table::at()`
-- added `array::replace()` (#109) (#LebJe)
-- added `default_init_flags` param to `array::resize()`
-- added `formatter_flags::quote_infinities_and_nans`
+- added `array::replace()` (#109) (@LebJe)
+- added `array::resize()` param `default_init_flags`
+- added `format_flags::allow_binary_integers`
+- added `format_flags::allow_hexadecimal_integers`
+- added `format_flags::allow_octal_integers`
+- added `format_flags::allow_real_tabs_in_strings`
+- added `format_flags::indent_array_elements`
+- added `format_flags::indent_sub_tables`
+- added `format_flags::quote_infinities_and_nans`
 - added `operator->` to `value` for class types
 - added `parse_benchmark` example
 - added `TOML_ENABLE_FORMATTERS` option
@@ -48,32 +55,34 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added value flags to array + table insert methods (#44) (@levicki)
 
 #### Changes:
-- `format_flags` is now backed by `uint64_t` (was previously `uint8_t`) ⚠&#xFE0F;
-- `source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`) ⚠&#xFE0F;
-- `value_flags` is now backed by `uint16_t` (was previously `uint8_t`) ⚠&#xFE0F;
+- ⚠&#xFE0F; `format_flags` is now backed by `uint64_t` (was previously `uint8_t`)
+- ⚠&#xFE0F; `source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`)
+- ⚠&#xFE0F; `value_flags` is now backed by `uint16_t` (was previously `uint8_t`)
+- ⚠&#xFE0F; made all overloaded operators 'hidden friends' where possible
+- ⚠&#xFE0F; renamed `default_formatter` to `toml_formatter` (`default_formatter` is now an alias)
+- ⚠&#xFE0F; renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated)
+- ⚠&#xFE0F; renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated)
+- ⚠&#xFE0F; renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated)
 - applied clang-format to all the things 🎉&#xFE0F;
-- improved performance of parser's internal UTF-8 stream decoder
-- made all overloaded operators 'hidden friends' where possible ⚠&#xFE0F;
+- improved performance of parser
 - made date/time constructors accept any integral types
 - moved all implementation headers to `/impl`
-- renamed `default_formatter` to `toml_formatter` (`default_formatter` is now an alias)
 - renamed all implementation headers to `.h` and 'source' headers to `.inl`
 - updated conformance tests
 
-#### Removals and Deprecations:
-- removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`) ⚠&#xFE0F;
+#### Removals:
+- ⚠&#xFE0F; removed `format_flags::allow_value_format_flags`
+- ⚠&#xFE0F; removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`)
 - removed unnecessary template machinery (esp. where ostreams were involved)
 - removed unnecessary uses of `final`
-- renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated) ⚠&#xFE0F;
-- renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated) ⚠&#xFE0F;
-- renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated) ⚠&#xFE0F;
 
 #### Build system:
+- ⚠&#xFE0F; increased minimum required meson version to `0.54.0`
 - disabled 'install' path when being used as a meson subproject (#114) (@Tachi107)
+- fixed builds failing with meson 0.6.0 (#117) (@Tachi107)
 - general meson improvements and fixes (#115) (@Tachi107)
 - used `override_dependency` where supported (#116) (@Tachi107)
-- fixed builds failing with meson 0.6.0 (#117) (@Tachi107)
-- increased minimum required meson version to `0.54.0` ⚠&#xFE0F;
+
 
 
 ## [v2.5.0](https://github.com/osgenic/stim/releases/tag/v2.5.0) - 2021-07-11
@@ -120,7 +129,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added proper cmake support (#85) (@ClausKlein)
 - added cmake FetchContent information to documentation (#101) (@proydakov)
 
-#### Removals and Deprecations:
+#### Removals:
 - removed explicit `#include <fstream>` requirement for `parse_file()`
 
 
@@ -199,7 +208,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 ## [v2.0.0](https://github.com/osgenic/stim/releases/tag/v2.0.0) - 2020-07-20
 
 This release contains a fairly significant number of 'quality of life' improvements, yay! But also necessitates an ABI
-break (hence the version number bump). Changes that might block a migration are annotated with '⚠&#xFE0F;'.
+break (hence the version number bump). Changes that might block a migration are annotated with ⚠&#xFE0F;.
 
 #### Fixes:
 - fixed infinity and NaN-related code breaking when using `-ffast-math` and friends
@@ -228,14 +237,14 @@ break (hence the version number bump). Changes that might block a migration are 
 - added explicit instantiations of more template types when `!TOML_ALL_INLINE`
 
 #### Changes:
+- ⚠&#xFE0F; deprecated `parse_result::get()` in favour of `parse_result::table()`
+- ⚠&#xFE0F; deprecated `node_view::get()` in favour of `node_view::node()`
+- ⚠&#xFE0F; simplified internal ABI namespaces
 - improved the quality of many static_assert error messages
-- simplified internal ABI namespaces ⚠&#xFE0F;
 
-#### Removals and Deprecations:
-- deprecated `node_view::get()` in favour of `node_view::node()` ⚠&#xFE0F;
-- deprecated `parse_result::get()` in favour of `parse_result::table()` ⚠&#xFE0F;
-- removed `TOML_CHAR_8_STRINGS` since it no longer makes sense ⚠&#xFE0F;
-- renamed `date_time::time_offset` to just 'offset' ⚠&#xFE0F;
+#### Removals:
+- ⚠&#xFE0F; renamed `date_time::time_offset` to just 'offset'
+- ⚠&#xFE0F; removed `TOML_CHAR_8_STRINGS` since it no longer makes sense
 
 
 
@@ -446,7 +455,7 @@ break (hence the version number bump). Changes that might block a migration are 
 - added `TOML_ALL_INLINE` and `TOML_IMPLEMENTATION` options
 - added preliminary support for ICC
 
-#### Removals and Deprecations:
+#### Removals:
 - removed `<cmath>` dependency
 
 
