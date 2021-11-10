@@ -89,6 +89,7 @@ TOML_NAMESPACE_START
 	template <typename>
 	class node_view;
 
+	class key;
 	class array;
 	class table;
 	template <typename>
@@ -111,6 +112,8 @@ TOML_NAMESPACE_END;
 
 TOML_IMPL_NAMESPACE_START
 {
+	using node_ptr = std::unique_ptr<node>;
+
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, impl_ex, impl_noex);
 	class parser;
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS

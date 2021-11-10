@@ -128,20 +128,9 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void toml_formatter::print_key_segment(std::string_view str)
+	void toml_formatter::print(const key& k)
 	{
-		print_string(str, false, true);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	void toml_formatter::print_key_path()
-	{
-		for (const auto& segment : key_path_)
-		{
-			if (std::addressof(segment) > key_path_.data())
-				print_unformatted('.');
-			print_key_segment(segment);
-		}
+		print_string(k.str(), false, true);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -162,7 +151,7 @@ TOML_NAMESPACE_START
 				print_unformatted(", "sv);
 			first = true;
 
-			print_key_segment(k);
+			print(k);
 			print_unformatted(" = "sv);
 
 			const auto type = v.type();
@@ -262,7 +251,7 @@ TOML_NAMESPACE_START
 			pending_table_separator_ = true;
 			print_newline();
 			print_indent();
-			print_key_segment(k);
+			print(k);
 			print_unformatted(" = "sv);
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
@@ -272,6 +261,17 @@ TOML_NAMESPACE_START
 				default: print_value(v, type);
 			}
 		}
+
+		const auto print_key_path = [&]()
+		{
+			size_t i{};
+			for (const auto k : key_path_)
+			{
+				if (i++)
+					print_unformatted('.');
+				print(*k);
+			}
+		};
 
 		// non-inline tables
 		for (auto&& [k, v] : tbl)
@@ -314,7 +314,7 @@ TOML_NAMESPACE_START
 			if (child_value_count == 0u && (child_table_count > 0u || child_table_array_count > 0u))
 				skip_self = true;
 
-			key_path_.push_back(std::string_view{ k });
+			key_path_.push_back(&k);
 
 			if (!skip_self)
 			{
@@ -344,7 +344,7 @@ TOML_NAMESPACE_START
 
 			if (indent_sub_tables())
 				increase_indent();
-			key_path_.push_back(std::string_view{ k });
+			key_path_.push_back(&k);
 
 			for (size_t i = 0; i < arr.size(); i++)
 			{

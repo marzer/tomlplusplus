@@ -22,8 +22,8 @@ TOML_IMPL_NAMESPACE_START
 		friend class array_iterator;
 		friend class TOML_NAMESPACE::array;
 
-		using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
-		using raw_const_iterator   = std::vector<std::unique_ptr<node>>::const_iterator;
+		using raw_mutable_iterator = std::vector<node_ptr>::iterator;
+		using raw_const_iterator   = std::vector<node_ptr>::const_iterator;
 		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
 		mutable raw_iterator raw_;
@@ -250,7 +250,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		friend class TOML_PARSER_TYPENAME;
-		std::vector<std::unique_ptr<node>> elems_;
+		std::vector<impl::node_ptr> elems_;
 
 		TOML_API
 		void preinsertion_resize(size_t idx, size_t count);
@@ -949,10 +949,10 @@ TOML_NAMESPACE_START
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
 					for (size_t e = start_idx + count - 1u; i < e; i++)
-						elems_[i].reset(impl::make_node(val, flags));
+						elems_[i] = impl::make_node(val, flags);
 
 					//# potentially move the initial value into the last element
-					elems_[i].reset(impl::make_node(static_cast<ElemType&&>(val), flags));
+					elems_[i] = impl::make_node(static_cast<ElemType&&>(val), flags);
 					return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
@@ -1001,9 +1001,9 @@ TOML_NAMESPACE_START
 							continue;
 					}
 					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elems_[i++].reset(impl::make_node(std::move(*it), flags));
+						elems_[i++] = impl::make_node(std::move(*it), flags);
 					else
-						elems_[i++].reset(impl::make_node(*it, flags));
+						elems_[i++] = impl::make_node(*it, flags);
 				}
 				return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 			}
@@ -1104,7 +1104,7 @@ TOML_NAMESPACE_START
 			}
 
 			const auto it = elems_.begin() + (pos.raw_ - elems_.cbegin());
-			it->reset(impl::make_node(static_cast<ElemType&&>(val), flags));
+			*it			  = impl::make_node(static_cast<ElemType&&>(val), flags);
 			return iterator{ it };
 		}
 
@@ -1342,8 +1342,8 @@ TOML_NAMESPACE_START
 		static bool equal_to_container(const array& lhs, const T& rhs) noexcept
 		{
 			using element_type = std::remove_const_t<typename T::value_type>;
-			static_assert(impl::is_native<element_type> || impl::is_losslessly_convertible_to_native<element_type>,
-						  "Container element type must be (or be promotable to) one of the TOML value types");
+			static_assert(impl::is_losslessly_convertible_to_native<element_type>,
+						  "Container element type must be losslessly convertible one of the native TOML value types");
 
 			if (lhs.size() != rhs.size())
 				return false;

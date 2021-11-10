@@ -22,8 +22,8 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 
 #### Fixes:
 - ⚠&#xFE0F; fixed incorrect `noexcept` specifications on many functions
-- fixed `json_formatter` not formatting inf and nan incorrectly
-- fixed `table` init-list constructor requiring double-brackets
+- fixed `toml::json_formatter` not formatting inf and nan incorrectly
+- fixed `toml::table` init-list constructor requiring double-brackets
 - fixed `TOML_API` + extern templates causing linker errors in some circumstances
 - fixed an illegal table redefinition edge case (#112) (@python36)
 - fixed documentation issues
@@ -34,32 +34,37 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
 
 #### Additions:
-- added `array::at()` and `table::at()`
-- added `array::replace()` (#109) (@LebJe)
-- added `array::resize()` param `default_init_flags`
-- added `format_flags::allow_binary_integers`
-- added `format_flags::allow_hexadecimal_integers`
-- added `format_flags::allow_octal_integers`
-- added `format_flags::allow_real_tabs_in_strings`
-- added `format_flags::indent_array_elements`
-- added `format_flags::indent_sub_tables`
-- added `format_flags::quote_infinities_and_nans`
-- added `operator->` to `value` for class types
+- added `operator->` to `toml::value` for class types
 - added `parse_benchmark` example
+- added `toml::array::at()` (same semantics as `std::vector::at()`)
+- added `toml::array::replace()` (#109) (@LebJe)
+- added `toml::array::resize()` param `default_init_flags`
+- added `toml::format_flags::allow_binary_integers`
+- added `toml::format_flags::allow_hexadecimal_integers`
+- added `toml::format_flags::allow_octal_integers`
+- added `toml::format_flags::allow_real_tabs_in_strings`
+- added `toml::format_flags::indent_array_elements`
+- added `toml::format_flags::indent_sub_tables`
+- added `toml::format_flags::quote_infinities_and_nans`
+- added `toml::key` - provides a facility to access the source_regions of parsed keys (#82) (@vaartis)
+- added `toml::table::at()` (same semantics as `std::map::at()`)
+- added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
+- added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
+- added `toml::yaml_formatter`
 - added `TOML_ENABLE_FORMATTERS` option
-- added `yaml_formatter`
 - added clang's enum annotation attributes to all enums
 - added formatter indentation flags (#120) (@W4RH4WK)
-- added magic `value_flags` constant `preserve_source_value_flags`
+- added magic `toml::value_flags` constant `toml::preserve_source_value_flags`
 - added support for Unicode 14.0
 - added value flags to array + table insert methods (#44) (@levicki)
 
 #### Changes:
-- ⚠&#xFE0F; `format_flags` is now backed by `uint64_t` (was previously `uint8_t`)
-- ⚠&#xFE0F; `source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`)
-- ⚠&#xFE0F; `value_flags` is now backed by `uint16_t` (was previously `uint8_t`)
+- ⚠&#xFE0F; `toml::format_flags` is now backed by `uint64_t` (was previously `uint8_t`)
+- ⚠&#xFE0F; `toml::source_index` is now an alias for `uint32_t` unconditionally (was previously dependent on `TOML_LARGE_FILES`)
+- ⚠&#xFE0F; `toml::table` now uses `toml::key` as the key type (was previously `std::string`)
+- ⚠&#xFE0F; `toml::value_flags` is now backed by `uint16_t` (was previously `uint8_t`)
 - ⚠&#xFE0F; made all overloaded operators 'hidden friends' where possible
-- ⚠&#xFE0F; renamed `default_formatter` to `toml_formatter` (`default_formatter` is now an alias)
+- ⚠&#xFE0F; renamed `toml::default_formatter` to `toml::toml_formatter` (`toml::default_formatter` is now an alias)
 - ⚠&#xFE0F; renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated)
@@ -71,7 +76,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - updated conformance tests
 
 #### Removals:
-- ⚠&#xFE0F; removed `format_flags::allow_value_format_flags`
+- ⚠&#xFE0F; removed `toml::format_flags::allow_value_format_flags`
 - ⚠&#xFE0F; removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`)
 - removed unnecessary template machinery (esp. where ostreams were involved)
 - removed unnecessary uses of `final`

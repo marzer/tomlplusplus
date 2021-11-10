@@ -551,3 +551,45 @@ fruit = []
     color = "green"
 )"sv);
 }
+
+TEST_CASE("parsing - keys")
+{
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
+[a.b]
+c = "10.0.0.1"
+d = "frontend"
+e = { f.g = 79.5, h = 72.0 }
+							)"sv,
+						   [](table&& tbl)
+						   {
+							   // ensure types are sane first
+							   REQUIRE(tbl["a"].is_table());
+							   REQUIRE(tbl["a"]["b"].is_table());
+							   REQUIRE(tbl["a"]["b"]["c"]);
+							   REQUIRE(tbl["a"]["b"]["d"]);
+							   REQUIRE(tbl["a"]["b"]["e"].is_table());
+							   REQUIRE(tbl["a"]["b"]["e"]["f"].is_table());
+							   REQUIRE(tbl["a"]["b"]["e"]["f"]["g"]);
+							   REQUIRE(tbl["a"]["b"]["e"]["h"]);
+
+							   const auto check_key =
+								   [&](const auto& t, std::string_view k, source_position b, source_position e)
+							   {
+								   const toml::key& found_key = t.as_table()->find(k)->first;
+								   CHECK(found_key.str() == k);
+								   CHECK(found_key.source().begin == b);
+								   CHECK(found_key.source().end == e);
+								   CHECK(found_key.source().path == tbl.source().path);
+							   };
+
+							   check_key(tbl, "a", { 2, 2 }, { 2, 3 });
+							   check_key(tbl["a"], "b", { 2, 4 }, { 2, 5 });
+							   check_key(tbl["a"]["b"], "c", { 3, 1 }, { 3, 2 });
+							   check_key(tbl["a"]["b"], "d", { 4, 1 }, { 4, 2 });
+							   check_key(tbl["a"]["b"], "e", { 5, 1 }, { 5, 2 });
+							   check_key(tbl["a"]["b"]["e"], "f", { 5, 7 }, { 5, 8 });
+							   check_key(tbl["a"]["b"]["e"]["f"], "g", { 5, 9 }, { 5, 10 });
+							   check_key(tbl["a"]["b"]["e"], "h", { 5, 19 }, { 5, 20 });
+						   });
+}

@@ -234,8 +234,8 @@ TOML_NAMESPACE_START
 				continue;
 			}
 
-			std::unique_ptr<node> arr_storage = std::move(elems_[i]);
-			const auto leaf_count			  = arr->total_leaf_count();
+			impl::node_ptr arr_storage = std::move(elems_[i]);
+			const auto leaf_count	   = arr->total_leaf_count();
 			if (leaf_count > 1u)
 				preinsertion_resize(i + 1u, leaf_count - 1u);
 			flatten_child(std::move(*arr), i); // increments i

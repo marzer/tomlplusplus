@@ -38,8 +38,8 @@ TOML_NAMESPACE_START
 		: node(other),
 		  inline_{ other.inline_ }
 	{
-		for (auto&& [k, v] : other)
-			map_.emplace_hint(map_.end(), k, impl::make_node(v));
+		for (auto&& [k, v] : other.map_)
+			map_.emplace_hint(map_.end(), k, impl::make_node(*v));
 
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -64,8 +64,8 @@ TOML_NAMESPACE_START
 		{
 			node::operator=(rhs);
 			map_.clear();
-			for (auto&& [k, v] : rhs)
-				map_.emplace_hint(map_.end(), k, impl::make_node(v));
+			for (auto&& [k, v] : rhs.map_)
+				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
 			inline_ = rhs.inline_;
 		}
 		return *this;
@@ -92,9 +92,9 @@ TOML_NAMESPACE_START
 		if (ntype == node_type::none)
 			ntype = map_.cbegin()->second->type();
 
-		for (const auto& [k, v] : map_)
+		for (auto&& [k, v] : map_)
 		{
-			(void)k;
+			static_cast<void>(k);
 			if (v->type() != ntype)
 				return false;
 		}
@@ -114,7 +114,7 @@ TOML_NAMESPACE_START
 			ntype = map_.cbegin()->second->type();
 		for (const auto& [k, v] : map_)
 		{
-			(void)k;
+			static_cast<void>(k);
 			if (v->type() != ntype)
 			{
 				first_nonmatch = v.get();
@@ -191,6 +191,18 @@ TOML_NAMESPACE_START
 				return false;
 		}
 		return true;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::iterator table::lower_bound(std::string_view key) noexcept
+	{
+		return iterator{ map_.lower_bound(key) };
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::const_iterator table::lower_bound(std::string_view key) const noexcept
+	{
+		return const_iterator{ map_.lower_bound(key) };
 	}
 }
 TOML_NAMESPACE_END;

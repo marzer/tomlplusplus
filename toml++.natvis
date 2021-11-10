@@ -69,25 +69,36 @@
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v3::value&lt;*&gt;" Priority="MediumLow">
-		<DisplayString>{{ {val_} }}</DisplayString>
+	<Type Name="toml::v3::value&lt;std::basic_string&lt;char,*&gt;&gt;" Priority="High">
+		<DisplayString>{{ {val_,s8} }}</DisplayString>
 		<Expand>
-			<Item Name="val_" ExcludeView="simple">val_</Item>
+			<Item Name="value" ExcludeView="simple">val_,s8</Item>
 		</Expand>
 	</Type>
 
-	<Type Name="toml::v3::value&lt;std::basic_string&lt;char,*&gt;&gt;">
-		<DisplayString>{{ {val_,s8} }}</DisplayString>
+	<Type Name="toml::v3::value&lt;*&gt;" Priority="MediumLow">
+		<DisplayString>{{ {val_} }}</DisplayString>
 		<Expand>
-			<Item Name="val_" ExcludeView="simple">val_,s8</Item>
+			<Item Name="value" ExcludeView="simple">val_</Item>
 		</Expand>
 	</Type>
 
 	<Type Name="toml::v3::source_position">
-		<DisplayString>line {line}, column {column}</DisplayString>
+		<DisplayString>line {line,d}, column {column,d}</DisplayString>
 		<Expand>
-			<Item Name="line" ExcludeView="simple">line</Item>
-			<Item Name="column" ExcludeView="simple">column</Item>
+			<Item Name="line" ExcludeView="simple">line,d</Item>
+			<Item Name="column" ExcludeView="simple">column,d</Item>
+		</Expand>
+	</Type>
+
+	<Type Name="toml::v3::key">
+		<Intrinsic Name="source_begin_zero" Expression="!source_.begin.line &amp;&amp; !source_.begin.column" />
+		<DisplayString Condition="!source_begin_zero()">{key_,s8} ({source_.begin})</DisplayString>
+		<DisplayString Condition="source_begin_zero()">{key_,s8}</DisplayString>
+		<Expand>
+			<Item Name="[string]" ExcludeView="simple">key_,s8</Item>
+			<Item Name="[begin]" ExcludeView="simple">source_.begin</Item>
+			<Item Name="[end]" ExcludeView="simple">source_.end</Item>
 		</Expand>
 	</Type>
 

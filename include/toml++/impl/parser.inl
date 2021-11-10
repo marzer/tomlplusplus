@@ -875,101 +875,49 @@ TOML_ANON_NAMESPACE_START
 #define push_parse_scope_1(scope, line) push_parse_scope_2(scope, line)
 #define push_parse_scope(scope)			push_parse_scope_1(scope, __LINE__)
 
-	// Q: "why not std::unique_ptr??
-	// A: It caused a lot of bloat on some implementations so this exists an internal substitute.
-	class node_ptr
-	{
-	  private:
-		node* node_ = {};
-
-	  public:
-		TOML_NODISCARD_CTOR
-		node_ptr() noexcept = default;
-
-		TOML_NODISCARD_CTOR
-		explicit node_ptr(node* n) noexcept //
-			: node_{ n }
-		{}
-
-		~node_ptr() noexcept
-		{
-			delete node_;
-		}
-
-		node_ptr& operator=(node* val) noexcept
-		{
-			if (val != node_)
-			{
-				delete node_;
-				node_ = val;
-			}
-			return *this;
-		}
-
-		node_ptr(const node_ptr&) = delete;
-		node_ptr& operator=(const node_ptr&) = delete;
-		node_ptr(node_ptr&&)				 = delete;
-		node_ptr& operator=(node_ptr&&) = delete;
-
-		TOML_PURE_INLINE_GETTER
-		operator bool() const noexcept
-		{
-			return node_ != nullptr;
-		}
-
-		TOML_PURE_INLINE_GETTER
-		node* operator->() noexcept
-		{
-			return node_;
-		}
-
-		TOML_NODISCARD
-		node* release() noexcept
-		{
-			auto n = node_;
-			node_  = nullptr;
-			return n;
-		}
-	};
-
 	struct parsed_key_buffer
 	{
 		std::string buffer;
 		std::vector<std::pair<size_t, size_t>> segments;
-		source_region source;
+		std::vector<source_position> starts;
+		std::vector<source_position> ends;
 
-		void reset(source_position pos) noexcept
+		void clear() noexcept
 		{
 			buffer.clear();
 			segments.clear();
-			source.begin = pos;
+			starts.clear();
+			ends.clear();
 		}
 
-		void push_back(std::string_view segment)
+		void push_back(std::string_view segment, source_position b, source_position e)
 		{
 			segments.push_back({ buffer.length(), segment.length() });
 			buffer.append(segment);
-		}
-
-		void finish(source_position pos) noexcept
-		{
-			source.end = pos;
+			starts.push_back(b);
+			ends.push_back(e);
 		}
 
 		TOML_PURE_INLINE_GETTER
-		std::string_view operator[](size_t i) noexcept
+		std::string_view operator[](size_t i) const noexcept
 		{
 			return std::string_view{ buffer.c_str() + segments[i].first, segments[i].second };
 		}
 
 		TOML_PURE_INLINE_GETTER
-		std::string_view back() noexcept
+		std::string_view back() const noexcept
 		{
 			return (*this)[segments.size() - 1u];
 		}
 
 		TOML_PURE_INLINE_GETTER
-		size_t size() noexcept
+		bool empty() const noexcept
+		{
+			return segments.empty();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		size_t size() const noexcept
 		{
 			return segments.size();
 		}
@@ -1755,19 +1703,18 @@ TOML_IMPL_NAMESPACE_START
 			assert_not_eof();
 			assert_or_assume(is_bare_key_character(*cp));
 
-			auto& segment = string_buffer;
-			segment.clear();
+			string_buffer.clear();
 
 			while (!is_eof())
 			{
 				if (!is_bare_key_character(*cp))
 					break;
 
-				segment.append(cp->bytes, cp->count);
+				string_buffer.append(cp->bytes, cp->count);
 				advance_and_return_if_error({});
 			}
 
-			return segment;
+			return string_buffer;
 		}
 
 		TOML_NODISCARD
@@ -2491,13 +2438,13 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		array* parse_array();
+		node_ptr parse_array();
 
 		TOML_NODISCARD
-		table* parse_inline_table();
+		node_ptr parse_inline_table();
 
 		TOML_NODISCARD
-		node* parse_value_known_prefixes()
+		node_ptr parse_value_known_prefixes()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2515,31 +2462,31 @@ TOML_IMPL_NAMESPACE_START
 
 					// floats beginning with '.'
 				case U'.':
-					return new value{ parse_float() };
+					return node_ptr{ new value{ parse_float() } };
 
 					// strings
 				case U'"': [[fallthrough]];
 				case U'\'':
-					return new value{ parse_string().value };
+					return node_ptr{ new value{ parse_string().value } };
 
 					// bools
 				case U't': [[fallthrough]];
 				case U'f': [[fallthrough]];
 				case U'T': [[fallthrough]];
 				case U'F':
-					return new value{ parse_boolean() };
+					return node_ptr{ new value{ parse_boolean() } };
 
 					// inf/nan
 				case U'i': [[fallthrough]];
 				case U'I': [[fallthrough]];
 				case U'n': [[fallthrough]];
-				case U'N': return new value{ parse_inf_or_nan() };
+				case U'N': return node_ptr{ new value{ parse_inf_or_nan() } };
 			}
 			return nullptr;
 		}
 
 		TOML_NODISCARD
-		node* parse_value()
+		node_ptr parse_value()
 		{
 			return_if_error({});
 			assert_not_eof();
@@ -2744,7 +2691,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					if (has_any(begins_zero | begins_digit))
 					{
-						val = new value{ static_cast<int64_t>(chars[0] - U'0') };
+						val.reset(new value{ static_cast<int64_t>(chars[0] - U'0') });
 						advance(); // skip the digit
 						break;
 					}
@@ -2763,7 +2710,7 @@ TOML_IMPL_NAMESPACE_START
 				// typed parse functions to take over and show better diagnostics if there's an issue
 				// (as opposed to the fallback "could not determine type" message)
 				if (has_any(has_p))
-					val = new value{ parse_hex_float() };
+					val.reset(new value{ parse_hex_float() });
 				else if (has_any(has_x | has_o | has_b))
 				{
 					int64_t i;
@@ -2785,17 +2732,17 @@ TOML_IMPL_NAMESPACE_START
 					}
 					return_if_error({});
 
-					val = new value{ i };
+					val.reset(new value{ i });
 					val->ref_cast<int64_t>().flags(flags);
 				}
 				else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
-					val = new value{ parse_float() };
+					val.reset(new value{ parse_float() });
 				else if (has_any(begins_sign))
 				{
 					// single-digit signed integers
 					if (char_count == 2u && has_any(has_digits))
 					{
-						val = new value{ static_cast<int64_t>(chars[1] - U'0') * (chars[0] == U'-' ? -1LL : 1LL) };
+						val.reset(new value{ static_cast<int64_t>(chars[1] - U'0') * (chars[0] == U'-' ? -1LL : 1LL) });
 						advance(); // skip the sign
 						advance(); // skip the digit
 						break;
@@ -2803,11 +2750,11 @@ TOML_IMPL_NAMESPACE_START
 
 					// simple signed floats (e.g. +1.0)
 					if (is_decimal_digit(chars[1]) && chars[2] == U'.')
-						val = new value{ parse_float() };
+						val.reset(new value{ parse_float() });
 
 					// signed infinity or nan
 					else if (is_match(chars[1], U'i', U'n', U'I', U'N'))
-						val = new value{ parse_inf_or_nan() };
+						val.reset(new value{ parse_inf_or_nan() });
 				}
 
 				return_if_error({});
@@ -2823,14 +2770,14 @@ TOML_IMPL_NAMESPACE_START
 					// binary integers
 					// 0b10
 					case bzero_msk | has_b:
-						val = new value{ parse_integer<2>() };
+						val.reset(new value{ parse_integer<2>() });
 						val->ref_cast<int64_t>().flags(value_flags::format_as_binary);
 						break;
 
 					// octal integers
 					// 0o10
 					case bzero_msk | has_o:
-						val = new value{ parse_integer<8>() };
+						val.reset(new value{ parse_integer<8>() });
 						val->ref_cast<int64_t>().flags(value_flags::format_as_octal);
 						break;
 
@@ -2842,12 +2789,12 @@ TOML_IMPL_NAMESPACE_START
 					case bzero_msk: [[fallthrough]];
 					case bdigit_msk: [[fallthrough]];
 					case begins_sign | has_digits | has_minus: [[fallthrough]];
-					case begins_sign | has_digits | has_plus: val = new value{ parse_integer<10>() }; break;
+					case begins_sign | has_digits | has_plus: val.reset(new value{ parse_integer<10>() }); break;
 
 					// hexadecimal integers
 					// 0x10
 					case bzero_msk | has_x:
-						val = new value{ parse_integer<16>() };
+						val.reset(new value{ parse_integer<16>() });
 						val->ref_cast<int64_t>().flags(value_flags::format_as_hexadecimal);
 						break;
 
@@ -2900,7 +2847,7 @@ TOML_IMPL_NAMESPACE_START
 					case begins_sign | has_digits | has_e | signs_msk: [[fallthrough]];
 					case begins_sign | has_digits | has_dot | has_minus: [[fallthrough]];
 					case begins_sign | has_digits | has_dot | has_e | has_minus:
-						val = new value{ parse_float() };
+						val.reset(new value{ parse_float() });
 						break;
 
 					// hexadecimal floats
@@ -2934,7 +2881,7 @@ TOML_IMPL_NAMESPACE_START
 					case begins_sign | has_digits | has_x | has_dot | has_p | has_minus: [[fallthrough]];
 					case begins_sign | has_digits | has_x | has_dot | has_p | has_plus: [[fallthrough]];
 					case begins_sign | has_digits | has_x | has_dot | has_p | signs_msk:
-						val = new value{ parse_hex_float() };
+						val.reset(new value{ parse_hex_float() });
 						break;
 
 					// times
@@ -2944,12 +2891,12 @@ TOML_IMPL_NAMESPACE_START
 					case bzero_msk | has_colon: [[fallthrough]];
 					case bzero_msk | has_colon | has_dot: [[fallthrough]];
 					case bdigit_msk | has_colon: [[fallthrough]];
-					case bdigit_msk | has_colon | has_dot: val = new value{ parse_time() }; break;
+					case bdigit_msk | has_colon | has_dot: val.reset(new value{ parse_time() }); break;
 
 					// local dates
 					// YYYY-MM-DD
 					case bzero_msk | has_minus: [[fallthrough]];
-					case bdigit_msk | has_minus: val = new value{ parse_date() }; break;
+					case bdigit_msk | has_minus: val.reset(new value{ parse_date() }); break;
 
 					// date-times
 					// YYYY-MM-DDTHH:MM
@@ -2988,7 +2935,7 @@ TOML_IMPL_NAMESPACE_START
 					case bzero_msk | has_minus | has_colon | has_dot | has_z | has_t: [[fallthrough]];
 					case bdigit_msk | has_minus | has_colon | has_z | has_t: [[fallthrough]];
 					case bdigit_msk | has_minus | has_colon | has_dot | has_z | has_t:
-						val = new value{ parse_date_time() };
+						val.reset(new value{ parse_date_time() });
 						break;
 				}
 			}
@@ -3012,7 +2959,7 @@ TOML_IMPL_NAMESPACE_START
 #endif
 
 			val->source_ = { begin_pos, current_position(1), reader.source_path() };
-			return val.release();
+			return val;
 		}
 
 		bool parse_key()
@@ -3022,9 +2969,8 @@ TOML_IMPL_NAMESPACE_START
 			assert_or_assume(is_bare_key_character(*cp) || is_string_delimiter(*cp));
 			push_parse_scope("key"sv);
 
-			key_buffer.reset(current_position());
+			key_buffer.clear();
 			recording_whitespace = false;
-			std::string_view pending_key_segment;
 
 			while (!is_error())
 			{
@@ -3033,9 +2979,12 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("bare keys may not begin with unicode combining marks"sv);
 #endif
 
+				std::string_view key_segment;
+				const auto key_begin = current_position();
+
 				// bare_key_segment
 				if (is_bare_key_character(*cp))
-					pending_key_segment = parse_bare_key_segment();
+					key_segment = parse_bare_key_segment();
 
 				// "quoted key segment"
 				else if (is_string_delimiter(*cp))
@@ -3051,12 +3000,12 @@ TOML_IMPL_NAMESPACE_START
 					{
 						set_error_at(begin_pos,
 									 "multi-line strings are prohibited in "sv,
-									 key_buffer.segments.empty() ? ""sv : "dotted "sv,
+									 key_buffer.empty() ? ""sv : "dotted "sv,
 									 "keys"sv);
 						return_after_error({});
 					}
 					else
-						pending_key_segment = str.value;
+						key_segment = str.value;
 				}
 
 				// ???
@@ -3065,11 +3014,13 @@ TOML_IMPL_NAMESPACE_START
 												 to_sv(*cp),
 												 "'"sv);
 
+				const auto key_end = current_position();
+
 				// whitespace following the key segment
 				consume_leading_whitespace();
 
 				// store segment
-				key_buffer.push_back(pending_key_segment);
+				key_buffer.push_back(key_segment, key_begin, key_end);
 
 				// eof or no more key to come
 				if (is_eof() || *cp != U'.')
@@ -3082,8 +3033,18 @@ TOML_IMPL_NAMESPACE_START
 			}
 			return_if_error({});
 
-			key_buffer.finish(current_position());
 			return true;
+		}
+
+		TOML_NODISCARD
+		key make_key(size_t segment_index) const
+		{
+			TOML_ASSERT(key_buffer.size() > segment_index);
+
+			return key{
+				key_buffer[segment_index],
+				source_region{ key_buffer.starts[segment_index], key_buffer.ends[segment_index], root.source().path }
+			};
 		}
 
 		TOML_NODISCARD
@@ -3154,108 +3115,90 @@ TOML_IMPL_NAMESPACE_START
 				if (!is_eof() && !consume_comment() && !consume_line_break())
 					set_error_and_return_default("expected a comment or whitespace, saw '"sv, to_sv(cp), "'"sv);
 			}
-			TOML_ASSERT(!key_buffer.segments.empty());
+			TOML_ASSERT(!key_buffer.empty());
 
 			// check if each parent is a table/table array, or can be created implicitly as a table.
-			auto parent = &root;
+			table* parent = &root;
 			for (size_t i = 0, e = key_buffer.size() - 1u; i < e; i++)
 			{
-				const auto segment = key_buffer[i];
-				auto child		   = parent->get(segment);
-				if (!child)
+				const std::string_view segment = key_buffer[i];
+				auto pit					   = parent->lower_bound(segment);
+
+				// parent already existed
+				if (pit != parent->end() && pit->first == segment)
 				{
-					child = parent->map_.emplace(segment, new table{}).first->second.get();
-					implicit_tables.push_back(&child->ref_cast<table>());
-					child->source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					parent		   = &child->ref_cast<table>();
-				}
-				else if (child->is_table())
-				{
-					parent = &child->ref_cast<table>();
-				}
-				else if (child->is_array()
-						 && impl::find(table_arrays.begin(), table_arrays.end(), &child->ref_cast<array>()))
-				{
-					// table arrays are a special case;
-					// the spec dictates we select the most recently declared element in the array.
-					TOML_ASSERT(!child->ref_cast<array>().elems_.empty());
-					TOML_ASSERT(child->ref_cast<array>().elems_.back()->is_table());
-					parent = &child->ref_cast<array>().back().ref_cast<table>();
-				}
-				else
-				{
-					if (!is_arr && child->type() == node_type::table)
-						set_error_and_return_default("cannot redefine existing table '"sv,
-													 to_sv(recording_buffer),
-													 "'"sv);
+					node& p = pit->second;
+
+					if (auto tbl = p.as_table())
+						parent = tbl;
+					else if (auto arr = p.as_array(); arr && impl::find(table_arrays.begin(), table_arrays.end(), arr))
+					{
+						// table arrays are a special case;
+						// the spec dictates we select the most recently declared element in the array.
+						TOML_ASSERT(!arr->elems_.empty());
+						TOML_ASSERT(arr->elems_.back()->is_table());
+						parent = &arr->back().ref_cast<table>();
+					}
 					else
-						set_error_and_return_default("cannot redefine existing "sv,
-													 to_sv(child->type()),
-													 " '"sv,
-													 to_sv(recording_buffer),
-													 "' as "sv,
-													 is_arr ? "array-of-tables"sv : "table"sv);
-				}
-			}
-
-			// check the last parent table for a node matching the last key.
-			// if there was no matching node, then sweet;
-			// we can freely instantiate a new table/table array.
-			const auto last_segment = key_buffer.back();
-			auto matching_node		= parent->get(last_segment);
-			if (!matching_node)
-			{
-				// if it's an array we need to make the array and it's first table element,
-				// set the starting regions, and return the table element
-				if (is_arr)
-				{
-					array& tbl_arr = parent->emplace<array>(last_segment).first->second.ref_cast<array>();
-					table_arrays.push_back(&tbl_arr);
-					tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-
-					table& tbl	= tbl_arr.emplace_back<table>();
-					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tbl;
+					{
+						if (!is_arr && p.type() == node_type::table)
+							set_error_and_return_default("cannot redefine existing table '"sv,
+														 to_sv(recording_buffer),
+														 "'"sv);
+						else
+							set_error_and_return_default("cannot redefine existing "sv,
+														 to_sv(p.type()),
+														 " '"sv,
+														 to_sv(recording_buffer),
+														 "' as "sv,
+														 is_arr ? "array-of-tables"sv : "table"sv);
+					}
 				}
 
-				// otherwise we're just making a table
+				// need to create a new implicit table
 				else
 				{
-					table& tbl	= parent->emplace<table>(last_segment).first->second.ref_cast<table>();
-					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
-					return &tbl;
+					pit		  = parent->emplace_hint<table>(pit, make_key(i));
+					table& p  = pit->second.ref_cast<table>();
+					p.source_ = pit->first.source();
+
+					implicit_tables.push_back(&p);
+					parent = &p;
 				}
 			}
+
+			const auto last_segment = key_buffer.back();
+			auto it					= parent->lower_bound(last_segment);
 
 			// if there was already a matching node some sanity checking is necessary;
 			// this is ok if we're making an array and the existing element is already an array (new element)
 			// or if we're making a table and the existing element is an implicitly-created table (promote it),
 			// otherwise this is a redefinition error.
-			else
+			if (it != parent->end() && it->first == last_segment)
 			{
-				if (is_arr && matching_node->is_array()
-					&& impl::find(table_arrays.begin(), table_arrays.end(), &matching_node->ref_cast<array>()))
+				node& matching_node = it->second;
+				if (auto arr = matching_node.as_array();
+					is_arr && arr && impl::find(table_arrays.begin(), table_arrays.end(), arr))
 				{
-					table& tbl	= matching_node->ref_cast<array>().emplace_back<table>();
+					table& tbl	= arr->emplace_back<table>();
 					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 					return &tbl;
 				}
 
-				else if (!is_arr && matching_node->is_table() && !implicit_tables.empty())
+				else if (auto tbl = matching_node.as_table(); !is_arr && tbl && !implicit_tables.empty())
 				{
-					table& tbl = matching_node->ref_cast<table>();
-					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), &tbl);
-						found && (tbl.empty() || tbl.is_homogeneous<table>()))
+					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl);
+						found && (tbl->empty() || tbl->is_homogeneous<table>()))
 					{
 						implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
-						tbl.source_.begin = header_begin_pos;
-						tbl.source_.end	  = header_end_pos;
-						return &tbl;
+						tbl->source_.begin = header_begin_pos;
+						tbl->source_.end   = header_end_pos;
+						return tbl;
 					}
 				}
 
 				// if we get here it's a redefinition error.
-				if (!is_arr && matching_node->type() == node_type::table)
+				if (!is_arr && matching_node.type() == node_type::table)
 				{
 					set_error_at(header_begin_pos,
 								 "cannot redefine existing table '"sv,
@@ -3267,12 +3210,41 @@ TOML_IMPL_NAMESPACE_START
 				{
 					set_error_at(header_begin_pos,
 								 "cannot redefine existing "sv,
-								 to_sv(matching_node->type()),
+								 to_sv(matching_node.type()),
 								 " '"sv,
 								 to_sv(recording_buffer),
 								 "' as "sv,
 								 is_arr ? "array-of-tables"sv : "table"sv);
 					return_after_error({});
+				}
+			}
+
+			// there was no matching node, sweet - we can freely instantiate a new table/table array.
+			else
+			{
+				auto last_key = make_key(key_buffer.size() - 1u);
+
+				// if it's an array we need to make the array and it's first table element,
+				// set the starting regions, and return the table element
+				if (is_arr)
+				{
+					it			   = parent->emplace_hint<array>(it, std::move(last_key));
+					array& tbl_arr = it->second.ref_cast<array>();
+					table_arrays.push_back(&tbl_arr);
+					tbl_arr.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+
+					table& tbl	= tbl_arr.emplace_back<table>();
+					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tbl;
+				}
+
+				// otherwise we're just making a table
+				else
+				{
+					it			= parent->emplace_hint<table>(it, std::move(last_key));
+					table& tbl	= it->second.ref_cast<table>();
+					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					return &tbl;
 				}
 			}
 		}
@@ -3309,58 +3281,67 @@ TOML_IMPL_NAMESPACE_START
 			if (is_value_terminator(*cp))
 				set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
 
-			// if it's a dotted kvp we need to spawn the sub-tables if necessary,
+			// if it's a dotted kvp we need to spawn the parent sub-tables if necessary,
 			// and set the target table to the second-to-last one in the chain
 			if (key_buffer.size() > 1u)
 			{
 				for (size_t i = 0; i < key_buffer.size() - 1u; i++)
 				{
-					const auto segment = key_buffer[i];
-					auto child		   = tbl->get(segment);
-					if (!child)
+					const std::string_view segment = key_buffer[i];
+					auto pit					   = tbl->lower_bound(segment);
+
+					// parent already existed
+					if (pit != tbl->end() && pit->first == segment)
 					{
-						child = tbl->map_.emplace(std::string{ segment }, new table{}).first->second.get();
-						dotted_key_tables.push_back(&child->ref_cast<table>());
-						child->source_ = key_buffer.source;
-					}
-					else if (!child->is_table()
-							 || !(impl::find(dotted_key_tables.begin(),
-											 dotted_key_tables.end(),
-											 &child->ref_cast<table>())
-								  || impl::find(implicit_tables.begin(),
-												implicit_tables.end(),
-												&child->ref_cast<table>())))
-					{
-						set_error_at(key_buffer.source.begin,
-									 "cannot redefine existing "sv,
-									 to_sv(child->type()),
-									 " as dotted key-value pair"sv);
-						return_after_error({});
+						table* p = pit->second.as_table();
+						if (!p
+							|| !(impl::find(dotted_key_tables.begin(), dotted_key_tables.end(), p)
+								 || impl::find(implicit_tables.begin(), implicit_tables.end(), p)))
+						{
+							set_error_at(key_buffer.starts[i],
+										 "cannot redefine existing "sv,
+										 to_sv(p->type()),
+										 " as dotted key-value pair"sv);
+							return_after_error({});
+						}
+
+						tbl = p;
 					}
 
-					tbl = &child->ref_cast<table>();
+					// need to create a new implicit table
+					else
+					{
+						pit		  = tbl->emplace_hint<table>(pit, make_key(i));
+						table& p  = pit->second.ref_cast<table>();
+						p.source_ = pit->first.source();
+
+						dotted_key_tables.push_back(&p);
+						tbl = &p;
+					}
 				}
 			}
 
 			// ensure this isn't a redefinition
-			if (auto conflicting_node = tbl->get(key_buffer.back()))
+			const std::string_view last_segment = key_buffer.back();
+			auto it								= tbl->lower_bound(last_segment);
+			if (it != tbl->end() && it->first == last_segment)
 			{
 				set_error("cannot redefine existing "sv,
-						  to_sv(conflicting_node->type()),
+						  to_sv(it->second.type()),
 						  " '"sv,
 						  to_sv(recording_buffer),
 						  "'"sv);
 				return_after_error({});
 			}
 
-			// cache the last segment since it might get overwritten by nested tables etc.
-			auto last_segment = std::string{ key_buffer.back() };
+			// create the key first since the key buffer will likely get overritten during value parsing (inline tables)
+			auto last_key = make_key(key_buffer.size() - 1u);
 
 			// now we can actually parse the value
-			auto val = node_ptr{ parse_value() };
+			node_ptr val = parse_value();
 			return_if_error({});
 
-			tbl->map_.emplace(std::move(last_segment), std::unique_ptr<node>{ val.release() });
+			tbl->map_.emplace_hint(it.raw_, std::move(last_key), std::move(val));
 			return true;
 		}
 
@@ -3453,8 +3434,7 @@ TOML_IMPL_NAMESPACE_START
 		parser(utf8_reader_interface&& reader_) //
 			: reader{ reader_ }
 		{
-			root.source_		   = { prev_pos, prev_pos, reader.source_path() };
-			key_buffer.source.path = reader.source_path();
+			root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
 			if (!reader.peek_eof())
 			{
@@ -3494,7 +3474,7 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	TOML_EXTERNAL_LINKAGE
-	array* parser::parse_array()
+	node_ptr parser::parse_array()
 	{
 		return_if_error({});
 		assert_not_eof();
@@ -3555,11 +3535,11 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return reinterpret_cast<array*>(arr_ptr.release());
+		return arr_ptr;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table* parser::parse_inline_table()
+	node_ptr parser::parse_inline_table()
 	{
 		return_if_error({});
 		assert_not_eof();
@@ -3640,7 +3620,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		return_if_error({});
-		return reinterpret_cast<table*>(tbl_ptr.release());
+		return tbl_ptr;
 	}
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS

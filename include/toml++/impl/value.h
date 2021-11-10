@@ -715,7 +715,7 @@ TOML_NAMESPACE_START
 			return *this;
 		}
 
-		/// \name Equality
+		/// \name Equality and Comparison
 		/// @{
 
 		/// \brief	Value equality operator.

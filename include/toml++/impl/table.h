@@ -9,6 +9,7 @@
 #include "array.h"
 #include "make_node.h"
 #include "node_view.h"
+#include "key.h"
 #include "header_start.h"
 
 /// \cond
@@ -19,7 +20,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using value_type = std::conditional_t<IsConst, const node, node>;
 
-		const std::string& first;
+		const toml::key& first;
 		value_type& second;
 	};
 
@@ -30,10 +31,11 @@ TOML_IMPL_NAMESPACE_START
 		template <bool>
 		friend class table_iterator;
 		friend class TOML_NAMESPACE::table;
+		friend class TOML_PARSER_TYPENAME;
 
 		using proxy_type		   = table_proxy_pair<IsConst>;
-		using raw_mutable_iterator = std::map<std::string, std::unique_ptr<node>, std::less<>>::iterator;
-		using raw_const_iterator   = std::map<std::string, std::unique_ptr<node>, std::less<>>::const_iterator;
+		using raw_mutable_iterator = std::map<toml::key, node_ptr, std::less<>>::iterator;
+		using raw_const_iterator   = std::map<toml::key, node_ptr, std::less<>>::const_iterator;
 		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
 		mutable raw_iterator raw_;
@@ -154,54 +156,15 @@ TOML_IMPL_NAMESPACE_START
 
 	struct table_init_pair
 	{
-		mutable std::string key;
-		mutable std::unique_ptr<node> value;
+		mutable toml::key key;
+		mutable node_ptr value;
 
-		template <typename V>
+		template <typename K, typename V>
 		TOML_NODISCARD_CTOR
-		table_init_pair(std::string&& k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ std::move(k) },
+		table_init_pair(K&& k, V&& v, value_flags flags = preserve_source_value_flags) //
+			: key{ static_cast<K&&>(k) },
 			  value{ make_node(static_cast<V&&>(v), flags) }
 		{}
-
-		template <typename V>
-		TOML_NODISCARD_CTOR
-		table_init_pair(std::string_view k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ k },
-			  value{ make_node(static_cast<V&&>(v), flags) }
-		{}
-
-		template <typename V>
-		TOML_NODISCARD_CTOR
-		table_init_pair(const char* k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ k },
-			  value{ make_node(static_cast<V&&>(v), flags) }
-		{}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		template <typename V>
-		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring&& k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v), flags) }
-		{}
-
-		template <typename V>
-		TOML_NODISCARD_CTOR
-		table_init_pair(std::wstring_view k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ narrow(k) },
-			  value{ make_node(static_cast<V&&>(v), flags) }
-		{}
-
-		template <typename V>
-		TOML_NODISCARD_CTOR
-		table_init_pair(const wchar_t* k, V&& v, value_flags flags = preserve_source_value_flags) //
-			: key{ narrow(std::wstring_view{ k }) },
-			  value{ make_node(static_cast<V&&>(v), flags) }
-		{}
-
-#endif
 	};
 }
 TOML_IMPL_NAMESPACE_END;
@@ -228,7 +191,7 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 
-		std::map<std::string, std::unique_ptr<node>, std::less<>> map_;
+		std::map<toml::key, impl::node_ptr, std::less<>> map_;
 		bool inline_ = false;
 
 		TOML_NODISCARD_CTOR
@@ -807,56 +770,56 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Returns an iterator to the first key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
 		{
-			return { map_.begin() };
+			return iterator{ map_.begin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
-			return { map_.cbegin() };
+			return const_iterator{ map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const_iterator cbegin() const noexcept
 		{
-			return { map_.cbegin() };
+			return const_iterator{ map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		iterator end() noexcept
 		{
-			return { map_.end() };
+			return iterator{ map_.end() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
-			return { map_.cend() };
+			return const_iterator{ map_.cend() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		const_iterator cend() const noexcept
 		{
-			return { map_.cend() };
+			return const_iterator{ map_.cend() };
 		}
 
 		/// \brief	Returns true if the table is empty.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		bool empty() const noexcept
 		{
 			return map_.empty();
 		}
 
 		/// \brief	Returns the number of key-value pairs in the table.
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		size_t size() const noexcept
 		{
 			return map_.size();
@@ -902,7 +865,7 @@ TOML_NAMESPACE_START
 		/// d = 42
 		/// \eout
 		///
-		/// \tparam KeyType		std::string (or a type convertible to it).
+		/// \tparam KeyType		A toml::key or any compatible string type.
 		/// \tparam ValueType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 		/// 					(or a type promotable to one).
 		/// \param 	key			The key at which to insert the new value.
@@ -920,7 +883,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `{ end(), false }` if the input value was an
 		/// 		   empty toml::node_view, because no insertion can take place. This is the only circumstance
 		/// 		   in which this can occur.
-		TOML_CONSTRAINED_TEMPLATE((std::is_convertible_v<KeyType&&, std::string_view> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
 		std::pair<iterator, bool> insert(KeyType&& key,
@@ -947,8 +910,9 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				auto ipos = map_.lower_bound(key);
-				if (ipos == map_.end() || ipos->first != key)
+				const auto key_view = std::string_view{ key };
+				auto ipos			= map_.lower_bound(key_view);
+				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = map_.emplace_hint(ipos,
 											 static_cast<KeyType&&>(key),
@@ -999,8 +963,7 @@ TOML_NAMESPACE_START
 		/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 		/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 		/// 		 table will not be replaced.
-		TOML_CONSTRAINED_TEMPLATE((!std::is_convertible_v<Iter, std::string_view> && !impl::is_wide_string<Iter>),
-								  typename Iter)
+		TOML_CONSTRAINED_TEMPLATE((!impl::is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
 		void insert(Iter first, Iter last, value_flags flags = preserve_source_value_flags)
 		{
 			if (first == last)
@@ -1049,7 +1012,7 @@ TOML_NAMESPACE_START
 		/// d = 42
 		/// \eout
 		///
-		/// \tparam KeyType		std::string (or a type convertible to it).
+		/// \tparam KeyType		A toml::key or any compatible string type.
 		/// \tparam ValueType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 		/// 					(or a type promotable to one).
 		/// \param 	key			The key at which to insert or assign the value.
@@ -1067,7 +1030,9 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `{ end(), false }` if the input value was
 		/// 		   an empty toml::node_view, because no insertion or assignment can take place.
 		/// 		   This is the only circumstance in which this can occur.
-		template <typename KeyType, typename ValueType>
+		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+								  typename KeyType,
+								  typename ValueType)
 		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
 												   ValueType&& val,
 												   value_flags flags = preserve_source_value_flags)
@@ -1094,8 +1059,9 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				auto ipos = map_.lower_bound(key);
-				if (ipos == map_.end() || ipos->first != key)
+				const auto key_view = std::string_view{ key };
+				auto ipos			= map_.lower_bound(key_view);
+				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = map_.emplace_hint(ipos,
 											 static_cast<KeyType&&>(key),
@@ -1104,9 +1070,114 @@ TOML_NAMESPACE_START
 				}
 				else
 				{
-					(*ipos).second.reset(impl::make_node(static_cast<ValueType&&>(val), flags));
+					(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
 					return { iterator{ ipos }, false };
 				}
+			}
+		}
+
+		/// \brief Returns an iterator to the first key-value pair with key that is _not less_ than the given key.
+		///
+		/// \returns	An iterator to the first matching key-value pair, or #end().
+		TOML_PURE_GETTER
+		TOML_API
+		iterator lower_bound(std::string_view key) noexcept;
+
+		/// \brief Returns a const iterator to the first key-value pair with key that is _not less_ than the given key.
+		///
+		/// \returns	An iterator to the first matching key-value pair, or #end().
+		TOML_PURE_GETTER
+		TOML_API
+		const_iterator lower_bound(std::string_view key) const noexcept;
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Returns an iterator to the first key-value pair with key that is _not less_ than the given key.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \returns	An iterator to the first matching key-value pair, or #end().
+		TOML_NODISCARD
+		iterator lower_bound(std::wstring_view key)
+		{
+			return lower_bound(impl::narrow(key));
+		}
+
+		/// \brief Returns a const iterator to the first key-value pair with key that is _not less_ than the given key.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \returns	An iterator to the first matching key-value pair, or #end().
+		TOML_NODISCARD
+		const_iterator lower_bound(std::wstring_view key) const
+		{
+			return lower_bound(impl::narrow(key));
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Emplaces a new value at a specific key if one did not already exist.
+		///
+		/// \tparam ValueType	toml::table, toml::array, or any native TOML value type.
+		/// \tparam KeyType		A toml::key or any compatible string type.
+		/// \tparam ValueArgs	Value constructor argument types.
+		/// \param 	hint		Iterator to the position before which the new element will be emplaced.
+		/// \param 	key			The key at which to emplace the new value.
+		/// \param 	args		Arguments to forward to the value's constructor.
+		///
+		/// \returns An iterator to the emplacement position (or the position of the value that prevented emplacement)
+		///
+		/// \note This function has exactly the same semantics as [std::map::emplace_hint()](https://en.cppreference.com/w/cpp/container/map/emplace_hint).
+		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+								  typename ValueType,
+								  typename KeyType,
+								  typename... ValueArgs)
+		iterator emplace_hint(const_iterator hint, KeyType&& key, ValueArgs&&... args)
+		{
+			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
+						  "Emplacement using wide-character keys is only supported on Windows with "
+						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+
+			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
+
+			if constexpr (impl::is_wide_string<KeyType>)
+			{
+#if TOML_ENABLE_WINDOWS_COMPAT
+				return emplace_hint<ValueType>(hint,
+											   impl::narrow(static_cast<KeyType&&>(key)),
+											   static_cast<ValueArgs&&>(args)...);
+#else
+				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
+#endif
+			}
+			else
+			{
+				using unwrapped_type = impl::unwrap_node<ValueType>;
+				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+							  "ValueType argument of table::emplace_hint() must be one "
+							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
+				auto ipos = map_.emplace_hint(hint.raw_, static_cast<KeyType&&>(key), nullptr);
+
+				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
+				// so now we have to construct the actual value
+				if (!ipos->second)
+				{
+#if TOML_COMPILER_EXCEPTIONS
+					try
+					{
+						ipos->second.reset(new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
+					}
+					catch (...)
+					{
+						map_.erase(ipos); // strong exception guarantee
+						throw;
+					}
+#else
+					ipos->second.reset(new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
+#endif
+				}
+				return ipos;
 			}
 		}
 
@@ -1138,7 +1209,7 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \tparam ValueType	toml::table, toml::array, or any native TOML value type.
-		/// \tparam KeyType		std::string (or a type convertible to it).
+		/// \tparam KeyType		A toml::key or any compatible string type.
 		/// \tparam ValueArgs	Value constructor argument types.
 		/// \param 	key			The key at which to emplace the new value.
 		/// \param 	args		Arguments to forward to the value's constructor.
@@ -1148,12 +1219,17 @@ TOML_NAMESPACE_START
 		/// 		- A boolean indicating if the emplacement was successful.
 		///
 		/// \remark There is no difference between insert() and emplace() for trivial value types (floats, ints, bools).
-		template <typename ValueType, typename KeyType, typename... ValueArgs>
+		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+								  typename ValueType,
+								  typename KeyType,
+								  typename... ValueArgs)
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
 		{
 			static_assert(!impl::is_wide_string<KeyType> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Emplacement using wide-character keys is only supported on Windows with "
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
+
+			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
@@ -1165,17 +1241,18 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				using type = impl::unwrap_node<ValueType>;
-				static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
-							  "The emplacement type argument of table::emplace() must be one "
+				using unwrapped_type = impl::unwrap_node<ValueType>;
+				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-				auto ipos = map_.lower_bound(key);
-				if (ipos == map_.end() || ipos->first != key)
+				const auto key_view = std::string_view{ key };
+				auto ipos			= map_.lower_bound(key_view);
+				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = map_.emplace_hint(ipos,
 											 static_cast<KeyType&&>(key),
-											 new impl::wrap_node<type>{ static_cast<ValueArgs&&>(args)... });
+											 new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };

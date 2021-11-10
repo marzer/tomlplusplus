@@ -614,7 +614,7 @@ TOML_NAMESPACE_START
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&, const toml::value<T>&, template <typename T>);
 
 		/// \brief	Returns true if the viewed node is a value with the same value as RHS.
-		TOML_CONSTRAINED_TEMPLATE((impl::is_native<T> || impl::is_losslessly_convertible_to_native<T>), typename T)
+		TOML_CONSTRAINED_TEMPLATE(impl::is_losslessly_convertible_to_native<T>, typename T)
 		TOML_NODISCARD
 		friend bool operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
 		{
@@ -636,11 +636,10 @@ TOML_NAMESPACE_START
 				return val && *val == rhs;
 			}
 		}
-		TOML_ASYMMETRICAL_EQUALITY_OPS(
-			const node_view&,
-			const T&,
-			TOML_CONSTRAINED_TEMPLATE((impl::is_native<T> || impl::is_losslessly_convertible_to_native<T>),
-									  typename T));
+		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&,
+									   const T&,
+									   TOML_CONSTRAINED_TEMPLATE(impl::is_losslessly_convertible_to_native<T>,
+																 typename T));
 
 		/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
 		template <typename T>

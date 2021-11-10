@@ -47,17 +47,14 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		using base = impl::formatter;
-		std::vector<std::string_view> key_path_;
+		std::vector<const key*> key_path_;
 		bool pending_table_separator_ = false;
 
 		TOML_API
 		void print_pending_table_separator();
 
 		TOML_API
-		void print_key_segment(std::string_view);
-
-		TOML_API
-		void print_key_path();
+		void print(const key&);
 
 		TOML_API
 		void print_inline(const toml::table&);

@@ -13,7 +13,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_specialized(T && val, [[maybe_unused]] value_flags flags)
+	auto* make_node_impl_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
 		using unwrapped_type = unwrap_node<remove_cvref<T>>;
 		static_assert(!std::is_same_v<unwrapped_type, node>);
@@ -45,8 +45,20 @@ TOML_IMPL_NAMESPACE_START
 				static_assert(!is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 							  "Instantiating values from wide-character strings is only "
 							  "supported on Windows with TOML_ENABLE_WINDOWS_COMPAT enabled.");
-				static_assert(is_native<unwrapped_type> || is_losslessly_convertible_to_native<unwrapped_type>,
-							  "Value initializers must be (or be promotable to) one of the TOML value types");
+
+				if constexpr (!is_losslessly_convertible_to_native<unwrapped_type>)
+				{
+					if constexpr (std::is_same_v<native_type, int64_t>)
+						static_assert(dependent_false<T>,
+									  "Integral value initializers must be losslessly convertible to int64_t");
+					else if constexpr (std::is_same_v<native_type, double>)
+						static_assert(dependent_false<T>,
+									  "Floating-point value initializers must be losslessly convertible to double");
+					else
+						static_assert(
+							dependent_false<T>,
+							"Value initializers must be losslessly convertible to one of the TOML value types");
+				}
 
 				if constexpr (is_wide_string<T>)
 				{
@@ -69,12 +81,12 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(T && val, value_flags flags = preserve_source_value_flags)
+	auto* make_node_impl(T && val, value_flags flags = preserve_source_value_flags)
 	{
-		using type = unwrap_node<remove_cvref<T>>;
-		if constexpr (std::is_same_v<type, node> || is_node_view<type>)
+		using unwrapped_type = unwrap_node<remove_cvref<T>>;
+		if constexpr (std::is_same_v<unwrapped_type, node> || is_node_view<unwrapped_type>)
 		{
-			if constexpr (is_node_view<type>)
+			if constexpr (is_node_view<unwrapped_type>)
 			{
 				if (!val)
 					return static_cast<toml::node*>(nullptr);
@@ -83,24 +95,24 @@ TOML_IMPL_NAMESPACE_START
 			return static_cast<T&&>(val).visit(
 				[flags](auto&& concrete) {
 					return static_cast<toml::node*>(
-						make_node_specialized(static_cast<decltype(concrete)&&>(concrete), flags));
+						make_node_impl_specialized(static_cast<decltype(concrete)&&>(concrete), flags));
 				});
 		}
 		else
-			return make_node_specialized(static_cast<T&&>(val), flags);
+			return make_node_impl_specialized(static_cast<T&&>(val), flags);
 	}
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node(inserter<T> && val, value_flags flags = preserve_source_value_flags)
+	auto* make_node_impl(inserter<T> && val, value_flags flags = preserve_source_value_flags)
 	{
-		return make_node(static_cast<T&&>(val.value), flags);
+		return make_node_impl(static_cast<T&&>(val.value), flags);
 	}
 
 	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
 	struct inserted_type_of_
 	{
-		using type = std::remove_pointer_t<decltype(make_node(std::declval<T>()))>;
+		using type = std::remove_pointer_t<decltype(make_node_impl(std::declval<T>()))>;
 	};
 
 	template <typename T>
@@ -114,6 +126,13 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using type = void;
 	};
+
+	template <typename T>
+	TOML_NODISCARD
+	node_ptr make_node(T && val, value_flags flags = preserve_source_value_flags)
+	{
+		return node_ptr{ make_node_impl(static_cast<T&&>(val), flags) };
+	}
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

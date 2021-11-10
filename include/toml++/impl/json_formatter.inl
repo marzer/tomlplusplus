@@ -42,7 +42,7 @@ TOML_NAMESPACE_START
 			print_newline(true);
 			print_indent();
 
-			print_string(k, false);
+			print_string(k.str(), false);
 			print_unformatted(" : "sv);
 
 			const auto type = v.type();
