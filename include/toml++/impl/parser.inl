@@ -777,7 +777,7 @@ TOML_ANON_NAMESPACE_START
 			std::memcpy(write_pos, arg.data(), len);
 			write_pos += len;
 		}
-		else if constexpr (std::is_floating_point_v<arg_t>)
+		else if constexpr (std::is_same_v<arg_t, double>)
 		{
 #if TOML_FLOAT_CHARCONV
 			const auto result = std::to_chars(write_pos, buf_end, arg);
@@ -785,12 +785,12 @@ TOML_ANON_NAMESPACE_START
 #else
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
-			ss.precision(std::numeric_limits<arg_t>::digits10 + 1);
+			ss.precision(std::numeric_limits<arg_t>::max_digits10);
 			ss << arg;
 			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 #endif
 		}
-		else if constexpr (std::is_integral_v<arg_t>)
+		else if constexpr (impl::is_one_of<arg_t, int64_t, uint64_t>)
 		{
 #if TOML_INT_CHARCONV
 			const auto result = std::to_chars(write_pos, buf_end, arg);
@@ -803,6 +803,8 @@ TOML_ANON_NAMESPACE_START
 			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 #endif
 		}
+		else
+			static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
 	}
 
 	struct error_builder
@@ -1324,6 +1326,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		std::string_view parse_basic_string(bool multi_line)
 		{
 			return_if_error({});
@@ -1549,6 +1552,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		std::string_view parse_literal_string(bool multi_line)
 		{
 			return_if_error({});
@@ -1773,6 +1777,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		double parse_float()
 		{
 			return_if_error({});
@@ -1928,6 +1933,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		double parse_hex_float()
 		{
 			return_if_error({});
@@ -2104,6 +2110,7 @@ TOML_IMPL_NAMESPACE_START
 
 		template <uint64_t base>
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		int64_t parse_integer()
 		{
 			return_if_error({});
@@ -2223,6 +2230,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		date parse_date(bool part_of_datetime = false)
 		{
 			return_if_error({});
@@ -2277,6 +2285,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		time parse_time(bool part_of_datetime = false)
 		{
 			return_if_error({});
@@ -2368,6 +2377,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		date_time parse_date_time()
 		{
 			return_if_error({});
@@ -2444,6 +2454,7 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr parse_inline_table();
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		node_ptr parse_value_known_prefixes()
 		{
 			return_if_error({});
@@ -2457,32 +2468,32 @@ TOML_IMPL_NAMESPACE_START
 				case U'[': return parse_array();
 
 				// inline tables
-				case U'{':
-					return parse_inline_table();
+				case U'{': return parse_inline_table();
 
-					// floats beginning with '.'
-				case U'.':
-					return node_ptr{ new value{ parse_float() } };
+				// floats beginning with '.'
+				case U'.': return node_ptr{ new value{ parse_float() } };
 
-					// strings
+				// strings
 				case U'"': [[fallthrough]];
-				case U'\'':
-					return node_ptr{ new value{ parse_string().value } };
+				case U'\'': return node_ptr{ new value{ parse_string().value } };
+
+				default:
+				{
+					const auto cp_upper = static_cast<uint_least32_t>(cp->value) & ~0x20u;
 
 					// bools
-				case U't': [[fallthrough]];
-				case U'f': [[fallthrough]];
-				case U'T': [[fallthrough]];
-				case U'F':
-					return node_ptr{ new value{ parse_boolean() } };
+					if (cp_upper == 70u || cp_upper == 84u) // F or T
+						return node_ptr{ new value{ parse_boolean() } };
 
 					// inf/nan
-				case U'i': [[fallthrough]];
-				case U'I': [[fallthrough]];
-				case U'n': [[fallthrough]];
-				case U'N': return node_ptr{ new value{ parse_inf_or_nan() } };
+					else if (cp_upper == 73u || cp_upper == 78u) // I or N
+						return node_ptr{ new value{ parse_inf_or_nan() } };
+
+					else
+						return nullptr;
+				}
 			}
-			return nullptr;
+			TOML_UNREACHABLE;
 		}
 
 		TOML_NODISCARD
@@ -2569,7 +2580,7 @@ TOML_IMPL_NAMESPACE_START
 				char32_t chars[utf8_buffered_reader::max_history_length];
 				size_t char_count = {}, advance_count = {};
 				bool eof_while_scanning = false;
-				const auto scan			= [&]()
+				const auto scan			= [&]() noexcept(!TOML_COMPILER_EXCEPTIONS)
 				{
 					if (is_eof())
 						return;
@@ -2962,6 +2973,7 @@ TOML_IMPL_NAMESPACE_START
 			return val;
 		}
 
+		TOML_NEVER_INLINE
 		bool parse_key()
 		{
 			return_if_error({});
@@ -3048,6 +3060,7 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
+		TOML_NEVER_INLINE
 		table* parse_table_header()
 		{
 			return_if_error({});
@@ -3135,8 +3148,8 @@ TOML_IMPL_NAMESPACE_START
 					{
 						// table arrays are a special case;
 						// the spec dictates we select the most recently declared element in the array.
-						TOML_ASSERT(!arr->elems_.empty());
-						TOML_ASSERT(arr->elems_.back()->is_table());
+						TOML_ASSERT(!arr->empty());
+						TOML_ASSERT(arr->back().is_table());
 						parent = &arr->back().ref_cast<table>();
 					}
 					else
@@ -3249,6 +3262,7 @@ TOML_IMPL_NAMESPACE_START
 			}
 		}
 
+		TOML_NEVER_INLINE
 		bool parse_key_value_pair_and_insert(table* tbl)
 		{
 			return_if_error({});
@@ -3341,7 +3355,7 @@ TOML_IMPL_NAMESPACE_START
 			node_ptr val = parse_value();
 			return_if_error({});
 
-			tbl->map_.emplace_hint(it.raw_, std::move(last_key), std::move(val));
+			tbl->emplace_hint<node_ptr>(it, std::move(last_key), std::move(val));
 			return true;
 		}
 
@@ -3404,23 +3418,24 @@ TOML_IMPL_NAMESPACE_START
 			if (type == node_type::table)
 			{
 				auto& tbl = nde.ref_cast<table>();
-				if (tbl.inline_) // inline tables (and all their inline descendants) are already correctly terminated
+				if (tbl.is_inline()) // inline tables (and all their inline descendants) are already correctly
+									 // terminated
 					return;
 
 				auto end = nde.source_.end;
-				for (auto& [k, v] : tbl.map_)
+				for (auto&& [k, v] : tbl)
 				{
 					(void)k;
-					update_region_ends(*v);
-					if (end < v->source_.end)
-						end = v->source_.end;
+					update_region_ends(v);
+					if (end < v.source_.end)
+						end = v.source_.end;
 				}
 			}
 			else // arrays
 			{
 				auto& arr = nde.ref_cast<array>();
 				auto end  = nde.source_.end;
-				for (auto& v : arr)
+				for (auto&& v : arr)
 				{
 					update_region_ends(v);
 					if (end < v.source_.end)
@@ -3530,7 +3545,7 @@ TOML_IMPL_NAMESPACE_START
 				prev = val;
 				if (!arr.capacity())
 					arr.reserve(4u);
-				arr.elems_.emplace_back(parse_value());
+				arr.emplace_back<node_ptr>(parse_value());
 			}
 		}
 
@@ -3550,8 +3565,8 @@ TOML_IMPL_NAMESPACE_START
 		advance_and_return_if_error_or_eof({});
 
 		node_ptr tbl_ptr{ new table{} };
-		table& tbl	= tbl_ptr->ref_cast<table>();
-		tbl.inline_ = true;
+		table& tbl = tbl_ptr->ref_cast<table>();
+		tbl.is_inline(true);
 		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,

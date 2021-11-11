@@ -178,7 +178,7 @@ TOML_ANON_NAMESPACE_START
 
 				std::ostringstream ss;
 				ss.imbue(std::locale::classic());
-				ss.precision(std::numeric_limits<T>::digits10 + 1);
+				ss.precision(std::numeric_limits<T>::max_digits10);
 				if (!!(format & value_flags::format_as_hexadecimal))
 					ss << std::hexfloat;
 				ss << val;

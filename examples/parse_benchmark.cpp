@@ -68,7 +68,7 @@ int main(int argc, char** argv)
 
 	const auto start = std::chrono::steady_clock::now();
 	for (size_t i = 0; i < iterations; i++)
-		std::ignore = toml::parse_file(file_path);
+		std::ignore = toml::parse(file_content, file_path);
 	const auto cumulative_sec =
 		std::chrono::duration_cast<std::chrono::duration<double>>(std::chrono::steady_clock::now() - start).count();
 	const auto mean_sec = cumulative_sec / static_cast<double>(iterations);

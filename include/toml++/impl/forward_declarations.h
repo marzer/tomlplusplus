@@ -389,7 +389,7 @@ TOML_IMPL_NAMESPACE_START
 		is_one_of<std::decay_t<T>, const wchar_t*, wchar_t*, std::wstring_view, std::wstring>;
 
 	template <typename T>
-	static constexpr bool value_retrieval_is_nothrow = !std::is_same_v<remove_cvref<T>, std::string>
+	inline constexpr bool value_retrieval_is_nothrow = !std::is_same_v<remove_cvref<T>, std::string>
 #if TOML_HAS_CHAR8
 													&& !std::is_same_v<remove_cvref<T>, std::u8string>
 #endif
@@ -398,6 +398,11 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	inline constexpr bool dependent_false = false;
+
+	template <typename T, typename... U>
+	inline constexpr bool first_is_same = false;
+	template <typename T, typename... U>
+	inline constexpr bool first_is_same<T, T, U...> = true;
 
 	// general value traits
 	// (as they relate to their equivalent native TOML type)

@@ -30,55 +30,59 @@ TOML_IMPL_NAMESPACE_START
 	  private:
 		template <bool>
 		friend class table_iterator;
-		friend class TOML_NAMESPACE::table;
-		friend class TOML_PARSER_TYPENAME;
 
 		using proxy_type		   = table_proxy_pair<IsConst>;
 		using raw_mutable_iterator = std::map<toml::key, node_ptr, std::less<>>::iterator;
 		using raw_const_iterator   = std::map<toml::key, node_ptr, std::less<>>::const_iterator;
 		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
-		mutable raw_iterator raw_;
-		mutable std::aligned_storage_t<sizeof(proxy_type), alignof(proxy_type)> proxy;
-		mutable bool proxy_instantiated = false;
+		mutable raw_iterator iter_;
+		mutable std::aligned_storage_t<sizeof(proxy_type), alignof(proxy_type)> proxy_;
+		mutable bool proxy_instantiated_ = false;
 
 		TOML_NODISCARD
 		proxy_type* get_proxy() const noexcept
 		{
-			if (!proxy_instantiated)
+			if (!proxy_instantiated_)
 			{
-				auto p			   = ::new (static_cast<void*>(&proxy)) proxy_type{ raw_->first, *raw_->second.get() };
-				proxy_instantiated = true;
+				auto p = ::new (static_cast<void*>(&proxy_)) proxy_type{ iter_->first, *iter_->second.get() };
+				proxy_instantiated_ = true;
 				return p;
 			}
 			else
-				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy));
+				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy_));
 		}
-
-		TOML_NODISCARD_CTOR
-		table_iterator(raw_mutable_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
-
-		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
-		TOML_NODISCARD_CTOR
-		table_iterator(raw_const_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
 
 	  public:
 		TOML_NODISCARD_CTOR
 		table_iterator() noexcept = default;
 
 		TOML_NODISCARD_CTOR
+		table_iterator(raw_mutable_iterator raw) noexcept //
+			: iter_{ raw }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		table_iterator(raw_const_iterator raw) noexcept //
+			: iter_{ raw }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		table_iterator(const table_iterator<false>& other) noexcept //
+			: iter_{ other.iter_ }
+		{}
+
+		TOML_NODISCARD_CTOR
 		table_iterator(const table_iterator& other) noexcept //
-			: raw_{ other.raw_ }
+			: iter_{ other.iter_ }
 		{}
 
 		table_iterator& operator=(const table_iterator& rhs) noexcept
 		{
-			raw_			   = rhs.raw_;
-			proxy_instantiated = false;
+			iter_				= rhs.iter_;
+			proxy_instantiated_ = false;
 			return *this;
 		}
 
@@ -90,31 +94,31 @@ TOML_IMPL_NAMESPACE_START
 
 		table_iterator& operator++() noexcept // ++pre
 		{
-			++raw_;
-			proxy_instantiated = false;
+			++iter_;
+			proxy_instantiated_ = false;
 			return *this;
 		}
 
 		table_iterator operator++(int) noexcept // post++
 		{
-			table_iterator out{ raw_ };
-			++raw_;
-			proxy_instantiated = false;
+			table_iterator out{ iter_ };
+			++iter_;
+			proxy_instantiated_ = false;
 			return out;
 		}
 
 		table_iterator& operator--() noexcept // --pre
 		{
-			--raw_;
-			proxy_instantiated = false;
+			--iter_;
+			proxy_instantiated_ = false;
 			return *this;
 		}
 
 		table_iterator operator--(int) noexcept // post--
 		{
-			table_iterator out{ raw_ };
-			--raw_;
-			proxy_instantiated = false;
+			table_iterator out{ iter_ };
+			--iter_;
+			proxy_instantiated_ = false;
 			return out;
 		}
 
@@ -131,27 +135,22 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
+		operator const raw_iterator&() const noexcept
+		{
+			return iter_;
+		}
+
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
-			return lhs.raw_ == rhs.raw_;
+			return lhs.iter_ == rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
-			return lhs.raw_ != rhs.raw_;
+			return lhs.iter_ != rhs.iter_;
 		}
-
-		TOML_DISABLE_WARNINGS;
-
-		TOML_CONSTRAINED_TEMPLATE(!C, bool C = IsConst)
-		TOML_NODISCARD
-		operator table_iterator<true>() const noexcept
-		{
-			return table_iterator<true>{ raw_ };
-		}
-
-		TOML_ENABLE_WARNINGS;
 	};
 
 	struct table_init_pair
@@ -188,8 +187,6 @@ TOML_NAMESPACE_START
 	{
 	  private:
 		/// \cond
-
-		friend class TOML_PARSER_TYPENAME;
 
 		std::map<toml::key, impl::node_ptr, std::less<>> map_;
 		bool inline_ = false;
@@ -773,42 +770,42 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
 		{
-			return iterator{ map_.begin() };
+			return map_.begin();
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
-			return const_iterator{ map_.cbegin() };
+			return map_.cbegin();
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cbegin() const noexcept
 		{
-			return const_iterator{ map_.cbegin() };
+			return map_.cbegin();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		iterator end() noexcept
 		{
-			return iterator{ map_.end() };
+			return map_.end();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
-			return const_iterator{ map_.cend() };
+			return map_.cend();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cend() const noexcept
 		{
-			return const_iterator{ map_.cend() };
+			return map_.cend();
 		}
 
 		/// \brief	Returns true if the table is empty.
@@ -1152,30 +1149,42 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
+				static constexpr auto moving_node_ptr = std::is_same_v<ValueType, impl::node_ptr> //
+													 && sizeof...(ValueArgs) == 1u				  //
+													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
 				using unwrapped_type = impl::unwrap_node<ValueType>;
-				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+
+				static_assert(moving_node_ptr										//
+								  || impl::is_native<unwrapped_type>				//
+								  || impl::is_one_of<unwrapped_type, table, array>, //
 							  "ValueType argument of table::emplace_hint() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-				auto ipos = map_.emplace_hint(hint.raw_, static_cast<KeyType&&>(key), nullptr);
+				auto ipos = map_.emplace_hint(hint, static_cast<KeyType&&>(key), nullptr);
 
 				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
 				// so now we have to construct the actual value
 				if (!ipos->second)
 				{
+					if constexpr (moving_node_ptr)
+						ipos->second = std::move(static_cast<ValueArgs&&>(args)...);
+					else
+					{
 #if TOML_COMPILER_EXCEPTIONS
-					try
-					{
-						ipos->second.reset(new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
-					}
-					catch (...)
-					{
-						map_.erase(ipos); // strong exception guarantee
-						throw;
-					}
-#else
-					ipos->second.reset(new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
+						try
+						{
 #endif
+							ipos->second.reset(
+								new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
+#if TOML_COMPILER_EXCEPTIONS
+						}
+						catch (...)
+						{
+							map_.erase(ipos); // strong exception guarantee
+							throw;
+						}
+#endif
+					}
 				}
 				return ipos;
 			}
@@ -1284,7 +1293,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(iterator pos) noexcept
 		{
-			return { map_.erase(pos.raw_) };
+			return map_.erase(pos);
 		}
 
 		/// \brief	Removes the specified key-value pair from the table (const iterator overload).
@@ -1312,7 +1321,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(const_iterator pos) noexcept
 		{
-			return { map_.erase(pos.raw_) };
+			return map_.erase(pos);
 		}
 
 		/// \brief	Removes the key-value pairs in the range [first, last) from the table.
@@ -1342,7 +1351,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the last removed key-value pair.
 		iterator erase(const_iterator first, const_iterator last) noexcept
 		{
-			return { map_.erase(first.raw_, last.raw_) };
+			return map_.erase(first, last);
 		}
 
 		/// \brief	Removes the value with the given key from the table.
@@ -1405,7 +1414,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		iterator find(std::string_view key) noexcept
 		{
-			return { map_.find(key) };
+			return map_.find(key);
 		}
 
 		/// \brief	Gets an iterator to the node at a specific key (const overload)
@@ -1416,7 +1425,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const_iterator find(std::string_view key) const noexcept
 		{
-			return { map_.find(key) };
+			return map_.find(key);
 		}
 
 		/// \brief	Returns true if the table contains a node at the given key.

@@ -20,24 +20,12 @@ TOML_IMPL_NAMESPACE_START
 	  private:
 		template <bool>
 		friend class array_iterator;
-		friend class TOML_NAMESPACE::array;
 
 		using raw_mutable_iterator = std::vector<node_ptr>::iterator;
 		using raw_const_iterator   = std::vector<node_ptr>::const_iterator;
 		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
 
-		mutable raw_iterator raw_;
-
-		TOML_NODISCARD_CTOR
-		array_iterator(raw_mutable_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
-
-		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
-		TOML_NODISCARD_CTOR
-		array_iterator(raw_const_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
+		mutable raw_iterator iter_;
 
 	  public:
 		using value_type		= std::conditional_t<IsConst, const node, node>;
@@ -50,136 +38,148 @@ TOML_IMPL_NAMESPACE_START
 		array_iterator() noexcept = default;
 
 		TOML_NODISCARD_CTOR
+		array_iterator(raw_mutable_iterator raw) noexcept //
+			: iter_{ raw }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		array_iterator(raw_const_iterator raw) noexcept //
+			: iter_{ raw }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		array_iterator(const array_iterator<false>& other) noexcept //
+			: iter_{ other.iter_ }
+		{}
+
+		TOML_NODISCARD_CTOR
 		array_iterator(const array_iterator&) noexcept = default;
 
 		array_iterator& operator=(const array_iterator&) noexcept = default;
 
 		array_iterator& operator++() noexcept // ++pre
 		{
-			++raw_;
+			++iter_;
 			return *this;
 		}
 
 		array_iterator operator++(int) noexcept // post++
 		{
-			array_iterator out{ raw_ };
-			++raw_;
+			array_iterator out{ iter_ };
+			++iter_;
 			return out;
 		}
 
 		array_iterator& operator--() noexcept // --pre
 		{
-			--raw_;
+			--iter_;
 			return *this;
 		}
 
 		array_iterator operator--(int) noexcept // post--
 		{
-			array_iterator out{ raw_ };
-			--raw_;
+			array_iterator out{ iter_ };
+			--iter_;
 			return out;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
-			return *raw_->get();
+			return *iter_->get();
 		}
 
 		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
-			return raw_->get();
+			return iter_->get();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		operator const raw_iterator&() const noexcept
+		{
+			return iter_;
 		}
 
 		array_iterator& operator+=(ptrdiff_t rhs) noexcept
 		{
-			raw_ += rhs;
+			iter_ += rhs;
 			return *this;
 		}
 
 		array_iterator& operator-=(ptrdiff_t rhs) noexcept
 		{
-			raw_ -= rhs;
+			iter_ -= rhs;
 			return *this;
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator+(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
-			return { lhs.raw_ + rhs };
+			return lhs.iter_ + rhs;
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator+(ptrdiff_t lhs, const array_iterator& rhs) noexcept
 		{
-			return { rhs.raw_ + lhs };
+			return rhs.iter_ + lhs;
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator-(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
-			return { lhs.raw_ - rhs };
+			return lhs.iter_ - rhs;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend ptrdiff_t operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ - rhs.raw_;
+			return lhs.iter_ - rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ == rhs.raw_;
+			return lhs.iter_ == rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ != rhs.raw_;
+			return lhs.iter_ != rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ < rhs.raw_;
+			return lhs.iter_ < rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ <= rhs.raw_;
+			return lhs.iter_ <= rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ > rhs.raw_;
+			return lhs.iter_ > rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		friend bool operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ >= rhs.raw_;
+			return lhs.iter_ >= rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
 		reference operator[](ptrdiff_t idx) const noexcept
 		{
-			return *(raw_ + idx)->get();
+			return *(iter_ + idx)->get();
 		}
-
-		TOML_DISABLE_WARNINGS;
-
-		TOML_CONSTRAINED_TEMPLATE(!C, bool C = IsConst)
-		TOML_NODISCARD
-		operator array_iterator<true>() const noexcept
-		{
-			return array_iterator<true>{ raw_ };
-		}
-
-		TOML_ENABLE_WARNINGS;
 	};
 }
 TOML_IMPL_NAMESPACE_END;
@@ -249,7 +249,6 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
-		friend class TOML_PARSER_TYPENAME;
 		std::vector<impl::node_ptr> elems_;
 
 		TOML_API
@@ -768,42 +767,42 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		iterator begin() noexcept
 		{
-			return { elems_.begin() };
+			return elems_.begin();
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator begin() const noexcept
 		{
-			return { elems_.cbegin() };
+			return elems_.cbegin();
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator cbegin() const noexcept
 		{
-			return { elems_.cbegin() };
+			return elems_.cbegin();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		iterator end() noexcept
 		{
-			return { elems_.end() };
+			return elems_.end();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator end() const noexcept
 		{
-			return { elems_.cend() };
+			return elems_.cend();
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator cend() const noexcept
 		{
-			return { elems_.cend() };
+			return elems_.cend();
 		}
 
 		/// \brief	Returns true if the array is empty.
@@ -887,7 +886,7 @@ TOML_NAMESPACE_START
 				if (!val)
 					return end();
 			}
-			return { elems_.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val), flags)) };
+			return elems_.emplace(pos, impl::make_node(static_cast<ElemType&&>(val), flags));
 		}
 
 		/// \brief	Repeatedly inserts a new element starting at a specific position in the array.
@@ -941,11 +940,11 @@ TOML_NAMESPACE_START
 			}
 			switch (count)
 			{
-				case 0: return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
+				case 0: return elems_.begin() + (pos - elems_.cbegin());
 				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
-					const auto start_idx = static_cast<size_t>(pos.raw_ - elems_.cbegin());
+					const auto start_idx = static_cast<size_t>(pos - elems_.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
 					for (size_t e = start_idx + count - 1u; i < e; i++)
@@ -953,7 +952,7 @@ TOML_NAMESPACE_START
 
 					//# potentially move the initial value into the last element
 					elems_[i] = impl::make_node(static_cast<ElemType&&>(val), flags);
-					return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
+					return elems_.begin() + static_cast<ptrdiff_t>(start_idx);
 				}
 			}
 		}
@@ -977,7 +976,7 @@ TOML_NAMESPACE_START
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
-				return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
+				return elems_.begin() + (pos - elems_.cbegin());
 			else
 			{
 				auto count		 = distance;
@@ -988,9 +987,9 @@ TOML_NAMESPACE_START
 						if (!(*it))
 							count--;
 					if (!count)
-						return { elems_.begin() + (pos.raw_ - elems_.cbegin()) };
+						return elems_.begin() + (pos - elems_.cbegin());
 				}
-				const auto start_idx = static_cast<size_t>(pos.raw_ - elems_.cbegin());
+				const auto start_idx = static_cast<size_t>(pos - elems_.cbegin());
 				preinsertion_resize(start_idx, static_cast<size_t>(count));
 				size_t i = start_idx;
 				for (auto it = first; it != last; it++)
@@ -1005,7 +1004,7 @@ TOML_NAMESPACE_START
 					else
 						elems_[i++] = impl::make_node(*it, flags);
 				}
-				return { elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
+				return elems_.begin() + static_cast<ptrdiff_t>(start_idx);
 			}
 		}
 
@@ -1062,7 +1061,7 @@ TOML_NAMESPACE_START
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return { elems_.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
+			return elems_.emplace(pos, new impl::wrap_node<type>{ static_cast<Args&&>(args)... });
 		}
 
 		/// \brief	Replaces the element at a specific position in the array with a different value.
@@ -1103,9 +1102,9 @@ TOML_NAMESPACE_START
 					return end();
 			}
 
-			const auto it = elems_.begin() + (pos.raw_ - elems_.cbegin());
+			const auto it = elems_.begin() + (pos - elems_.cbegin());
 			*it			  = impl::make_node(static_cast<ElemType&&>(val), flags);
-			return iterator{ it };
+			return it;
 		}
 
 		/// \brief	Removes the specified element from the array.
@@ -1129,7 +1128,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first element immediately following the removed element.
 		iterator erase(const_iterator pos) noexcept
 		{
-			return { elems_.erase(pos.raw_) };
+			return elems_.erase(pos);
 		}
 
 		/// \brief	Removes the elements in the range [first, last) from the array.
@@ -1154,7 +1153,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first element immediately following the last removed element.
 		iterator erase(const_iterator first, const_iterator last) noexcept
 		{
-			return { elems_.erase(first.raw_, last.raw_) };
+			return elems_.erase(first, last);
 		}
 
 		/// \brief	Resizes the array.
@@ -1271,23 +1270,41 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \tparam	Args		Value constructor argument types.
-		/// \param 	args		Arguments to forward to the value's constructor.
+		/// \tparam	ElemArgs	Element constructor argument types.
+		/// \param 	args		Arguments to forward to the elements's constructor.
 		///
 		/// \returns A reference to the newly-constructed element.
 		///
 		/// \remarks There is no difference between push_back() and emplace_back()
 		/// 		 For trivial value types (floats, ints, bools).
-		template <typename ElemType, typename... Args>
-		decltype(auto) emplace_back(Args&&... args)
+		template <typename ElemType, typename... ElemArgs>
+		decltype(auto) emplace_back(ElemArgs&&... args)
 		{
-			using type = impl::unwrap_node<ElemType>;
-			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
-						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
 
-			auto nde = new impl::wrap_node<type>{ static_cast<Args&&>(args)... };
-			elems_.emplace_back(nde);
-			return *nde;
+			static constexpr auto moving_node_ptr = std::is_same_v<ElemType, impl::node_ptr> //
+												 && sizeof...(ElemArgs) == 1u				 //
+												 && impl::first_is_same<impl::node_ptr&&, ElemArgs&&...>;
+
+			using unwrapped_type = impl::unwrap_node<ElemType>;
+
+			static_assert(
+				moving_node_ptr										  //
+					|| impl::is_native<unwrapped_type>				  //
+					|| impl::is_one_of<unwrapped_type, table, array>, //
+				"ElemType argument of array::emplace_back() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
+			if constexpr (moving_node_ptr)
+			{
+				elems_.emplace_back(static_cast<ElemArgs&&>(args)...);
+				return *elems_.back();
+			}
+			else
+			{
+				auto nde = new impl::wrap_node<unwrapped_type>{ static_cast<ElemArgs&&>(args)... };
+				elems_.emplace_back(nde);
+				return *nde;
+			}
 		}
 
 		/// \brief	Removes the last element from the array.
