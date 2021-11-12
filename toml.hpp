@@ -1112,7 +1112,6 @@ TOML_NAMESPACE_START
 	class toml_formatter;
 	class json_formatter;
 	class yaml_formatter;
-	class xml_formatter;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 #if TOML_EXCEPTIONS
@@ -5540,10 +5539,17 @@ TOML_NAMESPACE_START
 		TOML_API
 		array& flatten() &;
 
-		TOML_API
 		array&& flatten() &&
 		{
 			return static_cast<toml::array&&>(this->flatten());
+		}
+
+		TOML_API
+		array& prune(bool recursive = true) & noexcept;
+
+		array&& prune(bool recursive = true) && noexcept
+		{
+			return static_cast<toml::array&&>(this->prune(recursive));
 		}
 
 	  private:
@@ -5625,12 +5631,8 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/table.h  **********************************************************************************************
+//********  impl/key.h  ************************************************************************************************
 
-TOML_DISABLE_WARNINGS;
-#include <map>
-#include <iterator>
-TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -5863,6 +5865,13 @@ TOML_IMPL_NAMESPACE_END;
 #pragma pop_macro("max")
 #endif
 TOML_POP_WARNINGS;
+
+//********  impl/table.h  **********************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <map>
+#include <iterator>
+TOML_ENABLE_WARNINGS;
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -6778,6 +6787,14 @@ TOML_NAMESPACE_START
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_API
+		table& prune(bool recursive = true) & noexcept;
+
+		table&& prune(bool recursive = true) && noexcept
+		{
+			return static_cast<toml::table&&>(this->prune(recursive));
+		}
 
 	  private:
 
@@ -9770,6 +9787,33 @@ TOML_NAMESPACE_START
 
 		return *this;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::prune(bool recursive)& noexcept
+	{
+		if (elems_.empty())
+			return *this;
+
+		for (size_t i = elems_.size(); i-- > 0u;)
+		{
+			if (auto arr = elems_[i]->as_array())
+			{
+				if (recursive)
+					arr->prune(true);
+				if (arr->empty())
+					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+			}
+			else if (auto tbl = elems_[i]->as_table())
+			{
+				if (recursive)
+					tbl->prune(true);
+				if (tbl->empty())
+					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+			}
+		}
+
+		return *this;
+	}
 }
 TOML_NAMESPACE_END;
 
@@ -9977,6 +10021,42 @@ TOML_NAMESPACE_START
 	table::const_iterator table::lower_bound(std::string_view key) const noexcept
 	{
 		return const_iterator{ map_.lower_bound(key) };
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table& table::prune(bool recursive)& noexcept
+	{
+		if (map_.empty())
+			return *this;
+
+		for (auto it = map_.begin(); it != map_.end();)
+		{
+			if (auto arr = it->second->as_array())
+			{
+				if (recursive)
+					arr->prune(true);
+
+				if (arr->empty())
+				{
+					it = map_.erase(it);
+					continue;
+				}
+			}
+			else if (auto tbl = it->second->as_table())
+			{
+				if (recursive)
+					tbl->prune(true);
+
+				if (tbl->empty())
+				{
+					it = map_.erase(it);
+					continue;
+				}
+			}
+			it++;
+		}
+
+		return *this;
 	}
 }
 TOML_NAMESPACE_END;

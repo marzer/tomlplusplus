@@ -243,6 +243,33 @@ TOML_NAMESPACE_START
 
 		return *this;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	array& array::prune(bool recursive)& noexcept
+	{
+		if (elems_.empty())
+			return *this;
+
+		for (size_t i = elems_.size(); i-- > 0u;)
+		{
+			if (auto arr = elems_[i]->as_array())
+			{
+				if (recursive)
+					arr->prune(true);
+				if (arr->empty())
+					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+			}
+			else if (auto tbl = elems_[i]->as_table())
+			{
+				if (recursive)
+					tbl->prune(true);
+				if (tbl->empty())
+					elems_.erase(elems_.cbegin() + static_cast<ptrdiff_t>(i));
+			}
+		}
+
+		return *this;
+	}
 }
 TOML_NAMESPACE_END;
 

@@ -1555,6 +1555,38 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
+		/// \brief	Removes empty child arrays and tables.
+		///
+		/// \detail \cpp
+		///
+		/// auto tbl = toml::table{ { "a", 1 }, { "b", toml::array{ } }, { "c", toml::array{ toml::table{}, toml::array{} } } };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.prune();
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// { a = 1, b = [], c = [ {}, [] ] }
+		/// { a = 1 }
+		/// \eout
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns A reference to the table.
+		TOML_API
+		table& prune(bool recursive = true) & noexcept;
+
+		/// \brief	Removes empty child arrays and tables (rvalue overload).
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns An rvalue reference to the table.
+		table&& prune(bool recursive = true) && noexcept
+		{
+			return static_cast<toml::table&&>(this->prune(recursive));
+		}
+
 		/// @}
 
 	  private:

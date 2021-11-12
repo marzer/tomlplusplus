@@ -441,16 +441,16 @@ TEST_CASE("arrays - insertion and erasure")
 
 	arr.clear();
 	it = arr.insert(arr.cbegin(), L"test");
-	REQUIRE(*arr.get_as<std::string>(0u) == "test"sv);
+	CHECK(*arr.get_as<std::string>(0u) == "test"sv);
 
 	it = arr.emplace<std::string>(arr.cbegin(), L"test2"sv);
-	REQUIRE(*arr.get_as<std::string>(0u) == "test2"sv);
+	CHECK(*arr.get_as<std::string>(0u) == "test2"sv);
 
 	arr.push_back(L"test3"s);
-	REQUIRE(*arr.back().as_string() == "test3"sv);
+	CHECK(*arr.back().as_string() == "test3"sv);
 
 	arr.emplace_back<std::string>(L"test4");
-	REQUIRE(*arr.back().as_string() == "test4"sv);
+	CHECK(*arr.back().as_string() == "test4"sv);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 }
@@ -475,7 +475,7 @@ TEST_CASE("arrays - flattening")
 				   11 },
 		};
 		arr.flatten();
-		REQUIRE(arr == array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
+		CHECK(arr == array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
 	}
 
 	{
@@ -484,37 +484,53 @@ TEST_CASE("arrays - flattening")
 				   array{ array{}, array{ array{}, array{} }, array{} },
 				   array{ array{ array{ array{ array{ array{ 1 } } } } } } };
 		arr.flatten();
-		REQUIRE(arr == array{ 1 });
+		CHECK(arr == array{ 1 });
 	}
+}
+
+TEST_CASE("arrays - pruning")
+{
+	// [ 1, [ 2, [], 3 ], { 4 = 5, 6 = 7 }, [], 8, [{}], 9, 10 ]
+	const auto arr =
+		array{ 1, array{ 2, array{}, 3 }, table{ { "4", 5 }, { "6", array{} } }, array{}, 8, array{ table{} }, 9, 10 };
+
+	// [ 1, [ 2, 3 ], { 4 = 5, 6 = 7 }, 8, 9, 10 ]
+	const auto pruned_recursive = array{ 1, array{ 2, 3 }, table{ { "4", 5 } }, 8, 9, 10 };
+	CHECK(array{ arr }.prune(true) == pruned_recursive);
+
+	// [ 1, [ 2, [], 3 ], { 4 = 5, 6 = 7 }, [], 8, [{}], 9, 10 ]
+	const auto pruned_flat =
+		array{ 1, array{ 2, array{}, 3 }, table{ { "4", 5 }, { "6", array{} } }, 8, array{ table{} }, 9, 10 };
+	CHECK(array{ arr }.prune(false) == pruned_flat);
 }
 
 TEST_CASE("arrays - resizing and truncation")
 {
 	array arr{ 1, 2, 3, 4, 5 };
-	REQUIRE(arr.size() == 5u);
+	CHECK(arr.size() == 5u);
 
 	// truncate with no change
 	arr.truncate(5u);
-	REQUIRE(arr.size() == 5u);
-	REQUIRE(arr == array{ 1, 2, 3, 4, 5 });
+	CHECK(arr.size() == 5u);
+	CHECK(arr == array{ 1, 2, 3, 4, 5 });
 
 	// truncate down to three elements
 	arr.truncate(3u);
-	REQUIRE(arr.size() == 3u);
-	REQUIRE(arr == array{ 1, 2, 3 });
+	CHECK(arr.size() == 3u);
+	CHECK(arr == array{ 1, 2, 3 });
 
 	// resize down to two elements
 	arr.resize(2u, 42);
-	REQUIRE(arr.size() == 2u);
-	REQUIRE(arr == array{ 1, 2 });
+	CHECK(arr.size() == 2u);
+	CHECK(arr == array{ 1, 2 });
 
 	// resize with no change
 	arr.resize(2u, 42);
-	REQUIRE(arr.size() == 2u);
-	REQUIRE(arr == array{ 1, 2 });
+	CHECK(arr.size() == 2u);
+	CHECK(arr == array{ 1, 2 });
 
 	// resize up to six elements
 	arr.resize(6u, 42);
-	REQUIRE(arr.size() == 6u);
-	REQUIRE(arr == array{ 1, 2, 42, 42, 42, 42 });
+	CHECK(arr.size() == 6u);
+	CHECK(arr == array{ 1, 2, 42, 42, 42, 42 });
 }

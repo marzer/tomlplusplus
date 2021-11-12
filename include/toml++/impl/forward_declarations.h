@@ -98,7 +98,6 @@ TOML_NAMESPACE_START
 	class toml_formatter;
 	class json_formatter;
 	class yaml_formatter;
-	class xml_formatter;
 
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 #if TOML_EXCEPTIONS

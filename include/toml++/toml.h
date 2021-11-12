@@ -34,6 +34,7 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #include "impl/value.h"
 #include "impl/make_node.h"
 #include "impl/array.h"
+#include "impl/key.h"
 #include "impl/table.h"
 #include "impl/utf8.h"
 #include "impl/parse_error.h"

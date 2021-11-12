@@ -37,6 +37,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `operator->` to `toml::value` for class types
 - added `parse_benchmark` example
 - added `toml::array::at()` (same semantics as `std::vector::at()`)
+- added `toml::array::prune()`
 - added `toml::array::replace()` (#109) (@LebJe)
 - added `toml::array::resize()` param `default_init_flags`
 - added `toml::format_flags::allow_binary_integers`
@@ -50,6 +51,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `toml::table::at()` (same semantics as `std::map::at()`)
 - added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
 - added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
+- added `toml::table::prune()`
 - added `toml::yaml_formatter`
 - added `TOML_ENABLE_FORMATTERS` option
 - added clang's enum annotation attributes to all enums

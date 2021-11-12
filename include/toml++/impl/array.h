@@ -1339,10 +1339,41 @@ TOML_NAMESPACE_START
 		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
 		///
 		/// \returns An rvalue reference to the array.
-		TOML_API
 		array&& flatten() &&
 		{
 			return static_cast<toml::array&&>(this->flatten());
+		}
+
+		/// \brief	Removes empty child arrays and tables.
+		///
+		/// \detail \cpp
+		///
+		/// auto arr = toml::array{ 1, 2, toml::array{ }, toml::array{ 3, toml::array{ } }, 4 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.prune();
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, [], [ 3, [] ], 4 ]
+		/// [ 1, 2, [ 3 ], 4 ]
+		/// \eout
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns A reference to the array.
+		TOML_API
+		array& prune(bool recursive = true) & noexcept;
+
+		/// \brief	Removes empty child arrays and tables (rvalue overload).
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns An rvalue reference to the array.
+		array&& prune(bool recursive = true) && noexcept
+		{
+			return static_cast<toml::array&&>(this->prune(recursive));
 		}
 
 		/// @}

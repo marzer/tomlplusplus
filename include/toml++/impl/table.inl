@@ -204,6 +204,42 @@ TOML_NAMESPACE_START
 	{
 		return const_iterator{ map_.lower_bound(key) };
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	table& table::prune(bool recursive)& noexcept
+	{
+		if (map_.empty())
+			return *this;
+
+		for (auto it = map_.begin(); it != map_.end();)
+		{
+			if (auto arr = it->second->as_array())
+			{
+				if (recursive)
+					arr->prune(true);
+
+				if (arr->empty())
+				{
+					it = map_.erase(it);
+					continue;
+				}
+			}
+			else if (auto tbl = it->second->as_table())
+			{
+				if (recursive)
+					tbl->prune(true);
+
+				if (tbl->empty())
+				{
+					it = map_.erase(it);
+					continue;
+				}
+			}
+			it++;
+		}
+
+		return *this;
+	}
 }
 TOML_NAMESPACE_END;
 
