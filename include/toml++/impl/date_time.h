@@ -229,7 +229,6 @@ TOML_NAMESPACE_START
 		/// std::cout << toml::time_offset{ -2, 30 } << "\n";
 		/// std::cout << toml::time_offset{ -2, -30 } << "\n";
 		/// std::cout << toml::time_offset{ 0, 0 } << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out

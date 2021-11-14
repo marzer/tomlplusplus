@@ -303,25 +303,115 @@ namespace toml
 	CHECK_INSERTED_AS(TOML_FLOAT16, value<double>);
 #endif
 
-	static_assert(is_same_v<decltype(declval<node&>().ref<double>()), double&>);
-	static_assert(is_same_v<decltype(declval<node&&>().ref<double>()), double&&>);
-	static_assert(is_same_v<decltype(declval<const node&>().ref<double>()), const double&>);
-	static_assert(is_same_v<decltype(declval<node&>().ref<value<double>>()), double&>);
-	static_assert(is_same_v<decltype(declval<node&&>().ref<value<double>>()), double&&>);
-	static_assert(is_same_v<decltype(declval<const node&>().ref<value<double>>()), const double&>);
-	static_assert(is_same_v<decltype(declval<node&>().ref<table>()), table&>);
-	static_assert(is_same_v<decltype(declval<node&&>().ref<table>()), table&&>);
-	static_assert(is_same_v<decltype(declval<const node&>().ref<table>()), const table&>);
-	static_assert(is_same_v<decltype(declval<node&>().ref<array>()), array&>);
-	static_assert(is_same_v<decltype(declval<node&&>().ref<array>()), array&&>);
-	static_assert(is_same_v<decltype(declval<const node&>().ref<array>()), const array&>);
+#define CHECK_NODE_REF_TYPE(T)                                                                                         \
+	static_assert(is_same_v<decltype(declval<node&>().ref<T>()), T&>);                                                 \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const T>()), const T&>);                                     \
+	static_assert(is_same_v<decltype(declval<node&>().ref<volatile T>()), volatile T&>);                               \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const volatile T>()), const volatile T&>);                   \
+	static_assert(is_same_v<decltype(declval<node&>().ref<T&>()), T&>);                                                \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const T&>()), const T&>);                                    \
+	static_assert(is_same_v<decltype(declval<node&>().ref<volatile T&>()), volatile T&>);                              \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const volatile T&>()), const volatile T&>);                  \
+	static_assert(is_same_v<decltype(declval<node&>().ref<T&&>()), T&&>);                                              \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const T&&>()), const T&&>);                                  \
+	static_assert(is_same_v<decltype(declval<node&>().ref<volatile T&&>()), volatile T&&>);                            \
+	static_assert(is_same_v<decltype(declval<node&>().ref<const volatile T&&>()), const volatile T&&>);                \
+                                                                                                                       \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<T>()), T&&>);                                               \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const T>()), const T&&>);                                   \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<volatile T>()), volatile T&&>);                             \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const volatile T>()), const volatile T&&>);                 \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<T&>()), T&>);                                               \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const T&>()), const T&>);                                   \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<volatile T&>()), volatile T&>);                             \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const volatile T&>()), const volatile T&>);                 \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<T&&>()), T&&>);                                             \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const T&&>()), const T&&>);                                 \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<volatile T&&>()), volatile T&&>);                           \
+	static_assert(is_same_v<decltype(declval<node&&>().ref<const volatile T&&>()), const volatile T&&>);               \
+                                                                                                                       \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<T>()), const T&>);                                     \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const T>()), const T&>);                               \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<volatile T>()), const volatile T&>);                   \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const volatile T>()), const volatile T&>);             \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<T&>()), const T&>);                                    \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const T&>()), const T&>);                              \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<volatile T&>()), const volatile T&>);                  \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const volatile T&>()), const volatile T&>);            \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<T&&>()), const T&&>);                                  \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const T&&>()), const T&&>);                            \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<volatile T&&>()), const volatile T&&>);                \
+	static_assert(is_same_v<decltype(declval<const node&>().ref<const volatile T&&>()), const volatile T&&>);          \
+                                                                                                                       \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<T>()), const T&&>);                                   \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const T>()), const T&&>);                             \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<volatile T>()), const volatile T&&>);                 \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const volatile T>()), const volatile T&&>);           \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<T&>()), const T&>);                                   \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const T&>()), const T&>);                             \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<volatile T&>()), const volatile T&>);                 \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const volatile T&>()), const volatile T&>);           \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<T&&>()), const T&&>);                                 \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const T&&>()), const T&&>);                           \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<volatile T&&>()), const volatile T&&>);               \
+	static_assert(is_same_v<decltype(declval<const node&&>().ref<const volatile T&&>()), const volatile T&&>)
 
-	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<double>()), double&>);
-	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<double>()), const double&>);
-	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<value<double>>()), double&>);
-	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<value<double>>()), const double&>);
-	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<table>()), table&>);
-	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<table>()), const table&>);
-	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<array>()), array&>);
-	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<array>()), const array&>);
+	CHECK_NODE_REF_TYPE(table);
+	CHECK_NODE_REF_TYPE(array);
+	CHECK_NODE_REF_TYPE(std::string);
+	CHECK_NODE_REF_TYPE(int64_t);
+	CHECK_NODE_REF_TYPE(double);
+	CHECK_NODE_REF_TYPE(bool);
+	CHECK_NODE_REF_TYPE(date);
+	CHECK_NODE_REF_TYPE(time);
+	CHECK_NODE_REF_TYPE(date_time);
+
+#define CHECK_NODE_VIEW_REF_TYPE(T)                                                                                    \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<T>()), T&>);                                       \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const T>()), const T&>);                           \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<volatile T>()), volatile T&>);                     \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const volatile T>()), const volatile T&>);         \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<T&>()), T&>);                                      \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const T&>()), const T&>);                          \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<volatile T&>()), volatile T&>);                    \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const volatile T&>()), const volatile T&>);        \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<T&&>()), T&&>);                                    \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const T&&>()), const T&&>);                        \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<volatile T&&>()), volatile T&&>);                  \
+	static_assert(is_same_v<decltype(declval<node_view<node>>().ref<const volatile T&&>()), const volatile T&&>)
+
+	CHECK_NODE_VIEW_REF_TYPE(table);
+	CHECK_NODE_VIEW_REF_TYPE(array);
+	CHECK_NODE_VIEW_REF_TYPE(std::string);
+	CHECK_NODE_VIEW_REF_TYPE(int64_t);
+	CHECK_NODE_VIEW_REF_TYPE(double);
+	CHECK_NODE_VIEW_REF_TYPE(bool);
+	CHECK_NODE_VIEW_REF_TYPE(date);
+	CHECK_NODE_VIEW_REF_TYPE(time);
+	CHECK_NODE_VIEW_REF_TYPE(date_time);
+
+#define CHECK_CONST_NODE_VIEW_REF_TYPE(T)                                                                              \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<T>()), const T&>);                           \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const T>()), const T&>);                     \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<volatile T>()), const volatile T&>);         \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const volatile T>()), const volatile T&>);   \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<T&>()), const T&>);                          \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const T&>()), const T&>);                    \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<volatile T&>()), const volatile T&>);        \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const volatile T&>()), const volatile T&>);  \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<T&&>()), const T&&>);                        \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const T&&>()), const T&&>);                  \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<volatile T&&>()), const volatile T&&>);      \
+	static_assert(is_same_v<decltype(declval<node_view<const node>>().ref<const volatile T&&>()), const volatile T&&>)
+
+	CHECK_CONST_NODE_VIEW_REF_TYPE(table);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(array);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(std::string);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(int64_t);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(double);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(bool);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(date);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(time);
+	CHECK_CONST_NODE_VIEW_REF_TYPE(date_time);
+
 }

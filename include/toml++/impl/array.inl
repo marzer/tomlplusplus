@@ -17,6 +17,37 @@
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	array::array(const impl::array_init_elem* b, const impl::array_init_elem* e)
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_CREATED;
+#endif
+
+		TOML_ASSERT_ASSUME(b);
+		TOML_ASSERT_ASSUME(e);
+		TOML_ASSERT_ASSUME(b <= e);
+
+		if TOML_UNLIKELY(b == e)
+			return;
+
+		size_t cap{};
+		for (auto it = b; it != e; it++)
+		{
+			if (it->value)
+				cap++;
+		}
+		if TOML_UNLIKELY(!cap)
+			return;
+
+		elems_.reserve(cap);
+		for (; b != e; b++)
+		{
+			if (b->value)
+				elems_.push_back(std::move(b->value));
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) //
 		: node(other)
 	{
@@ -32,7 +63,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	array::array(array && other) noexcept //
 		: node(std::move(other)),
-		  elems_{ std::move(other.elems_) }
+		  elems_(std::move(other.elems_))
 	{
 #if TOML_LIFETIME_HOOKS
 		TOML_ARRAY_CREATED;
@@ -68,7 +99,7 @@ TOML_NAMESPACE_START
 	void array::preinsertion_resize(size_t idx, size_t count)
 	{
 		TOML_ASSERT(idx <= elems_.size());
-		TOML_ASSERT(count >= 1u);
+		TOML_ASSERT_ASSUME(count >= 1u);
 		const auto old_size			= elems_.size();
 		const auto new_size			= old_size + count;
 		const auto inserting_at_end = idx == old_size;
@@ -78,6 +109,18 @@ TOML_NAMESPACE_START
 			for (size_t left = old_size, right = new_size - 1u; left-- > idx; right--)
 				elems_[right] = std::move(elems_[left]);
 		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::insert_at_back(impl::node_ptr && elem)
+	{
+		elems_.push_back(std::move(elem));
+	}
+
+	TOML_API
+	array::vector_iterator array::insert_at(const_vector_iterator pos, impl::node_ptr && elem)
+	{
+		return elems_.insert(pos, std::move(elem));
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -136,34 +179,41 @@ TOML_NAMESPACE_START
 #else
 
 		auto n = get(index);
-		TOML_ASSERT(n && "element index not found in array!");
+		TOML_ASSERT_ASSUME(n && "element index not found in array!");
 		return *n;
 
 #endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool array::equal(const array& lhs, const array& rhs) noexcept
+	void array::reserve(size_t new_capacity)
 	{
-		if (&lhs == &rhs)
-			return true;
-		if (lhs.elems_.size() != rhs.elems_.size())
-			return false;
-		for (size_t i = 0, e = lhs.elems_.size(); i < e; i++)
-		{
-			const auto lhs_type = lhs.elems_[i]->type();
-			const node& rhs_	= *rhs.elems_[i];
-			const auto rhs_type = rhs_.type();
-			if (lhs_type != rhs_type)
-				return false;
+		elems_.reserve(new_capacity);
+	}
 
-			const bool equal = lhs.elems_[i]->visit(
-				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
-			if (!equal)
-				return false;
-		}
-		return true;
+	TOML_EXTERNAL_LINKAGE
+	void array::shrink_to_fit()
+	{
+		elems_.shrink_to_fit();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::truncate(size_t new_size)
+	{
+		if (new_size < elems_.size())
+			elems_.resize(new_size);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::iterator array::erase(const_iterator pos) noexcept
+	{
+		return elems_.erase(pos);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::iterator array::erase(const_iterator first, const_iterator last) noexcept
+	{
+		return elems_.erase(first, last);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -269,6 +319,42 @@ TOML_NAMESPACE_START
 		}
 
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::pop_back() noexcept
+	{
+		elems_.pop_back();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void array::clear() noexcept
+	{
+		elems_.clear();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool array::equal(const array& lhs, const array& rhs) noexcept
+	{
+		if (&lhs == &rhs)
+			return true;
+		if (lhs.elems_.size() != rhs.elems_.size())
+			return false;
+		for (size_t i = 0, e = lhs.elems_.size(); i < e; i++)
+		{
+			const auto lhs_type = lhs.elems_[i]->type();
+			const node& rhs_	= *rhs.elems_[i];
+			const auto rhs_type = rhs_.type();
+			if (lhs_type != rhs_type)
+				return false;
+
+			const bool equal = lhs.elems_[i]->visit(
+				[&](const auto& lhs_) noexcept
+				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			if (!equal)
+				return false;
+		}
+		return true;
 	}
 }
 TOML_NAMESPACE_END;

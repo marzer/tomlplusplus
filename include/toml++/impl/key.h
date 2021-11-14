@@ -36,39 +36,46 @@ TOML_NAMESPACE_START
 
 	  public:
 		/// \brief	Default constructor.
+		TOML_NODISCARD_CTOR
 		key() noexcept = default;
 
 		/// \brief	Constructs a key from a string view and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(std::string_view k, source_region&& src = {}) //
 			: key_{ k },
 			  source_{ std::move(src) }
 		{}
 
 		/// \brief	Constructs a key from a string view and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(std::string_view k, const source_region& src) //
 			: key_{ k },
 			  source_{ src }
 		{}
 
 		/// \brief	Constructs a key from a string and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(std::string&& k, source_region&& src = {}) noexcept //
 			: key_{ std::move(k) },
 			  source_{ std::move(src) }
 		{}
 
 		/// \brief	Constructs a key from a string and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(std::string&& k, const source_region& src) noexcept //
 			: key_{ std::move(k) },
 			  source_{ src }
 		{}
 
 		/// \brief	Constructs a key from a c-string and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(const char* k, source_region&& src = {}) //
 			: key_{ k },
 			  source_{ std::move(src) }
 		{}
 
 		/// \brief	Constructs a key from a c-string view and source region.
+		TOML_NODISCARD_CTOR
 		explicit key(const char* k, const source_region& src) //
 			: key_{ k },
 			  source_{ src }
@@ -79,6 +86,7 @@ TOML_NAMESPACE_START
 		/// \brief	Constructs a key from a wide string view and source region.
 		///
 		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD_CTOR
 		explicit key(std::wstring_view k, source_region&& src = {}) //
 			: key_{ impl::narrow(k) },
 			  source_{ std::move(src) }
@@ -87,6 +95,7 @@ TOML_NAMESPACE_START
 		/// \brief	Constructs a key from a wide string and source region.
 		///
 		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD_CTOR
 		explicit key(std::wstring_view k, const source_region& src) //
 			: key_{ impl::narrow(k) },
 			  source_{ src }

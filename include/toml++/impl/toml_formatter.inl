@@ -288,7 +288,7 @@ TOML_NAMESPACE_START
 			size_t child_table_array_count{};
 			for (auto&& [child_k, child_v] : child_tbl)
 			{
-				(void)child_k;
+				TOML_UNUSED(child_k);
 				const auto child_type = child_v.type();
 				TOML_ASSUME(child_type != node_type::none);
 				switch (child_type)

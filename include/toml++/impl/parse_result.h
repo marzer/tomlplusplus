@@ -35,7 +35,6 @@ TOML_NAMESPACE_START
 	///		do_stuff_with_a_table(result); //implicitly converts to table&
 	///	else
 	///		std::cerr << "Parse failed:\n"sv << result.error() << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -114,7 +113,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		toml::table& table() & noexcept
 		{
-			TOML_ASSERT(!err_);
+			TOML_ASSERT_ASSUME(!err_);
 			return *get_as<toml::table>(storage_);
 		}
 
@@ -122,7 +121,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		toml::table&& table() && noexcept
 		{
-			TOML_ASSERT(!err_);
+			TOML_ASSERT_ASSUME(!err_);
 			return static_cast<toml::table&&>(*get_as<toml::table>(storage_));
 		}
 
@@ -130,7 +129,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const toml::table& table() const& noexcept
 		{
-			TOML_ASSERT(!err_);
+			TOML_ASSERT_ASSUME(!err_);
 			return *get_as<const toml::table>(storage_);
 		}
 
@@ -138,7 +137,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		parse_error& error() & noexcept
 		{
-			TOML_ASSERT(err_);
+			TOML_ASSERT_ASSUME(err_);
 			return *get_as<parse_error>(storage_);
 		}
 
@@ -146,7 +145,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		parse_error&& error() && noexcept
 		{
-			TOML_ASSERT(err_);
+			TOML_ASSERT_ASSUME(err_);
 			return static_cast<parse_error&&>(*get_as<parse_error>(storage_));
 		}
 
@@ -154,7 +153,7 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		const parse_error& error() const& noexcept
 		{
-			TOML_ASSERT(err_);
+			TOML_ASSERT_ASSUME(err_);
 			return *get_as<const parse_error>(storage_);
 		}
 

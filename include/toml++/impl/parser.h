@@ -20,7 +20,6 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse("a = 3"sv);
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -45,7 +44,6 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse("a = 3"sv, "foo.toml");
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -91,7 +89,6 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse(u8"a = 3"sv);
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -116,7 +113,6 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse(u8"a = 3"sv, "foo.toml");
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -166,7 +162,6 @@ TOML_NAMESPACE_START
 	/// \detail \cpp
 	/// auto tbl = toml::parse("a = 3"sv, L"foo.toml");
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -196,7 +191,6 @@ TOML_NAMESPACE_START
 	///
 	/// auto tbl = toml::parse(ss);
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -277,7 +271,6 @@ TOML_NAMESPACE_START
 	///
 	/// auto tbl = toml::parse(ss);
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -305,7 +298,6 @@ TOML_NAMESPACE_START
 	///
 	/// auto tbl = toml::parse(ss, "foo.toml");
 	/// std::cout << tbl["a"] << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -338,7 +330,6 @@ TOML_NAMESPACE_START
 		///
 		/// auto tbl = "a = 3"_toml;
 		/// std::cout << tbl["a"] << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -367,7 +358,6 @@ TOML_NAMESPACE_START
 		///
 		/// auto tbl = u8"a = 3"_toml;
 		/// std::cout << tbl["a"] << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out

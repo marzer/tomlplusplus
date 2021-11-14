@@ -225,7 +225,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is() const noexcept
 		{
-			return node_ ? node_->template is<T>() : false;
+			return node_ ? node_->template is<impl::unwrap_node<impl::remove_cvref<T>>>() : false;
 		}
 
 		/// \brief	Checks if the viewed node contains values/elements of only one type.
@@ -276,7 +276,6 @@ TOML_NAMESPACE_START
 		/// std::cout << "all floats: "sv << cfg["arr"].is_homogeneous(toml::node_type::floating_point) << "\n";
 		/// std::cout << "all arrays: "sv << cfg["arr"].is_homogeneous(toml::node_type::array) << "\n";
 		/// std::cout << "all ints:   "sv << cfg["arr"].is_homogeneous(toml::node_type::integer) << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -308,7 +307,6 @@ TOML_NAMESPACE_START
 		/// std::cout << "all doubles:  "sv << cfg["arr"].is_homogeneous<double>() << "\n";
 		/// std::cout << "all arrays:   "sv << cfg["arr"].is_homogeneous<toml::array>() << "\n";
 		/// std::cout << "all integers: "sv << cfg["arr"].is_homogeneous<int64_t>() << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -330,7 +328,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			return node_ ? node_->template is_homogeneous<impl::unwrap_node<ElemType>>() : false;
+			return node_ ? node_->template is_homogeneous<impl::unwrap_node<impl::remove_cvref<ElemType>>>() : false;
 		}
 
 		/// @}
@@ -347,70 +345,70 @@ TOML_NAMESPACE_START
 		/// \see toml::node::as()
 		template <typename T>
 		TOML_PURE_GETTER
-		auto as() const noexcept
+		auto* as() const noexcept
 		{
 			return node_ ? node_->template as<T>() : nullptr;
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::table, if it is one.
 		TOML_PURE_GETTER
-		auto as_table() const noexcept
+		auto* as_table() const noexcept
 		{
 			return as<table>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::array, if it is one.
 		TOML_PURE_GETTER
-		auto as_array() const noexcept
+		auto* as_array() const noexcept
 		{
 			return as<array>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<string>, if it is one.
 		TOML_PURE_GETTER
-		auto as_string() const noexcept
+		auto* as_string() const noexcept
 		{
 			return as<std::string>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<int64_t>, if it is one.
 		TOML_PURE_GETTER
-		auto as_integer() const noexcept
+		auto* as_integer() const noexcept
 		{
 			return as<int64_t>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<double>, if it is one.
 		TOML_PURE_GETTER
-		auto as_floating_point() const noexcept
+		auto* as_floating_point() const noexcept
 		{
 			return as<double>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<bool>, if it is one.
 		TOML_PURE_GETTER
-		auto as_boolean() const noexcept
+		auto* as_boolean() const noexcept
 		{
 			return as<bool>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<date>, if it is one.
 		TOML_PURE_GETTER
-		auto as_date() const noexcept
+		auto* as_date() const noexcept
 		{
 			return as<date>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<time>, if it is one.
 		TOML_PURE_GETTER
-		auto as_time() const noexcept
+		auto* as_time() const noexcept
 		{
 			return as<time>();
 		}
 
 		/// \brief	Returns a pointer to the viewed node as a toml::value<date_time>, if it is one.
 		TOML_PURE_GETTER
-		auto as_date_time() const noexcept
+		auto* as_date_time() const noexcept
 		{
 			return as<date_time>();
 		}
@@ -528,6 +526,17 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a raw reference to the viewed node's underlying data.
 		///
+		///		/// \note Providing explicit ref qualifiers acts as an explicit ref-category cast. Providing
+		/// explicit cv-ref qualifiers 'merges' them with whatever the cv qualification of the viewed node is. Examples:
+		/// | node        | T                      | return type                  |
+		/// |-------------|------------------------|------------------------------|
+		/// | node        | std::string            | std::string&                 |
+		/// | node        | std::string&           | std::string&                 |
+		/// | node        | std::string&&          | std::string&&                |
+		/// | const node  | volatile std::string   | const volatile std::string&  |
+		/// | const node  | volatile std::string&  | const volatile std::string&  |
+		/// | const node  | volatile std::string&& | const volatile std::string&& |
+		///
 		/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
 		/// 		 node_view didn't reference a node, or the chosen value type doesn't match the node's
 		/// 		 actual type. In debug builds an assertion will fire when invalid accesses are attempted: \cpp
@@ -540,7 +549,6 @@ TOML_NAMESPACE_START
 		/// int64_t& min_ref = tbl["min"].ref<int64_t>(); // matching type
 		/// double& max_ref = tbl["max"].ref<double>();  // mismatched type, hits assert()
 		/// int64_t& foo_ref = tbl["foo"].ref<int64_t>(); // nonexistent key, hits assert()
-		///
 		/// \ecpp
 		///
 		/// \tparam	T	One of the TOML value types.
@@ -550,8 +558,8 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		decltype(auto) ref() const noexcept
 		{
-			TOML_ASSERT(node_ && "toml::node_view::ref() called on a node_view that did not reference a node");
-			return node_->template ref<impl::unwrap_node<T>>();
+			TOML_ASSERT_ASSUME(node_ && "toml::node_view::ref() called on a node_view that did not reference a node");
+			return node_->template ref<T>();
 		}
 
 		/// @}

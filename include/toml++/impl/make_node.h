@@ -22,7 +22,7 @@ TOML_IMPL_NAMESPACE_START
 		// arrays + tables - invoke copy/move ctor
 		if constexpr (is_one_of<unwrapped_type, array, table>)
 		{
-			return new unwrapped_type{ static_cast<T&&>(val) };
+			return new unwrapped_type(static_cast<T&&>(val));
 		}
 
 		// values

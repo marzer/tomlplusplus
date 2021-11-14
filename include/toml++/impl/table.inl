@@ -20,6 +20,17 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::table(const impl::table_init_pair* b, const impl::table_init_pair* e)
 	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_CREATED;
+#endif
+
+		TOML_ASSERT_ASSUME(b);
+		TOML_ASSERT_ASSUME(e);
+		TOML_ASSERT_ASSUME(b <= e);
+
+		if TOML_UNLIKELY(b == e)
+			return;
+
 		for (; b != e; b++)
 		{
 			if (!b->value) // empty node_views
@@ -27,10 +38,6 @@ TOML_NAMESPACE_START
 
 			map_.insert_or_assign(std::move(b->key), std::move(b->value));
 		}
-
-#if TOML_LIFETIME_HOOKS
-		TOML_TABLE_CREATED;
-#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -94,7 +101,7 @@ TOML_NAMESPACE_START
 
 		for (auto&& [k, v] : map_)
 		{
-			static_cast<void>(k);
+			TOML_UNUSED(k);
 			if (v->type() != ntype)
 				return false;
 		}
@@ -114,7 +121,7 @@ TOML_NAMESPACE_START
 			ntype = map_.cbegin()->second->type();
 		for (const auto& [k, v] : map_)
 		{
-			static_cast<void>(k);
+			TOML_UNUSED(k);
 			if (v->type() != ntype)
 			{
 				first_nonmatch = v.get();
@@ -158,7 +165,7 @@ TOML_NAMESPACE_START
 
 #else
 
-		TOML_ASSERT(n && "key not found in table!");
+		TOML_ASSERT_ASSUME(n && "key not found in table!");
 
 #endif
 
@@ -166,43 +173,44 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::equal(const table& lhs, const table& rhs) noexcept
+	table::map_iterator table::get_lower_bound(std::string_view key) noexcept
 	{
-		if (&lhs == &rhs)
-			return true;
-		if (lhs.map_.size() != rhs.map_.size())
-			return false;
+		return map_.lower_bound(key);
+	}
 
-		for (auto l = lhs.map_.begin(), r = rhs.map_.begin(), e = lhs.map_.end(); l != e; l++, r++)
+	TOML_EXTERNAL_LINKAGE
+	table::iterator table::find(std::string_view key) noexcept
+	{
+		return map_.find(key);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::const_iterator table::find(std::string_view key) const noexcept
+	{
+		return map_.find(key);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::map_iterator table::erase(const_map_iterator pos) noexcept
+	{
+		return map_.erase(pos);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::map_iterator table::erase(const_map_iterator begin, const_map_iterator end) noexcept
+	{
+		return map_.erase(begin, end);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	size_t table::erase(std::string_view key) noexcept
+	{
+		if (auto it = map_.find(key); it != map_.end())
 		{
-			if (l->first != r->first)
-				return false;
-
-			const auto lhs_type = l->second->type();
-			const node& rhs_	= *r->second;
-			const auto rhs_type = rhs_.type();
-			if (lhs_type != rhs_type)
-				return false;
-
-			const bool equal = l->second->visit(
-				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
-			if (!equal)
-				return false;
+			map_.erase(it);
+			return size_t{ 1 };
 		}
-		return true;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	table::iterator table::lower_bound(std::string_view key) noexcept
-	{
-		return iterator{ map_.lower_bound(key) };
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	table::const_iterator table::lower_bound(std::string_view key) const noexcept
-	{
-		return const_iterator{ map_.lower_bound(key) };
+		return size_t{};
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -239,6 +247,46 @@ TOML_NAMESPACE_START
 		}
 
 		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void table::clear() noexcept
+	{
+		map_.clear();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::map_iterator table::insert_with_hint(const_iterator hint, key && k, impl::node_ptr && v)
+	{
+		return map_.emplace_hint(hint, std::move(k), std::move(v));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool table::equal(const table& lhs, const table& rhs) noexcept
+	{
+		if (&lhs == &rhs)
+			return true;
+		if (lhs.map_.size() != rhs.map_.size())
+			return false;
+
+		for (auto l = lhs.map_.begin(), r = rhs.map_.begin(), e = lhs.map_.end(); l != e; l++, r++)
+		{
+			if (l->first != r->first)
+				return false;
+
+			const auto lhs_type = l->second->type();
+			const node& rhs_	= *r->second;
+			const auto rhs_type = rhs_.type();
+			if (lhs_type != rhs_type)
+				return false;
+
+			const bool equal = l->second->visit(
+				[&](const auto& lhs_) noexcept
+				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			if (!equal)
+				return false;
+		}
+		return true;
 	}
 }
 TOML_NAMESPACE_END;

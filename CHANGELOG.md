@@ -22,8 +22,8 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 
 #### Fixes:
 - ⚠&#xFE0F; fixed incorrect `noexcept` specifications on many functions
+- ⚠&#xFE0F; fixed `toml::table` init-list constructor requiring double-brackets
 - fixed `toml::json_formatter` not formatting inf and nan incorrectly
-- fixed `toml::table` init-list constructor requiring double-brackets
 - fixed `TOML_API` + extern templates causing linker errors in some circumstances
 - fixed an illegal table redefinition edge case (#112) (@python36)
 - fixed documentation issues
@@ -32,6 +32,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - fixed missing `#include <utility>`
 - fixed missing `TOML_API` on interfaces
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
+- fixed strong exception guarantee edge-cases in `toml::table` and `toml::array`
 
 #### Additions:
 - added `operator->` to `toml::value` for class types
@@ -52,6 +53,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
 - added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
 - added `toml::table::prune()`
+- added `toml::value` copy+move constructor overloads with flags override
 - added `toml::yaml_formatter`
 - added `TOML_ENABLE_FORMATTERS` option
 - added clang's enum annotation attributes to all enums
@@ -70,6 +72,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - ⚠&#xFE0F; renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated)
+- `toml::table::ref()` now supports explicit ref categories and cv-qualifiers
 - applied clang-format to all the things 🎉&#xFE0F;
 - improved performance of parser
 - made date/time constructors accept any integral types

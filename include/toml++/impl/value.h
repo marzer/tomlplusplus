@@ -82,7 +82,10 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
-			return T(static_cast<Args&&>(args)...);
+			if constexpr (std::is_aggregate_v<T>)
+				return T{ static_cast<Args&&>(args)... };
+			else
+				return T(static_cast<Args&&>(args)...);
 		}
 	};
 
@@ -106,18 +109,25 @@ TOML_IMPL_NAMESPACE_START
 		TOML_NODISCARD
 		static std::string make(T&& arg) noexcept
 		{
+			using arg_type = std::decay_t<T>;
 #if TOML_HAS_CHAR8
-			if constexpr (is_one_of<std::decay_t<T>, char8_t*, const char8_t*>)
+			if constexpr (is_one_of<arg_type, char8_t*, const char8_t*>)
+			{
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg)));
-			else if constexpr (is_one_of<remove_cvref<T>, std::u8string, std::u8string_view>)
+			}
+			if constexpr (is_one_of<arg_type, std::u8string, std::u8string_view>)
+			{
 				return std::string(reinterpret_cast<const char*>(static_cast<const char8_t*>(arg.data())),
 								   arg.length());
-#endif // TOML_HAS_CHAR8
+			}
+#endif
 
 #if TOML_ENABLE_WINDOWS_COMPAT
-			if constexpr (is_wide_string<T>)
+			if constexpr (is_wide_string<arg_type>)
+			{
 				return narrow(static_cast<T&&>(arg));
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+			}
+#endif
 		}
 	};
 
@@ -266,12 +276,36 @@ TOML_NAMESPACE_START
 #endif
 		}
 
+		/// \brief	Copy constructor with flags override.
+		TOML_NODISCARD_CTOR
+		value(const value& other, value_flags flags) noexcept //
+			: node(other),
+			  val_{ other.val_ },
+			  flags_{ flags == preserve_source_value_flags ? other.flags_ : flags }
+		{
+#if TOML_LIFETIME_HOOKS
+			TOML_VALUE_CREATED;
+#endif
+		}
+
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
 		value(value&& other) noexcept //
 			: node(std::move(other)),
 			  val_{ std::move(other.val_) },
 			  flags_{ other.flags_ }
+		{
+#if TOML_LIFETIME_HOOKS
+			TOML_VALUE_CREATED;
+#endif
+		}
+
+		/// \brief	Move constructor with flags override.
+		TOML_NODISCARD_CTOR
+		value(value&& other, value_flags flags) noexcept //
+			: node(std::move(other)),
+			  val_{ std::move(other.val_) },
+			  flags_{ flags == preserve_source_value_flags ? other.flags_ : flags }
 		{
 #if TOML_LIFETIME_HOOKS
 			TOML_VALUE_CREATED;
@@ -614,6 +648,13 @@ TOML_NAMESPACE_START
 			return val_;
 		}
 
+		/// \brief	Returns a reference to the underlying value (const rvalue overload).
+		TOML_PURE_INLINE_GETTER
+		const value_type&& get() const&& noexcept
+		{
+			return static_cast<const value_type&&>(val_);
+		}
+
 		/// \brief	Returns a reference to the underlying value.
 		TOML_PURE_INLINE_GETTER
 		value_type& operator*() & noexcept
@@ -635,6 +676,13 @@ TOML_NAMESPACE_START
 			return val_;
 		}
 
+		/// \brief	Returns a reference to the underlying value (const rvalue overload).
+		TOML_PURE_INLINE_GETTER
+		const value_type&& operator*() const&& noexcept
+		{
+			return static_cast<const value_type&&>(val_);
+		}
+
 		/// \brief	Returns a reference to the underlying value.
 		TOML_PURE_INLINE_GETTER
 		explicit operator value_type&() & noexcept
@@ -654,6 +702,13 @@ TOML_NAMESPACE_START
 		explicit operator const value_type&() const& noexcept
 		{
 			return val_;
+		}
+
+		/// \brief	Returns a reference to the underlying value (const rvalue overload).
+		TOML_PURE_INLINE_GETTER
+		explicit operator const value_type&&() && noexcept
+		{
+			return static_cast<const value_type&&>(val_);
 		}
 
 		/// \brief	Returns a pointer to the underlying value.

@@ -938,7 +938,7 @@ TOML_IMPL_NAMESPACE_START
 
 		constexpr void operator()(uint8_t byte) noexcept
 		{
-			TOML_ASSERT(!error());
+			TOML_ASSERT_ASSUME(!error());
 
 			const auto type = state_table[byte];
 

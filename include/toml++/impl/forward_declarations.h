@@ -395,6 +395,62 @@ TOML_IMPL_NAMESPACE_START
 
 													&& !is_wide_string<T>;
 
+	template <typename, typename>
+	struct copy_ref_;
+	template <typename Dest, typename Src>
+	using copy_ref = typename copy_ref_<Dest, Src>::type;
+
+	template <typename Dest, typename Src>
+	struct copy_ref_
+	{
+		using type = Dest;
+	};
+
+	template <typename Dest, typename Src>
+	struct copy_ref_<Dest, Src&>
+	{
+		using type = std::add_lvalue_reference_t<Dest>;
+	};
+
+	template <typename Dest, typename Src>
+	struct copy_ref_<Dest, Src&&>
+	{
+		using type = std::add_rvalue_reference_t<Dest>;
+	};
+
+	template <typename, typename>
+	struct copy_cv_;
+	template <typename Dest, typename Src>
+	using copy_cv = typename copy_cv_<Dest, Src>::type;
+
+	template <typename Dest, typename Src>
+	struct copy_cv_
+	{
+		using type = Dest;
+	};
+
+	template <typename Dest, typename Src>
+	struct copy_cv_<Dest, const Src>
+	{
+		using type = std::add_const_t<Dest>;
+	};
+
+	template <typename Dest, typename Src>
+	struct copy_cv_<Dest, volatile Src>
+	{
+		using type = std::add_volatile_t<Dest>;
+	};
+
+	template <typename Dest, typename Src>
+	struct copy_cv_<Dest, const volatile Src>
+	{
+		using type = std::add_cv_t<Dest>;
+	};
+
+	template <typename Dest, typename Src>
+	using copy_cvref =
+		copy_ref<copy_ref<copy_cv<std::remove_reference_t<Dest>, std::remove_reference_t<Src>>, Dest>, Src>;
+
 	template <typename T>
 	inline constexpr bool dependent_false = false;
 
@@ -417,19 +473,19 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	template <typename T>
+	struct value_traits<const T> : value_traits<T>
+	{};
+	template <typename T>
+	struct value_traits<volatile T> : value_traits<T>
+	{};
+	template <typename T>
+	struct value_traits<const volatile T> : value_traits<T>
+	{};
+	template <typename T>
 	struct value_traits<T&> : value_traits<T>
 	{};
 	template <typename T>
 	struct value_traits<T&&> : value_traits<T>
-	{};
-	template <typename T>
-	struct value_traits<T* const> : value_traits<T*>
-	{};
-	template <typename T>
-	struct value_traits<T* volatile> : value_traits<T*>
-	{};
-	template <typename T>
-	struct value_traits<T* const volatile> : value_traits<T*>
 	{};
 
 	// integer value_traits specializations - standard types
@@ -747,6 +803,21 @@ TOML_IMPL_NAMESPACE_START
 	{
 		using type = T;
 	};
+	template <typename T>
+	struct node_wrapper<const T>
+	{
+		using type = std::add_const_t<typename node_wrapper<T>::type>;
+	};
+	template <typename T>
+	struct node_wrapper<volatile T>
+	{
+		using type = std::add_volatile_t<typename node_wrapper<T>::type>;
+	};
+	template <typename T>
+	struct node_wrapper<const volatile T>
+	{
+		using type = std::add_const_t<std::add_volatile_t<typename node_wrapper<T>::type>>;
+	};
 	template <>
 	struct node_wrapper<std::string>
 	{
@@ -783,7 +854,7 @@ TOML_IMPL_NAMESPACE_START
 		using type = value<date_time>;
 	};
 	template <typename T>
-	using wrap_node = typename node_wrapper<T>::type;
+	using wrap_node = typename node_wrapper<std::remove_reference_t<T>>::type;
 
 	// nodes => native value types
 	template <typename T>
@@ -797,7 +868,22 @@ TOML_IMPL_NAMESPACE_START
 		using type = T;
 	};
 	template <typename T>
-	using unwrap_node = typename node_unwrapper<T>::type;
+	struct node_unwrapper<const value<T>>
+	{
+		using type = std::add_const_t<T>;
+	};
+	template <typename T>
+	struct node_unwrapper<volatile value<T>>
+	{
+		using type = std::add_volatile_t<T>;
+	};
+	template <typename T>
+	struct node_unwrapper<const volatile value<T>>
+	{
+		using type = std::add_volatile_t<std::add_const_t<T>>;
+	};
+	template <typename T>
+	using unwrap_node = typename node_unwrapper<std::remove_reference_t<T>>::type;
 
 	template <typename T>
 	struct node_type_getter

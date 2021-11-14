@@ -37,7 +37,7 @@ TOML_IMPL_NAMESPACE_START
 		  constants_{ &constants },
 		  config_{ config }
 	{
-		TOML_ASSERT(source_ != nullptr);
+		TOML_ASSERT_ASSUME(source_);
 
 		config_.flags = (config_.flags | constants_->mandatory_flags) & ~constants_->ignored_flags;
 
