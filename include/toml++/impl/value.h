@@ -779,12 +779,12 @@ TOML_NAMESPACE_START
 		{
 			if constexpr (std::is_same_v<value_type, double>)
 			{
-				const auto lhs_class = impl::fpclassify(lhs.val_);
-				const auto rhs_class = impl::fpclassify(rhs);
-				if (lhs_class == impl::fp_class::nan && rhs_class == impl::fp_class::nan)
-					return true;
-				if ((lhs_class == impl::fp_class::nan) != (rhs_class == impl::fp_class::nan))
+				const auto lhs_nan = impl::fpclassify(lhs.val_) == impl::fp_class::nan;
+				const auto rhs_nan = impl::fpclassify(rhs) == impl::fp_class::nan;
+				if (lhs_nan != rhs_nan)
 					return false;
+				if (lhs_nan)
+					return true;
 			}
 			return lhs.val_ == rhs;
 		}

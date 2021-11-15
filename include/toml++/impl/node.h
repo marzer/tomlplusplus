@@ -663,24 +663,7 @@ TOML_NAMESPACE_START
 		//# TOML_NODISCARD
 		//# std::vector<T> select() const noexcept;
 
-		/// \brief	Gets a raw reference to a value node's underlying data.
-		///
-		/// \note Providing explicit ref qualifiers acts as an explicit ref-category cast. Providing
-		/// explicit cv-ref qualifiers 'merges' them with whatever the cv qualification of the node is. Examples:
-		/// | node        | T                      | return type                  |
-		/// |-------------|------------------------|------------------------------|
-		/// | node&       | std::string            | std::string&                 |
-		/// | node&       | std::string&           | std::string&                 |
-		/// | node&       | std::string&&          | std::string&&                |
-		/// | node&&      | std::string            | std::string&&                |
-		/// | node&&      | std::string&           | std::string&                 |
-		/// | node&&      | std::string&&          | std::string&&                |
-		/// | const node& | std::string            | const std::string&           |
-		/// | const node& | std::string&           | const std::string&           |
-		/// | const node& | std::string&&          | const std::string&&          |
-		/// | const node& | volatile std::string   | const volatile std::string&  |
-		/// | const node& | volatile std::string&  | const volatile std::string&  |
-		/// | const node& | volatile std::string&& | const volatile std::string&& |
+		/// \brief	Gets a raw reference to a node's underlying data.
 		///
 		/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
 		///			 chosen value type doesn't match the node's actual type. In debug builds an assertion
@@ -691,11 +674,21 @@ TOML_NAMESPACE_START
 		///		max = 45
 		/// )"sv);
 		///
-		/// int64_t& min_ref = tbl.get("min")->ref<int64_t>(); // matching type
-		/// double& max_ref = tbl.get("max")->ref<double>();  // mismatched type, hits assert()
+		/// int64_t& min_ref = tbl.at("min").ref<int64_t>(); // matching type
+		/// double& max_ref = tbl.at("max").ref<double>();  // mismatched type, hits assert()
 		/// \ecpp
 		///
-		/// \tparam	T	One of the TOML value types.
+		/// \note	Specifying explicit ref qualifiers acts as an explicit ref-category cast,
+		///			whereas specifying explicit cv-ref qualifiers merges them with whatever
+		///			the cv qualification of the node is (to ensure cv-correctness is propagated), e.g.:
+		///			| node        | T                      | return type                  |
+		///			|-------------|------------------------|------------------------------|
+		///			| node&       | std::string            | std::string&                 |
+		///			| node&       | std::string&&          | std::string&&                |
+		///			| const node& | volatile std::string   | const volatile std::string&  |
+		///			| const node& | volatile std::string&& | const volatile std::string&& |
+		///
+		/// \tparam	T	toml::table, toml::array, or one of the TOML value types.
 		///
 		/// \returns	A reference to the underlying data.
 		template <typename T>
@@ -705,7 +698,7 @@ TOML_NAMESPACE_START
 			return do_ref<T>(*this);
 		}
 
-		/// \brief	Gets a raw reference to a value node's underlying data (rvalue overload).
+		/// \brief	Gets a raw reference to a node's underlying data (rvalue overload).
 		template <typename T>
 		TOML_PURE_GETTER
 		decltype(auto) ref() && noexcept
@@ -713,7 +706,7 @@ TOML_NAMESPACE_START
 			return do_ref<T>(std::move(*this));
 		}
 
-		/// \brief	Gets a raw reference to a value node's underlying data (const lvalue overload).
+		/// \brief	Gets a raw reference to a node's underlying data (const lvalue overload).
 		template <typename T>
 		TOML_PURE_GETTER
 		decltype(auto) ref() const& noexcept
@@ -721,7 +714,7 @@ TOML_NAMESPACE_START
 			return do_ref<T>(*this);
 		}
 
-		/// \brief	Gets a raw reference to a value node's underlying data (const rvalue overload).
+		/// \brief	Gets a raw reference to a node's underlying data (const rvalue overload).
 		template <typename T>
 		TOML_PURE_GETTER
 		decltype(auto) ref() const&& noexcept

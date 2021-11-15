@@ -72,7 +72,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - ⚠&#xFE0F; renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated)
-- `toml::table::ref()` now supports explicit ref categories and cv-qualifiers
+- `toml::node::ref()` now supports explicit ref categories and cv-qualifiers
 - applied clang-format to all the things 🎉&#xFE0F;
 - improved performance of parser
 - made date/time constructors accept any integral types

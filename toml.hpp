@@ -501,14 +501,6 @@
 	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
 #elif TOML_CPP_VERSION < 201703L
 	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
-#elif TOML_CPP_VERSION >= 202600L
-	#define TOML_CPP 26
-#elif TOML_CPP_VERSION >= 202300L
-	#define TOML_CPP 23
-#elif TOML_CPP_VERSION >= 202002L
-	#define TOML_CPP 20
-#elif TOML_CPP_VERSION >= 201703L
-	#define TOML_CPP 17
 #endif
 #undef TOML_CPP_VERSION
 
@@ -808,24 +800,24 @@
 
 #define	TOML_LIB_SINGLE_HEADER 1
 
-#define TOML_MAKE_VERSION(maj, min, rev)											\
-		((maj) * 1000 + (min) * 25 + (rev))
+#define TOML_MAKE_VERSION(major, minor, patch)											\
+		((major) * 10000 + (minor) * 100 + (patch))
 
 #if TOML_ENABLE_UNRELEASED_FEATURES
-	#define TOML_LANG_EFFECTIVE_VERSION												\
+	#define TOML_LANG_EFFECTIVE_VERSION													\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH+1)
 #else
-	#define TOML_LANG_EFFECTIVE_VERSION												\
+	#define TOML_LANG_EFFECTIVE_VERSION													\
 		TOML_MAKE_VERSION(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 #endif
 
-#define TOML_LANG_HIGHER_THAN(maj, min, rev)										\
-		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_HIGHER_THAN(major, minor, patch)										\
+		(TOML_LANG_EFFECTIVE_VERSION > TOML_MAKE_VERSION(major, minor, patch))
 
-#define TOML_LANG_AT_LEAST(maj, min, rev)											\
-		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(maj, min, rev))
+#define TOML_LANG_AT_LEAST(major, minor, patch)											\
+		(TOML_LANG_EFFECTIVE_VERSION >= TOML_MAKE_VERSION(major, minor, patch))
 
-#define TOML_LANG_UNRELEASED														\
+#define TOML_LANG_UNRELEASED															\
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
 #ifndef TOML_ABI_NAMESPACES
@@ -4278,12 +4270,12 @@ TOML_NAMESPACE_START
 		{
 			if constexpr (std::is_same_v<value_type, double>)
 			{
-				const auto lhs_class = impl::fpclassify(lhs.val_);
-				const auto rhs_class = impl::fpclassify(rhs);
-				if (lhs_class == impl::fp_class::nan && rhs_class == impl::fp_class::nan)
-					return true;
-				if ((lhs_class == impl::fp_class::nan) != (rhs_class == impl::fp_class::nan))
+				const auto lhs_nan = impl::fpclassify(lhs.val_) == impl::fp_class::nan;
+				const auto rhs_nan = impl::fpclassify(rhs) == impl::fp_class::nan;
+				if (lhs_nan != rhs_nan)
 					return false;
+				if (lhs_nan)
+					return true;
 			}
 			return lhs.val_ == rhs;
 		}
@@ -15320,7 +15312,6 @@ TOML_POP_WARNINGS;
 #undef TOML_CONST_GETTER
 #undef TOML_CONST_INLINE_GETTER
 #undef TOML_CONSTRAINED_TEMPLATE
-#undef TOML_CPP
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS

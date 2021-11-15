@@ -526,17 +526,6 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a raw reference to the viewed node's underlying data.
 		///
-		///		/// \note Providing explicit ref qualifiers acts as an explicit ref-category cast. Providing
-		/// explicit cv-ref qualifiers 'merges' them with whatever the cv qualification of the viewed node is. Examples:
-		/// | node        | T                      | return type                  |
-		/// |-------------|------------------------|------------------------------|
-		/// | node        | std::string            | std::string&                 |
-		/// | node        | std::string&           | std::string&                 |
-		/// | node        | std::string&&          | std::string&&                |
-		/// | const node  | volatile std::string   | const volatile std::string&  |
-		/// | const node  | volatile std::string&  | const volatile std::string&  |
-		/// | const node  | volatile std::string&& | const volatile std::string&& |
-		///
 		/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
 		/// 		 node_view didn't reference a node, or the chosen value type doesn't match the node's
 		/// 		 actual type. In debug builds an assertion will fire when invalid accesses are attempted: \cpp
@@ -550,6 +539,17 @@ TOML_NAMESPACE_START
 		/// double& max_ref = tbl["max"].ref<double>();  // mismatched type, hits assert()
 		/// int64_t& foo_ref = tbl["foo"].ref<int64_t>(); // nonexistent key, hits assert()
 		/// \ecpp
+		///
+		/// \note	Specifying explicit ref qualifiers acts as an explicit ref-category cast,
+		///			whereas specifying explicit cv-ref qualifiers merges them with whatever
+		///			the cv qualification of the viewed node is (to ensure cv-correctness is propagated), e.g.:
+		///			| node_view             | T                      | return type                  |
+		///			|-----------------------|------------------------|------------------------------|
+		///			| node_view<node>       | std::string            | std::string&                 |
+		///			| node_view<node>       | std::string&&          | std::string&&                |
+		///			| node_view<const node> | volatile std::string   | const volatile std::string&  |
+		///			| node_view<const node> | volatile std::string&& | const volatile std::string&& |
+		///
 		///
 		/// \tparam	T	One of the TOML value types.
 		///

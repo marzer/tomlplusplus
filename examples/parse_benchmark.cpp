@@ -58,8 +58,10 @@ int main(int argc, char** argv)
 #else
 		const auto result = toml::parse(file_content, file_path);
 		if (!result)
+		{
 			std::cerr << result.error() << "\n";
-		return 1;
+			return 1;
+		}
 #endif
 	}
 
