@@ -207,13 +207,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator pos) noexcept
 	{
-		return elems_.erase(pos);
+		return iterator{ elems_.erase(const_vector_iterator{ pos }) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	array::iterator array::erase(const_iterator first, const_iterator last) noexcept
 	{
-		return elems_.erase(first, last);
+		return iterator{ elems_.erase(const_vector_iterator{ first }, const_vector_iterator{ last }) };
 	}
 
 	TOML_EXTERNAL_LINKAGE

@@ -58,13 +58,13 @@ TOML_IMPL_NAMESPACE_START
 		table_iterator() noexcept = default;
 
 		TOML_NODISCARD_CTOR
-		table_iterator(mutable_map_iterator iter) noexcept //
+		explicit table_iterator(mutable_map_iterator iter) noexcept //
 			: iter_{ iter }
 		{}
 
 		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
 		TOML_NODISCARD_CTOR
-		table_iterator(const_map_iterator iter) noexcept //
+		explicit table_iterator(const_map_iterator iter) noexcept //
 			: iter_{ iter }
 		{}
 
@@ -135,14 +135,14 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		operator const map_iterator&() const noexcept
+		explicit operator const map_iterator&() const noexcept
 		{
 			return iter_;
 		}
 
 		TOML_CONSTRAINED_TEMPLATE(!C, bool C = IsConst)
 		TOML_PURE_INLINE_GETTER
-		operator const const_map_iterator() const noexcept
+		explicit operator const const_map_iterator() const noexcept
 		{
 			return iter_;
 		}
@@ -783,42 +783,42 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
 		{
-			return map_.begin();
+			return iterator{ map_.begin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
-			return map_.cbegin();
+			return const_iterator{ map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cbegin() const noexcept
 		{
-			return map_.cbegin();
+			return const_iterator{ map_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		iterator end() noexcept
 		{
-			return map_.end();
+			return iterator{ map_.end() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
-			return map_.cend();
+			return const_iterator{ map_.cend() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cend() const noexcept
 		{
-			return map_.cend();
+			return const_iterator{ map_.cend() };
 		}
 
 		/// @}
@@ -861,7 +861,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		iterator lower_bound(std::string_view key) noexcept
 		{
-			return get_lower_bound(key);
+			return iterator{ get_lower_bound(key) };
 		}
 
 		/// \brief Returns a const iterator to the first key-value pair with key that is _not less_ than the given key.
@@ -870,7 +870,7 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		const_iterator lower_bound(std::string_view key) const noexcept
 		{
-			return const_cast<table&>(*this).get_lower_bound(key);
+			return const_iterator{ const_cast<table&>(*this).get_lower_bound(key) };
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -1013,7 +1013,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(iterator pos) noexcept
 		{
-			return erase(const_map_iterator{ pos });
+			return iterator{ erase(const_map_iterator{ pos }) };
 		}
 
 		/// \brief	Removes the specified key-value pair from the table (const iterator overload).
@@ -1040,7 +1040,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the removed key-value pair.
 		iterator erase(const_iterator pos) noexcept
 		{
-			return erase(const_map_iterator{ pos });
+			return iterator{ erase(const_map_iterator{ pos }) };
 		}
 
 		/// \brief	Removes the key-value pairs in the range [first, last) from the table.
@@ -1069,7 +1069,7 @@ TOML_NAMESPACE_START
 		/// \returns Iterator to the first key-value pair immediately following the last removed key-value pair.
 		iterator erase(const_iterator begin, const_iterator end) noexcept
 		{
-			return erase(const_map_iterator{ begin }, const_map_iterator{ end });
+			return iterator{ erase(const_map_iterator{ begin }, const_map_iterator{ end }) };
 		}
 
 		/// \brief	Removes the value with the given key from the table.
@@ -1242,7 +1242,7 @@ TOML_NAMESPACE_START
 #endif
 					}
 				}
-				return ipos;
+				return iterator{ ipos };
 			}
 		}
 
@@ -1328,7 +1328,7 @@ TOML_NAMESPACE_START
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
-					ipos = insert_with_hint(ipos,
+					ipos = insert_with_hint(const_iterator{ ipos },
 											toml::key{ static_cast<KeyType&&>(key) },
 											impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
@@ -1475,7 +1475,7 @@ TOML_NAMESPACE_START
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
-					ipos = insert_with_hint(ipos,
+					ipos = insert_with_hint(const_iterator{ ipos },
 											toml::key{ static_cast<KeyType&&>(key) },
 											impl::make_node(static_cast<ValueType&&>(val), flags));
 					return { iterator{ ipos }, true };
@@ -1557,7 +1557,7 @@ TOML_NAMESPACE_START
 				if (ipos == map_.end() || ipos->first != key_view)
 				{
 					ipos = insert_with_hint(
-						ipos,
+						const_iterator{ ipos },
 						toml::key{ static_cast<KeyType&&>(key) },
 						impl::node_ptr{ new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } });
 					return { iterator{ ipos }, true };

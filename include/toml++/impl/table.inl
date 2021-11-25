@@ -181,13 +181,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
-		return map_.find(key);
+		return iterator{ map_.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
-		return map_.find(key);
+		return const_iterator{ map_.find(key) };
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -258,7 +258,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::insert_with_hint(const_iterator hint, key && k, impl::node_ptr && v)
 	{
-		return map_.emplace_hint(hint, std::move(k), std::move(v));
+		return map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
 	}
 
 	TOML_EXTERNAL_LINKAGE

@@ -3,3 +3,6 @@ option('build_examples',		type: 'boolean', value: false,	description: 'Build exa
 option('generate_cmake_config',	type: 'boolean', value: true,	description: 'Generate a cmake package config file (default: true - no effect when included as a subproject)')
 option('pedantic',				type: 'boolean', value: false,	description: 'Enable as many compiler warnings as possible (default: false)')
 option('time_trace',			type: 'boolean', value: false,	description: 'Enable the -ftime-trace option (Clang only)')
+option('asan_examples',			type: 'boolean', value: false)
+option('asan_tests',			type: 'boolean', value: false)
+

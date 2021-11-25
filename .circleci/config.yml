@@ -23,7 +23,7 @@ jobs:
             - run:
                 name: Building and testing with clang
                 command: |
-                    CXX_LD=lld CXX=clang++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    CXX_LD=lld CXX=clang++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     release_clang:
@@ -39,7 +39,7 @@ jobs:
             - run:
                 name: Building and testing with clang
                 command: |
-                    CXX_LD=lld CXX=clang++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
+                    CXX_LD=lld CXX=clang++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     debug_gcc:

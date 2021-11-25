@@ -156,12 +156,6 @@ if is_clang
 	if get_option('time_trace')
 		add_project_arguments('-ftime-trace', language: 'cpp')
 	endif
-	if is_release
-		add_project_arguments(
-			'-fmerge-all-constants',
-			language: 'cpp'
-		)
-	endif
 endif
 
 # MSVC or icc-cl

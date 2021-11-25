@@ -77,6 +77,10 @@ foreach cpp20 : cpp20_modes
 				test_args = []
 				test_args += additional_arguments
 
+				single_header = (counter % 2 == 1)
+				tl_optional = (counter % 4 == 2 and exceptions)
+				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
+
 				if cpp20
 					test_name = 'cpp20'
 					test_overrides += 'cpp_std=none'
@@ -101,6 +105,11 @@ foreach cpp20 : cpp20_modes
 					if is_windows
 						test_args += '-D_HAS_EXCEPTIONS=0'
 					endif
+				endif
+
+				if address_sanitizer
+					test_args += [ '-g3' ]
+					test_overrides += 'b_sanitize=address'
 				endif
 
 				if fast_math
@@ -130,14 +139,14 @@ foreach cpp20 : cpp20_modes
 					test_args += '-DTOML_ENABLE_UNRELEASED_FEATURES=0'
 				endif
 
-				if counter % 2 == 1
+				if single_header
 					test_args += '-DUSE_SINGLE_HEADER=1'
 				endif
-				if counter % 4 == 2 and exceptions
+				if tl_optional
 					test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
 					test_name = test_name + '_tlopt'
 				endif
-				
+
 				test_executables += [[
 					test_name,
 					executable(
@@ -171,7 +180,8 @@ locales = [
 foreach executable : test_executables
 	foreach locale : locales
 		test(
-			executable[0] + ' (' + locale + ')', executable[1],
+			executable[0] + ' (' + locale + ')', # name
+			executable[1], # executable object
 			env: ['LC_ALL=' + locale],
 			workdir: meson.source_root()/'tests'
 		)
