@@ -280,6 +280,12 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
+#ifdef __APPLE__ // because, honestly, what the fuck mac OS??
+#define TOML_OVERALIGNED
+#else
+#define TOML_OVERALIGNED alignas(32)
+#endif
+
 	template <typename T>
 	class TOML_EMPTY_BASES utf8_reader final : public utf8_reader_interface
 	{
@@ -297,7 +303,7 @@ TOML_ANON_NAMESPACE_START
 
 		struct codepoints_t
 		{
-			alignas(32) utf8_codepoint buffer[block_capacity];
+			TOML_OVERALIGNED utf8_codepoint buffer[block_capacity];
 			size_t current;
 			size_t count;
 		} codepoints_;
@@ -312,7 +318,7 @@ TOML_ANON_NAMESPACE_START
 		{
 			TOML_ASSERT(stream_);
 
-			alignas(32) char raw_bytes[block_capacity];
+			TOML_OVERALIGNED char raw_bytes[block_capacity];
 			size_t raw_bytes_read;
 
 			// read the next raw (encoded) block in from the stream
@@ -3693,7 +3699,7 @@ TOML_ANON_NAMESPACE_START
 
 		// open file with a custom-sized stack buffer
 		std::ifstream file;
-		alignas(32) char file_buffer[sizeof(void*) * 1024u];
+		TOML_OVERALIGNED char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 		if (!file.is_open())
@@ -3819,5 +3825,6 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+#undef TOML_OVERALIGNED
 #include "header_end.h"
 #endif // TOML_ENABLE_PARSER
