@@ -11889,7 +11889,8 @@ TOML_IMPL_NAMESPACE_START
 			// get the value
 			if (is_value_terminator(*cp))
 				set_error_and_return_default("expected value, saw '"sv, to_sv(*cp), "'"sv);
-			return { std::move(key), node_ptr{ parse_value() } };
+			auto value = parse_value();
+			return { std::move(key), node_ptr{ value } };
 		}
 
 		TOML_NODISCARD
