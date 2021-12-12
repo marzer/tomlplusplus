@@ -51,6 +51,9 @@
 
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
+#if TOML_CLANG == 13
+#pragma clang diagnostic ignored "-Wreserved-identifier" // false-positive
+#endif
 
 TOML_DISABLE_WARNINGS;
 #include "lib_catch2.h"

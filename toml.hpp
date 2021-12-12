@@ -938,6 +938,9 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #elif TOML_CLANG && !TOML_HEADER_ONLY && TOML_IMPLEMENTATION
 #pragma clang diagnostic ignored "-Wheader-hygiene" // false-positive
 #endif
+#if TOML_CLANG == 13
+#pragma clang diagnostic ignored "-Wreserved-identifier" // false-positive
+#endif
 
 //********  impl/std_new.h  ********************************************************************************************
 

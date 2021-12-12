@@ -4,7 +4,7 @@ jobs:
 
     debug_clang:
         docker:
-            - image: marzer/cpp_dev:0.1.0
+            - image: marzer/cpp_dev:0.2.0
         resource_class: large
         steps:
             - checkout
@@ -23,12 +23,13 @@ jobs:
             - run:
                 name: Building and testing with clang
                 command: |
+                    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-13 130
                     CXX_LD=lld CXX=clang++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     release_clang:
         docker:
-            - image: marzer/cpp_dev:0.1.0
+            - image: marzer/cpp_dev:0.2.0
         resource_class: large
         steps:
             - checkout
@@ -39,12 +40,13 @@ jobs:
             - run:
                 name: Building and testing with clang
                 command: |
+                    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-13 130
                     CXX_LD=lld CXX=clang++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     debug_gcc:
         docker:
-            - image: marzer/cpp_dev:0.1.0
+            - image: marzer/cpp_dev:0.2.0
         resource_class: large
         steps:
             - checkout
@@ -55,12 +57,13 @@ jobs:
             - run:
                 name: Building and testing with gcc
                 command: |
+                    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-13 130
                     CXX_LD=lld CXX=g++ meson build --buildtype=debug -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     release_gcc:
         docker:
-            - image: marzer/cpp_dev:0.1.0
+            - image: marzer/cpp_dev:0.2.0
         resource_class: large
         steps:
             - checkout
@@ -71,12 +74,13 @@ jobs:
             - run:
                 name: Building and testing with gcc
                 command: |
+                    update-alternatives --install /usr/bin/ld.lld ld.lld /usr/bin/ld.lld-13 130
                     CXX_LD=lld CXX=g++ meson build --buildtype=release -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false
                     cd build && meson compile -j 4 && meson test --num-processes 1 --verbose
 
     generate_dox:
         docker:
-            - image: marzer/cpp_dev:0.1.0
+            - image: marzer/cpp_dev:0.2.0
         resource_class: small
         steps:
             - checkout

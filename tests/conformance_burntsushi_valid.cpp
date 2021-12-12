@@ -85,7 +85,9 @@ more = [ # Comment
 ] # Hopefully not.
 
 # Make sure the space between the datetime and "#" isn't lexed.
-d = 1979-05-27T07:32:12-07:00  # c)"sv;
+dt = 1979-05-27T07:32:12-07:00  # c
+d = 1979-05-27 # Comment)"sv;
+	static constexpr auto comment_noeol		 = R"(# single comment without any eol characters)"sv;
 	static constexpr auto comment_tricky	 = R"([section]#attached comment
 #[notsection]
 one = "11"#cmt
@@ -124,9 +126,9 @@ milliseconds = 10:32:00.555)"sv;
 	static constexpr auto datetime_local		= R"(local = 1987-07-05T17:45:00
 milli = 1977-12-21T10:32:00.555
 space = 1987-07-05 17:45:00)"sv;
-	static constexpr auto datetime_milliseconds = R"(utc1  = 1987-07-05T17:45:56.123456Z
+	static constexpr auto datetime_milliseconds = R"(utc1  = 1987-07-05T17:45:56.1234Z
 utc2  = 1987-07-05T17:45:56.6Z
-wita1 = 1987-07-05T17:45:56.123456+08:00
+wita1 = 1987-07-05T17:45:56.1234+08:00
 wita2 = 1987-07-05T17:45:56.6+08:00)"sv;
 	static constexpr auto datetime_timezone		= R"(utc  = 1987-07-05T17:45:56Z
 pdt  = 1987-07-05T17:45:56-05:00
@@ -450,8 +452,13 @@ mismatch2 = '''aaa"""bbb''')"sv;
 	static constexpr auto string_multiline	   = R"(# NOTE: this file includes some literal tab characters.
 
 multiline_empty_one = """"""
+
+# A newline immediately following the opening delimiter will be trimmed.
 multiline_empty_two = """
 """
+
+# \ at the end of line trims newlines as well; note that last \ is followed by
+# two spaces, which are ignored.
 multiline_empty_three = """\
     """
 multiline_empty_four = """\
@@ -482,6 +489,7 @@ whitespace-after-bs = """\
 no-space = """a\
     b"""
 
+# Has tab character.
 keep-ws-before = """a   	\
    b"""
 
@@ -499,9 +507,14 @@ nl_end = """value\n"""
 lit_nl_end = '''value\n'''
 lit_nl_mid = 'val\nue'
 lit_nl_uni = 'val\ue')"sv;
-	static constexpr auto string_raw_multiline = R"(oneline = '''This string has a ' quote character.'''
+	static constexpr auto string_raw_multiline = R"(# Single ' should be allowed.
+oneline = '''This string has a ' quote character.'''
+
+# A newline immediately following the opening delimiter will be trimmed.
 firstnl = '''
 This string has a ' quote character.'''
+
+# All other whitespace and newline characters remain intact.
 multiline = '''
 This string
 has ' a quote character
@@ -967,7 +980,8 @@ TEST_CASE("conformance - burntsushi/valid")
 								   { R"(group)"sv,
 									 toml::table{
 										 { R"(answer)"sv, 42 },
-										 { R"(d)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 12 }, { -7, 0 } } },
+										 { R"(dt)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 12 }, { -7, 0 } } },
+										 { R"(d)"sv, toml::date{ 1979, 5, 27 } },
 										 { R"(more)"sv,
 										   toml::array{
 											   42,
@@ -975,6 +989,14 @@ TEST_CASE("conformance - burntsushi/valid")
 										   } },
 									 } },
 							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   comment_noeol,
+						   [](toml::table&& tbl) // comment-noeol
+						   {
+							   const auto expected = toml::table{};
 							   REQUIRE(tbl == expected);
 						   });
 
@@ -1084,9 +1106,9 @@ TEST_CASE("conformance - burntsushi/valid")
 		[](toml::table&& tbl) // datetime-milliseconds
 		{
 			const auto expected = toml::table{
-				{ R"(utc1)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 123456000 }, { 0, 0 } } },
+				{ R"(utc1)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 123400000 }, { 0, 0 } } },
 				{ R"(utc2)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 600000000 }, { 0, 0 } } },
-				{ R"(wita1)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 123456000 }, { 8, 0 } } },
+				{ R"(wita1)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 123400000 }, { 8, 0 } } },
 				{ R"(wita2)"sv, toml::date_time{ { 1987, 7, 5 }, { 17, 45, 56, 600000000 }, { 8, 0 } } },
 			};
 			REQUIRE(tbl == expected);

@@ -46,15 +46,41 @@ fruit = []
 	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
 	static constexpr auto bool_wrong_case_true	= R"(a = TRUE)"sv;
 
-	static constexpr auto datetime_impossible_date	   = R"(d = 2006-01-50T00:00:00Z)"sv;
-	static constexpr auto datetime_no_leads_with_milli = R"(with-milli = 1987-07-5T17:45:00.12Z)"sv;
-	static constexpr auto datetime_no_leads			   = R"(no-leads = 1987-7-05T17:45:00Z)"sv;
-	static constexpr auto datetime_no_t				   = R"(no-t = 1987-07-0517:45:00Z)"sv;
-	static constexpr auto datetime_trailing_t		   = R"(d = 2006-01-30T)"sv;
+	static constexpr auto datetime_hour_over   = R"(# time-hour       = 2DIGIT  ; 00-23
+d = 2006-01-01T24:00:00-00:00)"sv;
+	static constexpr auto datetime_mday_over   = R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-32T00:00:00-00:00)"sv;
+	static constexpr auto datetime_mday_under  = R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-00T00:00:00-00:00)"sv;
+	static constexpr auto datetime_minute_over = R"(# time-minute     = 2DIGIT  ; 00-59
+d = 2006-01-01T00:60:00-00:00)"sv;
+	static constexpr auto datetime_month_over  = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2006-13-01T00:00:00-00:00)"sv;
+	static constexpr auto datetime_month_under = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2007-00-01T00:00:00-00:00)"sv;
+	static constexpr auto datetime_no_leads_with_milli = R"(# Day "5" instead of "05"; the leading zero is required.
+with-milli = 1987-07-5T17:45:00.12Z)"sv;
+	static constexpr auto datetime_no_leads			   = R"(# Month "7" instead of "07"; the leading zero is required.
+no-leads = 1987-7-05T17:45:00Z)"sv;
+	static constexpr auto datetime_no_t				   = R"(# No "t" or "T" between the date and time.
+no-t = 1987-07-0517:45:00Z)"sv;
+	static constexpr auto datetime_second_over =
+		R"(# time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
+#                           ; rules
+d = 2006-01-01T00:00:61-00:00)"sv;
+	static constexpr auto datetime_time_no_leads_2 = R"(# Leading 0 is always required.
+d = 01:32:0)"sv;
+	static constexpr auto datetime_time_no_leads   = R"(# Leading 0 is always required.
+d = 1:32:00)"sv;
+	static constexpr auto datetime_trailing_t	   = R"(# Date cannot end with trailing T
+d = 2006-01-30T)"sv;
 
 #if !TOML_LANG_UNRELEASED
 
-	static constexpr auto datetime_no_secs = R"(no-secs = 1987-07-05T17:45Z)"sv;
+	static constexpr auto datetime_no_secs = R"(# No seconds in time.
+no-secs = 1987-07-05T17:45Z)"sv;
 
 #endif // !TOML_LANG_UNRELEASED
 
@@ -136,8 +162,10 @@ abc = { abc = 123, })"sv;
 	static constexpr auto integer_leading_us		  = R"(leading-us = _123)"sv;
 	static constexpr auto integer_leading_zero_1	  = R"(leading-zero-1 = 01)"sv;
 	static constexpr auto integer_leading_zero_2	  = R"(leading-zero-2 = 00)"sv;
+	static constexpr auto integer_leading_zero_3	  = R"(leading-zero-3 = 0_0)"sv;
 	static constexpr auto integer_leading_zero_sign_1 = R"(leading-zero-sign-1 = -01)"sv;
 	static constexpr auto integer_leading_zero_sign_2 = R"(leading-zero-sign-2 = +01)"sv;
+	static constexpr auto integer_leading_zero_sign_3 = R"(leading-zero-sign-3 = +0_1)"sv;
 	static constexpr auto integer_negative_bin		  = R"(negative-bin = -0b11010110)"sv;
 	static constexpr auto integer_negative_hex		  = R"(negative-hex = -0xff)"sv;
 	static constexpr auto integer_negative_oct		  = R"(negative-oct = -0o99)"sv;
@@ -197,7 +225,8 @@ key""" = 1)"sv;
 	static constexpr auto string_bad_codepoint =
 		R"(invalid-codepoint = "This string contains a non scalar unicode codepoint \uD801")"sv;
 	static constexpr auto string_bad_concat	   = R"(no_concat = "first" "second")"sv;
-	static constexpr auto string_bad_escape	   = R"(invalid-escape = "This string has a bad \a escape character.")"sv;
+	static constexpr auto string_bad_escape_1  = R"(invalid-escape = "This string has a bad \a escape character.")"sv;
+	static constexpr auto string_bad_escape_2  = R"(invalid-escape = "This string has a bad \  escape character.")"sv;
 	static constexpr auto string_bad_multiline = R"(multi = "first line
 second line")"sv;
 	static constexpr auto string_bad_slash_escape =
@@ -213,6 +242,11 @@ second line")"sv;
 	static constexpr auto string_literal_multiline_quotes_1			 = R"(a = '''6 apostrophes: '''''')"sv;
 	static constexpr auto string_literal_multiline_quotes_2			 = R"(a = '''15 apostrophes: '''''''''''''''''')"sv;
 	static constexpr auto string_missing_quotes						 = R"(name = value)"sv;
+	static constexpr auto string_multiline_bad_escape_1				 = R"(k = """t\a""")"sv;
+	static constexpr auto string_multiline_bad_escape_2				 = R"(# \<Space> is not a valid escape.
+k = """t\ t""")"sv;
+	static constexpr auto string_multiline_bad_escape_3				 = R"(# \<Space> is not a valid escape.
+k = """t\ """)"sv;
 	static constexpr auto string_multiline_escape_space				 = R"(a = """
   foo \ \n
   bar""")"sv;
@@ -231,6 +265,32 @@ second line")"sv;
 
 #endif // !TOML_LANG_UNRELEASED
 
+	static constexpr auto table_append_with_dotted_keys_1 = R"(# First a.b.c defines a table: a.b.c = {z=9}
+#
+# Then we define a.b.c.t = "str" to add a str to the above table, making it:
+#
+#   a.b.c = {z=9, t="..."}
+#
+# While this makes sense, logically, it was decided this is not valid TOML as
+# it's too confusing/convoluted.
+# 
+# See: https://github.com/toml-lang/toml/issues/846
+#      https://github.com/toml-lang/toml/pull/859
+
+[a.b.c]
+  z = 9
+
+[a]
+  b.c.t = "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed")"sv;
+	static constexpr auto table_append_with_dotted_keys_2 =
+		R"(# This is the same issue as in injection-1.toml, except that nests one level
+# deeper. See that file for a more complete description.
+
+[a.b.c.d]
+  z = 9
+
+[a]
+  b.c.d.k.t = "Using dotted keys to add to [a.b.c.d] after explicitly defining it above is not allowed")"sv;
 	static constexpr auto table_array_empty = R"([[]]
 name = "Born to Run")"sv;
 	static constexpr auto table_array_implicit =
@@ -267,18 +327,6 @@ c = 2)"sv;
 	static constexpr auto table_empty_implicit_table   = R"([naughty..naughty])"sv;
 	static constexpr auto table_empty				   = R"([])"sv;
 	static constexpr auto table_equals_sign			   = R"([name=bad])"sv;
-	static constexpr auto table_injection_1			   = R"([a.b.c]
-  z = 9
-[a]
-  b.c.t = "Using dotted keys to add to [a.b.c] after explicitly defining it above is not allowed"
-  
-# see https://github.com/toml-lang/toml/issues/846)"sv;
-	static constexpr auto table_injection_2			   = R"([a.b.c.d]
-  z = 9
-[a]
-  b.c.d.k.t = "Using dotted keys to add to [a.b.c.d] after explicitly defining it above is not allowed"
-  
-# see https://github.com/toml-lang/toml/issues/846)"sv;
 	static constexpr auto table_llbrace				   = R"([ [table]])"sv;
 	static constexpr auto table_nested_brackets_close  = R"([a]b]
 zyx = 42)"sv;
@@ -327,13 +375,29 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true); // bool-wrong-case-true
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_impossible_date); // datetime-impossible-date
+	parsing_should_fail(FILE_LINE_ARGS, datetime_hour_over); // datetime-hour-over
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_mday_over); // datetime-mday-over
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_mday_under); // datetime-mday-under
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_minute_over); // datetime-minute-over
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_month_over); // datetime-month-over
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_month_under); // datetime-month-under
 
 	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_with_milli); // datetime-no-leads-with-milli
 
 	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads); // datetime-no-leads
 
 	parsing_should_fail(FILE_LINE_ARGS, datetime_no_t); // datetime-no-t
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_second_over); // datetime-second-over
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads_2); // datetime-time-no-leads-2
+
+	parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads); // datetime-time-no-leads
 
 	parsing_should_fail(FILE_LINE_ARGS, datetime_trailing_t); // datetime-trailing-t
 
@@ -457,9 +521,13 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_2); // integer-leading-zero-2
 
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_3); // integer-leading-zero-3
+
 	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_1); // integer-leading-zero-sign-1
 
 	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_2); // integer-leading-zero-sign-2
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_3); // integer-leading-zero-sign-3
 
 	parsing_should_fail(FILE_LINE_ARGS, integer_negative_bin); // integer-negative-bin
 
@@ -547,7 +615,9 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, string_bad_concat); // string-bad-concat
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape); // string-bad-escape
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_1); // string-bad-escape-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_2); // string-bad-escape-2
 
 	parsing_should_fail(FILE_LINE_ARGS, string_bad_multiline); // string-bad-multiline
 
@@ -581,6 +651,12 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, string_missing_quotes); // string-missing-quotes
 
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_1); // string-multiline-bad-escape-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_2); // string-multiline-bad-escape-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_3); // string-multiline-bad-escape-3
+
 	parsing_should_fail(FILE_LINE_ARGS, string_multiline_escape_space); // string-multiline-escape-space
 
 	parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close_2); // string-multiline-no-close-2
@@ -603,6 +679,10 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 #endif // !TOML_LANG_UNRELEASED
 
+	parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_1); // table-append-with-dotted-keys-1
+
+	parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_2); // table-append-with-dotted-keys-2
+
 	parsing_should_fail(FILE_LINE_ARGS, table_array_empty); // table-array-empty
 
 	parsing_should_fail(FILE_LINE_ARGS, table_array_implicit); // table-array-implicit
@@ -622,10 +702,6 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, table_empty); // table-empty
 
 	parsing_should_fail(FILE_LINE_ARGS, table_equals_sign); // table-equals-sign
-
-	parsing_should_fail(FILE_LINE_ARGS, table_injection_1); // table-injection-1
-
-	parsing_should_fail(FILE_LINE_ARGS, table_injection_2); // table-injection-2
 
 	parsing_should_fail(FILE_LINE_ARGS, table_llbrace); // table-llbrace
 
