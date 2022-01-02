@@ -468,7 +468,12 @@
 
 
  \subsection mainpage-adding-lib-meson Meson
- The library supports being added as a subproject in the meson build system.
+ You can install the wrap with:
+ \bash
+ meson wrap install tomlplusplus
+ \ebash
+ After that, you can use it like a regular dependency: `tomlplusplus_dep = dependency('tomlplusplus')`.
+ You can also add it as a subproject directly.
 
 
 
