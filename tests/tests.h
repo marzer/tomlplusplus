@@ -73,7 +73,7 @@ constexpr size_t operator"" _sz(unsigned long long n) noexcept
 	return static_cast<size_t>(n);
 }
 
-#define FILE_LINE_ARGS std::string_view{ __FILE__ }, __LINE__
+#define FILE_LINE_ARGS trim_file_path(std::string_view{ __FILE__ }), __LINE__
 #define BOM_PREFIX	   "\xEF\xBB\xBF"
 
 #if TOML_EXCEPTIONS
@@ -155,6 +155,15 @@ bool parsing_should_fail(std::string_view test_file,
 						 std::string_view toml_str,
 						 source_index expected_failure_line	  = static_cast<source_index>(-1),
 						 source_index expected_failure_column = static_cast<source_index>(-1));
+
+TOML_PURE_GETTER
+constexpr std::string_view trim_file_path(std::string_view sv) noexcept
+{
+	const auto src = std::min(sv.rfind("\\"sv), sv.rfind("/"sv));
+	if (src != std::string_view::npos)
+		sv = sv.substr(src + 1_sz);
+	return sv;
+}
 
 template <typename T>
 inline bool parse_expected_value(std::string_view test_file,

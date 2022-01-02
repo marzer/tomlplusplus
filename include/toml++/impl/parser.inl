@@ -105,22 +105,8 @@ TOML_ANON_NAMESPACE_START
 		explicit constexpr utf8_byte_stream(std::basic_string_view<Char> sv) noexcept //
 			: source_{ sv }
 		{
-			// trim trailing nulls
-			const size_t initial_len = source_.length();
-			size_t actual_len		 = initial_len;
-			for (size_t i = actual_len; i-- > 0u;)
-			{
-				if (source_[i] != Char{}) // not '\0'
-				{
-					actual_len = i + 1u;
-					break;
-				}
-			}
-			if (initial_len != actual_len)
-				source_ = source_.substr(0u, actual_len);
-
 			// skip bom
-			if (actual_len >= 3u && memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
+			if (source_.length() >= 3u && memcmp(utf8_byte_order_mark.data(), source_.data(), 3u) == 0)
 				position_ += 3u;
 		}
 
@@ -1252,12 +1238,12 @@ TOML_IMPL_NAMESPACE_START
 					// toml/issues/567 (disallow non-TAB control characters in comments)
 					if (is_nontab_control_character(*cp))
 						set_error_and_return_default(
-							"control characters other than TAB (U+0009) are explicitly prohibited"sv);
+							"control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
 
 					// toml/pull/720 (disallow surrogates in comments)
 					else if (is_unicode_surrogate(*cp))
 						set_error_and_return_default(
-							"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv);
+							"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
 				}
 				advance_and_return_if_error({});
 			}

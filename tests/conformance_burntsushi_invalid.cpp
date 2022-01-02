@@ -46,6 +46,30 @@ fruit = []
 	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
 	static constexpr auto bool_wrong_case_true	= R"(a = TRUE)"sv;
 
+	static constexpr auto control_bare_null		 = "bare-null = \"some value\" \x00"sv;
+	static constexpr auto control_comment_cr	 = "comment-cr = \"Carriage return in comment\" # \ra=1"sv;
+	static constexpr auto control_comment_del	 = "comment-del = \"0x7f\" # \x7F"sv;
+	static constexpr auto control_comment_lf	 = "comment-lf = \"ctrl-P\" # \x10"sv;
+	static constexpr auto control_comment_null	 = "comment-null = \"null\" # \x00"sv;
+	static constexpr auto control_comment_us	 = "comment-us = \"ctrl-_\" # \x1F"sv;
+	static constexpr auto control_multi_del		 = "multi-del = \"\"\"null\x7F\"\"\""sv;
+	static constexpr auto control_multi_lf		 = "multi-lf = \"\"\"null\x10\"\"\""sv;
+	static constexpr auto control_multi_null	 = "multi-null = \"\"\"null\x00\"\"\""sv;
+	static constexpr auto control_multi_us		 = "multi-us = \"\"\"null\x1F\"\"\""sv;
+	static constexpr auto control_rawmulti_del	 = "rawmulti-del = '''null\x7F'''"sv;
+	static constexpr auto control_rawmulti_lf	 = "rawmulti-lf = '''null\x10'''"sv;
+	static constexpr auto control_rawmulti_null	 = "rawmulti-null = '''null\x00'''"sv;
+	static constexpr auto control_rawmulti_us	 = "rawmulti-us = '''null\x1F'''"sv;
+	static constexpr auto control_rawstring_del	 = "rawstring-del = 'null\x7F'"sv;
+	static constexpr auto control_rawstring_lf	 = "rawstring-lf = 'null\x10'"sv;
+	static constexpr auto control_rawstring_null = "rawstring-null = 'null\x00'"sv;
+	static constexpr auto control_rawstring_us	 = "rawstring-us = 'null\x1F'"sv;
+	static constexpr auto control_string_bs		 = "string-bs = \"backspace\x08\""sv;
+	static constexpr auto control_string_del	 = "string-del = \"null\x7F\""sv;
+	static constexpr auto control_string_lf		 = "string-lf = \"null\x10\""sv;
+	static constexpr auto control_string_null	 = "string-null = \"null\x00\""sv;
+	static constexpr auto control_string_us		 = "string-us = \"null\x1F\""sv;
+
 	static constexpr auto datetime_hour_over   = R"(# time-hour       = 2DIGIT  ; 00-23
 d = 2006-01-01T24:00:00-00:00)"sv;
 	static constexpr auto datetime_mday_over   = R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
@@ -83,6 +107,32 @@ d = 2006-01-30T)"sv;
 no-secs = 1987-07-05T17:45Z)"sv;
 
 #endif // !TOML_LANG_UNRELEASED
+
+	static constexpr auto encoding_bad_utf8_at_end =
+		"\x23\x20\x54\x68\x65\x72\x65\x20\x69\x73\x20\x61\x20\x30\x78\x64\x61\x20\x61\x74\x20\x61\x66\x74\x65"
+		"\x72\x20\x74\x68\x65\x20\x71\x75\x6F\x74\x65\x73\x2C\x20\x61\x6E\x64\x20\x6E\x6F\x20\x45\x4F\x4C\x20"
+		"\x61\x74\x20\x74\x68\x65\x20\x65\x6E\x64\x20\x6F\x66\x20\x74\x68\x65\x20\x66\x69\x6C\x65\x2E\x0A\x23"
+		"\x0A\x23\x20\x54\x68\x69\x73\x20\x69\x73\x20\x61\x20\x62\x69\x74\x20\x6F\x66\x20\x61\x6E\x20\x65\x64"
+		"\x67\x65\x20\x63\x61\x73\x65\x3A\x20\x54\x68\x69\x73\x20\x69\x6E\x64\x69\x63\x61\x74\x65\x73\x20\x74"
+		"\x68\x65\x72\x65\x20\x73\x68\x6F\x75\x6C\x64\x20\x62\x65\x20\x74\x77\x6F\x20\x62\x79\x74\x65\x73\x0A"
+		"\x23\x20\x28\x30\x62\x31\x31\x30\x31\x5F\x31\x30\x31\x30\x29\x20\x62\x75\x74\x20\x74\x68\x65\x72\x65"
+		"\x20\x69\x73\x20\x6E\x6F\x20\x62\x79\x74\x65\x20\x74\x6F\x20\x66\x6F\x6C\x6C\x6F\x77\x20\x62\x65\x63"
+		"\x61\x75\x73\x65\x20\x69\x74\x27\x73\x20\x74\x68\x65\x20\x65\x6E\x64\x20\x6F\x66\x20\x74\x68\x65\x20"
+		"\x66\x69\x6C\x65\x2E\x0A\x78\x20\x3D\x20\x22\x22\x22\x22\x22\x22\xDA"sv;
+	static constexpr auto encoding_bad_utf8_in_comment = "\x23\x20\xC3\x0A"sv;
+	static constexpr auto encoding_bad_utf8_in_string =
+		"\x23\x20\x54\x68\x65\x20\x66\x6F\x6C\x6C\x6F\x77\x69\x6E\x67\x20\x6C\x69\x6E\x65\x20\x63\x6F\x6E\x74"
+		"\x61\x69\x6E\x73\x20\x61\x6E\x20\x69\x6E\x76\x61\x6C\x69\x64\x20\x55\x54\x46\x2D\x38\x20\x73\x65\x71"
+		"\x75\x65\x6E\x63\x65\x2E\x0A\x62\x61\x64\x20\x3D\x20\x22\xC3\x22\x0A"sv;
+	static constexpr auto encoding_bom_not_at_start_1 =
+		"\x62\x6F\x6D\x2D\x6E\x6F\x74\x2D\x61\x74\x2D\x73\x74\x61\x72\x74\x20\xFF\xFD\x0A"sv;
+	static constexpr auto encoding_bom_not_at_start_2 =
+		"\x62\x6F\x6D\x2D\x6E\x6F\x74\x2D\x61\x74\x2D\x73\x74\x61\x72\x74\x3D\x20\xFF\xFD\x0A"sv;
+	static constexpr auto encoding_utf16_bom =
+		"\xFE\xFF\x00\x23\x00\x20\x00\x55\x00\x54\x00\x46\x00\x2D\x00\x31\x00\x36\x00\x20\x00\x77\x00\x69\x00"
+		"\x74\x00\x68\x00\x20\x00\x42\x00\x4F\x00\x4D\x00\x0A"sv;
+	static constexpr auto encoding_utf16 =
+		"\x00#\x00 \x00U\x00T\x00F\x00-\x001\x006\x00 \x00w\x00i\x00t\x00h\x00o\x00u\x00t\x00 \x00B\x00O\x00M\x00"sv;
 
 	static constexpr auto float_double_point_1		= R"(double-point-1 = 0..1)"sv;
 	static constexpr auto float_double_point_2		= R"(double-point-2 = 0.1.2)"sv;
@@ -124,6 +174,9 @@ trailing-us-exp2 = 1.2_e2)"sv;
 a={b=1, b=2})"sv;
 	static constexpr auto inline_table_empty		 = R"(t = {,})"sv;
 	static constexpr auto inline_table_no_comma		 = R"(t = {x = 3 y = 4})"sv;
+	static constexpr auto inline_table_overwrite	 = R"(a.b=0
+# Since table "a" is already defined, it can't be replaced by an inline table.
+a={})"sv;
 
 #if !TOML_LANG_UNRELEASED
 
@@ -194,7 +247,7 @@ dupe = true)"sv;
 	static constexpr auto key_duplicate				 = R"(# DO NOT DO THIS
 name = "Tom"
 name = "Pradyun")"sv;
-	static constexpr auto key_empty					 = R"(= 1)"sv;
+	static constexpr auto key_empty					 = R"( = 1)"sv;
 	static constexpr auto key_escape				 = R"(\u00c0 = "latin capital letter A with grave")"sv;
 	static constexpr auto key_hash					 = R"(a# = 1)"sv;
 	static constexpr auto key_multiline				 = R"("""long
@@ -213,7 +266,7 @@ key""" = 1)"sv;
 	static constexpr auto key_two_equals2			 = R"(a==1)"sv;
 	static constexpr auto key_two_equals3			 = R"(a=b=1)"sv;
 	static constexpr auto key_without_value_1		 = R"(key)"sv;
-	static constexpr auto key_without_value_2		 = R"(key =)"sv;
+	static constexpr auto key_without_value_2		 = R"(key = )"sv;
 
 #if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
@@ -308,42 +361,50 @@ name = "Glory Days"
 
 [[albums]]
 name = "Born in the USA")"sv;
-	static constexpr auto table_array_missing_bracket  = R"([[albums]
+	static constexpr auto table_array_missing_bracket		= R"([[albums]
 name = "Born to Run")"sv;
-	static constexpr auto table_duplicate_key_table	   = R"([fruit]
+	static constexpr auto table_duplicate_key_dotted_table	= R"([fruit]
+apple.color = "red"
+
+[fruit.apple] # INVALID)"sv;
+	static constexpr auto table_duplicate_key_dotted_table2 = R"([fruit]
+apple.taste.sweet = true
+
+[fruit.apple.taste] # INVALID)"sv;
+	static constexpr auto table_duplicate_key_table			= R"([fruit]
 type = "apple"
 
 [fruit.type]
 apple = "yes")"sv;
-	static constexpr auto table_duplicate_table_array  = R"([tbl]
+	static constexpr auto table_duplicate_table_array		= R"([tbl]
 [[tbl]])"sv;
-	static constexpr auto table_duplicate_table_array2 = R"([[tbl]]
+	static constexpr auto table_duplicate_table_array2		= R"([[tbl]]
 [tbl])"sv;
-	static constexpr auto table_duplicate			   = R"([a]
+	static constexpr auto table_duplicate					= R"([a]
 b = 1
 
 [a]
 c = 2)"sv;
-	static constexpr auto table_empty_implicit_table   = R"([naughty..naughty])"sv;
-	static constexpr auto table_empty				   = R"([])"sv;
-	static constexpr auto table_equals_sign			   = R"([name=bad])"sv;
-	static constexpr auto table_llbrace				   = R"([ [table]])"sv;
-	static constexpr auto table_nested_brackets_close  = R"([a]b]
+	static constexpr auto table_empty_implicit_table		= R"([naughty..naughty])"sv;
+	static constexpr auto table_empty						= R"([])"sv;
+	static constexpr auto table_equals_sign					= R"([name=bad])"sv;
+	static constexpr auto table_llbrace						= R"([ [table]])"sv;
+	static constexpr auto table_nested_brackets_close		= R"([a]b]
 zyx = 42)"sv;
-	static constexpr auto table_nested_brackets_open   = R"([a[b]
+	static constexpr auto table_nested_brackets_open		= R"([a[b]
 zyx = 42)"sv;
-	static constexpr auto table_quoted_no_close		   = R"(["where will it end]
+	static constexpr auto table_quoted_no_close				= R"(["where will it end]
 name = value)"sv;
-	static constexpr auto table_redefine			   = R"(# Define b as int, and try to use it as a table: error
+	static constexpr auto table_redefine		 = R"(# Define b as int, and try to use it as a table: error
 [a]
 b = 1
 
 [a.b]
 c = 2)"sv;
-	static constexpr auto table_rrbrace				   = R"([[table] ])"sv;
-	static constexpr auto table_text_after_table	   = R"([error] this shouldn't be here)"sv;
-	static constexpr auto table_whitespace			   = R"([invalid key])"sv;
-	static constexpr auto table_with_pound			   = R"([key#group]
+	static constexpr auto table_rrbrace			 = R"([[table] ])"sv;
+	static constexpr auto table_text_after_table = R"([error] this shouldn't be here)"sv;
+	static constexpr auto table_whitespace		 = R"([invalid key])"sv;
+	static constexpr auto table_with_pound		 = R"([key#group]
 answer = 42)"sv;
 }
 
@@ -374,6 +435,52 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false); // bool-wrong-case-false
 
 	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true); // bool-wrong-case-true
+
+	parsing_should_fail(FILE_LINE_ARGS, control_bare_null); // control-bare-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_comment_cr); // control-comment-cr
+
+	parsing_should_fail(FILE_LINE_ARGS, control_comment_del); // control-comment-del
+
+	parsing_should_fail(FILE_LINE_ARGS, control_comment_lf); // control-comment-lf
+
+	parsing_should_fail(FILE_LINE_ARGS, control_comment_null); // control-comment-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_comment_us); // control-comment-us
+
+	parsing_should_fail(FILE_LINE_ARGS, control_multi_del); // control-multi-del
+
+	parsing_should_fail(FILE_LINE_ARGS, control_multi_lf); // control-multi-lf
+
+	parsing_should_fail(FILE_LINE_ARGS, control_multi_null); // control-multi-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_multi_us); // control-multi-us
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_del); // control-rawmulti-del
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_lf); // control-rawmulti-lf
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_null); // control-rawmulti-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_us); // control-rawmulti-us
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_del); // control-rawstring-del
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_lf); // control-rawstring-lf
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_null); // control-rawstring-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_us); // control-rawstring-us
+
+	parsing_should_fail(FILE_LINE_ARGS, control_string_bs); // control-string-bs
+
+	parsing_should_fail(FILE_LINE_ARGS, control_string_del); // control-string-del
+
+	parsing_should_fail(FILE_LINE_ARGS, control_string_lf); // control-string-lf
+
+	parsing_should_fail(FILE_LINE_ARGS, control_string_null); // control-string-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_string_us); // control-string-us
 
 	parsing_should_fail(FILE_LINE_ARGS, datetime_hour_over); // datetime-hour-over
 
@@ -406,6 +513,20 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, datetime_no_secs); // datetime-no-secs
 
 #endif // !TOML_LANG_UNRELEASED
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_at_end); // encoding-bad-utf8-at-end
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_comment); // encoding-bad-utf8-in-comment
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_string); // encoding-bad-utf8-in-string
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_1); // encoding-bom-not-at-start-1
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_2); // encoding-bom-not-at-start-2
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_utf16_bom); // encoding-utf16-bom
+
+	parsing_should_fail(FILE_LINE_ARGS, encoding_utf16); // encoding-utf16
 
 	parsing_should_fail(FILE_LINE_ARGS, float_double_point_1); // float-double-point-1
 
@@ -476,6 +597,8 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_empty); // inline-table-empty
 
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_no_comma); // inline-table-no-comma
+
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_overwrite); // inline-table-overwrite
 
 #if !TOML_LANG_UNRELEASED
 
@@ -688,6 +811,10 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, table_array_implicit); // table-array-implicit
 
 	parsing_should_fail(FILE_LINE_ARGS, table_array_missing_bracket); // table-array-missing-bracket
+
+	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table); // table-duplicate-key-dotted-table
+
+	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table2); // table-duplicate-key-dotted-table2
 
 	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_table); // table-duplicate-key-table
 

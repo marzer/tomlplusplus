@@ -9,263 +9,282 @@
 
 namespace
 {
-	static constexpr auto spec_array_1 = R"(integers = [ 1, 2, 3 ])"sv;
-	static constexpr auto spec_array_2 = R"(colors = [ "red", "yellow", "green" ])"sv;
-	static constexpr auto spec_array_3 = R"(nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ])"sv;
-	static constexpr auto spec_array_4 = R"(string_array = [ "all", 'strings', """are the same""", '''type'''])"sv;
-	static constexpr auto spec_array_5 = R"(nested_mixed_array = [ [ 1, 2 ], ["a", "b", "c"] ])"sv;
-	static constexpr auto spec_array_7 = R"(integers2 = [
-  1, 2, 3
-])"sv;
-	static constexpr auto spec_array_8 = R"(integers3 = [
-  1,
-  2, # this is ok
-])"sv;
-	static constexpr auto spec_array_mixed_number_types = R"(numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ])"sv;
-	static constexpr auto spec_array_more_mixed_types	= R"(contributors = [
-  "Foo Bar <foo@example.com>",
-  { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-])"sv;
-	static constexpr auto spec_array_of_tables_1		= R"([[products]]
-name = "Hammer"
-sku = 738594937
-
-[[products]]
-
-[[products]]
-name = "Nail"
-sku = 284758393
-color = "gray")"sv;
-	static constexpr auto spec_array_of_tables_2		= R"([[fruit]]
-  name = "apple"
-
-  [fruit.physical]
-    color = "red"
-    shape = "round"
-
-  [[fruit.variety]]
-    name = "red delicious"
-
-  [[fruit.variety]]
-    name = "granny smith"
-
-[[fruit]]
-  name = "banana"
-
-  [[fruit.variety]]
-    name = "plantain")"sv;
-	static constexpr auto spec_array_of_tables_3		= R"(points = [ { x = 1, y = 2, z = 3 },
-           { x = 7, y = 8, z = 9 },
-           { x = 2, y = 4, z = 8 } ])"sv;
-	static constexpr auto spec_boolean_1				= R"(bool1 = true)"sv;
-	static constexpr auto spec_boolean_2				= R"(bool1 = false)"sv;
-	static constexpr auto spec_case_sensitive			= R"(# TOML is case sensitive.
-abc = 123
-ABC = 456)"sv;
-	static constexpr auto spec_comment_mid_array		= R"(# eol commetns can go anywhere
-abc = [ # this is valid
-  123,#as is this
-  456    #so is  this
-  ]# and this
-# here too)"sv;
-	static constexpr auto spec_comment_mid_string		= R"(another = "# This is not a comment")"sv;
-	static constexpr auto spec_comment_tab				= R"(# This is a full-line	comment with a tab in the middle
-key = "value" # This is a commen	with a tab in the middle at the end of a line)"sv;
-	static constexpr auto spec_comment					= R"(# This is a full-line comment
-key = "value" # This is a comment at the end of a line)"sv;
-	static constexpr auto spec_date_local_1				= R"(ld1 = 1979-05-27)"sv;
-	static constexpr auto spec_date_time_1				= R"(odt1 = 1979-05-27T07:32:00Z)"sv;
-	static constexpr auto spec_date_time_2				= R"(odt2 = 1979-05-27T00:32:00-07:00)"sv;
-	static constexpr auto spec_date_time_3				= R"(odt3 = 1979-05-27T00:32:00.999999-07:00)"sv;
-	static constexpr auto spec_date_time_4				= R"(odt4 = 1979-05-27 07:32:00Z)"sv;
-	static constexpr auto spec_date_time_5				= R"(odt5 = 1979-05-27T07:32:00.123Z)"sv;
-	static constexpr auto spec_date_time_local_1		= R"(ldt1 = 1979-05-27T07:32:00)"sv;
-	static constexpr auto spec_dotted_keys_1			= R"(name = "Orange"
-physical.color = "orange"
-physical.shape = "round"
-site."google.com" = true)"sv;
-	static constexpr auto spec_dotted_keys_2			= R"(a  .  b = 23)"sv;
-	static constexpr auto spec_dotted_keys_3			= R"(a  	.  b = 23)"sv;
-	static constexpr auto spec_empty_key_name_1			= R"("" = "blank"     # VALID but discouraged)"sv;
-	static constexpr auto spec_empty_key_name_2			= R"('' = "blank"     # VALID but discouraged)"sv;
-	static constexpr auto spec_extend_dotted_object_1	= R"(# This makes the key "fruit" into a table.
-fruit.apple.smooth = true
-
-# So then you can add to the table "fruit" like so:
-fruit.orange = 2)"sv;
-	static constexpr auto spec_extend_dotted_object_2	= R"(# VALID BUT DISCOURAGED
-
-apple.type = "fruit"
-orange.type = "fruit"
-
-apple.skin = "thin"
-orange.skin = "thick"
-
-apple.color = "red"
-orange.color = "orange")"sv;
-	static constexpr auto spec_extend_dotted_object_3	= R"(# RECOMMENDED
-
-apple.type = "fruit"
-apple.skin = "thin"
-apple.color = "red"
-
-orange.type = "fruit"
-orange.skin = "thick"
-orange.color = "orange")"sv;
-	static constexpr auto spec_float_1					= R"(flt1 = +1.0)"sv;
-	static constexpr auto spec_float_10					= R"(sf1 = inf  # positive infinity)"sv;
-	static constexpr auto spec_float_11					= R"(sf2 = +inf # positive infinity)"sv;
-	static constexpr auto spec_float_12					= R"(sf2 = -inf # negative infinity)"sv;
-	static constexpr auto spec_float_13 = R"(sf4 = nan  # actual sNaN/qNaN encoding is implementation specific)"sv;
-	static constexpr auto spec_float_14 = R"(sf5 = +nan # same as `nan`)"sv;
-	static constexpr auto spec_float_15 = R"(sf6 = -nan # valid, actual encoding is implementation specific)"sv;
-	static constexpr auto spec_float_2	= R"(flt2 = 3.1415)"sv;
-	static constexpr auto spec_float_3	= R"(flt3 = -0.01)"sv;
-	static constexpr auto spec_float_4	= R"(flt4 = 5e+22)"sv;
-	static constexpr auto spec_float_5	= R"(flt5 = 1e06)"sv;
-	static constexpr auto spec_float_6	= R"(flt6 = -2E-2)"sv;
-	static constexpr auto spec_float_7	= R"(flt7 = 6.626e-34)"sv;
-	static constexpr auto spec_float_8	= R"(flt8 = 224_617.445_991_228)"sv;
-	static constexpr auto spec_float_9	= R"(flt9 = -0e0)"sv;
-	static constexpr auto spec_int_1	= R"(int1 = +99)"sv;
-	static constexpr auto spec_int_2	= R"(int2 = 42)"sv;
-	static constexpr auto spec_int_3	= R"(int3 = 0)"sv;
-	static constexpr auto spec_int_3a	= R"(int3 = +0)"sv;
-	static constexpr auto spec_int_3b	= R"(int3 = -0)"sv;
-	static constexpr auto spec_int_4	= R"(int4 = -17)"sv;
-	static constexpr auto spec_int_5	= R"(int5 = 1_000)"sv;
-	static constexpr auto spec_int_6	= R"(int6 = 5_349_221)"sv;
-	static constexpr auto spec_int_7	= R"(int7 = 1_2_3_4_5     # VALID but discouraged)"sv;
-	static constexpr auto spec_int_bin1 = R"(bin1 = 0b11010110)"sv;
-	static constexpr auto spec_int_hex1 = R"(hex1 = 0xDEADBEEF)"sv;
-	static constexpr auto spec_int_hex2 = R"(hex2 = 0xdeadbeef)"sv;
-	static constexpr auto spec_int_hex3 = R"(hex3 = 0xdead_beef)"sv;
-	static constexpr auto spec_int_max	= R"(max=9_223_372_036_854_775_807)"sv;
-	static constexpr auto spec_int_min	= R"(min=-9_223_372_036_854_775_808)"sv;
-	static constexpr auto spec_int_oct1 = R"(oct1 = 0o01234567)"sv;
-	static constexpr auto spec_int_oct2 = R"(oct2 = 0o755 # useful for Unix file permissions)"sv;
-	static constexpr auto spec_key_value_pair_1			= R"(key = "value")"sv;
-	static constexpr auto spec_key_value_pair_2			= R"(bare_key = "value")"sv;
-	static constexpr auto spec_key_value_pair_3			= R"(bare-key = "value")"sv;
-	static constexpr auto spec_key_value_pair_4			= R"(1234 = "value")"sv;
-	static constexpr auto spec_key_value_pair_5			= R"(1234="value")"sv;
-	static constexpr auto spec_key_value_pair_6			= R"(-=1)"sv;
-	static constexpr auto spec_key_value_pair_7			= R"(_=1)"sv;
-	static constexpr auto spec_key_value_pair_8			= R"(-_-_-_-_-=1)"sv;
-	static constexpr auto spec_key_value_pair_9			= R"(3.14159 = "pi")"sv;
-	static constexpr auto spec_quoted_literal_keys_1	= R"('quoted "value"' = "value")"sv;
-	static constexpr auto spec_readme_example			= R"(# This is a TOML document.
-
-title = "TOML Example"
-
-[owner]
-name = "Tom Preston-Werner"
-dob = 1979-05-27T07:32:00-08:00 # First class dates
-
-[database]
-server = "192.168.1.1"
-ports = [ 8001, 8001, 8002 ]
-connection_max = 5000
-enabled = true
-
-[servers]
-
-  # Indentation (tabs and/or spaces) is allowed but not required
-  [servers.alpha]
-  ip = "10.0.0.1"
-  dc = "eqdc10"
-
-  [servers.beta]
-  ip = "10.0.0.2"
-  dc = "eqdc10"
-
-[clients]
-data = [ ["gamma", "delta"], [1, 2] ]
-
-# Line breaks are OK when inside arrays
-hosts = [
-  "alpha",
-  "omega"
-])"sv;
-	static constexpr auto spec_string_basic_multiline_1 = R"(str1 = """
-Roses are red
-Violets are blue""")"sv;
-	static constexpr auto spec_string_basic_multiline_2 = R"(str = """
-The quick brown \
-
-
-  fox jumps over \
-    the lazy dog.""")"sv;
-	static constexpr auto spec_string_basic_multiline_3 = R"(str = """\
-      The quick brown \
-      fox jumps over \
-      the lazy dog.\
-      """)"sv;
-	static constexpr auto spec_string_basic_multiline_4 = R"(a = """abc\
-def""")"sv;
-	static constexpr auto spec_string_basic_multiline_5 = R"(ml-escaped-nl = """
-  foo \
-  bar \\
-  baz \\\
-  quux""")"sv;
+	static constexpr auto spec_array_1 = "integers = [ 1, 2, 3 ]"sv;
+	static constexpr auto spec_array_2 = "colors = [ \"red\", \"yellow\", \"green\" ]"sv;
+	static constexpr auto spec_array_3 = "nested_array_of_int = [ [ 1, 2 ], [3, 4, 5] ]"sv;
+	static constexpr auto spec_array_4 = "string_array = [ \"all\", 'strings', \"\"\"are the same\"\"\", '''type''']"sv;
+	static constexpr auto spec_array_5 = "nested_mixed_array = [ [ 1, 2 ], [\"a\", \"b\", \"c\"] ]"sv;
+	static constexpr auto spec_array_7 = "integers2 = [\r\n"
+										 "  1, 2, 3\r\n"
+										 "]"sv;
+	static constexpr auto spec_array_8 = "integers3 = [\r\n"
+										 "  1,\r\n"
+										 "  2, # this is ok\r\n"
+										 "]"sv;
+	static constexpr auto spec_array_mixed_number_types = "numbers = [ 0.1, 0.2, 0.5, 1, 2, 5 ]"sv;
+	static constexpr auto spec_array_more_mixed_types =
+		"contributors = [\r\n"
+		"  \"Foo Bar <foo@example.com>\",\r\n"
+		"  { name = \"Baz Qux\", email = \"bazqux@example.com\", url = \"https://example.com/bazqux\" }\r\n"
+		"]"sv;
+	static constexpr auto spec_array_of_tables_1  = "[[products]]\r\n"
+													"name = \"Hammer\"\r\n"
+													"sku = 738594937\r\n"
+													"\r\n"
+													"[[products]]\r\n"
+													"\r\n"
+													"[[products]]\r\n"
+													"name = \"Nail\"\r\n"
+													"sku = 284758393\r\n"
+													"color = \"gray\""sv;
+	static constexpr auto spec_array_of_tables_2  = "[[fruit]]\r\n"
+													"  name = \"apple\"\r\n"
+													"\r\n"
+													"  [fruit.physical]\r\n"
+													"    color = \"red\"\r\n"
+													"    shape = \"round\"\r\n"
+													"\r\n"
+													"  [[fruit.variety]]\r\n"
+													"    name = \"red delicious\"\r\n"
+													"\r\n"
+													"  [[fruit.variety]]\r\n"
+													"    name = \"granny smith\"\r\n"
+													"\r\n"
+													"[[fruit]]\r\n"
+													"  name = \"banana\"\r\n"
+													"\r\n"
+													"  [[fruit.variety]]\r\n"
+													"    name = \"plantain\""sv;
+	static constexpr auto spec_array_of_tables_3  = "points = [ { x = 1, y = 2, z = 3 },\r\n"
+													"           { x = 7, y = 8, z = 9 },\r\n"
+													"           { x = 2, y = 4, z = 8 } ]"sv;
+	static constexpr auto spec_boolean_1		  = "bool1 = true"sv;
+	static constexpr auto spec_boolean_2		  = "bool1 = false"sv;
+	static constexpr auto spec_case_sensitive	  = "# TOML is case sensitive.\r\n"
+													"abc = 123\r\n"
+													"ABC = 456"sv;
+	static constexpr auto spec_comment_mid_array  = "# eol commetns can go anywhere\r\n"
+													"abc = [ # this is valid\r\n"
+													"  123,#as is this\r\n"
+													"  456    #so is  this\r\n"
+													"  ]# and this\r\n"
+													"# here too"sv;
+	static constexpr auto spec_comment_mid_string = "another = \"# This is not a comment\""sv;
+	static constexpr auto spec_comment_tab =
+		"# This is a full-line	comment with a tab in the middle\r\n"
+		"key = \"value\" # This is a commen	with a tab in the middle at the end of a line"sv;
+	static constexpr auto spec_comment				  = "# This is a full-line comment\r\n"
+														"key = \"value\" # This is a comment at the end of a line"sv;
+	static constexpr auto spec_date_local_1			  = "ld1 = 1979-05-27"sv;
+	static constexpr auto spec_date_time_1			  = "odt1 = 1979-05-27T07:32:00Z"sv;
+	static constexpr auto spec_date_time_2			  = "odt2 = 1979-05-27T00:32:00-07:00"sv;
+	static constexpr auto spec_date_time_3			  = "odt3 = 1979-05-27T00:32:00.999999-07:00"sv;
+	static constexpr auto spec_date_time_4			  = "odt4 = 1979-05-27 07:32:00Z"sv;
+	static constexpr auto spec_date_time_5			  = "odt5 = 1979-05-27T07:32:00.123Z"sv;
+	static constexpr auto spec_date_time_local_1	  = "ldt1 = 1979-05-27T07:32:00"sv;
+	static constexpr auto spec_dotted_keys_1		  = "name = \"Orange\"\r\n"
+														"physical.color = \"orange\"\r\n"
+														"physical.shape = \"round\"\r\n"
+														"site.\"google.com\" = true"sv;
+	static constexpr auto spec_dotted_keys_2		  = "a  .  b = 23"sv;
+	static constexpr auto spec_dotted_keys_3		  = "a  	.  b = 23"sv;
+	static constexpr auto spec_empty_key_name_1		  = "\"\" = \"blank\"     # VALID but discouraged"sv;
+	static constexpr auto spec_empty_key_name_2		  = "'' = \"blank\"     # VALID but discouraged"sv;
+	static constexpr auto spec_extend_dotted_object_1 = "# This makes the key \"fruit\" into a table.\r\n"
+														"fruit.apple.smooth = true\r\n"
+														"\r\n"
+														"# So then you can add to the table \"fruit\" like so:\r\n"
+														"fruit.orange = 2"sv;
+	static constexpr auto spec_extend_dotted_object_2 = "# VALID BUT DISCOURAGED\r\n"
+														"\r\n"
+														"apple.type = \"fruit\"\r\n"
+														"orange.type = \"fruit\"\r\n"
+														"\r\n"
+														"apple.skin = \"thin\"\r\n"
+														"orange.skin = \"thick\"\r\n"
+														"\r\n"
+														"apple.color = \"red\"\r\n"
+														"orange.color = \"orange\""sv;
+	static constexpr auto spec_extend_dotted_object_3 = "# RECOMMENDED\r\n"
+														"\r\n"
+														"apple.type = \"fruit\"\r\n"
+														"apple.skin = \"thin\"\r\n"
+														"apple.color = \"red\"\r\n"
+														"\r\n"
+														"orange.type = \"fruit\"\r\n"
+														"orange.skin = \"thick\"\r\n"
+														"orange.color = \"orange\""sv;
+	static constexpr auto spec_float_1				  = "flt1 = +1.0"sv;
+	static constexpr auto spec_float_10				  = "sf1 = inf  # positive infinity"sv;
+	static constexpr auto spec_float_11				  = "sf2 = +inf # positive infinity"sv;
+	static constexpr auto spec_float_12				  = "sf2 = -inf # negative infinity"sv;
+	static constexpr auto spec_float_13			= "sf4 = nan  # actual sNaN/qNaN encoding is implementation specific"sv;
+	static constexpr auto spec_float_14			= "sf5 = +nan # same as `nan`"sv;
+	static constexpr auto spec_float_15			= "sf6 = -nan # valid, actual encoding is implementation specific"sv;
+	static constexpr auto spec_float_2			= "flt2 = 3.1415"sv;
+	static constexpr auto spec_float_3			= "flt3 = -0.01"sv;
+	static constexpr auto spec_float_4			= "flt4 = 5e+22"sv;
+	static constexpr auto spec_float_5			= "flt5 = 1e06"sv;
+	static constexpr auto spec_float_6			= "flt6 = -2E-2"sv;
+	static constexpr auto spec_float_7			= "flt7 = 6.626e-34"sv;
+	static constexpr auto spec_float_8			= "flt8 = 224_617.445_991_228"sv;
+	static constexpr auto spec_float_9			= "flt9 = -0e0"sv;
+	static constexpr auto spec_int_1			= "int1 = +99"sv;
+	static constexpr auto spec_int_2			= "int2 = 42"sv;
+	static constexpr auto spec_int_3			= "int3 = 0"sv;
+	static constexpr auto spec_int_3a			= "int3 = +0"sv;
+	static constexpr auto spec_int_3b			= "int3 = -0"sv;
+	static constexpr auto spec_int_4			= "int4 = -17"sv;
+	static constexpr auto spec_int_5			= "int5 = 1_000"sv;
+	static constexpr auto spec_int_6			= "int6 = 5_349_221"sv;
+	static constexpr auto spec_int_7			= "int7 = 1_2_3_4_5     # VALID but discouraged"sv;
+	static constexpr auto spec_int_bin1			= "bin1 = 0b11010110"sv;
+	static constexpr auto spec_int_hex1			= "hex1 = 0xDEADBEEF"sv;
+	static constexpr auto spec_int_hex2			= "hex2 = 0xdeadbeef"sv;
+	static constexpr auto spec_int_hex3			= "hex3 = 0xdead_beef"sv;
+	static constexpr auto spec_int_max			= "max=9_223_372_036_854_775_807"sv;
+	static constexpr auto spec_int_min			= "min=-9_223_372_036_854_775_808"sv;
+	static constexpr auto spec_int_oct1			= "oct1 = 0o01234567"sv;
+	static constexpr auto spec_int_oct2			= "oct2 = 0o755 # useful for Unix file permissions"sv;
+	static constexpr auto spec_key_value_pair_1 = "key = \"value\""sv;
+	static constexpr auto spec_key_value_pair_2 = "bare_key = \"value\""sv;
+	static constexpr auto spec_key_value_pair_3 = "bare-key = \"value\""sv;
+	static constexpr auto spec_key_value_pair_4 = "1234 = \"value\""sv;
+	static constexpr auto spec_key_value_pair_5 = "1234=\"value\""sv;
+	static constexpr auto spec_key_value_pair_6 = "-=1"sv;
+	static constexpr auto spec_key_value_pair_7 = "_=1"sv;
+	static constexpr auto spec_key_value_pair_8 = "-_-_-_-_-=1"sv;
+	static constexpr auto spec_key_value_pair_9 = "3.14159 = \"pi\""sv;
+	static constexpr auto spec_newline_1		= R"(abc = 123
+def = 456)"sv;
+	static constexpr auto spec_newline_2		= "abc = 123\r\n"
+												  "def = 456"sv;
+	static constexpr auto spec_newline_3		= "abc = 123\r\n"
+												  "def = 456\n"
+												  "ghi = 789"sv;
+	static constexpr auto spec_quoted_literal_keys_1	= "'quoted \"value\"' = \"value\""sv;
+	static constexpr auto spec_readme_example			= "# This is a TOML document.\r\n"
+														  "\r\n"
+														  "title = \"TOML Example\"\r\n"
+														  "\r\n"
+														  "[owner]\r\n"
+														  "name = \"Tom Preston-Werner\"\r\n"
+														  "dob = 1979-05-27T07:32:00-08:00 # First class dates\r\n"
+														  "\r\n"
+														  "[database]\r\n"
+														  "server = \"192.168.1.1\"\r\n"
+														  "ports = [ 8001, 8001, 8002 ]\r\n"
+														  "connection_max = 5000\r\n"
+														  "enabled = true\r\n"
+														  "\r\n"
+														  "[servers]\r\n"
+														  "\r\n"
+														  "  # Indentation (tabs and/or spaces) is allowed but not required\r\n"
+														  "  [servers.alpha]\r\n"
+														  "  ip = \"10.0.0.1\"\r\n"
+														  "  dc = \"eqdc10\"\r\n"
+														  "\r\n"
+														  "  [servers.beta]\r\n"
+														  "  ip = \"10.0.0.2\"\r\n"
+														  "  dc = \"eqdc10\"\r\n"
+														  "\r\n"
+														  "[clients]\r\n"
+														  "data = [ [\"gamma\", \"delta\"], [1, 2] ]\r\n"
+														  "\r\n"
+														  "# Line breaks are OK when inside arrays\r\n"
+														  "hosts = [\r\n"
+														  "  \"alpha\",\r\n"
+														  "  \"omega\"\r\n"
+														  "]"sv;
+	static constexpr auto spec_string_basic_multiline_1 = "str1 = \"\"\"\r\n"
+														  "Roses are red\r\n"
+														  "Violets are blue\"\"\""sv;
+	static constexpr auto spec_string_basic_multiline_2 = "str = \"\"\"\r\n"
+														  "The quick brown \\\r\n"
+														  "\r\n"
+														  "\r\n"
+														  "  fox jumps over \\\r\n"
+														  "    the lazy dog.\"\"\""sv;
+	static constexpr auto spec_string_basic_multiline_3 = "str = \"\"\"\\\r\n"
+														  "      The quick brown \\\r\n"
+														  "      fox jumps over \\\r\n"
+														  "      the lazy dog.\\\r\n"
+														  "      \"\"\""sv;
+	static constexpr auto spec_string_basic_multiline_4 = "a = \"\"\"abc\\   \r\n"
+														  "def\"\"\""sv;
+	static constexpr auto spec_string_basic_multiline_5 = "ml-escaped-nl = \"\"\"\r\n"
+														  "  foo \\\r\n"
+														  "  bar \\\\\r\n"
+														  "  baz \\\\\\\r\n"
+														  "  quux\"\"\""sv;
 	static constexpr auto spec_string_basic_multiline_6 =
-		R"(str4 = """Here are two quotation marks: "". Simple enough.""")"sv;
-	static constexpr auto spec_string_basic_multiline_7 = R"(str5 = """Here are three quotation marks: ""\".""")"sv;
+		"str4 = \"\"\"Here are two quotation marks: \"\". Simple enough.\"\"\""sv;
+	static constexpr auto spec_string_basic_multiline_7 =
+		"str5 = \"\"\"Here are three quotation marks: \"\"\\\".\"\"\""sv;
 	static constexpr auto spec_string_basic_multiline_8 =
-		R"(str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\".""")"sv;
+		"str6 = \"\"\"Here are fifteen quotation marks: \"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\"\"\"\\\".\"\"\""sv;
 	static constexpr auto spec_string_basic_multiline_9 =
-		R"(str7 = """"This," she said, "is just a pointless statement."""")"sv;
-	static constexpr auto spec_string_basic_tab_multiline = R"(str = """This is a	tab""")"sv;
-	static constexpr auto spec_string_basic_tab			  = R"(str = "This is a	tab")"sv;
-	static constexpr auto spec_string_literal_1			  = R"(winpath  = 'C:\Users\nodejs\templates')"sv;
-	static constexpr auto spec_string_literal_2			  = R"(winpath2 = '\\ServerX\admin$\system32\')"sv;
-	static constexpr auto spec_string_literal_3			  = R"(quoted   = 'Tom "Dubs" Preston-Werner')"sv;
-	static constexpr auto spec_string_literal_4			  = R"(regex    = '<\i\c*\s*>')"sv;
-	static constexpr auto spec_string_literal_multiline_1 = R"(regex2 = '''I [dw]on't need \d{2} apples''')"sv;
-	static constexpr auto spec_string_literal_multiline_2 = R"(lines  = '''
-The first newline is
-trimmed in raw strings.
-   All other whitespace
-   is preserved.
-''')"sv;
+		"str7 = \"\"\"\"This,\" she said, \"is just a pointless statement.\"\"\"\""sv;
+	static constexpr auto spec_string_basic_tab_multiline = "str = \"\"\"This is a	tab\"\"\""sv;
+	static constexpr auto spec_string_basic_tab			  = "str = \"This is a	tab\""sv;
+	static constexpr auto spec_string_escape_1			  = "a = \"\\b\""sv;
+	static constexpr auto spec_string_escape_2			  = "a = \"\\t\""sv;
+	static constexpr auto spec_string_escape_3			  = "a = \"\\n\""sv;
+	static constexpr auto spec_string_escape_4			  = "a = \"\\f\""sv;
+	static constexpr auto spec_string_escape_5			  = "a = \"\\r\""sv;
+	static constexpr auto spec_string_escape_6			  = "a = \"\\\"\""sv;
+	static constexpr auto spec_string_escape_7			  = "a = \"\\\\\""sv;
+	static constexpr auto spec_string_escape_8			  = "a = \"\\u0000\""sv;
+	static constexpr auto spec_string_escape_9			  = "a = \"\\U00000000\""sv;
+	static constexpr auto spec_string_literal_1			  = "winpath  = 'C:\\Users\\nodejs\\templates'"sv;
+	static constexpr auto spec_string_literal_2			  = "winpath2 = '\\\\ServerX\\admin$\\system32\\'"sv;
+	static constexpr auto spec_string_literal_3			  = "quoted   = 'Tom \"Dubs\" Preston-Werner'"sv;
+	static constexpr auto spec_string_literal_4			  = "regex    = '<\\i\\c*\\s*>'"sv;
+	static constexpr auto spec_string_literal_multiline_1 = "regex2 = '''I [dw]on't need \\d{2} apples'''"sv;
+	static constexpr auto spec_string_literal_multiline_2 = "lines  = '''\r\n"
+															"The first newline is\r\n"
+															"trimmed in raw strings.\r\n"
+															"   All other whitespace\r\n"
+															"   is preserved.\r\n"
+															"'''"sv;
 	static constexpr auto spec_string_literal_multiline_3 =
-		R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""''')"sv;
-	static constexpr auto spec_string_literal_multiline_4 = R"(str = ''''That,' she said, 'is still pointless.'''')"sv;
-	static constexpr auto spec_table_1					  = R"([table-1]
-key1 = "some string"
-key2 = 123
-
-[table-2]
-key1 = "another string"
-key2 = 456)"sv;
-	static constexpr auto spec_table_2					  = R"([dog."tater.man"]
-type.name = "pug")"sv;
-	static constexpr auto spec_table_3					  = R"([a.b.c])"sv;
-	static constexpr auto spec_table_4					  = R"([ d.e.f ]          # same as [d.e.f])"sv;
-	static constexpr auto spec_table_5					  = R"([ g .  h  . i ]    # same as [g.h.i])"sv;
-	static constexpr auto spec_table_7					  = R"(# [x] you
-# [x.y] don't
-# [x.y.z] need these
-[x.y.z.w] # for this to work
-[x] # defining a super-table afterwards is ok)"sv;
-	static constexpr auto spec_table_8					  = R"([fruit]
-apple.color = "red"
-apple.taste.sweet = true
-
-[fruit.apple.texture]  # you can add sub-tables
-smooth = true)"sv;
-	static constexpr auto spec_table_inline_1			  = R"(name = { first = "Tom", last = "Preston-Werner" })"sv;
-	static constexpr auto spec_table_inline_2			  = R"(point = { x = 1, y = 2 })"sv;
-	static constexpr auto spec_table_inline_3			  = R"(animal = { type.name = "pug" })"sv;
-	static constexpr auto spec_table					  = R"([table])"sv;
-	static constexpr auto spec_time_1					  = R"(lt1 = 07:32:00)"sv;
+		"quot15 = '''Here are fifteen quotation marks: \"\"\"\"\"\"\"\"\"\"\"\"\"\"\"'''"sv;
+	static constexpr auto spec_string_literal_multiline_4 = "str = ''''That,' she said, 'is still pointless.''''"sv;
+	static constexpr auto spec_table_1					  = "[table-1]\r\n"
+															"key1 = \"some string\"\r\n"
+															"key2 = 123\r\n"
+															"\r\n"
+															"[table-2]\r\n"
+															"key1 = \"another string\"\r\n"
+															"key2 = 456"sv;
+	static constexpr auto spec_table_2					  = "[dog.\"tater.man\"]\r\n"
+															"type.name = \"pug\""sv;
+	static constexpr auto spec_table_3					  = "[a.b.c]"sv;
+	static constexpr auto spec_table_4					  = "[ d.e.f ]          # same as [d.e.f]"sv;
+	static constexpr auto spec_table_5					  = "[ g .  h  . i ]    # same as [g.h.i]"sv;
+	static constexpr auto spec_table_7					  = "# [x] you\r\n"
+															"# [x.y] don't\r\n"
+															"# [x.y.z] need these\r\n"
+															"[x.y.z.w] # for this to work\r\n"
+															"[x] # defining a super-table afterwards is ok"sv;
+	static constexpr auto spec_table_8					  = "[fruit]\r\n"
+															"apple.color = \"red\"\r\n"
+															"apple.taste.sweet = true\r\n"
+															"\r\n"
+															"[fruit.apple.texture]  # you can add sub-tables\r\n"
+															"smooth = true"sv;
+	static constexpr auto spec_table_inline_1			  = "name = { first = \"Tom\", last = \"Preston-Werner\" }"sv;
+	static constexpr auto spec_table_inline_2			  = "point = { x = 1, y = 2 }"sv;
+	static constexpr auto spec_table_inline_3			  = "animal = { type.name = \"pug\" } "sv;
+	static constexpr auto spec_table					  = "[table]"sv;
+	static constexpr auto spec_time_1					  = "lt1 = 07:32:00"sv;
 
 #if UNICODE_LITERALS_OK
 
-	static constexpr auto spec_quoted_basic_keys_1 = R"("ʎǝʞ" = "value")"sv;
+	static constexpr auto spec_quoted_basic_keys_1 = "\"ʎǝʞ\" = \"value\""sv;
 	static constexpr auto spec_string_basic =
-		R"(str = "I'm a string. \"You can quote me\". Name\tJos\u00E9\nLocation\tSF.")"sv;
-	static constexpr auto spec_table_6 = R"([ j . "ʞ" . 'l' ]  # same as [j."ʞ".'l'])"sv;
+		"str = \"I'm a string. \\\"You can quote me\\\". Name\\tJos\\u00E9\\nLocation\\tSF.\""sv;
+	static constexpr auto spec_table_6 = "[ j . \"ʞ\" . 'l' ]  # same as [j.\"ʞ\".'l']"sv;
 
 #endif // UNICODE_LITERALS_OK
 }
@@ -1197,6 +1216,40 @@ TEST_CASE("conformance - iarna/valid")
 						   });
 
 	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_newline_1,
+						   [](toml::table&& tbl) // spec-newline-1
+						   {
+							   const auto expected = toml::table{
+								   { R"(abc)"sv, 123 },
+								   { R"(def)"sv, 456 },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_newline_2,
+						   [](toml::table&& tbl) // spec-newline-2
+						   {
+							   const auto expected = toml::table{
+								   { R"(abc)"sv, 123 },
+								   { R"(def)"sv, 456 },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_newline_3,
+						   [](toml::table&& tbl) // spec-newline-3
+						   {
+							   const auto expected = toml::table{
+								   { R"(abc)"sv, 123 },
+								   { R"(def)"sv, 456 },
+								   { R"(ghi)"sv, 789 },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
 						   spec_quoted_literal_keys_1,
 						   [](toml::table&& tbl) // spec-quoted-literal-keys-1
 						   {
@@ -1373,6 +1426,97 @@ Violets are blue)"sv },
 						   {
 							   const auto expected = toml::table{
 								   { R"(str)"sv, R"(This is a	tab)"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_1,
+						   [](toml::table&& tbl) // spec-string-escape-1
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, "\x08"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_2,
+						   [](toml::table&& tbl) // spec-string-escape-2
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, R"(	)"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_3,
+						   [](toml::table&& tbl) // spec-string-escape-3
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, R"(
+)"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_4,
+						   [](toml::table&& tbl) // spec-string-escape-4
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, "\x0C"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_5,
+						   [](toml::table&& tbl) // spec-string-escape-5
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, "\r"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_6,
+						   [](toml::table&& tbl) // spec-string-escape-6
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, R"(")"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_7,
+						   [](toml::table&& tbl) // spec-string-escape-7
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, R"(\)"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_8,
+						   [](toml::table&& tbl) // spec-string-escape-8
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, "\x00"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   spec_string_escape_9,
+						   [](toml::table&& tbl) // spec-string-escape-9
+						   {
+							   const auto expected = toml::table{
+								   { R"(a)"sv, "\x00"sv },
 							   };
 							   REQUIRE(tbl == expected);
 						   });

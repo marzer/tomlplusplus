@@ -34,13 +34,17 @@ endforeach
 
 if is_clang and get_option('asan_examples')
 	foreach executable : example_executables
-		if executable[0].contains('transcoder') # skip the transcoder because it waits on stdin
+
+		# skip the transcoder (it waits on stdin) and the benchmark (might be slow and cause CI to fail)
+		if executable[0].contains('transcoder') or executable[0].contains('benchmark')
 			continue
 		endif
+
 		test(
 			executable[0], # name
 			executable[1], # executable object
 			workdir: meson.source_root()/'examples'
 		)
+
 	endforeach
 endif

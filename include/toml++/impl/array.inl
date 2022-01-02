@@ -20,7 +20,7 @@ TOML_NAMESPACE_START
 	array::array(const impl::array_init_elem* b, const impl::array_init_elem* e)
 	{
 #if TOML_LIFETIME_HOOKS
-		TOML_TABLE_CREATED;
+		TOML_ARRAY_CREATED;
 #endif
 
 		TOML_ASSERT_ASSUME(b);

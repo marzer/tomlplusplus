@@ -368,8 +368,8 @@ true = 1
 inf = 100000000
 nan = "ceci n'est pas un nombre")"sv;
 
-	static constexpr auto newline_crlf = R"(os = "DOS"
-newline = "crlf")"sv;
+	static constexpr auto newline_crlf = "os = \"DOS\"\r\n"
+										 "newline = \"crlf\""sv;
 	static constexpr auto newline_lf   = R"(os = "unix"
 newline = "lf")"sv;
 
@@ -449,58 +449,59 @@ two_space = """ ""two quotes"" """
 
 mismatch1 = """aaa'''bbb"""
 mismatch2 = '''aaa"""bbb''')"sv;
-	static constexpr auto string_multiline	   = R"(# NOTE: this file includes some literal tab characters.
-
-multiline_empty_one = """"""
-
-# A newline immediately following the opening delimiter will be trimmed.
-multiline_empty_two = """
-"""
-
-# \ at the end of line trims newlines as well; note that last \ is followed by
-# two spaces, which are ignored.
-multiline_empty_three = """\
-    """
-multiline_empty_four = """\
-   \
-   \
-   """
-
-equivalent_one = "The quick brown fox jumps over the lazy dog."
-equivalent_two = """
-The quick brown \
-
-
-  fox jumps over \
-    the lazy dog."""
-
-equivalent_three = """\
-       The quick brown \
-       fox jumps over \
-       the lazy dog.\
-       """
-
-whitespace-after-bs = """\
-       The quick brown \
-       fox jumps over \
-       the lazy dog.\
-       """
-
-no-space = """a\
-    b"""
-
-# Has tab character.
-keep-ws-before = """a   	\
-   b"""
-
-escape-bs-1 = """a \\
-b"""
-
-escape-bs-2 = """a \\\
-b"""
-
-escape-bs-3 = """a \\\\
-  b""")"sv;
+	static constexpr auto string_multiline =
+		"# NOTE: this file includes some literal tab characters.\n"
+		"\n"
+		"multiline_empty_one = \"\"\"\"\"\"\n"
+		"\n"
+		"# A newline immediately following the opening delimiter will be trimmed.\n"
+		"multiline_empty_two = \"\"\"\n"
+		"\"\"\"\n"
+		"\n"
+		"# \\ at the end of line trims newlines as well; note that last \\ is followed by\n"
+		"# two spaces, which are ignored.\n"
+		"multiline_empty_three = \"\"\"\\\n"
+		"    \"\"\"\n"
+		"multiline_empty_four = \"\"\"\\\n"
+		"   \\\n"
+		"   \\  \n"
+		"   \"\"\"\n"
+		"\n"
+		"equivalent_one = \"The quick brown fox jumps over the lazy dog.\"\n"
+		"equivalent_two = \"\"\"\n"
+		"The quick brown \\\n"
+		"\n"
+		"\n"
+		"  fox jumps over \\\n"
+		"    the lazy dog.\"\"\"\n"
+		"\n"
+		"equivalent_three = \"\"\"\\\n"
+		"       The quick brown \\\n"
+		"       fox jumps over \\\n"
+		"       the lazy dog.\\\n"
+		"       \"\"\"\n"
+		"\n"
+		"whitespace-after-bs = \"\"\"\\\n"
+		"       The quick brown \\\n"
+		"       fox jumps over \\   \n"
+		"       the lazy dog.\\	\n"
+		"       \"\"\"\n"
+		"\n"
+		"no-space = \"\"\"a\\\n"
+		"    b\"\"\"\n"
+		"\n"
+		"# Has tab character.\n"
+		"keep-ws-before = \"\"\"a   	\\\n"
+		"   b\"\"\"\n"
+		"\n"
+		"escape-bs-1 = \"\"\"a \\\\\n"
+		"b\"\"\"\n"
+		"\n"
+		"escape-bs-2 = \"\"\"a \\\\\\\n"
+		"b\"\"\"\n"
+		"\n"
+		"escape-bs-3 = \"\"\"a \\\\\\\\\n"
+		"  b\"\"\""sv;
 	static constexpr auto string_nl			   = R"(nl_mid = "val\nue"
 nl_end = """value\n"""
 
@@ -610,13 +611,13 @@ last_name = "Springsteen")"sv;
 	static constexpr auto table_with_literal_string = R"(['a']
 [a.'"b"']
 [a.'"b"'.c]
-answer = 42)"sv;
+answer = 42 )"sv;
 	static constexpr auto table_with_pound			= R"(["key#group"]
 answer = 42)"sv;
 	static constexpr auto table_with_single_quotes	= R"(['a']
 [a.'b']
 [a.'b'.c]
-answer = 42)"sv;
+answer = 42 )"sv;
 	static constexpr auto table_without_super		= R"(# [x] you
 # [x.y] don't
 # [x.y.z] need these
@@ -1748,7 +1749,7 @@ another line)"sv },
 									 toml::table{
 										 { R"(À)"sv, toml::table{} },
 									 } },
-								   { R"(backsp)"sv, toml::table{} },
+								   { "backsp\x08\x08"sv, toml::table{} },
 								   { R"(À)"sv, R"(latin capital letter A with grave)"sv },
 							   };
 							   REQUIRE(tbl == expected);

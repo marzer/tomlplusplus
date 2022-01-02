@@ -9,138 +9,160 @@
 
 namespace
 {
-	static constexpr auto array_of_tables_1 = R"(# INVALID TOML DOC
-fruit = []
+	static constexpr auto array_of_tables_1 = "# INVALID TOML DOC\r\n"
+											  "fruit = []\r\n"
+											  "\r\n"
+											  "[[fruit]] # Not allowed"sv;
+	static constexpr auto array_of_tables_2 = "# INVALID TOML DOC\r\n"
+											  "[[fruit]]\r\n"
+											  "  name = \"apple\"\r\n"
+											  "\r\n"
+											  "  [[fruit.variety]]\r\n"
+											  "    name = \"red delicious\"\r\n"
+											  "\r\n"
+											  "  # This table conflicts with the previous table\r\n"
+											  "  [fruit.variety]\r\n"
+											  "    name = \"granny smith\""sv;
 
-[[fruit]] # Not allowed)"sv;
-	static constexpr auto array_of_tables_2 = R"(# INVALID TOML DOC
-[[fruit]]
-  name = "apple"
-
-  [[fruit.variety]]
-    name = "red delicious"
-
-  # This table conflicts with the previous table
-  [fruit.variety]
-    name = "granny smith")"sv;
-
-	static constexpr auto bare_key_1 = R"(bare!key = 123)"sv;
-	static constexpr auto bare_key_2 = R"(barekey
-   = 123)"sv;
+	static constexpr auto bare_key_1 = "bare!key = 123"sv;
+	static constexpr auto bare_key_2 = "barekey\r\n"
+									   "   = 123"sv;
 	static constexpr auto bare_key_3 = R"(barekey =)"sv;
 
-	static constexpr auto inline_table_imutable_1 = R"([product]
-type = { name = "Nail" }
-type.edible = false  # INVALID)"sv;
-	static constexpr auto inline_table_imutable_2 = R"([product]
-type.name = "Nail"
-type = { edible = false }  # INVALID)"sv;
+	static constexpr auto comment_control_1 = "a = \"null\" # \x00"sv;
+	static constexpr auto comment_control_2 = "a = \"ctrl-P\" # \x10"sv;
+	static constexpr auto comment_control_3 = "a = \"ctrl-_\" # \x1F"sv;
+	static constexpr auto comment_control_4 = "a = \"0x7f\" # \x7F"sv;
+
+	static constexpr auto inline_table_imutable_1 = "[product]\r\n"
+													"type = { name = \"Nail\" }\r\n"
+													"type.edible = false  # INVALID"sv;
+	static constexpr auto inline_table_imutable_2 = "[product]\r\n"
+													"type.name = \"Nail\"\r\n"
+													"type = { edible = false }  # INVALID"sv;
 
 #if !TOML_LANG_UNRELEASED
 
-	static constexpr auto inline_table_trailing_comma = R"(abc = { abc = 123, })"sv;
+	static constexpr auto inline_table_trailing_comma = "abc = { abc = 123, }"sv;
 
 #endif // !TOML_LANG_UNRELEASED
 
-	static constexpr auto int_0_padded	 = R"(int = 0123)"sv;
-	static constexpr auto int_signed_bin = R"(bin = +0b10)"sv;
-	static constexpr auto int_signed_hex = R"(hex = +0xab)"sv;
-	static constexpr auto int_signed_oct = R"(oct = +0o23)"sv;
+	static constexpr auto int_0_padded	 = "int = 0123"sv;
+	static constexpr auto int_signed_bin = "bin = +0b10"sv;
+	static constexpr auto int_signed_hex = "hex = +0xab"sv;
+	static constexpr auto int_signed_oct = "oct = +0o23"sv;
 
-	static constexpr auto key_value_pair_1 = R"(key = # INVALID)"sv;
-	static constexpr auto key_value_pair_2 = R"(first = "Tom" last = "Preston-Werner" # INVALID)"sv;
+	static constexpr auto key_value_pair_1 = "key = # INVALID"sv;
+	static constexpr auto key_value_pair_2 = "first = \"Tom\" last = \"Preston-Werner\" # INVALID"sv;
 
-	static constexpr auto multiple_dot_key = R"(# THE FOLLOWING IS INVALID
+	static constexpr auto multiple_dot_key = "# THE FOLLOWING IS INVALID\r\n"
+											 "\r\n"
+											 "# This defines the value of fruit.apple to be an integer.\r\n"
+											 "fruit.apple = 1\r\n"
+											 "\r\n"
+											 "# But then this treats fruit.apple like it's a table.\r\n"
+											 "# You can't turn an integer into a table.\r\n"
+											 "fruit.apple.smooth = true"sv;
+	static constexpr auto multiple_key	   = "# DO NOT DO THIS\r\n"
+											 "name = \"Tom\"\r\n"
+											 "name = \"Pradyun\""sv;
 
-# This defines the value of fruit.apple to be an integer.
-fruit.apple = 1
+	static constexpr auto no_key_name = "= \"no key name\"  # INVALID"sv;
 
-# But then this treats fruit.apple like it's a table.
-# You can't turn an integer into a table.
-fruit.apple.smooth = true)"sv;
-	static constexpr auto multiple_key	   = R"(# DO NOT DO THIS
-name = "Tom"
-name = "Pradyun")"sv;
-
-	static constexpr auto no_key_name = R"(= "no key name"  # INVALID)"sv;
-
-	static constexpr auto string_basic_multiline_invalid_backslash			   = R"(a = """
-  foo \ \n
-  bar""")"sv;
-	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_1 = R"(a = """\UFFFFFFFF""")"sv;
-	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_2 = R"(a = """\U00D80000""")"sv;
-	static constexpr auto string_basic_multiline_quotes = R"(str5 = """Here are three quotation marks: """.""")"sv;
-	static constexpr auto string_basic_multiline_unknown_escape		 = R"(a = """\@""")"sv;
-	static constexpr auto string_basic_out_of_range_unicode_escape_1 = R"(a = "\UFFFFFFFF")"sv;
-	static constexpr auto string_basic_out_of_range_unicode_escape_2 = R"(a = "\U00D80000")"sv;
-	static constexpr auto string_basic_unknown_escape				 = R"(a = "\@")"sv;
+	static constexpr auto string_basic_control_1							   = "a = \"null\x00\""sv;
+	static constexpr auto string_basic_control_2							   = "a = \"ctrl-P\x10\""sv;
+	static constexpr auto string_basic_control_3							   = "a = \"ctrl-_\x1F\""sv;
+	static constexpr auto string_basic_control_4							   = "a = \"0x7f\x7F\""sv;
+	static constexpr auto string_basic_multiline_control_1					   = "a = \"\"\"null\x00\"\"\""sv;
+	static constexpr auto string_basic_multiline_control_2					   = "a = \"\"\"null\x10\"\"\""sv;
+	static constexpr auto string_basic_multiline_control_3					   = "a = \"\"\"null\x1F\"\"\""sv;
+	static constexpr auto string_basic_multiline_control_4					   = "a = \"\"\"null\x7F\"\"\""sv;
+	static constexpr auto string_basic_multiline_invalid_backslash			   = "a = \"\"\"\r\n"
+																				 "  foo \\ \\n\r\n"
+																				 "  bar\"\"\""sv;
+	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_1 = "a = \"\"\"\\UFFFFFFFF\"\"\""sv;
+	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_2 = "a = \"\"\"\\U00D80000\"\"\""sv;
+	static constexpr auto string_basic_multiline_quotes =
+		"str5 = \"\"\"Here are three quotation marks: \"\"\".\"\"\""sv;
+	static constexpr auto string_basic_multiline_unknown_escape		 = "a = \"\"\"\\@\"\"\""sv;
+	static constexpr auto string_basic_out_of_range_unicode_escape_1 = "a = \"\\UFFFFFFFF\""sv;
+	static constexpr auto string_basic_out_of_range_unicode_escape_2 = "a = \"\\U00D80000\""sv;
+	static constexpr auto string_basic_unknown_escape				 = "a = \"\\@\""sv;
+	static constexpr auto string_literal_control_1					 = "a = 'null\x00'"sv;
+	static constexpr auto string_literal_control_2					 = "a = 'null\x10'"sv;
+	static constexpr auto string_literal_control_3					 = "a = 'null\x1F'"sv;
+	static constexpr auto string_literal_control_4					 = "a = 'null\x7F'"sv;
+	static constexpr auto string_literal_multiline_control_1		 = "a = '''null\x00'''"sv;
+	static constexpr auto string_literal_multiline_control_2		 = "a = '''null\x10'''"sv;
+	static constexpr auto string_literal_multiline_control_3		 = "a = '''null\x1F'''"sv;
+	static constexpr auto string_literal_multiline_control_4		 = "a = '''null\x7F'''"sv;
 	static constexpr auto string_literal_multiline_quotes =
-		R"(apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID)"sv;
+		"apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID"sv;
 
-	static constexpr auto table_1 = R"(# DO NOT DO THIS
-
-[fruit]
-apple = "red"
-
-[fruit]
-orange = "orange")"sv;
-	static constexpr auto table_2 = R"(# DO NOT DO THIS EITHER
-
-[fruit]
-apple = "red"
-
-[fruit.apple]
-texture = "smooth")"sv;
-	static constexpr auto table_3 = R"([fruit]
-apple.color = "red"
-apple.taste.sweet = true
-
-[fruit.apple]  # INVALID)"sv;
-	static constexpr auto table_4 = R"([fruit]
-apple.color = "red"
-apple.taste.sweet = true
-
-[fruit.apple.taste]  # INVALID)"sv;
+	static constexpr auto table_1 = "# DO NOT DO THIS\r\n"
+									"\r\n"
+									"[fruit]\r\n"
+									"apple = \"red\"\r\n"
+									"\r\n"
+									"[fruit]\r\n"
+									"orange = \"orange\""sv;
+	static constexpr auto table_2 = "# DO NOT DO THIS EITHER\r\n"
+									"\r\n"
+									"[fruit]\r\n"
+									"apple = \"red\"\r\n"
+									"\r\n"
+									"[fruit.apple]\r\n"
+									"texture = \"smooth\""sv;
+	static constexpr auto table_3 = "[fruit]\r\n"
+									"apple.color = \"red\"\r\n"
+									"apple.taste.sweet = true\r\n"
+									"\r\n"
+									"[fruit.apple]  # INVALID"sv;
+	static constexpr auto table_4 = "[fruit]\r\n"
+									"apple.color = \"red\"\r\n"
+									"apple.taste.sweet = true\r\n"
+									"\r\n"
+									"[fruit.apple.taste]  # INVALID"sv;
 	static constexpr auto table_invalid_1 =
-		R"([fruit.physical]  # subtable, but to which parent element should it belong?
-  color = "red"
-  shape = "round"
-
-[[fruit]]  # parser must throw an error upon discovering that "fruit" is
-           # an array rather than a table
-  name = "apple")"sv;
-	static constexpr auto table_invalid_2 = R"(# INVALID TOML DOC
-fruit = []
-
-[[fruit]] # Not allowed)"sv;
-	static constexpr auto table_invalid_3 = R"(# INVALID TOML DOC
-[[fruit]]
-  name = "apple"
-
-  [[fruit.variety]]
-    name = "red delicious"
-
-  # INVALID: This table conflicts with the previous array of tables
-  [fruit.variety]
-    name = "granny smith"
-
-  [fruit.physical]
-    color = "red"
-    shape = "round")"sv;
-	static constexpr auto table_invalid_4 = R"(# INVALID TOML DOC
-[[fruit]]
-  name = "apple"
-
-  [[fruit.variety]]
-    name = "red delicious"
-
-  [fruit.physical]
-    color = "red"
-    shape = "round"
-
-  # INVALID: This array of tables conflicts with the previous table
-  [[fruit.physical]]
-    color = "green")"sv;
+		"[fruit.physical]  # subtable, but to which parent element should it belong?\r\n"
+		"  color = \"red\"\r\n"
+		"  shape = \"round\"\r\n"
+		"\r\n"
+		"[[fruit]]  # parser must throw an error upon discovering that \"fruit\" is\r\n"
+		"           # an array rather than a table\r\n"
+		"  name = \"apple\""sv;
+	static constexpr auto table_invalid_2 = "# INVALID TOML DOC\r\n"
+											"fruit = []\r\n"
+											"\r\n"
+											"[[fruit]] # Not allowed"sv;
+	static constexpr auto table_invalid_3 = "# INVALID TOML DOC\r\n"
+											"[[fruit]]\r\n"
+											"  name = \"apple\"\r\n"
+											"\r\n"
+											"  [[fruit.variety]]\r\n"
+											"    name = \"red delicious\"\r\n"
+											"\r\n"
+											"  # INVALID: This table conflicts with the previous array of tables\r\n"
+											"  [fruit.variety]\r\n"
+											"    name = \"granny smith\"\r\n"
+											"\r\n"
+											"  [fruit.physical]\r\n"
+											"    color = \"red\"\r\n"
+											"    shape = \"round\""sv;
+	static constexpr auto table_invalid_4 = "# INVALID TOML DOC\r\n"
+											"[[fruit]]\r\n"
+											"  name = \"apple\"\r\n"
+											"\r\n"
+											"  [[fruit.variety]]\r\n"
+											"    name = \"red delicious\"\r\n"
+											"\r\n"
+											"  [fruit.physical]\r\n"
+											"    color = \"red\"\r\n"
+											"    shape = \"round\"\r\n"
+											"\r\n"
+											"  # INVALID: This array of tables conflicts with the previous table\r\n"
+											"  [[fruit.physical]]\r\n"
+											"    color = \"green\""sv;
 }
 
 TEST_CASE("conformance - iarna/invalid")
@@ -154,6 +176,14 @@ TEST_CASE("conformance - iarna/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, bare_key_2); // bare-key-2
 
 	parsing_should_fail(FILE_LINE_ARGS, bare_key_3); // bare-key-3
+
+	parsing_should_fail(FILE_LINE_ARGS, comment_control_1); // comment-control-1
+
+	parsing_should_fail(FILE_LINE_ARGS, comment_control_2); // comment-control-2
+
+	parsing_should_fail(FILE_LINE_ARGS, comment_control_3); // comment-control-3
+
+	parsing_should_fail(FILE_LINE_ARGS, comment_control_4); // comment-control-4
 
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_1); // inline-table-imutable-1
 
@@ -183,6 +213,22 @@ TEST_CASE("conformance - iarna/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, no_key_name); // no-key-name
 
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_1); // string-basic-control-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_2); // string-basic-control-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_3); // string-basic-control-3
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_4); // string-basic-control-4
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_1); // string-basic-multiline-control-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_2); // string-basic-multiline-control-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_3); // string-basic-multiline-control-3
+
+	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_4); // string-basic-multiline-control-4
+
 	parsing_should_fail(FILE_LINE_ARGS,
 						string_basic_multiline_invalid_backslash); // string-basic-multiline-invalid-backslash
 
@@ -205,6 +251,22 @@ TEST_CASE("conformance - iarna/invalid")
 						string_basic_out_of_range_unicode_escape_2); // string-basic-out-of-range-unicode-escape-2
 
 	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape); // string-basic-unknown-escape
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_1); // string-literal-control-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_2); // string-literal-control-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_3); // string-literal-control-3
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_4); // string-literal-control-4
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_1); // string-literal-multiline-control-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_2); // string-literal-multiline-control-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_3); // string-literal-multiline-control-3
+
+	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_4); // string-literal-multiline-control-4
 
 	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes); // string-literal-multiline-quotes
 

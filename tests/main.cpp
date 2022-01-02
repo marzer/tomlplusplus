@@ -28,26 +28,26 @@ namespace leakproof
 		total_created_++;
 	}
 
+	void table_destroyed() noexcept
+	{
+		tables_--;
+	}
+
 	void array_created() noexcept
 	{
 		arrays_++;
 		total_created_++;
 	}
 
+	void array_destroyed() noexcept
+	{
+		arrays_--;
+	}
+
 	void value_created() noexcept
 	{
 		values_++;
 		total_created_++;
-	}
-
-	void table_destroyed() noexcept
-	{
-		tables_--;
-	}
-
-	void array_destroyed() noexcept
-	{
-		arrays_--;
 	}
 
 	void value_destroyed() noexcept
