@@ -1181,7 +1181,7 @@ TOML_NAMESPACE_START
 		/// \returns An iterator to the emplacement position (or the position of the value that prevented emplacement)
 		///
 		/// \note This function has exactly the same semantics as [std::map::emplace_hint()](https://en.cppreference.com/w/cpp/container/map/emplace_hint).
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename ValueType,
 								  typename KeyType,
 								  typename... ValueArgs)
@@ -1297,7 +1297,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `{ end(), false }` if the input value was an
 		/// 		   null toml::node_view, because no insertion can take place. This is the only circumstance
 		/// 		   in which this can occur.
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
 		std::pair<iterator, bool> insert(KeyType&& key,
@@ -1376,7 +1376,7 @@ TOML_NAMESPACE_START
 		/// \remarks This function is morally equivalent to calling `insert(key, value)` for each
 		/// 		 key-value pair covered by the iterator range, so any values with keys already found in the
 		/// 		 table will not be replaced.
-		TOML_CONSTRAINED_TEMPLATE((!impl::is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
+		TOML_CONSTRAINED_TEMPLATE((!is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
 		void insert(Iter begin, Iter end, value_flags flags = preserve_source_value_flags)
 		{
 			if (begin == end)
@@ -1442,7 +1442,7 @@ TOML_NAMESPACE_START
 		/// \attention The return value will always be `{ end(), false }` if the input value was
 		/// 		   a null toml::node_view, because no insertion or assignment can take place.
 		/// 		   This is the only circumstance in which this can occur.
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
 		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
@@ -1525,7 +1525,7 @@ TOML_NAMESPACE_START
 		/// 		- A boolean indicating if the emplacement was successful.
 		///
 		/// \remark There is no difference between insert() and emplace() for trivial value types (floats, ints, bools).
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename ValueType,
 								  typename KeyType,
 								  typename... ValueArgs)

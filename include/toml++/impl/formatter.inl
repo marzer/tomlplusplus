@@ -130,10 +130,15 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (decoder.has_code_point())
 				{
-					if (is_vertical_whitespace(decoder.codepoint))
+					if (decoder.codepoint == U'\n')
+					{
 						has_line_breaks = true;
+						if (!multi_line)
+							has_control_chars = true;
+					}
 					else if (is_nontab_control_character(decoder.codepoint)
-							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t'))
+							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t')
+							 || is_vertical_whitespace(decoder.codepoint))
 						has_control_chars = true;
 					else if (decoder.codepoint == U'\'')
 						has_single_quotes = true;

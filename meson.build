@@ -496,6 +496,11 @@ if build_examples
 	subdir('examples')
 endif
 
+build_tt = (get_option('build_tt_encoder') or get_option('build_tt_encoder')) and not is_subproject
+if build_tt
+	subdir('toml-test')
+endif
+
 if not is_subproject
 	install_subdir('include'/'toml++',
 		strip_directory: true,

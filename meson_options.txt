@@ -5,4 +5,6 @@ option('pedantic',				type: 'boolean', value: false,	description: 'Enable as man
 option('time_trace',			type: 'boolean', value: false,	description: 'Enable the -ftime-trace option (Clang only)')
 option('asan_examples',			type: 'boolean', value: false)
 option('asan_tests',			type: 'boolean', value: false)
+option('build_tt_encoder',		type: 'boolean', value: false,	description: 'Enable to build the toml-test encoder.')
+option('build_tt_decoder',		type: 'boolean', value: false,	description: 'Enable to build the toml-test decoder.')
 

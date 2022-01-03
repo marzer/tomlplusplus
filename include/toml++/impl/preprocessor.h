@@ -347,6 +347,20 @@
 #endif
 
 //#====================================================================================================================
+//# CPP VERSION
+//#====================================================================================================================
+
+#ifndef TOML_CPP_VERSION
+	#define TOML_CPP_VERSION __cplusplus
+#endif
+#if TOML_CPP_VERSION < 201103L
+	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
+#elif TOML_CPP_VERSION < 201703L
+	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
+#endif
+#undef TOML_CPP_VERSION
+
+//#====================================================================================================================
 //# USER CONFIGURATION
 //#====================================================================================================================
 
@@ -453,9 +467,33 @@
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
 #endif
 
+// exceptions (compiler support)
+#ifndef TOML_COMPILER_EXCEPTIONS
+	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
+		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
+	#endif
+#endif
+
+// exceptions (library use)
+#if TOML_COMPILER_EXCEPTIONS
+	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
+		#undef TOML_EXCEPTIONS
+		#define TOML_EXCEPTIONS 1
+	#endif
+#else
+	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
+		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
+	#endif
+	#undef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS	0
+#endif
+
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
+
 
 #ifndef TOML_MAX_NESTED_VALUES
 	#define TOML_MAX_NESTED_VALUES 256
@@ -479,35 +517,8 @@
 //# ATTRIBUTES, UTILITY MACROS ETC
 //#====================================================================================================================
 
-#ifndef TOML_CPP_VERSION
-	#define TOML_CPP_VERSION __cplusplus
-#endif
-#if TOML_CPP_VERSION < 201103L
-	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
-#elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
-#endif
-#undef TOML_CPP_VERSION
 
-#ifndef TOML_COMPILER_EXCEPTIONS
-	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-#endif
-#if TOML_COMPILER_EXCEPTIONS
-	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
-		#undef TOML_EXCEPTIONS
-		#define TOML_EXCEPTIONS 1
-	#endif
-#else
-	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
-		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
-	#endif
-	#undef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS	0
-#endif
+
 
 #if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
 	// not supported by any version of GCC or Clang as of 26/11/2020

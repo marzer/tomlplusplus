@@ -132,6 +132,11 @@ FetchContent_MakeAvailable(tomlplusplus)
 in the C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
 assured that I fully support it being added, and welcome [pull requests](./CONTRIBUTING.md)!
 
+### What about dependencies?
+If you just want to consume `toml++` as a regular library then you don't have any dependencies to worry about.
+There's a few test-related dependencies to be aware of if you're working on the library, though.
+See [CONTRIBUTING] for information.
+
 <br>
 
 # Configuration

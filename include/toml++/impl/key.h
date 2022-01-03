@@ -294,19 +294,17 @@ TOML_NAMESPACE_START
 			return lhs;
 		}
 	};
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::key.
+	template <typename T>
+	inline constexpr bool is_key = std::is_same_v<impl::remove_cvref<T>, toml::key>;
+
+	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::key,
+	///			or is implicitly or explicitly convertible to one.
+	template <typename T>
+	inline constexpr bool is_key_or_convertible =
+		is_key<T> || std::is_constructible_v<toml::key, T> || std::is_convertible_v<T, toml::key>;
 }
 TOML_NAMESPACE_END;
-
-/// \cond
-TOML_IMPL_NAMESPACE_START
-{
-	template <typename T>
-	inline constexpr bool is_key = std::is_same_v<remove_cvref<T>, toml::key>;
-
-	template <typename T>
-	inline constexpr bool is_key_or_convertible = is_key<T> || std::is_constructible_v<toml::key, T>;
-}
-TOML_IMPL_NAMESPACE_END;
-/// \endcond
 
 #include "header_end.h"

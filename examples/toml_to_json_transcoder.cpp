@@ -5,7 +5,7 @@
 
 // This example demonstrates how to use the toml::json_formatter to re-serialize TOML data as JSON.
 
-#include "examples.h"
+#include "examples.hpp"
 
 #define TOML_ENABLE_UNRELEASED_FEATURES 1
 #include <toml++/toml.h>

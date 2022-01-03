@@ -6,7 +6,7 @@
 // This example shows the error messages the library produces by forcing a set of specific parsing
 // failures and printing their results.
 
-#include "examples.h"
+#include "examples.hpp"
 
 #define TOML_EXCEPTIONS					0
 #define TOML_ENABLE_UNRELEASED_FEATURES 0

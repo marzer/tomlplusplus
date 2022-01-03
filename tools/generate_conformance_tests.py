@@ -438,7 +438,6 @@ def add_condition(tests, condition, names):
 def load_valid_inputs(tests, extern_root):
 	tests['valid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'valid'), True, (
 		# broken by the json reader
-		'string-escapes',
 		'key-alphanum',
 	))
 	add_condition(tests['valid']['burntsushi'], '!TOML_MSVC', (

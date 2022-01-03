@@ -927,15 +927,21 @@ TOML_NAMESPACE_START
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a std::string or toml::value<std::string>.
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<std::string>>;
+	inline constexpr bool is_string = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<std::string>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a int64_t or toml::value<int64_t>.
 	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<int64_t>>;
+	inline constexpr bool is_integer = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<int64_t>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a double or toml::value<double>.
 	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<double>>;
+	inline constexpr bool is_floating_point = std::is_same_v<		//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<double>>;
 
 	/// \brief	Metafunction for determining if a type satisfies either toml::is_integer or toml::is_floating_point.
 	template <typename T>
@@ -943,19 +949,27 @@ TOML_NAMESPACE_START
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a bool or toml::value<bool>.
 	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<bool>>;
+	inline constexpr bool is_boolean = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<bool>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::date or toml::value<date>.
 	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<date>>;
+	inline constexpr bool is_date = std::is_same_v<					//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<date>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::time or toml::value<time>.
 	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<time>>;
+	inline constexpr bool is_time = std::is_same_v<					//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<time>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::date_time or toml::value<date_time>.
 	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<date_time>>;
+	inline constexpr bool is_date_time = std::is_same_v<			//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<date_time>>;
 
 	/// \brief	Metafunction for determining if a type satisfies any of toml::is_date, toml::is_time or toml::is_date_time.
 	template <typename T>

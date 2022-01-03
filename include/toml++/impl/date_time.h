@@ -347,6 +347,26 @@ TOML_NAMESPACE_START
 			  offset{} // TINAE - icc bugfix
 		{}
 
+		/// \brief	Constructs a local date-time.
+		///
+		/// \param 	d	The date component.
+		TOML_NODISCARD_CTOR
+		explicit constexpr date_time(const toml::date& d) noexcept //
+			: date{ d },
+			  time{},
+			  offset{} // TINAE - icc bugfix
+		{}
+
+		/// \brief	Constructs a local date-time.
+		///
+		/// \param 	t	The time component.
+		TOML_NODISCARD_CTOR
+		explicit constexpr date_time(const toml::time& t) noexcept //
+			: date{},
+			  time{ t },
+			  offset{} // TINAE - icc bugfix
+		{}
+
 		/// \brief	Constructs an offset date-time.
 		///
 		/// \param 	d	  	The date component.

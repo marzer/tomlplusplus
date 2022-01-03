@@ -369,6 +369,16 @@
 
 #endif
 
+#ifndef TOML_CPP_VERSION
+	#define TOML_CPP_VERSION __cplusplus
+#endif
+#if TOML_CPP_VERSION < 201103L
+	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
+#elif TOML_CPP_VERSION < 201703L
+	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
+#endif
+#undef TOML_CPP_VERSION
+
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
 #endif
@@ -472,6 +482,29 @@
 	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
 #endif
 
+// exceptions (compiler support)
+#ifndef TOML_COMPILER_EXCEPTIONS
+	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
+		#define TOML_COMPILER_EXCEPTIONS 1
+	#else
+		#define TOML_COMPILER_EXCEPTIONS 0
+	#endif
+#endif
+
+// exceptions (library use)
+#if TOML_COMPILER_EXCEPTIONS
+	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
+		#undef TOML_EXCEPTIONS
+		#define TOML_EXCEPTIONS 1
+	#endif
+#else
+	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
+		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
+	#endif
+	#undef TOML_EXCEPTIONS
+	#define TOML_EXCEPTIONS	0
+#endif
+
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
@@ -492,36 +525,6 @@
 	#if !TOML_LARGE_FILES
 		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
 	#endif
-#endif
-
-#ifndef TOML_CPP_VERSION
-	#define TOML_CPP_VERSION __cplusplus
-#endif
-#if TOML_CPP_VERSION < 201103L
-	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
-#elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
-#endif
-#undef TOML_CPP_VERSION
-
-#ifndef TOML_COMPILER_EXCEPTIONS
-	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-#endif
-#if TOML_COMPILER_EXCEPTIONS
-	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
-		#undef TOML_EXCEPTIONS
-		#define TOML_EXCEPTIONS 1
-	#endif
-#else
-	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
-		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
-	#endif
-	#undef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS	0
 #endif
 
 #if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
@@ -1840,28 +1843,42 @@ TOML_NAMESPACE_START
 	inline constexpr bool is_container = is_table<T> || is_array<T>;
 
 	template <typename T>
-	inline constexpr bool is_string = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<std::string>>;
+	inline constexpr bool is_string = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<std::string>>;
 
 	template <typename T>
-	inline constexpr bool is_integer = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<int64_t>>;
+	inline constexpr bool is_integer = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<int64_t>>;
 
 	template <typename T>
-	inline constexpr bool is_floating_point = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<double>>;
+	inline constexpr bool is_floating_point = std::is_same_v<		//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<double>>;
 
 	template <typename T>
 	inline constexpr bool is_number = is_integer<T> || is_floating_point<T>;
 
 	template <typename T>
-	inline constexpr bool is_boolean = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<bool>>;
+	inline constexpr bool is_boolean = std::is_same_v<				//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<bool>>;
 
 	template <typename T>
-	inline constexpr bool is_date = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<date>>;
+	inline constexpr bool is_date = std::is_same_v<					//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<date>>;
 
 	template <typename T>
-	inline constexpr bool is_time = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<time>>;
+	inline constexpr bool is_time = std::is_same_v<					//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<time>>;
 
 	template <typename T>
-	inline constexpr bool is_date_time = std::is_same_v<impl::wrap_node<impl::remove_cvref<T>>, value<date_time>>;
+	inline constexpr bool is_date_time = std::is_same_v<			//
+		impl::remove_cvref<impl::wrap_node<impl::remove_cvref<T>>>, //
+		value<date_time>>;
 
 	template <typename T>
 	inline constexpr bool is_chronological = is_date<T> || is_time<T> || is_date_time<T>;
@@ -2426,6 +2443,20 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		constexpr date_time(const toml::date& d, const toml::time& t) noexcept //
 			: date{ d },
+			  time{ t },
+			  offset{} // TINAE - icc bugfix
+		{}
+
+		TOML_NODISCARD_CTOR
+		explicit constexpr date_time(const toml::date& d) noexcept //
+			: date{ d },
+			  time{},
+			  offset{} // TINAE - icc bugfix
+		{}
+
+		TOML_NODISCARD_CTOR
+		explicit constexpr date_time(const toml::time& t) noexcept //
+			: date{},
 			  time{ t },
 			  offset{} // TINAE - icc bugfix
 		{}
@@ -6069,18 +6100,15 @@ TOML_NAMESPACE_START
 			return lhs;
 		}
 	};
+
+	template <typename T>
+	inline constexpr bool is_key = std::is_same_v<impl::remove_cvref<T>, toml::key>;
+
+	template <typename T>
+	inline constexpr bool is_key_or_convertible =
+		is_key<T> || std::is_constructible_v<toml::key, T> || std::is_convertible_v<T, toml::key>;
 }
 TOML_NAMESPACE_END;
-
-TOML_IMPL_NAMESPACE_START
-{
-	template <typename T>
-	inline constexpr bool is_key = std::is_same_v<remove_cvref<T>, toml::key>;
-
-	template <typename T>
-	inline constexpr bool is_key_or_convertible = is_key<T> || std::is_constructible_v<toml::key, T>;
-}
-TOML_IMPL_NAMESPACE_END;
 
 #ifdef _MSC_VER
 #pragma pop_macro("min")
@@ -6831,7 +6859,7 @@ TOML_NAMESPACE_START
 
 	  public:
 
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename ValueType,
 								  typename KeyType,
 								  typename... ValueArgs)
@@ -6896,7 +6924,7 @@ TOML_NAMESPACE_START
 			}
 		}
 
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
 		std::pair<iterator, bool> insert(KeyType&& key,
@@ -6936,7 +6964,7 @@ TOML_NAMESPACE_START
 			}
 		}
 
-		TOML_CONSTRAINED_TEMPLATE((!impl::is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
+		TOML_CONSTRAINED_TEMPLATE((!is_key_or_convertible<Iter> && !impl::is_wide_string<Iter>), typename Iter)
 		void insert(Iter begin, Iter end, value_flags flags = preserve_source_value_flags)
 		{
 			if (begin == end)
@@ -6950,7 +6978,7 @@ TOML_NAMESPACE_START
 			}
 		}
 
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename KeyType,
 								  typename ValueType)
 		std::pair<iterator, bool> insert_or_assign(KeyType&& key,
@@ -6996,7 +7024,7 @@ TOML_NAMESPACE_START
 			}
 		}
 
-		TOML_CONSTRAINED_TEMPLATE((impl::is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
+		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
 								  typename ValueType,
 								  typename KeyType,
 								  typename... ValueArgs)
@@ -14415,10 +14443,15 @@ TOML_IMPL_NAMESPACE_START
 				}
 				else if (decoder.has_code_point())
 				{
-					if (is_vertical_whitespace(decoder.codepoint))
+					if (decoder.codepoint == U'\n')
+					{
 						has_line_breaks = true;
+						if (!multi_line)
+							has_control_chars = true;
+					}
 					else if (is_nontab_control_character(decoder.codepoint)
-							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t'))
+							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t')
+							 || is_vertical_whitespace(decoder.codepoint))
 						has_control_chars = true;
 					else if (decoder.codepoint == U'\'')
 						has_single_quotes = true;
@@ -15306,8 +15339,6 @@ TOML_POP_WARNINGS;
 #undef TOML_CLOSED_ENUM
 #undef TOML_CLOSED_FLAGS_ENUM
 #undef TOML_COMPILER_EXCEPTIONS
-#undef TOML_CONCAT
-#undef TOML_CONCAT_1
 #undef TOML_CONST_GETTER
 #undef TOML_CONST_INLINE_GETTER
 #undef TOML_CONSTRAINED_TEMPLATE
@@ -15361,8 +15392,6 @@ TOML_POP_WARNINGS;
 #undef TOML_MAKE_VERSION
 #undef TOML_MSVC
 #undef TOML_NAMESPACE
-#undef TOML_NAMESPACE_END
-#undef TOML_NAMESPACE_START
 #undef TOML_NEVER_INLINE
 #undef TOML_NODISCARD
 #undef TOML_NODISCARD_CTOR

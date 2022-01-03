@@ -28,6 +28,8 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - fixed an illegal table redefinition edge case (#112) (@python36)
 - fixed documentation issues
 - fixed incorrect source position in redefinition error messages
+- fixed incorrect handling of vertical whitespace in keys when printing TOML to streams
+- fixed memory leak during parse failures when compiled using GCC (#123, #124) (@rsmmr, @ronalabraham)
 - fixed missing `#include <initializer_list>`
 - fixed missing `#include <utility>`
 - fixed missing `TOML_API` on interfaces
@@ -41,6 +43,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `toml::array::prune()`
 - added `toml::array::replace()` (#109) (@LebJe)
 - added `toml::array::resize()` param `default_init_flags`
+- added `toml::date_time` converting constructors from `toml::date` and `toml::time`
 - added `toml::format_flags::allow_binary_integers`
 - added `toml::format_flags::allow_hexadecimal_integers`
 - added `toml::format_flags::allow_octal_integers`
@@ -49,6 +52,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `toml::format_flags::indent_sub_tables`
 - added `toml::format_flags::quote_infinities_and_nans`
 - added `toml::key` - provides a facility to access the source_regions of parsed keys (#82) (@vaartis)
+- added `toml::is_key<>` and toml::is_key_or_convertible<>` metafunctions
 - added `toml::table::at()` (same semantics as `std::map::at()`)
 - added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
 - added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
@@ -79,6 +83,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - moved all implementation headers to `/impl`
 - renamed all implementation headers to `.h` and 'source' headers to `.inl`
 - updated conformance tests
+- exposed `TOML_NAMESPACE_START` and `TOML_NAMESPACE_END` macros to help with ADL specialization scenarios
 
 #### Removals:
 - ⚠&#xFE0F; removed `toml::format_flags::allow_value_format_flags`

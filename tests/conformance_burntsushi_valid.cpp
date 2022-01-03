@@ -433,6 +433,19 @@ hosts = [
 	static constexpr auto string_double_quote_escape = R"(test = "\"one\"")"sv;
 	static constexpr auto string_empty				 = R"(answer = "")"sv;
 	static constexpr auto string_escaped_escape		 = R"(answer = "\\x64")"sv;
+	static constexpr auto string_escapes			 = R"(backspace = "This string has a \b backspace character."
+tab = "This string has a \t tab character."
+newline = "This string has a \n new line character."
+formfeed = "This string has a \f form feed character."
+carriage = "This string has a \r carriage return character."
+quote = "This string has a \" quote character."
+backslash = "This string has a \\ backslash character."
+notunicode1 = "This string does not have a unicode \\u escape."
+notunicode2 = "This string does not have a unicode \u005Cu escape."
+notunicode3 = "This string does not have a unicode \\u0075 escape."
+notunicode4 = "This string does not have a unicode \\\u0075 escape."
+delete = "This string has a \u007F delete control code."
+unitseparator = "This string has a \u001F unit separator control code.")"sv;
 	static constexpr auto string_multiline_quotes =
 		R"(# Make sure that quotes inside multiline strings are allowed, including right
 # after the opening '''/""" and before the closing '''/"""
@@ -2115,6 +2128,29 @@ another line)"sv },
 						   {
 							   const auto expected = toml::table{
 								   { R"(answer)"sv, R"(\x64)"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   string_escapes,
+						   [](toml::table&& tbl) // string-escapes
+						   {
+							   const auto expected = toml::table{
+								   { R"(backslash)"sv, R"(This string has a \ backslash character.)"sv },
+								   { R"(backspace)"sv, "This string has a \x08 backspace character."sv },
+								   { R"(carriage)"sv, "This string has a \r carriage return character."sv },
+								   { R"(delete)"sv, "This string has a \x7F delete control code."sv },
+								   { R"(formfeed)"sv, "This string has a \x0C form feed character."sv },
+								   { R"(newline)"sv, R"(This string has a 
+ new line character.)"sv },
+								   { R"(notunicode1)"sv, R"(This string does not have a unicode \u escape.)"sv },
+								   { R"(notunicode2)"sv, R"(This string does not have a unicode \u escape.)"sv },
+								   { R"(notunicode3)"sv, R"(This string does not have a unicode \u0075 escape.)"sv },
+								   { R"(notunicode4)"sv, R"(This string does not have a unicode \u escape.)"sv },
+								   { R"(quote)"sv, R"(This string has a " quote character.)"sv },
+								   { R"(tab)"sv, R"(This string has a 	 tab character.)"sv },
+								   { R"(unitseparator)"sv, "This string has a \x1F unit separator control code."sv },
 							   };
 							   REQUIRE(tbl == expected);
 						   });

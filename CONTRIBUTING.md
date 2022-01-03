@@ -29,7 +29,7 @@ git submodule update --init --depth 1 external/Catch2 external/tloptional
 
 ### Testing on Windows with Visual Studio
 
-Install [Visual Studio] and [Test Adapter for Catch2], then open `vs/toml++.sln` and build the
+Install [Visual Studio] and [Test Adapter for Catch2], then open `toml++.sln` and build the
 projects in the `tests` solution folder. Visual Studio's Test Explorer should pick these up and
 allow you to run the tests directly.
 
@@ -64,6 +64,13 @@ cd build-gcc-debug && ninja && ninja test               \
     && cd ..
 ```
 
+<br>
+
+## Testing with the [toml-test] suite
+As an optional extra you may wish to test against the 'official' test TOML test suite, [BurntSushi/toml-test]. See the
+instructions at [toml-test/README](./toml-test/README.md). Note that the toml++ tests already consume tests from the
+offical suite via a C++ code-generation script so you are not expected to take this extra step as part of contributing
+to the library.
 
 [Visual Studio]: https://visualstudio.microsoft.com/vs/
 [Test Adapter for Catch2]: https://marketplace.visualstudio.com/items?itemName=JohnnyHendriks.ext01
@@ -71,3 +78,5 @@ cd build-gcc-debug && ninja && ninja test               \
 [Catch2]: https://github.com/catchorg/Catch2
 [meson]: https://mesonbuild.com/Getting-meson.html
 [ninja]: https://github.com/ninja-build/ninja/wiki/Pre-built-Ninja-packages
+[toml-test]: https://github.com/BurntSushi/toml-test
+[BurntSushi/toml-test]: https://github.com/BurntSushi/toml-test
