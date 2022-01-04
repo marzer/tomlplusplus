@@ -6,7 +6,7 @@
 // This example shows the error messages the library produces by forcing a set of specific parsing
 // failures and printing their results.
 
-#include "examples.hpp"
+#include "examples.h"
 
 #define TOML_EXCEPTIONS					0
 #define TOML_ENABLE_UNRELEASED_FEATURES 0
@@ -17,10 +17,11 @@ using namespace std::string_view_literals;
 namespace
 {
 	inline constexpr auto invalid_parses = std::array{
-		"########## comments"sv,
+		"########## comments and whitespace"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
 		"# \xf1\x63"sv,
+		"# val1 = 1\fval2 = 2"sv,
 
 		"########## inline tables"sv,
 		"val = {,}"sv,

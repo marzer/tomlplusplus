@@ -1138,7 +1138,7 @@ TOML_IMPL_NAMESPACE_START
 
 	// clang-format off
 
-	inline constexpr std::string_view low_character_escape_table[] =
+	inline constexpr std::string_view control_char_escapes[] =
 	{
 		"\\u0000"sv,
 		"\\u0001"sv,
@@ -1262,11 +1262,12 @@ TOML_NAMESPACE_START // abi namespace
 		allow_literal_strings = (1ull << 2),
 		allow_multi_line_strings = (1ull << 3),
 		allow_real_tabs_in_strings = (1ull << 4),
-		allow_binary_integers = (1ull << 5),
-		allow_octal_integers = (1ull << 6),
-		allow_hexadecimal_integers = (1ull << 7),
-		indent_sub_tables = (1ull << 8),
-		indent_array_elements = (1ull << 9),
+		allow_unicode_strings = (1ull << 5),
+		allow_binary_integers = (1ull << 6),
+		allow_octal_integers = (1ull << 7),
+		allow_hexadecimal_integers = (1ull << 8),
+		indent_sub_tables = (1ull << 9),
+		indent_array_elements = (1ull << 10),
 		indentation = indent_sub_tables | indent_array_elements,
 	};
 	TOML_MAKE_FLAGS(format_flags);
@@ -1994,28 +1995,28 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, char);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int8_t, value_flags = {});
+	void print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int16_t, value_flags = {});
+	void print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int32_t, value_flags = {});
+	void print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int64_t, value_flags = {});
+	void print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint8_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint16_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint32_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint64_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
 	void print_to_stream(std::ostream&, float, value_flags = {});
@@ -2074,24 +2075,6 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, const value<date_time>&);
 
 #endif
-
-	template <typename T>
-	inline void print_to_stream_with_escapes(std::ostream & stream, const T& str)
-	{
-		for (auto c : str)
-		{
-			if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
-				print_to_stream(stream, low_character_escape_table[c]);
-			else if TOML_UNLIKELY(c == '\x7F')
-				print_to_stream(stream, "\\u007F"sv);
-			else if TOML_UNLIKELY(c == '"')
-				print_to_stream(stream, "\\\""sv);
-			else if TOML_UNLIKELY(c == '\\')
-				print_to_stream(stream, "\\\\"sv);
-			else
-				print_to_stream(stream, c);
-		}
-	}
 
 	template <typename T, typename U>
 	inline void print_to_stream_bookended(std::ostream & stream, const T& val, const U& bookend)
@@ -5895,6 +5878,10 @@ TOML_NAMESPACE_START
 
 	  public:
 
+		using const_iterator = const char*;
+
+		using iterator = const_iterator;
+
 		TOML_NODISCARD_CTOR
 		key() noexcept = default;
 
@@ -6092,6 +6079,30 @@ TOML_NAMESPACE_START
 		friend bool operator>=(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs >= rhs.key_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator begin() const noexcept
+		{
+			return key_.data();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator end() const noexcept
+		{
+			return key_.data() + key_.length();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		friend const_iterator begin(const key& k) noexcept
+		{
+			return k.begin();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		friend const_iterator end(const key& k) noexcept
+		{
+			return k.end();
 		}
 
 		friend std::ostream& operator<<(std::ostream& lhs, const key& rhs)
@@ -7132,7 +7143,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/utf8.h  ***********************************************************************************************
+//********  impl/unicode.h  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -7236,15 +7247,21 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	constexpr bool is_ascii_vertical_whitespace(char32_t c) noexcept
 	{
-		return (U'\n' <= c && c <= U'\r') || (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+		return U'\n' <= c && c <= U'\r';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_vertical_whitespace_excl_cr(char32_t c) noexcept
+	constexpr bool is_non_ascii_vertical_whitespace(char32_t c) noexcept
 	{
-		return (U'\n' <= c && c <= U'\f') || (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+		return (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	{
+		return is_ascii_vertical_whitespace(c) || is_non_ascii_vertical_whitespace(c);
 	}
 
 	TOML_CONST_GETTER
@@ -7256,6 +7273,11 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_ascii_bare_key_character(char32_t c) noexcept
 	{
+#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys)
+		if (c == U'+')
+			return true;
+#endif
+
 		if (c < U'-' || c > U'z')
 			return false;
 
@@ -7989,8 +8011,7 @@ TOML_IMPL_NAMESPACE_START
 	constexpr bool is_bare_key_character(char32_t c) noexcept
 	{
 		return is_ascii_bare_key_character(c)
-#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
-			|| c == U'+' //
+#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 			|| is_non_ascii_bare_key_character(c)
 #endif
 			;
@@ -8000,6 +8021,12 @@ TOML_IMPL_NAMESPACE_START
 	constexpr bool is_value_terminator(char32_t c) noexcept
 	{
 		return is_whitespace(c) || c == U']' || c == U'}' || c == U',' || c == U'#';
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_control_character(char c) noexcept
+	{
+		return c <= '\u001F' || c == '\u007F';
 	}
 
 	TOML_CONST_GETTER
@@ -8077,11 +8104,21 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_ALWAYS_INLINE
+		constexpr void operator()(char c) noexcept
+		{
+			operator()(static_cast<uint8_t>(c));
+		}
+
+		TOML_ALWAYS_INLINE
 		constexpr void reset() noexcept
 		{
 			state = {};
 		}
 	};
+
+	TOML_PURE_GETTER
+	TOML_ATTR(nonnull)
+	bool is_ascii(const char* str, size_t len) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -8722,6 +8759,24 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::allow_literal_strings);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool multi_line_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_multi_line_strings);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool real_tabs_in_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_real_tabs_in_strings);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool unicode_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_unicode_strings);
+		}
+
 		TOML_API
 		void attach(std::ostream& stream) noexcept;
 
@@ -8826,8 +8881,8 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory flags
-																 format_flags::none, // ignored flags
+		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory
+																 format_flags::none, // ignored
 																 "inf"sv,
 																 "-inf"sv,
 																 "nan"sv,
@@ -8839,6 +8894,7 @@ TOML_NAMESPACE_START
 		static constexpr format_flags default_flags = constants.mandatory_flags				   //
 													| format_flags::allow_literal_strings	   //
 													| format_flags::allow_multi_line_strings   //
+													| format_flags::allow_unicode_strings	   //
 													| format_flags::allow_real_tabs_in_strings //
 													| format_flags::allow_binary_integers	   //
 													| format_flags::allow_octal_integers	   //
@@ -8927,6 +8983,7 @@ TOML_NAMESPACE_START
 
 		static constexpr format_flags default_flags = constants.mandatory_flags				  //
 													| format_flags::quote_infinities_and_nans //
+													| format_flags::allow_unicode_strings	  //
 													| format_flags::indentation;
 
 		TOML_NODISCARD_CTOR
@@ -9014,6 +9071,7 @@ TOML_NAMESPACE_START
 
 		static constexpr format_flags default_flags = constants.mandatory_flags			  //
 													| format_flags::allow_literal_strings //
+													| format_flags::allow_unicode_strings //
 													| format_flags::allow_octal_integers  //
 													| format_flags::allow_hexadecimal_integers;
 
@@ -9217,11 +9275,16 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {})
+	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
 	{
 		if (!val)
 		{
-			stream.put('0');
+			if (!min_digits)
+				min_digits = 1;
+
+			for (size_t i = 0; i < min_digits; i++)
+				stream.put('0');
+
 			return;
 		}
 
@@ -9230,7 +9293,7 @@ TOML_ANON_NAMESPACE_START
 		format &= value_flags_mask;
 
 		int base = 10;
-		if (format != value_flags::none && val >= T{})
+		if (format != value_flags::none && val > T{})
 		{
 			switch (format)
 			{
@@ -9246,6 +9309,8 @@ TOML_ANON_NAMESPACE_START
 		char buf[(sizeof(T) * CHAR_BIT)];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
 		const auto len = static_cast<size_t>(res.ptr - buf);
+		for (size_t i = len; i < min_digits; i++)
+			stream.put('0');
 		if (base == 16)
 		{
 			for (size_t i = 0; i < len; i++)
@@ -9259,12 +9324,16 @@ TOML_ANON_NAMESPACE_START
 		using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
 		using cast_type		= std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
 
-		if TOML_UNLIKELY(format == value_flags::format_as_binary)
+		if (base == 2)
 		{
+			const auto len = sizeof(T) * CHAR_BIT;
+			for (size_t i = len; i < min_digits; i++)
+				stream.put('0');
+
 			bool found_one	   = false;
 			const auto v	   = static_cast<unsigned_type>(val);
-			unsigned_type mask = unsigned_type{ 1 } << (sizeof(unsigned_type) * CHAR_BIT - 1u);
-			for (unsigned i = 0; i < sizeof(unsigned_type) * CHAR_BIT; i++)
+			unsigned_type mask = unsigned_type{ 1 } << (len - 1u);
+			for (size_t i = 0; i < len; i++)
 			{
 				if ((v & mask))
 				{
@@ -9281,6 +9350,8 @@ TOML_ANON_NAMESPACE_START
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
 			ss << std::uppercase << std::setbase(base);
+			if (min_digits)
+				ss << std::setfill('0') << std::setw(static_cast<int>(min_digits));
 			ss << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
 			impl::print_to_stream(stream, str);
@@ -9342,31 +9413,6 @@ TOML_ANON_NAMESPACE_START
 			default: TOML_UNREACHABLE;
 		}
 	}
-
-	template <typename T>
-	TOML_INTERNAL_LINKAGE
-	void print_integer_leftpad_zeros(std::ostream & stream, T val, size_t min_digits)
-	{
-#if TOML_INT_CHARCONV
-
-		char buf[charconv_buffer_length<T>];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
-		const auto len = static_cast<size_t>(res.ptr - buf);
-		for (size_t i = len; i < min_digits; i++)
-			stream.put('0');
-		impl::print_to_stream(stream, buf, static_cast<size_t>(res.ptr - buf));
-
-#else
-
-		std::ostringstream ss;
-		ss.imbue(std::locale::classic());
-		using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-		ss << std::setfill('0') << std::setw(static_cast<int>(min_digits)) << static_cast<cast_type>(val);
-		const auto str = std::move(ss).str();
-		impl::print_to_stream(stream, str);
-
-#endif
-	}
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -9398,51 +9444,51 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int8_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int16_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int32_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int64_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint8_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint16_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint32_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint64_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -9466,21 +9512,21 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::date& val)
 	{
-		print_integer_leftpad_zeros(stream, val.year, 4u);
+		print_to_stream(stream, val.year, {}, 4);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.month, 2u);
+		print_to_stream(stream, val.month, {}, 2);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.day, 2u);
+		print_to_stream(stream, val.day, {}, 2);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::time& val)
 	{
-		print_integer_leftpad_zeros(stream, val.hour, 2u);
+		print_to_stream(stream, val.hour, {}, 2);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.minute, 2u);
+		print_to_stream(stream, val.minute, {}, 2);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.second, 2u);
+		print_to_stream(stream, val.second, {}, 2);
 		if (val.nanosecond && val.nanosecond <= 999999999u)
 		{
 			stream.put('.');
@@ -9491,7 +9537,7 @@ TOML_IMPL_NAMESPACE_START
 				ns /= 10u;
 				digits--;
 			}
-			print_integer_leftpad_zeros(stream, ns, digits);
+			print_to_stream(stream, ns, {}, digits);
 		}
 	}
 
@@ -9515,13 +9561,13 @@ TOML_IMPL_NAMESPACE_START
 		const auto hours = mins / 60;
 		if (hours)
 		{
-			print_integer_leftpad_zeros(stream, static_cast<unsigned int>(hours), 2u);
+			print_to_stream(stream, static_cast<unsigned int>(hours), {}, 2);
 			mins -= hours * 60;
 		}
 		else
 			print_to_stream(stream, "00"sv);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, static_cast<unsigned int>(mins), 2u);
+		print_to_stream(stream, static_cast<unsigned int>(mins), {}, 2);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -10498,23 +10544,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/parser.inl  *******************************************************************************************
-
-#if TOML_ENABLE_PARSER
-
-TOML_DISABLE_WARNINGS;
-#include <istream>
-#include <fstream>
-#if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
-#include <charconv>
-#endif
-#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
-#include <sstream>
-#endif
-#if !TOML_INT_CHARCONV
-#include <iomanip>
-#endif
-TOML_ENABLE_WARNINGS;
+//********  impl/unicode.inl  ******************************************************************************************
 
 #if TOML_ENABLE_SIMD
 
@@ -10552,26 +10582,21 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
-TOML_ANON_NAMESPACE_START
+TOML_IMPL_NAMESPACE_START
 {
-	template <typename T>
-	TOML_PURE_GETTER
-	TOML_ATTR(nonnull)
-	TOML_INTERNAL_LINKAGE
-	bool is_ascii(const T* str, size_t size) noexcept
+	TOML_EXTERNAL_LINKAGE
+	bool is_ascii(const char* str, size_t len) noexcept
 	{
-		static_assert(sizeof(T) == 1);
-
-		const T* const end = str + size;
+		const char* const end = str + len;
 
 #if TOML_HAS_SSE2 && (128 % CHAR_BIT) == 0
 		{
-			constexpr size_t chars_per_vector = 128 / CHAR_BIT;
+			constexpr size_t chars_per_vector = 128u / CHAR_BIT;
 
-			if (const size_t simdable = size - (size % chars_per_vector))
+			if (const size_t simdable = len - (len % chars_per_vector))
 			{
 				__m128i mask = _mm_setzero_si128();
-				for (const T* const e = str + simdable; str < e; str += chars_per_vector)
+				for (const char* const e = str + simdable; str < e; str += chars_per_vector)
 				{
 					const __m128i current_bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(str));
 					mask						= _mm_or_si128(mask, current_bytes);
@@ -10595,7 +10620,42 @@ TOML_ANON_NAMESPACE_START
 
 		return true;
 	}
+}
+TOML_IMPL_NAMESPACE_END;
 
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
+TOML_POP_WARNINGS;
+
+//********  impl/parser.inl  *******************************************************************************************
+
+#if TOML_ENABLE_PARSER
+
+TOML_DISABLE_WARNINGS;
+#include <istream>
+#include <fstream>
+#if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
+#include <charconv>
+#endif
+#if !TOML_INT_CHARCONV || !TOML_FLOAT_CHARCONV
+#include <sstream>
+#endif
+#if !TOML_INT_CHARCONV
+#include <iomanip>
+#endif
+TOML_ENABLE_WARNINGS;
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
+TOML_ANON_NAMESPACE_START
+{
 	template <typename T>
 	class utf8_byte_stream;
 
@@ -10874,7 +10934,7 @@ TOML_ANON_NAMESPACE_START
 					auto& cp	= codepoints_.buffer[i];
 					cp.position = next_pos_;
 
-					if (impl::is_vertical_whitespace_excl_cr(cp))
+					if (cp == U'\n')
 					{
 						next_pos_.line++;
 						next_pos_.column = source_index{ 1 };
@@ -10885,7 +10945,7 @@ TOML_ANON_NAMESPACE_START
 			};
 
 			// decide whether we need to use the UTF-8 decoder or if we can treat this block as plain ASCII
-			const auto ascii_fast_path = !decoder_.needs_more_input() && is_ascii(raw_bytes, raw_bytes_read);
+			const auto ascii_fast_path = !decoder_.needs_more_input() && impl::is_ascii(raw_bytes, raw_bytes_read);
 
 			// ASCII fast-path
 			if (ascii_fast_path)
@@ -11233,7 +11293,7 @@ TOML_ANON_NAMESPACE_START
 	std::string_view to_sv(const utf8_codepoint& cp) noexcept
 	{
 		if TOML_UNLIKELY(cp.value <= U'\x1F')
-			return impl::low_character_escape_table[cp.value];
+			return impl::control_char_escapes[cp.value];
 		else if TOML_UNLIKELY(cp.value == U'\x7F')
 			return "\\u007F"sv;
 		else
@@ -11690,8 +11750,9 @@ TOML_IMPL_NAMESPACE_START
 		{
 			return_if_error_or_eof({});
 
-			if (!is_vertical_whitespace(*cp))
-				return false;
+			if TOML_UNLIKELY(is_match(*cp, U'\v', U'\f'))
+				set_error_and_return_default(
+					R"(vertical tabs '\v' and form-feeds '\f' are not legal whitespace in TOML.)"sv);
 
 			if (*cp == U'\r')
 			{
@@ -11699,10 +11760,14 @@ TOML_IMPL_NAMESPACE_START
 
 				if (is_eof())
 					return true; // eof after \r is 'fine'
-				else if (*cp != U'\n')
+
+				if (*cp != U'\n')
 					set_error_and_return_default("expected \\n, saw '"sv, to_sv(*cp), "'"sv);
 			}
-			advance_and_return_if_error({}); // skip \n (or other single-character line ending)
+			else if (*cp != U'\n')
+				return false;
+
+			advance_and_return_if_error({}); // skip \n
 			return true;
 		}
 
@@ -11712,7 +11777,7 @@ TOML_IMPL_NAMESPACE_START
 
 			do
 			{
-				if (is_vertical_whitespace(*cp))
+				if (is_ascii_vertical_whitespace(*cp))
 					return consume_line_break();
 				else
 					advance();
@@ -11856,7 +11921,7 @@ TOML_IMPL_NAMESPACE_START
 						continue;
 					}
 
-					bool skipped_escaped_codepoint = false;
+					bool skip_escaped_codepoint = true;
 					assert_not_eof();
 					switch (const auto escaped_codepoint = *cp)
 					{
@@ -11880,9 +11945,9 @@ TOML_IMPL_NAMESPACE_START
 						case U'u': [[fallthrough]];
 						case U'U':
 						{
-							push_parse_scope("unicode scalar escape sequence"sv);
+							push_parse_scope("unicode scalar sequence"sv);
 							advance_and_return_if_error_or_eof({});
-							skipped_escaped_codepoint = true;
+							skip_escaped_codepoint = false;
 
 							uint32_t place_value =
 								escaped_codepoint == U'U' ? 0x10000000u : (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
@@ -11902,25 +11967,28 @@ TOML_IMPL_NAMESPACE_START
 									"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
 							else if (sequence_value > 0x10FFFFu)
 								set_error_and_return_default("values greater than U+10FFFF are invalid"sv);
-							else if (sequence_value <= 0x7Fu) // ascii
-								str += static_cast<char>(sequence_value & 0x7Fu);
-							else if (sequence_value <= 0x7FFu)
+
+							if (sequence_value < 0x80)
 							{
-								str += static_cast<char>(0xC0u | ((sequence_value >> 6) & 0x1Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>(sequence_value);
 							}
-							else if (sequence_value <= 0xFFFFu)
+							else if (sequence_value < 0x800u)
 							{
-								str += static_cast<char>(0xE0u | ((sequence_value >> 12) & 0x0Fu));
-								str += static_cast<char>(0x80u | ((sequence_value >> 6) & 0x1Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>((sequence_value >> 6) | 0xC0u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
 							}
-							else
+							else if (sequence_value < 0x10000u)
 							{
-								str += static_cast<char>(0xF0u | ((sequence_value >> 18) & 0x07u));
-								str += static_cast<char>(0x80u | ((sequence_value >> 12) & 0x3Fu));
-								str += static_cast<char>(0x80u | ((sequence_value >> 6) & 0x3Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>((sequence_value >> 12) | 0xE0u);
+								str += static_cast<char>(((sequence_value >> 6) & 0x3Fu) | 0x80u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
+							}
+							else if (sequence_value < 0x110000u)
+							{
+								str += static_cast<char>((sequence_value >> 18) | 0xF0u);
+								str += static_cast<char>(((sequence_value >> 12) & 0x3Fu) | 0x80u);
+								str += static_cast<char>(((sequence_value >> 6) & 0x3Fu) | 0x80u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
 							}
 							break;
 						}
@@ -11929,8 +11997,7 @@ TOML_IMPL_NAMESPACE_START
 						default: set_error_and_return_default("unknown escape sequence '\\"sv, to_sv(*cp), "'"sv);
 					}
 
-					// skip the escaped character
-					if (!skipped_escaped_codepoint)
+					if (skip_escaped_codepoint)
 						advance_and_return_if_error_or_eof({});
 				}
 				else
@@ -11999,7 +12066,7 @@ TOML_IMPL_NAMESPACE_START
 					}
 
 					// handle line endings in multi-line mode
-					if (multi_line && is_vertical_whitespace(*cp))
+					if (multi_line && is_ascii_vertical_whitespace(*cp))
 					{
 						consume_line_break();
 						return_if_error({});
@@ -12115,7 +12182,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				// handle line endings in multi-line mode
-				if (multi_line && is_vertical_whitespace(*cp))
+				if (multi_line && is_ascii_vertical_whitespace(*cp))
 				{
 					consume_line_break();
 					return_if_error({});
@@ -12782,7 +12849,8 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(is_decimal_digit(*cp));
 			push_parse_scope("time"sv);
 
-			static constexpr size_t max_digits = 9;
+			static constexpr size_t max_digits = 64; // far more than necessary but needed to allow fractional
+													 // millisecond truncation per the spec
 			uint32_t digits[max_digits];
 
 			// "HH"
@@ -12851,15 +12919,14 @@ TOML_IMPL_NAMESPACE_START
 				else if (!part_of_datetime && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 			}
-
 			uint32_t value = 0u;
 			uint32_t place = 1u;
-			for (auto i = digit_count; i-- > 0u;)
+			for (auto i = impl::min<size_t>(digit_count, 9u); i-- > 0u;)
 			{
 				value += digits[i] * place;
 				place *= 10u;
 			}
-			for (auto i = digit_count; i < max_digits; i++) // implicit zeros
+			for (auto i = digit_count; i < 9u; i++) // implicit zeros
 				value *= 10u;
 			time.nanosecond = value;
 			return time;
@@ -14336,6 +14403,20 @@ TOML_PUSH_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
 {
+	enum class formatted_string_traits : unsigned
+	{
+		none,
+		line_breaks	  = 1u << 0, // \n
+		tabs		  = 1u << 1, // \t
+		control_chars = 1u << 2, // also includes non-ascii vertical whitespace
+		single_quotes = 1u << 3,
+		non_bare	  = 1u << 4, // anything not satisfying "is bare key character"
+		non_ascii	  = 1u << 5, // any codepoint >= 128
+
+		all = (non_ascii << 1u) - 1u
+	};
+	TOML_MAKE_FLAGS(formatted_string_traits);
+
 	TOML_EXTERNAL_LINKAGE
 	formatter::formatter(const node* source_node,
 						 const parse_result* source_pr,
@@ -14414,70 +14495,236 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
-		auto literal = literal_strings_allowed();
 		if (str.empty())
 		{
-			print_to_stream(*stream_, literal ? "''"sv : "\"\""sv);
-			naked_newline_ = false;
+			print_unformatted(literal_strings_allowed() ? "''"sv : "\"\""sv);
 			return;
 		}
 
-		bool multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
-		const bool treat_raw_tab_as_control_char = !(config_.flags & format_flags::allow_real_tabs_in_strings);
-		if (multi_line || literal || treat_raw_tab_as_control_char || allow_bare)
+		// pre-scan the string to determine how we should output it
+		formatted_string_traits traits = {};
+
+		if (!allow_bare)
+			traits |= formatted_string_traits::non_bare;
+		bool unicode_allowed = unicode_strings_allowed();
+
+		// ascii fast path
+		if (is_ascii(str.data(), str.length()))
 		{
-			utf8_decoder decoder;
-			bool has_line_breaks   = false;
-			bool has_control_chars = false;
-			bool has_single_quotes = false;
-			for (size_t i = 0; i < str.length(); i++)
+			for (auto c : str)
 			{
-				decoder(static_cast<uint8_t>(str[i]));
-				if (decoder.error())
+				switch (c)
 				{
-					has_line_breaks	  = false;
-					has_control_chars = true; // force ""
-					has_single_quotes = true;
-					allow_bare		  = false;
-					break;
-				}
-				else if (decoder.has_code_point())
-				{
-					if (decoder.codepoint == U'\n')
+					case '\n': traits |= formatted_string_traits::line_breaks; break;
+					case '\t': traits |= formatted_string_traits::tabs; break;
+					case '\'': traits |= formatted_string_traits::single_quotes; break;
+					default:
 					{
-						has_line_breaks = true;
-						if (!multi_line)
-							has_control_chars = true;
+						if (is_control_character(c))
+							traits |= formatted_string_traits::control_chars;
+
+						if (!is_ascii_bare_key_character(static_cast<char32_t>(c)))
+							traits |= formatted_string_traits::non_bare;
+						break;
 					}
-					else if (is_nontab_control_character(decoder.codepoint)
-							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t')
-							 || is_vertical_whitespace(decoder.codepoint))
-						has_control_chars = true;
-					else if (decoder.codepoint == U'\'')
-						has_single_quotes = true;
-					if (allow_bare)
-						allow_bare = is_bare_key_character(decoder.codepoint);
 				}
 
-				if (has_line_breaks && has_control_chars && has_single_quotes && !allow_bare)
+				static constexpr auto all_ascii_traits =
+					formatted_string_traits::all & ~formatted_string_traits::non_ascii;
+				if (traits == all_ascii_traits)
 					break;
 			}
-			multi_line = multi_line && has_line_breaks;
-			literal	   = literal && !has_control_chars && !(!multi_line && has_single_quotes);
 		}
 
-		if (allow_bare)
-			print_to_stream(*stream_, str);
-		else if (literal)
-			print_to_stream_bookended(*stream_, str, multi_line ? "'''"sv : "'"sv);
+		// unicode slow path
 		else
 		{
-			const auto quot = multi_line ? R"(""")"sv : R"(")"sv;
-			print_to_stream(*stream_, quot);
-			print_to_stream_with_escapes(*stream_, str);
-			print_to_stream(*stream_, quot);
+			traits |= formatted_string_traits::non_ascii;
+			utf8_decoder decoder;
+
+			// if the unicode is malformed just treat the string as a single-line non-literal and
+			// escape all non-ascii characters (to ensure round-tripping and help with diagnostics)
+			const auto bad_unicode = [&]() noexcept
+			{
+				traits &= ~formatted_string_traits::line_breaks;
+				traits |= formatted_string_traits::control_chars | formatted_string_traits::non_bare;
+				unicode_allowed = false;
+			};
+
+			for (auto c : str)
+			{
+				decoder(c);
+
+				if TOML_UNLIKELY(decoder.error())
+				{
+					bad_unicode();
+					break;
+				}
+
+				if (!decoder.has_code_point())
+					continue;
+
+				switch (decoder.codepoint)
+				{
+					case U'\n': traits |= formatted_string_traits::line_breaks; break;
+					case U'\t': traits |= formatted_string_traits::tabs; break;
+					case U'\'': traits |= formatted_string_traits::single_quotes; break;
+					default:
+					{
+						if (is_control_character(decoder.codepoint)
+							|| is_non_ascii_vertical_whitespace(decoder.codepoint))
+							traits |= formatted_string_traits::control_chars;
+
+						if (!is_bare_key_character(decoder.codepoint))
+							traits |= formatted_string_traits::non_bare;
+						break;
+					}
+				}
+			}
+
+			if (decoder.needs_more_input())
+				bad_unicode();
 		}
-		naked_newline_ = false;
+
+		// if the string meets the requirements of being 'bare' we can emit a bare string
+		// (bare strings are composed of letters and numbers; no whitespace, control chars, quotes, etc)
+		if (!(traits & formatted_string_traits::non_bare)
+			&& (!(traits & formatted_string_traits::non_ascii) || unicode_allowed))
+		{
+			print_unformatted(str);
+			return;
+		}
+
+		// determine if this should be a multi-line string (triple-quotes)
+		const auto multi_line = allow_multi_line			 //
+							 && multi_line_strings_allowed() //
+							 && !!(traits & formatted_string_traits::line_breaks);
+
+		// determine if this should be a literal string (single-quotes with no escaping)
+		const auto literal = literal_strings_allowed()													   //
+						  && !(traits & formatted_string_traits::control_chars)							   //
+						  && (!(traits & formatted_string_traits::single_quotes) || multi_line)			   //
+						  && (!(traits & formatted_string_traits::tabs) || real_tabs_in_strings_allowed()) //
+						  && (!(traits & formatted_string_traits::non_ascii) || unicode_allowed);
+
+		// literal strings (single quotes, no escape codes)
+		if (literal)
+		{
+			const auto quot = multi_line ? R"(''')"sv : R"(')"sv;
+			print_unformatted(quot);
+			print_unformatted(str);
+			print_unformatted(quot);
+			return;
+		}
+
+		// anything from here down is a non-literal string, so requires iteration and escaping.
+		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
+
+		const auto real_tabs_allowed = real_tabs_in_strings_allowed();
+
+		// ascii fast path
+		if (!(traits & formatted_string_traits::non_ascii))
+		{
+			for (auto c : str)
+			{
+				switch (c)
+				{
+					case '"': print_to_stream(*stream_, R"(\")"sv); break;
+					case '\\': print_to_stream(*stream_, R"(\\)"sv); break;
+					case '\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
+					case '\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
+					case '\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					default:
+					{
+						// control characters from lookup table
+						if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
+							print_to_stream(*stream_, control_char_escapes[c]);
+
+						// regular characters
+						else
+							print_to_stream(*stream_, c);
+					}
+				}
+			}
+		}
+
+		// unicode slow path
+		else
+		{
+			utf8_decoder decoder;
+			const char* cp_start = str.data();
+			const char* cp_end	 = cp_start;
+			for (auto c : str)
+			{
+				decoder(c);
+				cp_end++;
+
+				// if the decoder encounters malformed unicode just emit raw bytes and
+				if (decoder.error())
+				{
+					while (cp_start != cp_end)
+					{
+						print_to_stream(*stream_, R"(\u00)"sv);
+						print_to_stream(*stream_,
+										static_cast<uint8_t>(*cp_start),
+										value_flags::format_as_hexadecimal,
+										2);
+						cp_start++;
+					}
+					decoder.reset();
+					continue;
+				}
+
+				if (!decoder.has_code_point())
+					continue;
+
+				switch (decoder.codepoint)
+				{
+					case U'"': print_to_stream(*stream_, R"(\")"sv); break;
+					case U'\\': print_to_stream(*stream_, R"(\\)"sv); break;
+					case U'\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
+					case U'\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
+					case U'\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					default:
+					{
+						// control characters from lookup table
+						if TOML_UNLIKELY(decoder.codepoint <= U'\x1F')
+							print_to_stream(*stream_,
+											control_char_escapes[static_cast<uint_least32_t>(decoder.codepoint)]);
+
+						// escaped unicode characters
+						else if (decoder.codepoint > U'\x7F'
+								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)))
+						{
+							if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu)
+							{
+								print_to_stream(*stream_, R"(\U)"sv);
+								print_to_stream(*stream_,
+												static_cast<uint_least32_t>(decoder.codepoint),
+												value_flags::format_as_hexadecimal,
+												8);
+							}
+							else
+							{
+								print_to_stream(*stream_, R"(\u)"sv);
+								print_to_stream(*stream_,
+												static_cast<uint_least32_t>(decoder.codepoint),
+												value_flags::format_as_hexadecimal,
+												4);
+							}
+						}
+
+						// regular characters
+						else
+							print_to_stream(*stream_, cp_start, static_cast<size_t>(cp_end - cp_start));
+					}
+				}
+
+				cp_start = cp_end;
+			}
+		}
+
+		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE

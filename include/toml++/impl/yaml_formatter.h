@@ -73,6 +73,7 @@ TOML_NAMESPACE_START
 		/// \brief	The default flags for a yaml_formatter.
 		static constexpr format_flags default_flags = constants.mandatory_flags			  //
 													| format_flags::allow_literal_strings //
+													| format_flags::allow_unicode_strings //
 													| format_flags::allow_octal_integers  //
 													| format_flags::allow_hexadecimal_integers;
 

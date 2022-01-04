@@ -69,11 +69,16 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {})
+	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
 	{
 		if (!val)
 		{
-			stream.put('0');
+			if (!min_digits)
+				min_digits = 1;
+
+			for (size_t i = 0; i < min_digits; i++)
+				stream.put('0');
+
 			return;
 		}
 
@@ -82,7 +87,7 @@ TOML_ANON_NAMESPACE_START
 		format &= value_flags_mask;
 
 		int base = 10;
-		if (format != value_flags::none && val >= T{})
+		if (format != value_flags::none && val > T{})
 		{
 			switch (format)
 			{
@@ -98,6 +103,8 @@ TOML_ANON_NAMESPACE_START
 		char buf[(sizeof(T) * CHAR_BIT)];
 		const auto res = std::to_chars(buf, buf + sizeof(buf), val, base);
 		const auto len = static_cast<size_t>(res.ptr - buf);
+		for (size_t i = len; i < min_digits; i++)
+			stream.put('0');
 		if (base == 16)
 		{
 			for (size_t i = 0; i < len; i++)
@@ -111,12 +118,16 @@ TOML_ANON_NAMESPACE_START
 		using unsigned_type = std::conditional_t<(sizeof(T) > sizeof(unsigned)), std::make_unsigned_t<T>, unsigned>;
 		using cast_type		= std::conditional_t<std::is_signed_v<T>, std::make_signed_t<unsigned_type>, unsigned_type>;
 
-		if TOML_UNLIKELY(format == value_flags::format_as_binary)
+		if (base == 2)
 		{
+			const auto len = sizeof(T) * CHAR_BIT;
+			for (size_t i = len; i < min_digits; i++)
+				stream.put('0');
+
 			bool found_one	   = false;
 			const auto v	   = static_cast<unsigned_type>(val);
-			unsigned_type mask = unsigned_type{ 1 } << (sizeof(unsigned_type) * CHAR_BIT - 1u);
-			for (unsigned i = 0; i < sizeof(unsigned_type) * CHAR_BIT; i++)
+			unsigned_type mask = unsigned_type{ 1 } << (len - 1u);
+			for (size_t i = 0; i < len; i++)
 			{
 				if ((v & mask))
 				{
@@ -133,6 +144,8 @@ TOML_ANON_NAMESPACE_START
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
 			ss << std::uppercase << std::setbase(base);
+			if (min_digits)
+				ss << std::setfill('0') << std::setw(static_cast<int>(min_digits));
 			ss << static_cast<cast_type>(val);
 			const auto str = std::move(ss).str();
 			impl::print_to_stream(stream, str);
@@ -194,31 +207,6 @@ TOML_ANON_NAMESPACE_START
 			default: TOML_UNREACHABLE;
 		}
 	}
-
-	template <typename T>
-	TOML_INTERNAL_LINKAGE
-	void print_integer_leftpad_zeros(std::ostream & stream, T val, size_t min_digits)
-	{
-#if TOML_INT_CHARCONV
-
-		char buf[charconv_buffer_length<T>];
-		const auto res = std::to_chars(buf, buf + sizeof(buf), val);
-		const auto len = static_cast<size_t>(res.ptr - buf);
-		for (size_t i = len; i < min_digits; i++)
-			stream.put('0');
-		impl::print_to_stream(stream, buf, static_cast<size_t>(res.ptr - buf));
-
-#else
-
-		std::ostringstream ss;
-		ss.imbue(std::locale::classic());
-		using cast_type = std::conditional_t<std::is_signed_v<T>, int64_t, uint64_t>;
-		ss << std::setfill('0') << std::setw(static_cast<int>(min_digits)) << static_cast<cast_type>(val);
-		const auto str = std::move(ss).str();
-		impl::print_to_stream(stream, str);
-
-#endif
-	}
 }
 TOML_ANON_NAMESPACE_END;
 
@@ -250,51 +238,51 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int8_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int16_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int32_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int64_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint8_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint16_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint32_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint64_t val, value_flags format)
+	void print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
 	{
-		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -318,21 +306,21 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::date& val)
 	{
-		print_integer_leftpad_zeros(stream, val.year, 4u);
+		print_to_stream(stream, val.year, {}, 4);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.month, 2u);
+		print_to_stream(stream, val.month, {}, 2);
 		stream.put('-');
-		print_integer_leftpad_zeros(stream, val.day, 2u);
+		print_to_stream(stream, val.day, {}, 2);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void print_to_stream(std::ostream & stream, const toml::time& val)
 	{
-		print_integer_leftpad_zeros(stream, val.hour, 2u);
+		print_to_stream(stream, val.hour, {}, 2);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.minute, 2u);
+		print_to_stream(stream, val.minute, {}, 2);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, val.second, 2u);
+		print_to_stream(stream, val.second, {}, 2);
 		if (val.nanosecond && val.nanosecond <= 999999999u)
 		{
 			stream.put('.');
@@ -343,7 +331,7 @@ TOML_IMPL_NAMESPACE_START
 				ns /= 10u;
 				digits--;
 			}
-			print_integer_leftpad_zeros(stream, ns, digits);
+			print_to_stream(stream, ns, {}, digits);
 		}
 	}
 
@@ -367,13 +355,13 @@ TOML_IMPL_NAMESPACE_START
 		const auto hours = mins / 60;
 		if (hours)
 		{
-			print_integer_leftpad_zeros(stream, static_cast<unsigned int>(hours), 2u);
+			print_to_stream(stream, static_cast<unsigned int>(hours), {}, 2);
 			mins -= hours * 60;
 		}
 		else
 			print_to_stream(stream, "00"sv);
 		stream.put(':');
-		print_integer_leftpad_zeros(stream, static_cast<unsigned int>(mins), 2u);
+		print_to_stream(stream, static_cast<unsigned int>(mins), {}, 2);
 	}
 
 	TOML_EXTERNAL_LINKAGE

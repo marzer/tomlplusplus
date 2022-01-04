@@ -12,15 +12,15 @@
 //# }}
 #if TOML_ENABLE_PARSER
 
-#include "std_optional.h"
 #include "parser.h"
+#include "std_optional.h"
 #include "source_region.h"
 #include "parse_error.h"
-#include "utf8.h"
 #include "date_time.h"
 #include "value.h"
 #include "array.h"
 #include "table.h"
+#include "unicode.h"
 TOML_DISABLE_WARNINGS;
 #include <istream>
 #include <fstream>
@@ -34,7 +34,6 @@ TOML_DISABLE_WARNINGS;
 #include <iomanip>
 #endif
 TOML_ENABLE_WARNINGS;
-#include "simd.h"
 #include "header_start.h"
 
 //#---------------------------------------------------------------------------------------------------------------------
@@ -43,48 +42,6 @@ TOML_ENABLE_WARNINGS;
 
 TOML_ANON_NAMESPACE_START
 {
-	template <typename T>
-	TOML_PURE_GETTER
-	TOML_ATTR(nonnull)
-	TOML_INTERNAL_LINKAGE
-	bool is_ascii(const T* str, size_t size) noexcept
-	{
-		static_assert(sizeof(T) == 1);
-
-		const T* const end = str + size;
-
-#if TOML_HAS_SSE2 && (128 % CHAR_BIT) == 0
-		{
-			constexpr size_t chars_per_vector = 128 / CHAR_BIT;
-
-			if (const size_t simdable = size - (size % chars_per_vector))
-			{
-				__m128i mask = _mm_setzero_si128();
-				for (const T* const e = str + simdable; str < e; str += chars_per_vector)
-				{
-					const __m128i current_bytes = _mm_loadu_si128(reinterpret_cast<const __m128i*>(str));
-					mask						= _mm_or_si128(mask, current_bytes);
-				}
-				const __m128i has_error = _mm_cmpgt_epi8(_mm_setzero_si128(), mask);
-
-#if TOML_HAS_SSE4_1
-				if (!_mm_testz_si128(has_error, has_error))
-					return false;
-#else
-				if (_mm_movemask_epi8(_mm_cmpeq_epi8(has_error, _mm_setzero_si128())) != 0xFFFF)
-					return false;
-#endif
-			}
-		}
-#endif
-
-		for (; str < end; str++)
-			if (static_cast<unsigned char>(*str) > 127u)
-				return false;
-
-		return true;
-	}
-
 	template <typename T>
 	class utf8_byte_stream;
 
@@ -363,7 +320,7 @@ TOML_ANON_NAMESPACE_START
 					auto& cp	= codepoints_.buffer[i];
 					cp.position = next_pos_;
 
-					if (impl::is_vertical_whitespace_excl_cr(cp))
+					if (cp == U'\n')
 					{
 						next_pos_.line++;
 						next_pos_.column = source_index{ 1 };
@@ -374,7 +331,7 @@ TOML_ANON_NAMESPACE_START
 			};
 
 			// decide whether we need to use the UTF-8 decoder or if we can treat this block as plain ASCII
-			const auto ascii_fast_path = !decoder_.needs_more_input() && is_ascii(raw_bytes, raw_bytes_read);
+			const auto ascii_fast_path = !decoder_.needs_more_input() && impl::is_ascii(raw_bytes, raw_bytes_read);
 
 			// ASCII fast-path
 			if (ascii_fast_path)
@@ -726,7 +683,7 @@ TOML_ANON_NAMESPACE_START
 	std::string_view to_sv(const utf8_codepoint& cp) noexcept
 	{
 		if TOML_UNLIKELY(cp.value <= U'\x1F')
-			return impl::low_character_escape_table[cp.value];
+			return impl::control_char_escapes[cp.value];
 		else if TOML_UNLIKELY(cp.value == U'\x7F')
 			return "\\u007F"sv;
 		else
@@ -1183,8 +1140,9 @@ TOML_IMPL_NAMESPACE_START
 		{
 			return_if_error_or_eof({});
 
-			if (!is_vertical_whitespace(*cp))
-				return false;
+			if TOML_UNLIKELY(is_match(*cp, U'\v', U'\f'))
+				set_error_and_return_default(
+					R"(vertical tabs '\v' and form-feeds '\f' are not legal whitespace in TOML.)"sv);
 
 			if (*cp == U'\r')
 			{
@@ -1192,10 +1150,14 @@ TOML_IMPL_NAMESPACE_START
 
 				if (is_eof())
 					return true; // eof after \r is 'fine'
-				else if (*cp != U'\n')
+
+				if (*cp != U'\n')
 					set_error_and_return_default("expected \\n, saw '"sv, to_sv(*cp), "'"sv);
 			}
-			advance_and_return_if_error({}); // skip \n (or other single-character line ending)
+			else if (*cp != U'\n')
+				return false;
+
+			advance_and_return_if_error({}); // skip \n
 			return true;
 		}
 
@@ -1205,7 +1167,7 @@ TOML_IMPL_NAMESPACE_START
 
 			do
 			{
-				if (is_vertical_whitespace(*cp))
+				if (is_ascii_vertical_whitespace(*cp))
 					return consume_line_break();
 				else
 					advance();
@@ -1349,7 +1311,7 @@ TOML_IMPL_NAMESPACE_START
 						continue;
 					}
 
-					bool skipped_escaped_codepoint = false;
+					bool skip_escaped_codepoint = true;
 					assert_not_eof();
 					switch (const auto escaped_codepoint = *cp)
 					{
@@ -1373,9 +1335,9 @@ TOML_IMPL_NAMESPACE_START
 						case U'u': [[fallthrough]];
 						case U'U':
 						{
-							push_parse_scope("unicode scalar escape sequence"sv);
+							push_parse_scope("unicode scalar sequence"sv);
 							advance_and_return_if_error_or_eof({});
-							skipped_escaped_codepoint = true;
+							skip_escaped_codepoint = false;
 
 							uint32_t place_value =
 								escaped_codepoint == U'U' ? 0x10000000u : (escaped_codepoint == U'u' ? 0x1000u : 0x10u);
@@ -1395,25 +1357,28 @@ TOML_IMPL_NAMESPACE_START
 									"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
 							else if (sequence_value > 0x10FFFFu)
 								set_error_and_return_default("values greater than U+10FFFF are invalid"sv);
-							else if (sequence_value <= 0x7Fu) // ascii
-								str += static_cast<char>(sequence_value & 0x7Fu);
-							else if (sequence_value <= 0x7FFu)
+
+							if (sequence_value < 0x80)
 							{
-								str += static_cast<char>(0xC0u | ((sequence_value >> 6) & 0x1Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>(sequence_value);
 							}
-							else if (sequence_value <= 0xFFFFu)
+							else if (sequence_value < 0x800u)
 							{
-								str += static_cast<char>(0xE0u | ((sequence_value >> 12) & 0x0Fu));
-								str += static_cast<char>(0x80u | ((sequence_value >> 6) & 0x1Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>((sequence_value >> 6) | 0xC0u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
 							}
-							else
+							else if (sequence_value < 0x10000u)
 							{
-								str += static_cast<char>(0xF0u | ((sequence_value >> 18) & 0x07u));
-								str += static_cast<char>(0x80u | ((sequence_value >> 12) & 0x3Fu));
-								str += static_cast<char>(0x80u | ((sequence_value >> 6) & 0x3Fu));
-								str += static_cast<char>(0x80u | (sequence_value & 0x3Fu));
+								str += static_cast<char>((sequence_value >> 12) | 0xE0u);
+								str += static_cast<char>(((sequence_value >> 6) & 0x3Fu) | 0x80u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
+							}
+							else if (sequence_value < 0x110000u)
+							{
+								str += static_cast<char>((sequence_value >> 18) | 0xF0u);
+								str += static_cast<char>(((sequence_value >> 12) & 0x3Fu) | 0x80u);
+								str += static_cast<char>(((sequence_value >> 6) & 0x3Fu) | 0x80u);
+								str += static_cast<char>((sequence_value & 0x3Fu) | 0x80u);
 							}
 							break;
 						}
@@ -1422,8 +1387,7 @@ TOML_IMPL_NAMESPACE_START
 						default: set_error_and_return_default("unknown escape sequence '\\"sv, to_sv(*cp), "'"sv);
 					}
 
-					// skip the escaped character
-					if (!skipped_escaped_codepoint)
+					if (skip_escaped_codepoint)
 						advance_and_return_if_error_or_eof({});
 				}
 				else
@@ -1492,7 +1456,7 @@ TOML_IMPL_NAMESPACE_START
 					}
 
 					// handle line endings in multi-line mode
-					if (multi_line && is_vertical_whitespace(*cp))
+					if (multi_line && is_ascii_vertical_whitespace(*cp))
 					{
 						consume_line_break();
 						return_if_error({});
@@ -1608,7 +1572,7 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				// handle line endings in multi-line mode
-				if (multi_line && is_vertical_whitespace(*cp))
+				if (multi_line && is_ascii_vertical_whitespace(*cp))
 				{
 					consume_line_break();
 					return_if_error({});
@@ -2275,7 +2239,8 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(is_decimal_digit(*cp));
 			push_parse_scope("time"sv);
 
-			static constexpr size_t max_digits = 9;
+			static constexpr size_t max_digits = 64; // far more than necessary but needed to allow fractional
+													 // millisecond truncation per the spec
 			uint32_t digits[max_digits];
 
 			// "HH"
@@ -2344,15 +2309,14 @@ TOML_IMPL_NAMESPACE_START
 				else if (!part_of_datetime && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 			}
-
 			uint32_t value = 0u;
 			uint32_t place = 1u;
-			for (auto i = digit_count; i-- > 0u;)
+			for (auto i = impl::min<size_t>(digit_count, 9u); i-- > 0u;)
 			{
 				value += digits[i] * place;
 				place *= 10u;
 			}
-			for (auto i = digit_count; i < max_digits; i++) // implicit zeros
+			for (auto i = digit_count; i < 9u; i++) // implicit zeros
 				value *= 10u;
 			time.nanosecond = value;
 			return time;

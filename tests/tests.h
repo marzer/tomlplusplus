@@ -198,9 +198,9 @@ inline bool parse_expected_value(std::string_view test_file,
 			if (!decoder.has_code_point())
 				continue;
 
-			if (impl::is_vertical_whitespace_excl_cr(decoder.codepoint))
+			if (impl::is_ascii_vertical_whitespace(decoder.codepoint))
 			{
-				if (decoder.codepoint != U'\r')
+				if (decoder.codepoint == U'\n')
 				{
 					pos.line++;
 					pos.column = source_index{ 1 };

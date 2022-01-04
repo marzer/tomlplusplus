@@ -102,15 +102,21 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	constexpr bool is_ascii_vertical_whitespace(char32_t c) noexcept
 	{
-		return (U'\n' <= c && c <= U'\r') || (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+		return U'\n' <= c && c <= U'\r';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_vertical_whitespace_excl_cr(char32_t c) noexcept
+	constexpr bool is_non_ascii_vertical_whitespace(char32_t c) noexcept
 	{
-		return (U'\n' <= c && c <= U'\f') || (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+		return (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	{
+		return is_ascii_vertical_whitespace(c) || is_non_ascii_vertical_whitespace(c);
 	}
 
 	TOML_CONST_GETTER
@@ -122,6 +128,11 @@ TOML_IMPL_NAMESPACE_START
 	TOML_CONST_GETTER
 	constexpr bool is_ascii_bare_key_character(char32_t c) noexcept
 	{
+#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys)
+		if (c == U'+')
+			return true;
+#endif
+
 		if (c < U'-' || c > U'z')
 			return false;
 
@@ -861,8 +872,7 @@ TOML_IMPL_NAMESPACE_START
 	constexpr bool is_bare_key_character(char32_t c) noexcept
 	{
 		return is_ascii_bare_key_character(c)
-#if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
-			|| c == U'+' //
+#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
 			|| is_non_ascii_bare_key_character(c)
 #endif
 			;
@@ -872,6 +882,12 @@ TOML_IMPL_NAMESPACE_START
 	constexpr bool is_value_terminator(char32_t c) noexcept
 	{
 		return is_whitespace(c) || c == U']' || c == U'}' || c == U',' || c == U'#';
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_control_character(char c) noexcept
+	{
+		return c <= '\u001F' || c == '\u007F';
 	}
 
 	TOML_CONST_GETTER
@@ -950,11 +966,21 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_ALWAYS_INLINE
+		constexpr void operator()(char c) noexcept
+		{
+			operator()(static_cast<uint8_t>(c));
+		}
+
+		TOML_ALWAYS_INLINE
 		constexpr void reset() noexcept
 		{
 			state = {};
 		}
 	};
+
+	TOML_PURE_GETTER
+	TOML_ATTR(nonnull)
+	bool is_ascii(const char* str, size_t len) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 

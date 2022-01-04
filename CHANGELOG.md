@@ -35,6 +35,9 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - fixed missing `TOML_API` on interfaces
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
 - fixed strong exception guarantee edge-cases in `toml::table` and `toml::array`
+- fixed some incorrect unicode scalar sequence transformations (#125) (@moorereason)
+- fixed extended-precision fractional times causing parse error instead of truncating per the spec (#127) (@moorereason)
+- fixed some non-spec vertical whitespace being accepted as line breaks (#128) (@moorereason)
 
 #### Additions:
 - added `operator->` to `toml::value` for class types
@@ -48,6 +51,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - added `toml::format_flags::allow_hexadecimal_integers`
 - added `toml::format_flags::allow_octal_integers`
 - added `toml::format_flags::allow_real_tabs_in_strings`
+- added `toml::format_flags::allow_unicode_strings`
 - added `toml::format_flags::indent_array_elements`
 - added `toml::format_flags::indent_sub_tables`
 - added `toml::format_flags::quote_infinities_and_nans`

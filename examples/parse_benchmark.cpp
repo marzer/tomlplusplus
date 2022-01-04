@@ -5,7 +5,7 @@
 
 // This example is just a short-n-shiny benchmark.
 
-#include "examples.hpp"
+#include "examples.h"
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;

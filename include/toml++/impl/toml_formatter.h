@@ -68,8 +68,8 @@ TOML_NAMESPACE_START
 		TOML_API
 		void print();
 
-		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory flags
-																 format_flags::none, // ignored flags
+		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory
+																 format_flags::none, // ignored
 																 "inf"sv,
 																 "-inf"sv,
 																 "nan"sv,
@@ -83,6 +83,7 @@ TOML_NAMESPACE_START
 		static constexpr format_flags default_flags = constants.mandatory_flags				   //
 													| format_flags::allow_literal_strings	   //
 													| format_flags::allow_multi_line_strings   //
+													| format_flags::allow_unicode_strings	   //
 													| format_flags::allow_real_tabs_in_strings //
 													| format_flags::allow_binary_integers	   //
 													| format_flags::allow_octal_integers	   //

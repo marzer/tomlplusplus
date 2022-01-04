@@ -35,6 +35,12 @@ TOML_NAMESPACE_START
 		source_region source_;
 
 	  public:
+		/// A const iterator for iterating over the characters in the key.
+		using const_iterator = const char*;
+
+		/// A const iterator for iterating over the characters in the key.
+		using iterator = const_iterator;
+
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
 		key() noexcept = default;
@@ -283,6 +289,40 @@ TOML_NAMESPACE_START
 		friend bool operator>=(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs >= rhs.key_;
+		}
+
+		/// @}
+
+		/// \name Iterators
+		/// @{
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator begin() const noexcept
+		{
+			return key_.data();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator end() const noexcept
+		{
+			return key_.data() + key_.length();
+		}
+
+		/// @}
+
+		/// \name Iterators (ADL)
+		/// @{
+
+		TOML_PURE_INLINE_GETTER
+		friend const_iterator begin(const key& k) noexcept
+		{
+			return k.begin();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		friend const_iterator end(const key& k) noexcept
+		{
+			return k.end();
 		}
 
 		/// @}

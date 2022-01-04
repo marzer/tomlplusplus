@@ -72,7 +72,7 @@
     <ClInclude Include="include\toml++\impl\std_vector.h" />
     <ClInclude Include="include\toml++\impl\table.h" />
     <ClInclude Include="include\toml++\impl\table.inl" />
-    <ClInclude Include="include\toml++\impl\utf8.h" />
+    <ClInclude Include="include\toml++\impl\unicode.h" />
     <ClInclude Include="include\toml++\impl\value.h" />
     <ClInclude Include="include\toml++\impl\value.inl" />
     <ClInclude Include="include\toml++\impl\value_extern.inl" />
@@ -95,6 +95,7 @@
     <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="include\toml++\impl\unicode.inl" />
     <None Include="include\toml++\impl\node_view_extern.inl" />
     <None Include="include\toml++\impl\yaml_formatter.inl" />
     <None Include="LICENSE" />

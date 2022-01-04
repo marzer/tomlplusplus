@@ -75,6 +75,7 @@ TOML_NAMESPACE_START
 		/// \brief	The default flags for a json_formatter.
 		static constexpr format_flags default_flags = constants.mandatory_flags				  //
 													| format_flags::quote_infinities_and_nans //
+													| format_flags::allow_unicode_strings	  //
 													| format_flags::indentation;
 
 		/// \brief	Constructs a JSON formatter and binds it to a TOML object.

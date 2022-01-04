@@ -14,15 +14,29 @@
 
 #include "formatter.h"
 #include "print_to_stream.h"
-#include "utf8.h"
 #include "value.h"
 #include "table.h"
 #include "array.h"
+#include "unicode.h"
 #include "parse_result.h"
 #include "header_start.h"
 
 TOML_IMPL_NAMESPACE_START
 {
+	enum class formatted_string_traits : unsigned
+	{
+		none,
+		line_breaks	  = 1u << 0, // \n
+		tabs		  = 1u << 1, // \t
+		control_chars = 1u << 2, // also includes non-ascii vertical whitespace
+		single_quotes = 1u << 3,
+		non_bare	  = 1u << 4, // anything not satisfying "is bare key character"
+		non_ascii	  = 1u << 5, // any codepoint >= 128
+
+		all = (non_ascii << 1u) - 1u
+	};
+	TOML_MAKE_FLAGS(formatted_string_traits);
+
 	TOML_EXTERNAL_LINKAGE
 	formatter::formatter(const node* source_node,
 						 const parse_result* source_pr,
@@ -101,70 +115,236 @@ TOML_IMPL_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
 	{
-		auto literal = literal_strings_allowed();
 		if (str.empty())
 		{
-			print_to_stream(*stream_, literal ? "''"sv : "\"\""sv);
-			naked_newline_ = false;
+			print_unformatted(literal_strings_allowed() ? "''"sv : "\"\""sv);
 			return;
 		}
 
-		bool multi_line = allow_multi_line && !!(config_.flags & format_flags::allow_multi_line_strings);
-		const bool treat_raw_tab_as_control_char = !(config_.flags & format_flags::allow_real_tabs_in_strings);
-		if (multi_line || literal || treat_raw_tab_as_control_char || allow_bare)
+		// pre-scan the string to determine how we should output it
+		formatted_string_traits traits = {};
+
+		if (!allow_bare)
+			traits |= formatted_string_traits::non_bare;
+		bool unicode_allowed = unicode_strings_allowed();
+
+		// ascii fast path
+		if (is_ascii(str.data(), str.length()))
 		{
-			utf8_decoder decoder;
-			bool has_line_breaks   = false;
-			bool has_control_chars = false;
-			bool has_single_quotes = false;
-			for (size_t i = 0; i < str.length(); i++)
+			for (auto c : str)
 			{
-				decoder(static_cast<uint8_t>(str[i]));
-				if (decoder.error())
+				switch (c)
 				{
-					has_line_breaks	  = false;
-					has_control_chars = true; // force ""
-					has_single_quotes = true;
-					allow_bare		  = false;
-					break;
-				}
-				else if (decoder.has_code_point())
-				{
-					if (decoder.codepoint == U'\n')
+					case '\n': traits |= formatted_string_traits::line_breaks; break;
+					case '\t': traits |= formatted_string_traits::tabs; break;
+					case '\'': traits |= formatted_string_traits::single_quotes; break;
+					default:
 					{
-						has_line_breaks = true;
-						if (!multi_line)
-							has_control_chars = true;
+						if (is_control_character(c))
+							traits |= formatted_string_traits::control_chars;
+
+						if (!is_ascii_bare_key_character(static_cast<char32_t>(c)))
+							traits |= formatted_string_traits::non_bare;
+						break;
 					}
-					else if (is_nontab_control_character(decoder.codepoint)
-							 || (treat_raw_tab_as_control_char && decoder.codepoint == U'\t')
-							 || is_vertical_whitespace(decoder.codepoint))
-						has_control_chars = true;
-					else if (decoder.codepoint == U'\'')
-						has_single_quotes = true;
-					if (allow_bare)
-						allow_bare = is_bare_key_character(decoder.codepoint);
 				}
 
-				if (has_line_breaks && has_control_chars && has_single_quotes && !allow_bare)
+				static constexpr auto all_ascii_traits =
+					formatted_string_traits::all & ~formatted_string_traits::non_ascii;
+				if (traits == all_ascii_traits)
 					break;
 			}
-			multi_line = multi_line && has_line_breaks;
-			literal	   = literal && !has_control_chars && !(!multi_line && has_single_quotes);
 		}
 
-		if (allow_bare)
-			print_to_stream(*stream_, str);
-		else if (literal)
-			print_to_stream_bookended(*stream_, str, multi_line ? "'''"sv : "'"sv);
+		// unicode slow path
 		else
 		{
-			const auto quot = multi_line ? R"(""")"sv : R"(")"sv;
-			print_to_stream(*stream_, quot);
-			print_to_stream_with_escapes(*stream_, str);
-			print_to_stream(*stream_, quot);
+			traits |= formatted_string_traits::non_ascii;
+			utf8_decoder decoder;
+
+			// if the unicode is malformed just treat the string as a single-line non-literal and
+			// escape all non-ascii characters (to ensure round-tripping and help with diagnostics)
+			const auto bad_unicode = [&]() noexcept
+			{
+				traits &= ~formatted_string_traits::line_breaks;
+				traits |= formatted_string_traits::control_chars | formatted_string_traits::non_bare;
+				unicode_allowed = false;
+			};
+
+			for (auto c : str)
+			{
+				decoder(c);
+
+				if TOML_UNLIKELY(decoder.error())
+				{
+					bad_unicode();
+					break;
+				}
+
+				if (!decoder.has_code_point())
+					continue;
+
+				switch (decoder.codepoint)
+				{
+					case U'\n': traits |= formatted_string_traits::line_breaks; break;
+					case U'\t': traits |= formatted_string_traits::tabs; break;
+					case U'\'': traits |= formatted_string_traits::single_quotes; break;
+					default:
+					{
+						if (is_control_character(decoder.codepoint)
+							|| is_non_ascii_vertical_whitespace(decoder.codepoint))
+							traits |= formatted_string_traits::control_chars;
+
+						if (!is_bare_key_character(decoder.codepoint))
+							traits |= formatted_string_traits::non_bare;
+						break;
+					}
+				}
+			}
+
+			if (decoder.needs_more_input())
+				bad_unicode();
 		}
-		naked_newline_ = false;
+
+		// if the string meets the requirements of being 'bare' we can emit a bare string
+		// (bare strings are composed of letters and numbers; no whitespace, control chars, quotes, etc)
+		if (!(traits & formatted_string_traits::non_bare)
+			&& (!(traits & formatted_string_traits::non_ascii) || unicode_allowed))
+		{
+			print_unformatted(str);
+			return;
+		}
+
+		// determine if this should be a multi-line string (triple-quotes)
+		const auto multi_line = allow_multi_line			 //
+							 && multi_line_strings_allowed() //
+							 && !!(traits & formatted_string_traits::line_breaks);
+
+		// determine if this should be a literal string (single-quotes with no escaping)
+		const auto literal = literal_strings_allowed()													   //
+						  && !(traits & formatted_string_traits::control_chars)							   //
+						  && (!(traits & formatted_string_traits::single_quotes) || multi_line)			   //
+						  && (!(traits & formatted_string_traits::tabs) || real_tabs_in_strings_allowed()) //
+						  && (!(traits & formatted_string_traits::non_ascii) || unicode_allowed);
+
+		// literal strings (single quotes, no escape codes)
+		if (literal)
+		{
+			const auto quot = multi_line ? R"(''')"sv : R"(')"sv;
+			print_unformatted(quot);
+			print_unformatted(str);
+			print_unformatted(quot);
+			return;
+		}
+
+		// anything from here down is a non-literal string, so requires iteration and escaping.
+		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
+
+		const auto real_tabs_allowed = real_tabs_in_strings_allowed();
+
+		// ascii fast path
+		if (!(traits & formatted_string_traits::non_ascii))
+		{
+			for (auto c : str)
+			{
+				switch (c)
+				{
+					case '"': print_to_stream(*stream_, R"(\")"sv); break;
+					case '\\': print_to_stream(*stream_, R"(\\)"sv); break;
+					case '\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
+					case '\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
+					case '\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					default:
+					{
+						// control characters from lookup table
+						if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
+							print_to_stream(*stream_, control_char_escapes[c]);
+
+						// regular characters
+						else
+							print_to_stream(*stream_, c);
+					}
+				}
+			}
+		}
+
+		// unicode slow path
+		else
+		{
+			utf8_decoder decoder;
+			const char* cp_start = str.data();
+			const char* cp_end	 = cp_start;
+			for (auto c : str)
+			{
+				decoder(c);
+				cp_end++;
+
+				// if the decoder encounters malformed unicode just emit raw bytes and
+				if (decoder.error())
+				{
+					while (cp_start != cp_end)
+					{
+						print_to_stream(*stream_, R"(\u00)"sv);
+						print_to_stream(*stream_,
+										static_cast<uint8_t>(*cp_start),
+										value_flags::format_as_hexadecimal,
+										2);
+						cp_start++;
+					}
+					decoder.reset();
+					continue;
+				}
+
+				if (!decoder.has_code_point())
+					continue;
+
+				switch (decoder.codepoint)
+				{
+					case U'"': print_to_stream(*stream_, R"(\")"sv); break;
+					case U'\\': print_to_stream(*stream_, R"(\\)"sv); break;
+					case U'\x7F': print_to_stream(*stream_, R"(\u007F)"sv); break;
+					case U'\t': print_to_stream(*stream_, real_tabs_allowed ? "\t"sv : R"(\t)"sv); break;
+					case U'\n': print_to_stream(*stream_, multi_line ? "\n"sv : R"(\n)"sv); break;
+					default:
+					{
+						// control characters from lookup table
+						if TOML_UNLIKELY(decoder.codepoint <= U'\x1F')
+							print_to_stream(*stream_,
+											control_char_escapes[static_cast<uint_least32_t>(decoder.codepoint)]);
+
+						// escaped unicode characters
+						else if (decoder.codepoint > U'\x7F'
+								 && (!unicode_allowed || is_non_ascii_vertical_whitespace(decoder.codepoint)))
+						{
+							if (static_cast<uint_least32_t>(decoder.codepoint) > 0xFFFFu)
+							{
+								print_to_stream(*stream_, R"(\U)"sv);
+								print_to_stream(*stream_,
+												static_cast<uint_least32_t>(decoder.codepoint),
+												value_flags::format_as_hexadecimal,
+												8);
+							}
+							else
+							{
+								print_to_stream(*stream_, R"(\u)"sv);
+								print_to_stream(*stream_,
+												static_cast<uint_least32_t>(decoder.codepoint),
+												value_flags::format_as_hexadecimal,
+												4);
+							}
+						}
+
+						// regular characters
+						else
+							print_to_stream(*stream_, cp_start, static_cast<size_t>(cp_end - cp_start));
+					}
+				}
+
+				cp_start = cp_end;
+			}
+		}
+
+		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE

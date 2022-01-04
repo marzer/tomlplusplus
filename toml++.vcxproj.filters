@@ -61,7 +61,7 @@
     <ClInclude Include="include\toml++\impl\table.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\utf8.h">
+    <ClInclude Include="include\toml++\impl\unicode.h">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\value.h">
@@ -213,6 +213,9 @@
     <None Include="CHANGELOG.md" />
     <None Include="tools\generate_single_header.bat">
       <Filter>tools</Filter>
+    </None>
+    <None Include="include\toml++\impl\unicode.inl">
+      <Filter>include\impl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

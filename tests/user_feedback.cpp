@@ -192,4 +192,42 @@ b = []
 		)",
 							4);
 	}
+
+	SECTION("github/issues/125") // https://github.com/marzer/tomlplusplus/issues/125
+	{
+		parse_expected_value(FILE_LINE_ARGS, R"("\u0800")"sv, "\xE0\xA0\x80"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u7840")"sv, "\xE7\xA1\x80"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\uAA23")"sv, "\xEA\xA8\xA3"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\uA928")"sv, "\xEA\xA4\xA8"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u9CBF")"sv, "\xE9\xB2\xBF"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u2247")"sv, "\xE2\x89\x87"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u13D9")"sv, "\xE1\x8F\x99"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u69FC")"sv, "\xE6\xA7\xBC"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u8DE5")"sv, "\xE8\xB7\xA5"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u699C")"sv, "\xE6\xA6\x9C"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u8CD4")"sv, "\xE8\xB3\x94"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u4ED4")"sv, "\xE4\xBB\x94"sv);
+		parse_expected_value(FILE_LINE_ARGS, R"("\u2597")"sv, "\xE2\x96\x97"sv);
+	}
+
+	SECTION("github/issues/127") // https://github.com/marzer/tomlplusplus/issues/127
+	{
+		parse_expected_value(FILE_LINE_ARGS,
+							 "12:34:56.11122233345678"sv,
+							 toml::time{
+								 12,
+								 34,
+								 56,
+								 111222333u // should truncate the .45678 part
+							 });
+	}
+
+	SECTION("github/issues/128") // https://github.com/marzer/tomlplusplus/issues/128
+	{
+		parsing_should_fail(FILE_LINE_ARGS, "\f"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "\v"sv);
+		parsing_should_succeed(FILE_LINE_ARGS, " "sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\t"sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\n"sv);
+	}
 }

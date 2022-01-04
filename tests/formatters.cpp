@@ -24,7 +24,7 @@ namespace
 		friend std::ostream& operator<<(std::ostream& os, const char32_printer& p)
 		{
 			if (p.value <= U'\x1F')
-				return os << '\'' << impl::low_character_escape_table[static_cast<size_t>(p.value)] << '\'';
+				return os << '\'' << impl::control_char_escapes[static_cast<size_t>(p.value)] << '\'';
 			else if (p.value == U'\x7F')
 				return os << "'\\u007F'"sv;
 			else if (p.value < 127u)
@@ -52,6 +52,7 @@ namespace
 	{
 		string_difference diff{ { 1u, 1u } };
 		impl::utf8_decoder a, b;
+
 		for (size_t i = 0, e = std::min(str_a.length(), str_b.length()); i < e; i++, diff.index++)
 		{
 			a(static_cast<uint8_t>(str_a[i]));
@@ -76,7 +77,7 @@ namespace
 				return diff;
 			}
 
-			if (impl::is_vertical_whitespace_excl_cr(a.codepoint))
+			if (a.codepoint == U'\n')
 			{
 				diff.position.line++;
 				diff.position.column = 1u;

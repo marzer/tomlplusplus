@@ -119,7 +119,7 @@ TOML_IMPL_NAMESPACE_START
 
 	// clang-format off
 
-	inline constexpr std::string_view low_character_escape_table[] =
+	inline constexpr std::string_view control_char_escapes[] =
 	{
 		"\\u0000"sv,
 		"\\u0001"sv,
@@ -309,20 +309,23 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Allow real tab characters in string literals (as opposed to the escaped form `\t`).
 		allow_real_tabs_in_strings = (1ull << 4),
 
+		/// \brief Allow non-ASCII characters in strings (as opposed to their escaped form, e.g. `\u00DA`).
+		allow_unicode_strings = (1ull << 5),
+
 		/// \brief Allow integers with #value_flags::format_as_binary to be emitted as binary.
-		allow_binary_integers = (1ull << 5),
+		allow_binary_integers = (1ull << 6),
 
 		/// \brief Allow integers with #value_flags::format_as_octal to be emitted as octal.
-		allow_octal_integers = (1ull << 6),
+		allow_octal_integers = (1ull << 7),
 
 		/// \brief Allow integers with #value_flags::format_as_hexadecimal to be emitted as hexadecimal.
-		allow_hexadecimal_integers = (1ull << 7),
+		allow_hexadecimal_integers = (1ull << 8),
 
 		/// \brief Apply indentation to tables nested within other tables/arrays.
-		indent_sub_tables = (1ull << 8),
+		indent_sub_tables = (1ull << 9),
 
 		/// \brief Apply indentation to array elements when the array is forced to wrap over multiple lines.
-		indent_array_elements = (1ull << 9),
+		indent_array_elements = (1ull << 10),
 
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,

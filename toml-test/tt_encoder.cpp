@@ -3,7 +3,7 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tt.hpp"
+#include "tt.h"
 
 using nlohmann::json;
 using namespace std::string_view_literals;
@@ -191,12 +191,13 @@ TOML_NAMESPACE_END;
 
 int main()
 {
-	toml::table tbl;
 	try
 	{
 		const std::string str(std::istreambuf_iterator<char>{ std::cin }, std::istreambuf_iterator<char>{});
 
-		tbl = json::parse(str);
+		toml::table tbl = json::parse(str);
+
+		std::cout << tbl << "\n";
 	}
 	catch (const std::exception& exc)
 	{
@@ -208,8 +209,6 @@ int main()
 		std::cerr << "An unspecified error occurred.\n";
 		return 1;
 	}
-
-	std::cout << tbl << "\n";
 
 	return 0;
 }

@@ -14,10 +14,10 @@
 
 #include "toml_formatter.h"
 #include "print_to_stream.h"
-#include "utf8.h"
 #include "value.h"
 #include "table.h"
 #include "array.h"
+#include "unicode.h"
 #include "header_start.h"
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 

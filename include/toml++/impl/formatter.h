@@ -106,6 +106,24 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::allow_literal_strings);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool multi_line_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_multi_line_strings);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool real_tabs_in_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_real_tabs_in_strings);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool unicode_strings_allowed() const noexcept
+		{
+			return !!(config_.flags & format_flags::allow_unicode_strings);
+		}
+
 		TOML_API
 		void attach(std::ostream& stream) noexcept;
 

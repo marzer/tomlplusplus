@@ -30,28 +30,28 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, char);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int8_t, value_flags = {});
+	void print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int16_t, value_flags = {});
+	void print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int32_t, value_flags = {});
+	void print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, int64_t, value_flags = {});
+	void print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint8_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint16_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint32_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, uint64_t, value_flags = {});
+	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
 	void print_to_stream(std::ostream&, float, value_flags = {});
@@ -110,24 +110,6 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, const value<date_time>&);
 
 #endif
-
-	template <typename T>
-	inline void print_to_stream_with_escapes(std::ostream & stream, const T& str)
-	{
-		for (auto c : str)
-		{
-			if TOML_UNLIKELY(c >= '\x00' && c <= '\x1F')
-				print_to_stream(stream, low_character_escape_table[c]);
-			else if TOML_UNLIKELY(c == '\x7F')
-				print_to_stream(stream, "\\u007F"sv);
-			else if TOML_UNLIKELY(c == '"')
-				print_to_stream(stream, "\\\""sv);
-			else if TOML_UNLIKELY(c == '\\')
-				print_to_stream(stream, "\\\\"sv);
-			else
-				print_to_stream(stream, c);
-		}
-	}
 
 	template <typename T, typename U>
 	inline void print_to_stream_bookended(std::ostream & stream, const T& val, const U& bookend)

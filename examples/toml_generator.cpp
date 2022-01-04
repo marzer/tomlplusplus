@@ -5,7 +5,7 @@
 
 // This example demonstrates the use of some more advanced features to generate a tree of random TOML data.
 
-#include "examples.hpp"
+#include "examples.h"
 
 #define TOML_ENABLE_PARSER 0
 #include <toml++/toml.h>
