@@ -264,7 +264,7 @@ TOML_NAMESPACE_START // abi namespace
 	}
 
 	/// \brief Metadata associated with TOML values.
-	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t
+	enum class TOML_OPEN_FLAGS_ENUM value_flags : uint16_t // being an "OPEN" flags enum is not an error
 	{
 		/// \brief None.
 		none,

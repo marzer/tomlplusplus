@@ -23,7 +23,7 @@
 
 TOML_IMPL_NAMESPACE_START
 {
-	enum class formatted_string_traits : unsigned
+	enum class TOML_CLOSED_FLAGS_ENUM formatted_string_traits : unsigned
 	{
 		none,
 		line_breaks	  = 1u << 0, // \n

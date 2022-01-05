@@ -217,6 +217,9 @@
     <None Include="include\toml++\impl\unicode.inl">
       <Filter>include\impl</Filter>
     </None>
+    <None Include=".github\ISSUE_TEMPLATE\spec_bug_report.md">
+      <Filter>.github</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">

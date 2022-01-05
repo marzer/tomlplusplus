@@ -1,8 +1,8 @@
 ---
 name: Bug report
-about: Found a bug? Help me squash it.
+about: Regular ol' bugs.
 title: ''
-labels: bug
+labels: [ "bug" ]
 assignees: marzer
 
 ---

@@ -230,4 +230,21 @@ b = []
 		parsing_should_succeed(FILE_LINE_ARGS, "\t"sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "\n"sv);
 	}
+
+	SECTION("github/issues/129") // https://github.com/marzer/tomlplusplus/issues/129
+	{
+		parsing_should_fail(FILE_LINE_ARGS, R"(
+			hex = 0x
+			oct = 0o
+			bin = 0b
+		)"sv);
+	}
+
+	SECTION("github/issues/130") // https://github.com/marzer/tomlplusplus/issues/130
+	{
+		parse_expected_value(FILE_LINE_ARGS, "0400-01-01 00:00:00"sv, toml::date_time{ { 400, 1, 1 }, { 0, 0, 0 } });
+		parse_expected_value(FILE_LINE_ARGS, "0400-01-01         "sv, toml::date{ 400, 1, 1 });
+		parse_expected_value(FILE_LINE_ARGS, "0400-01-01T00:00:00"sv, toml::date_time{ { 400, 1, 1 }, { 0, 0, 0 } });
+		parse_expected_value(FILE_LINE_ARGS, "1000-01-01 00:00:00"sv, toml::date_time{ { 1000, 1, 1 }, { 0, 0, 0 } });
+	}
 }

@@ -2088,6 +2088,9 @@ TOML_IMPL_NAMESPACE_START
 				if (*cp != traits::prefix_codepoint)
 					set_error_and_return_default("expected '"sv, traits::prefix, "', saw '"sv, to_sv(*cp), "'"sv);
 				advance_and_return_if_error_or_eof({});
+
+				if (!traits::is_digit(*cp))
+					set_error_and_return_default("expected digit, saw '"sv, to_sv(*cp), "'"sv);
 			}
 
 			// consume value chars
@@ -2400,7 +2403,6 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr parse_inline_table();
 
 		TOML_NODISCARD
-		TOML_NEVER_INLINE
 		node_ptr parse_value_known_prefixes()
 		{
 			return_if_error({});
@@ -2505,8 +2507,8 @@ TOML_IMPL_NAMESPACE_START
 					begins_zero	 = 1 << 14,
 
 					signs_msk  = has_plus | has_minus,
-					bzero_msk  = begins_zero | has_digits,
-					bdigit_msk = begins_digit | has_digits,
+					bdigit_msk = has_digits | begins_digit,
+					bzero_msk  = bdigit_msk | begins_zero,
 				};
 				value_traits traits	 = has_nothing;
 				const auto has_any	 = [&](auto t) noexcept { return (traits & t) != has_nothing; };
@@ -2516,7 +2518,11 @@ TOML_IMPL_NAMESPACE_START
 				// examine the first character to get the 'begins with' traits
 				// (good fail-fast opportunity; all the remaining types begin with numeric digits or signs)
 				if (is_decimal_digit(*cp))
-					add_trait(*cp == U'0' ? begins_zero : begins_digit);
+				{
+					add_trait(begins_digit);
+					if (*cp == U'0')
+						add_trait(begins_zero);
+				}
 				else if (is_match(*cp, U'+', U'-'))
 					add_trait(begins_sign);
 				else
@@ -2601,8 +2607,12 @@ TOML_IMPL_NAMESPACE_START
 				return_if_error({});
 
 				// force further scanning if this could have been a date-time with a space instead of a T
-				if (char_count == 10u && traits == (bdigit_msk | has_minus) && chars[4] == U'-' && chars[7] == U'-'
-					&& !is_eof() && *cp == U' ')
+				if (char_count == 10u									 //
+					&& (traits | begins_zero) == (bzero_msk | has_minus) //
+					&& chars[4] == U'-'									 //
+					&& chars[7] == U'-'									 //
+					&& !is_eof()										 //
+					&& *cp == U' ')
 				{
 					const auto pre_advance_count = advance_count;
 					const auto pre_scan_traits	 = traits;
@@ -2646,7 +2656,7 @@ TOML_IMPL_NAMESPACE_START
 				// the only valid value type is an integer.
 				if (char_count == 1u)
 				{
-					if (has_any(begins_zero | begins_digit))
+					if (has_any(begins_digit))
 					{
 						val.reset(new value{ static_cast<int64_t>(chars[0] - U'0') });
 						advance(); // skip the digit
@@ -2692,7 +2702,7 @@ TOML_IMPL_NAMESPACE_START
 					val.reset(new value{ i });
 					val->ref_cast<int64_t>().flags(flags);
 				}
-				else if (has_any(has_e) || (has_any(begins_zero | begins_digit) && chars[1] == U'.'))
+				else if (has_any(has_e) || (has_any(begins_digit) && chars[1] == U'.'))
 					val.reset(new value{ parse_float() });
 				else if (has_any(begins_sign))
 				{

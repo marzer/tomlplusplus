@@ -152,6 +152,11 @@ TEST_CASE("parsing - integers (hex, bin, oct)")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 0o1000000000000000000000"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 0b1000000000000000000000000000000000000000000000000000000000000000"sv);
 
+	// missing values after base prefix
+	parsing_should_fail(FILE_LINE_ARGS, "val = 0x "sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 0o "sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 0b "sv);
+
 	// value tests
 	parse_expected_value(FILE_LINE_ARGS, "0xDEADBEEF"sv, 0xDEADBEEF);
 	parse_expected_value(FILE_LINE_ARGS, "0xdeadbeef"sv, 0xDEADBEEF);
