@@ -1,15 +1,15 @@
 ---
 name: Bug report
-about: Found a bug? Help me squash it.
+about: Regular ol' bugs.
 title: ''
-labels: bug
+labels: [ "bug" ]
 assignees: marzer
 
 ---
 
 <!--
     Replace the HTML comments below with the requested information.
-    Please DO NOT delete this template and roll your own!
+    Please don't delete this template and roll your own!
 
     Thanks for contributing!
 -->
@@ -20,7 +20,7 @@ assignees: marzer
 **toml++ version and/or commit hash:**  
 <!--
     If you're using the single-header version of the library, the version number is right at the top of the file.
-    Otherwise you can find it by opening toml++/toml_version.h; it'll be represented by three defines -
+    Otherwise you can find it by opening toml++/impl/version.h; it'll be represented by three defines -
     TOML_LIB_MAJOR, TOML_LIB_MINOR and TOML_LIB_PATCH.
     
     If you're not using any particular release and are instead just living large at HEAD of master, the commit hash
@@ -53,7 +53,7 @@ assignees: marzer
 **Library configuration overrides:**  
 <!--
     If you've explicitly set any of the library configuration macros,
-    list them here (e.g. TOML_EXCEPTIONS=0, TOML_UNRELEASED_FEATURES=1, etc.)
+    list them here (e.g. TOML_EXCEPTIONS=0, TOML_ENABLE_UNRELEASED_FEATURES=1, etc.)
 -->
 
 
