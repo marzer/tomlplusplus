@@ -255,4 +255,9 @@ b = []
 			[a.b]
 		)"sv);
 	}
+
+	SECTION("github/issues/132") // https://github.com/marzer/tomlplusplus/issues/132
+	{
+		parsing_should_fail(FILE_LINE_ARGS, "#\r"sv);
+	}
 }

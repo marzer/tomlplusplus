@@ -36,7 +36,7 @@ code changes at callsites or in build systems are indicated with ⚠&#xFE0F;.
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
 - fixed strong exception guarantee edge-cases in `toml::table` and `toml::array`
 - fixed some incorrect unicode scalar sequence transformations (#125)
-- fixed a number of spec conformance issues (#127, #128, #129, #130, #131) (@moorereason)
+- fixed a number of spec conformance issues (#127, #128, #129, #130, #131, #132) (@moorereason)
 
 #### Additions:
 - added `operator->` to `toml::value` for class types

@@ -11774,7 +11774,7 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error({}); // skip \r
 
 				if (is_eof())
-					return true; // eof after \r is 'fine'
+					set_error_and_return_default("expected \\n, saw EOF"sv);
 
 				if (*cp != U'\n')
 					set_error_and_return_default("expected \\n, saw '"sv, to_sv(*cp), "'"sv);
