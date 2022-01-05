@@ -20,7 +20,7 @@ using namespace std::string_view_literals;
 
 TOML_NAMESPACE_START
 {
-	void from_json(const json& j, value<std::string>& val)
+	static void from_json(const json& j, value<std::string>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "string");
@@ -54,7 +54,7 @@ TOML_NAMESPACE_START
 			});
 	}
 
-	void from_json(const json& j, value<int64_t>& val)
+	static void from_json(const json& j, value<int64_t>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "integer");
@@ -62,7 +62,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json& j, value<double>& val)
+	static void from_json(const json& j, value<double>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "float");
@@ -70,7 +70,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json& j, value<bool>& val)
+	static void from_json(const json& j, value<bool>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "bool");
@@ -78,7 +78,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json& j, value<date>& val)
+	static void from_json(const json& j, value<date>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "date-local");
@@ -86,7 +86,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json& j, value<time>& val)
+	static void from_json(const json& j, value<time>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "time-local");
@@ -94,7 +94,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json& j, value<date_time>& val)
+	static void from_json(const json& j, value<date_time>& val)
 	{
 		assert(is_tt_value(j));
 		assert(j["type"] == "datetime-local" || j["type"] == "datetime");
@@ -102,7 +102,7 @@ TOML_NAMESPACE_START
 		from_json_via_parse(j, val);
 	}
 
-	void from_json(const json&, array&);
+	static void from_json(const json&, array&);
 
 	template <typename T, typename Key>
 	static void insert_from_json(table & tbl, Key && key, const json& val)
@@ -120,7 +120,7 @@ TOML_NAMESPACE_START
 		arr.push_back(std::move(v));
 	}
 
-	void from_json(const json& j, table& tbl)
+	static void from_json(const json& j, table& tbl)
 	{
 		assert(j.is_object());
 		assert(!is_tt_value(j));
@@ -154,7 +154,7 @@ TOML_NAMESPACE_START
 		}
 	}
 
-	void from_json(const json& j, array& arr)
+	static void from_json(const json& j, array& arr)
 	{
 		assert(j.is_array());
 

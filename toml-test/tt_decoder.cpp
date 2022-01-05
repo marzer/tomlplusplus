@@ -10,7 +10,7 @@ using namespace std::string_view_literals;
 
 TOML_NAMESPACE_START
 {
-	void to_json(json & j, const value<std::string>& val)
+	static void to_json(json & j, const value<std::string>& val)
 	{
 		j["type"]  = "string";
 		j["value"] = *val;
@@ -29,52 +29,52 @@ TOML_NAMESPACE_START
 		j["value"] = ss.str();
 	}
 
-	void to_json(json & j, const value<int64_t>& val)
+	static void to_json(json & j, const value<int64_t>& val)
 	{
 		j["type"] = "integer";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json & j, const value<double>& val)
+	static void to_json(json & j, const value<double>& val)
 	{
 		j["type"] = "float";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json & j, const value<bool>& val)
+	static void to_json(json & j, const value<bool>& val)
 	{
 		j["type"] = "bool";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json & j, const value<date>& val)
+	static void to_json(json & j, const value<date>& val)
 	{
 		j["type"] = "date-local";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json & j, const value<time>& val)
+	static void to_json(json & j, const value<time>& val)
 	{
 		j["type"] = "time-local";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json & j, const value<date_time>& val)
+	static void to_json(json & j, const value<date_time>& val)
 	{
 		j["type"] = val->is_local() ? "datetime-local" : "datetime";
 		to_json_via_stream(j, val);
 	}
 
-	void to_json(json&, const array&);
+	static void to_json(json&, const array&);
 
-	void to_json(json & j, const table& tbl)
+	static void to_json(json & j, const table& tbl)
 	{
 		j = json::object();
 		for (auto& [k_, v_] : tbl)
 			v_.visit([&, k = &k_](auto& v) { j[std::string{ k->str() }] = v; });
 	}
 
-	void to_json(json & j, const array& arr)
+	static void to_json(json & j, const array& arr)
 	{
 		j = json::array();
 		for (auto& v_ : arr)

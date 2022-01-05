@@ -517,9 +517,6 @@
 //# ATTRIBUTES, UTILITY MACROS ETC
 //#====================================================================================================================
 
-
-
-
 #if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
 	// not supported by any version of GCC or Clang as of 26/11/2020
 	// not supported by any version of ICC on Linux as of 11/01/2021
@@ -747,6 +744,12 @@
 #endif
 
 #define TOML_UNUSED(...) static_cast<void>(__VA_ARGS__)
+
+#define TOML_DELETE_DEFAULTS(T)                                                                                        \
+	T(const T&) = delete;                                                                                              \
+	T(T&&)		= delete;                                                                                              \
+	T& operator=(const T&) = delete;                                                                                   \
+	T& operator=(T&&) = delete
 
 //======================================================================================================================
 // SFINAE

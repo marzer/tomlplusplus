@@ -754,6 +754,12 @@
 
 #define TOML_UNUSED(...) static_cast<void>(__VA_ARGS__)
 
+#define TOML_DELETE_DEFAULTS(T)                                                                                        \
+	T(const T&) = delete;                                                                                              \
+	T(T&&)		= delete;                                                                                              \
+	T& operator=(const T&) = delete;                                                                                   \
+	T& operator=(T&&) = delete
+
 // SFINAE
 #if defined(__cpp_concepts) && __cpp_concepts >= 201907
 	#define TOML_REQUIRES(...)	requires(__VA_ARGS__)
@@ -11393,10 +11399,7 @@ TOML_ANON_NAMESPACE_START
 #endif
 		}
 
-		error_builder(const error_builder&) = delete;
-		error_builder(error_builder&&)		= delete;
-		error_builder& operator=(const error_builder&) = delete;
-		error_builder& operator=(error_builder&&) = delete;
+		TOML_DELETE_DEFAULTS(error_builder);
 	};
 
 	struct parse_scope
@@ -11417,16 +11420,13 @@ TOML_ANON_NAMESPACE_START
 			storage_ = parent_;
 		}
 
-		parse_scope(const parse_scope&) = delete;
-		parse_scope(parse_scope&&)		= delete;
-		parse_scope& operator=(const parse_scope&) = delete;
-		parse_scope& operator=(parse_scope&&) = delete;
+		TOML_DELETE_DEFAULTS(parse_scope);
 	};
 #define push_parse_scope_2(scope, line) parse_scope ps_##line(current_scope, scope)
 #define push_parse_scope_1(scope, line) push_parse_scope_2(scope, line)
 #define push_parse_scope(scope)			push_parse_scope_1(scope, __LINE__)
 
-	struct parsed_key_buffer
+	struct parse_key_buffer
 	{
 		std::string buffer;
 		std::vector<std::pair<size_t, size_t>> segments;
@@ -11474,31 +11474,48 @@ TOML_ANON_NAMESPACE_START
 		}
 	};
 
-	struct parse_depth_counter
+	struct depth_counter_scope
 	{
 		size_t& depth_;
 
 		TOML_NODISCARD_CTOR
-		explicit parse_depth_counter(size_t& depth) noexcept : depth_{ depth }
+		explicit depth_counter_scope(size_t& depth) noexcept //
+			: depth_{ depth }
 		{
 			depth_++;
 		}
 
-		~parse_depth_counter() noexcept
+		~depth_counter_scope() noexcept
 		{
 			depth_--;
 		}
 
-		parse_depth_counter(const parse_depth_counter&) = delete;
-		parse_depth_counter(parse_depth_counter&&)		= delete;
-		parse_depth_counter& operator=(const parse_depth_counter&) = delete;
-		parse_depth_counter& operator=(parse_depth_counter&&) = delete;
+		TOML_DELETE_DEFAULTS(depth_counter_scope);
 	};
 
 	struct parsed_string
 	{
 		std::string_view value;
 		bool was_multi_line;
+	};
+
+	struct table_vector_scope
+	{
+		std::vector<table*>& tables;
+
+		TOML_NODISCARD_CTOR
+		explicit table_vector_scope(std::vector<table*>& tables_, table& tbl) //
+			: tables{ tables_ }
+		{
+			tables.push_back(&tbl);
+		}
+
+		~table_vector_scope() noexcept
+		{
+			tables.pop_back();
+		}
+
+		TOML_DELETE_DEFAULTS(table_vector_scope);
 	};
 }
 TOML_ANON_NAMESPACE_END;
@@ -11623,8 +11640,9 @@ TOML_IMPL_NAMESPACE_START
 		const utf8_codepoint* cp = {};
 		std::vector<table*> implicit_tables;
 		std::vector<table*> dotted_key_tables;
+		std::vector<table*> open_inline_tables;
 		std::vector<array*> table_arrays;
-		parsed_key_buffer key_buffer;
+		parse_key_buffer key_buffer;
 		std::string string_buffer;
 		std::string recording_buffer; // for diagnostics
 		bool recording = false, recording_whitespace = true;
@@ -11648,10 +11666,7 @@ TOML_IMPL_NAMESPACE_START
 		void set_error_at(source_position pos, const T&... reason) const
 		{
 			static_assert(sizeof...(T) > 0);
-#if !TOML_EXCEPTIONS
-			if (err)
-				return;
-#endif
+			return_if_error();
 
 			error_builder builder{ current_scope };
 			(builder.append(reason), ...);
@@ -13062,8 +13077,8 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(!is_value_terminator(*cp));
 			push_parse_scope("value"sv);
 
-			const parse_depth_counter depth_counter{ nested_values };
-			if (nested_values > max_nested_values)
+			const depth_counter_scope depth_counter{ nested_values };
+			if TOML_UNLIKELY(nested_values > max_nested_values)
 				set_error_and_return_default("exceeded maximum nested value depth of "sv,
 											 static_cast<uint64_t>(max_nested_values),
 											 " (TOML_MAX_NESTED_VALUES)"sv);
@@ -13708,7 +13723,15 @@ TOML_IMPL_NAMESPACE_START
 					node& p = pit->second;
 
 					if (auto tbl = p.as_table())
+					{
+						// adding to closed inline tables is illegal
+						if (tbl->is_inline() && !impl::find(open_inline_tables.begin(), open_inline_tables.end(), tbl))
+							set_error_and_return_default("cannot insert '"sv,
+														 to_sv(recording_buffer),
+														 "' into existing inline table"sv);
+
 						parent = tbl;
+					}
 					else if (auto arr = p.as_array(); arr && impl::find(table_arrays.begin(), table_arrays.end(), arr))
 					{
 						// table arrays are a special case;
@@ -13873,7 +13896,9 @@ TOML_IMPL_NAMESPACE_START
 					if (pit != tbl->end() && pit->first == segment)
 					{
 						table* p = pit->second.as_table();
-						if (!p
+
+						// redefinition
+						if TOML_UNLIKELY(!p
 							|| !(impl::find(dotted_key_tables.begin(), dotted_key_tables.end(), p)
 								 || impl::find(implicit_tables.begin(), implicit_tables.end(), p)))
 						{
@@ -14132,6 +14157,8 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr tbl_ptr{ new table{} };
 		table& tbl = tbl_ptr->ref_cast<table>();
 		tbl.is_inline(true);
+		table_vector_scope table_scope{ open_inline_tables, tbl };
+
 		enum TOML_CLOSED_ENUM parse_elem : int
 		{
 			none,
@@ -14139,7 +14166,6 @@ TOML_IMPL_NAMESPACE_START
 			kvp
 		};
 		parse_elem prev = none;
-
 		while (!is_error())
 		{
 			if constexpr (TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
@@ -15599,6 +15625,7 @@ TOML_POP_WARNINGS;
 #undef TOML_CONST_GETTER
 #undef TOML_CONST_INLINE_GETTER
 #undef TOML_CONSTRAINED_TEMPLATE
+#undef TOML_DELETE_DEFAULTS
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS

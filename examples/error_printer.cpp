@@ -30,6 +30,7 @@ namespace
 		"val = {a='b',"sv,
 		"val = {a='b',\n c='d'}"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		"val = {?='b'}"sv,
+		"foo = {} \n [foo.bar]"sv,
 
 		"########## tables"sv,
 		"[]"sv,
