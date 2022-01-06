@@ -136,6 +136,9 @@
     <ClInclude Include="include\toml++\impl\key.h">
       <Filter>include\impl</Filter>
     </ClInclude>
+    <ClInclude Include="include\toml++\impl\at_path.h">
+      <Filter>include\impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />
@@ -219,6 +222,9 @@
     </None>
     <None Include=".github\ISSUE_TEMPLATE\spec_bug_report.md">
       <Filter>.github</Filter>
+    </None>
+    <None Include="include\toml++\impl\at_path.inl">
+      <Filter>include\impl</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

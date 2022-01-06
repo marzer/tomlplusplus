@@ -1,4 +1,5 @@
 test_sources = [
+	'at_path.cpp',
 	'conformance_burntsushi_invalid.cpp',
 	'conformance_burntsushi_valid.cpp',
 	'conformance_iarna_invalid.cpp',

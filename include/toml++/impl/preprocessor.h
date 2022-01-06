@@ -358,7 +358,6 @@
 #elif TOML_CPP_VERSION < 201703L
 	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
 #endif
-#undef TOML_CPP_VERSION
 
 //#====================================================================================================================
 //# USER CONFIGURATION
@@ -621,18 +620,34 @@
 	#define TOML_HAS_ATTR(...)	0
 #endif
 
-#if !defined(TOML_LIKELY) && TOML_HAS_ATTR(likely) >= 201803
-	#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
+#if TOML_HAS_ATTR(likely) >= 201803
+	#ifndef TOML_LIKELY
+		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
+	#endif
+	#ifndef TOML_LIKELY_CASE
+		#define TOML_LIKELY_CASE	[[likely]]
+	#endif
 #endif
 #ifndef TOML_LIKELY
 	#define TOML_LIKELY(...)	(__VA_ARGS__)
 #endif
+#ifndef TOML_LIKELY_CASE
+	#define TOML_LIKELY_CASE
+#endif
 
-#if !defined(TOML_UNLIKELY) && TOML_HAS_ATTR(unlikely) >= 201803
-	#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
+#if TOML_HAS_ATTR(unlikely) >= 201803
+	#ifndef TOML_UNLIKELY
+		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
+	#endif
+	#ifndef TOML_UNLIKELY_CASE
+		#define TOML_UNLIKELY_CASE	[[unlikely]]
+	#endif
 #endif
 #ifndef TOML_UNLIKELY
 	#define TOML_UNLIKELY(...)	(__VA_ARGS__)
+#endif
+#ifndef TOML_UNLIKELY_CASE
+	#define TOML_UNLIKELY_CASE
 #endif
 
 #if TOML_HAS_ATTR(nodiscard)

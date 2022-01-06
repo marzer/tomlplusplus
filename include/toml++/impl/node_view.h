@@ -68,7 +68,7 @@ TOML_NAMESPACE_START
 
 	  private:
 		template <typename T>
-		friend class TOML_NAMESPACE::node_view;
+		friend class node_view;
 
 		mutable viewed_type* node_ = nullptr;
 
@@ -587,6 +587,23 @@ TOML_NAMESPACE_START
 		/// \name Equality
 		/// @{
 
+	  public:
+		/// \brief	Returns true if the two views refer to nodes of the same type and value.
+		template <typename T>
+		TOML_PURE_GETTER
+		friend bool operator==(const node_view& lhs, const node_view<T>& rhs) noexcept
+		{
+			return impl::node_deep_equality(lhs.node_, rhs.node_);
+		}
+
+		/// \brief	Returns true if the two views do not refer to nodes of the same type and value.
+		template <typename T>
+		TOML_PURE_GETTER
+		friend bool operator!=(const node_view& lhs, const node_view<T>& rhs) noexcept
+		{
+			return !impl::node_deep_equality(lhs.node_, rhs.node_);
+		}
+
 		/// \brief	Returns true if the viewed node is a table with the same contents as RHS.
 		TOML_NODISCARD
 		friend bool operator==(const node_view& lhs, const table& rhs) noexcept
@@ -686,7 +703,16 @@ TOML_NAMESPACE_START
 		{
 			if (auto tbl = this->as_table())
 				return node_view{ tbl->get(key) };
-			return node_view{ nullptr };
+			return {};
+		}
+
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		node_view at_path(std::string_view path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
 		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -704,7 +730,18 @@ TOML_NAMESPACE_START
 		{
 			if (auto tbl = this->as_table())
 				return node_view{ tbl->get(key) };
-			return node_view{ nullptr };
+			return {};
+		}
+
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		node_view at_path(std::wstring_view path) const
+		{
+			return node_ ? node_->at_path(path) : node_view{};
 		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -720,7 +757,7 @@ TOML_NAMESPACE_START
 		{
 			if (auto arr = this->as_array())
 				return node_view{ arr->get(index) };
-			return node_view{ nullptr };
+			return {};
 		}
 
 		/// @}
@@ -767,12 +804,12 @@ TOML_NAMESPACE_START
 {
 	inline node::operator node_view<node>() noexcept
 	{
-		return node_view<node>(this);
+		return node_view<node>{ this };
 	}
 
 	inline node::operator node_view<const node>() const noexcept
 	{
-		return node_view<const node>(this);
+		return node_view<const node>{ this };
 	}
 }
 TOML_NAMESPACE_END;

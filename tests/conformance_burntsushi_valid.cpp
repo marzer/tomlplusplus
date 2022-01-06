@@ -446,6 +446,11 @@ notunicode3 = "This string does not have a unicode \\u0075 escape."
 notunicode4 = "This string does not have a unicode \\\u0075 escape."
 delete = "This string has a \u007F delete control code."
 unitseparator = "This string has a \u001F unit separator control code.")"sv;
+	static constexpr auto string_multiline_escaped_crlf =
+		"# The following line should be an unescaped backslash followed by a Windows\r\n"
+		"# newline sequence (\"\\r\\n\")\r\n"
+		"0=\"\"\"\\\r\n"
+		"\"\"\""sv;
 	static constexpr auto string_multiline_quotes =
 		R"(# Make sure that quotes inside multiline strings are allowed, including right
 # after the opening '''/""" and before the closing '''/"""
@@ -2141,7 +2146,7 @@ another line)"sv },
 								   { R"(backspace)"sv, "This string has a \x08 backspace character."sv },
 								   { R"(carriage)"sv, "This string has a \r carriage return character."sv },
 								   { R"(delete)"sv, "This string has a \x7F delete control code."sv },
-								   { R"(formfeed)"sv, "This string has a \x0C form feed character."sv },
+								   { R"(formfeed)"sv, "This string has a \f form feed character."sv },
 								   { R"(newline)"sv, R"(This string has a 
  new line character.)"sv },
 								   { R"(notunicode1)"sv, R"(This string does not have a unicode \u escape.)"sv },
@@ -2151,6 +2156,16 @@ another line)"sv },
 								   { R"(quote)"sv, R"(This string has a " quote character.)"sv },
 								   { R"(tab)"sv, R"(This string has a 	 tab character.)"sv },
 								   { R"(unitseparator)"sv, "This string has a \x1F unit separator control code."sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   string_multiline_escaped_crlf,
+						   [](toml::table&& tbl) // string-multiline-escaped-crlf
+						   {
+							   const auto expected = toml::table{
+								   { R"(0)"sv, ""sv },
 							   };
 							   REQUIRE(tbl == expected);
 						   });

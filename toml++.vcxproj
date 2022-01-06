@@ -37,6 +37,7 @@
   <ItemGroup>
     <ClInclude Include="include\toml++\impl\array.h" />
     <ClInclude Include="include\toml++\impl\array.inl" />
+    <ClInclude Include="include\toml++\impl\at_path.h" />
     <ClInclude Include="include\toml++\impl\date_time.h" />
     <ClInclude Include="include\toml++\impl\key.h" />
     <ClInclude Include="include\toml++\impl\simd.h" />
@@ -96,6 +97,7 @@
     <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="include\toml++\impl\at_path.inl" />
     <None Include="include\toml++\impl\unicode.inl" />
     <None Include="include\toml++\impl\node_view_extern.inl" />
     <None Include="include\toml++\impl\yaml_formatter.inl" />

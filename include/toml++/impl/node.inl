@@ -13,6 +13,10 @@
 
 #include "node.h"
 #include "node_view.h"
+#include "at_path.h"
+#include "table.h"
+#include "array.h"
+#include "value.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START
@@ -51,7 +55,62 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	node::~node() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> node::at_path(std::string_view path) noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> node::at_path(std::string_view path) const noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> node::at_path(std::wstring_view path)
+	{
+		return toml::at_path(*this, path);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> node::at_path(std::wstring_view path) const
+	{
+		return toml::at_path(*this, path);
+	}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 TOML_NAMESPACE_END;
+
+TOML_IMPL_NAMESPACE_START
+{
+	TOML_EXTERNAL_LINKAGE
+	bool node_deep_equality(const node* lhs, const node* rhs) noexcept
+	{
+		// both same or both null
+		if (lhs == rhs)
+			return true;
+
+		// lhs null != rhs null or different types
+		if ((!lhs != !rhs) || lhs->type() != rhs->type())
+			return false;
+
+		bool same;
+		lhs->visit(
+			[=, &same](auto& l) noexcept
+			{
+				using concrete_type = remove_cvref<decltype(l)>;
+
+				same = (l == *(rhs->as<concrete_type>()));
+			});
+
+		return same;
+	}
+}
+TOML_IMPL_NAMESPACE_END;
 
 #include "header_end.h"

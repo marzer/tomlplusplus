@@ -1466,7 +1466,7 @@ Violets are blue)"sv },
 						   [](toml::table&& tbl) // spec-string-escape-4
 						   {
 							   const auto expected = toml::table{
-								   { R"(a)"sv, "\x0C"sv },
+								   { R"(a)"sv, "\f"sv },
 							   };
 							   REQUIRE(tbl == expected);
 						   });

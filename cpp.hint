@@ -33,3 +33,5 @@
 #define TOML_RETURNS_BY_THROWING
 #define TOML_TRIVIAL_ABI
 #define TOML_UNLIKELY(...)						(__VA_ARGS__)
+#define TOML_LIKELY_CASE
+#define TOML_UNLIKELY_CASE

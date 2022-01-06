@@ -296,12 +296,14 @@ TOML_NAMESPACE_START
 		/// \name Iterators
 		/// @{
 
+		/// \brief Returns an iterator to the first character in the key's backing string.
 		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
 			return key_.data();
 		}
 
+		/// \brief Returns an iterator to one-past-the-last character in the key's backing string.
 		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
@@ -313,12 +315,14 @@ TOML_NAMESPACE_START
 		/// \name Iterators (ADL)
 		/// @{
 
+		/// \brief Returns an iterator to the first character in a key's backing string.
 		TOML_PURE_INLINE_GETTER
 		friend const_iterator begin(const key& k) noexcept
 		{
 			return k.begin();
 		}
 
+		/// \brief Returns an iterator to one-past-the-last character in a key's backing string.
 		TOML_PURE_INLINE_GETTER
 		friend const_iterator end(const key& k) noexcept
 		{

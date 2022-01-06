@@ -495,7 +495,7 @@ TOML_ANON_NAMESPACE_START
 	class TOML_EMPTY_BASES utf8_buffered_reader
 	{
 	  public:
-		static constexpr size_t max_history_length = 72;
+		static constexpr size_t max_history_length = 128;
 
 	  private:
 		static constexpr size_t history_buffer_size = max_history_length - 1; //'head' is stored in the reader
@@ -619,40 +619,40 @@ TOML_ANON_NAMESPACE_START
 	template <>
 	struct parse_integer_traits<2>
 	{
-		static constexpr auto scope_qualifier  = "binary integer"sv;
-		static constexpr auto is_digit		   = impl::is_binary_digit;
-		static constexpr auto is_signed		   = false;
-		static constexpr auto buffer_length	   = 63;
-		static constexpr auto prefix_codepoint = U'b';
-		static constexpr auto prefix		   = "b"sv;
+		static constexpr auto scope_qualifier	= "binary integer"sv;
+		static constexpr auto is_digit			= impl::is_binary_digit;
+		static constexpr auto is_signed			= false;
+		static constexpr auto min_buffer_length = 63;
+		static constexpr auto prefix_codepoint	= U'b';
+		static constexpr auto prefix			= "b"sv;
 	};
 	template <>
 	struct parse_integer_traits<8>
 	{
-		static constexpr auto scope_qualifier  = "octal integer"sv;
-		static constexpr auto is_digit		   = impl::is_octal_digit;
-		static constexpr auto is_signed		   = false;
-		static constexpr auto buffer_length	   = 21; // strlen("777777777777777777777")
-		static constexpr auto prefix_codepoint = U'o';
-		static constexpr auto prefix		   = "o"sv;
+		static constexpr auto scope_qualifier	= "octal integer"sv;
+		static constexpr auto is_digit			= impl::is_octal_digit;
+		static constexpr auto is_signed			= false;
+		static constexpr auto min_buffer_length = 21; // strlen("777777777777777777777")
+		static constexpr auto prefix_codepoint	= U'o';
+		static constexpr auto prefix			= "o"sv;
 	};
 	template <>
 	struct parse_integer_traits<10>
 	{
-		static constexpr auto scope_qualifier = "decimal integer"sv;
-		static constexpr auto is_digit		  = impl::is_decimal_digit;
-		static constexpr auto is_signed		  = true;
-		static constexpr auto buffer_length	  = 19; // strlen("9223372036854775807")
+		static constexpr auto scope_qualifier	= "decimal integer"sv;
+		static constexpr auto is_digit			= impl::is_decimal_digit;
+		static constexpr auto is_signed			= true;
+		static constexpr auto min_buffer_length = 19; // strlen("9223372036854775807")
 	};
 	template <>
 	struct parse_integer_traits<16>
 	{
-		static constexpr auto scope_qualifier  = "hexadecimal integer"sv;
-		static constexpr auto is_digit		   = impl::is_hexadecimal_digit;
-		static constexpr auto is_signed		   = false;
-		static constexpr auto buffer_length	   = 16; // strlen("7FFFFFFFFFFFFFFF")
-		static constexpr auto prefix_codepoint = U'x';
-		static constexpr auto prefix		   = "x"sv;
+		static constexpr auto scope_qualifier	= "hexadecimal integer"sv;
+		static constexpr auto is_digit			= impl::is_hexadecimal_digit;
+		static constexpr auto is_signed			= false;
+		static constexpr auto min_buffer_length = 16; // strlen("7FFFFFFFFFFFFFFF")
+		static constexpr auto prefix_codepoint	= U'x';
+		static constexpr auto prefix			= "x"sv;
 	};
 
 	TOML_PURE_GETTER
@@ -1157,11 +1157,11 @@ TOML_IMPL_NAMESPACE_START
 			{
 				advance_and_return_if_error({}); // skip \r
 
-				if (is_eof())
-					set_error_and_return_default("expected \\n, saw EOF"sv);
+				if TOML_UNLIKELY(is_eof())
+					set_error_and_return_default("expected \\n after \\r, saw EOF"sv);
 
-				if (*cp != U'\n')
-					set_error_and_return_default("expected \\n, saw '"sv, to_sv(*cp), "'"sv);
+				if TOML_UNLIKELY(*cp != U'\n')
+					set_error_and_return_default("expected \\n after \\r, saw '"sv, to_sv(*cp), "'"sv);
 			}
 			else if (*cp != U'\n')
 				return false;
@@ -1204,18 +1204,19 @@ TOML_IMPL_NAMESPACE_START
 					return true;
 				return_if_error({});
 
-				if constexpr (TOML_LANG_AT_LEAST(1, 0, 0))
-				{
-					// toml/issues/567 (disallow non-TAB control characters in comments)
-					if (is_nontab_control_character(*cp))
-						set_error_and_return_default(
-							"control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+#if TOML_LANG_AT_LEAST(1, 0, 0)
 
-					// toml/pull/720 (disallow surrogates in comments)
-					else if (is_unicode_surrogate(*cp))
-						set_error_and_return_default(
-							"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
-				}
+				// toml/issues/567 (disallow non-TAB control characters in comments)
+				if TOML_UNLIKELY(is_nontab_control_character(*cp))
+					set_error_and_return_default(
+						"control characters other than TAB (U+0009) are explicitly prohibited in comments"sv);
+
+				// toml/pull/720 (disallow surrogates in comments)
+				else if TOML_UNLIKELY(is_unicode_surrogate(*cp))
+					set_error_and_return_default(
+						"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
+#endif
+
 				advance_and_return_if_error({});
 			}
 
@@ -1312,9 +1313,11 @@ TOML_IMPL_NAMESPACE_START
 					if (multi_line && is_whitespace(*cp))
 					{
 						consume_leading_whitespace();
-						if (!consume_line_break())
+
+						if TOML_UNLIKELY(!consume_line_break())
 							set_error_and_return_default(
 								"line-ending backslashes must be the last non-whitespace character on the line"sv);
+
 						skipping_whitespace = true;
 						return_if_error({});
 						continue;
@@ -1354,17 +1357,19 @@ TOML_IMPL_NAMESPACE_START
 							while (place_value)
 							{
 								set_error_and_return_if_eof({});
-								if (!is_hexadecimal_digit(*cp))
+
+								if TOML_UNLIKELY(!is_hexadecimal_digit(*cp))
 									set_error_and_return_default("expected hex digit, saw '"sv, to_sv(*cp), "'"sv);
+
 								sequence_value += place_value * hex_to_dec(*cp);
 								place_value /= 16u;
 								advance_and_return_if_error({});
 							}
 
-							if (is_unicode_surrogate(sequence_value))
+							if TOML_UNLIKELY(is_unicode_surrogate(sequence_value))
 								set_error_and_return_default(
 									"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
-							else if (sequence_value > 0x10FFFFu)
+							else if TOML_UNLIKELY(sequence_value > 0x10FFFFu)
 								set_error_and_return_default("values greater than U+10FFFF are invalid"sv);
 
 							if (sequence_value < 0x80)
@@ -1392,7 +1397,8 @@ TOML_IMPL_NAMESPACE_START
 							break;
 						}
 
-						// ???
+							// ???
+							TOML_UNLIKELY_CASE
 						default: set_error_and_return_default("unknown escape sequence '\\"sv, to_sv(*cp), "'"sv);
 					}
 
@@ -1475,17 +1481,17 @@ TOML_IMPL_NAMESPACE_START
 					}
 
 					// handle control characters
-					if (is_nontab_control_character(*cp))
+					if TOML_UNLIKELY(is_nontab_control_character(*cp))
 						set_error_and_return_default(
 							"unescaped control characters other than TAB (U+0009) are explicitly prohibited"sv);
 
-					// handle surrogates in strings (1.0.0 and later)
-					if constexpr (TOML_LANG_AT_LEAST(1, 0, 0))
-					{
-						if (is_unicode_surrogate(*cp))
-							set_error_and_return_default(
-								"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv);
-					}
+#if TOML_LANG_AT_LEAST(1, 0, 0)
+
+					// handle surrogates in strings
+					if TOML_UNLIKELY(is_unicode_surrogate(*cp))
+						set_error_and_return_default(
+							"unescaped unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited"sv);
+#endif
 
 					if (multi_line)
 					{
@@ -1590,17 +1596,16 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				// handle control characters
-				if (is_nontab_control_character(*cp))
+				if TOML_UNLIKELY(is_nontab_control_character(*cp))
 					set_error_and_return_default(
 						"control characters other than TAB (U+0009) are explicitly prohibited"sv);
 
-				// handle surrogates in strings (1.0.0 and later)
-				if constexpr (TOML_LANG_AT_LEAST(1, 0, 0))
-				{
-					if (is_unicode_surrogate(*cp))
-						set_error_and_return_default(
-							"unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
-				}
+#if TOML_LANG_AT_LEAST(1, 0, 0)
+
+				// handle surrogates in strings
+				if TOML_UNLIKELY(is_unicode_surrogate(*cp))
+					set_error_and_return_default("unicode surrogates (U+D800 - U+DFFF) are explicitly prohibited"sv);
+#endif
 
 				str.append(cp->bytes, cp->count);
 				advance_and_return_if_error({});
@@ -1746,13 +1751,19 @@ TOML_IMPL_NAMESPACE_START
 				advance_and_return_if_error_or_eof({});
 
 			// consume value chars
-			char chars[64];
+			char chars[utf8_buffered_reader::max_history_length];
 			size_t length			   = {};
 			const utf8_codepoint* prev = {};
 			bool seen_decimal = false, seen_exponent = false;
 			char first_integer_part = '\0';
 			while (!is_eof() && !is_value_terminator(*cp))
 			{
+				if TOML_UNLIKELY(length == sizeof(chars))
+					set_error_and_return_default("exceeds maximum length of "sv,
+												 static_cast<uint64_t>(sizeof(chars)),
+												 " characters"sv,
+												 (seen_exponent ? ""sv : " (consider using exponent notation)"sv));
+
 				if (*cp == U'_')
 				{
 					if (!prev || !is_decimal_digit(*prev))
@@ -1819,11 +1830,6 @@ TOML_IMPL_NAMESPACE_START
 				else
 					set_error_and_return_default("expected decimal digit, saw '"sv, to_sv(*cp), "'"sv);
 
-				if (length == sizeof(chars))
-					set_error_and_return_default("exceeds maximum length of "sv,
-												 static_cast<uint64_t>(sizeof(chars)),
-												 " characters"sv);
-
 				chars[length++] = static_cast<char>(cp->bytes[0]);
 				prev			= cp;
 				advance_and_return_if_error({});
@@ -1851,6 +1857,7 @@ TOML_IMPL_NAMESPACE_START
 				auto fc_result = std::from_chars(chars, chars + length, result);
 				switch (fc_result.ec)
 				{
+					TOML_LIKELY_CASE
 					case std::errc{}: // ok
 						return result * sign;
 
@@ -2103,7 +2110,9 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			// consume value chars
-			char chars[traits::buffer_length];
+			static constexpr size_t underscore_padding = 32;
+			static constexpr size_t buffer_length	   = traits::min_buffer_length + underscore_padding;
+			char chars[buffer_length];
 			size_t length			   = {};
 			const utf8_codepoint* prev = {};
 			while (!is_eof() && !is_value_terminator(*cp))
@@ -2609,7 +2618,7 @@ TOML_IMPL_NAMESPACE_START
 						advance_count++;
 						eof_while_scanning = is_eof();
 					}
-					while (advance_count < utf8_buffered_reader::max_history_length && !is_eof()
+					while (advance_count < (utf8_buffered_reader::max_history_length - 1u) && !is_eof()
 						   && !is_value_terminator(*cp));
 				};
 				scan();
@@ -2658,8 +2667,6 @@ TOML_IMPL_NAMESPACE_START
 
 				// set the reader back to where we started
 				go_back(advance_count);
-				if (char_count < utf8_buffered_reader::max_history_length - 1u)
-					chars[char_count] = U'\0';
 
 				// if after scanning ahead we still only have one value character,
 				// the only valid value type is an integer.
@@ -2765,7 +2772,23 @@ TOML_IMPL_NAMESPACE_START
 					case bzero_msk: [[fallthrough]];
 					case bdigit_msk: [[fallthrough]];
 					case begins_sign | has_digits | has_minus: [[fallthrough]];
-					case begins_sign | has_digits | has_plus: val.reset(new value{ parse_integer<10>() }); break;
+					case begins_sign | has_digits | has_plus:
+					{
+						// if the value was so long we exhausted the history buffer it's reasonable to assume
+						// there was more and the value's actual type is impossible to identify without making the
+						// buffer bigger (since it could have actually been a float), so emit an error.
+						//
+						// (this will likely only come up during fuzzing and similar scenarios)
+						static constexpr size_t max_numeric_value_length =
+							utf8_buffered_reader::max_history_length - 2u;
+						if TOML_UNLIKELY(!eof_while_scanning && advance_count > max_numeric_value_length)
+							set_error_and_return_default("numeric value too long to identify type - cannot exceed "sv,
+														 max_numeric_value_length,
+														 " characters"sv);
+
+						val.reset(new value{ parse_integer<10>() });
+						break;
+					}
 
 					// hexadecimal integers
 					// 0x10
@@ -2922,17 +2945,6 @@ TOML_IMPL_NAMESPACE_START
 				set_error_at(begin_pos, "could not determine value type"sv);
 				return_after_error({});
 			}
-
-#if !TOML_LANG_AT_LEAST(1, 0, 0) // toml/issues/665 (heterogeneous arrays)
-			{
-				if (auto arr = val->as_array(); arr && !arr->is_homogeneous())
-				{
-					delete arr;
-					set_error_at(begin_pos, "arrays cannot contain values of different types before TOML 1.0.0"sv);
-					return_after_error({});
-				}
-			}
-#endif
 
 			val->source_ = { begin_pos, current_position(1), reader.source_path() };
 			return val;

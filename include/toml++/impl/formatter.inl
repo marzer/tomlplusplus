@@ -140,7 +140,7 @@ TOML_IMPL_NAMESPACE_START
 					case '\'': traits |= formatted_string_traits::single_quotes; break;
 					default:
 					{
-						if (is_control_character(c))
+						if TOML_UNLIKELY(is_control_character(c))
 							traits |= formatted_string_traits::control_chars;
 
 						if (!is_ascii_bare_key_character(static_cast<char32_t>(c)))
@@ -191,7 +191,7 @@ TOML_IMPL_NAMESPACE_START
 					case U'\'': traits |= formatted_string_traits::single_quotes; break;
 					default:
 					{
-						if (is_control_character(decoder.codepoint)
+						if TOML_UNLIKELY(is_control_character(decoder.codepoint)
 							|| is_non_ascii_vertical_whitespace(decoder.codepoint))
 							traits |= formatted_string_traits::control_chars;
 

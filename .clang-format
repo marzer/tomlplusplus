@@ -29,9 +29,11 @@ AttributeMacros:
   - TOML_CLOSED_FLAGS_ENUM
   - TOML_EMPTY_BASES
   - TOML_FLAGS_ENUM
+  - TOML_LIKELY_CASE
   - TOML_OPEN_ENUM
   - TOML_OPEN_FLAGS_ENUM
   - TOML_TRIVIAL_ABI
+  - TOML_UNLIKELY_CASE
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:

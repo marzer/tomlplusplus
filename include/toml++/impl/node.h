@@ -655,14 +655,6 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		auto value_or(T&& default_value) const noexcept(impl::value_retrieval_is_nothrow<T>);
 
-		//# template <typename T>
-		//# TOML_NODISCARD
-		//# std::vector<T> select_exact() const noexcept;
-
-		//# template <typename T>
-		//# TOML_NODISCARD
-		//# std::vector<T> select() const noexcept;
-
 		/// \brief	Gets a raw reference to a node's underlying data.
 		///
 		/// \warning This function is dangerous if used carelessly and **WILL** break your code if the
@@ -968,9 +960,55 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		explicit operator node_view<const node>() const noexcept;
 
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		TOML_API
+		node_view<node> at_path(std::string_view path) noexcept;
+
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		TOML_API
+		node_view<const node> at_path(std::string_view path) const noexcept;
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		TOML_API
+		node_view<node> at_path(std::wstring_view path);
+
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		///
+		/// \see #toml::at_path(node&, std::string_view)
+		TOML_NODISCARD
+		TOML_API
+		node_view<const node> at_path(std::wstring_view path) const;
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 		/// @}
 	};
 }
 TOML_NAMESPACE_END;
+
+/// \cond
+TOML_IMPL_NAMESPACE_START
+{
+	TOML_PURE_GETTER
+	TOML_API
+	bool node_deep_equality(const node*, const node*) noexcept;
+}
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
 
 #include "header_end.h"

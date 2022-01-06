@@ -46,29 +46,34 @@ fruit = []
 	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
 	static constexpr auto bool_wrong_case_true	= R"(a = TRUE)"sv;
 
-	static constexpr auto control_bare_null		 = "bare-null = \"some value\" \x00"sv;
-	static constexpr auto control_comment_cr	 = "comment-cr = \"Carriage return in comment\" # \ra=1"sv;
-	static constexpr auto control_comment_del	 = "comment-del = \"0x7f\" # \x7F"sv;
-	static constexpr auto control_comment_lf	 = "comment-lf = \"ctrl-P\" # \x10"sv;
-	static constexpr auto control_comment_null	 = "comment-null = \"null\" # \x00"sv;
-	static constexpr auto control_comment_us	 = "comment-us = \"ctrl-_\" # \x1F"sv;
-	static constexpr auto control_multi_del		 = "multi-del = \"\"\"null\x7F\"\"\""sv;
-	static constexpr auto control_multi_lf		 = "multi-lf = \"\"\"null\x10\"\"\""sv;
-	static constexpr auto control_multi_null	 = "multi-null = \"\"\"null\x00\"\"\""sv;
-	static constexpr auto control_multi_us		 = "multi-us = \"\"\"null\x1F\"\"\""sv;
-	static constexpr auto control_rawmulti_del	 = "rawmulti-del = '''null\x7F'''"sv;
-	static constexpr auto control_rawmulti_lf	 = "rawmulti-lf = '''null\x10'''"sv;
-	static constexpr auto control_rawmulti_null	 = "rawmulti-null = '''null\x00'''"sv;
-	static constexpr auto control_rawmulti_us	 = "rawmulti-us = '''null\x1F'''"sv;
-	static constexpr auto control_rawstring_del	 = "rawstring-del = 'null\x7F'"sv;
-	static constexpr auto control_rawstring_lf	 = "rawstring-lf = 'null\x10'"sv;
-	static constexpr auto control_rawstring_null = "rawstring-null = 'null\x00'"sv;
-	static constexpr auto control_rawstring_us	 = "rawstring-us = 'null\x1F'"sv;
-	static constexpr auto control_string_bs		 = "string-bs = \"backspace\x08\""sv;
-	static constexpr auto control_string_del	 = "string-del = \"null\x7F\""sv;
-	static constexpr auto control_string_lf		 = "string-lf = \"null\x10\""sv;
-	static constexpr auto control_string_null	 = "string-null = \"null\x00\""sv;
-	static constexpr auto control_string_us		 = "string-us = \"null\x1F\""sv;
+	static constexpr auto control_bare_cr =
+		"# The following line contains a single carriage return control character\r\n"
+		"\r"sv;
+	static constexpr auto control_bare_formfeed		= "bare-formfeed = \f"sv;
+	static constexpr auto control_bare_null			= "bare-null = \"some value\" \x00"sv;
+	static constexpr auto control_bare_vertical_tab = "bare-vertical-tab = \v"sv;
+	static constexpr auto control_comment_cr		= "comment-cr = \"Carriage return in comment\" # \ra=1"sv;
+	static constexpr auto control_comment_del		= "comment-del = \"0x7f\" # \x7F"sv;
+	static constexpr auto control_comment_lf		= "comment-lf = \"ctrl-P\" # \x10"sv;
+	static constexpr auto control_comment_null		= "comment-null = \"null\" # \x00"sv;
+	static constexpr auto control_comment_us		= "comment-us = \"ctrl-_\" # \x1F"sv;
+	static constexpr auto control_multi_del			= "multi-del = \"\"\"null\x7F\"\"\""sv;
+	static constexpr auto control_multi_lf			= "multi-lf = \"\"\"null\x10\"\"\""sv;
+	static constexpr auto control_multi_null		= "multi-null = \"\"\"null\x00\"\"\""sv;
+	static constexpr auto control_multi_us			= "multi-us = \"\"\"null\x1F\"\"\""sv;
+	static constexpr auto control_rawmulti_del		= "rawmulti-del = '''null\x7F'''"sv;
+	static constexpr auto control_rawmulti_lf		= "rawmulti-lf = '''null\x10'''"sv;
+	static constexpr auto control_rawmulti_null		= "rawmulti-null = '''null\x00'''"sv;
+	static constexpr auto control_rawmulti_us		= "rawmulti-us = '''null\x1F'''"sv;
+	static constexpr auto control_rawstring_del		= "rawstring-del = 'null\x7F'"sv;
+	static constexpr auto control_rawstring_lf		= "rawstring-lf = 'null\x10'"sv;
+	static constexpr auto control_rawstring_null	= "rawstring-null = 'null\x00'"sv;
+	static constexpr auto control_rawstring_us		= "rawstring-us = 'null\x1F'"sv;
+	static constexpr auto control_string_bs			= "string-bs = \"backspace\x08\""sv;
+	static constexpr auto control_string_del		= "string-del = \"null\x7F\""sv;
+	static constexpr auto control_string_lf			= "string-lf = \"null\x10\""sv;
+	static constexpr auto control_string_null		= "string-null = \"null\x00\""sv;
+	static constexpr auto control_string_us			= "string-us = \"null\x1F\""sv;
 
 	static constexpr auto datetime_hour_over   = R"(# time-hour       = 2DIGIT  ; 00-23
 d = 2006-01-01T24:00:00-00:00)"sv;
@@ -169,6 +174,9 @@ trailing-us-exp2 = 1.2_e2)"sv;
 	static constexpr auto float_us_after_point		= R"(us-after-point = 1._2)"sv;
 	static constexpr auto float_us_before_point		= R"(us-before-point = 1_.2)"sv;
 
+	static constexpr auto inline_table_add			 = R"(a={}
+# Inline tables are immutable and can't be extended
+[a.b])"sv;
 	static constexpr auto inline_table_double_comma	 = R"(t = {x=3,,y=4})"sv;
 	static constexpr auto inline_table_duplicate_key = R"(# Duplicate keys within an inline table are invalid
 a={b=1, b=2})"sv;
@@ -206,6 +214,9 @@ abc = { abc = 123, })"sv;
 	static constexpr auto integer_double_sign_nex	  = R"(double-sign-nex = --99)"sv;
 	static constexpr auto integer_double_sign_plus	  = R"(double-sign-plus = ++99)"sv;
 	static constexpr auto integer_double_us			  = R"(double-us = 1__23)"sv;
+	static constexpr auto integer_incomplete_bin	  = R"(incomplete-bin = 0b)"sv;
+	static constexpr auto integer_incomplete_hex	  = R"(incomplete-hex = 0x)"sv;
+	static constexpr auto integer_incomplete_oct	  = R"(incomplete-oct = 0o)"sv;
 	static constexpr auto integer_invalid_bin		  = R"(invalid-bin = 0b0012)"sv;
 	static constexpr auto integer_invalid_hex		  = R"(invalid-hex = 0xaafz)"sv;
 	static constexpr auto integer_invalid_oct		  = R"(invalid-oct = 0o778)"sv;
@@ -436,7 +447,13 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true); // bool-wrong-case-true
 
+	parsing_should_fail(FILE_LINE_ARGS, control_bare_cr); // control-bare-cr
+
+	parsing_should_fail(FILE_LINE_ARGS, control_bare_formfeed); // control-bare-formfeed
+
 	parsing_should_fail(FILE_LINE_ARGS, control_bare_null); // control-bare-null
+
+	parsing_should_fail(FILE_LINE_ARGS, control_bare_vertical_tab); // control-bare-vertical-tab
 
 	parsing_should_fail(FILE_LINE_ARGS, control_comment_cr); // control-comment-cr
 
@@ -590,6 +607,8 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, float_us_before_point); // float-us-before-point
 
+	parsing_should_fail(FILE_LINE_ARGS, inline_table_add); // inline-table-add
+
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_double_comma); // inline-table-double-comma
 
 	parsing_should_fail(FILE_LINE_ARGS, inline_table_duplicate_key); // inline-table-duplicate-key
@@ -625,6 +644,12 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_plus); // integer-double-sign-plus
 
 	parsing_should_fail(FILE_LINE_ARGS, integer_double_us); // integer-double-us
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_bin); // integer-incomplete-bin
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_hex); // integer-incomplete-hex
+
+	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_oct); // integer-incomplete-oct
 
 	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_bin); // integer-invalid-bin
 

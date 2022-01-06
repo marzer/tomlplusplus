@@ -82,10 +82,14 @@ def make_string_literal(val, escape_all = False, escape_any = False):
 					buf.write(r'\"')
 				elif c_ord == 0x5C: # \
 					buf.write(r'\\')
-				elif c_ord == 0x0D: # \r
-					buf.write(r'\r')
 				elif c_ord == 0x0A: # \n
 					buf.write('\\n"\n\t\t"')
+				elif c_ord == 0x0B: # \v
+					buf.write(r'\v')
+				elif c_ord == 0x0C: # \f
+					buf.write(r'\f')
+				elif c_ord == 0x0D: # \r
+					buf.write(r'\r')
 				elif is_problematic_control_char(c_ord):
 					if c_ord <= 0xFF:
 						buf.write(rf'\x{c_ord:02X}')
@@ -105,10 +109,10 @@ def make_string_literal(val, escape_all = False, escape_any = False):
 
 def python_value_to_tomlpp(val):
 	if isinstance(val, str):
-		if re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
-			return str(float(val))
-		elif not val:
+		if not val:
 			return r'""sv'
+		elif re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
+			return str(float(val))
 		else:
 			return rf'{make_string_literal(val, escape_any = has_problematic_control_chars(val))}sv'
 	elif isinstance(val, bool):
@@ -399,6 +403,8 @@ def load_tests(source_folder, is_valid_set, ignore_list = None):
 		for f,n in files:
 			ignored = False
 			for ignore in ignore_list:
+				if ignore is None:
+					continue
 				if isinstance(ignore, str):
 					if n == ignore:
 						ignored = True
@@ -411,10 +417,7 @@ def load_tests(source_folder, is_valid_set, ignore_list = None):
 		files = files_
 	tests = []
 	for f,n in files:
-		#try:
-			tests.append(TomlTest(f, n, is_valid_set))
-		#except Exception as e:
-			#print(rf'Error reading {f}, skipping...', file=sys.stderr)
+		tests.append(TomlTest(f, n, is_valid_set))
 	return tests
 
 

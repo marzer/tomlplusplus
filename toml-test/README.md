@@ -2,19 +2,20 @@
 
 > ℹ&#xFE0F; _The contents of this directory relate to testing with the [toml-test] suite, **not** anything to do with running the library's unit-tests.
 > For information about running the unit-tests see [CONTRIBUTING](../CONTRIBUTING.md)._
+>
+> ℹ&#xFE0F; _All command snippets in this document assume the working directory is the toml++ repository root._
 
 <br>
 
 ## Prequisites
 For this document to make sense, you will need to:
-1. Install some recent version of Go
-2. Follow the installation instructions from the [toml-test] README to compile the `toml-test` runner
-3. Add `toml-test` as an alias or have it on the system PATH
-4. Clone the toml++ repository's [nlohmann/json] submodule:
+1. Follow the installation instructions from the [toml-test] README to compile the `toml-test` runner
+2. Add `toml-test` as an alias or have it on the system PATH
+3. Clone the toml++ repository's [nlohmann/json] submodule:
 ```bash
 git submodule update --init --depth 1 external/json
 ```
-5. **Linux only:** Install `ninja` and `meson`:
+4. **Linux only:** Install `ninja` and `meson`:
 ```bash
 sudo apt update && sudo apt install -y locales python3 python3-pip ninja-build
 sudo pip3 install meson
@@ -23,7 +24,6 @@ sudo pip3 install meson
 <br>
 
 ## Building and Testing the Encoder and Decoder
-> ℹ&#xFE0F; _Commands in this section assume the starting directory is the toml++ repository root directory._
 
 ### Windows with Visual Studio
 Open `toml++.sln` and build the two projects in the `toml-test` solution folder. They'll be compiled in some target-specific subfolder under `/bin` in the repo root. Then run `toml-test` against them:
