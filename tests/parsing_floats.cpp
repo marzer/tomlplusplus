@@ -133,6 +133,12 @@ TEST_CASE("parsing - floats")
 	parse_expected_value(FILE_LINE_ARGS, "6.02e23"sv, 6.02e23);
 	parse_expected_value(FILE_LINE_ARGS, "6.02e+23"sv, 6.02e+23);
 	parse_expected_value(FILE_LINE_ARGS, "1.112_650_06e-17"sv, 1.11265006e-17);
+	parse_expected_value(FILE_LINE_ARGS, "0.010284358729827818"sv, 0.010284358729827818);
+	parse_expected_value(FILE_LINE_ARGS, "0.010284358729827818"sv, 0.010284358729827818);
+	parse_expected_value(FILE_LINE_ARGS, "0.0102"sv, 0.0102);
+	parse_expected_value(FILE_LINE_ARGS, "10.0102"sv, 10.0102);
+	parse_expected_value(FILE_LINE_ARGS, "10.010284358729828"sv, 10.010284358729828);
+	parse_expected_value(FILE_LINE_ARGS, "10.0"sv, 10.0);
 
 // toml/issues/562 (hexfloats)
 #if TOML_LANG_UNRELEASED

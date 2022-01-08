@@ -30,7 +30,7 @@ TOML_NAMESPACE_START
 	/// \eout
 	///
 	///
-	/// \warning Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
+	/// \note Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
 	/// \cpp
 	/// toml::at_path(config, "foo.bar")  // same as config["foo"]["bar"]
 	/// toml::at_path(config, "foo. bar") // same as config["foo"][" bar"]

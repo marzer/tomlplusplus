@@ -516,12 +516,12 @@
 //# ATTRIBUTES, UTILITY MACROS ETC
 //#====================================================================================================================
 
-#if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
+#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
 	// not supported by any version of GCC or Clang as of 26/11/2020
 	// not supported by any version of ICC on Linux as of 11/01/2021
 	#define TOML_FLOAT_CHARCONV 0
 #endif
-#if defined(__EMSCRIPTEN__) || defined(__APPLE__)
+#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
 	// causes link errors on emscripten
 	// causes Mac OS SDK version errors on some versions of Apple Clang
 	#define TOML_INT_CHARCONV 0
@@ -690,9 +690,7 @@
 #endif
 
 #define TOML_MAKE_FLAGS_(name, op)																	\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr name operator op(name lhs, name rhs) noexcept											\
 	{																								\
 		using under = std::underlying_type_t<name>;													\
@@ -708,17 +706,13 @@
 	TOML_MAKE_FLAGS_(name, &);																		\
 	TOML_MAKE_FLAGS_(name, |);																		\
 	TOML_MAKE_FLAGS_(name, ^);																		\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr name operator~(name val) noexcept														\
 	{																								\
 		using under = std::underlying_type_t<name>;													\
 		return static_cast<name>(~static_cast<under>(val));											\
 	}																								\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr bool operator!(name val) noexcept														\
 	{																								\
 		using under = std::underlying_type_t<name>;													\

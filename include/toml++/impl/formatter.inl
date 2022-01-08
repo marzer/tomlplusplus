@@ -410,7 +410,12 @@ TOML_IMPL_NAMESPACE_START
 			case fp_class::neg_inf: inf_nan = &constants_->float_neg_inf; break;
 			case fp_class::pos_inf: inf_nan = &constants_->float_pos_inf; break;
 			case fp_class::nan: inf_nan = &constants_->float_nan; break;
-			case fp_class::ok: print_to_stream(*stream_, *val); break;
+			case fp_class::ok:
+				print_to_stream(*stream_,
+								*val,
+								value_flags::none,
+								!!(config_.flags & format_flags::relaxed_float_precision));
+				break;
 			default: TOML_UNREACHABLE;
 		}
 

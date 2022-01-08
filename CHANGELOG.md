@@ -59,6 +59,7 @@ Highlights are indicated with ❤&#xFE0F;.
 - added `toml::format_flags::allow_unicode_strings`
 - added `toml::format_flags::indent_array_elements` (#120) (@W4RH4WK)
 - added `toml::format_flags::indent_sub_tables` (#120) (@W4RH4WK)
+- added `toml::format_flags::relaxed_float_precision` (#89) (@vaartis)
 - added `toml::format_flags::quote_infinities_and_nans`
 - added `toml::is_key<>` and toml::is_key_or_convertible<>` metafunctions
 - added `toml::node_view::operator==`

@@ -526,12 +526,12 @@
 	#endif
 #endif
 
-#if TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL)
+#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
 	// not supported by any version of GCC or Clang as of 26/11/2020
 	// not supported by any version of ICC on Linux as of 11/01/2021
 	#define TOML_FLOAT_CHARCONV 0
 #endif
-#if defined(__EMSCRIPTEN__) || defined(__APPLE__)
+#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
 	// causes link errors on emscripten
 	// causes Mac OS SDK version errors on some versions of Apple Clang
 	#define TOML_INT_CHARCONV 0
@@ -700,9 +700,7 @@
 #endif
 
 #define TOML_MAKE_FLAGS_(name, op)																	\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr name operator op(name lhs, name rhs) noexcept											\
 	{																								\
 		using under = std::underlying_type_t<name>;													\
@@ -718,17 +716,13 @@
 	TOML_MAKE_FLAGS_(name, &);																		\
 	TOML_MAKE_FLAGS_(name, |);																		\
 	TOML_MAKE_FLAGS_(name, ^);																		\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr name operator~(name val) noexcept														\
 	{																								\
 		using under = std::underlying_type_t<name>;													\
 		return static_cast<name>(~static_cast<under>(val));											\
 	}																								\
-	TOML_NODISCARD																					\
-	TOML_ALWAYS_INLINE																				\
-	TOML_ATTR(const)																				\
+	TOML_CONST_INLINE_GETTER																		\
 	constexpr bool operator!(name val) noexcept														\
 	{																								\
 		using under = std::underlying_type_t<name>;													\
@@ -1295,6 +1289,7 @@ TOML_NAMESPACE_START // abi namespace
 		indent_sub_tables = (1ull << 9),
 		indent_array_elements = (1ull << 10),
 		indentation = indent_sub_tables | indent_array_elements,
+		relaxed_float_precision = (1ull << 11),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -2045,10 +2040,10 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, float, value_flags = {});
+	void print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
 
 	TOML_API
-	void print_to_stream(std::ostream&, double, value_flags = {});
+	void print_to_stream(std::ostream&, double, value_flags = {}, bool relaxed_precision = false);
 
 	TOML_API
 	void print_to_stream(std::ostream&, bool);
@@ -9376,10 +9371,10 @@ TOML_ANON_NAMESPACE_START
 	inline constexpr size_t charconv_buffer_length<uint64_t> = 20; // strlen("18446744073709551615")
 
 	template <>
-	inline constexpr size_t charconv_buffer_length<float> = 40;
+	inline constexpr size_t charconv_buffer_length<float> = 64;
 
 	template <>
-	inline constexpr size_t charconv_buffer_length<double> = 60;
+	inline constexpr size_t charconv_buffer_length<double> = 64;
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
@@ -9470,7 +9465,10 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void print_floating_point_to_stream(std::ostream & stream, T val, value_flags format = {})
+	void print_floating_point_to_stream(std::ostream & stream,
+										T val,
+										value_flags format,
+										[[maybe_unused]] bool relaxed_precision)
 	{
 		switch (impl::fpclassify(val))
 		{
@@ -9492,20 +9490,31 @@ TOML_ANON_NAMESPACE_START
 
 #if TOML_FLOAT_CHARCONV
 
+				const auto hex = !!(format & value_flags::format_as_hexadecimal);
 				char buf[charconv_buffer_length<T>];
-				const auto res = !!(format & value_flags::format_as_hexadecimal)
-								   ? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
-								   : std::to_chars(buf, buf + sizeof(buf), val);
-				const auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
+				auto res = hex ? std::to_chars(buf, buf + sizeof(buf), val, std::chars_format::hex)
+							   : std::to_chars(buf, buf + sizeof(buf), val);
+				auto str = std::string_view{ buf, static_cast<size_t>(res.ptr - buf) };
+
+				char buf2[charconv_buffer_length<T>];
+				if (!hex && relaxed_precision)
+				{
+					res				= std::to_chars(buf2, buf2 + sizeof(buf2), val, std::chars_format::general, 6);
+					const auto str2 = std::string_view{ buf2, static_cast<size_t>(res.ptr - buf2) };
+					if (str2.length() < str.length())
+						str = str2;
+				}
+
 				impl::print_to_stream(stream, str);
-				if (!(format & value_flags::format_as_hexadecimal) && needs_decimal_point(str))
+				if (!hex && needs_decimal_point(str))
 					toml::impl::print_to_stream(stream, ".0"sv);
 
 #else
 
 				std::ostringstream ss;
 				ss.imbue(std::locale::classic());
-				ss.precision(std::numeric_limits<T>::max_digits10);
+				if (!relaxed_precision)
+					ss.precision(std::numeric_limits<T>::max_digits10);
 				if (!!(format & value_flags::format_as_hexadecimal))
 					ss << std::hexfloat;
 				ss << val;
@@ -9600,15 +9609,15 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, float val, value_flags format)
+	void print_to_stream(std::ostream & stream, float val, value_flags format, bool relaxed_precision)
 	{
-		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, double val, value_flags format)
+	void print_to_stream(std::ostream & stream, double val, value_flags format, bool relaxed_precision)
 	{
-		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format);
+		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -15244,7 +15253,12 @@ TOML_IMPL_NAMESPACE_START
 			case fp_class::neg_inf: inf_nan = &constants_->float_neg_inf; break;
 			case fp_class::pos_inf: inf_nan = &constants_->float_pos_inf; break;
 			case fp_class::nan: inf_nan = &constants_->float_nan; break;
-			case fp_class::ok: print_to_stream(*stream_, *val); break;
+			case fp_class::ok:
+				print_to_stream(*stream_,
+								*val,
+								value_flags::none,
+								!!(config_.flags & format_flags::relaxed_float_precision));
+				break;
 			default: TOML_UNREACHABLE;
 		}
 

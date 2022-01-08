@@ -54,10 +54,10 @@ TOML_IMPL_NAMESPACE_START
 	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
 	TOML_API
-	void print_to_stream(std::ostream&, float, value_flags = {});
+	void print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
 
 	TOML_API
-	void print_to_stream(std::ostream&, double, value_flags = {});
+	void print_to_stream(std::ostream&, double, value_flags = {}, bool relaxed_precision = false);
 
 	TOML_API
 	void print_to_stream(std::ostream&, bool);
