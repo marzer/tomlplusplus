@@ -260,4 +260,46 @@ b = []
 	{
 		parsing_should_fail(FILE_LINE_ARGS, "#\r"sv);
 	}
+
+	SECTION("github/issues/134") // https://github.com/marzer/tomlplusplus/issues/134
+	{
+		// binary
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"val = 0b11111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111"sv); // uint64_t
+																								  // max
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			"val = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000"sv); // int64_t
+																								  // max
+																								  // + 1
+		parse_expected_value(FILE_LINE_ARGS,
+							 "0b01111111_11111111_11111111_11111111_11111111_11111111_11111111_11111111"sv,
+							 INT64_MAX); // int64_t max
+
+		// octal
+		parsing_should_fail(FILE_LINE_ARGS, " val = 0o1777777777777777777777"sv); // uint64_t max
+		parsing_should_fail(FILE_LINE_ARGS, " val = 0o1000000000000000000000"sv); // int64_t max + 1
+		parse_expected_value(FILE_LINE_ARGS, "      0o0777777777777777777777"sv, INT64_MAX);
+
+		// decimal
+		parsing_should_fail(FILE_LINE_ARGS, " val =  100000000000000000000"sv);
+		parsing_should_fail(FILE_LINE_ARGS, " val =   18446744073709551615"sv); // uint64_t max
+		parsing_should_fail(FILE_LINE_ARGS, " val =   10000000000000000000"sv);
+		parsing_should_fail(FILE_LINE_ARGS, " val =    9999999999999999999"sv);
+		parsing_should_fail(FILE_LINE_ARGS, " val =    9223372036854775808"sv); // int64_t max + 1
+		parse_expected_value(FILE_LINE_ARGS, "         9223372036854775807"sv, INT64_MAX);
+		parse_expected_value(FILE_LINE_ARGS, "         1000000000000000000"sv, 1000000000000000000LL);
+		parse_expected_value(FILE_LINE_ARGS, "        -1000000000000000000"sv, -1000000000000000000LL);
+		parse_expected_value(FILE_LINE_ARGS, "        -9223372036854775808"sv, INT64_MIN);
+		parsing_should_fail(FILE_LINE_ARGS, " val =   -9223372036854775809"sv); // int64_t min - 1
+		parsing_should_fail(FILE_LINE_ARGS, " val =  -10000000000000000000"sv);
+		parsing_should_fail(FILE_LINE_ARGS, " val =  -18446744073709551615"sv); // -(uint64_t max)
+		parsing_should_fail(FILE_LINE_ARGS, " val = -100000000000000000000"sv);
+
+		// hexadecimal
+		parsing_should_fail(FILE_LINE_ARGS, " val = 0xFFFFFFFFFFFFFFFF"sv); // uint64_t max
+		parsing_should_fail(FILE_LINE_ARGS, " val = 0x8000000000000000"sv); // int64_t max + 1
+		parse_expected_value(FILE_LINE_ARGS, "      0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
+	}
 }

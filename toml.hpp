@@ -11617,40 +11617,44 @@ TOML_ANON_NAMESPACE_START
 	template <>
 	struct parse_integer_traits<2>
 	{
-		static constexpr auto scope_qualifier	= "binary integer"sv;
-		static constexpr auto is_digit			= impl::is_binary_digit;
-		static constexpr auto is_signed			= false;
-		static constexpr auto min_buffer_length = 63;
-		static constexpr auto prefix_codepoint	= U'b';
-		static constexpr auto prefix			= "b"sv;
+		static constexpr auto scope_qualifier  = "binary integer"sv;
+		static constexpr auto is_digit		   = impl::is_binary_digit;
+		static constexpr auto is_signed		   = false;
+		static constexpr auto max_digits	   = 63;
+		static constexpr auto prefix_codepoint = U'b';
+		static constexpr auto prefix		   = "b"sv;
+		static constexpr auto full_prefix	   = "0b"sv;
 	};
 	template <>
 	struct parse_integer_traits<8>
 	{
-		static constexpr auto scope_qualifier	= "octal integer"sv;
-		static constexpr auto is_digit			= impl::is_octal_digit;
-		static constexpr auto is_signed			= false;
-		static constexpr auto min_buffer_length = 21; // strlen("777777777777777777777")
-		static constexpr auto prefix_codepoint	= U'o';
-		static constexpr auto prefix			= "o"sv;
+		static constexpr auto scope_qualifier  = "octal integer"sv;
+		static constexpr auto is_digit		   = impl::is_octal_digit;
+		static constexpr auto is_signed		   = false;
+		static constexpr auto max_digits	   = 21; // strlen("777777777777777777777")
+		static constexpr auto prefix_codepoint = U'o';
+		static constexpr auto prefix		   = "o"sv;
+		static constexpr auto full_prefix	   = "0o"sv;
 	};
 	template <>
 	struct parse_integer_traits<10>
 	{
-		static constexpr auto scope_qualifier	= "decimal integer"sv;
-		static constexpr auto is_digit			= impl::is_decimal_digit;
-		static constexpr auto is_signed			= true;
-		static constexpr auto min_buffer_length = 19; // strlen("9223372036854775807")
+		static constexpr auto scope_qualifier = "decimal integer"sv;
+		static constexpr auto is_digit		  = impl::is_decimal_digit;
+		static constexpr auto is_signed		  = true;
+		static constexpr auto max_digits	  = 19; // strlen("9223372036854775807")
+		static constexpr auto full_prefix	  = ""sv;
 	};
 	template <>
 	struct parse_integer_traits<16>
 	{
-		static constexpr auto scope_qualifier	= "hexadecimal integer"sv;
-		static constexpr auto is_digit			= impl::is_hexadecimal_digit;
-		static constexpr auto is_signed			= false;
-		static constexpr auto min_buffer_length = 16; // strlen("7FFFFFFFFFFFFFFF")
-		static constexpr auto prefix_codepoint	= U'x';
-		static constexpr auto prefix			= "x"sv;
+		static constexpr auto scope_qualifier  = "hexadecimal integer"sv;
+		static constexpr auto is_digit		   = impl::is_hexadecimal_digit;
+		static constexpr auto is_signed		   = false;
+		static constexpr auto max_digits	   = 16; // strlen("7FFFFFFFFFFFFFFF")
+		static constexpr auto prefix_codepoint = U'x';
+		static constexpr auto prefix		   = "x"sv;
+		static constexpr auto full_prefix	   = "0x"sv;
 	};
 
 	TOML_PURE_GETTER
@@ -12756,12 +12760,6 @@ TOML_IMPL_NAMESPACE_START
 			char first_integer_part = '\0';
 			while (!is_eof() && !is_value_terminator(*cp))
 			{
-				if TOML_UNLIKELY(length == sizeof(chars))
-					set_error_and_return_default("exceeds maximum length of "sv,
-												 static_cast<uint64_t>(sizeof(chars)),
-												 " characters"sv,
-												 (seen_exponent ? ""sv : " (consider using exponent notation)"sv));
-
 				if (*cp == U'_')
 				{
 					if (!prev || !is_decimal_digit(*prev))
@@ -12771,8 +12769,13 @@ TOML_IMPL_NAMESPACE_START
 					advance_and_return_if_error_or_eof({});
 					continue;
 				}
-				else if (prev && *prev == U'_' && !is_decimal_digit(*cp))
+				else if TOML_UNLIKELY(prev && *prev == U'_' && !is_decimal_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
+				else if TOML_UNLIKELY(length == sizeof(chars))
+					set_error_and_return_default("exceeds length limit of "sv,
+												 static_cast<uint64_t>(sizeof(chars)),
+												 " digits"sv,
+												 (seen_exponent ? ""sv : " (consider using exponent notation)"sv));
 				else if (*cp == U'.')
 				{
 					// .1
@@ -13107,10 +13110,8 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected digit, saw '"sv, to_sv(*cp), "'"sv);
 			}
 
-			// consume value chars
-			static constexpr size_t underscore_padding = 32;
-			static constexpr size_t buffer_length	   = traits::min_buffer_length + underscore_padding;
-			char chars[buffer_length];
+			// consume digits
+			char digits[utf8_buffered_reader::max_history_length];
 			size_t length			   = {};
 			const utf8_codepoint* prev = {};
 			while (!is_eof() && !is_value_terminator(*cp))
@@ -13124,16 +13125,16 @@ TOML_IMPL_NAMESPACE_START
 					advance_and_return_if_error_or_eof({});
 					continue;
 				}
-				else if (prev && *prev == U'_' && !traits::is_digit(*cp))
+				else if TOML_UNLIKELY(prev && *prev == U'_' && !traits::is_digit(*cp))
 					set_error_and_return_default("underscores must be followed by digits"sv);
-				else if (!traits::is_digit(*cp))
+				else if TOML_UNLIKELY(!traits::is_digit(*cp))
 					set_error_and_return_default("expected digit, saw '"sv, to_sv(*cp), "'"sv);
-				else if (length == sizeof(chars))
-					set_error_and_return_default("exceeds maximum length of "sv,
-												 static_cast<uint64_t>(sizeof(chars)),
-												 " characters"sv);
+				else if TOML_UNLIKELY(length == sizeof(digits))
+					set_error_and_return_default("exceeds length limit of "sv,
+												 static_cast<uint64_t>(sizeof(digits)),
+												 " digits"sv);
 				else
-					chars[length++] = static_cast<char>(cp->bytes[0]);
+					digits[length++] = static_cast<char>(cp->bytes[0]);
 
 				prev = cp;
 				advance_and_return_if_error({});
@@ -13146,52 +13147,75 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("underscores must be followed by digits"sv);
 			}
 
-			// check for leading zeroes
-			if constexpr (base == 10)
-			{
-				if (chars[0] == '0')
-					set_error_and_return_default("leading zeroes are prohibited"sv);
-			}
-
 			// single digits can be converted trivially
 			if (length == 1u)
 			{
+				int64_t result;
+
 				if constexpr (base == 16)
-					return static_cast<int64_t>(hex_to_dec(chars[0]));
-				else if constexpr (base <= 10)
-					return static_cast<int64_t>(chars[0] - '0');
+					result = static_cast<int64_t>(hex_to_dec(digits[0]));
+				else
+					result = static_cast<int64_t>(digits[0] - '0');
+
+				if constexpr (traits::is_signed)
+					result *= sign;
+
+				return result;
 			}
 
-			// otherwise do the thing
-			uint64_t result = {};
+			// bin, oct and hex allow leading zeroes so trim them first
+			const char* end = digits + length;
+			const char* msd = digits;
+			if constexpr (base != 10)
 			{
-				const char* msd = chars;
-				const char* end = msd + length;
 				while (msd < end && *msd == '0')
 					msd++;
 				if (msd == end)
 					return 0ll;
-				uint64_t power = 1;
-				while (--end >= msd)
-				{
-					if constexpr (base == 16)
-						result += power * hex_to_dec(*end);
-					else
-						result += power * static_cast<uint64_t>(*end - '0');
-					power *= base;
-				}
+			}
+
+			// decimal integers do not allow leading zeroes
+			else
+			{
+				if TOML_UNLIKELY(digits[0] == '0')
+					set_error_and_return_default("leading zeroes are prohibited"sv);
 			}
 
 			// range check
-			if (result > static_cast<uint64_t>((std::numeric_limits<int64_t>::max)()) + (sign < 0 ? 1ull : 0ull))
+			if TOML_UNLIKELY(static_cast<size_t>(end - msd) > traits::max_digits)
 				set_error_and_return_default("'"sv,
-											 std::string_view{ chars, length },
+											 traits::full_prefix,
+											 std::string_view{ digits, length },
 											 "' is not representable in 64 bits"sv);
 
-			if constexpr (traits::is_signed)
-				return static_cast<int64_t>(result) * sign;
-			else
-				return static_cast<int64_t>(result);
+			// do the thing
+			{
+				uint64_t result = {};
+				{
+					uint64_t power = 1;
+					while (--end >= msd)
+					{
+						if constexpr (base == 16)
+							result += power * hex_to_dec(*end);
+						else
+							result += power * static_cast<uint64_t>(*end - '0');
+
+						power *= base;
+					}
+				}
+
+				// range check
+				if TOML_UNLIKELY(result > static_cast<uint64_t>((std::numeric_limits<int64_t>::max)()) + (sign < 0 ? 1ull : 0ull))
+					set_error_and_return_default("'"sv,
+												 traits::full_prefix,
+												 std::string_view{ digits, length },
+												 "' is not representable in 64 bits"sv);
+
+				if constexpr (traits::is_signed)
+					return static_cast<int64_t>(result) * sign;
+				else
+					return static_cast<int64_t>(result);
+			}
 		}
 
 		TOML_NODISCARD
