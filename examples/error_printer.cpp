@@ -22,6 +22,7 @@ namespace
 		"# bar\bkek"sv,
 		"# \xf1\x63"sv,
 		"# val1 = 1\fval2 = 2"sv,
+		"foo = 1\n\u2000\nbar = 2"sv,
 
 		"########## inline tables"sv,
 		"val = {,}"sv,

@@ -302,4 +302,22 @@ b = []
 		parsing_should_fail(FILE_LINE_ARGS, " val = 0x8000000000000000"sv); // int64_t max + 1
 		parse_expected_value(FILE_LINE_ARGS, "      0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
 	}
+
+	SECTION("github/issues/135") // https://github.com/marzer/tomlplusplus/issues/135
+	{
+		parsing_should_succeed(FILE_LINE_ARGS, "0=0"sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "1=1"sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "2=2"sv);
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   "0=0\n"
+							   "1=1\n"
+							   "2=2\n"sv);
+
+		parsing_should_fail(FILE_LINE_ARGS,
+							"0=0\n"
+							"\u2000\u2000\n"
+							"1=1\n"
+							"2=2\n"sv);
+	}
 }

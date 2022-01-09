@@ -686,9 +686,9 @@ TOML_ANON_NAMESPACE_START
 	TOML_INTERNAL_LINKAGE
 	std::string_view to_sv(const utf8_codepoint& cp) noexcept
 	{
-		if TOML_UNLIKELY(cp.value <= U'\x1F')
+		if (cp.value <= U'\x1F')
 			return impl::control_char_escapes[cp.value];
-		else if TOML_UNLIKELY(cp.value == U'\x7F')
+		else if (cp.value == U'\x7F')
 			return "\\u007F"sv;
 		else
 			return std::string_view{ cp.bytes, cp.count };
@@ -703,15 +703,21 @@ TOML_ANON_NAMESPACE_START
 		return ""sv;
 	}
 
+	struct escaped_codepoint
+	{
+		const utf8_codepoint& cp;
+	};
+
 	template <typename T>
 	TOML_ATTR(nonnull)
 	TOML_INTERNAL_LINKAGE
 	TOML_NEVER_INLINE
 	void concatenate(char*& write_pos, char* const buf_end, const T& arg) noexcept
 	{
-		static_assert(impl::is_one_of<impl::remove_cvref<T>, std::string_view, int64_t, uint64_t, double>,
-					  "concatenate inputs are limited to std::string_view, int64_t, uint64_t and double to keep "
-					  "instantiations to a minimum as an anti-bloat measure (hint: to_sv will probably help)");
+		static_assert(
+			impl::is_one_of<impl::remove_cvref<T>, std::string_view, int64_t, uint64_t, double, escaped_codepoint>,
+			"concatenate inputs are limited to [std::string_view, int64_t, uint64_t, double, escaped_codepoint] to "
+			"keep instantiations at a minimum as an anti-bloat measure (hint: to_sv will probably help)");
 
 		if (write_pos >= buf_end)
 			return;
@@ -749,6 +755,25 @@ TOML_ANON_NAMESPACE_START
 			ss << static_cast<cast_type>(arg);
 			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 #endif
+		}
+		else if constexpr (std::is_same_v<arg_t, escaped_codepoint>)
+		{
+			if (arg.cp.value <= U'\x7F')
+				concatenate(write_pos, buf_end, to_sv(arg.cp));
+			else
+			{
+				auto val			= static_cast<uint_least32_t>(arg.cp.value);
+				const auto digits	= val > 0xFFFFu ? 8u : 4u;
+				constexpr auto mask = uint_least32_t{ 0xFu };
+				char buf[10]		= { '\\', digits > 4 ? 'U' : 'u' };
+				for (auto i = 2u + digits; i-- > 2u;)
+				{
+					const auto hexdig = val & mask;
+					buf[i]			  = static_cast<char>(hexdig >= 0xAu ? ('A' + (hexdig - 0xAu)) : ('0' + hexdig));
+					val >>= 4;
+				}
+				concatenate(write_pos, buf_end, std::string_view{ buf, digits + 2u });
+			}
 		}
 		else
 			static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
@@ -1143,6 +1168,9 @@ TOML_IMPL_NAMESPACE_START
 			bool consumed = false;
 			while (!is_eof() && is_horizontal_whitespace(*cp))
 			{
+				if TOML_UNLIKELY(!is_ascii_horizontal_whitespace(*cp))
+					set_error_and_return_default("expected space or tab, saw '"sv, escaped_codepoint{ *cp }, "'"sv);
+
 				consumed = true;
 				advance_and_return_if_error({});
 			}
@@ -1155,17 +1183,19 @@ TOML_IMPL_NAMESPACE_START
 
 			if TOML_UNLIKELY(is_match(*cp, U'\v', U'\f'))
 				set_error_and_return_default(
-					R"(vertical tabs '\v' and form-feeds '\f' are not legal whitespace in TOML.)"sv);
+					R"(vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 
 			if (*cp == U'\r')
 			{
 				advance_and_return_if_error({}); // skip \r
 
 				if TOML_UNLIKELY(is_eof())
-					set_error_and_return_default("expected \\n after \\r, saw EOF"sv);
+					set_error_and_return_default("expected '\\n' after '\\r', saw EOF"sv);
 
 				if TOML_UNLIKELY(*cp != U'\n')
-					set_error_and_return_default("expected \\n after \\r, saw '"sv, to_sv(*cp), "'"sv);
+					set_error_and_return_default("expected '\\n' after '\\r', saw '"sv,
+												 escaped_codepoint{ *cp },
+												 "'"sv);
 			}
 			else if (*cp != U'\n')
 				return false;
@@ -2807,7 +2837,7 @@ TOML_IMPL_NAMESPACE_START
 							utf8_buffered_reader::max_history_length - 2u;
 						if TOML_UNLIKELY(!eof_while_scanning && advance_count > max_numeric_value_length)
 							set_error_and_return_default("numeric value too long to identify type - cannot exceed "sv,
-														 max_numeric_value_length,
+														 static_cast<uint64_t>(max_numeric_value_length),
 														 " characters"sv);
 
 						val.reset(new value{ parse_integer<10>() });
@@ -3359,7 +3389,8 @@ TOML_IMPL_NAMESPACE_START
 				return_after_error({});
 			}
 
-			// create the key first since the key buffer will likely get overritten during value parsing (inline tables)
+			// create the key first since the key buffer will likely get overwritten during value parsing (inline
+			// tables)
 			auto last_key = make_key(key_buffer.size() - 1u);
 
 			// now we can actually parse the value

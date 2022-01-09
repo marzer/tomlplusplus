@@ -18,9 +18,7 @@ template:
 ## Unreleased
 
 This release will be a major version bump, so it's ABI breaks all around.
-Any changes that might cause code or build systems to break are indicated with ⚠&#xFE0F;.
-
-Highlights are indicated with ❤&#xFE0F;.
+Any changes that are likely to cause migration issues (API changes, build system breakage, etc.) are indicated with ⚠&#xFE0F;.
 
 #### Fixes:
 - ⚠&#xFE0F; fixed `toml::table` init-list constructor requiring double-brackets
@@ -28,50 +26,50 @@ Highlights are indicated with ❤&#xFE0F;.
 - ⚠&#xFE0F; fixed incorrect `noexcept` specifications on many functions
 - ⚠&#xFE0F; fixed missing `TOML_API` on some interfaces
 - fixed `toml::json_formatter` not formatting inf and nan incorrectly
-- fixed a number of spec conformance issues (#127, #128, #129, #130, #131, #132) (@moorereason)
+- fixed a number of spec conformance issues (#127, #128, #129, #130, #131, #132, #135) (@moorereason)
 - fixed an illegal table redefinition edge case (#112) (@python36)
 - fixed documentation issues
+- fixed GCC bug causing memory leak during parse failures (#123, #124) (@rsmmr, @ronalabraham)
 - fixed incorrect handling of vertical whitespace in keys when printing TOML to streams
 - fixed incorrect source position in redefinition error messages
-- fixed memory leak during parse failures when compiled using GCC (#123, #124) (@rsmmr, @ronalabraham)
-- fixed missing `#include <initializer_list>`
-- fixed missing `#include <utility>`
+- fixed missing includes `<initializer_list>`, `<utility>`
 - fixed parser not correctly round-tripping the format of binary and octal integers in some cases
 - fixed some incorrect unicode scalar sequence transformations (#125)
 - fixed strong exception guarantee edge-cases in `toml::table` and `toml::array`
 
 #### Additions:
-- ❤&#xFE0F; added `operator->` to `toml::value` for class types
-- ❤&#xFE0F; added `toml::at_path()`, `toml::node::at_path()` and `toml::node_view::at_path()` for qualified path-based lookups (#118) (@ben-crowhurst)
-- ❤&#xFE0F; added `toml::key` - provides a facility to access the source_regions of parsed keys (#82) (@vaartis)
-- ❤&#xFE0F; added `toml::yaml_formatter`
-- ❤&#xFE0F; added support for Unicode 14.0
-- added `parse_benchmark` example
-- added `toml::array::at()` (same semantics as `std::vector::at()`)
-- added `toml::array::prune()`
-- added `toml::array::replace()` (#109) (@LebJe)
-- added `toml::array::resize()` param `default_init_flags`
-- added `toml::date_time` converting constructors from `toml::date` and `toml::time`
-- added `toml::format_flags::allow_binary_integers`
-- added `toml::format_flags::allow_hexadecimal_integers`
-- added `toml::format_flags::allow_octal_integers`
-- added `toml::format_flags::allow_real_tabs_in_strings`
-- added `toml::format_flags::allow_unicode_strings`
-- added `toml::format_flags::indent_array_elements` (#120) (@W4RH4WK)
-- added `toml::format_flags::indent_sub_tables` (#120) (@W4RH4WK)
+- added value flags to array + table insert methods (#44) (@levicki)
+- added support for Unicode 14.0
+- added support for ref categories and cv-qualifiers in `toml::node::ref()`
+- added magic `toml::value_flags` constant `toml::preserve_source_value_flags`
+- added clang's enum annotation attributes to all enums
+- added `TOML_ENABLE_FORMATTERS` option
+- added `toml::yaml_formatter`
+- added `toml::value` copy+move constructor overloads with flags override
+- added `toml::table::prune()`
+- added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
+- added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
+- added `toml::table::at()` (same semantics as `std::map::at()`)
+- added `toml::node_view::operator==`
+- added `toml::key` - provides a facility to access the source_regions of parsed keys (#82) (@vaartis)
+- added `toml::is_key<>` and toml::is_key_or_convertible<>` metafunctions
 - added `toml::format_flags::relaxed_float_precision` (#89) (@vaartis)
 - added `toml::format_flags::quote_infinities_and_nans`
-- added `toml::is_key<>` and toml::is_key_or_convertible<>` metafunctions
-- added `toml::node_view::operator==`
-- added `toml::table::at()` (same semantics as `std::map::at()`)
-- added `toml::table::emplace_hint()` (same semantics as `std::map::emplace_hint()`)
-- added `toml::table::lower_bound()` (same semantics as `std::map::lower_bound()`)
-- added `toml::table::prune()`
-- added `toml::value` copy+move constructor overloads with flags override
-- added `TOML_ENABLE_FORMATTERS` option
-- added clang's enum annotation attributes to all enums
-- added magic `toml::value_flags` constant `toml::preserve_source_value_flags`
-- added value flags to array + table insert methods (#44) (@levicki)
+- added `toml::format_flags::indent_sub_tables` (#120) (@W4RH4WK)
+- added `toml::format_flags::indent_array_elements` (#120) (@W4RH4WK)
+- added `toml::format_flags::allow_unicode_strings`
+- added `toml::format_flags::allow_real_tabs_in_strings`
+- added `toml::format_flags::allow_octal_integers`
+- added `toml::format_flags::allow_hexadecimal_integers`
+- added `toml::format_flags::allow_binary_integers`
+- added `toml::date_time` converting constructors from `toml::date` and `toml::time`
+- added `toml::at_path()`, `toml::node::at_path()` and `toml::node_view::at_path()` for qualified path-based lookups (#118) (@ben-crowhurst)
+- added `toml::array::resize()` param `default_init_flags`
+- added `toml::array::replace()` (#109) (@LebJe)
+- added `toml::array::prune()`
+- added `toml::array::at()` (same semantics as `std::vector::at()`)
+- added `parse_benchmark` example
+- added `operator->` to `toml::value` for class types
 
 #### Changes:
 - ⚠&#xFE0F; `toml::format_flags` is now backed by `uint64_t` (was previously `uint8_t`)
@@ -83,8 +81,7 @@ Highlights are indicated with ❤&#xFE0F;.
 - ⚠&#xFE0F; renamed `TOML_PARSER` option to `TOML_ENABLE_PARSER` (`TOML_PARSER` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_UNRELEASED_FEATURES` to `TOML_ENABLE_UNRELEASED_FEATURES` (`TOML_UNRELEASED_FEATURES` will continue to work but is deprecated)
 - ⚠&#xFE0F; renamed `TOML_WINDOWS_COMPAT` to `TOML_ENABLE_WINDOWS_COMPAT` (`TOML_WINDOWS_COMPAT` will continue to work but is deprecated)
-- ❤&#xFE0F; `toml::node::ref()` now supports explicit ref categories and cv-qualifiers
-- ❤&#xFE0F; applied clang-format to all the things 🎉&#xFE0F;
+- applied clang-format to all the things 🎉&#xFE0F;
 - exposed `TOML_NAMESPACE_START` and `TOML_NAMESPACE_END` macros to help with ADL specialization scenarios
 - improved performance of parser
 - made date/time constructors accept any integral types
@@ -95,7 +92,7 @@ Highlights are indicated with ❤&#xFE0F;.
 #### Removals:
 - ⚠&#xFE0F; removed `toml::format_flags::allow_value_format_flags`
 - ⚠&#xFE0F; removed `TOML_LARGE_FILES` (it is now default - explicitly setting `TOML_LARGE_FILES` to `0` will invoke an `#error`)
-- removed unnecessary template machinery (esp. where ostreams were involved)
+- ⚠&#xFE0F; removed unnecessary template machinery (esp. where ostreams were involved)
 - removed unnecessary uses of `final`
 
 #### Build system:

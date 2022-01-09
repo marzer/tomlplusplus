@@ -312,25 +312,6 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Iterators (ADL)
-		/// @{
-
-		/// \brief Returns an iterator to the first character in a key's backing string.
-		TOML_PURE_INLINE_GETTER
-		friend const_iterator begin(const key& k) noexcept
-		{
-			return k.begin();
-		}
-
-		/// \brief Returns an iterator to one-past-the-last character in a key's backing string.
-		TOML_PURE_INLINE_GETTER
-		friend const_iterator end(const key& k) noexcept
-		{
-			return k.end();
-		}
-
-		/// @}
-
 		/// \brief	Prints the key's underlying string out to the stream.
 		friend std::ostream& operator<<(std::ostream& lhs, const key& rhs)
 		{

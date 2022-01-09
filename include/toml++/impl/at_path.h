@@ -39,7 +39,7 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	/// <br>
 	/// Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings.
-	/// This function makes no allowance for this this, instead treating all period characters as sub-table delimiters.
+	/// This function makes no allowance for this, instead treating all period characters as sub-table delimiters.
 	/// If you have periods in your table keys, first consider:
 	/// 1. Not doing that
 	/// 2. Using node_view::operator[] instead.
