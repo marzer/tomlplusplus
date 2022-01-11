@@ -77,7 +77,7 @@
 <pre class="m-code"><span class="k">auto</span> <span class="n">table</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The node 'description' was defined at "</span><span class="sa">sv</span>
     <span class="o">&lt;&lt;</span> <span class="n">table</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"description"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
-    <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value 'description' was defined at line 7, column 15</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
+    <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value 'description' was defined at line 7, column 15</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle non-ASCII whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your source_positions don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -91,11 +91,11 @@
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
             <dt>
-              <a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">source_<wbr/>index</a> <a class="m-doc" href="#ab21cac59798d70e25fe97ac7433763cc">line</a>
+              <a class="m-doc" href="namespacetoml.html#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> <a class="m-doc" href="#ab21cac59798d70e25fe97ac7433763cc">line</a>
             </dt>
             <dd>The line number.</dd>
             <dt>
-              <a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">source_<wbr/>index</a> <a class="m-doc" href="#a1ca6d0db40c69d2784703011f7cf5434">column</a>
+              <a class="m-doc" href="namespacetoml.html#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> <a class="m-doc" href="#a1ca6d0db40c69d2784703011f7cf5434">column</a>
             </dt>
             <dd>The column number.</dd>
           </dl>
@@ -113,6 +113,11 @@
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if the LHS position is before the RHS position.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a40b4b23ccd23a205a2c2298853066aba">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</dd>
             <dt id="abb7d47c85374301ec48e7c5f3ee1c71a">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abb7d47c85374301ec48e7c5f3ee1c71a">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
@@ -126,17 +131,53 @@
           </dl>
         </section>
         <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a40b4b23ccd23a205a2c2298853066aba"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a40b4b23ccd23a205a2c2298853066aba">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a> to a stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The stream.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The input stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="sa">sv</span><span class="p">);</span>
+
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
+    <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="p">()</span>
+    <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7</span></pre>
+          </div></section>
+        </section>
+        <section>
           <h2>Variable documentation</h2>
           <section class="m-doc-details" id="ab21cac59798d70e25fe97ac7433763cc"><div>
             <h3>
-              <a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">source_<wbr/>index</a> toml::<wbr/>source_position::<wbr/><a class="m-doc-self" href="#ab21cac59798d70e25fe97ac7433763cc">line</a>
+              <a class="m-doc" href="namespacetoml.html#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> toml::<wbr/>source_position::<wbr/><a class="m-doc-self" href="#ab21cac59798d70e25fe97ac7433763cc">line</a>
             </h3>
             <p>The line number.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Valid line numbers start at 1.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a1ca6d0db40c69d2784703011f7cf5434"><div>
             <h3>
-              <a class="m-doc" href="namespacetoml.html#ae845239fd7271e3d8e529302d300ad5b">source_<wbr/>index</a> toml::<wbr/>source_position::<wbr/><a class="m-doc-self" href="#a1ca6d0db40c69d2784703011f7cf5434">column</a>
+              <a class="m-doc" href="namespacetoml.html#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> toml::<wbr/>source_position::<wbr/><a class="m-doc-self" href="#a1ca6d0db40c69d2784703011f7cf5434">column</a>
             </h3>
             <p>The column number.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Valid column numbers start at 1.</p></aside>

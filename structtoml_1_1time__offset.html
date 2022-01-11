@@ -77,15 +77,16 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a93151fbb3eca9339753b901aa3142c47">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a93151fbb3eca9339753b901aa3142c47">time_offset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a49af2cb136f213443f15e108657f5f0e">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a49af2cb136f213443f15e108657f5f0e">time_offset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Default-constructs a zero time-offset.</dd>
+            <dd>Default constructor. Does not initialize the members.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a8a875e9fa59060eec5d5d775e407d46d">time_offset</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> h,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> m) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename H, typename M&gt;</div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a9e963488f164473ee9af35ddf7d4f93e">time_offset</a>(</span><span class="m-doc-wrap">H h,
+              M m) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Constructs a timezone offset from separate hour and minute totals.</dd>
+            <dd>Constructs a timezone offset from individual hour and minute totals.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -109,6 +110,11 @@
               <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Less-than operator.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac87df01b4e60bd303d75712470517451">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</dd>
             <dt id="a4a0886d9ad65963a4e812576ba0c6928">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4a0886d9ad65963a4e812576ba0c6928">operator&lt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
               <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
@@ -133,19 +139,35 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a8a875e9fa59060eec5d5d775e407d46d"><div>
+          <section class="m-doc-details" id="a9e963488f164473ee9af35ddf7d4f93e"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> toml::<wbr/>time_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a875e9fa59060eec5d5d775e407d46d">time_offset</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> h,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int8_t</a> m) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <div class="m-doc-template">
+                template&lt;typename H, typename M&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>time_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9e963488f164473ee9af35ddf7d4f93e">time_offset</a>(</span><span class="m-doc-wrap">H h,
+              M m) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Constructs a timezone offset from separate hour and minute totals.</p>
+            <p>Constructs a timezone offset from individual hour and minute totals.</p>
             <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">H</td>
+                  <td>An integral type.</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>An integral type.</td>
+                </tr>
+              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td style="width: 1%">h</td>
+                  <td>h</td>
                   <td>The total hours.</td>
                 </tr>
                 <tr>
@@ -161,6 +183,22 @@
 <span class="go">-01:30</span>
 <span class="go">-02:30</span>
 <span class="go">Z</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="ac87df01b4e60bd303d75712470517451"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac87df01b4e60bd303d75712470517451">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</p>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">-2</span><span class="p">,</span> <span class="mi">-30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
+<span class="go">+01:30</span>
+<span class="go">Z</span>
+<span class="go">-01:30</span>
+<span class="go">-02:30</span></pre>
           </div></section>
         </section>
       </div>

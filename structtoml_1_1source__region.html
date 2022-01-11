@@ -69,6 +69,7 @@
               <ul>
                 <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
+                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -81,12 +82,12 @@
     <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"path: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">path</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">begin: line 3, column 1</span>
 <span class="go">end: line 3, column 22</span>
-<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle various non-conventional whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your <a class="m-doc poxy-injected" href="structtoml_1_1source__position.html">source_positions</a> don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
+<span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle non-ASCII whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your <a class="m-doc poxy-injected" href="structtoml_1_1source__position.html">source_positions</a> don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8e9110cd42e834f95e9a12c59909c1c0">wide_path</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt;</span>
             </dt>
             <dd>The path to the corresponding source document as a wide-string.</dd>
           </dl>
@@ -108,14 +109,57 @@
             <dd>The path to the corresponding source document.</dd>
           </dl>
         </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9de8ac24a607abd098bb4179520f3734">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</dd>
+          </dl>
+        </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ae4aaf4e5c7a8b178b4ba46e7f9d050bd"><div>
+          <section class="m-doc-details" id="a8e9110cd42e834f95e9a12c59909c1c0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; toml::<wbr/>source_region::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae4aaf4e5c7a8b178b4ba46e7f9d050bd">wide_path</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a>&gt; toml::<wbr/>source_region::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8e9110cd42e834f95e9a12c59909c1c0">wide_path</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>The path to the corresponding source document as a wide-string.</p>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This function is only available when <a class="m-doc" href="group__configuration.html#ga0785b375499ea976c627d775f8fc747b">TOML_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p>This will return an empty optional if no path was provided to <a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a>.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This function is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p>This will return an empty optional if no path was provided to <a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a>.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a9de8ac24a607abd098bb4179520f3734"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9de8ac24a607abd098bb4179520f3734">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a> to a stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The stream.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The <a class="m-doc" href="structtoml_1_1source__position.html">source_<wbr/>position</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The input stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="p">,</span> <span class="s">"config.toml"</span><span class="p">);</span>
+
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
+    <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
+    <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7 of 'config.toml'</span></pre>
           </div></section>
         </section>
         <section>

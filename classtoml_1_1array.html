@@ -58,7 +58,7 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>array <span class="m-thin">class</span> <span class="m-label m-flat m-warning">final</span>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>array <span class="m-thin">class</span>
         </h1>
         <p>A TOML array.</p>
         <div class="m-block m-default poxy-toc">
@@ -68,13 +68,15 @@
               Reference
               <ul>
                 <li><a href="#base-classes">Base classes</a></li>
-                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-methods">Public functions</a></li>
-                <li><a href="#array-operations">Array operations</a></li>
                 <li><a href="#equality">Equality</a></li>
+                <li><a href="#erasure">Erasure</a></li>
+                <li><a href="#insertion-and-emplacement">Insertion and Emplacement</a></li>
+                <li><a href="#iterators">Iterators</a></li>
                 <li><a href="#metadata">Metadata</a></li>
                 <li><a href="#node-views">Node views</a></li>
+                <li><a href="#size-and-capacity">Size and Capacity</a></li>
                 <li><a href="#type-casts">Type casts</a></li>
                 <li><a href="#type-checks">Type checks</a></li>
                 <li><a href="#value-retrieval">Value retrieval</a></li>
@@ -128,28 +130,15 @@
             <dd>A TOML node.</dd>
           </dl>
         </section>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="adfd38318d3390a76f073a83fd2f2aa21">
-              using <a class="m-doc-self" href="#adfd38318d3390a76f073a83fd2f2aa21">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#aeba9fe3a193c8b641a1fb3a2096d7c13">const_<wbr/>array_<wbr/>iterator</a>
-            </dt>
-            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="a62a18471ca7c5b06204d2e26c963f833">
-              using <a class="m-doc-self" href="#a62a18471ca7c5b06204d2e26c963f833">iterator</a> = <a class="m-doc" href="namespacetoml.html#ac7e383cde1b8d61dba45292b2b0fcb69">array_<wbr/>iterator</a>
-            </dt>
-            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a29fc707cf66a79f3c3d93dadbe3b2719">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a29fc707cf66a79f3c3d93dadbe3b2719">array</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a0955d4edc2415406a5f7c6c43fd3a606">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0955d4edc2415406a5f7c6c43fd3a606">array</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Default constructor.</dd>
-            <dt id="a5883d7e1a7b9c9ba2b87fb8043ddb0d9">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5883d7e1a7b9c9ba2b87fb8043ddb0d9">array</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;) <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3bd4611c96ce97d7e6991b7a4312370d">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3bd4611c96ce97d7e6991b7a4312370d">array</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ac552a63c329598d671e6531b0cef957b">
@@ -167,186 +156,14 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="af9bf16bc9e21887dc1447651f6fbaba7">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af9bf16bc9e21887dc1447651f6fbaba7">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a37f428f585188ce70c82f1df6935f5d5">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a37f428f585188ce70c82f1df6935f5d5">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;</span>
             </dt>
             <dd>Copy-assignment operator.</dd>
             <dt id="a7e5e45777e08941abb2069a5991e1f31">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7e5e45777e08941abb2069a5991e1f31">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
-          </dl>
-        </section>
-        <section id="array-operations">
-          <h2><a href="#array-operations">Array operations</a></h2>
-          <dl class="m-doc">
-            <dt id="a4c58dea5e8795e4b9f8df4f1e1473204">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4c58dea5e8795e4b9f8df4f1e1473204">back</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a reference to the last element in the array.</dd>
-            <dt id="ac7652c1ab60af2ca1c7d52f0658639b4">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac7652c1ab60af2ca1c7d52f0658639b4">back</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a reference to the last element in the array.</dd>
-            <dt id="a8ee8179ddf1cb44fdf0b8d0700f55c2f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8ee8179ddf1cb44fdf0b8d0700f55c2f">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to the first element.</dd>
-            <dt id="a7cff1526a6d1f6157e0eab231b4757aa">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7cff1526a6d1f6157e0eab231b4757aa">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to the first element.</dd>
-            <dt id="a02b773a1ff337692e78da429030c1610">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a02b773a1ff337692e78da429030c1610">capacity</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the current max number of elements that may be held in the array's internal storage.</dd>
-            <dt id="a56d1cba006dccc5ad9982b58a8b2ddc1">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a56d1cba006dccc5ad9982b58a8b2ddc1">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to the first element.</dd>
-            <dt id="a50e6b032805760f3930e02923d9a84b0">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a50e6b032805760f3930e02923d9a84b0">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to one-past-the-last element.</dd>
-            <dt id="adaa65bf63f29f898c27423306c165d68">
-              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#adaa65bf63f29f898c27423306c165d68">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Removes all elements from the array.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType, typename... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5b87d1345eccbb1b9406092e72fa0c38">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              Args &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Emplaces a new element at a specific position in the array.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType, typename... Args&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af82fb4fec1f33c323123fab0ec4a74ac">emplace_back</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Emplaces a new element at the end of the array.</dd>
-            <dt id="a5d527ea6bfddad1025e90e4363c822cc">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5d527ea6bfddad1025e90e4363c822cc">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if the array is empty.</dd>
-            <dt id="adaf908b0cc3e8bcb1ee9ec9ec706d223">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#adaf908b0cc3e8bcb1ee9ec9ec706d223">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to one-past-the-last element.</dd>
-            <dt id="a778b5b807ff7329f7de10237d73f29c2">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a778b5b807ff7329f7de10237d73f29c2">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns an iterator to one-past-the-last element.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a22389a9ed9444fe52be10c4acbdec908">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Removes the specified element from the array.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a723388860d72c9a162137d0293366fb2">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> first,
-              <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Removes the elements in the range [first, last) from the array.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa2a21958705629bde15aafae9598a2ec">flatten</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;</span>
-            </dt>
-            <dd>Flattens this array, recursively hoisting the contents of child arrays up into itself.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad307bea17e7640c57715d67ab8a777d4">flatten</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp;</span>
-            </dt>
-            <dd>Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).</dd>
-            <dt id="a9c78848129a2a703c154e7cbe1a973d3">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9c78848129a2a703c154e7cbe1a973d3">front</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a reference to the first element in the array.</dd>
-            <dt id="a5ba3af18c63546da6f9d2ac3b5b77f64">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5ba3af18c63546da6f9d2ac3b5b77f64">front</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a reference to the first element in the array.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a10664e00054ea4021fec5144b69b8792">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets the element at a specific index.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a44db509dce6b7b77e563c822a5936abe">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets the element at a specific index (const overload).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5c2f4624498cba9e1e467b0eb2e9046e">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; impl::wrap_node&lt;ElemType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets the element at a specific index if it is a particular type.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae47ca1cc4c61e94fed30aea72ca8d268">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const impl::wrap_node&lt;ElemType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets the element at a specific index if it is a particular type (const overload).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab44c0e3568a683bc6d53c8f5b11abb88">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              ElemType&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Inserts a new element at a specific position in the array.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa454d276f2935b1e2b5c2caec9bc2a0d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
-              ElemType&amp;&amp; val) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Repeatedly inserts a new element starting at a specific position in the array.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename Iter&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              Iter first,
-              Iter last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Inserts a range of elements into the array at a specific position.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a87500f1ea51f3b42dadc686a3e128fea">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a>&lt;ElemType&gt; ilist) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Inserts a range of elements into the array at a specific position.</dd>
-            <dt id="ae65a76add6d756fc7ba8f12a5aad983c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae65a76add6d756fc7ba8f12a5aad983c">max_size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the maximum number of elements that can be stored in an array on the current platform.</dd>
-            <dt id="a853bad0297ca4dcee57c97da2fe318e7">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a853bad0297ca4dcee57c97da2fe318e7">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets a reference to the element at a specific index.</dd>
-            <dt id="ae9f72a1b877f2ac66327a152d55aa9c6">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae9f72a1b877f2ac66327a152d55aa9c6">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Gets a reference to the element at a specific index.</dd>
-            <dt id="af99d72e29cef84f736d91d627b47a1dc">
-              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#af99d72e29cef84f736d91d627b47a1dc">pop_back</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Removes the last element from the array.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a2b3315295340dc76b69ce916d31fec35">push_back</a>(</span><span class="m-doc-wrap">ElemType&amp;&amp; val) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Appends a new element to the end of the array.</dd>
-            <dt id="a1ba073adc52c3df5ad29cfd7e5daa1d5">
-              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a1ba073adc52c3df5ad29cfd7e5daa1d5">reserve</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_capacity)</span>
-            </dt>
-            <dd>Reserves internal storage capacity up to a pre-determined number of elements.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a8694e01e9b0b1c5b9152518137d5b971">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
-              ElemType&amp;&amp; default_init_val) <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Resizes the array.</dd>
-            <dt id="a718c2031ead428aa52912741f6d094aa">
-              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a718c2031ead428aa52912741f6d094aa">shrink_to_fit</a>(</span><span class="m-doc-wrap">)</span>
-            </dt>
-            <dd>Requests the removal of any unused internal storage capacity.</dd>
-            <dt id="af81d7b6a1257ad766a47d9276855a7c9">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af81d7b6a1257ad766a47d9276855a7c9">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns the number of elements in the array.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span>
-            </dt>
-            <dd>Shrinks the array to the given size.</dd>
           </dl>
         </section>
         <section id="equality">
@@ -376,6 +193,140 @@
             <dd>Vector equality operator.</dd>
           </dl>
         </section>
+        <section id="erasure">
+          <h2><a href="#erasure">Erasure</a></h2>
+          <dl class="m-doc">
+            <dt id="adaa65bf63f29f898c27423306c165d68">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#adaa65bf63f29f898c27423306c165d68">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes all elements from the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a22389a9ed9444fe52be10c4acbdec908">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes the specified element from the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a723388860d72c9a162137d0293366fb2">erase</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> first,
+              <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> last) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes the elements in the range [first, last) from the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa2a21958705629bde15aafae9598a2ec">flatten</a>(</span><span class="m-doc-wrap">) &amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;</span>
+            </dt>
+            <dd>Flattens this array, recursively hoisting the contents of child arrays up into itself.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad307bea17e7640c57715d67ab8a777d4">flatten</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp;</span>
+            </dt>
+            <dd>Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).</dd>
+            <dt id="af99d72e29cef84f736d91d627b47a1dc">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#af99d72e29cef84f736d91d627b47a1dc">pop_back</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes the last element from the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae548cf1dc26ade60733548a00a39b175">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes empty child arrays and tables.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6fc918a151ada40c713d6855af3021c2">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Removes empty child arrays and tables (rvalue overload).</dd>
+          </dl>
+        </section>
+        <section id="insertion-and-emplacement">
+          <h2><a href="#insertion-and-emplacement">Insertion and Emplacement</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType, typename... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4110b96386b33097a255f3694ac01d4a">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              Args &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Emplaces a new element at a specific position in the array.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType, typename... ElemArgs&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae9ceab13446e118333e3a486e81c2448">emplace_back</a>(</span><span class="m-doc-wrap">ElemArgs &amp;&amp; ... args) -&gt; decltype(auto)</span>
+            </dt>
+            <dd>Emplaces a new element at the end of the array.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a17c7e34b433ea8907186dbb1788c9d37">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Inserts a new element at a specific position in the array.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a55a9e6e742e556ea07573d29c23ce7df">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Repeatedly inserts a new element starting at a specific position in the array.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Iter&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a60a0d39bfd8721cef23e155f5504d54d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              Iter first,
+              Iter last,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Inserts a range of elements into the array at a specific position.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1baecd5d579afb508886572674b89781">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a>&lt;ElemType&gt; ilist,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Inserts a range of elements into the array at a specific position.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#ab7188537b351ef3a756b54b83e4b05b3">push_back</a>(</span><span class="m-doc-wrap">ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span>
+            </dt>
+            <dd>Appends a new element to the end of the array.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a37a8a283e6c1cbeef757b2e59489ee6c">replace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
+            </dt>
+            <dd>Replaces the element at a specific position in the array with a different value.</dd>
+          </dl>
+        </section>
+        <section id="iterators">
+          <h2><a href="#iterators">Iterators</a></h2>
+          <dl class="m-doc">
+            <dt id="adfd38318d3390a76f073a83fd2f2aa21">
+              using <a class="m-doc-self" href="#adfd38318d3390a76f073a83fd2f2aa21">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#aeba9fe3a193c8b641a1fb3a2096d7c13">const_<wbr/>array_<wbr/>iterator</a>
+            </dt>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="a62a18471ca7c5b06204d2e26c963f833">
+              using <a class="m-doc-self" href="#a62a18471ca7c5b06204d2e26c963f833">iterator</a> = <a class="m-doc" href="namespacetoml.html#ac7e383cde1b8d61dba45292b2b0fcb69">array_<wbr/>iterator</a>
+            </dt>
+            <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
+            <dt id="a8ee8179ddf1cb44fdf0b8d0700f55c2f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8ee8179ddf1cb44fdf0b8d0700f55c2f">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first element.</dd>
+            <dt id="a7cff1526a6d1f6157e0eab231b4757aa">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7cff1526a6d1f6157e0eab231b4757aa">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first element.</dd>
+            <dt id="a56d1cba006dccc5ad9982b58a8b2ddc1">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a56d1cba006dccc5ad9982b58a8b2ddc1">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to the first element.</dd>
+            <dt id="a50e6b032805760f3930e02923d9a84b0">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a50e6b032805760f3930e02923d9a84b0">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last element.</dd>
+            <dt id="adaf908b0cc3e8bcb1ee9ec9ec706d223">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#adaf908b0cc3e8bcb1ee9ec9ec706d223">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last element.</dd>
+            <dt id="a778b5b807ff7329f7de10237d73f29c2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a778b5b807ff7329f7de10237d73f29c2">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns an iterator to one-past-the-last element.</dd>
+          </dl>
+        </section>
         <section id="metadata">
           <h2><a href="#metadata">Metadata</a></h2>
           <dl class="m-doc">
@@ -389,6 +340,22 @@
           <h2><a href="#node-views">Node views</a></h2>
           <dl class="m-doc">
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a view of the subnode matching a fully-qualified "TOML path".</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#acf55d2ffe0c31b6a8507fb1265444be2">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a const view of the subnode matching a fully-qualified "TOML path".</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a9b4d952e01bd2fafe7c307d61d4a247f">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
+            </dt>
+            <dd>Returns a view of the subnode matching a fully-qualified "TOML path".</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aca7e24cd0070ce226defd71eb501c4cd">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) const -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
+            </dt>
+            <dd>Returns a const view of the subnode matching a fully-qualified "TOML path".</dd>
+            <dt>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node.html#ac7d6979c7246d7faee8ca48aadfcee68">operator node_view&lt;const node&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> pointing to this node (const overload).</dd>
@@ -396,6 +363,46 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node.html#a04d800d6ec9342d2ee2a364f05317573">operator node_view&lt;node&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Creates a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> pointing to this node.</dd>
+          </dl>
+        </section>
+        <section id="size-and-capacity">
+          <h2><a href="#size-and-capacity">Size and Capacity</a></h2>
+          <dl class="m-doc">
+            <dt id="a02b773a1ff337692e78da429030c1610">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a02b773a1ff337692e78da429030c1610">capacity</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the current max number of elements that may be held in the array's internal storage.</dd>
+            <dt id="a5d527ea6bfddad1025e90e4363c822cc">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5d527ea6bfddad1025e90e4363c822cc">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the array is empty.</dd>
+            <dt id="ae65a76add6d756fc7ba8f12a5aad983c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae65a76add6d756fc7ba8f12a5aad983c">max_size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the maximum number of elements that can be stored in an array on the current platform.</dd>
+            <dt id="a1ba073adc52c3df5ad29cfd7e5daa1d5">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a1ba073adc52c3df5ad29cfd7e5daa1d5">reserve</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_capacity)</span>
+            </dt>
+            <dd>Reserves internal storage capacity up to a pre-determined number of elements.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#ab1aca2337ffce7e583a2cf303f16259f">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
+              ElemType&amp;&amp; default_init_val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> default_init_flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span>
+            </dt>
+            <dd>Resizes the array.</dd>
+            <dt id="a718c2031ead428aa52912741f6d094aa">
+              <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a718c2031ead428aa52912741f6d094aa">shrink_to_fit</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Requests the removal of any unused internal storage capacity.</dd>
+            <dt id="af81d7b6a1257ad766a47d9276855a7c9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af81d7b6a1257ad766a47d9276855a7c9">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the number of elements in the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">void <a class="m-doc" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span>
+            </dt>
+            <dd>Shrinks the array to the given size.</dd>
           </dl>
         </section>
         <section id="type-casts">
@@ -411,151 +418,247 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a21d7481eabdf0eaedb91ddeefa950cc1">as</a>(</span><span class="m-doc-wrap">) const -&gt; const impl::wrap_node&lt;T&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Gets a pointer to the node as a more specific node type (const overload).</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a40031abf671512f9fdcd31666ce481fd">as_boolean</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;bool&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a97b772796c962a635e8d5c50e7c03b3a">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a97b772796c962a635e8d5c50e7c03b3a">as_array</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;bool&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a35ec7bd4efab69906d7874df736cdaaf">as_date</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns a pointer to the array.</dd>
+            <dt id="a8007db93bdeb82c8c77965ff72056f6b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8007db93bdeb82c8c77965ff72056f6b">as_array</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;date&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a68cc63dfd8e435b00c7c99da298d6733">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns a const-qualified pointer to the array.</dd>
+            <dt id="ac1989a2c4d50f8493f97c23ee22e15e6">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac1989a2c4d50f8493f97c23ee22e15e6">as_boolean</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;bool&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;date_time&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a480ae95e180992d152ad80e3b52a330a">as_floating_point</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a48206827982b5cffe51662adfc3aec2b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a48206827982b5cffe51662adfc3aec2b">as_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;bool&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;double&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ac507d02b3b744e0624c504614e91c9e5">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a78a9e7b1d44f90eb55403e54d6d31e2b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a78a9e7b1d44f90eb55403e54d6d31e2b">as_date</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ab8f42ecf095260b1d97363949a98267b">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="afc3f86ca86c60deda39e69d24abcacca">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afc3f86ca86c60deda39e69d24abcacca">as_date</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date.html">date</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;string&gt;, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aa696716239e7434145103173e880fb80">as_table</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a58c350366cbbab3eb430751212ba9b18">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a58c350366cbbab3eb430751212ba9b18">as_date_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, if it is one.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aeb23a8054899c4b0d57e10c4a3dcadf0">as_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="aa8fb689b36f44a4fa7c0ffccff20dbd9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa8fb689b36f44a4fa7c0ffccff20dbd9">as_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1date__time.html">date_<wbr/>time</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns a pointer to the node as a toml::value&lt;time&gt;, if it is one.</dd>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a5e6ed524c4548fdd2131dcbb38b8c766">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5e6ed524c4548fdd2131dcbb38b8c766">as_floating_point</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a8f5736e45881203e362bcbb43ed90093">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8f5736e45881203e362bcbb43ed90093">as_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;double&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a41d03d31a6ab168bc4b50046c4bbb50f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a41d03d31a6ab168bc4b50046c4bbb50f">as_integer</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a79871c2b52557b74da8302925b5624ee">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a79871c2b52557b74da8302925b5624ee">as_integer</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a5d4d3b502ef2e33107eb1d682b282c75">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5d4d3b502ef2e33107eb1d682b282c75">as_string</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a943378ff5912e9c732b4dee12d4bf2de">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a943378ff5912e9c732b4dee12d4bf2de">as_string</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a95985d66ecd4abf6c5822cbd0d239582">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a95985d66ecd4abf6c5822cbd0d239582">as_table</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="ae45534b573d10c7e2e1c5624153608f9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae45534b573d10c7e2e1c5624153608f9">as_table</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a3dedcb2261a528c59454fc9e0bb7c9fb">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a3dedcb2261a528c59454fc9e0bb7c9fb">as_time</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
+            <dt id="a7708feaac3561b836e0789db0dfa6db4">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7708feaac3561b836e0789db0dfa6db4">as_time</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>&lt;<a class="m-doc" href="structtoml_1_1time.html">time</a>&gt;* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>nullptr</code>.</dd>
           </dl>
         </section>
         <section id="type-checks">
           <h2><a href="#type-checks">Type checks</a></h2>
           <dl class="m-doc">
-            <dt id="a92874b0f5a195ffc699dde0a5a25f118">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a92874b0f5a195ffc699dde0a5a25f118">as_array</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>* <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns a pointer to the node as a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, if it is one.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a03e1bbe1a0640953b7105fe40c733118">is</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Checks if a node is a specific type.</dd>
-            <dt id="a17362a39f6ec6f14ce59f8a8ed2b88cf">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a17362a39f6ec6f14ce59f8a8ed2b88cf">is_array</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a1f1e4d93f52778613d0a7bcf74a23427">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1f1e4d93f52778613d0a7bcf74a23427">is_array</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is an array.</dd>
-            <dt id="ab8e15c4067237ab3192ab8f412bee0f6">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab8e15c4067237ab3192ab8f412bee0f6">is_array_of_tables</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>true</code>.</dd>
+            <dt id="a87cd0dcbebcfd661a0ae387255c0605e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a87cd0dcbebcfd661a0ae387255c0605e">is_array_of_tables</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is an array containing only tables.</dd>
+            <dd>Returns <code>true</code> if the array contains only tables.</dd>
+            <dt id="abbecf0a51aa3e175bc5748ccf71063d8">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abbecf0a51aa3e175bc5748ccf71063d8">is_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="a792dc3fd7105185415925d4f9ab3ca1d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a792dc3fd7105185415925d4f9ab3ca1d">is_date</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="ae844f53a9604fb42f185a91616a72cbd">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae844f53a9604fb42f185a91616a72cbd">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="ab758b93eedbdc27112681f26440bee03">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab758b93eedbdc27112681f26440bee03">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <code>false</code>.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a47ca3bd6392029a065f13c029b2db0b2">is_boolean</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if this node is a boolean value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a6e6060cb1233b87d7b57a2a203891d2a">is_date</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if this node is a local date value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a9115204bee51ac6ef962dd9d47bf1b7e">is_date_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if this node is a date-time value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a3ea1296a95c43125119a6fe26af5b014">is_floating_point</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if this node is an floating-point value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a628574d1e47440545019a3467be64fdc">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a79a1fe77c03b33ea2b9d8d0a859c93e6">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Checks if the node contains values/elements of only one type.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abff1c5e9bf3afb04ff16c15522aa55c4">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
-              <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae4e986f9fdb23090f9a0b3716a63e8bb">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Checks if a node contains values/elements of only one type.</dd>
-            <dt id="aa3f96a375f73b5378d06894ab40af641">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa3f96a375f73b5378d06894ab40af641">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
-              const <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="ad00610c0e18f02516de92b623dc4d0f5">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad00610c0e18f02516de92b623dc4d0f5">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              const <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Checks if a node contains values/elements of only one type (const overload).</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a5ecdb684288275ce1786281fbe1845cc">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <div class="m-doc-template">template&lt;typename ElemType = void&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a7d2b7360a2ea44282890e1ded3d3946a">is_homogeneous</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is an integer value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a1db6db67940c59bf0d6f7be184be3511">is_number</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Checks if the node contains values/elements of only one type.</dd>
+            <dt id="a78db4190977034c4364674a2958855d4">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a78db4190977034c4364674a2958855d4">is_integer</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is an integer or floating-point value.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aeff35977a4b13fe0fefb9a3b5917f98e">is_string</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="aa034144c580b3d8a4727c0cfbfebc214">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa034144c580b3d8a4727c0cfbfebc214">is_number</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a string value.</dd>
-            <dt id="a30764b48a4c5cb191b620b77df4c8b00">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a30764b48a4c5cb191b620b77df4c8b00">is_table</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="aeefdd01a2ce3f6bcd7aecfabd363d06b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeefdd01a2ce3f6bcd7aecfabd363d06b">is_string</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a table.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a4a7663a4b15650cf833d5c833e313d9b">is_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">virtual</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="ad7ed894e54ad3aaef6d7693c26b887d9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad7ed894e54ad3aaef6d7693c26b887d9">is_table</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a local time value.</dd>
-            <dt id="a7a38831cec7e7215a6101ba40fc1ce11">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7a38831cec7e7215a6101ba40fc1ce11">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="a2d2fc80512d08af7a934a6d02c7bf506">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2d2fc80512d08af7a934a6d02c7bf506">is_time</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns true if this node is a value.</dd>
-            <dt id="a10f914637ff56f5bc6f96b089fd141a3">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10f914637ff56f5bc6f96b089fd141a3">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">override</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="acc533a7fa1ea5c68fce6f4fea5bc419c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acc533a7fa1ea5c68fce6f4fea5bc419c">is_value</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Returns the node's type identifier.</dd>
+            <dd>Returns <code>false</code>.</dd>
+            <dt id="a352b6a99235216f070b5e97976663571">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a352b6a99235216f070b5e97976663571">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">toml::<wbr/>node_type::<wbr/>array</a>.</dd>
           </dl>
         </section>
         <section id="value-retrieval">
           <h2><a href="#value-retrieval">Value retrieval</a></h2>
           <dl class="m-doc">
-            <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a0f2b674e80b882b329513e7ec9aed842">ref</a>(</span><span class="m-doc-wrap">) &amp; -&gt; impl::unwrap_node&lt;T&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aeade4e0cafa3f57b4800e72baa843b1e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeade4e0cafa3f57b4800e72baa843b1e">at</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a raw reference to a value node's underlying data.</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a292bce25bfe779dc51403e88f0cc4bcc">ref</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; impl::unwrap_node&lt;T&gt;&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Gets a reference to the element at a specific index, throwing <code><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dt id="a8a5957e22aa2d0f4f9e6feaf9bfffa55">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8a5957e22aa2d0f4f9e6feaf9bfffa55">at</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a raw reference to a value node's underlying data (rvalue overload).</dd>
-            <dt>
-              <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a378e94ebc00235eb4d1da68f81edd77f">ref</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; const impl::unwrap_node&lt;T&gt;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dd>Gets a reference to the element at a specific index, throwing <code><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dt id="a4c58dea5e8795e4b9f8df4f1e1473204">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4c58dea5e8795e4b9f8df4f1e1473204">back</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Gets a raw reference to a value node's underlying data (const lvalue overload).</dd>
+            <dd>Returns a reference to the last element in the array.</dd>
+            <dt id="ac7652c1ab60af2ca1c7d52f0658639b4">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac7652c1ab60af2ca1c7d52f0658639b4">back</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the last element in the array.</dd>
+            <dt id="a9c78848129a2a703c154e7cbe1a973d3">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9c78848129a2a703c154e7cbe1a973d3">front</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the first element in the array.</dd>
+            <dt id="a5ba3af18c63546da6f9d2ac3b5b77f64">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5ba3af18c63546da6f9d2ac3b5b77f64">front</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a reference to the first element in the array.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a10664e00054ea4021fec5144b69b8792">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the element at a specific index.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a44db509dce6b7b77e563c822a5936abe">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the element at a specific index (const overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5c2f4624498cba9e1e467b0eb2e9046e">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; impl::wrap_node&lt;ElemType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the element at a specific index if it is a particular type.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename ElemType&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae47ca1cc4c61e94fed30aea72ca8d268">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const impl::wrap_node&lt;ElemType&gt;* <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a pointer to the element at a specific index if it is a particular type (const overload).</dd>
+            <dt id="a853bad0297ca4dcee57c97da2fe318e7">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a853bad0297ca4dcee57c97da2fe318e7">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a reference to the element at a specific index.</dd>
+            <dt id="ae9f72a1b877f2ac66327a152d55aa9c6">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae9f72a1b877f2ac66327a152d55aa9c6">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a reference to the element at a specific index.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a0973c92f88fc3fc5d5264d9daba9f11d">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a58fde40ef0b172d36bf293c251b25130">ref</a>(</span><span class="m-doc-wrap">) &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to a node's underlying data.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#aca651e7fe7f377fe958b20678d08ef14">ref</a>(</span><span class="m-doc-wrap">) &amp;&amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to a node's underlying data (rvalue overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a9794ed57d952d8293ed3278a11e54ca2">ref</a>(</span><span class="m-doc-wrap">) const &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to a node's underlying data (const lvalue overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a937af29dc15ef8e1af7950d925341cc3">ref</a>(</span><span class="m-doc-wrap">) const &amp;&amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Gets a raw reference to a node's underlying data (const rvalue overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename T&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a0b717d136b8a8b6f142a56056a570fed">value</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a374b939deec83da2a5867d08d0b12549">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a1fd6d582bdadae6b104440aec7b6e383">value_exact</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a423ddccc36345545615e20290c9a8a65">value_or</a>(</span><span class="m-doc-wrap">T&amp;&amp; default_value) const -&gt; auto <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ad1c332ae403fade90216726105419efc">value_or</a>(</span><span class="m-doc-wrap">T&amp;&amp; default_value) const -&gt; auto <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Gets the raw value contained by this node, or a default.</dd>
           </dl>
@@ -578,15 +681,19 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ad4a42e50f923b0fe1efff0a6719dab90">visit</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on the node based on the node's concrete type (const lvalue overload).</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#ac387cb04111addc0c291ecdd6f299666">visit</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; decltype(auto) <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Invokes a visitor on the node based on the node's concrete type (const rvalue overload).</dd>
           </dl>
         </section>
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a8574290131ff09ae36a4535e2ac25261">
-              <div class="m-doc-template">template&lt;typename Char&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8574290131ff09ae36a4535e2ac25261">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;,
-              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;</span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af1fae5bb4ad4da74199f0a77170c505e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints the array out to a stream as formatted TOML.</dd>
           </dl>
@@ -638,96 +745,61 @@
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"good:"</span> <span class="o">&lt;&lt;</span> <span class="n">good</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">bad:  [ 42 ]</span>
 <span class="go">good: [ [ 42 ] ]</span></pre></div></aside>
           </div></section>
-          <section class="m-doc-details" id="a5b87d1345eccbb1b9406092e72fa0c38"><div>
+          <section class="m-doc-details" id="af06c7437a0946a9d5e093d903b59f6a4"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType, typename... Args&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5b87d1345eccbb1b9406092e72fa0c38">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              Args &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af06c7437a0946a9d5e093d903b59f6a4">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Emplaces a new element at a specific position in the array.</p>
+            <p>Inequality operator.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or any native TOML value type.</td>
-                </tr>
-                <tr>
-                  <td>Args</td>
-                  <td>Value constructor argument types.</td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>pos</td>
-                  <td>The insertion position.</td>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS array.</td>
                 </tr>
                 <tr>
-                  <td>args</td>
-                  <td>Arguments to forward to the value's constructor.</td>
+                  <td>rhs</td>
+                  <td>The RHS array.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>An iterator to the inserted element.</td>
+                  <td>True if the arrays did not contain the same elements.</td>
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
-
-<span class="c1">//add a string using <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>'s substring constructor</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 'drill', 2 ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#ab44c0e3568a683bc6d53c8f5b11abb88">insert()</a> and <a class="m-doc" href="classtoml_1_1array.html#a5b87d1345eccbb1b9406092e72fa0c38">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
-          <section class="m-doc-details" id="af82fb4fec1f33c323123fab0ec4a74ac"><div>
+          <section class="m-doc-details" id="a06cf25e3f80c98d88e041ef9823976c0"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType, typename... Args&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af82fb4fec1f33c323123fab0ec4a74ac">emplace_back</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a06cf25e3f80c98d88e041ef9823976c0">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Emplaces a new element at the end of the array.</p>
+            <p>Equality operator.</p>
             <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type</td>
-                </tr>
-                <tr>
-                  <td>Args</td>
-                  <td>Value constructor argument types.</td>
-                </tr>
-              </tbody>
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>args</td>
-                  <td>Arguments to forward to the value's constructor.</td>
+                  <td style="width: 1%">lhs</td>
+                  <td>The LHS array.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The RHS array.</td>
                 </tr>
               </tbody>
               <tfoot>
                 <tr>
                   <th>Returns</th>
-                  <td>A reference to the newly-constructed element.</td>
+                  <td>True if the arrays contained the same elements.</td>
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">"four"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, [ 3, 'four' ] ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#a2b3315295340dc76b69ce916d31fec35">push_<wbr/>back()</a> and <a class="m-doc" href="classtoml_1_1array.html#af82fb4fec1f33c323123fab0ec4a74ac">emplace_<wbr/>back()</a> For trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a22389a9ed9444fe52be10c4acbdec908"><div>
             <h3>
@@ -826,11 +898,583 @@
               </tfoot>
             </table>
           </div></section>
+          <section class="m-doc-details" id="ae548cf1dc26ade60733548a00a39b175"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae548cf1dc26ade60733548a00a39b175">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Removes empty child arrays and tables.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">recursive</td>
+                  <td>Should child arrays and tables themselves be pruned?</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the array.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="p">},</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">3</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="p">}</span> <span class="p">},</span> <span class="mi">4</span> <span class="p">};</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">prune</span><span class="p">(</span><span class="k">true</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, [], [ 3, [] ], 4 ]</span>
+<span class="go">[ 1, 2, [ 3 ], 4 ]</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a6fc918a151ada40c713d6855af3021c2"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6fc918a151ada40c713d6855af3021c2">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Removes empty child arrays and tables (rvalue overload).</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">recursive</td>
+                  <td>Should child arrays and tables themselves be pruned?</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>An rvalue reference to the array.</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a4110b96386b33097a255f3694ac01d4a"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType, typename... Args&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4110b96386b33097a255f3694ac01d4a">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              Args &amp;&amp; ... args)</span></span>
+            </h3>
+            <p>Emplaces a new element at a specific position in the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or any native TOML value type.</td>
+                </tr>
+                <tr>
+                  <td>Args</td>
+                  <td>Value constructor argument types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>args</td>
+                  <td>Arguments to forward to the value's constructor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>An iterator to the inserted element.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
+
+<span class="c1">//add a string using <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>'s substring constructor</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">5</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 'drill', 2 ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#a17c7e34b433ea8907186dbb1788c9d37">insert()</a> and <a class="m-doc" href="classtoml_1_1array.html#a4110b96386b33097a255f3694ac01d4a">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae9ceab13446e118333e3a486e81c2448"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType, typename... ElemArgs&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae9ceab13446e118333e3a486e81c2448">emplace_back</a>(</span><span class="m-doc-wrap">ElemArgs &amp;&amp; ... args)</span></span>
+            </h3>
+            <p>Emplaces a new element at the end of the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type</td>
+                </tr>
+                <tr>
+                  <td>ElemArgs</td>
+                  <td>Element constructor argument types.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>args</td>
+                  <td>Arguments to forward to the elements's constructor.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the newly-constructed element.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="s">"four"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, [ 3, 'four' ] ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#ab7188537b351ef3a756b54b83e4b05b3">push_<wbr/>back()</a> and <a class="m-doc" href="classtoml_1_1array.html#ae9ceab13446e118333e3a486e81c2448">emplace_<wbr/>back()</a> For trivial value types (floats, ints, bools).</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a17c7e34b433ea8907186dbb1788c9d37"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a17c7e34b433ea8907186dbb1788c9d37">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Inserts a new element at a specific position in the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>val</td>
+                  <td>The node or value being inserted.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>Valid input:</em></strong> An iterator to the newly-inserted element. <strong><em>Input is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong> <a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"two"</span><span class="p">);</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cend</span><span class="p">(),</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">});</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 'two', 3, [ 4, 5 ] ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a55a9e6e742e556ea07573d29c23ce7df"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a55a9e6e742e556ea07573d29c23ce7df">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Repeatedly inserts a new element starting at a specific position in the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>count</td>
+                  <td>The number of times the node or value should be inserted.</td>
+                </tr>
+                <tr>
+                  <td>val</td>
+                  <td>The node or value being inserted.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>Valid input:</em></strong> An iterator to the newly-inserted element. <strong><em>count == 0:</em></strong> A copy of pos <strong><em>Input is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong> <a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span>
+    <span class="s">"with an evil twinkle in its eye the goose said"</span><span class="p">,</span>
+    <span class="s">"and immediately we knew peace was never an option."</span>
+<span class="p">};</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">"honk"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[</span>
+<span class="go">    'with an evil twinkle in its eye the goose said',</span>
+<span class="go">    'honk',</span>
+<span class="go">    'honk',</span>
+<span class="go">    'honk',</span>
+<span class="go">    'and immediately we knew peace was never an option.'</span>
+<span class="go">]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a60a0d39bfd8721cef23e155f5504d54d"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Iter&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a60a0d39bfd8721cef23e155f5504d54d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              Iter first,
+              Iter last,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Inserts a range of elements into the array at a specific position.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Iter</td>
+                  <td>An iterator type. Must satisfy <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/ForwardIterator" target="_blank">ForwardIterator</a>.</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>first</td>
+                  <td>Iterator to the first node or value being inserted.</td>
+                </tr>
+                <tr>
+                  <td>last</td>
+                  <td>Iterator to the one-past-the-last node or value being inserted.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>Valid input:</em></strong> An iterator to the first newly-inserted element. <strong><em>first &gt;= last:</em></strong> A copy of pos <strong><em>All objects in the range were null <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_views</a>:</em></strong> A copy of pos</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a1baecd5d579afb508886572674b89781"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1baecd5d579afb508886572674b89781">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a>&lt;ElemType&gt; ilist,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Inserts a range of elements into the array at a specific position.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>ilist</td>
+                  <td>An initializer list containing the values to be inserted.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>Valid input:</em></strong> An iterator to the first newly-inserted element. <strong><em>Input list is empty:</em></strong> A copy of pos <strong><em>All objects in the list were null <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_views</a>:</em></strong> A copy of pos</td>
+                </tr>
+              </tfoot>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="ab7188537b351ef3a756b54b83e4b05b3"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab7188537b351ef3a756b54b83e4b05b3">push_back</a>(</span><span class="m-doc-wrap">ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Appends a new element to the end of the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>val</td>
+                  <td>The node or value being added.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mf">4.0</span><span class="p">);</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">5</span><span class="p">,</span> <span class="s">"six"</span><span class="sa">sv</span> <span class="p">});</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3, 4.0, [ 5, 'six' ] ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>No insertion takes place if the input value is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>. This is the only circumstance in which this can occur.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a37a8a283e6c1cbeef757b2e59489ee6c"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a37a8a283e6c1cbeef757b2e59489ee6c">replace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
+              ElemType&amp;&amp; val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Replaces the element at a specific position in the array with a different value.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>pos</td>
+                  <td>The insertion position.</td>
+                </tr>
+                <tr>
+                  <td>val</td>
+                  <td>The node or value being inserted.</td>
+                </tr>
+                <tr>
+                  <td>flags</td>
+                  <td>Value flags to apply to new values.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>Valid input:</em></strong> An iterator to the replaced element. <strong><em>Input is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong> <a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"two"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
+<span class="go">[ 1, 'two', 3 ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no replacement can take place. This is the only circumstance in which this can occur.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ab1aca2337ffce7e583a2cf303f16259f"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename ElemType&gt;
+              </div>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab1aca2337ffce7e583a2cf303f16259f">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
+              ElemType&amp;&amp; default_init_val,
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> default_init_flags = <a class="m-doc" href="namespacetoml.html#a32f700b152e15c357801e905d626a4fb">preserve_<wbr/>source_<wbr/>value_<wbr/>flags</a>)</span></span>
+            </h3>
+            <p>Resizes the array.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ElemType</td>
+                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>new_size</td>
+                  <td>The number of elements the array will have after resizing.</td>
+                </tr>
+                <tr>
+                  <td>default_init_val</td>
+                  <td>The node or value used to initialize new elements if the array needs to grow.</td>
+                </tr>
+                <tr>
+                  <td>default_init_flags</td>
+                  <td>Value flags to apply to new values created if new elements are created by growing.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="poxy-external godbolt" href="https://godbolt.org/z/W5zqx3" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
+<span class="go">[ 1, 2, 3, 42, 42, 42 ]</span>
+<span class="go">[ 1, 2 ]</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a6e3ac9962c706a88c1001ff83a4084f3"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span></span>
+            </h3>
+            <p>Shrinks the array to the given size.</p>
+<pre class="m-code"><p class="m-note m-success godbolt"><a class="poxy-external godbolt" href="https://godbolt.org/z/rxEzK5" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// no-op</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
+<span class="go">[ 1, 2, 3 ]</span>
+<span class="go">[ 1]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Does nothing if the requested size is larger than or equal to the current size.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a79a1fe77c03b33ea2b9d8d0a859c93e6"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a79a1fe77c03b33ea2b9d8d0a859c93e6">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks if the node contains values/elements of only one type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ntype</td>
+                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?" <strong><em>Anything else:</em></strong> "is every element one of these?"</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the node was homogeneous.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">none</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all floats: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">floating_point</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">array</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all ints:   "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">integer</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
+<span class="go">all floats:  false</span>
+<span class="go">all arrays:  false</span>
+<span class="go">all ints:    true</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ae4e986f9fdb23090f9a0b3716a63e8bb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae4e986f9fdb23090f9a0b3716a63e8bb">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Checks if a node contains values/elements of only one type.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">ntype</td>
+                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?" <strong><em>Anything else:</em></strong> "is every element one of these?"</td>
+                </tr>
+                <tr>
+                  <td>first_nonmatch</td>
+                  <td>Reference to a pointer in which the address of the first non-matching element will be stored if the return value is false.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>True if the node was homogeneous.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3, 4.0 ]"</span><span class="p">);</span>
+<span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&amp;</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">*</span><span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">as_array</span><span class="p">();</span>
+
+<span class="ns">toml</span><span class="o">::</span><span class="ut">node</span><span class="o">*</span> <span class="n">nonmatch</span><span class="p">{};</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">integer</span><span class="p">,</span> <span class="n">nonmatch</span><span class="p">))</span>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was homogeneous"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="k">else</span>
+    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was not homogeneous!</span><span class="se">\n</span><span class="s">"</span>
+    <span class="o">&lt;&lt;</span> <span class="s">"first non-match was a "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" at "</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">array was not homogeneous!</span>
+<span class="go">first non-match was a floating-point at line 1, column 18</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="a10664e00054ea4021fec5144b69b8792"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node.html">node</a>* toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a10664e00054ea4021fec5144b69b8792">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Gets the element at a specific index.</p>
+            <p>Gets a pointer to the element at a specific index.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -862,7 +1506,7 @@
             <h3>
               <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node.html">node</a>* toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a44db509dce6b7b77e563c822a5936abe">get</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Gets the element at a specific index (const overload).</p>
+            <p>Gets a pointer to the element at a specific index (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -888,7 +1532,7 @@
               </div>
               <span class="m-doc-wrap-bumper">impl::wrap_node&lt;ElemType&gt;* toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5c2f4624498cba9e1e467b0eb2e9046e">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Gets the element at a specific index if it is a particular type.</p>
+            <p>Gets a pointer to the element at a specific index if it is a particular type.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -926,7 +1570,7 @@
               </div>
               <span class="m-doc-wrap-bumper">const impl::wrap_node&lt;ElemType&gt;* toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae47ca1cc4c61e94fed30aea72ca8d268">get_as</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Gets the element at a specific index if it is a particular type (const overload).</p>
+            <p>Gets a pointer to the element at a specific index if it is a particular type (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Template parameters</th></tr>
@@ -954,410 +1598,13 @@
               </tfoot>
             </table>
           </div></section>
-          <section class="m-doc-details" id="ab44c0e3568a683bc6d53c8f5b11abb88"><div>
+          <section class="m-doc-details" id="af1fae5bb4ad4da74199f0a77170c505e"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab44c0e3568a683bc6d53c8f5b11abb88">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              ElemType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af1fae5bb4ad4da74199f0a77170c505e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs)</span></span>
             </h3>
-            <p>Inserts a new element at a specific position in the array.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>pos</td>
-                  <td>The insertion position.</td>
-                </tr>
-                <tr>
-                  <td>val</td>
-                  <td>The node or value being inserted.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><strong><em>Valid input:</em></strong> An iterator to the newly-inserted element. <strong><em>Input is an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong> <a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="s">"two"</span><span class="p">);</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cend</span><span class="p">(),</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">});</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 'two', 3, [ 4, 5 ] ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="aa454d276f2935b1e2b5c2caec9bc2a0d"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa454d276f2935b1e2b5c2caec9bc2a0d">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> count,
-              ElemType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Repeatedly inserts a new element starting at a specific position in the array.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>pos</td>
-                  <td>The insertion position.</td>
-                </tr>
-                <tr>
-                  <td>count</td>
-                  <td>The number of times the node or value should be inserted.</td>
-                </tr>
-                <tr>
-                  <td>val</td>
-                  <td>The node or value being inserted.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><strong><em>Valid input:</em></strong> An iterator to the newly-inserted element. <strong><em>count == 0:</em></strong> A copy of pos <strong><em>Input is an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong> <a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span>
-    <span class="s">"with an evil twinkle in its eye the goose said"</span><span class="p">,</span>
-    <span class="s">"and immediately we knew peace was never an option."</span>
-<span class="p">};</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="s">"honk"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[</span>
-<span class="go">    'with an evil twinkle in its eye the goose said',</span>
-<span class="go">    'honk',</span>
-<span class="go">    'honk',</span>
-<span class="go">    'honk',</span>
-<span class="go">    'and immediately we knew peace was never an option.'</span>
-<span class="go">]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="classtoml_1_1array.html#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a311fed9b54b87daab0646fbc1818170b"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename Iter&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a311fed9b54b87daab0646fbc1818170b">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              Iter first,
-              Iter last) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Inserts a range of elements into the array at a specific position.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">Iter</td>
-                  <td>An iterator type. Must satisfy <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/ForwardIterator" target="_blank">ForwardIterator</a>.</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>pos</td>
-                  <td>The insertion position.</td>
-                </tr>
-                <tr>
-                  <td>first</td>
-                  <td>Iterator to the first node or value being inserted.</td>
-                </tr>
-                <tr>
-                  <td>last</td>
-                  <td>Iterator to the one-past-the-last node or value being inserted.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><strong><em>Valid input:</em></strong> An iterator to the first newly-inserted element. <strong><em>first &gt;= last:</em></strong> A copy of pos <strong><em>All objects in the range were empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_views</a>:</em></strong> A copy of pos</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a87500f1ea51f3b42dadc686a3e128fea"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a87500f1ea51f3b42dadc686a3e128fea">insert</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/initializer_list.html" target="_blank">std::<wbr/>initializer_list</a>&lt;ElemType&gt; ilist) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Inserts a range of elements into the array at a specific position.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>pos</td>
-                  <td>The insertion position.</td>
-                </tr>
-                <tr>
-                  <td>ilist</td>
-                  <td>An initializer list containing the values to be inserted.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td><strong><em>Valid input:</em></strong> An iterator to the first newly-inserted element. <strong><em>Input list is empty:</em></strong> A copy of pos <strong><em>All objects in the list were empty <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_views</a>:</em></strong> A copy of pos</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a2b3315295340dc76b69ce916d31fec35"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2b3315295340dc76b69ce916d31fec35">push_back</a>(</span><span class="m-doc-wrap">ElemType&amp;&amp; val) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Appends a new element to the end of the array.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>val</td>
-                  <td>The node or value being added.</td>
-                </tr>
-              </tbody>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="p">};</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mf">4.0</span><span class="p">);</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">5</span><span class="p">,</span> <span class="s">"six"</span><span class="sa">sv</span> <span class="p">});</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3, 4.0, [ 5, 'six' ] ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>No insertion takes place if the input value is an empty <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>. This is the only circumstance in which this can occur.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="a8694e01e9b0b1c5b9152518137d5b971"><div>
-            <h3>
-              <div class="m-doc-template">
-                template&lt;typename ElemType&gt;
-              </div>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8694e01e9b0b1c5b9152518137d5b971">resize</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size,
-              ElemType&amp;&amp; default_init_val) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Resizes the array.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ElemType</td>
-                  <td><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type (or a type promotable to one).</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>new_size</td>
-                  <td>The number of elements the array will have after resizing.</td>
-                </tr>
-                <tr>
-                  <td>default_init_val</td>
-                  <td>The node or value used to initialize new elements if the array needs to grow.</td>
-                </tr>
-              </tbody>
-            </table>
-<pre class="m-code"><p class="m-note m-success godbolt"><a class="poxy-external godbolt" href="https://godbolt.org/z/W5zqx3" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-
-<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">42</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-
-<span class="n">arr</span><span class="p">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
-<span class="go">[ 1, 2, 3, 42, 42, 42 ]</span>
-<span class="go">[ 1, 2 ]</span></pre>
-          </div></section>
-          <section class="m-doc-details" id="a6e3ac9962c706a88c1001ff83a4084f3"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">void toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6e3ac9962c706a88c1001ff83a4084f3">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_size)</span></span>
-            </h3>
-            <p>Shrinks the array to the given size.</p>
-<pre class="m-code"><p class="m-note m-success godbolt"><a class="poxy-external godbolt" href="https://godbolt.org/z/rxEzK5" target="_blank">Try this code on Compiler Explorer</a></p><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-
-<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// no-op</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-
-<span class="n">arr</span><span class="p">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
-<span class="go">[ 1, 2, 3 ]</span>
-<span class="go">[ 1]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Does nothing if the requested size is larger than or equal to the current size.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="af06c7437a0946a9d5e093d903b59f6a4"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af06c7437a0946a9d5e093d903b59f6a4">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Inequality operator.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The LHS array.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The RHS array.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if the arrays did not contain the same elements.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a06cf25e3f80c98d88e041ef9823976c0"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a06cf25e3f80c98d88e041ef9823976c0">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Equality operator.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">lhs</td>
-                  <td>The LHS array.</td>
-                </tr>
-                <tr>
-                  <td>rhs</td>
-                  <td>The RHS array.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if the arrays contained the same elements.</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div></section>
-          <section class="m-doc-details" id="a628574d1e47440545019a3467be64fdc"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a628574d1e47440545019a3467be64fdc">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Checks if the node contains values/elements of only one type.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ntype</td>
-                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?" <strong><em>Anything else:</em></strong> "is every element one of these?"</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if the node was homogeneous.</td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">none</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all floats: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">floating_point</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">array</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all ints:   "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">integer</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
-<span class="go">all floats:  false</span>
-<span class="go">all arrays:  false</span>
-<span class="go">all ints:    true</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="abff1c5e9bf3afb04ff16c15522aa55c4"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">bool toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abff1c5e9bf3afb04ff16c15522aa55c4">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
-              <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) <span class="m-label m-warning">override</span> <span class="m-label m-success">noexcept</span></span></span>
-            </h3>
-            <p>Checks if a node contains values/elements of only one type.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">ntype</td>
-                  <td>A TOML node type.<br/><strong><em><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">toml::<wbr/>node_type::<wbr/>none</a>:</em></strong> "is every element the same type?" <strong><em>Anything else:</em></strong> "is every element one of these?"</td>
-                </tr>
-                <tr>
-                  <td>first_nonmatch</td>
-                  <td>Reference to a pointer in which the address of the first non-matching element will be stored if the return value is false.</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr>
-                  <th>Returns</th>
-                  <td>True if the node was homogeneous.</td>
-                </tr>
-              </tfoot>
-            </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3, 4.0 ]"</span><span class="p">);</span>
-<span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&amp;</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">*</span><span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">as_array</span><span class="p">();</span>
-
-<span class="ns">toml</span><span class="o">::</span><span class="ut">node</span><span class="o">*</span> <span class="n">nonmatch</span><span class="p">{};</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="ut">node_type</span><span class="o">::</span><span class="ne">integer</span><span class="p">,</span> <span class="n">nonmatch</span><span class="p">))</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was homogeneous"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="k">else</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was not homogeneous!</span><span class="se">\n</span><span class="s">"</span>
-    <span class="o">&lt;&lt;</span> <span class="s">"first non-match was a "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" at "</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">array was not homogeneous!</span>
-<span class="go">first non-match was a floating-point at line 1, column 18</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
+            <p>Prints the array out to a stream as formatted TOML.</p>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This operator is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside>
           </div></section>
         </section>
       </div>

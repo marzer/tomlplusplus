@@ -67,12 +67,30 @@
             <li>
               Reference
               <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
                 <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
         </div>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a460d6626a20b992f38c676bf5ee62a20">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a460d6626a20b992f38c676bf5ee62a20">time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor. Does not initialize the members.</dd>
+            <dt id="acaec3dc6784706c57cc712ab403123e6">
+              <div class="m-doc-template">template&lt;typename H, typename M, typename S = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>, typename NS = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a>&gt;</div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acaec3dc6784706c57cc712ab403123e6">time</a>(</span><span class="m-doc-wrap">H h,
+              M m,
+              S s = S{},
+              NS ns = NS{}) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructs a time from individual time component values.</dd>
+          </dl>
+        </section>
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
@@ -98,14 +116,19 @@
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
-            <dt id="a6e53cc30a5701a18713e853d8abd4b20">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6e53cc30a5701a18713e853d8abd4b20">operator&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time.html">time</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time.html">time</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a220d5428532dc59f1846f29159430be8">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a220d5428532dc59f1846f29159430be8">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Less-than operator.</dd>
-            <dt id="a108b128e5d6a831b110909e4f18c1cbb">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a108b128e5d6a831b110909e4f18c1cbb">operator&lt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time.html">time</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time.html">time</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            </dt>
+            <dd>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</dd>
+            <dt id="a459d4906732bd6c6129de62f1c601a60">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a459d4906732bd6c6129de62f1c601a60">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Less-than-or-equal-to operator.</dd>
             <dt id="aa88d156f8ea405513e00702b3c88de2f">
@@ -113,17 +136,30 @@
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Equality operator.</dd>
-            <dt id="aaba3d9a66b122ab5a10a359d95d0171c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aaba3d9a66b122ab5a10a359d95d0171c">operator&gt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time.html">time</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time.html">time</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a8564e5d443652ec48b50acedee1ab64c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8564e5d443652ec48b50acedee1ab64c">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Greater-than operator.</dd>
-            <dt id="a59c7d66cd934fe5af4f85e2fdd1a3892">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a59c7d66cd934fe5af4f85e2fdd1a3892">operator&gt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time.html">time</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time.html">time</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="ae551c63caf265a78d5a73c797ee538f5">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae551c63caf265a78d5a73c797ee538f5">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Greater-than-or-equal-to operator.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="aad81b91942de3b3f2d54656c8a686ee7"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</p>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">34</span><span class="p">,</span> <span class="mi">500000000</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">10:20:34</span>
+<span class="go">10:20:34.5</span></pre>
+          </div></section>
         </section>
       </div>
     </div>

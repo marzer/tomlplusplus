@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en"><head>
   <meta charset="utf-8"/>
-  <title>toml::json_formatter class | toml++ TOML for C++</title>
+  <title>toml::yaml_formatter class | toml++ TOML for C++</title>
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
   <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
   <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
@@ -58,9 +58,9 @@
     <div class="m-row">
       <div class="m-col-l-10 m-push-l-1">
         <h1>
-          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>json_formatter <span class="m-thin">class</span>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>yaml_formatter <span class="m-thin">class</span>
         </h1>
-        <p>A wrapper for printing TOML objects out to a stream as formatted JSON.</p>
+        <p>A wrapper for printing TOML objects out to a stream as formatted YAML.</p>
         <div class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
@@ -82,66 +82,60 @@
 <span class="s">    [fruit.apple.texture]</span>
 <span class="s">    smooth = true</span>
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{</span>
-<span class="go">    "fruit" : {</span>
-<span class="go">        "apple" : {</span>
-<span class="go">            "color" : "red",</span>
-<span class="go">            "taste" : {</span>
-<span class="go">                "sweet" : true</span>
-<span class="go">            },</span>
-<span class="go">            "texture" : {</span>
-<span class="go">                "smooth" : true</span>
-<span class="go">            }</span>
-<span class="go">        }</span>
-<span class="go">    }</span>
-<span class="go">}</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">fruit:</span>
+<span class="go">  apple:</span>
+<span class="go">    color: red</span>
+<span class="go">    taste:</span>
+<span class="go">      sweet: true</span>
+<span class="go">    texture:</span>
+<span class="go">      smooth: true</span></pre>
         <section id="pub-static-attribs">
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
-            <dt id="a4541a4662894ce8936f6f2c3ab90fe2e">
-              static <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> <a class="m-doc-self" href="#a4541a4662894ce8936f6f2c3ab90fe2e">default_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
+            <dt id="af161f0a6c794945e85b210ee85cb78e9">
+              static <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> <a class="m-doc-self" href="#af161f0a6c794945e85b210ee85cb78e9">default_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>The default flags for a <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>.</dd>
+            <dd>The default flags for a <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>.</dd>
           </dl>
         </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ade267ecca82e3bbac3d1392abab91be9">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#a4541a4662894ce8936f6f2c3ab90fe2e">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a0089cdd517d9f6641ed10c8ddb5b1c11">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
+              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Constructs a JSON formatter and binds it to a TOML object.</dd>
+            <dd>Constructs a YAML formatter and binds it to a TOML object.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a51785aa8ef373a9136e896fafabd53be">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#a4541a4662894ce8936f6f2c3ab90fe2e">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a2eb50c4983f7ec26a417befeface23bf">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
+              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Constructs a JSON formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</dd>
+            <dd>Constructs a YAML formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</dd>
           </dl>
         </section>
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a2b88bc230c589c1fad25ffd8df96b74e">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2b88bc230c589c1fad25ffd8df96b74e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            <dt id="a10b0c89256eb2ab4ea2b4e23f8ad8eff">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10b0c89256eb2ab4ea2b4e23f8ad8eff">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
-            <dd>Prints the bound TOML object out to the stream as JSON.</dd>
-            <dt id="a5eefe4e5ca640b12fbb09fd521eab335">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5eefe4e5ca640b12fbb09fd521eab335">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              <a class="m-doc" href="classtoml_1_1json__formatter.html">json_<wbr/>formatter</a>&amp;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            <dd>Prints the bound TOML object out to the stream as YAML.</dd>
+            <dt id="a50d463617bccb66a9cdf01390321bd47">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a50d463617bccb66a9cdf01390321bd47">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>&amp;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
-            <dd>Prints the bound TOML object out to the stream as JSON (rvalue overload).</dd>
+            <dd>Prints the bound TOML object out to the stream as YAML (rvalue overload).</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ade267ecca82e3bbac3d1392abab91be9"><div>
+          <section class="m-doc-details" id="a0089cdd517d9f6641ed10c8ddb5b1c11"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> toml::<wbr/>json_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ade267ecca82e3bbac3d1392abab91be9">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#a4541a4662894ce8936f6f2c3ab90fe2e">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>yaml_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0089cdd517d9f6641ed10c8ddb5b1c11">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
+              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Constructs a JSON formatter and binds it to a TOML object.</p>
+            <p>Constructs a YAML formatter and binds it to a TOML object.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -158,12 +152,12 @@
               </tbody>
             </table>
           </div></section>
-          <section class="m-doc-details" id="a51785aa8ef373a9136e896fafabd53be"><div>
+          <section class="m-doc-details" id="a2eb50c4983f7ec26a417befeface23bf"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"> toml::<wbr/>json_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a51785aa8ef373a9136e896fafabd53be">json_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1json__formatter.html#a4541a4662894ce8936f6f2c3ab90fe2e">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>yaml_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2eb50c4983f7ec26a417befeface23bf">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
+              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Constructs a JSON formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</p>
+            <p>Constructs a YAML formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -179,12 +173,10 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid JSON, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid YAML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
           <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
-          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">json_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
-          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">{</span>
-<span class="go">    "a" : "b"</span>
-<span class="go">}</span>
+          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
+          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a: b</span>
 
 <span class="go">Error while parsing key-value pair: encountered end-of-file</span>
 <span class="go">        (error occurred at line 1, column 5)</span></pre><p>Use the library with exceptions if you want to avoid this scenario.</p></aside>
