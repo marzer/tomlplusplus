@@ -7,87 +7,214 @@
 
 #ifdef _WIN32
 TOML_DISABLE_WARNINGS;
-#include <windows.h>
+#include <Windows.h>
 TOML_ENABLE_WARNINGS;
 #endif
-
-TOML_DISABLE_SPAM_WARNINGS;
 
 template <typename T>
 static constexpr T one = static_cast<T>(1);
 
 TEST_CASE("values - construction")
 {
-	#define CHECK_VALUE_INIT2(initializer, target_type, equiv)				\
-	do {																	\
-		auto v = value{ initializer };										\
-		static_assert(std::is_same_v<decltype(v), value<target_type>>);		\
-		CHECK(v == equiv);													\
-		CHECK(equiv == v);													\
-		CHECK(*v == equiv);													\
-		CHECK(v.get() == equiv);											\
-		CHECK(v.is_homogeneous());											\
-		CHECK(v.is_homogeneous<target_type>());								\
-		CHECK(v.is_homogeneous(impl::node_type_of<target_type>));			\
-	} while (false)
+	static constexpr auto check_value = [](const auto& init_value, auto expected_native_type_tag)
+	{
+		using init_type			   = impl::remove_cvref<decltype(init_value)>;
+		using native_type		   = impl::native_type_of<init_type>;
+		using expected_native_type = typename decltype(expected_native_type_tag)::type;
+		static_assert(std::is_same_v<native_type, expected_native_type>);
 
-	#define CHECK_VALUE_INIT(initializer, target_type)						\
-		CHECK_VALUE_INIT2(initializer, target_type, initializer)
+		auto v			 = value{ init_value };
+		using value_type = decltype(v);
+		static_assert(std::is_same_v<value_type, value<native_type>>);
 
-	CHECK_VALUE_INIT(one<signed char>,			int64_t);
-	CHECK_VALUE_INIT(one<signed short>,			int64_t);
-	CHECK_VALUE_INIT(one<signed int>,			int64_t);
-	CHECK_VALUE_INIT(one<signed long>,			int64_t);
-	CHECK_VALUE_INIT(one<signed long long>,		int64_t);
-	CHECK_VALUE_INIT2(one<unsigned char>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned short>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned int>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned long>,		int64_t,		1u);
-	CHECK_VALUE_INIT2(one<unsigned long long>,	int64_t,		1u);
-	CHECK_VALUE_INIT(true,						bool);
-	CHECK_VALUE_INIT(false,						bool);
-	CHECK_VALUE_INIT("kek",						std::string);
-	CHECK_VALUE_INIT("kek"s,					std::string);
-	CHECK_VALUE_INIT("kek"sv,					std::string);
-	CHECK_VALUE_INIT2("kek"sv.data(),			std::string,	"kek"sv);
-	#if TOML_HAS_CHAR8
-	CHECK_VALUE_INIT2(u8"kek",					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"s,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"sv,				std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(u8"kek"sv.data(),			std::string,	"kek"sv);
-	#endif
+		if constexpr (std::is_same_v<std::string, native_type>)
+		{
+#if TOML_HAS_CHAR8
+			using char8_type = char8_t;
+#else
+			using char8_type = char;
+#endif
 
-	#ifdef _WIN32
-	CHECK_VALUE_INIT(one<BOOL>,					int64_t);
-	CHECK_VALUE_INIT(one<SHORT>,				int64_t);
-	CHECK_VALUE_INIT(one<INT>,					int64_t);
-	CHECK_VALUE_INIT(one<LONG>,					int64_t);
-	CHECK_VALUE_INIT(one<INT_PTR>,				int64_t);
-	CHECK_VALUE_INIT(one<LONG_PTR>,				int64_t);
-	CHECK_VALUE_INIT2(one<USHORT>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<UINT>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<ULONG>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<UINT_PTR>,			int64_t,		1u);
-	CHECK_VALUE_INIT2(one<ULONG_PTR>,			int64_t,		1u);
-	CHECK_VALUE_INIT2(one<WORD>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD32>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORD64>,				int64_t,		1u);
-	CHECK_VALUE_INIT2(one<DWORDLONG>,			int64_t,		1u);
+			using init_char_type = impl::remove_cvref<decltype(init_value[0])>;
+			using init_view_type = std::basic_string_view<init_char_type>;
+			static_assert(impl::is_one_of<init_char_type, char, wchar_t, char8_type>);
 
-	#if TOML_WINDOWS_COMPAT
- 
-	CHECK_VALUE_INIT2(L"kek",					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"s,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv,					std::string,	"kek"sv);
-	CHECK_VALUE_INIT2(L"kek"sv.data(),			std::string,	"kek"sv);
-	
-	#endif // TOML_WINDOWS_COMPAT
+			const auto init_view = init_view_type{ init_value };
+			if constexpr (impl::is_one_of<init_char_type, char, char8_type>)
+			{
+				const auto coerced_view =
+					std::string_view{ reinterpret_cast<const char*>(init_view.data()), init_view.length() };
 
-	#endif
+				CHECK(v == coerced_view);
+				CHECK(coerced_view == v);
+			}
+#if TOML_ENABLE_WINDOWS_COMPAT
+			else if constexpr (impl::is_one_of<init_char_type, wchar_t>)
+			{
+				const auto narrowed_string = impl::narrow(init_view);
+
+				CHECK(v == narrowed_string);
+				CHECK(narrowed_string == v);
+			}
+#endif
+			else
+			{
+				static_assert(impl::dependent_false<init_char_type>, "evaluated unreachable branch");
+			}
+		}
+		else if constexpr (impl::is_one_of<native_type, int64_t, double, bool>)
+		{
+			CHECK(v == static_cast<native_type>(init_value));
+			CHECK(static_cast<native_type>(init_value) == v);
+		}
+		else // dates + times
+		{
+			CHECK(v == init_value);
+			CHECK(init_value == v);
+		}
+
+		static constexpr auto expected_node_type = impl::node_type_of<native_type>;
+
+		CHECK(v.is_homogeneous());
+		CHECK(v.template is_homogeneous<native_type>());
+		CHECK(v.is_homogeneous(expected_node_type));
+
+		// sanity check the virtual type checks
+		CHECK(v.type() == expected_node_type);
+		CHECK(!v.is_table());
+		CHECK(!v.is_array());
+		CHECK(!v.is_array_of_tables());
+		CHECK(v.is_value());
+		CHECK(v.is_string() == (expected_node_type == node_type::string));
+		CHECK(v.is_integer() == (expected_node_type == node_type::integer));
+		CHECK(v.is_floating_point() == (expected_node_type == node_type::floating_point));
+		CHECK(v.is_number()
+			  == (expected_node_type == node_type::integer || expected_node_type == node_type::floating_point));
+		CHECK(v.is_boolean() == (expected_node_type == node_type::boolean));
+		CHECK(v.is_date() == (expected_node_type == node_type::date));
+		CHECK(v.is_time() == (expected_node_type == node_type::time));
+		CHECK(v.is_date_time() == (expected_node_type == node_type::date_time));
+
+		// sanity check the virtual type casts (non-const)
+		CHECK(!v.as_table());
+		CHECK(!v.as_array());
+		if constexpr (expected_node_type == node_type::string)
+			CHECK(v.as_string() == &v);
+		else
+			CHECK(!v.as_string());
+		if constexpr (expected_node_type == node_type::integer)
+			CHECK(v.as_integer() == &v);
+		else
+			CHECK(!v.as_integer());
+		if constexpr (expected_node_type == node_type::floating_point)
+			CHECK(v.as_floating_point() == &v);
+		else
+			CHECK(!v.as_floating_point());
+		if constexpr (expected_node_type == node_type::boolean)
+			CHECK(v.as_boolean() == &v);
+		else
+			CHECK(!v.as_boolean());
+		if constexpr (expected_node_type == node_type::date)
+			CHECK(v.as_date() == &v);
+		else
+			CHECK(!v.as_date());
+		if constexpr (expected_node_type == node_type::time)
+			CHECK(v.as_time() == &v);
+		else
+			CHECK(!v.as_time());
+		if constexpr (expected_node_type == node_type::date_time)
+			CHECK(v.as_date_time() == &v);
+		else
+			CHECK(!v.as_date_time());
+
+		// sanity check the virtual type casts (const)
+		const auto& cv = std::as_const(v);
+		CHECK(!cv.as_table());
+		CHECK(!cv.as_array());
+		if constexpr (expected_node_type == node_type::string)
+			CHECK(cv.as_string() == &v);
+		else
+			CHECK(!cv.as_string());
+		if constexpr (expected_node_type == node_type::integer)
+			CHECK(cv.as_integer() == &v);
+		else
+			CHECK(!cv.as_integer());
+		if constexpr (expected_node_type == node_type::floating_point)
+			CHECK(cv.as_floating_point() == &v);
+		else
+			CHECK(!cv.as_floating_point());
+		if constexpr (expected_node_type == node_type::boolean)
+			CHECK(cv.as_boolean() == &v);
+		else
+			CHECK(!cv.as_boolean());
+		if constexpr (expected_node_type == node_type::date)
+			CHECK(cv.as_date() == &v);
+		else
+			CHECK(!cv.as_date());
+		if constexpr (expected_node_type == node_type::time)
+			CHECK(cv.as_time() == &v);
+		else
+			CHECK(!cv.as_time());
+		if constexpr (expected_node_type == node_type::date_time)
+			CHECK(cv.as_date_time() == &v);
+		else
+			CHECK(!cv.as_date_time());
+	};
+
+	check_value(one<signed char>, type_tag<int64_t>{});
+	check_value(one<signed short>, type_tag<int64_t>{});
+	check_value(one<signed int>, type_tag<int64_t>{});
+	check_value(one<signed long>, type_tag<int64_t>{});
+	check_value(one<signed long long>, type_tag<int64_t>{});
+	check_value(one<unsigned char>, type_tag<int64_t>{});
+	check_value(one<unsigned short>, type_tag<int64_t>{});
+	check_value(one<unsigned int>, type_tag<int64_t>{});
+	check_value(one<unsigned long>, type_tag<int64_t>{});
+	check_value(one<unsigned long long>, type_tag<int64_t>{});
+	check_value(true, type_tag<bool>{});
+	check_value(false, type_tag<bool>{});
+	check_value("kek", type_tag<std::string>{});
+	check_value("kek"s, type_tag<std::string>{});
+	check_value("kek"sv, type_tag<std::string>{});
+	check_value("kek"sv.data(), type_tag<std::string>{});
+#if TOML_HAS_CHAR8
+	check_value(u8"kek", type_tag<std::string>{});
+	check_value(u8"kek"s, type_tag<std::string>{});
+	check_value(u8"kek"sv, type_tag<std::string>{});
+	check_value(u8"kek"sv.data(), type_tag<std::string>{});
+#endif
+
+#ifdef _WIN32
+	check_value(one<BOOL>, type_tag<int64_t>{});
+	check_value(one<SHORT>, type_tag<int64_t>{});
+	check_value(one<INT>, type_tag<int64_t>{});
+	check_value(one<LONG>, type_tag<int64_t>{});
+	check_value(one<INT_PTR>, type_tag<int64_t>{});
+	check_value(one<LONG_PTR>, type_tag<int64_t>{});
+	check_value(one<USHORT>, type_tag<int64_t>{});
+	check_value(one<UINT>, type_tag<int64_t>{});
+	check_value(one<ULONG>, type_tag<int64_t>{});
+	check_value(one<UINT_PTR>, type_tag<int64_t>{});
+	check_value(one<ULONG_PTR>, type_tag<int64_t>{});
+	check_value(one<WORD>, type_tag<int64_t>{});
+	check_value(one<DWORD>, type_tag<int64_t>{});
+	check_value(one<DWORD32>, type_tag<int64_t>{});
+	check_value(one<DWORD64>, type_tag<int64_t>{});
+	check_value(one<DWORDLONG>, type_tag<int64_t>{});
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	check_value(L"kek", type_tag<std::string>{});
+	check_value(L"kek"s, type_tag<std::string>{});
+	check_value(L"kek"sv, type_tag<std::string>{});
+	check_value(L"kek"sv.data(), type_tag<std::string>{});
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
+#endif
 }
 
-TEST_CASE("values - printing")
+TEST_CASE("values - toml_formatter")
 {
 	static constexpr auto print_value = [](auto&& raw)
 	{
@@ -132,10 +259,8 @@ TEST_CASE("values - printing")
 
 TEST_CASE("nodes - value() int/float/bool conversions")
 {
-	#define CHECK_VALUE_PASS(type, v) \
-		CHECK(n.value<type>() == static_cast<type>(v))
-	#define CHECK_VALUE_FAIL(type) \
-		CHECK(!n.value<type>())
+#define CHECK_VALUE_PASS(type, v) CHECK(n.value<type>() == static_cast<type>(v))
+#define CHECK_VALUE_FAIL(type)	  CHECK(!n.value<type>())
 
 	// bools
 	{
@@ -327,7 +452,6 @@ TEST_CASE("nodes - value() int/float/bool conversions")
 		CHECK_VALUE_FAIL(toml::date);
 		CHECK_VALUE_FAIL(toml::time);
 		CHECK_VALUE_FAIL(toml::date_time);
-
 
 		*val = 1.0;
 		CHECK_VALUE_FAIL(bool);

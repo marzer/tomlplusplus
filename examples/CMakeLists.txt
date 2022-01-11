@@ -20,6 +20,7 @@ function(add_example name)
 endfunction()
 
 add_example(error_printer)
+add_example(parse_benchmark)
 add_example(simple_parser ARGS "${PROJECT_SOURCE_DIR}/example.toml")
 add_example(toml_generator ARGS 100)
 add_example(toml_to_json_transcoder ARGS "${PROJECT_SOURCE_DIR}/example.toml")

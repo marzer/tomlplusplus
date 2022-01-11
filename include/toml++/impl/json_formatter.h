@@ -2,18 +2,19 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
-#include "formatter.h"
-#include "table.h"
-#include "array.h"
 
-TOML_PUSH_WARNINGS;
-TOML_DISABLE_SWITCH_WARNINGS;
+#include "preprocessor.h"
+#if TOML_ENABLE_FORMATTERS
+
+#include "formatter.h"
+#include "header_start.h"
 
 TOML_NAMESPACE_START
 {
 	/// \brief	A wrapper for printing TOML objects out to a stream as formatted JSON.
+	///
+	/// \availability This class is only available when #TOML_ENABLE_FORMATTERS is enabled.
 	///
 	/// \detail \cpp
 	/// auto some_toml = toml::parse(R"(
@@ -25,7 +26,6 @@ TOML_NAMESPACE_START
 	///		smooth = true
 	/// )"sv);
 	///	std::cout << toml::json_formatter{ some_toml } << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -43,71 +43,40 @@ TOML_NAMESPACE_START
 	///     }
 	/// }
 	/// \eout
-	///
-	/// \tparam	Char	The underlying character type of the output stream. Must be 1 byte in size.
-	template <typename Char = char>
-	class TOML_API json_formatter final : impl::formatter<Char>
+	class json_formatter : impl::formatter
 	{
 	  private:
 		/// \cond
 
-		using base = impl::formatter<Char>;
+		using base = impl::formatter;
 
-		void print(const toml::table& tbl);
+		TOML_API
+		void print(const toml::table&);
 
-		void print(const array& arr)
-		{
-			if (arr.empty())
-				impl::print_to_stream("[]"sv, base::stream());
-			else
-			{
-				impl::print_to_stream('[', base::stream());
-				base::increase_indent();
-				for (size_t i = 0; i < arr.size(); i++)
-				{
-					if (i > 0_sz)
-						impl::print_to_stream(',', base::stream());
-					base::print_newline(true);
-					base::print_indent();
+		TOML_API
+		void print(const toml::array&);
 
-					auto& v			= arr[i];
-					const auto type = v.type();
-					TOML_ASSUME(type != node_type::none);
-					switch (type)
-					{
-						case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-						case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-						default: base::print_value(v, type);
-					}
-				}
-				base::decrease_indent();
-				base::print_newline(true);
-				base::print_indent();
-				impl::print_to_stream(']', base::stream());
-			}
-			base::clear_naked_newline();
-		}
+		TOML_API
+		void print();
 
-		void print()
-		{
-			if (base::dump_failed_parse_result())
-				return;
-
-			switch (auto source_type = base::source().type())
-			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&base::source())); break;
-
-				case node_type::array: print(*reinterpret_cast<const array*>(&base::source())); break;
-
-				default: base::print_value(base::source(), source_type);
-			}
-		}
+		static constexpr impl::formatter_constants constants = {
+			format_flags::quote_dates_and_times,										  // mandatory
+			format_flags::allow_literal_strings | format_flags::allow_multi_line_strings, // ignored
+			"Infinity"sv,
+			"-Infinity"sv,
+			"NaN"sv,
+			"true"sv,
+			"false"sv
+		};
 
 		/// \endcond
 
 	  public:
 		/// \brief	The default flags for a json_formatter.
-		static constexpr format_flags default_flags = format_flags::quote_dates_and_times;
+		static constexpr format_flags default_flags = constants.mandatory_flags				  //
+													| format_flags::quote_infinities_and_nans //
+													| format_flags::allow_unicode_strings	  //
+													| format_flags::indentation;
 
 		/// \brief	Constructs a JSON formatter and binds it to a TOML object.
 		///
@@ -115,10 +84,10 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::node& source, format_flags flags = default_flags) noexcept
-			: base{ source, flags }
+			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_PARSER && !TOML_EXCEPTIONS)
+#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		/// \brief	Constructs a JSON formatter and binds it to a toml::parse_result.
 		///
@@ -146,50 +115,28 @@ TOML_NAMESPACE_START
 		/// \param 	flags 	Format option flags.
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
-			: base{ result, flags }
+			: base{ nullptr, &result, constants, { flags, "    "sv } }
 		{}
 
 #endif
 
-		template <typename T, typename U>
-		friend std::basic_ostream<T>& operator<<(std::basic_ostream<T>&, json_formatter<U>&);
-		template <typename T, typename U>
-		friend std::basic_ostream<T>& operator<<(std::basic_ostream<T>&, json_formatter<U>&&);
+		/// \brief	Prints the bound TOML object out to the stream as JSON.
+		friend std::ostream& operator<<(std::ostream& lhs, json_formatter& rhs)
+		{
+			rhs.attach(lhs);
+			rhs.print();
+			rhs.detach();
+			return lhs;
+		}
+
+		/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
+		friend std::ostream& operator<<(std::ostream& lhs, json_formatter&& rhs)
+		{
+			return lhs << rhs; // as lvalue
+		}
 	};
-
-#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
-	extern template class TOML_API json_formatter<char>;
-#endif
-
-	json_formatter(const table&)->json_formatter<char>;
-	json_formatter(const array&)->json_formatter<char>;
-	template <typename T>
-	json_formatter(const value<T>&) -> json_formatter<char>;
-
-	/// \brief	Prints the bound TOML object out to the stream as JSON.
-	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator<<(std::basic_ostream<T>& lhs, json_formatter<U>& rhs)
-	{
-		rhs.attach(lhs);
-		rhs.print();
-		rhs.detach();
-		return lhs;
-	}
-
-	/// \brief	Prints the bound TOML object out to the stream as JSON (rvalue overload).
-	template <typename T, typename U>
-	inline std::basic_ostream<T>& operator<<(std::basic_ostream<T>& lhs, json_formatter<U>&& rhs)
-	{
-		return lhs << rhs; // as lvalue
-	}
-
-#if !defined(DOXYGEN) && !TOML_HEADER_ONLY
-	extern template TOML_API
-	std::ostream& operator<<(std::ostream&, json_formatter<char>&);
-	extern template TOML_API
-	std::ostream& operator<<(std::ostream&, json_formatter<char>&&);
-#endif
 }
 TOML_NAMESPACE_END;
 
-TOML_POP_WARNINGS; // TOML_DISABLE_SWITCH_WARNINGS
+#include "header_end.h"
+#endif // TOML_ENABLE_FORMATTERS

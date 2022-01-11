@@ -8,28 +8,30 @@
 
 #include "examples.h"
 
-#define TOML_EXCEPTIONS 0
-#define TOML_UNRELEASED_FEATURES 0
+#define TOML_EXCEPTIONS					0
+#define TOML_ENABLE_UNRELEASED_FEATURES 0
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;
 
 namespace
 {
-	inline constexpr auto invalid_parses = std::array
-	{
-		"########## comments"sv,
+	inline constexpr auto invalid_parses = std::array{
+		"########## comments and whitespace"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
 		"# \xf1\x63"sv,
+		"# val1 = 1\fval2 = 2"sv,
+		"foo = 1\n\u2000\nbar = 2"sv,
 
 		"########## inline tables"sv,
 		"val = {,}"sv,
-		"val = {a='b',}"sv,				// allowed when TOML_UNRELEASED_FEATURES == 1
+		"val = {a='b',}"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		"val = {a='b',,}"sv,
 		"val = {a='b',"sv,
-		"val = {a='b',\n c='d'}"sv,		// allowed when TOML_UNRELEASED_FEATURES == 1
+		"val = {a='b',\n c='d'}"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		"val = {?='b'}"sv,
+		"foo = {} \n [foo.bar]"sv,
 
 		"########## tables"sv,
 		"[]"sv,
@@ -69,7 +71,7 @@ namespace
 		"val = \" \r \""sv,
 		R"(val = ")"sv,
 		R"(val = "\g")"sv,
-		R"(val = "\x20")"sv,			// allowed when TOML_UNRELEASED_FEATURES == 1
+		R"(val = "\x20")"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 		R"(val = "\uFFF")"sv,
 		R"(val = "\uFFFG")"sv,
 		R"(val = "\UFFFFFFF")"sv,
@@ -92,12 +94,14 @@ namespace
 		R"(val = -+1)"sv,
 		R"(val = 1_0_)"sv,
 		R"(val = 1_0_ )"sv,
-		R"(val = 999999999999999999999999999999999999 )"sv,
-		R"(val = 9223372036854775808 )"sv,
 		R"(val = 01 )"sv,
+		R"(val = 0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000 )"sv,
+		R"(val = 0o1000000000000000000000 )"sv,
+		R"(val = 9223372036854775808 )"sv,
+		R"(val = 0x8000000000000000 )"sv,
 
 		"########## floats"sv,
-		R"(val = 9999999999999999999999999999999999999999999999999999999999999995.0)"sv,
+		R"(val = 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0)"sv,
 	};
 
 	inline constexpr auto divider =
@@ -106,8 +110,6 @@ namespace
 
 int main()
 {
-	examples::init();
-
 	for (auto str : invalid_parses)
 	{
 		if (str.empty())

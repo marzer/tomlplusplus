@@ -10,10 +10,10 @@ namespace leakproof
 	void value_destroyed() noexcept;
 }
 
-#define TOML_LIFETIME_HOOKS		1
-#define TOML_TABLE_CREATED		::leakproof::table_created()
-#define TOML_TABLE_DESTROYED	::leakproof::table_destroyed()
-#define TOML_ARRAY_CREATED		::leakproof::array_created()
-#define TOML_ARRAY_DESTROYED	::leakproof::array_destroyed()
-#define TOML_VALUE_CREATED		::leakproof::value_created()
-#define TOML_VALUE_DESTROYED	::leakproof::value_destroyed()
+#define TOML_LIFETIME_HOOKS	 1
+#define TOML_TABLE_CREATED	 ::leakproof::table_created()
+#define TOML_TABLE_DESTROYED ::leakproof::table_destroyed()
+#define TOML_ARRAY_CREATED	 ::leakproof::array_created()
+#define TOML_ARRAY_DESTROYED ::leakproof::array_destroyed()
+#define TOML_VALUE_CREATED	 ::leakproof::value_created()
+#define TOML_VALUE_DESTROYED ::leakproof::value_destroyed()

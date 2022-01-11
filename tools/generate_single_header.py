@@ -15,10 +15,11 @@ from io import StringIO
 
 class Preprocessor:
 
-	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)"', re.I | re.M)
+	__re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)".*?$', re.I | re.M)
+	__re_pragma_once = re.compile(r'^\s*#\s*pragma\s+once\s*$', re.M)
 
 	def __init__(self, file):
-		self.__processed_includes = []
+		self.__once_only = set()
 		self.__current_level = 0
 		self.__directory_stack = [ Path.cwd() ]
 		self.__entry_root = ''
@@ -32,16 +33,21 @@ class Preprocessor:
 			incl = Path(incl.strip().replace('\\',r'/'))
 		if not incl.is_absolute():
 			incl = Path(self.__directory_stack[-1], incl).resolve()
-		if incl in self.__processed_includes:
+		if incl in self.__once_only:
 			return ''
-		if self.__current_level == 0 and self.__entry_root == '':
-			self.__entry_root = str(incl.parent).replace('\\',r'/')
 
-		self.__processed_includes.append(incl)
-		self.__directory_stack.append(incl.parent)
 
 		text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
 		text = text.replace('\r\n', '\n') # convert windows newlines
+
+		self.__directory_stack.append(incl.parent)
+		if self.__re_pragma_once.search(text):
+			self.__once_only.add(incl)
+		if self.__current_level == 0 and self.__entry_root == '':
+			self.__entry_root = str(incl.parent).replace('\\',r'/')
+		if self.__current_level > 0:
+			text = self.__re_pragma_once.sub('', text)
+
 		self.__current_level += 1
 		text = self.__re_includes.sub(lambda m : self.__preprocess(m), text, 0)
 		self.__current_level -= 1
@@ -51,7 +57,7 @@ class Preprocessor:
 			if header.startswith(self.__entry_root):
 				header = header[len(self.__entry_root):].strip('/')
 			header = utils.make_divider(header, 10, pattern = r'*')
-			text = f'{header}\n\n{text}'
+			text = f'\n\n{header}\n\n{text}'
 
 		self.__directory_stack.pop()
 		return '\n\n' + text + '\n\n'
@@ -72,30 +78,34 @@ def main():
 
 	# strip various things:
 	if 1:
-		# 'pragma once'
-		toml_h = re.sub(r'^\s*#\s*pragma\s+once\s*$', '', toml_h, 0, re.I | re.M)
-		# trailing whitespace
-		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
-		# explicit 'strip this' blocks
-		toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
-		# spdx license identifiers
-		toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, 0, re.I | re.M)
-		# magic comments
-		blank_line = r'(?:[ \t]*\n)'
-		comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
-		toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
-		toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
-		toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
-		# trailing whitespace
-		toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
-		# double blank lines
-		toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
-		# weird spacing edge case between } and pp directives
-		toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
-		# blank lines following opening brackets or a comma
-		toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
-		# blank lines preceeding closing brackets
-		toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+		for i in range(3):
+			# trailing whitespace
+			toml_h = re.sub('([^ \t])[ \t]+\n', r'\1\n', toml_h)
+			# explicit 'strip this' blocks
+			toml_h = re.sub(r'(?:\n[ \t]*)?//[#!][ \t]*[{][{].*?//[#!][ \t]*[}][}].*?\n', '\n', toml_h, flags=re.S)
+			# spdx license identifiers
+			toml_h = re.sub(r'^\s*//\s*SPDX-License-Identifier:.+?$', '', toml_h, 0, re.I | re.M)
+			# double blank lines
+			toml_h = re.sub('\n(?:[ \t]*\n[ \t]*)+\n', '\n\n', toml_h)
+			# magic comments
+			blank_line = r'(?:[ \t]*\n)'
+			comment_line = r'(?:[ \t]*//(?:[/#!<]| ?(?:---|===|\^\^\^|vvv))[^\n]*\n)'
+			toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
+			toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
+			toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
+			# weird spacing edge case between } and pp directives
+			toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
+			# enable warnings -> disable warnings
+			toml_h = re.sub('(TOML_ENABLE_WARNINGS;)\n[ \t\n]*\n(TOML_DISABLE_WARNINGS;)', r'', toml_h)
+			# blank lines between consecutive TOML_XXXXX_WARNINGS statements
+			toml_h = re.sub('(TOML_[A-Z_]+?_WARNINGS;)\n[ \t\n]*\n(TOML_[A-Z_]+?_WARNINGS;)', r'\1\n\2', toml_h)
+			# blank lines between consecutive #includes
+			toml_h = re.sub('[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
+			# blank lines following opening brackets or a comma
+			toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
+			# blank lines preceeding closing brackets
+			toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+		# ensure only one trailing newline
 		toml_h = toml_h.strip() + '\n'
 
 	# change TOML_LIB_SINGLE_HEADER to 1
@@ -176,28 +186,35 @@ def main():
 					defines[m.group(1)] = defined
 			ignore_list = ( # macros that are meant to stay public (user configs etc)
 				r'INCLUDE_TOMLPLUSPLUS_H',
+				r'POXY_IMPLEMENTATION_DETAIL',
 				r'TOML_ALL_INLINE',
 				r'TOML_API',
+				r'TOML_CONCAT',
+				r'TOML_CONCAT_1',
 				r'TOML_CONFIG_HEADER',
+				r'TOML_ENABLE_FORMATTERS',
+				r'TOML_ENABLE_PARSER',
+				r'TOML_ENABLE_SIMD',
+				r'TOML_ENABLE_UNRELEASED_FEATURES',
+				r'TOML_ENABLE_WINDOWS_COMPAT',
 				r'TOML_EXCEPTIONS',
+				r'TOML_EXTERN_TEMPLATES',
 				r'TOML_HEADER_ONLY',
 				r'TOML_LANG_MAJOR',
 				r'TOML_LANG_MINOR',
 				r'TOML_LANG_PATCH',
-				r'TOML_LARGE_FILES',
 				r'TOML_LIB_MAJOR',
 				r'TOML_LIB_MINOR',
 				r'TOML_LIB_PATCH',
 				r'TOML_LIB_SINGLE_HEADER',
 				r'TOML_MAX_NESTED_VALUES',
+				r'TOML_NAMESPACE_END',
+				r'TOML_NAMESPACE_START',
 				r'TOML_OPTIONAL_TYPE',
-				r'TOML_PARSER',
 				r'TOML_SMALL_FLOAT_TYPE',
 				r'TOML_SMALL_INT_TYPE',
 				r'TOML_UNDEF_MACROS',
-				r'TOML_UNRELEASED_FEATURES',
-				r'TOML_WINDOWS_COMPAT',
-				r'POXY_IMPLEMENTATION_DETAIL',
+				r'TOMLPLUSPLUS_H',
 			)
 			set_defines = []
 			for define, currently_set in defines.items():

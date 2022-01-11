@@ -2,47 +2,57 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
+
+#include "std_utility.h"
+#include "std_vector.h"
+#include "std_initializer_list.h"
 #include "value.h"
+#include "make_node.h"
+#include "header_start.h"
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
 {
 	template <bool IsConst>
-	class TOML_TRIVIAL_ABI array_iterator final
+	class TOML_TRIVIAL_ABI array_iterator
 	{
 	  private:
-		template <bool C>
+		template <bool>
 		friend class array_iterator;
-		friend class TOML_NAMESPACE::array;
 
-		using raw_mutable_iterator = std::vector<std::unique_ptr<node>>::iterator;
-		using raw_const_iterator   = std::vector<std::unique_ptr<node>>::const_iterator;
-		using raw_iterator		   = std::conditional_t<IsConst, raw_const_iterator, raw_mutable_iterator>;
+		using mutable_vector_iterator = std::vector<node_ptr>::iterator;
+		using const_vector_iterator	  = std::vector<node_ptr>::const_iterator;
+		using vector_iterator		  = std::conditional_t<IsConst, const_vector_iterator, mutable_vector_iterator>;
 
-		mutable raw_iterator raw_;
-
-		TOML_NODISCARD_CTOR
-		array_iterator(raw_mutable_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
-
-		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
-		TOML_NODISCARD_CTOR
-		array_iterator(raw_const_iterator raw) noexcept //
-			: raw_{ raw }
-		{}
+		mutable vector_iterator iter_;
 
 	  public:
 		using value_type		= std::conditional_t<IsConst, const node, node>;
 		using reference			= value_type&;
 		using pointer			= value_type*;
 		using difference_type	= ptrdiff_t;
-		using iterator_category = typename std::iterator_traits<raw_iterator>::iterator_category;
+		using iterator_category = typename std::iterator_traits<vector_iterator>::iterator_category;
 
 		TOML_NODISCARD_CTOR
 		array_iterator() noexcept = default;
+
+		TOML_NODISCARD_CTOR
+		explicit array_iterator(mutable_vector_iterator iter) noexcept //
+			: iter_{ iter }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		explicit array_iterator(const_vector_iterator iter) noexcept //
+			: iter_{ iter }
+		{}
+
+		TOML_CONSTRAINED_TEMPLATE(C, bool C = IsConst)
+		TOML_NODISCARD_CTOR
+		array_iterator(const array_iterator<false>& other) noexcept //
+			: iter_{ other.iter_ }
+		{}
 
 		TOML_NODISCARD_CTOR
 		array_iterator(const array_iterator&) noexcept = default;
@@ -51,130 +61,143 @@ TOML_IMPL_NAMESPACE_START
 
 		array_iterator& operator++() noexcept // ++pre
 		{
-			++raw_;
+			++iter_;
 			return *this;
 		}
 
 		array_iterator operator++(int) noexcept // post++
 		{
-			array_iterator out{ raw_ };
-			++raw_;
+			array_iterator out{ iter_ };
+			++iter_;
 			return out;
 		}
 
 		array_iterator& operator--() noexcept // --pre
 		{
-			--raw_;
+			--iter_;
 			return *this;
 		}
 
 		array_iterator operator--(int) noexcept // post--
 		{
-			array_iterator out{ raw_ };
-			--raw_;
+			array_iterator out{ iter_ };
+			--iter_;
 			return out;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator*() const noexcept
 		{
-			return *raw_->get();
+			return *iter_->get();
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		pointer operator->() const noexcept
 		{
-			return raw_->get();
+			return iter_->get();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		explicit operator const vector_iterator&() const noexcept
+		{
+			return iter_;
+		}
+
+		TOML_CONSTRAINED_TEMPLATE(!C, bool C = IsConst)
+		TOML_PURE_INLINE_GETTER
+		explicit operator const const_vector_iterator() const noexcept
+		{
+			return iter_;
 		}
 
 		array_iterator& operator+=(ptrdiff_t rhs) noexcept
 		{
-			raw_ += rhs;
+			iter_ += rhs;
 			return *this;
 		}
 
 		array_iterator& operator-=(ptrdiff_t rhs) noexcept
 		{
-			raw_ -= rhs;
+			iter_ -= rhs;
 			return *this;
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator+(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
-			return { lhs.raw_ + rhs };
+			return array_iterator{ lhs.iter_ + rhs };
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator+(ptrdiff_t lhs, const array_iterator& rhs) noexcept
 		{
-			return { rhs.raw_ + lhs };
+			return array_iterator{ rhs.iter_ + lhs };
 		}
 
 		TOML_NODISCARD
 		friend array_iterator operator-(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
-			return { lhs.raw_ - rhs };
+			return array_iterator{ lhs.iter_ - rhs };
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend ptrdiff_t operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ - rhs.raw_;
+			return lhs.iter_ - rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ == rhs.raw_;
+			return lhs.iter_ == rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ != rhs.raw_;
+			return lhs.iter_ != rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ < rhs.raw_;
+			return lhs.iter_ < rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ <= rhs.raw_;
+			return lhs.iter_ <= rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ > rhs.raw_;
+			return lhs.iter_ > rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
-			return lhs.raw_ >= rhs.raw_;
+			return lhs.iter_ >= rhs.iter_;
 		}
 
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		reference operator[](ptrdiff_t idx) const noexcept
 		{
-			return *(raw_ + idx)->get();
+			return *(iter_ + idx)->get();
 		}
+	};
 
-		TOML_DISABLE_WARNINGS;
+	struct array_init_elem
+	{
+		mutable node_ptr value;
 
-		TOML_CONSTRAINED_TEMPLATE(!C, bool C = IsConst)
-		TOML_NODISCARD
-		operator array_iterator<true>() const noexcept
-		{
-			return array_iterator<true>{ raw_ };
-		}
-
-		TOML_ENABLE_WARNINGS;
+		template <typename T>
+		TOML_NODISCARD_CTOR
+		array_init_elem(T&& val, value_flags flags = preserve_source_value_flags) //
+			: value{ make_node(static_cast<T&&>(val), flags) }
+		{}
 	};
 }
 TOML_IMPL_NAMESPACE_END;
@@ -230,7 +253,6 @@ TOML_NAMESPACE_START
 	/// arr.emplace_back<std::string>("ten");
 	/// arr.emplace_back<toml::array>(11, 12.0);
 	/// std::cout << arr << "\n";
-	///
 	/// \ecpp
 	///
 	/// \out
@@ -239,31 +261,52 @@ TOML_NAMESPACE_START
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine' ]
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine', 'ten', [ 11, 12.0 ] ]
 	/// \eout
-	class TOML_API array final : public node
+	class array : public node
 	{
 	  private:
 		/// \cond
 
-		friend class TOML_PARSER_TYPENAME;
-		std::vector<std::unique_ptr<node>> elements;
+		using vector_type			= std::vector<impl::node_ptr>;
+		using vector_iterator		= typename vector_type::iterator;
+		using const_vector_iterator = typename vector_type::const_iterator;
+		vector_type elems_;
 
-		void preinsertion_resize(size_t idx, size_t count) noexcept;
+		TOML_NODISCARD_CTOR
+		TOML_API
+		array(const impl::array_init_elem*, const impl::array_init_elem*);
+
+		TOML_NODISCARD_CTOR
+		array(std::false_type, std::initializer_list<impl::array_init_elem> elems) //
+			: array{ elems.begin(), elems.end() }
+		{}
+
+		TOML_API
+		void preinsertion_resize(size_t idx, size_t count);
+
+		TOML_API
+		void insert_at_back(impl::node_ptr&&);
+
+		TOML_API
+		vector_iterator insert_at(const_vector_iterator, impl::node_ptr&&);
 
 		template <typename T>
-		void emplace_back_if_not_empty_view(T&& val) noexcept
+		void emplace_back_if_not_empty_view(T&& val, value_flags flags)
 		{
 			if constexpr (is_node_view<T>)
 			{
 				if (!val)
 					return;
 			}
-			elements.emplace_back(impl::make_node(static_cast<T&&>(val)));
+			insert_at_back(impl::make_node(static_cast<T&&>(val), flags));
 		}
 
 		TOML_NODISCARD
+		TOML_API
 		size_t total_leaf_count() const noexcept;
 
+		TOML_API
 		void flatten_child(array&& child, size_t& dest_index) noexcept;
+
 		/// \endcond
 
 	  public:
@@ -273,42 +316,42 @@ TOML_NAMESPACE_START
 		using reference		  = node&;
 		using const_reference = const node&;
 
-		/// \brief A RandomAccessIterator for iterating over elements in a toml::array.
-		using iterator = array_iterator;
-		/// \brief A RandomAccessIterator for iterating over const elements in a toml::array.
-		using const_iterator = const_array_iterator;
-
-		/// \brief	Default constructor.
-		TOML_NODISCARD_CTOR
-		array() noexcept;
-
-		/// \brief	Copy constructor.
-		TOML_NODISCARD_CTOR
-		array(const array&) noexcept;
-
-		/// \brief	Move constructor.
-		TOML_NODISCARD_CTOR
-		array(array&& other) noexcept;
-
-		/// \brief	Copy-assignment operator.
-		array& operator=(const array&) noexcept;
-
-		/// \brief	Move-assignment operator.
-		array& operator=(array&& rhs) noexcept;
-
 #if TOML_LIFETIME_HOOKS
-		~array() noexcept override
+
+		TOML_NODISCARD_CTOR
+		array() noexcept
+		{
+			TOML_ARRAY_CREATED;
+		}
+
+		~array() noexcept
 		{
 			TOML_ARRAY_DESTROYED;
 		}
+
+#else
+
+		/// \brief	Default constructor.
+		TOML_NODISCARD_CTOR
+		array() noexcept = default;
+
 #endif
+
+		/// \brief	Copy constructor.
+		TOML_NODISCARD_CTOR
+		TOML_API
+		array(const array&);
+
+		/// \brief	Move constructor.
+		TOML_NODISCARD_CTOR
+		TOML_API
+		array(array&& other) noexcept;
 
 		/// \brief	Constructs an array with one or more initial elements.
 		///
 		/// \detail \cpp
 		/// auto arr = toml::array{ 1, 2.0, "three"sv, toml::array{ 4, 5 } };
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -336,218 +379,695 @@ TOML_NAMESPACE_START
 		/// \tparam	ElemTypes	One of the TOML node or value types (or a type promotable to one).
 		/// \param 	val 	The node or value used to initialize element 0.
 		/// \param 	vals	The nodes or values used to initialize elements 1...N.
-		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0_sz
-								   || !std::is_same_v<impl::remove_cvref_t<ElemType>, array>),
+		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0 || !std::is_same_v<impl::remove_cvref<ElemType>, array>),
 								  typename ElemType,
 								  typename... ElemTypes)
 		TOML_NODISCARD_CTOR
 		explicit array(ElemType&& val, ElemTypes&&... vals)
-		{
-			elements.reserve(sizeof...(ElemTypes) + 1_sz);
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
-			if constexpr (sizeof...(ElemTypes) > 0)
-			{
-				(emplace_back_if_not_empty_view(static_cast<ElemTypes&&>(vals)), ...);
-			}
+			: array{ std::false_type{},
+					 std::initializer_list<impl::array_init_elem>{ static_cast<ElemType&&>(val),
+																   static_cast<ElemTypes&&>(vals)... } }
+		{}
 
-#if TOML_LIFETIME_HOOKS
-			TOML_ARRAY_CREATED;
-#endif
-		}
+		/// \brief	Copy-assignment operator.
+		TOML_API
+		array& operator=(const array&);
+
+		/// \brief	Move-assignment operator.
+		TOML_API
+		array& operator=(array&& rhs) noexcept;
 
 		/// \name Type checks
 		/// @{
 
-		TOML_NODISCARD
-		node_type type() const noexcept override
+		/// \brief Returns #toml::node_type::array.
+		TOML_CONST_INLINE_GETTER
+		node_type type() const noexcept final
 		{
 			return node_type::array;
 		}
 
-		TOML_NODISCARD
-		bool is_table() const noexcept override
+		TOML_PURE_GETTER
+		TOML_API
+		bool is_homogeneous(node_type ntype) const noexcept final;
+
+		TOML_PURE_GETTER
+		TOML_API
+		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
+
+		TOML_PURE_GETTER
+		TOML_API
+		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
+
+		/// \cond
+		template <typename ElemType = void>
+		TOML_PURE_GETTER
+		bool is_homogeneous() const noexcept
+		{
+			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<ElemType>>;
+			static_assert(std::is_void_v<unwrapped_type> //
+							  || (impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+						  "The template type argument of array::is_homogeneous() must be void or one "
+						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+
+			return is_homogeneous(impl::node_type_of<unwrapped_type>);
+		}
+		/// \endcond
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_table() const noexcept final
 		{
 			return false;
 		}
 
-		TOML_NODISCARD
-		bool is_array() const noexcept override
+		/// \brief Returns `true`.
+		TOML_CONST_INLINE_GETTER
+		bool is_array() const noexcept final
 		{
 			return true;
 		}
 
-		TOML_NODISCARD
-		bool is_value() const noexcept override
-		{
-			return false;
-		}
-
-		TOML_NODISCARD
-		array* as_array() noexcept override
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
-		const array* as_array() const noexcept override
-		{
-			return this;
-		}
-
-		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype) const noexcept override;
-		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept override;
-		TOML_NODISCARD
-		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept override;
-
-		template <typename ElemType = void>
-		TOML_NODISCARD
-		bool is_homogeneous() const noexcept
-		{
-			using type = impl::unwrap_node<ElemType>;
-			static_assert(
-				std::is_void_v<
-					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
-				"The template type argument of array::is_homogeneous() must be void or one "
-				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
-			return is_homogeneous(impl::node_type_of<type>);
-		}
-
-		TOML_NODISCARD
-		bool is_array_of_tables() const noexcept override
+		/// \brief Returns `true` if the array contains only tables.
+		TOML_PURE_GETTER
+		bool is_array_of_tables() const noexcept final
 		{
 			return is_homogeneous(node_type::table);
 		}
 
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_value() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_string() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_integer() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_floating_point() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_number() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_boolean() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_time() const noexcept final
+		{
+			return false;
+		}
+
+		/// \brief Returns `false`.
+		TOML_CONST_INLINE_GETTER
+		bool is_date_time() const noexcept final
+		{
+			return false;
+		}
+
 		/// @}
 
-		/// \name Array operations
+		/// \name Type casts
 		/// @{
 
-		/// \brief	Gets a reference to the element at a specific index.
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		table* as_table() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns a pointer to the array.
+		TOML_CONST_INLINE_GETTER
+		array* as_array() noexcept final
+		{
+			return this;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<std::string>* as_string() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<int64_t>* as_integer() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<double>* as_floating_point() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<bool>* as_boolean() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date>* as_date() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<time>* as_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		toml::value<date_time>* as_date_time() noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const table* as_table() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns a const-qualified pointer to the array.
+		TOML_CONST_INLINE_GETTER
+		const array* as_array() const noexcept final
+		{
+			return this;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<std::string>* as_string() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<int64_t>* as_integer() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<double>* as_floating_point() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<bool>* as_boolean() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date>* as_date() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<time>* as_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// \brief Returns `nullptr`.
+		TOML_CONST_INLINE_GETTER
+		const toml::value<date_time>* as_date_time() const noexcept final
+		{
+			return nullptr;
+		}
+
+		/// @}
+
+		/// \name Value retrieval
+		/// @{
+
+		/// \brief	Gets a pointer to the element at a specific index.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
+		///	std::cout << "element [0] exists: "sv << !!arr.get(0) << "\n";
+		///	std::cout << "element [1] exists: "sv << !!arr.get(1) << "\n";
+		///	std::cout << "element [2] exists: "sv << !!arr.get(2) << "\n";
+		/// if (toml::node* val = arr.get(0))
+		///		std::cout << "element [0] is an "sv << val->type() << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// element [0] exists: true
+		/// element [1] exists: true
+		/// element [2] exists: false
+		/// element [0] is an integer
+		/// \eout
+		///
+		/// \param 	index	The element's index.
+		///
+		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
+		TOML_PURE_INLINE_GETTER
+		node* get(size_t index) noexcept
+		{
+			return index < elems_.size() ? elems_[index].get() : nullptr;
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index (const overload).
+		///
+		/// \param 	index	The element's index.
+		///
+		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
+		TOML_PURE_INLINE_GETTER
+		const node* get(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).get(index);
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index if it is a particular type.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 42, "is the meaning of life, apparently."sv };
+		/// if (toml::value<int64_t>* val = arr.get_as<int64_t>(0))
+		///		std::cout << "element [0] is an integer with value "sv << *val << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// element [0] is an integer with value 42
+		/// \eout
+		///
+		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
+		/// \param 	index		The element's index.
+		///
+		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
+		template <typename ElemType>
 		TOML_NODISCARD
-		node& operator[](size_t index) noexcept;
+		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
+		{
+			if (auto val = get(index))
+				return val->template as<ElemType>();
+			return nullptr;
+		}
+
+		/// \brief	Gets a pointer to the element at a specific index if it is a particular type (const overload).
+		///
+		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
+		/// \param 	index		The element's index.
+		///
+		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
+		template <typename ElemType>
+		TOML_NODISCARD
+		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
+		{
+			return const_cast<array&>(*this).template get_as<ElemType>(index);
+		}
 
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
-		const node& operator[](size_t index) const noexcept;
+		node& operator[](size_t index) noexcept
+		{
+			return *elems_[index];
+		}
+
+		/// \brief	Gets a reference to the element at a specific index.
+		TOML_NODISCARD
+		const node& operator[](size_t index) const noexcept
+		{
+			return *elems_[index];
+		}
+
+		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
+		TOML_NODISCARD
+		TOML_API
+		node& at(size_t index);
+
+		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
+		TOML_NODISCARD
+		const node& at(size_t index) const
+		{
+			return const_cast<array&>(*this).at(index);
+		}
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
 		node& front() noexcept
 		{
-			return *elements.front();
+			return *elems_.front();
 		}
 
 		/// \brief	Returns a reference to the first element in the array.
 		TOML_NODISCARD
 		const node& front() const noexcept
 		{
-			return *elements.front();
+			return *elems_.front();
 		}
 
 		/// \brief	Returns a reference to the last element in the array.
 		TOML_NODISCARD
 		node& back() noexcept
 		{
-			return *elements.back();
+			return *elems_.back();
 		}
 
 		/// \brief	Returns a reference to the last element in the array.
 		TOML_NODISCARD
 		const node& back() const noexcept
 		{
-			return *elements.back();
+			return *elems_.back();
 		}
+
+		/// @}
+
+		/// \name Iterators
+		/// @{
+
+		/// \brief A RandomAccessIterator for iterating over elements in a toml::array.
+		using iterator = array_iterator;
+
+		/// \brief A RandomAccessIterator for iterating over const elements in a toml::array.
+		using const_iterator = const_array_iterator;
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		iterator begin() noexcept
 		{
-			return { elements.begin() };
+			return iterator{ elems_.begin() };
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator begin() const noexcept
 		{
-			return { elements.cbegin() };
+			return const_iterator{ elems_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD
 		const_iterator cbegin() const noexcept
 		{
-			return { elements.cbegin() };
+			return const_iterator{ elems_.cbegin() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		iterator end() noexcept
 		{
-			return { elements.end() };
+			return iterator{ elems_.end() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator end() const noexcept
 		{
-			return { elements.cend() };
+			return const_iterator{ elems_.cend() };
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last element.
 		TOML_NODISCARD
 		const_iterator cend() const noexcept
 		{
-			return { elements.cend() };
+			return const_iterator{ elems_.cend() };
 		}
+
+		/// @}
+
+		/// \name Size and Capacity
+		/// @{
 
 		/// \brief	Returns true if the array is empty.
 		TOML_NODISCARD
 		bool empty() const noexcept
 		{
-			return elements.empty();
+			return elems_.empty();
 		}
 
 		/// \brief	Returns the number of elements in the array.
 		TOML_NODISCARD
 		size_t size() const noexcept
 		{
-			return elements.size();
-		}
-
-		/// \brief	Reserves internal storage capacity up to a pre-determined number of elements.
-		void reserve(size_t new_capacity)
-		{
-			elements.reserve(new_capacity);
-		}
-
-		/// \brief	Removes all elements from the array.
-		void clear() noexcept
-		{
-			elements.clear();
+			return elems_.size();
 		}
 
 		/// \brief	Returns the maximum number of elements that can be stored in an array on the current platform.
 		TOML_NODISCARD
 		size_t max_size() const noexcept
 		{
-			return elements.max_size();
+			return elems_.max_size();
 		}
 
 		/// \brief	Returns the current max number of elements that may be held in the array's internal storage.
 		TOML_NODISCARD
 		size_t capacity() const noexcept
 		{
-			return elements.capacity();
+			return elems_.capacity();
 		}
 
+		/// \brief	Reserves internal storage capacity up to a pre-determined number of elements.
+		TOML_API
+		void reserve(size_t new_capacity);
+
 		/// \brief	Requests the removal of any unused internal storage capacity.
-		void shrink_to_fit()
+		TOML_API
+		void shrink_to_fit();
+
+		/// \brief	Shrinks the array to the given size.
+		///
+		/// \detail \godbolt{rxEzK5}
+		///
+		/// \cpp
+		/// auto arr = toml::array{ 1, 2, 3 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.truncate(5); // no-op
+		/// std::cout << arr << "\n";
+		///
+		/// arr.truncate(1);
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, 3 ]
+		/// [ 1, 2, 3 ]
+		/// [ 1]
+		/// \eout
+		///
+		/// \remarks	Does nothing if the requested size is larger than or equal to the current size.
+		TOML_API
+		void truncate(size_t new_size);
+
+		/// \brief	Resizes the array.
+		///
+		/// \detail \godbolt{W5zqx3}
+		///
+		/// \cpp
+		/// auto arr = toml::array{ 1, 2, 3 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.resize(6, 42);
+		/// std::cout << arr << "\n";
+		///
+		/// arr.resize(2, 0);
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, 3 ]
+		/// [ 1, 2, 3, 42, 42, 42 ]
+		/// [ 1, 2 ]
+		/// \eout
+		///
+		/// \tparam ElemType	toml::node, toml::table, toml::array, or a native TOML value type
+		/// 					(or a type promotable to one).
+		///
+		/// \param 	new_size			The number of elements the array will have after resizing.
+		/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
+		/// \param	default_init_flags	Value flags to apply to new values created if new elements are created by growing.
+		template <typename ElemType>
+		void resize(size_t new_size,
+					ElemType&& default_init_val,
+					value_flags default_init_flags = preserve_source_value_flags)
 		{
-			elements.shrink_to_fit();
+			static_assert(!is_node_view<ElemType>,
+						  "The default element type argument to toml::array::resize may not be toml::node_view.");
+
+			if (!new_size)
+				clear();
+			else if (new_size > elems_.size())
+				insert(cend(), new_size - elems_.size(), static_cast<ElemType&&>(default_init_val), default_init_flags);
+			else
+				truncate(new_size);
 		}
+
+		/// @}
+
+		/// \name Erasure
+		/// @{
+
+		/// \brief	Removes the specified element from the array.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 1, 2, 3 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.erase(arr.cbegin() + 1);
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, 3 ]
+		/// [ 1, 3 ]
+		/// \eout
+		///
+		/// \param 	pos		Iterator to the element being erased.
+		///
+		/// \returns Iterator to the first element immediately following the removed element.
+		TOML_API
+		iterator erase(const_iterator pos) noexcept;
+
+		/// \brief	Removes the elements in the range [first, last) from the array.
+		///
+		/// \detail \cpp
+		/// auto arr = toml::array{ 1, "bad", "karma" 2 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.erase(arr.cbegin() + 1, arr.cbegin() + 3);
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 'bad', 'karma', 3 ]
+		/// [ 1, 3 ]
+		/// \eout
+		///
+		/// \param 	first	Iterator to the first element being erased.
+		/// \param 	last	Iterator to the one-past-the-last element being erased.
+		///
+		/// \returns Iterator to the first element immediately following the last removed element.
+		TOML_API
+		iterator erase(const_iterator first, const_iterator last) noexcept;
+
+		/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
+		///
+		/// \detail \cpp
+		///
+		/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.flatten();
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, [ 3, 4, [ 5 ] ], 6, [] ]
+		/// [ 1, 2, 3, 4, 5, 6 ]
+		/// \eout
+		///
+		/// \remarks	Arrays inside child tables are not flattened.
+		///
+		/// \returns A reference to the array.
+		TOML_API
+		array& flatten() &;
+
+		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
+		///
+		/// \returns An rvalue reference to the array.
+		array&& flatten() &&
+		{
+			return static_cast<toml::array&&>(this->flatten());
+		}
+
+		/// \brief	Removes empty child arrays and tables.
+		///
+		/// \detail \cpp
+		///
+		/// auto arr = toml::array{ 1, 2, toml::array{ }, toml::array{ 3, toml::array{ } }, 4 };
+		/// std::cout << arr << "\n";
+		///
+		/// arr.prune(true);
+		/// std::cout << arr << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// [ 1, 2, [], [ 3, [] ], 4 ]
+		/// [ 1, 2, [ 3 ], 4 ]
+		/// \eout
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns A reference to the array.
+		TOML_API
+		array& prune(bool recursive = true) & noexcept;
+
+		/// \brief	Removes empty child arrays and tables (rvalue overload).
+		///
+		/// \param recursive Should child arrays and tables themselves be pruned?
+		///
+		/// \returns An rvalue reference to the array.
+		array&& prune(bool recursive = true) && noexcept
+		{
+			return static_cast<toml::array&&>(this->prune(recursive));
+		}
+
+		/// \brief	Removes the last element from the array.
+		TOML_API
+		void pop_back() noexcept;
+
+		/// \brief	Removes all elements from the array.
+		TOML_API
+		void clear() noexcept;
+
+		/// @}
+
+		/// \name Insertion and Emplacement
+		/// @{
 
 		/// \brief	Inserts a new element at a specific position in the array.
 		///
@@ -556,7 +1076,6 @@ TOML_NAMESPACE_START
 		///	arr.insert(arr.cbegin() + 1, "two");
 		///	arr.insert(arr.cend(), toml::array{ 4, 5 });
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -567,23 +1086,25 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	pos			The insertion position.
 		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
 		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the newly-inserted element.
-		///			 \conditional_return{Input is an empty toml::node_view}
+		///			 \conditional_return{Input is a null toml::node_view}
 		/// 		 end()
 		///
-		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
+		/// \attention The return value will always be `end()` if the input value was a null toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, ElemType&& val) noexcept
+		iterator insert(const_iterator pos, ElemType&& val, value_flags flags = preserve_source_value_flags)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
 				if (!val)
 					return end();
 			}
-			return { elements.emplace(pos.raw_, impl::make_node(static_cast<ElemType&&>(val))) };
+			return iterator{ insert_at(const_vector_iterator{ pos },
+									   impl::make_node(static_cast<ElemType&&>(val), flags)) };
 		}
 
 		/// \brief	Repeatedly inserts a new element starting at a specific position in the array.
@@ -595,7 +1116,6 @@ TOML_NAMESPACE_START
 		///	};
 		///	arr.insert(arr.cbegin() + 1, 3, "honk");
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -613,18 +1133,22 @@ TOML_NAMESPACE_START
 		/// \param 	pos			The insertion position.
 		/// \param 	count		The number of times the node or value should be inserted.
 		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
 		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the newly-inserted element.
 		/// 		 \conditional_return{count == 0}
 		/// 		 A copy of pos
-		/// 		 \conditional_return{Input is an empty toml::node_view}
+		/// 		 \conditional_return{Input is a null toml::node_view}
 		/// 		 end()
 		///
-		/// \attention The return value will always be `end()` if the input value was an empty toml::node_view,
+		/// \attention The return value will always be `end()` if the input value was a null toml::node_view,
 		/// 		   because no insertion can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		iterator insert(const_iterator pos, size_t count, ElemType&& val) noexcept
+		iterator insert(const_iterator pos,
+						size_t count,
+						ElemType&& val,
+						value_flags flags = preserve_source_value_flags)
 		{
 			if constexpr (is_node_view<ElemType>)
 			{
@@ -633,19 +1157,19 @@ TOML_NAMESPACE_START
 			}
 			switch (count)
 			{
-				case 0: return { elements.begin() + (pos.raw_ - elements.cbegin()) };
-				case 1: return insert(pos, static_cast<ElemType&&>(val));
+				case 0: return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
+				case 1: return insert(pos, static_cast<ElemType&&>(val), flags);
 				default:
 				{
-					const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
+					const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
 					preinsertion_resize(start_idx, count);
 					size_t i = start_idx;
-					for (size_t e = start_idx + count - 1_sz; i < e; i++)
-						elements[i].reset(impl::make_node(val));
+					for (size_t e = start_idx + count - 1u; i < e; i++)
+						elems_[i] = impl::make_node(val, flags);
 
 					//# potentially move the initial value into the last element
-					elements[i].reset(impl::make_node(static_cast<ElemType&&>(val)));
-					return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
+					elems_[i] = impl::make_node(static_cast<ElemType&&>(val), flags);
+					return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 				}
 			}
 		}
@@ -656,19 +1180,20 @@ TOML_NAMESPACE_START
 		/// \param 	pos		The insertion position.
 		/// \param 	first	Iterator to the first node or value being inserted.
 		/// \param 	last	Iterator to the one-past-the-last node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
 		///
 		/// \returns \conditional_return{Valid input}
 		/// 		 An iterator to the first newly-inserted element.
 		/// 		 \conditional_return{first >= last}
 		/// 		 A copy of pos
-		/// 		 \conditional_return{All objects in the range were empty toml::node_views}
+		/// 		 \conditional_return{All objects in the range were null toml::node_views}
 		/// 		 A copy of pos
 		template <typename Iter>
-		iterator insert(const_iterator pos, Iter first, Iter last) noexcept
+		iterator insert(const_iterator pos, Iter first, Iter last, value_flags flags = preserve_source_value_flags)
 		{
 			const auto distance = std::distance(first, last);
 			if (distance <= 0)
-				return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+				return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
 			else
 			{
 				auto count		 = distance;
@@ -679,9 +1204,9 @@ TOML_NAMESPACE_START
 						if (!(*it))
 							count--;
 					if (!count)
-						return { elements.begin() + (pos.raw_ - elements.cbegin()) };
+						return iterator{ elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin()) };
 				}
-				const auto start_idx = static_cast<size_t>(pos.raw_ - elements.cbegin());
+				const auto start_idx = static_cast<size_t>(const_vector_iterator{ pos } - elems_.cbegin());
 				preinsertion_resize(start_idx, static_cast<size_t>(count));
 				size_t i = start_idx;
 				for (auto it = first; it != last; it++)
@@ -692,11 +1217,11 @@ TOML_NAMESPACE_START
 							continue;
 					}
 					if constexpr (std::is_rvalue_reference_v<deref_type>)
-						elements[i++].reset(impl::make_node(std::move(*it)));
+						elems_[i++] = impl::make_node(std::move(*it), flags);
 					else
-						elements[i++].reset(impl::make_node(*it));
+						elems_[i++] = impl::make_node(*it, flags);
 				}
-				return { elements.begin() + static_cast<ptrdiff_t>(start_idx) };
+				return iterator{ elems_.begin() + static_cast<ptrdiff_t>(start_idx) };
 			}
 		}
 
@@ -706,17 +1231,20 @@ TOML_NAMESPACE_START
 		/// 					(or a type promotable to one).
 		/// \param 	pos			The insertion position.
 		/// \param 	ilist		An initializer list containing the values to be inserted.
+		/// \param	flags		Value flags to apply to new values.
 		///
 		/// \returns \conditional_return{Valid input}
 		///			 An iterator to the first newly-inserted element.
 		/// 		 \conditional_return{Input list is empty}
 		///			 A copy of pos
-		/// 		 \conditional_return{All objects in the list were empty toml::node_views}
+		/// 		 \conditional_return{All objects in the list were null toml::node_views}
 		///			 A copy of pos
 		template <typename ElemType>
-		iterator insert(const_iterator pos, std::initializer_list<ElemType> ilist) noexcept
+		iterator insert(const_iterator pos,
+						std::initializer_list<ElemType> ilist,
+						value_flags flags = preserve_source_value_flags)
 		{
-			return insert(pos, ilist.begin(), ilist.end());
+			return insert(pos, ilist.begin(), ilist.end(), flags);
 		}
 
 		/// \brief	Emplaces a new element at a specific position in the array.
@@ -727,7 +1255,6 @@ TOML_NAMESPACE_START
 		///	//add a string using std::string's substring constructor
 		///	arr.emplace<std::string>(arr.cbegin() + 1, "this is not a drill"sv, 14, 5);
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -744,132 +1271,57 @@ TOML_NAMESPACE_START
 		/// \remarks There is no difference between insert() and emplace()
 		/// 		 for trivial value types (floats, ints, bools).
 		template <typename ElemType, typename... Args>
-		iterator emplace(const_iterator pos, Args&&... args) noexcept
+		iterator emplace(const_iterator pos, Args&&... args)
 		{
 			using type = impl::unwrap_node<ElemType>;
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return { elements.emplace(pos.raw_, new impl::wrap_node<type>{ static_cast<Args&&>(args)... }) };
+			return iterator{ insert_at(const_vector_iterator{ pos },
+									   impl::node_ptr{ new impl::wrap_node<type>{ static_cast<Args&&>(args)... } }) };
 		}
 
-		/// \brief	Removes the specified element from the array.
+		/// \brief	Replaces the element at a specific position in the array with a different value.
 		///
 		/// \detail \cpp
 		/// auto arr = toml::array{ 1, 2, 3 };
 		/// std::cout << arr << "\n";
-		///
-		/// arr.erase(arr.cbegin() + 1);
+		///	arr.replace(arr.cbegin() + 1, "two");
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
 		/// [ 1, 2, 3 ]
-		/// [ 1, 3 ]
+		/// [ 1, 'two', 3 ]
 		/// \eout
 		///
-		/// \param 	pos		Iterator to the element being erased.
-		///
-		/// \returns Iterator to the first element immediately following the removed element.
-		iterator erase(const_iterator pos) noexcept
-		{
-			return { elements.erase(pos.raw_) };
-		}
-
-		/// \brief	Removes the elements in the range [first, last) from the array.
-		///
-		/// \detail \cpp
-		/// auto arr = toml::array{ 1, "bad", "karma" 2 };
-		/// std::cout << arr << "\n";
-		///
-		/// arr.erase(arr.cbegin() + 1, arr.cbegin() + 3);
-		/// std::cout << arr << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// [ 1, 'bad', 'karma', 3 ]
-		/// [ 1, 3 ]
-		/// \eout
-		///
-		/// \param 	first	Iterator to the first element being erased.
-		/// \param 	last	Iterator to the one-past-the-last element being erased.
-		///
-		/// \returns Iterator to the first element immediately following the last removed element.
-		iterator erase(const_iterator first, const_iterator last) noexcept
-		{
-			return { elements.erase(first.raw_, last.raw_) };
-		}
-
-		/// \brief	Resizes the array.
-		///
-		/// \detail \godbolt{W5zqx3}
-		///
-		/// \cpp
-		/// auto arr = toml::array{ 1, 2, 3 };
-		/// std::cout << arr << "\n";
-		///
-		/// arr.resize(6, 42);
-		/// std::cout << arr << "\n";
-		///
-		/// arr.resize(2, 0);
-		/// std::cout << arr << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// [ 1, 2, 3 ]
-		/// [ 1, 2, 3, 42, 42, 42 ]
-		/// [ 1, 2 ]
-		/// \eout
-		///
-		/// \tparam ElemType	toml::node, toml::table, toml::array, or a native TOML value type
+		/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 		/// 					(or a type promotable to one).
+		/// \param 	pos			The insertion position.
+		/// \param 	val			The node or value being inserted.
+		/// \param	flags		Value flags to apply to new values.
 		///
-		/// \param 	new_size			The number of elements the array will have after resizing.
-		/// \param 	default_init_val	The node or value used to initialize new elements if the array needs to grow.
+		/// \returns \conditional_return{Valid input}
+		///			 An iterator to the replaced element.
+		///			 \conditional_return{Input is a null toml::node_view}
+		/// 		 end()
+		///
+		/// \attention The return value will always be `end()` if the input value was a null toml::node_view,
+		/// 		   because no replacement can take place. This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		void resize(size_t new_size, ElemType&& default_init_val) noexcept
+		iterator replace(const_iterator pos, ElemType&& val, value_flags flags = preserve_source_value_flags)
 		{
-			static_assert(!is_node_view<ElemType>,
-						  "The default element type argument to toml::array::resize may not be toml::node_view.");
+			TOML_ASSERT(pos >= cbegin() && pos < cend());
 
-			if (!new_size)
-				elements.clear();
-			else if (new_size < elements.size())
-				elements.resize(new_size);
-			else if (new_size > elements.size())
-				insert(cend(), new_size - elements.size(), static_cast<ElemType&&>(default_init_val));
-		}
+			if constexpr (is_node_view<ElemType>)
+			{
+				if (!val)
+					return end();
+			}
 
-		/// \brief	Shrinks the array to the given size.
-		///
-		/// \detail \godbolt{rxEzK5}
-		///
-		/// \cpp
-		/// auto arr = toml::array{ 1, 2, 3 };
-		/// std::cout << arr << "\n";
-		///
-		/// arr.truncate(5); // no-op
-		/// std::cout << arr << "\n";
-		///
-		/// arr.truncate(1);
-		/// std::cout << arr << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// [ 1, 2, 3 ]
-		/// [ 1, 2, 3 ]
-		/// [ 1]
-		/// \eout
-		///
-		/// \remarks	Does nothing if the requested size is larger than or equal to the current size.
-		void truncate(size_t new_size)
-		{
-			if (new_size < elements.size())
-				elements.resize(new_size);
+			const auto it = elems_.begin() + (const_vector_iterator{ pos } - elems_.cbegin());
+			*it			  = impl::make_node(static_cast<ElemType&&>(val), flags);
+			return iterator{ it };
 		}
 
 		/// \brief	Appends a new element to the end of the array.
@@ -880,7 +1332,6 @@ TOML_NAMESPACE_START
 		///	arr.push_back(4.0);
 		///	arr.push_back(toml::array{ 5, "six"sv });
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -889,13 +1340,14 @@ TOML_NAMESPACE_START
 		///
 		/// \tparam ElemType	toml::node, toml::node_view, toml::table, toml::array, or a native TOML value type
 		/// \param 	val			The node or value being added.
+		/// \param	flags		Value flags to apply to new values.
 		///
-		/// \attention	No insertion takes place if the input value is an empty toml::node_view.
+		/// \attention	No insertion takes place if the input value is a null toml::node_view.
 		/// 			This is the only circumstance in which this can occur.
 		template <typename ElemType>
-		void push_back(ElemType&& val) noexcept
+		void push_back(ElemType&& val, value_flags flags = preserve_source_value_flags)
 		{
-			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val));
+			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), flags);
 		}
 
 		/// \brief	Emplaces a new element at the end of the array.
@@ -904,7 +1356,6 @@ TOML_NAMESPACE_START
 		/// auto arr = toml::array{ 1, 2 };
 		///	arr.emplace_back<toml::array>(3, "four"sv);
 		/// std::cout << arr << "\n";
-		///
 		/// \ecpp
 		///
 		/// \out
@@ -912,167 +1363,63 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \tparam	Args		Value constructor argument types.
-		/// \param 	args		Arguments to forward to the value's constructor.
+		/// \tparam	ElemArgs	Element constructor argument types.
+		/// \param 	args		Arguments to forward to the elements's constructor.
 		///
 		/// \returns A reference to the newly-constructed element.
 		///
 		/// \remarks There is no difference between push_back() and emplace_back()
 		/// 		 For trivial value types (floats, ints, bools).
-		template <typename ElemType, typename... Args>
-		decltype(auto) emplace_back(Args&&... args) noexcept
+		template <typename ElemType, typename... ElemArgs>
+		decltype(auto) emplace_back(ElemArgs&&... args)
 		{
-			using type = impl::unwrap_node<ElemType>;
-			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
-						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
 
-			auto nde = new impl::wrap_node<type>{ static_cast<Args&&>(args)... };
-			elements.emplace_back(nde);
-			return *nde;
-		}
+			static constexpr auto moving_node_ptr = std::is_same_v<ElemType, impl::node_ptr> //
+												 && sizeof...(ElemArgs) == 1u				 //
+												 && impl::first_is_same<impl::node_ptr&&, ElemArgs&&...>;
 
-		/// \brief	Removes the last element from the array.
-		void pop_back() noexcept
-		{
-			elements.pop_back();
-		}
+			using unwrapped_type = impl::unwrap_node<ElemType>;
 
-		/// \brief	Gets the element at a specific index.
-		///
-		/// \detail \cpp
-		/// auto arr = toml::array{ 99, "bottles of beer on the wall" };
-		///	std::cout << "element [0] exists: "sv << !!arr.get(0) << "\n";
-		///	std::cout << "element [1] exists: "sv << !!arr.get(1) << "\n";
-		///	std::cout << "element [2] exists: "sv << !!arr.get(2) << "\n";
-		/// if (toml::node* val = arr.get(0))
-		///		std::cout << "element [0] is an "sv << val->type() << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// element [0] exists: true
-		/// element [1] exists: true
-		/// element [2] exists: false
-		/// element [0] is an integer
-		/// \eout
-		///
-		/// \param 	index	The element's index.
-		///
-		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
-		TOML_NODISCARD
-		node* get(size_t index) noexcept;
+			static_assert(
+				moving_node_ptr										  //
+					|| impl::is_native<unwrapped_type>				  //
+					|| impl::is_one_of<unwrapped_type, table, array>, //
+				"ElemType argument of array::emplace_back() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-		/// \brief	Gets the element at a specific index (const overload).
-		///
-		/// \param 	index	The element's index.
-		///
-		/// \returns	A pointer to the element at the specified index if one existed, or nullptr.
-		TOML_NODISCARD
-		const node* get(size_t index) const noexcept;
-
-		/// \brief	Gets the element at a specific index if it is a particular type.
-		///
-		/// \detail \cpp
-		/// auto arr = toml::array{ 42, "is the meaning of life, apparently."sv };
-		/// if (toml::value<int64_t>* val = arr.get_as<int64_t>(0))
-		///		std::cout << "element [0] is an integer with value "sv << *val << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// element [0] is an integer with value 42
-		/// \eout
-		///
-		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \param 	index		The element's index.
-		///
-		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
-		template <typename ElemType>
-		TOML_NODISCARD
-		impl::wrap_node<ElemType>* get_as(size_t index) noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
-		}
-
-		/// \brief	Gets the element at a specific index if it is a particular type (const overload).
-		///
-		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \param 	index		The element's index.
-		///
-		/// \returns	A pointer to the selected element if it existed and was of the specified type, or nullptr.
-		template <typename ElemType>
-		TOML_NODISCARD
-		const impl::wrap_node<ElemType>* get_as(size_t index) const noexcept
-		{
-			if (auto val = get(index))
-				return val->as<ElemType>();
-			return nullptr;
-		}
-
-		/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
-		///
-		/// \detail \cpp
-		///
-		/// auto arr = toml::array{ 1, 2, toml::array{ 3, 4, toml::array{ 5 } }, 6, toml::array{} };
-		/// std::cout << arr << "\n";
-		///
-		/// arr.flatten();
-		/// std::cout << arr << "\n";
-		///
-		/// \ecpp
-		///
-		/// \out
-		/// [ 1, 2, [ 3, 4, [ 5 ] ], 6, [] ]
-		/// [ 1, 2, 3, 4, 5, 6 ]
-		/// \eout
-		///
-		/// \remarks	Arrays inside child tables are not flattened.
-		///
-		/// \returns A reference to the array.
-		array& flatten() &;
-
-		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
-		/// \returns An rvalue reference to the array.
-		array&& flatten() &&
-		{
-			return static_cast<toml::array&&>(this->flatten());
+			if constexpr (moving_node_ptr)
+			{
+				insert_at_back(static_cast<ElemArgs&&>(args)...);
+				return *elems_.back();
+			}
+			else
+			{
+				auto ptr = new impl::wrap_node<unwrapped_type>{ static_cast<ElemArgs&&>(args)... };
+				insert_at_back(impl::node_ptr{ ptr });
+				return *ptr;
+			}
 		}
 
 		/// @}
 
-		/// \name Equality
-		/// @{
-
-		/// \brief	Equality operator.
-		///
-		/// \param 	lhs	The LHS array.
-		/// \param 	rhs	The RHS array.
-		///
-		/// \returns	True if the arrays contained the same elements.
-		friend bool operator==(const array& lhs, const array& rhs) noexcept;
-
-		/// \brief	Inequality operator.
-		///
-		/// \param 	lhs	The LHS array.
-		/// \param 	rhs	The RHS array.
-		///
-		/// \returns	True if the arrays did not contain the same elements.
-		friend bool operator!=(const array& lhs, const array& rhs) noexcept;
-
 	  private:
+		/// \cond
+
+		TOML_NODISCARD
+		TOML_API
+		static bool equal(const array&, const array&) noexcept;
+
 		template <typename T>
 		TOML_NODISCARD
-		static bool container_equality(const array& lhs, const T& rhs) noexcept
+		static bool equal_to_container(const array& lhs, const T& rhs) noexcept
 		{
 			using element_type = std::remove_const_t<typename T::value_type>;
-			static_assert(impl::is_native<element_type> || impl::is_losslessly_convertible_to_native<element_type>,
-						  "Container element type must be (or be promotable to) one of the TOML value types");
+			static_assert(impl::is_losslessly_convertible_to_native<element_type>,
+						  "Container element type must be losslessly convertible one of the native TOML value types");
 
 			if (lhs.size() != rhs.size())
 				return false;
-			if (rhs.size() == 0_sz)
+			if (rhs.size() == 0u)
 				return true;
 
 			size_t i{};
@@ -1086,13 +1433,42 @@ TOML_NAMESPACE_START
 			return true;
 		}
 
+		/// \endcond
+
 	  public:
+		/// \name Equality
+		/// @{
+
+		/// \brief	Equality operator.
+		///
+		/// \param 	lhs	The LHS array.
+		/// \param 	rhs	The RHS array.
+		///
+		/// \returns	True if the arrays contained the same elements.
+		TOML_NODISCARD
+		friend bool operator==(const array& lhs, const array& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		/// \brief	Inequality operator.
+		///
+		/// \param 	lhs	The LHS array.
+		/// \param 	rhs	The RHS array.
+		///
+		/// \returns	True if the arrays did not contain the same elements.
+		TOML_NODISCARD
+		friend bool operator!=(const array& lhs, const array& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
+
 		/// \brief	Initializer list equality operator.
 		template <typename T>
 		TOML_NODISCARD
 		friend bool operator==(const array& lhs, const std::initializer_list<T>& rhs) noexcept
 		{
-			return container_equality(lhs, rhs);
+			return equal_to_container(lhs, rhs);
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::initializer_list<T>&, template <typename T>);
 
@@ -1101,16 +1477,26 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		friend bool operator==(const array& lhs, const std::vector<T>& rhs) noexcept
 		{
-			return container_equality(lhs, rhs);
+			return equal_to_container(lhs, rhs);
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const array&, const std::vector<T>&, template <typename T>);
 
 		/// @}
 
+#if TOML_ENABLE_FORMATTERS
+
 		/// \brief	Prints the array out to a stream as formatted TOML.
-		template <typename Char>
-		friend std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>&, const array&);
-		// implemented in toml_default_formatter.h
+		///
+		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
+		friend std::ostream& operator<<(std::ostream& lhs, const array& rhs)
+		{
+			impl::print_to_stream(lhs, rhs);
+			return lhs;
+		}
+
+#endif
 	};
 }
 TOML_NAMESPACE_END;
+
+#include "header_end.h"

@@ -25,6 +25,44 @@ TEST_CASE("arrays - moving")
 			REQUIRE(arr1->get_as<std::string>(0u));
 			CHECK(*arr1->get_as<std::string>(0u) == "foo"sv);
 
+			// sanity check the virtual type checks
+			CHECK(arr1->type() == node_type::array);
+			CHECK(!arr1->is_table());
+			CHECK(arr1->is_array());
+			CHECK(!arr1->is_array_of_tables());
+			CHECK(!arr1->is_value());
+			CHECK(!arr1->is_string());
+			CHECK(!arr1->is_integer());
+			CHECK(!arr1->is_floating_point());
+			CHECK(!arr1->is_number());
+			CHECK(!arr1->is_boolean());
+			CHECK(!arr1->is_date());
+			CHECK(!arr1->is_time());
+			CHECK(!arr1->is_date_time());
+
+			// sanity check the virtual type casts (non-const)
+			CHECK(!arr1->as_table());
+			CHECK(arr1->as_array() == arr1);
+			CHECK(!arr1->as_string());
+			CHECK(!arr1->as_integer());
+			CHECK(!arr1->as_floating_point());
+			CHECK(!arr1->as_boolean());
+			CHECK(!arr1->as_date());
+			CHECK(!arr1->as_time());
+			CHECK(!arr1->as_date_time());
+
+			// sanity check the virtual type casts (const)
+			const auto carr1 = &std::as_const(*arr1);
+			CHECK(!carr1->as_table());
+			CHECK(carr1->as_array() == carr1);
+			CHECK(!carr1->as_string());
+			CHECK(!carr1->as_integer());
+			CHECK(!carr1->as_floating_point());
+			CHECK(!carr1->as_boolean());
+			CHECK(!carr1->as_date());
+			CHECK(!carr1->as_time());
+			CHECK(!carr1->as_date_time());
+
 			// sanity-check initial state of default-constructed array
 			array arr2;
 			CHECK(arr2.source().begin == source_position{});
@@ -64,8 +102,7 @@ TEST_CASE("arrays - moving")
 			CHECK(!arr2.source().path);
 			CHECK(arr2.size() == 0u);
 		},
-		filename
-	);
+		filename);
 }
 
 TEST_CASE("arrays - copying")
@@ -116,8 +153,7 @@ TEST_CASE("arrays - copying")
 			CHECK(arr3 == *arr1);
 			CHECK(arr3 == arr2);
 		},
-		filename
-	);
+		filename);
 }
 
 TEST_CASE("arrays - construction")
@@ -133,7 +169,7 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.source().path);
 		CHECK(!arr.is_homogeneous());
 	}
-	
+
 	{
 		array arr{ 42 };
 		CHECK(arr.size() == 1u);
@@ -142,9 +178,24 @@ TEST_CASE("arrays - construction")
 		CHECK(arr.cbegin() != arr.cend());
 		REQUIRE(arr.get_as<int64_t>(0u));
 		CHECK(*arr.get_as<int64_t>(0u) == 42);
+		CHECK(arr.get(0u) == &arr[0u]);
 		CHECK(arr.is_homogeneous());
 		CHECK(arr.is_homogeneous<int64_t>());
 		CHECK(!arr.is_homogeneous<double>());
+		CHECK(arr.get(0u) == &arr.at(0u));
+
+		const array& carr = arr;
+		CHECK(carr.size() == 1u);
+		CHECK(!carr.empty());
+		CHECK(carr.begin() != carr.end());
+		CHECK(carr.cbegin() != carr.cend());
+		REQUIRE(carr.get_as<int64_t>(0u));
+		CHECK(*carr.get_as<int64_t>(0u) == 42);
+		CHECK(carr.get(0u) == &carr[0u]);
+		CHECK(carr.is_homogeneous());
+		CHECK(carr.is_homogeneous<int64_t>());
+		CHECK(!carr.is_homogeneous<double>());
+		CHECK(carr.get(0u) == &carr.at(0u));
 	}
 
 	{
@@ -153,17 +204,21 @@ TEST_CASE("arrays - construction")
 		CHECK(!arr.empty());
 		REQUIRE(arr.get_as<int64_t>(0u));
 		CHECK(*arr.get_as<int64_t>(0u) == 42);
+		CHECK(arr.get(0u) == &arr[0u]);
 		REQUIRE(arr.get_as<std::string>(1u));
 		CHECK(*arr.get_as<std::string>(1u) == "test"sv);
+		CHECK(arr.get(1u) == &arr[1u]);
 		REQUIRE(arr.get_as<double>(2u));
 		CHECK(*arr.get_as<double>(2u) == 10.0);
 		REQUIRE(arr.get_as<array>(3u));
 		REQUIRE(arr.get_as<int64_t>(4u));
 		CHECK(*arr.get_as<int64_t>(4u) == 3);
 		CHECK(!arr.is_homogeneous());
+		CHECK(arr.get(0u) == &arr.at(0u));
+		CHECK(arr.get(1u) == &arr.at(1u));
 	}
 
-	#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 	{
 		array arr{ "mixed", "string"sv, L"test", L"kek"sv };
 		CHECK(arr.size() == 4u);
@@ -174,7 +229,7 @@ TEST_CASE("arrays - construction")
 		CHECK(*arr.get_as<std::string>(2) == "test"sv);
 		CHECK(*arr.get_as<std::string>(3) == "kek"sv);
 	}
-	#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - equality")
@@ -373,77 +428,109 @@ TEST_CASE("arrays - insertion and erasure")
 		CHECK(*arr.get_as<double>(5u) == 3.0);
 	}
 
-	#if TOML_WINDOWS_COMPAT
+	// iterator replace(const_iterator pos, ElemType&& elem) noexcept
+	{
+		arr.clear();
+		arr.insert(arr.begin(), { 1, 2, 3 });
+		CHECK(arr == array{ 1, 2, 3 });
+		arr.replace(arr.begin() + 1u, "two"sv);
+		CHECK(arr == array{ 1, "two"sv, 3 });
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 	arr.clear();
 	it = arr.insert(arr.cbegin(), L"test");
-	REQUIRE(*arr.get_as<std::string>(0u) == "test"sv);
-	
+	CHECK(*arr.get_as<std::string>(0u) == "test"sv);
+
 	it = arr.emplace<std::string>(arr.cbegin(), L"test2"sv);
-	REQUIRE(*arr.get_as<std::string>(0u) == "test2"sv);
+	CHECK(*arr.get_as<std::string>(0u) == "test2"sv);
 
 	arr.push_back(L"test3"s);
-	REQUIRE(*arr.back().as_string() == "test3"sv);
+	CHECK(*arr.back().as_string() == "test3"sv);
 
 	arr.emplace_back<std::string>(L"test4");
-	REQUIRE(*arr.back().as_string() == "test4"sv);
+	CHECK(*arr.back().as_string() == "test4"sv);
 
-	#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 
 TEST_CASE("arrays - flattening")
 {
 	{
 		array arr{
-			1, 2, 3,
+			1,
+			2,
+			3,
 			array{ 4, 5 },
 			6,
 			array{},
-			array{ 7, array{ 8, array{ 9 }, 10, array{}, }, 11 },
+			array{ 7,
+				   array{
+					   8,
+					   array{ 9 },
+					   10,
+					   array{},
+				   },
+				   11 },
 		};
 		arr.flatten();
-		REQUIRE(arr == array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
+		CHECK(arr == array{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 });
 	}
 
 	{
-		array arr{
-			array{},
-			array{inserter{array{}}},
-			array{array{},array{array{},array{}},array{}},
-			array{array{array{array{array{array{ 1 }}}}}}
-		};
+		array arr{ array{},
+				   array{ inserter{ array{} } },
+				   array{ array{}, array{ array{}, array{} }, array{} },
+				   array{ array{ array{ array{ array{ array{ 1 } } } } } } };
 		arr.flatten();
-		REQUIRE(arr == array{ 1 });
+		CHECK(arr == array{ 1 });
 	}
+}
+
+TEST_CASE("arrays - pruning")
+{
+	// [ 1, [ 2, [], 3 ], { 4 = 5, 6 = 7 }, [], 8, [{}], 9, 10 ]
+	const auto arr =
+		array{ 1, array{ 2, array{}, 3 }, table{ { "4", 5 }, { "6", array{} } }, array{}, 8, array{ table{} }, 9, 10 };
+
+	// [ 1, [ 2, 3 ], { 4 = 5, 6 = 7 }, 8, 9, 10 ]
+	const auto pruned_recursive = array{ 1, array{ 2, 3 }, table{ { "4", 5 } }, 8, 9, 10 };
+	CHECK(array{ arr }.prune(true) == pruned_recursive);
+
+	// [ 1, [ 2, [], 3 ], { 4 = 5, 6 = 7 }, [], 8, [{}], 9, 10 ]
+	const auto pruned_flat =
+		array{ 1, array{ 2, array{}, 3 }, table{ { "4", 5 }, { "6", array{} } }, 8, array{ table{} }, 9, 10 };
+	CHECK(array{ arr }.prune(false) == pruned_flat);
 }
 
 TEST_CASE("arrays - resizing and truncation")
 {
 	array arr{ 1, 2, 3, 4, 5 };
-	REQUIRE(arr.size() == 5u);
+	CHECK(arr.size() == 5u);
 
 	// truncate with no change
 	arr.truncate(5u);
-	REQUIRE(arr.size() == 5u);
-	REQUIRE(arr == array{ 1, 2, 3, 4, 5 });
+	CHECK(arr.size() == 5u);
+	CHECK(arr == array{ 1, 2, 3, 4, 5 });
 
 	// truncate down to three elements
 	arr.truncate(3u);
-	REQUIRE(arr.size() == 3u);
-	REQUIRE(arr == array{ 1, 2, 3 });
+	CHECK(arr.size() == 3u);
+	CHECK(arr == array{ 1, 2, 3 });
 
 	// resize down to two elements
 	arr.resize(2u, 42);
-	REQUIRE(arr.size() == 2u);
-	REQUIRE(arr == array{ 1, 2 });
+	CHECK(arr.size() == 2u);
+	CHECK(arr == array{ 1, 2 });
 
 	// resize with no change
 	arr.resize(2u, 42);
-	REQUIRE(arr.size() == 2u);
-	REQUIRE(arr == array{ 1, 2 });
+	CHECK(arr.size() == 2u);
+	CHECK(arr == array{ 1, 2 });
 
-	//resize up to six elements
+	// resize up to six elements
 	arr.resize(6u, 42);
-	REQUIRE(arr.size() == 6u);
-	REQUIRE(arr == array{ 1, 2, 42, 42, 42, 42 });
+	CHECK(arr.size() == 6u);
+	CHECK(arr == array{ 1, 2, 42, 42, 42, 42 });
 }

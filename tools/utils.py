@@ -5,8 +5,9 @@
 # SPDX-License-Identifier: MIT
 
 import sys
+import subprocess
+from pathlib import Path
 from misk import *
-
 
 
 def repeat_pattern(pattern, count):
@@ -29,6 +30,17 @@ def make_divider(text = None, text_col = 40, pattern = '-', line_length = 120):
 		else:
 			return text
 
+
+
+def apply_clang_format(text, cwd=None):
+	return subprocess.run(
+		'clang-format --style=file'.split(),
+		check=True,
+		capture_output=True,
+		cwd=str(Path.cwd() if cwd is None else cwd),
+		encoding='utf-8',
+		input=text
+	).stdout
 
 
 def run(main_func, verbose=False):

@@ -6,7 +6,6 @@
 
 import sys
 import utils
-import io
 import re
 import json
 import yaml
@@ -14,6 +13,7 @@ import math
 import dateutil.parser
 from pathlib import Path
 from datetime import datetime, date, time
+from io import StringIO
 
 
 
@@ -25,14 +25,96 @@ def sanitize(s):
 
 
 
+def is_problematic_control_char(val):
+	if isinstance(val, str):
+		val = ord(val)
+	return (0x00 <= val <= 0x08) or (0x0B <= val <= 0x1F) or val == 0x7F
+
+
+
+def has_problematic_control_chars(val):
+	for c in val:
+		if is_problematic_control_char(c):
+			return True
+	return False
+
+
+
+def requires_unicode(s):
+	for c in s:
+		if ord(c) > 127:
+			return True
+	return False
+
+
+
+def make_string_literal(val, escape_all = False, escape_any = False):
+	get_ord = (lambda c: ord(c)) if isinstance(val, str) else (lambda c: c)
+	if escape_all:
+		with StringIO() as buf:
+			line_len = 0
+			for c in val:
+				c_ord = get_ord(c)
+				if not line_len:
+					buf.write('\n\t\t"')
+					line_len += 1
+				if c_ord <= 0xFF:
+					buf.write(rf'\x{c_ord:02X}')
+					line_len += 4
+				elif c_ord <= 0xFFFF:
+					buf.write(rf'\u{c_ord:04X}')
+					line_len += 6
+				else:
+					buf.write(rf'\U{c_ord:08X}')
+					line_len += 10
+				if line_len >= 100:
+					buf.write('"')
+					line_len = 0
+			if line_len:
+				buf.write('"')
+			return buf.getvalue()
+	elif escape_any:
+		with StringIO() as buf:
+			buf.write(r'"')
+			for c in val:
+				c_ord = get_ord(c)
+				if c_ord == 0x22: # "
+					buf.write(r'\"')
+				elif c_ord == 0x5C: # \
+					buf.write(r'\\')
+				elif c_ord == 0x0A: # \n
+					buf.write('\\n"\n\t\t"')
+				elif c_ord == 0x0B: # \v
+					buf.write(r'\v')
+				elif c_ord == 0x0C: # \f
+					buf.write(r'\f')
+				elif c_ord == 0x0D: # \r
+					buf.write(r'\r')
+				elif is_problematic_control_char(c_ord):
+					if c_ord <= 0xFF:
+						buf.write(rf'\x{c_ord:02X}')
+					elif c_ord <= 0xFFFF:
+						buf.write(rf'\u{c_ord:04X}')
+					else:
+						buf.write(rf'\U{c_ord:08X}')
+				else:
+					buf.write(chr(c_ord))
+			buf.write(r'"')
+			return buf.getvalue()
+	else:
+		return rf'R"({val})"'
+
+
+
+
 def python_value_to_tomlpp(val):
 	if isinstance(val, str):
-		if re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
-			return str(float(val))
-		elif not val:
+		if not val:
 			return r'""sv'
+		elif re.fullmatch(r'^[+-]?[0-9]+[eE][+-]?[0-9]+$', val, re.M):
+			return str(float(val))
 		else:
-			return rf'R"({val})"sv'
+			return rf'{make_string_literal(val, escape_any = has_problematic_control_chars(val))}sv'
 	elif isinstance(val, bool):
 		return 'true' if val else 'false'
 	elif isinstance(val, float):
@@ -51,35 +133,31 @@ def python_value_to_tomlpp(val):
 			return str(val)
 	elif isinstance(val, (TomlPPArray, TomlPPTable)):
 		return str(val)
-	elif isinstance(val, datetime):
-		offset = None
-		if val.tzinfo is not None:
-			offset = val.tzinfo.utcoffset(val)
-			mins = offset.total_seconds() / 60
-			offset = (int(mins / 60), int(mins % 60))
-		return 'toml::date_time{{ {{ {}, {}, {} }}, {{ {}, {}, {}, {}u }}{} }}'.format(
-			val.year,
-			val.month,
-			val.day,
-			val.hour,
-			val.minute,
-			val.second,
-			val.microsecond*1000,
-			'' if offset is None else ', {{ {}, {} }}'.format(offset[0], offset[1])
-		)
-	elif isinstance(val, date):
-		return 'toml::date{{ {}, {}, {} }}'.format(
-			val.year,
-			val.month,
-			val.day
-		)
-	elif isinstance(val, time):
-		return 'toml::time{{ {}, {}, {}, {} }}'.format(
-			val.hour,
-			val.minute,
-			val.second,
-			val.microsecond*1000
-		)
+	elif isinstance(val, (date, time, datetime)):
+		date_args = None
+		if isinstance(val, (date, datetime)):
+			date_args = rf'{val.year}, {val.month}, {val.day}'
+		time_args = None
+		if isinstance(val, (time, datetime)):
+			time_args = rf'{val.hour}, {val.minute}'
+			if val.second and val.microsecond:
+				time_args = rf'{time_args}, {val.second}, {val.microsecond*1000}'
+			elif val.second:
+				time_args = rf'{time_args}, {val.second}'
+			elif val.microsecond:
+				time_args = rf'{time_args}, 0, {val.microsecond*1000}'
+		if isinstance(val, datetime):
+			offset_init = ''
+			if val.tzinfo is not None:
+				offset = val.tzinfo.utcoffset(val)
+				mins = offset.total_seconds() / 60
+				offset = (int(mins / 60), int(mins % 60))
+				offset_init = rf', {{ {offset[0]}, {offset[1]} }}'
+			return rf'toml::date_time{{ {{ {date_args} }}, {{ {time_args} }}{offset_init} }}'
+		elif isinstance(val, time):
+			return rf'toml::time{{ {time_args} }}'
+		elif isinstance(val, date):
+			return rf'toml::date{{ {date_args} }}'
 	else:
 		raise ValueError(str(type(val)))
 
@@ -132,7 +210,7 @@ class TomlPPTable:
 		if len(self.values) == 0:
 			s += 'toml::table{}'
 		else:
-			s += 'toml::table{{'
+			s += 'toml::table{'
 			for key, val in self.values.items():
 				s += '\n' + indent + '\t{ '
 				if isinstance(val, (TomlPPTable, TomlPPArray)) and len(val) > 0:
@@ -142,7 +220,7 @@ class TomlPPTable:
 				else:
 					s += '{}, {} '.format(python_value_to_tomlpp(str(key)), python_value_to_tomlpp(val))
 				s += '},'
-			s += '\n' + indent + '}}'
+			s += '\n' + indent + '}'
 		return s
 
 	def __str__(self):
@@ -217,8 +295,55 @@ class TomlTest:
 		self.__name = name
 		self.__identifier = sanitize(self.__name)
 		self.__group = self.__identifier.strip('_').split('_')[0]
-		self.__data = utils.read_all_text_from_file(file_path, logger=True).strip()
-		self.__data = re.sub(r'\\[ \t]+?\n', '\\\n', self.__data, re.S) # C++ compilers don't like whitespace after trailing slashes
+
+		# read file
+		self.__raw = True
+		self.__bytes = False
+		with open(file_path, "rb") as f:
+			self.__source = f.read()
+
+		# if we find a utf-16 or utf-32 BOM, treat the file as bytes
+		if len(self.__source) >= 4:
+			prefix = self.__source[:4]
+			if prefix == b'\x00\x00\xFE\xFF' or prefix == b'\xFF\xFE\x00\x00':
+				self.__bytes = True
+		if len(self.__source) >= 2:
+			prefix = self.__source[:2]
+			if prefix == b'\xFF\xFE' or prefix == b'\xFE\xFF':
+				self.__bytes = True
+
+		# if we find a utf-8 BOM, treat it as a string but don't use a raw string literal
+		if not self.__bytes and len(self.__source) >= 3:
+			prefix = self.__source[:3]
+			if prefix == b'\xEF\xBB\xBF':
+				self.__raw = False
+
+		# if we're not treating it as bytes, decode the bytes into a utf-8 string
+		if not self.__bytes:
+			try:
+				self.__source = str(self.__source, encoding='utf-8')
+
+				# disable raw literals if the string contains some things that should be escaped
+				for c in self.__source:
+					if is_problematic_control_char(c):
+						self.__raw = False
+						break
+
+				# disable raw literals if the string has trailing backslashes followed by whitespace on the same line
+				# (GCC doesn't like it and generates some noisy warnings)
+				if self.__raw and re.search(r'\\[ \t]+?\n', self.__source, re.S):
+					self.__raw = False
+
+			except UnicodeDecodeError:
+				self.__bytes = True
+
+		# strip off trailing newlines for non-byte strings (they're just noise)
+		if not self.__bytes:
+			while self.__source.endswith('\r\n'):
+				self.__source = self.__source[:-2]
+			self.__source = self.__source.rstrip('\n')
+
+		# parse preprocessor conditions
 		self.__conditions = []
 		if is_valid_case:
 			self.__expected = True
@@ -259,21 +384,15 @@ class TomlTest:
 			return rf'{self.__conditions[0]}'
 		return rf'{" && ".join([rf"{c}" for c in self.__conditions])}'
 
-	def data(self):
-		return self.__data
-
 	def expected(self):
 		return self.__expected
 
 	def __str__(self):
-		return 'static constexpr auto {} = R"({})"sv;'.format(
-			self.__identifier,
-			self.__data,
-		)
+		return rf'static constexpr auto {self.__identifier} = {make_string_literal(self.__source, escape_all = self.__bytes, escape_any = not self.__raw)}sv;'
 
 
 
-def load_tests(source_folder, is_valid_set, ignore_list):
+def load_tests(source_folder, is_valid_set, ignore_list = None):
 	source_folder = source_folder.resolve()
 	utils.assert_existing_directory(source_folder)
 	files = utils.get_all_files(source_folder, all="*.toml", recursive=True)
@@ -284,6 +403,8 @@ def load_tests(source_folder, is_valid_set, ignore_list):
 		for f,n in files:
 			ignored = False
 			for ignore in ignore_list:
+				if ignore is None:
+					continue
 				if isinstance(ignore, str):
 					if n == ignore:
 						ignored = True
@@ -296,10 +417,7 @@ def load_tests(source_folder, is_valid_set, ignore_list):
 		files = files_
 	tests = []
 	for f,n in files:
-		try:
-			tests.append(TomlTest(f, n, is_valid_set))
-		except Exception as e:
-			print(rf'Error reading {f}, skipping...', file=sys.stderr)
+		tests.append(TomlTest(f, n, is_valid_set))
 	return tests
 
 
@@ -322,8 +440,6 @@ def add_condition(tests, condition, names):
 
 def load_valid_inputs(tests, extern_root):
 	tests['valid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'valid'), True, (
-		# newline/escape handling tests. these get broken by I/O (I test them separately)
-		'string-escapes',
 		# broken by the json reader
 		'key-alphanum',
 	))
@@ -343,9 +459,6 @@ def load_valid_inputs(tests, extern_root):
 		'qa-scalar-string-multiline-40kb',
 		'qa-table-inline-1000',
 		'qa-table-inline-nested-1000',
-		# newline/escape handling tests. these get broken by I/O (I test them separately)
-		re.compile(r'spec-newline-.*'),
-		re.compile(r'spec-string-escape-.*'),
 		# bugged: https://github.com/iarna/toml-spec-tests/issues/3
 		'spec-date-time-6',
 		'spec-date-time-local-2',
@@ -355,11 +468,7 @@ def load_valid_inputs(tests, extern_root):
 
 
 def load_invalid_inputs(tests, extern_root):
-	tests['invalid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'invalid'), False, (
-		# these break IO/git/visual studio (i test them elsewhere)
-		re.compile('.*(bom|control).*'),
-		'encoding-utf16',
-	))
+	tests['invalid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'invalid'), False)
 	add_condition(tests['invalid']['burntsushi'], '!TOML_LANG_UNRELEASED', (
 		'datetime-no-secs',
 		re.compile(r'inline-table-linebreak-.*'),
@@ -369,21 +478,10 @@ def load_invalid_inputs(tests, extern_root):
 		'string-basic-byte-escapes',
 	))
 
-	tests['invalid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'errors'), False, (
-		# these break IO/git/visual studio (i test them elsewhere)
-		re.compile('.*(bom|control).*'),
-	))
+	tests['invalid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'errors'), False)
 	add_condition(tests['invalid']['iarna'], '!TOML_LANG_UNRELEASED', (
 		'inline-table-trailing-comma',
 	))
-
-
-
-def requires_unicode(s):
-	for c in s:
-		if ord(c) > 127:
-			return True
-	return False
 
 
 
@@ -407,25 +505,21 @@ def write_test_file(name, all_tests):
 	all_tests = tests_by_group
 
 	test_file_path = Path(utils.entry_script_dir(), '..', 'tests', rf'conformance_{sanitize(name.strip())}.cpp').resolve()
-	print(rf'Writing to {test_file_path}')
-	with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
-		write = lambda txt,end='\n': print(txt, file=test_file, end=end)
+	with StringIO() as test_file_buffer:
+		write = lambda txt,end='\n': print(txt, file=test_file_buffer, end=end)
 
 		# preamble
-		write('// This file is a part of toml++ and is subject to the the terms of the MIT license.')
-		write('// Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>')
-		write('// See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.')
-		write('// SPDX-License-Identifier: MIT')
-		write('//-----')
-		write('// this file was generated by generate_conformance_tests.py - do not modify it directly')
-		write('')
-		write('#include "tests.h"')
-		write('using namespace toml::impl;')
-		write('')
+		write(r'// This file is a part of toml++ and is subject to the the terms of the MIT license.')
+		write(r'// Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>')
+		write(r'// See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.')
+		write(r'// SPDX-License-Identifier: MIT')
+		write(r'//-----')
+		write(r'// this file was generated by generate_conformance_tests.py - do not modify it directly')
+		write(r'')
+		write(r'#include "tests.h"')
 
 		# test data
-		write('TOML_DISABLE_WARNINGS; // unused variable spam')
-		write('')
+		write(r'')
 		write('namespace')
 		write('{', end='')
 		for group, conditions in all_tests.items():
@@ -440,11 +534,9 @@ def write_test_file(name, all_tests):
 					write('')
 					write(f'#endif // {condition}');
 		write('}')
-		write('')
-		write('TOML_ENABLE_WARNINGS;')
-		write('')
 
 		# tests
+		write('')
 		write(f'TEST_CASE("conformance - {name}")')
 		write('{', end='')
 		for group, conditions in all_tests.items():
@@ -472,6 +564,21 @@ def write_test_file(name, all_tests):
 					write(f'#endif // {condition}');
 		write('}')
 		write('')
+
+		test_file_content = test_file_buffer.getvalue()
+
+		# clang-format
+		print(f"Running clang-format for {test_file_path}")
+		try:
+			test_file_content = utils.apply_clang_format(test_file_content, cwd=test_file_path.parent)
+		except Exception as ex:
+			print(rf'Error running clang-format:', file=sys.stderr)
+			utils.print_exception(ex)
+
+		# write to disk
+		print(rf'Writing {test_file_path}')
+		with open(test_file_path, 'w', encoding='utf-8', newline='\n') as test_file:
+			test_file.write(test_file_content)
 
 
 

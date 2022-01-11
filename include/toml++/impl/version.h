@@ -2,11 +2,10 @@
 //# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
-
 #pragma once
 
-#define TOML_LIB_MAJOR 2
-#define TOML_LIB_MINOR 6
+#define TOML_LIB_MAJOR 3
+#define TOML_LIB_MINOR 0
 #define TOML_LIB_PATCH 0
 
 #define TOML_LANG_MAJOR 1

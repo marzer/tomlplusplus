@@ -6,14 +6,14 @@
 // this file is for boilerplate unrelated to the toml++ example learning outcomes.
 
 #ifdef __clang__
-	#pragma clang diagnostic push
-	#pragma clang diagnostic ignored "-Weverything"
-#elif defined (__GNUC__)
-	#pragma GCC diagnostic push
-	#pragma GCC diagnostic ignored "-Wall"
-	#pragma GCC diagnostic ignored "-Wextra"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Weverything"
+#elif defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wextra"
 #elif defined(_MSC_VER)
-	#pragma warning(push, 0)
+#pragma warning(push, 0)
 #endif
 
 #include <cstdlib>
@@ -24,29 +24,37 @@
 #include <string_view>
 #include <vector>
 #include <array>
+#include <chrono>
 #ifdef _WIN32
-	#include <windows.h>
+#ifdef _MSC_VER
+extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);
+#pragma comment(lib, "Kernel32.lib")
+#else
+#include <Windows.h>
+#endif
 #endif
 
-#ifdef __clang__
-	#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-	#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
-	#pragma warning(pop)
-#endif
-
-namespace examples
+namespace
 {
-	inline void init() noexcept
+	static const auto initialize_environment_automagically = []() noexcept
 	{
-		#ifdef _WIN32
-		SetConsoleOutputCP(65001); //CP_UTF8
-		#endif
+#ifdef _WIN32
+		SetConsoleOutputCP(65001); // CP_UTF8
+#endif
 
 		std::ios_base::sync_with_stdio(false);
 		std::cout << std::boolalpha;
 
 		srand(static_cast<unsigned int>(time(nullptr)));
-	}
+
+		return true;
+	}();
 }
+
+#ifdef __clang__
+#pragma clang diagnostic pop
+#elif defined(__GNUC__)
+#pragma GCC diagnostic pop
+#elif defined(_MSC_VER)
+#pragma warning(pop)
+#endif

@@ -7,83 +7,105 @@
 #include "settings.h"
 
 #if USE_TARTANLLAMA_OPTIONAL
-	#include "tloptional.h"
+#include "lib_tloptional.h"
 #endif
 
 #if USE_SINGLE_HEADER
-	#include "../toml.hpp"
+#include "../toml.hpp"
 #else
-	#include "../include/toml++/toml.h"
+#include "../include/toml++/toml.h"
 #endif
 #if defined(TOML_FP16) ^ SHOULD_HAVE_FP16
-	#error TOML_FP16 was not deduced correctly
+#error TOML_FP16 was not deduced correctly
 #endif
 #if defined(TOML_FLOAT16) ^ SHOULD_HAVE_FLOAT16
-	#error TOML_FLOAT16 was not deduced correctly
+#error TOML_FLOAT16 was not deduced correctly
 #endif
 #if defined(TOML_FLOAT128) ^ SHOULD_HAVE_FLOAT128
-	#error TOML_FLOAT128 was not deduced correctly
+#error TOML_FLOAT128 was not deduced correctly
 #endif
 #if defined(TOML_INT128) ^ SHOULD_HAVE_INT128
-	#error TOML_INT128 was not deduced correctly
+#error TOML_INT128 was not deduced correctly
 #endif
 #if defined(TOML_INT128) ^ defined(TOML_UINT128)
-	#error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
+#error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
 #endif
-#if TOML_COMPILER_EXCEPTIONS != SHOULD_HAVE_EXCEPTIONS
-	#error TOML_COMPILER_EXCEPTIONS was not deduced correctly
+#if TOML_COMPILER_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
+#error TOML_COMPILER_EXCEPTIONS was not deduced correctly
 #endif
-#if TOML_COMPILER_EXCEPTIONS != TOML_EXCEPTIONS
-	#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
+#if TOML_COMPILER_EXCEPTIONS ^ TOML_EXCEPTIONS
+#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
 #endif
-#if (defined(_WIN32) && !TOML_WINDOWS_COMPAT) || (!defined(_WIN32) && TOML_WINDOWS_COMPAT)
-	#error TOML_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#if defined(_WIN32) ^ TOML_ENABLE_WINDOWS_COMPAT
+#error TOML_ENABLE_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
+#endif
+#if !(TOML_HEADER_ONLY ^ TOML_EXTERN_TEMPLATES) && !TOML_INTELLISENSE
+#error TOML_EXTERN_TEMPLATES should hold the opposite value to TOML_HEADER_ONLY by default
 #endif
 
 #if TOML_ICC
-	#define UNICODE_LITERALS_OK 0
+#define UNICODE_LITERALS_OK 0
 #else
-	#define UNICODE_LITERALS_OK 1
+#define UNICODE_LITERALS_OK 1
 #endif
 
 TOML_DISABLE_SPAM_WARNINGS;
 TOML_DISABLE_ARITHMETIC_WARNINGS;
+#if TOML_CLANG == 13
+#pragma clang diagnostic ignored "-Wreserved-identifier" // false-positive
+#endif
 
 TOML_DISABLE_WARNINGS;
-#include "catch2.h"
+#include "lib_catch2.h"
 #include <sstream>
-namespace toml {}
+namespace toml
+{
+}
 using namespace Catch::literals;
 using namespace toml;
 TOML_ENABLE_WARNINGS;
 
-#define FILE_LINE_ARGS	std::string_view{ __FILE__ }, __LINE__
-#define BOM_PREFIX "\xEF\xBB\xBF"
+TOML_NODISCARD
+TOML_ATTR(const)
+TOML_ALWAYS_INLINE
+constexpr size_t operator"" _sz(unsigned long long n) noexcept
+{
+	return static_cast<size_t>(n);
+}
+
+#define FILE_LINE_ARGS trim_file_path(std::string_view{ __FILE__ }), __LINE__
+#define BOM_PREFIX	   "\xEF\xBB\xBF"
 
 #if TOML_EXCEPTIONS
-	#define FORCE_FAIL(...) FAIL(__VA_ARGS__)
+#define FORCE_FAIL(...) FAIL(__VA_ARGS__)
 #else
-	#define FORCE_FAIL(...)		\
-	do							\
-	{							\
-		FAIL(__VA_ARGS__);		\
-		std::exit(-1);			\
-		TOML_UNREACHABLE;		\
-	}							\
+#define FORCE_FAIL(...)                                                                                                \
+	do                                                                                                                 \
+	{                                                                                                                  \
+		FAIL(__VA_ARGS__);                                                                                             \
+		std::exit(-1);                                                                                                 \
+		TOML_UNREACHABLE;                                                                                              \
+	}                                                                                                                  \
 	while (false)
 #endif
 
-#define CHECK_SYMMETRIC_RELOP(lhs, op, rhs, result)	\
-	CHECK(((lhs) op (rhs)) == (result));			\
-	CHECK(((rhs) op (lhs)) == (result))
+#define CHECK_SYMMETRIC_RELOP(lhs, op, rhs, result)                                                                    \
+	CHECK(((lhs)op(rhs)) == (result));                                                                                 \
+	CHECK(((rhs)op(lhs)) == (result))
 
-#define CHECK_SYMMETRIC_EQUAL(lhs, rhs)				\
-	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, true);		\
+#define CHECK_SYMMETRIC_EQUAL(lhs, rhs)                                                                                \
+	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, true);                                                                         \
 	CHECK_SYMMETRIC_RELOP(lhs, !=, rhs, false)
 
-#define CHECK_SYMMETRIC_INEQUAL(lhs, rhs)			\
-	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, false);		\
+#define CHECK_SYMMETRIC_INEQUAL(lhs, rhs)                                                                              \
+	CHECK_SYMMETRIC_RELOP(lhs, ==, rhs, false);                                                                        \
 	CHECK_SYMMETRIC_RELOP(lhs, !=, rhs, true)
+
+template <typename T>
+struct type_tag
+{
+	using type = T;
+};
 
 // function_view - adapted from here: https://vittorioromeo.info/index/blog/passing_functions_to_functions.html
 template <typename Func>
@@ -91,59 +113,66 @@ class function_view;
 template <typename R, typename... P>
 class function_view<R(P...)> final
 {
-	private:
-		using func_type = R(P...);
-		using eraser_func_type = R(void*, P&&...);
+  private:
+	using func_type		   = R(P...);
+	using eraser_func_type = R(void*, P&&...);
 
-		mutable void* ptr_ = {};
-		mutable eraser_func_type* eraser = {};
+	mutable void* ptr_				 = {};
+	mutable eraser_func_type* eraser = {};
 
-	public:
+  public:
+	function_view() noexcept = default;
 
-		function_view() noexcept = default;
+	template <typename T>
+	function_view(T&& x) noexcept : ptr_{ reinterpret_cast<void*>(std::addressof(x)) }
+	{
+		eraser = [](void* ptr, P&&... xs) -> R
+		{ return (*reinterpret_cast<std::add_pointer_t<std::remove_reference_t<T>>>(ptr))(std::forward<P>(xs)...); };
+	}
 
-		template <typename T>
-		function_view(T&& x) noexcept
-			: ptr_{ reinterpret_cast<void*>(std::addressof(x)) }
-		{
-			eraser = [](void* ptr, P&&... xs) -> R
-			{
-				return (*reinterpret_cast<std::add_pointer_t<std::remove_reference_t<T>>>(ptr))(std::forward<P>(xs)...);
-			};
-		}
+	decltype(auto) operator()(P&&... xs) const
+	{
+		return eraser(ptr_, std::forward<P>(xs)...);
+	}
 
-		decltype(auto) operator()(P&&... xs) const
-		{
-			return eraser(ptr_, std::forward<P>(xs)...);
-		}
-
-		[[nodiscard]] operator bool() const noexcept { return !!ptr_; }
+	TOML_NODISCARD
+	operator bool() const noexcept
+	{
+		return !!ptr_;
+	}
 };
 
-using pss_func = function_view<void(toml::table&&)>;
+using pss_func = function_view<void(table&&)>;
 
-bool parsing_should_succeed(
-	std::string_view test_file,
-	uint32_t test_line,
-	std::string_view toml_str,
-	pss_func&& func = {},
-	std::string_view source_path = {});
+bool parsing_should_succeed(std::string_view test_file,
+							uint32_t test_line,
+							std::string_view toml_str,
+							pss_func&& func				 = {},
+							std::string_view source_path = {});
 
-bool parsing_should_fail(
-	std::string_view test_file,
-	uint32_t test_line,
-	std::string_view toml_str,
-	source_index expected_failure_line = static_cast<source_index>(-1),
-	source_index expected_failure_column = static_cast<source_index>(-1));
+bool parsing_should_fail(std::string_view test_file,
+						 uint32_t test_line,
+						 std::string_view toml_str,
+						 source_index expected_failure_line	  = static_cast<source_index>(-1),
+						 source_index expected_failure_column = static_cast<source_index>(-1));
+
+TOML_PURE_GETTER
+constexpr std::string_view trim_file_path(std::string_view sv) noexcept
+{
+	const auto src = std::min(sv.rfind("\\"sv), sv.rfind("/"sv));
+	if (src != std::string_view::npos)
+		sv = sv.substr(src + 1_sz);
+	return sv;
+}
 
 template <typename T>
-inline bool parse_expected_value(
-	std::string_view test_file,
-	uint32_t test_line,
-	std::string_view value_str,
-	const T& expected)
+inline bool parse_expected_value(std::string_view test_file,
+								 uint32_t test_line,
+								 std::string_view value_str,
+								 const T& expected)
 {
-	INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value(\""sv << value_str << "\")"sv)
+	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
+			   << "parse_expected_value(\""sv << value_str << "\")"sv)
 
 	std::string val;
 	static constexpr auto key = "val = "sv;
@@ -159,7 +188,7 @@ inline bool parse_expected_value(
 			return !impl::is_whitespace(codepoint);
 	};
 
-	source_position pos{ 1,  static_cast<source_index>(key.length()) };
+	source_position pos{ 1, static_cast<source_index>(key.length()) };
 	source_position begin{}, end{};
 	{
 		impl::utf8_decoder decoder;
@@ -169,9 +198,9 @@ inline bool parse_expected_value(
 			if (!decoder.has_code_point())
 				continue;
 
-			if (impl::is_line_break(decoder.codepoint))
+			if (impl::is_ascii_vertical_whitespace(decoder.codepoint))
 			{
-				if (decoder.codepoint != U'\r')
+				if (decoder.codepoint == U'\n')
 				{
 					pos.line++;
 					pos.column = source_index{ 1 };
@@ -193,10 +222,11 @@ inline bool parse_expected_value(
 		end.column++;
 	}
 
-	using value_type = impl::native_type_of<impl::remove_cvref_t<T>>;
+	using value_type = impl::native_type_of<impl::remove_cvref<T>>;
 	value<value_type> val_parsed;
 	{
-		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking initial parse"sv)
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
+				   << "parse_expected_value: Checking initial parse"sv)
 
 		bool stolen_value = false; // parsing_should_succeed invokes the functor more than once
 		const auto result = parsing_should_succeed(
@@ -310,11 +340,10 @@ inline bool parse_expected_value(
 				// steal the val for round-trip tests
 				if (!stolen_value)
 				{
-					val_parsed = std::move(*nv.as<value_type>());
+					val_parsed	 = std::move(*nv.as<value_type>());
 					stolen_value = true;
 				}
-			}
-		);
+			});
 
 		if (!result)
 			return false;
@@ -322,7 +351,8 @@ inline bool parse_expected_value(
 
 	// check round-tripping
 	{
-		INFO("["sv << test_file << ", line "sv << test_line << "] "sv << "parse_expected_value: Checking round-trip"sv)
+		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
+				   << "parse_expected_value: Checking round-trip"sv)
 		{
 			std::string str;
 			{
@@ -333,25 +363,24 @@ inline bool parse_expected_value(
 			}
 
 			bool value_ok = true;
-			const auto parse_ok = parsing_should_succeed(
-				test_file,
-				test_line,
-				std::string_view{ str },
-				[&](table&& tbl)
-				{
-					REQUIRE(tbl.size() == 1);
-					auto nv = tbl["val"sv];
-					REQUIRE(nv);
-					REQUIRE(nv.as<value_type>());
-					REQUIRE(nv.node()->type() == impl::node_type_of<T>);
+			const auto parse_ok =
+				parsing_should_succeed(test_file,
+									   test_line,
+									   std::string_view{ str },
+									   [&](table&& tbl)
+									   {
+										   REQUIRE(tbl.size() == 1);
+										   auto nv = tbl["val"sv];
+										   REQUIRE(nv);
+										   REQUIRE(nv.as<value_type>());
+										   REQUIRE(nv.node()->type() == impl::node_type_of<T>);
 
-					if (value_ok && nv.ref<value_type>() != expected)
-					{
-						value_ok = false;
-						FORCE_FAIL("Value was not the same after round-tripping"sv);
-					}
-				}
-			);
+										   if (value_ok && nv.ref<value_type>() != expected)
+										   {
+											   value_ok = false;
+											   FORCE_FAIL("Value was not the same after round-tripping"sv);
+										   }
+									   });
 
 			if (!parse_ok || value_ok)
 				return false;
@@ -377,8 +406,8 @@ namespace Catch
 {
 	extern template struct StringMaker<node_view<node>>;
 	extern template struct StringMaker<node_view<const node>>;
-	extern template ReusableStringStream& ReusableStringStream::operator << (node_view<node> const&);
-	extern template ReusableStringStream& ReusableStringStream::operator << (node_view<const node> const&);
+	extern template ReusableStringStream& ReusableStringStream::operator<<(node_view<node> const&);
+	extern template ReusableStringStream& ReusableStringStream::operator<<(node_view<const node> const&);
 	namespace Detail
 	{
 		extern template std::string stringify(const node_view<node>&);

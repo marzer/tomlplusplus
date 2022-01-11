@@ -25,8 +25,15 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
   - TOML_ABSTRACT_BASE
+  - TOML_CLOSED_ENUM
+  - TOML_CLOSED_FLAGS_ENUM
   - TOML_EMPTY_BASES
+  - TOML_FLAGS_ENUM
+  - TOML_LIKELY_CASE
+  - TOML_OPEN_ENUM
+  - TOML_OPEN_FLAGS_ENUM
   - TOML_TRIVIAL_ABI
+  - TOML_UNLIKELY_CASE
 BinPackArguments: false
 BinPackParameters: false
 BraceWrapping:
@@ -96,7 +103,7 @@ IncludeIsMainSourceRegex: ''
 IndentCaseLabels: true
 IndentCaseBlocks: false
 IndentGotoLabels: true
-IndentPPDirectives: BeforeHash
+IndentPPDirectives: None
 IndentExternBlock: Indent
 IndentRequires:  false
 IndentWidth:     4
@@ -124,6 +131,7 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Left
+ReferenceAlignment: Left
 ReflowComments:  true
 SortIncludes:    false
 SortJavaStaticImport: Before
@@ -155,13 +163,17 @@ StatementMacros:
   - TOML_ALWAYS_INLINE
   - TOML_API
   - TOML_ATTR
-  - TOML_CONSTEVAL
+  - TOML_CONST_GETTER
+  - TOML_CONST_INLINE_GETTER
+  - TOML_EXTERN
   - TOML_EXTERNAL_LINKAGE
   - TOML_INTERNAL_LINKAGE
   - TOML_MEMBER_ATTR
   - TOML_NEVER_INLINE
   - TOML_NODISCARD
   - TOML_NODISCARD_CTOR
+  - TOML_PURE_GETTER
+  - TOML_PURE_INLINE_GETTER
   - TOML_RETURNS_BY_THROWING
 TabWidth:        4
 TypenameMacros:

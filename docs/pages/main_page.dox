@@ -9,7 +9,7 @@
  \section mainpage-features Features
  - Supports the latest [TOML](https://toml.io/) release ([v1.0.0](https://toml.io/en/v1.0.0)), plus
    optional support for some unreleased TOML features
- - Supports serializing to JSON
+ - Supports serializing to JSON and YAML
  - Proper UTF-8 handling (incl. BOM)
  - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
  - Header-only (optional!)
@@ -130,7 +130,7 @@
 
  \subsection mainpage-example-parsing-without-exceptions Handling errors without exceptions
  Can't (or won't) use exceptions? That's fine too. You can disable exceptions in your compiler flags and/or
- explicitly disable the library's use of them by setting the option \ref TOML_EXCEPTIONS to `0`. In either case,
+ explicitly disable the library's use of them by setting the option #TOML_EXCEPTIONS to `0`. In either case,
  the parsing functions return a toml::parse_result instead of a toml::table:
 
  \cpp
@@ -260,6 +260,10 @@
  	std::cout << "cats: " << tbl["animals"]["cats"] << "\n";
  	std::cout << "fish[1]: " << tbl["animals"]["fish"][1] << "\n";
 
+	// can also be retrieved via absolute path
+	std::cout << "cats: " << tbl.at_path("animals.cats") << "\n";
+	std::cout << "fish[1]: " << tbl.at_path("animals.fish[1]") << "\n";
+
  	// ...even if the element doesn't exist
  	std::cout << "dinosaurs: " << tbl["animals"]["dinosaurs"] << "\n"; //no dinosaurs :(
 
@@ -278,6 +282,8 @@
  numbers: [ 2, 3, 4, 'five', 6.0, 7, [ 8, 9 ] ]
  cats: [ 'tiger', 'lion', 'puma' ]
  fish[1]: 'trout'
+ cats: [ 'tiger', 'lion', 'puma' ]
+ fish[1]: 'trout'
  dinosaurs:
  \eout
 
@@ -290,12 +296,12 @@
 
 
 
- \subsection mainpage-example-serialization Serializing as TOML and JSON
+ \subsection mainpage-example-serialization Serializing as TOML, JSON and YAML
  All toml++ data types have overloaded `operator<<` for ostreams, so 'serializing' a set of TOML data to actual
- TOML is done just by printing it to an ostream. Converting it to JSON is done in the same way,
- but via a toml::json_formatter.
+ TOML is done just by printing it to an ostream. Converting it to JSON and YAML is done in much the same way,
+ but via a toml::json_formatter and toml::yaml_formatter.
 
- \godbolt{MMNoW4}
+ \godbolt{srdfoWMq6}
 
  \cpp
  #include <iostream>
@@ -303,18 +309,18 @@
 
  int main()
  {
- 	auto tbl = toml::table{{
+ 	auto tbl = toml::table{
  		{ "lib", "toml++" },
  		{ "cpp", toml::array{ 17, 20, "and beyond" } },
  		{ "toml", toml::array{ "1.0.0", "and beyond" } },
  		{ "repo", "https://github.com/marzer/tomlplusplus/" },
- 		{ "author", toml::table{{
+ 		{ "author", toml::table{
  				{ "name", "Mark Gillard" },
  				{ "github", "https://github.com/marzer" },
  				{ "twitter", "https://twitter.com/marzer8789" }
- 			}}
+ 			}
  		},
- 	}};
+ 	};
 
  	// serializing as TOML
  	std::cout << "###### TOML ######" << "\n\n";
@@ -323,6 +329,11 @@
  	// serializing as JSON using toml::json_formatter:
  	std::cout << "###### JSON ######" << "\n\n";
  	std::cout << toml::json_formatter{ tbl } << "\n\n";
+
+	// serializing as YAML using toml::yaml_formatter:
+	std::cout << "###### YAML ######" << "\n\n";
+	std::cout << toml::yaml_formatter{ tbl } << "\n\n";
+
  	return 0;
  }
  \ecpp
@@ -360,10 +371,28 @@
          "and beyond"
      ]
  }
+
+ ###### YAML ######
+
+ author:
+   github: 'https://github.com/marzer'
+   name: 'Mark Gillard'
+   twitter: 'https://twitter.com/marzer8789'
+ cpp:
+   - 17
+   - 20
+   - 'and beyond'
+ lib: toml++
+ repo: 'https://github.com/marzer/tomlplusplus/'
+ toml:
+   - '1.0.0'
+   - 'and beyond'
  \eout
+
  \see
- 	- toml::default_formatter
+ 	- toml::toml_formatter
  	- toml::json_formatter
+	- toml::yaml_formatter
 
 
 
@@ -373,7 +402,7 @@
  a large number of translation units. You can counter this by disabling header-only mode and explicitly controlling
  where the library's implementation is compiled.
 
- <strong>Step 1: Set \ref TOML_HEADER_ONLY to [code]0[/code] before including toml++</strong>
+ <strong>Step 1: Set #TOML_HEADER_ONLY to [code]0[/code] before including toml++</strong>
 
  This must be the same everywhere, so either set it as a global `#define` in your build system, or
  do it manually before including toml++ in some global header that's used everywhere in your project:
@@ -384,7 +413,7 @@
  #include <toml.hpp>
  \ecpp
 
- <strong>Step 2: Define \ref TOML_IMPLEMENTATION before including toml++ in one specific translation unit</strong>
+ <strong>Step 2: Define #TOML_IMPLEMENTATION before including toml++ in one specific translation unit</strong>
 
  \cpp
  // some_code_file.cpp
@@ -393,10 +422,11 @@
  #include "global_header_that_includes_toml++.h"
  \ecpp
 
- <strong>Bonus Step: Disable the parser if you don't need it</strong>
+ <strong>Bonus Step: Disable any library features you don't need</strong>
 
- If all you need to do is serialize some code-generated TOML and don't actually need the parser at all you can
- set \ref TOML_PARSER to `0` to disable the parser altogether. This can yield fairly significant compilation
+ Some library features can be disabled wholesale so you can avoid paying their the compilation cost if you don't need them.
+ For example, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all you, can
+ set #TOML_ENABLE_PARSER to `0` to disable the parser altogether. This can yield fairly significant compilation
  speedups since the parser accounts for a good chunk of the library's code.
 
 
@@ -427,7 +457,7 @@
 
 
  \subsection mainpage-adding-lib-conan Conan
- Add `tomlplusplus/2.5.0` to your conanfile.
+ Add `tomlplusplus/3.0.0` to your conanfile.
 
 
 
@@ -435,7 +465,7 @@
  Add `tomlpp` to your `package.json5`, e.g.:
  \bash
  depends: [
-		'tomlpp^2.5.0',
+		'tomlpp^3.0.0',
  ]
  \ebash
 
@@ -467,7 +497,7 @@
  FetchContent_Declare(
      tomlplusplus
      GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-     GIT_TAG        v2.5.0
+     GIT_TAG        v3.0.0
  )
  FetchContent_MakeAvailable(tomlplusplus)
  \endcode
@@ -490,10 +520,12 @@
 
  \out
  Parsing data.toml 5000 times:
-  pytomlpp:    0.662 s
-      toml:    5.277 s (7.9x slower)
-     qtoml:    8.020 s (12.1x slower)
-   tomlkit:   32.898 s (49.6x slower)
+   pytomlpp:   0.694 s
+      rtoml:   0.871 s ( 1.25x)
+      tomli:   2.625 s ( 3.78x)
+       toml:   5.642 s ( 8.12x)
+      qtoml:   7.760 s (11.17x)
+    tomlkit:  32.708 s (47.09x)
  \eout
 
  Install it using `pip`:

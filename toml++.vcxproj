@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
@@ -36,31 +36,50 @@
   <Import Project="$(ProjectDir)\toml++.props" />
   <ItemGroup>
     <ClInclude Include="include\toml++\impl\array.h" />
-    <ClInclude Include="include\toml++\impl\array_impl.h" />
-    <ClInclude Include="include\toml++\impl\common.h" />
+    <ClInclude Include="include\toml++\impl\array.inl" />
+    <ClInclude Include="include\toml++\impl\at_path.h" />
     <ClInclude Include="include\toml++\impl\date_time.h" />
-    <ClInclude Include="include\toml++\impl\default_formatter.h" />
-    <ClInclude Include="include\toml++\impl\default_formatter_impl.h" />
+    <ClInclude Include="include\toml++\impl\key.h" />
+    <ClInclude Include="include\toml++\impl\simd.h" />
+    <ClInclude Include="include\toml++\impl\std_utility.h" />
+    <ClInclude Include="include\toml++\impl\toml_formatter.h" />
+    <ClInclude Include="include\toml++\impl\toml_formatter.inl" />
     <ClInclude Include="include\toml++\impl\formatter.h" />
+    <ClInclude Include="include\toml++\impl\formatter.inl" />
+    <ClInclude Include="include\toml++\impl\forward_declarations.h" />
+    <ClInclude Include="include\toml++\impl\header_end.h" />
+    <ClInclude Include="include\toml++\impl\header_start.h" />
     <ClInclude Include="include\toml++\impl\json_formatter.h" />
-    <ClInclude Include="include\toml++\impl\json_formatter_impl.h" />
+    <ClInclude Include="include\toml++\impl\json_formatter.inl" />
+    <ClInclude Include="include\toml++\impl\make_node.h" />
     <ClInclude Include="include\toml++\impl\node.h" />
-    <ClInclude Include="include\toml++\impl\node_impl.h" />
+    <ClInclude Include="include\toml++\impl\node.inl" />
     <ClInclude Include="include\toml++\impl\node_view.h" />
+    <ClInclude Include="include\toml++\impl\node_view.inl" />
     <ClInclude Include="include\toml++\impl\parse_error.h" />
     <ClInclude Include="include\toml++\impl\parse_result.h" />
     <ClInclude Include="include\toml++\impl\parser.h" />
-    <ClInclude Include="include\toml++\impl\parser_impl.h" />
+    <ClInclude Include="include\toml++\impl\parser.inl" />
     <ClInclude Include="include\toml++\impl\preprocessor.h" />
     <ClInclude Include="include\toml++\impl\print_to_stream.h" />
+    <ClInclude Include="include\toml++\impl\print_to_stream.inl" />
+    <ClInclude Include="include\toml++\impl\source_region.h" />
+    <ClInclude Include="include\toml++\impl\std_except.h" />
+    <ClInclude Include="include\toml++\impl\std_initializer_list.h" />
+    <ClInclude Include="include\toml++\impl\std_map.h" />
+    <ClInclude Include="include\toml++\impl\std_new.h" />
+    <ClInclude Include="include\toml++\impl\std_optional.h" />
+    <ClInclude Include="include\toml++\impl\std_string.h" />
+    <ClInclude Include="include\toml++\impl\std_vector.h" />
     <ClInclude Include="include\toml++\impl\table.h" />
-    <ClInclude Include="include\toml++\impl\table_impl.h" />
-    <ClInclude Include="include\toml++\impl\template_instantiations.h" />
-    <ClInclude Include="include\toml++\impl\utf8.h" />
-    <ClInclude Include="include\toml++\impl\utf8_streams.h" />
-    <ClInclude Include="include\toml++\impl\utf8_streams_impl.h" />
+    <ClInclude Include="include\toml++\impl\table.inl" />
+    <ClInclude Include="include\toml++\impl\unicode.h" />
     <ClInclude Include="include\toml++\impl\value.h" />
+    <ClInclude Include="include\toml++\impl\value.inl" />
+    <ClInclude Include="include\toml++\impl\value_extern.inl" />
     <ClInclude Include="include\toml++\impl\version.h" />
+    <ClInclude Include="include\toml++\impl\std_string.inl" />
+    <ClInclude Include="include\toml++\impl\yaml_formatter.h" />
     <ClInclude Include="include\toml++\toml.h" />
   </ItemGroup>
   <ItemGroup>
@@ -68,10 +87,20 @@
     <None Include=".clang-format" />
     <None Include=".editorconfig" />
     <None Include=".gitattributes" />
+    <None Include=".github\ISSUE_TEMPLATE\bug_report.md" />
+    <None Include=".github\ISSUE_TEMPLATE\config.yml" />
+    <None Include=".github\ISSUE_TEMPLATE\feature_request.md" />
+    <None Include=".github\ISSUE_TEMPLATE\spec_bug_report.md" />
+    <None Include=".github\pull_request_template.md" />
     <None Include=".gitignore" />
     <None Include=".runsettings" />
+    <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="include\toml++\impl\at_path.inl" />
+    <None Include="include\toml++\impl\unicode.inl" />
+    <None Include="include\toml++\impl\node_view_extern.inl" />
+    <None Include="include\toml++\impl\yaml_formatter.inl" />
     <None Include="LICENSE" />
     <None Include="README.md" />
     <None Include="cmake\install-rules.cmake" />
@@ -85,7 +114,9 @@
     <None Include="meson.build" />
     <None Include="toml++.props" />
     <None Include="tools\ci_single_header_check.py" />
+    <None Include="tools\clang_format.bat" />
     <None Include="tools\generate_conformance_tests.py" />
+    <None Include="tools\generate_single_header.bat" />
     <None Include="tools\generate_single_header.py" />
     <None Include="tools\generate_windows_test_targets.py" />
     <None Include="tools\utils.py" />

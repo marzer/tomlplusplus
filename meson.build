@@ -1,8 +1,8 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version: '2.6.0',
-	meson_version: '>=0.53.0',
+	version: '3.0.0',
+	meson_version: '>=0.54.0',
 	license: 'MIT',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
 		# core options
@@ -122,14 +122,14 @@ if is_gcc
 			'-Wvariadic-macros',
 			'-Wwrite-strings',
 			'-Wmissing-noreturn',
-			'-Wsuggest-attribute=const',
-			'-Wsuggest-attribute=pure',
 			language: 'cpp'
 		)
 	endif
 	if is_release
 		add_project_arguments(
 			'-fmerge-constants',
+			'-Wsuggest-attribute=const',
+			'-Wsuggest-attribute=pure',
 			language: 'cpp'
 		)
 	endif
@@ -155,12 +155,6 @@ if is_clang
 	)
 	if get_option('time_trace')
 		add_project_arguments('-ftime-trace', language: 'cpp')
-	endif
-	if is_release
-		add_project_arguments(
-			'-fmerge-all-constants',
-			language: 'cpp'
-		)
 	endif
 endif
 
@@ -265,6 +259,16 @@ compiler_supports_cpp20 = compiler_supports_cpp20_args.length() > 0 and compiler
 	#include <version>
 	#include <string>
 	#include <iostream>
+	#include <cstdint>
+	#include <cstddef>
+	#include <cstring>
+	#include <cfloat>
+	#include <climits>
+	#include <cmath>
+	#include <limits>
+	#include <memory>
+	#include <iosfwd>
+	#include <type_traits>
 
 	int main()
 	{
@@ -492,6 +496,11 @@ if build_examples
 	subdir('examples')
 endif
 
+build_tt = (get_option('build_tt_encoder') or get_option('build_tt_encoder')) and not is_subproject
+if build_tt
+	subdir('toml-test')
+endif
+
 if not is_subproject
 	install_subdir('include'/'toml++',
 		strip_directory: true,
@@ -508,9 +517,7 @@ tomlplusplus_dep = declare_dependency(
 	version: meson.project_version(),
 )
 
-if meson.version().version_compare('>=0.54.0')
-	meson.override_dependency('tomlplusplus', tomlplusplus_dep)
-endif
+meson.override_dependency('tomlplusplus', tomlplusplus_dep)
 
 if not is_subproject
 	import('pkgconfig').generate(

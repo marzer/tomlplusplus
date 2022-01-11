@@ -5,7 +5,7 @@
 
 #include "tests.h"
 
-#if TOML_WINDOWS_COMPAT
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 TOML_DISABLE_WARNINGS;
 #include <windows.h>
@@ -24,10 +24,10 @@ TEST_CASE("windows compat")
 	)"sv;
 
 	auto res = toml::parse(toml_text, L"kek.toml");
-	#if !TOML_EXCEPTIONS
-		REQUIRE(res.succeeded());
-	#endif
-	toml::table& tbl = res;
+#if !TOML_EXCEPTIONS
+	REQUIRE(res.succeeded());
+#endif
+	table& tbl = res;
 
 	// source paths
 	REQUIRE(tbl.source().path != nullptr);
@@ -94,4 +94,4 @@ TEST_CASE("windows compat")
 	CHECK(tbl[L"dependencies"][L"cpp"].value<DWORDLONG>() == 17u);
 }
 
-#endif // TOML_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
