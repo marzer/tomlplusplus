@@ -316,11 +316,6 @@ TOML_NAMESPACE_START
 		using reference		  = node&;
 		using const_reference = const node&;
 
-		/// \brief A RandomAccessIterator for iterating over elements in a toml::array.
-		using iterator = array_iterator;
-		/// \brief A RandomAccessIterator for iterating over const elements in a toml::array.
-		using const_iterator = const_array_iterator;
-
 #if TOML_LIFETIME_HOOKS
 
 		TOML_NODISCARD_CTOR
@@ -793,6 +788,12 @@ TOML_NAMESPACE_START
 
 		/// \name Iterators
 		/// @{
+
+		/// \brief A RandomAccessIterator for iterating over elements in a toml::array.
+		using iterator = array_iterator;
+
+		/// \brief A RandomAccessIterator for iterating over const elements in a toml::array.
+		using const_iterator = const_array_iterator;
 
 		/// \brief	Returns an iterator to the first element.
 		TOML_NODISCARD

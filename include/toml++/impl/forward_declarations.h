@@ -330,8 +330,7 @@ TOML_NAMESPACE_START // abi namespace
 		/// \brief Combination mask of all indentation-enabling flags.
 		indentation = indent_sub_tables | indent_array_elements,
 
-		/// \brief Emit floating-point values with relaxed precision.
-		///
+		/// \brief Emit floating-point values with relaxed (human-friendly) precision.
 		/// \warning	Setting this flag may cause serialized documents to no longer round-trip correctly
 		///				since floats might have a less precise value upon being written out than they did when being
 		///				read in. Use this flag at your own risk.

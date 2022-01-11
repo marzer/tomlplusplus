@@ -186,9 +186,35 @@ TOML_NAMESPACE_START
 
 	/// \brief	A TOML table.
 	///
-	/// \remarks The interface of this type is modeled after std::map, with some
+	/// \detail The interface of this type is modeled after std::map, with some
 	/// 		additional considerations made for the heterogeneous nature of a
 	/// 		TOML table.
+	///
+	/// \cpp
+	/// toml::table tbl = toml::parse(R"(
+	///
+	/// 	[animals]
+	/// 	cats = [ "tiger", "lion", "puma" ]
+	/// 	birds = [ "macaw", "pigeon", "canary" ]
+	/// 	fish = [ "salmon", "trout", "carp" ]
+	///
+	/// )"sv);
+	///
+	/// // operator[] retrieves node-views
+	/// std::cout << "cats: " << tbl["animals"]["cats"] << "\n";
+	/// std::cout << "fish[1]: " << tbl["animals"]["fish"][1] << "\n";
+	///
+	/// // at_path() does fully-qualified "toml path" lookups
+	/// std::cout << "cats: " << tbl.at_path("animals.cats") << "\n";
+	/// std::cout << "fish[1]: " << tbl.at_path("animals.fish[1]") << "\n";
+	/// \ecpp
+	///
+	/// \out
+	/// cats: ['tiger', 'lion', 'puma']
+	/// fish[1] : 'trout'
+	/// cats : ['tiger', 'lion', 'puma']
+	/// fish[1] : 'trout'
+	/// \eout
 	class table : public node
 	{
 	  private:
@@ -208,12 +234,6 @@ TOML_NAMESPACE_START
 		/// \endcond
 
 	  public:
-		/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
-		using iterator = toml::table_iterator;
-
-		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
-		using const_iterator = toml::const_table_iterator;
-
 #if TOML_LIFETIME_HOOKS
 
 		TOML_NODISCARD_CTOR
@@ -778,6 +798,12 @@ TOML_NAMESPACE_START
 
 		/// \name Iterators
 		/// @{
+
+		/// \brief A BidirectionalIterator for iterating over key-value pairs in a toml::table.
+		using iterator = toml::table_iterator;
+
+		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
+		using const_iterator = toml::const_table_iterator;
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER

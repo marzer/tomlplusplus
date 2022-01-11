@@ -711,26 +711,24 @@ TOML_ANON_NAMESPACE_START
 	template <typename T>
 	TOML_ATTR(nonnull)
 	TOML_INTERNAL_LINKAGE
-	TOML_NEVER_INLINE
 	void concatenate(char*& write_pos, char* const buf_end, const T& arg) noexcept
 	{
-		static_assert(
-			impl::is_one_of<impl::remove_cvref<T>, std::string_view, int64_t, uint64_t, double, escaped_codepoint>,
-			"concatenate inputs are limited to [std::string_view, int64_t, uint64_t, double, escaped_codepoint] to "
-			"keep instantiations at a minimum as an anti-bloat measure (hint: to_sv will probably help)");
-
-		if (write_pos >= buf_end)
+		if TOML_UNLIKELY(write_pos >= buf_end)
 			return;
 
-		using arg_t = impl::remove_cvref<T>;
-		if constexpr (std::is_same_v<arg_t, std::string_view>)
+		using arg_type = impl::remove_cvref<T>;
+
+		// string views
+		if constexpr (std::is_same_v<arg_type, std::string_view>)
 		{
 			const auto max_chars = static_cast<size_t>(buf_end - write_pos);
 			const auto len		 = max_chars < arg.length() ? max_chars : arg.length();
 			std::memcpy(write_pos, arg.data(), len);
 			write_pos += len;
 		}
-		else if constexpr (std::is_same_v<arg_t, double>)
+
+		// doubles
+		else if constexpr (std::is_same_v<arg_type, double>)
 		{
 #if TOML_FLOAT_CHARCONV
 			const auto result = std::to_chars(write_pos, buf_end, arg);
@@ -738,12 +736,14 @@ TOML_ANON_NAMESPACE_START
 #else
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
-			ss.precision(std::numeric_limits<arg_t>::max_digits10);
+			ss.precision(std::numeric_limits<arg_type>::max_digits10);
 			ss << arg;
 			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 #endif
 		}
-		else if constexpr (impl::is_one_of<arg_t, int64_t, uint64_t>)
+
+		// 64-bit integers
+		else if constexpr (impl::is_one_of<arg_type, int64_t, uint64_t>)
 		{
 #if TOML_INT_CHARCONV
 			const auto result = std::to_chars(write_pos, buf_end, arg);
@@ -751,12 +751,14 @@ TOML_ANON_NAMESPACE_START
 #else
 			std::ostringstream ss;
 			ss.imbue(std::locale::classic());
-			using cast_type = std::conditional_t<std::is_signed_v<arg_t>, int64_t, uint64_t>;
+			using cast_type = std::conditional_t<std::is_signed_v<arg_type>, int64_t, uint64_t>;
 			ss << static_cast<cast_type>(arg);
 			concatenate(write_pos, buf_end, to_sv(std::move(ss).str()));
 #endif
 		}
-		else if constexpr (std::is_same_v<arg_t, escaped_codepoint>)
+
+		// escaped_codepoint
+		else if constexpr (std::is_same_v<arg_type, escaped_codepoint>)
 		{
 			if (arg.cp.value <= U'\x7F')
 				concatenate(write_pos, buf_end, to_sv(arg.cp));
@@ -775,8 +777,24 @@ TOML_ANON_NAMESPACE_START
 				concatenate(write_pos, buf_end, std::string_view{ buf, digits + 2u });
 			}
 		}
+
+		// all other floats (fallback - coerce to double)
+		else if constexpr (std::is_floating_point_v<arg_type>)
+			concatenate(write_pos, buf_end, static_cast<double>(arg));
+
+		// all other integers (fallback - coerce to (u)int64_t)
+		else if constexpr (std::is_arithmetic_v<arg_type> && std::is_integral_v<arg_type>)
+		{
+			using cast_type = std::conditional_t<std::is_unsigned_v<arg_type>, uint64_t, int64_t>;
+			concatenate(write_pos, buf_end, static_cast<cast_type>(arg));
+		}
+
 		else
-			static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
+		{
+			static_assert(
+				impl::dependent_false<T>,
+				"concatenate() inputs are limited to std::string_views, integers, floats, and escaped_codepoint");
+		}
 	}
 
 	struct error_builder
@@ -1805,7 +1823,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("underscores must be followed by digits"sv);
 				else if TOML_UNLIKELY(length == sizeof(chars))
 					set_error_and_return_default("exceeds length limit of "sv,
-												 static_cast<uint64_t>(sizeof(chars)),
+												 sizeof(chars),
 												 " digits"sv,
 												 (seen_exponent ? ""sv : " (consider using exponent notation)"sv));
 				else if (*cp == U'.')
@@ -2028,7 +2046,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected exponent digit or sign, saw '"sv, to_sv(*cp), "'"sv);
 				else if (current_fragment->length == sizeof(fragment::chars))
 					set_error_and_return_default("fragment exceeeds maximum length of "sv,
-												 static_cast<uint64_t>(sizeof(fragment::chars)),
+												 sizeof(fragment::chars),
 												 " characters"sv);
 				else
 					current_fragment->chars[current_fragment->length++] = static_cast<char>(cp->bytes[0]);
@@ -2162,9 +2180,7 @@ TOML_IMPL_NAMESPACE_START
 				else if TOML_UNLIKELY(!traits::is_digit(*cp))
 					set_error_and_return_default("expected digit, saw '"sv, to_sv(*cp), "'"sv);
 				else if TOML_UNLIKELY(length == sizeof(digits))
-					set_error_and_return_default("exceeds length limit of "sv,
-												 static_cast<uint64_t>(sizeof(digits)),
-												 " digits"sv);
+					set_error_and_return_default("exceeds length limit of "sv, sizeof(digits), " digits"sv);
 				else
 					digits[length++] = static_cast<char>(cp->bytes[0]);
 
@@ -2277,8 +2293,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("expected 2-digit month, saw '"sv, to_sv(cp), "'"sv);
 			const auto month = digits[1] + digits[0] * 10u;
 			if (month == 0u || month > 12u)
-				set_error_and_return_default("expected month between 1 and 12 (inclusive), saw "sv,
-											 static_cast<uint64_t>(month));
+				set_error_and_return_default("expected month between 1 and 12 (inclusive), saw "sv, month);
 			const auto max_days_in_month = month == 2u
 											 ? (is_leap_year ? 29u : 28u)
 											 : (month == 4u || month == 6u || month == 9u || month == 11u ? 30u : 31u);
@@ -2295,9 +2310,9 @@ TOML_IMPL_NAMESPACE_START
 			const auto day = digits[1] + digits[0] * 10u;
 			if (day == 0u || day > max_days_in_month)
 				set_error_and_return_default("expected day between 1 and "sv,
-											 static_cast<uint64_t>(max_days_in_month),
+											 max_days_in_month,
 											 " (inclusive), saw "sv,
-											 static_cast<uint64_t>(day));
+											 day);
 
 			if (!part_of_datetime && !is_eof() && !is_value_terminator(*cp))
 				set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
@@ -2323,8 +2338,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 			const auto hour = digits[1] + digits[0] * 10u;
 			if (hour > 23u)
-				set_error_and_return_default("expected hour between 0 to 59 (inclusive), saw "sv,
-											 static_cast<uint64_t>(hour));
+				set_error_and_return_default("expected hour between 0 to 59 (inclusive), saw "sv, hour);
 			set_error_and_return_if_eof({});
 
 			// ':'
@@ -2337,8 +2351,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 			const auto minute = digits[1] + digits[0] * 10u;
 			if (minute > 59u)
-				set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv,
-											 static_cast<uint64_t>(minute));
+				set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, minute);
 			auto time = toml::time{ hour, minute };
 
 			// ':'
@@ -2358,8 +2371,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("expected 2-digit second, saw '"sv, to_sv(cp), "'"sv);
 			const auto second = digits[1] + digits[0] * 10u;
 			if (second > 59u)
-				set_error_and_return_default("expected second between 0 and 59 (inclusive), saw "sv,
-											 static_cast<uint64_t>(second));
+				set_error_and_return_default("expected second between 0 and 59 (inclusive), saw "sv, second);
 			time.second = static_cast<decltype(time.second)>(second);
 
 			// '.' (early-exiting is allowed; fractional is optional)
@@ -2379,8 +2391,7 @@ TOML_IMPL_NAMESPACE_START
 			else if (!is_eof())
 			{
 				if (digit_count == max_digits && is_decimal_digit(*cp))
-					set_error_and_return_default("fractional component exceeds maximum precision of "sv,
-												 static_cast<uint64_t>(max_digits));
+					set_error_and_return_default("fractional component exceeds maximum precision of "sv, max_digits);
 				else if (!part_of_datetime && !is_value_terminator(*cp))
 					set_error_and_return_default("expected value-terminator, saw '"sv, to_sv(*cp), "'"sv);
 			}
@@ -2443,8 +2454,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(cp), "'"sv);
 				const auto hour = digits[1] + digits[0] * 10;
 				if (hour > 23)
-					set_error_and_return_default("expected hour between 0 and 23 (inclusive), saw "sv,
-												 static_cast<int64_t>(hour));
+					set_error_and_return_default("expected hour between 0 and 23 (inclusive), saw "sv, hour);
 				set_error_and_return_if_eof({});
 
 				// ':'
@@ -2457,8 +2467,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("expected 2-digit minute, saw '"sv, to_sv(cp), "'"sv);
 				const auto minute = digits[1] + digits[0] * 10;
 				if (minute > 59)
-					set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv,
-												 static_cast<int64_t>(minute));
+					set_error_and_return_default("expected minute between 0 and 59 (inclusive), saw "sv, minute);
 				offset.minutes = static_cast<decltype(offset.minutes)>((hour * 60 + minute) * sign);
 			}
 
@@ -2527,7 +2536,7 @@ TOML_IMPL_NAMESPACE_START
 			const depth_counter_scope depth_counter{ nested_values };
 			if TOML_UNLIKELY(nested_values > max_nested_values)
 				set_error_and_return_default("exceeded maximum nested value depth of "sv,
-											 static_cast<uint64_t>(max_nested_values),
+											 max_nested_values,
 											 " (TOML_MAX_NESTED_VALUES)"sv);
 
 			// check if it begins with some control character
@@ -2837,7 +2846,7 @@ TOML_IMPL_NAMESPACE_START
 							utf8_buffered_reader::max_history_length - 2u;
 						if TOML_UNLIKELY(!eof_while_scanning && advance_count > max_numeric_value_length)
 							set_error_and_return_default("numeric value too long to identify type - cannot exceed "sv,
-														 static_cast<uint64_t>(max_numeric_value_length),
+														 max_numeric_value_length,
 														 " characters"sv);
 
 						val.reset(new value{ parse_integer<10>() });

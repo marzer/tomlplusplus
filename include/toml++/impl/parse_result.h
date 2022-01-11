@@ -82,12 +82,6 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
-		/// \brief A BidirectionalIterator for iterating over key-value pairs in a wrapped toml::table.
-		using iterator = table_iterator;
-
-		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a wrapped toml::table.
-		using const_iterator = const_table_iterator;
-
 		/// \brief Default constructs an 'error' result.
 		TOML_NODISCARD_CTOR
 		parse_result() noexcept //
@@ -278,8 +272,14 @@ TOML_NAMESPACE_START
 		/// \name Iterators
 		/// @{
 
+		/// \brief A BidirectionalIterator for iterating over key-value pairs in a wrapped toml::table.
+		using iterator = table_iterator;
+
+		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a wrapped toml::table.
+		using const_iterator = const_table_iterator;
+
 		/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+		/// \remarks Always returns the same value as #end() if parsing failed.
 		TOML_NODISCARD
 		table_iterator begin() noexcept
 		{
@@ -287,7 +287,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+		/// \remarks Always returns the same value as #end() if parsing failed.
 		TOML_NODISCARD
 		const_table_iterator begin() const noexcept
 		{
@@ -295,7 +295,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
+		/// \remarks Always returns the same value as #cend() if parsing failed.
 		TOML_NODISCARD
 		const_table_iterator cbegin() const noexcept
 		{
@@ -303,7 +303,6 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
 		TOML_NODISCARD
 		table_iterator end() noexcept
 		{
@@ -311,7 +310,6 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
 		TOML_NODISCARD
 		const_table_iterator end() const noexcept
 		{
@@ -319,7 +317,6 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair in the wrapped table.
-		/// \remarks Returns a default-constructed 'nothing' iterator if the parsing failed.
 		TOML_NODISCARD
 		const_table_iterator cend() const noexcept
 		{

@@ -260,6 +260,10 @@
  	std::cout << "cats: " << tbl["animals"]["cats"] << "\n";
  	std::cout << "fish[1]: " << tbl["animals"]["fish"][1] << "\n";
 
+	// can also be retrieved via absolute path
+	std::cout << "cats: " << tbl.at_path("animals.cats") << "\n";
+	std::cout << "fish[1]: " << tbl.at_path("animals.fish[1]") << "\n";
+
  	// ...even if the element doesn't exist
  	std::cout << "dinosaurs: " << tbl["animals"]["dinosaurs"] << "\n"; //no dinosaurs :(
 
@@ -276,6 +280,8 @@
  numbers is an: array
  numbers: [ 1, 2, 3, 'four', 5.0 ]
  numbers: [ 2, 3, 4, 'five', 6.0, 7, [ 8, 9 ] ]
+ cats: [ 'tiger', 'lion', 'puma' ]
+ fish[1]: 'trout'
  cats: [ 'tiger', 'lion', 'puma' ]
  fish[1]: 'trout'
  dinosaurs:
@@ -514,10 +520,12 @@
 
  \out
  Parsing data.toml 5000 times:
-  pytomlpp:    0.662 s
-      toml:    5.277 s (7.9x slower)
-     qtoml:    8.020 s (12.1x slower)
-   tomlkit:   32.898 s (49.6x slower)
+   pytomlpp:   0.694 s
+      rtoml:   0.871 s ( 1.25x)
+      tomli:   2.625 s ( 3.78x)
+       toml:   5.642 s ( 8.12x)
+      qtoml:   7.760 s (11.17x)
+    tomlkit:  32.708 s (47.09x)
  \eout
 
  Install it using `pip`:
