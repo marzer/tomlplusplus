@@ -188,3 +188,11 @@ foreach executable : test_executables
 		)
 	endforeach
 endforeach
+
+
+# add the ODR-test build project
+executable(
+	'odr_test',
+	[ 'odr_test_1.cpp', 'odr_test_2.cpp' ],
+	include_directories: include_dirs
+)
