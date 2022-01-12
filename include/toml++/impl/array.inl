@@ -117,7 +117,7 @@ TOML_NAMESPACE_START
 		elems_.push_back(std::move(elem));
 	}
 
-	TOML_API
+	TOML_EXTERNAL_LINKAGE
 	array::vector_iterator array::insert_at(const_vector_iterator pos, impl::node_ptr && elem)
 	{
 		return elems_.insert(pos, std::move(elem));

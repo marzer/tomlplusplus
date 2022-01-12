@@ -14,6 +14,12 @@ template:
 -->
 
 
+## Unreleased
+
+#### Fixes:
+- fixed erroneous use of `TOML_API` causing ODR issue (#136) (@Azarael)
+
+
 
 ## [v3.0.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.0) - 2022-01-11
 
