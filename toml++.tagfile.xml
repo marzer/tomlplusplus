@@ -1705,20 +1705,6 @@
   <compound kind="class">
     <name>toml::key</name>
     <filename>classtoml_1_1key.html</filename>
-    <member kind="typedef">
-      <type>const char *</type>
-      <name>const_iterator</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>a38a33d5010936195ac2083e428165512</anchor>
-      <arglist></arglist>
-    </member>
-    <member kind="typedef">
-      <type>const_iterator</type>
-      <name>iterator</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>a40c42bc323383db54972b5752b9ad4dd</anchor>
-      <arglist></arglist>
-    </member>
     <member kind="function">
       <type></type>
       <name>key</name>
@@ -1822,20 +1808,6 @@
       <name>source</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a82a81d4a4e4d502b661ee2ba10810bea</anchor>
-      <arglist>() const noexcept</arglist>
-    </member>
-    <member kind="function">
-      <type>const_iterator</type>
-      <name>begin</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>ab1691956be4ffe1c604e8e66acdc237e</anchor>
-      <arglist>() const noexcept</arglist>
-    </member>
-    <member kind="function">
-      <type>const_iterator</type>
-      <name>end</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>a9b37a10b4aff1e6e7902301789f579c8</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="friend">
@@ -1971,6 +1943,34 @@
       <anchor>aa89096b9f6b364702858f2dc6734987a</anchor>
       <arglist>(std::string_view lhs, const key &amp;rhs) noexcept</arglist>
     </member>
+    <member kind="typedef">
+      <type>const char *</type>
+      <name>const_iterator</name>
+      <anchorfile>classtoml_1_1key.html</anchorfile>
+      <anchor>a38a33d5010936195ac2083e428165512</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="typedef">
+      <type>const_iterator</type>
+      <name>iterator</name>
+      <anchorfile>classtoml_1_1key.html</anchorfile>
+      <anchor>a40c42bc323383db54972b5752b9ad4dd</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="function">
+      <type>const_iterator</type>
+      <name>begin</name>
+      <anchorfile>classtoml_1_1key.html</anchorfile>
+      <anchor>ab1691956be4ffe1c604e8e66acdc237e</anchor>
+      <arglist>() const noexcept</arglist>
+    </member>
+    <member kind="function">
+      <type>const_iterator</type>
+      <name>end</name>
+      <anchorfile>classtoml_1_1key.html</anchorfile>
+      <anchor>a9b37a10b4aff1e6e7902301789f579c8</anchor>
+      <arglist>() const noexcept</arglist>
+    </member>
     <member kind="function">
       <type>std::string_view</type>
       <name>str</name>
@@ -2011,20 +2011,6 @@
       <name>source</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a82a81d4a4e4d502b661ee2ba10810bea</anchor>
-      <arglist>() const noexcept</arglist>
-    </member>
-    <member kind="function">
-      <type>const_iterator</type>
-      <name>begin</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>ab1691956be4ffe1c604e8e66acdc237e</anchor>
-      <arglist>() const noexcept</arglist>
-    </member>
-    <member kind="function">
-      <type>const_iterator</type>
-      <name>end</name>
-      <anchorfile>classtoml_1_1key.html</anchorfile>
-      <anchor>a9b37a10b4aff1e6e7902301789f579c8</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="friend">

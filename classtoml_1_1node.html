@@ -375,28 +375,53 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a20a0cfac8f31649544db5d9eead609f9">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a034ab5f50d46f89dcaf871a788d56be9">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">path</td>
+                  <td>The "TOML path" to traverse.</td>
+                </tr>
+              </tbody>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+
+<span class="s">[foo]</span>
+<span class="s">bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
+
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
+
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="s">"foo.bar[2]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="s">"foo.bar[3][0]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="s">"foo.bar[4].kek"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
+<span class="go">3</span>
+<span class="go">4</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span> <span class="s">"foo.bar"</span><span class="p">)</span>  <span class="c1">// same as <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_view</a>{ config }["foo"]["bar"]</span>
+<span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span> <span class="s">"foo. bar"</span><span class="p">)</span> <span class="c1">// same as <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_view</a>{ config }["foo"][" bar"]</span>
+<span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span> <span class="s">"foo..bar"</span><span class="p">)</span> <span class="c1">// same as <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_view</a>{ config }["foo"][""]["bar"]</span>
+<span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span> <span class="s">".foo.bar"</span><span class="p">)</span> <span class="c1">// same as <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_view</a>{ config }[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters. If you have periods in your table keys, first consider:</p><ol><li>Not doing that</li><li>Using <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a> instead.</li></ol></aside>
           </div></section>
           <section class="m-doc-details" id="acf55d2ffe0c31b6a8507fb1265444be2"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acf55d2ffe0c31b6a8507fb1265444be2">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a034ab5f50d46f89dcaf871a788d56be9">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a9b4d952e01bd2fafe7c307d61d4a247f"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9b4d952e01bd2fafe7c307d61d4a247f">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path)</span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a034ab5f50d46f89dcaf871a788d56be9">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aca7e24cd0070ce226defd71eb501c4cd"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/>node::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aca7e24cd0070ce226defd71eb501c4cd">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) const</span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a034ab5f50d46f89dcaf871a788d56be9">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aa818a12fc0212e5e416b38fcf103f899"><div>
             <h3>

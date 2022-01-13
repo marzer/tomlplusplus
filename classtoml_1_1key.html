@@ -67,7 +67,6 @@
             <li>
               Reference
               <ul>
-                <li><a href="#pub-types">Public types</a></li>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
                 <li><a href="#equality-and-comparison">Equality and Comparison</a></li>
                 <li><a href="#iterators">Iterators</a></li>
@@ -88,19 +87,6 @@
     <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"' defined at "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span><span class="p">.</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">key 'a' defined at line 2, column 5</span>
 <span class="go">key 'b' defined at line 3, column 7</span>
 <span class="go">key 'c' defined at line 4, column 9</span></pre>
-        <section id="pub-types">
-          <h2><a href="#pub-types">Public types</a></h2>
-          <dl class="m-doc">
-            <dt id="a38a33d5010936195ac2083e428165512">
-              using <a class="m-doc-self" href="#a38a33d5010936195ac2083e428165512">const_iterator</a> = const char*
-            </dt>
-            <dd>A const iterator for iterating over the characters in the key.</dd>
-            <dt id="a40c42bc323383db54972b5752b9ad4dd">
-              using <a class="m-doc-self" href="#a40c42bc323383db54972b5752b9ad4dd">iterator</a> = <a class="m-doc" href="classtoml_1_1key.html#a38a33d5010936195ac2083e428165512">const_<wbr/>iterator</a>
-            </dt>
-            <dd>A const iterator for iterating over the characters in the key.</dd>
-          </dl>
-        </section>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
@@ -249,6 +235,14 @@
         <section id="iterators">
           <h2><a href="#iterators">Iterators</a></h2>
           <dl class="m-doc">
+            <dt id="a38a33d5010936195ac2083e428165512">
+              using <a class="m-doc-self" href="#a38a33d5010936195ac2083e428165512">const_iterator</a> = const char*
+            </dt>
+            <dd>A const iterator for iterating over the characters in the key.</dd>
+            <dt id="a40c42bc323383db54972b5752b9ad4dd">
+              using <a class="m-doc-self" href="#a40c42bc323383db54972b5752b9ad4dd">iterator</a> = <a class="m-doc" href="classtoml_1_1key.html#a38a33d5010936195ac2083e428165512">const_<wbr/>iterator</a>
+            </dt>
+            <dd>A const iterator for iterating over the characters in the key.</dd>
             <dt id="ab1691956be4ffe1c604e8e66acdc237e">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab1691956be4ffe1c604e8e66acdc237e">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1key.html#a38a33d5010936195ac2083e428165512">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>

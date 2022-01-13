@@ -703,12 +703,12 @@
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 
 <span class="s">[foo]</span>
 <span class="s">bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
 
-<span class="dl">)</span><span class="s">"</span><span class="sa">_toml</span><span class="p">;</span>
+<span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
 
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[2]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[3][0]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
