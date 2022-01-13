@@ -35,12 +35,6 @@ TOML_NAMESPACE_START
 		source_region source_;
 
 	  public:
-		/// A const iterator for iterating over the characters in the key.
-		using const_iterator = const char*;
-
-		/// A const iterator for iterating over the characters in the key.
-		using iterator = const_iterator;
-
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
 		key() noexcept = default;
@@ -295,6 +289,12 @@ TOML_NAMESPACE_START
 
 		/// \name Iterators
 		/// @{
+
+		/// A const iterator for iterating over the characters in the key.
+		using const_iterator = const char*;
+
+		/// A const iterator for iterating over the characters in the key.
+		using iterator = const_iterator;
 
 		/// \brief Returns an iterator to the first character in the key's backing string.
 		TOML_PURE_INLINE_GETTER

@@ -11,12 +11,12 @@ TOML_NAMESPACE_START
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".
 	///
 	/// \detail \cpp
-	/// auto config = R"(
+	/// auto config = toml::parse(R"(
 	///
 	/// [foo]
 	/// bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]
 	///
-	/// )"_toml;
+	/// )"sv);
 	///
 	/// std::cout << toml::at_path(config, "foo.bar[2]") << "\n";
 	/// std::cout << toml::at_path(config, "foo.bar[3][0]") << "\n";

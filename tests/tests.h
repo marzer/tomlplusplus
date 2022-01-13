@@ -42,6 +42,9 @@
 #if !(TOML_HEADER_ONLY ^ TOML_EXTERN_TEMPLATES) && !TOML_INTELLISENSE
 #error TOML_EXTERN_TEMPLATES should hold the opposite value to TOML_HEADER_ONLY by default
 #endif
+#if TOML_LIB_SINGLE_HEADER ^ USE_SINGLE_HEADER
+#error TOML_LIB_SINGLE_HEADER was not set correctly
+#endif
 
 #if TOML_ICC
 #define UNICODE_LITERALS_OK 0

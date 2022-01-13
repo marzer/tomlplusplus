@@ -358,7 +358,7 @@ TOML_NAMESPACE_START
 
 		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #toml::node::at_path(std::string_view)
 		TOML_NODISCARD
 		node_view<node> at_path(std::string_view path) noexcept
 		{
@@ -367,7 +367,7 @@ TOML_NAMESPACE_START
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #toml::node::at_path(std::string_view)
 		TOML_NODISCARD
 		node_view<const node> at_path(std::string_view path) const noexcept
 		{
@@ -412,7 +412,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #toml::node::at_path(std::string_view)
 		TOML_NODISCARD
 		node_view<node> at_path(std::wstring_view path) noexcept
 		{
@@ -423,7 +423,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #toml::node::at_path(std::string_view)
 		TOML_NODISCARD
 		node_view<const node> at_path(std::wstring_view path) const noexcept
 		{

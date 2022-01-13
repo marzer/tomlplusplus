@@ -99,13 +99,13 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ### Conan
-Add `tomlplusplus/3.0.0` to your conanfile.
+Add `tomlplusplus/3.0.1` to your conanfile.
 
 ### DDS
 Add `tomlpp` to your `package.json5`, e.g.:
 ```
 depends: [
-    'tomlpp^3.0.0',
+    'tomlpp^3.0.1',
 ]
 ```
 > ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
@@ -121,7 +121,7 @@ include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        v3.0.0
+    GIT_TAG        v3.0.1
 )
 FetchContent_MakeAvailable(tomlplusplus)
 ```

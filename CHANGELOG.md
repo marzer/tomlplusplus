@@ -14,7 +14,11 @@ template:
 -->
 
 
-## Unreleased
+## [v3.0.1](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.1) - 2022-01-13
+
+This is a single-bugfix release to fix an ODR issue for people using header-only mode in multiple
+translation units. If you aren't seeing linker errors because of `toml::array::insert_at()`,
+this release holds nothing of value over v3.0.0.
 
 #### Fixes:
 - fixed erroneous use of `TOML_API` causing ODR issue (#136) (@Azarael)

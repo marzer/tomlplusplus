@@ -166,7 +166,7 @@ foreach cpp20 : cpp20_modes
 	endforeach # strict
 endforeach # cpp20
 
-locales = [
+test_locales = [
 	'C',
 	'en_US.utf8',
 	'ja_JP.utf8',
@@ -179,7 +179,7 @@ locales = [
 ]
 
 foreach executable : test_executables
-	foreach locale : locales
+	foreach locale : test_locales
 		test(
 			executable[0] + ' (' + locale + ')', # name
 			executable[1], # executable object
@@ -194,5 +194,7 @@ endforeach
 executable(
 	'odr_test',
 	[ 'odr_test_1.cpp', 'odr_test_2.cpp' ],
-	include_directories: include_dirs
+	include_directories: include_dirs,
+	cpp_args: additional_arguments,
+	override_options: overrides
 )

@@ -457,7 +457,7 @@
 
 
  \subsection mainpage-adding-lib-conan Conan
- Add `tomlplusplus/3.0.0` to your conanfile.
+ Add `tomlplusplus/3.0.1` to your conanfile.
 
 
 
@@ -465,7 +465,7 @@
  Add `tomlpp` to your `package.json5`, e.g.:
  \bash
  depends: [
-		'tomlpp^3.0.0',
+		'tomlpp^3.0.1',
  ]
  \ebash
 
@@ -497,7 +497,7 @@
  FetchContent_Declare(
      tomlplusplus
      GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-     GIT_TAG        v3.0.0
+     GIT_TAG        v3.0.1
  )
  FetchContent_MakeAvailable(tomlplusplus)
  \endcode

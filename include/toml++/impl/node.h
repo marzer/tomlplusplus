@@ -962,14 +962,48 @@ TOML_NAMESPACE_START
 
 		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \detail \cpp
+		/// auto config = toml::parse(R"(
+		///
+		/// [foo]
+		/// bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]
+		///
+		/// )"sv);
+		///
+		/// std::cout << config.at_path("foo.bar[2]") << "\n";
+		/// std::cout << config.at_path("foo.bar[3][0]") << "\n";
+		/// std::cout << config.at_path("foo.bar[4].kek") << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// 2
+		/// 3
+		/// 4
+		/// \eout
+		///
+		///
+		/// \note Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
+		/// \cpp
+		/// config.at_path( "foo.bar")  // same as node_view{ config }["foo"]["bar"]
+		/// config.at_path( "foo. bar") // same as node_view{ config }["foo"][" bar"]
+		/// config.at_path( "foo..bar") // same as node_view{ config }["foo"][""]["bar"]
+		/// config.at_path( ".foo.bar") // same as node_view{ config }[""]["foo"]["bar"]
+		/// \ecpp
+		/// <br>
+		/// Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings.
+		/// This function makes no allowance for this, instead treating all period characters as sub-table delimiters.
+		/// If you have periods in your table keys, first consider:
+		/// 1. Not doing that
+		/// 2. Using node_view::operator[] instead.
+		///
+		/// \param path		The "TOML path" to traverse.
 		TOML_NODISCARD
 		TOML_API
 		node_view<node> at_path(std::string_view path) noexcept;
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
 		TOML_API
 		node_view<const node> at_path(std::string_view path) const noexcept;
@@ -980,7 +1014,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
 		TOML_API
 		node_view<node> at_path(std::wstring_view path);
@@ -989,7 +1023,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		///
-		/// \see #toml::at_path(node&, std::string_view)
+		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
 		TOML_API
 		node_view<const node> at_path(std::wstring_view path) const;
