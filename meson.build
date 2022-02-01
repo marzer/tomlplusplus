@@ -512,17 +512,13 @@ endif
 # dependencies, cmake etc.
 #######################################################################################################################
 
-tomlplusplus_dep = declare_dependency(
-	include_directories: include_directories('include'),
-	version: meson.project_version(),
-)
+tomlplusplus_dep = declare_dependency(include_directories: 'include')
 
-meson.override_dependency('tomlplusplus', tomlplusplus_dep)
+meson.override_dependency(meson.project_name(), tomlplusplus_dep)
 
 if not is_subproject
 	import('pkgconfig').generate(
 		name: meson.project_name(),
-		version: meson.project_version(),
 		description: 'Header-only TOML config file parser and serializer for C++',
 		install_dir: get_option('datadir')/'pkgconfig',
 	)
@@ -531,17 +527,27 @@ endif
 # cmake
 if get_option('generate_cmake_config') and not is_subproject
 	cmake = import('cmake')
-	cmake.write_basic_package_version_file(
-		name: meson.project_name(),
-		version: meson.project_version(),
-		install_dir: 'lib'/'cmake'/meson.project_name(),
+	# Can't use until Meson 0.62.0, see https://github.com/mesonbuild/meson/pull/9916
+	# and https://github.com/marzer/tomlplusplus/issues/140
+	#cmake.write_basic_package_version_file(
+	#	name: meson.project_name(),
+	#	version: meson.project_version(),
+	#	install_dir: get_option('datadir')/'cmake'/meson.project_name(),
+	#	arch_independent: true
+	#)
+	# In the meantime, install a pre-generated Package Version file
+	configure_file(
+		configuration: {'version': meson.project_version()},
+		input: 'cmake'/'tomlplusplusConfigVersion.cmake.in',
+		output: 'tomlplusplusConfigVersion.cmake',
+		install: true,
+		install_dir: get_option('datadir')/'cmake'/meson.project_name()
 	)
 
-	cmake_conf = configuration_data()
 	cmake.configure_package_config_file(
 		name: meson.project_name(),
 		input: 'cmake'/'tomlplusplus.cmake.in',
-		configuration: cmake_conf,
-		install_dir: 'lib'/'cmake'/meson.project_name(),
+		configuration: configuration_data(), # empty conf, not needed
+		install_dir: get_option('datadir')/'cmake'/meson.project_name(),
 	)
 endif
