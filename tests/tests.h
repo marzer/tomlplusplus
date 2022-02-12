@@ -39,9 +39,6 @@
 #if defined(_WIN32) ^ TOML_ENABLE_WINDOWS_COMPAT
 #error TOML_ENABLE_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)
 #endif
-#if !(TOML_HEADER_ONLY ^ TOML_EXTERN_TEMPLATES) && !TOML_INTELLISENSE
-#error TOML_EXTERN_TEMPLATES should hold the opposite value to TOML_HEADER_ONLY by default
-#endif
 #if TOML_LIB_SINGLE_HEADER ^ USE_SINGLE_HEADER
 #error TOML_LIB_SINGLE_HEADER was not set correctly
 #endif

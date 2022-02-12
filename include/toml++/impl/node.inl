@@ -22,6 +22,12 @@
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	node::node() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
+	node::~node() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
 		: source_{ std::exchange(other.source_, {}) }
 	{}
@@ -52,9 +58,6 @@ TOML_NAMESPACE_START
 			source_ = std::exchange(rhs.source_, {});
 		return *this;
 	}
-
-	TOML_EXTERNAL_LINKAGE
-	node::~node() noexcept = default;
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> node::at_path(std::string_view path) noexcept

@@ -43,20 +43,20 @@ TOML_NAMESPACE_START
 	///     }
 	/// }
 	/// \eout
-	class json_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS json_formatter : impl::formatter
 	{
 	  private:
 		/// \cond
 
 		using base = impl::formatter;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = {

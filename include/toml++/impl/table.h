@@ -215,7 +215,7 @@ TOML_NAMESPACE_START
 	/// cats : ['tiger', 'lion', 'puma']
 	/// fish[1] : 'trout'
 	/// \eout
-	class table : public node
+	class TOML_EXPORTED_CLASS table : public node
 	{
 	  private:
 		/// \cond
@@ -228,40 +228,28 @@ TOML_NAMESPACE_START
 		bool inline_ = false;
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
 
 		/// \endcond
 
 	  public:
-#if TOML_LIFETIME_HOOKS
-
-		TOML_NODISCARD_CTOR
-		table() noexcept
-		{
-			TOML_TABLE_CREATED;
-		}
-
-		~table() noexcept
-		{
-			TOML_TABLE_DESTROYED;
-		}
-#else
-
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
-		table() noexcept = default;
+		TOML_EXPORTED_MEMBER_FUNCTION
+		table() noexcept;
 
-#endif
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~table() noexcept;
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(const table&);
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(table&& other) noexcept;
 
 		/// \brief	Constructs a table with one or more initial key-value pairs.
@@ -281,17 +269,17 @@ TOML_NAMESPACE_START
 		///
 		/// \param 	kvps	A list of key-value pairs used to initialize the table.
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		explicit table(std::initializer_list<impl::table_init_pair> kvps) //
 			: table(kvps.begin(), kvps.end())
 		{}
 
 		/// \brief	Copy-assignment operator.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(const table&);
 
 		/// \brief	Move-assignment operator.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(table&& rhs) noexcept;
 
 		/// \name Type checks
@@ -305,15 +293,15 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		/// \cond
@@ -636,7 +624,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A pointer to the node at the specified key, or nullptr.
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node* get(std::string_view key) noexcept;
 
 		/// \brief	Gets the node at a specific key (const overload).
@@ -762,7 +750,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& at(std::string_view key);
 
 		/// \brief	Gets a reference to the element at a specific key, throwing `std::out_of_range` if none existed.
@@ -875,7 +863,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator get_lower_bound(std::string_view) noexcept;
 
 		/// \endcond
@@ -937,7 +925,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	An iterator to the node at the specified key, or end().
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator find(std::string_view key) noexcept;
 
 		/// \brief	Gets an iterator to the node at a specific key (const overload)
@@ -946,7 +934,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A const iterator to the node at the specified key, or cend().
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		const_iterator find(std::string_view key) const noexcept;
 
 		/// \brief	Returns true if the table contains a node at the given key.
@@ -1006,10 +994,10 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator erase(const_map_iterator) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator erase(const_map_iterator, const_map_iterator) noexcept;
 
 		/// \endcond
@@ -1123,7 +1111,7 @@ TOML_NAMESPACE_START
 		/// \param 	key		Key to erase.
 		///
 		/// \returns Number of elements removed (0 or 1).
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		size_t erase(std::string_view key) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -1164,7 +1152,7 @@ TOML_NAMESPACE_START
 		/// \param recursive Should child arrays and tables themselves be pruned?
 		///
 		/// \returns A reference to the table.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& prune(bool recursive = true) & noexcept;
 
 		/// \brief	Removes empty child arrays and tables (rvalue overload).
@@ -1178,7 +1166,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Removes all key-value pairs from the table.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
 		/// @}
@@ -1189,7 +1177,7 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator insert_with_hint(const_iterator, key&&, impl::node_ptr&&);
 
 		/// \endcond
@@ -1682,7 +1670,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_STATIC_FUNCTION
 		static bool equal(const table&, const table&) noexcept;
 
 		/// \endcond

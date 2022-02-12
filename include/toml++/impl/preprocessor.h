@@ -380,15 +380,6 @@
 	#define TOML_HEADER_ONLY 0
 #endif
 
-// extern templates (for !TOML_HEADER_ONLY)
-#ifndef TOML_EXTERN_TEMPLATES
-	#define TOML_EXTERN_TEMPLATES 1
-#endif
-#if (defined(DOXYGEN) || TOML_HEADER_ONLY)
-	#undef TOML_EXTERN_TEMPLATES
-	#define TOML_EXTERN_TEMPLATES 0
-#endif
-
 // internal implementation switch
 #if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
 	#undef TOML_IMPLEMENTATION
@@ -397,9 +388,27 @@
 	#define TOML_IMPLEMENTATION 0
 #endif
 
-// dllexport etc
-#ifndef TOML_API
-	#define TOML_API
+// dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
+#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)		   \
+		&& !defined(TOML_EXPORTED_STATIC_FUNCTION) \
+		&& !defined(TOML_EXPORTED_FREE_FUNCTION)   \
+		&& defined(TOML_API)
+	#define TOML_EXPORTED_MEMBER_FUNCTION	TOML_API
+	#define TOML_EXPORTED_STATIC_FUNCTION	TOML_API
+	#define TOML_EXPORTED_FREE_FUNCTION		TOML_API
+#endif
+
+#ifndef TOML_EXPORTED_CLASS
+	#define TOML_EXPORTED_CLASS
+#endif
+#ifndef TOML_EXPORTED_MEMBER_FUNCTION
+	#define TOML_EXPORTED_MEMBER_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_STATIC_FUNCTION
+	#define TOML_EXPORTED_STATIC_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_FREE_FUNCTION
+	#define TOML_EXPORTED_FREE_FUNCTION
 #endif
 
 // experimental language features
@@ -729,17 +738,6 @@
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
-#if TOML_IMPLEMENTATION
-	#define TOML_EXTERN
-#else
-	#define TOML_EXTERN extern
-#endif
-#if TOML_CLANG
-	#define TOML_EXTERN_NOEXCEPT(...)
-#else
-	#define TOML_EXTERN_NOEXCEPT(...) noexcept(__VA_ARGS__)
-#endif
-
 #ifdef NDEBUG
 	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_ATTR(pure)
 	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_ATTR(const)
@@ -994,10 +992,24 @@
 /// \ecpp
 
 
-/// \def TOML_API
-/// \brief An annotation to add to public symbols.
+/// \def TOML_EXPORTED_CLASS
+/// \brief An 'export' annotation to add to classes.
 /// \detail Not defined by default.
-///	\remark You'd override this with `__declspec(dllexport)` if you were building the library
+///	\remark You might override this with `__declspec(dllexport)` if you were building the library
+/// 		into the public API of a DLL on Windows.
+
+
+/// \def TOML_EXPORTED_MEMBER_FUNCTION
+/// \brief An 'export' annotation to add to non-static class member functions.
+/// \detail Not defined by default.
+///	\remark You might override this with `__declspec(dllexport)` if you were building the library
+/// 		into the public API of a DLL on Windows.
+
+
+/// \def TOML_EXPORTED_FREE_FUNCTION
+/// \brief An 'export' annotation to add to free functions.
+/// \detail Not defined by default.
+///	\remark You might override this with `__declspec(dllexport)` if you were building the library
 /// 		into the public API of a DLL on Windows.
 
 

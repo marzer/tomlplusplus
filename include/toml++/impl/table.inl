@@ -18,6 +18,22 @@
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	table::table() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_CREATED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::~table() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_DESTROYED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	table::table(const impl::table_init_pair* b, const impl::table_init_pair* e)
 	{
 #if TOML_LIFETIME_HOOKS

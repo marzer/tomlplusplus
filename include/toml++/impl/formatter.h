@@ -33,7 +33,7 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view indent;
 	};
 
-	class formatter
+	class TOML_EXPORTED_CLASS formatter
 	{
 	  private:
 		const node* source_;
@@ -124,57 +124,57 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::allow_unicode_strings);
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void detach() noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_newline(bool force = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_indent();
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_unformatted(char);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_unformatted(std::string_view);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_string(std::string_view str, bool allow_multi_line = true, bool allow_bare = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<std::string>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<int64_t>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<double>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<bool>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<date>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<time>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<date_time>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_value(const node&, node_type);
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool dump_failed_parse_result();
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		formatter(const node*, const parse_result*, const formatter_constants&, const formatter_config&) noexcept;
 	};
 }

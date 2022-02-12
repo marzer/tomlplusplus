@@ -17,6 +17,22 @@
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_ARRAY_CREATED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::~array() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_ARRAY_DESTROYED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	array::array(const impl::array_init_elem* b, const impl::array_init_elem* e)
 	{
 #if TOML_LIFETIME_HOOKS

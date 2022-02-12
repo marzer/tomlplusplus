@@ -37,23 +37,23 @@ TOML_NAMESPACE_START
 	///     texture:
 	///       smooth: true
 	/// \eout
-	class yaml_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS yaml_formatter : impl::formatter
 	{
 	  private:
 		/// \cond
 
 		using base = impl::formatter;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_yaml_string(const value<std::string>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&, bool = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&, bool = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = {

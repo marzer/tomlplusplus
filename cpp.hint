@@ -12,8 +12,10 @@
 #define TOML_CONST_INLINE_GETTER				inline
 #define TOML_CONSTRAINED_TEMPLATE(cond, ...)	template <__VA_ARGS__>
 #define TOML_EMPTY_BASES
-#define TOML_EXTERN
-#define TOML_EXTERN_NOEXCEPT(...)
+#define TOML_EXPORTED_CLASS
+#define TOML_EXPORTED_FREE_FUNCTION
+#define TOML_EXPORTED_MEMBER_FUNCTION
+#define TOML_EXPORTED_STATIC_FUNCTION
 #define TOML_EXTERNAL_LINKAGE
 #define TOML_FLAGS_ENUM
 #define TOML_HIDDEN_CONSTRAINT(cond, ...)		template <__VA_ARGS__>
@@ -21,6 +23,7 @@
 #define TOML_IMPL_NAMESPACE_START				namespace toml::impl
 #define TOML_INTERNAL_LINKAGE					static
 #define TOML_LIKELY(...)						(__VA_ARGS__)
+#define TOML_LIKELY_CASE
 #define TOML_NAMESPACE_END						static_assert(true)
 #define TOML_NAMESPACE_START					namespace toml
 #define TOML_NEVER_INLINE
@@ -33,5 +36,4 @@
 #define TOML_RETURNS_BY_THROWING
 #define TOML_TRIVIAL_ABI
 #define TOML_UNLIKELY(...)						(__VA_ARGS__)
-#define TOML_LIKELY_CASE
 #define TOML_UNLIKELY_CASE

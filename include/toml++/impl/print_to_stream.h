@@ -16,97 +16,97 @@ TOML_IMPL_NAMESPACE_START
 	//    - I can (potentially) avoid forcing users to drag in <sstream> and <iomanip>.
 	//    - Strings in C++. Honestly.
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	TOML_ATTR(nonnull)
 	void print_to_stream(std::ostream&, const char*, size_t);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, std::string_view);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const std::string&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, char);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, double, value_flags = {}, bool relaxed_precision = false);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, bool);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::date&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::time&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::time_offset&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::date_time&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const source_position&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const source_region&);
 
 #if TOML_ENABLE_FORMATTERS
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const array&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const table&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<std::string>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<int64_t>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<double>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<bool>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<date>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<time>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<date_time>&);
 
 #endif
