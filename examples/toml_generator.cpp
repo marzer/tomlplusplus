@@ -6,8 +6,6 @@
 // This example demonstrates the use of some more advanced features to generate a tree of random TOML data.
 
 #include "examples.h"
-
-#define TOML_ENABLE_PARSER 0
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;

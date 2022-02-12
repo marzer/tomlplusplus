@@ -228,7 +228,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@sneves](https://github.com/sneves)** - Helped fix a number of parser bugs
 - **[@sobczyk](https://github.com/sobczyk)** - Reported some bugs
 - **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
-- **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build
+- **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build, added compile_library build option
 - **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
 - **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 - **[@ximion](https://github.com/ximion)** - Added support for installation with meson

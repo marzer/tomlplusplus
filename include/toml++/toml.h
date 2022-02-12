@@ -20,6 +20,9 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 // misc warning false-positives
 #if TOML_MSVC
 #pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch
+#if TOML_SHARED_LIB
+#pragma warning(disable : 4251) // dll exports for std lib types
+#endif
 #elif TOML_CLANG
 #pragma clang diagnostic ignored "-Wheader-hygiene"
 #if TOML_CLANG >= 12

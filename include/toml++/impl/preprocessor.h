@@ -88,6 +88,7 @@
 		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
 		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
 		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
+		_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -366,6 +367,11 @@
 #ifdef TOML_CONFIG_HEADER
 	#include TOML_CONFIG_HEADER
 #endif
+
+// is the library being built as a shared lib/dll using meson and friends?
+#ifndef TOML_SHARED_LIB
+	#define TOML_SHARED_LIB 0
+#endif
  
 // header-only mode
 #if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
@@ -375,7 +381,7 @@
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 1
 #endif
-#ifdef DOXYGEN
+#if defined(DOXYGEN) || TOML_SHARED_LIB
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 0
 #endif
@@ -398,6 +404,28 @@
 	#define TOML_EXPORTED_FREE_FUNCTION		TOML_API
 #endif
 
+// dll/shared lib exports
+#if TOML_SHARED_LIB
+	#undef TOML_API
+	#undef TOML_EXPORTED_CLASS
+	#undef TOML_EXPORTED_MEMBER_FUNCTION
+	#undef TOML_EXPORTED_STATIC_FUNCTION
+	#undef TOML_EXPORTED_FREE_FUNCTION
+	#if defined(_WIN32) || defined(__CYGWIN__)
+		#if TOML_IMPLEMENTATION
+			#define TOML_EXPORTED_CLASS			__declspec(dllexport)
+			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllexport)
+		#else
+			#define TOML_EXPORTED_CLASS			__declspec(dllimport)
+			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllimport)
+		#endif
+	#elif defined(__GNUC__) && __GNUC__ >= 4
+		#define TOML_EXPORTED_CLASS				__attribute__((visibility("default")))
+		#define TOML_EXPORTED_MEMBER_FUNCTION	__attribute__((visibility("default")))
+		#define TOML_EXPORTED_STATIC_FUNCTION	__attribute__((visibility("default")))
+		#define TOML_EXPORTED_FREE_FUNCTION		__attribute__((visibility("default")))
+	#endif
+#endif
 #ifndef TOML_EXPORTED_CLASS
 	#define TOML_EXPORTED_CLASS
 #endif

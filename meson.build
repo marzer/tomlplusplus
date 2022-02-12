@@ -44,7 +44,8 @@ is_subproject = meson.is_subproject()
 has_exceptions = get_option('cpp_eh') != 'none'
 include_dirs = include_directories('include', 'external')
 overrides = []
-additional_arguments = []
+universal_args = [] # args used in tests, examples, lib, everything
+devel_args = [] # args used in everything *but* the lib
 
 message('is_release: @0@'.format(is_release))
 message('is_windows: @0@'.format(is_windows))
@@ -59,34 +60,17 @@ message('has_exceptions: @0@'.format(has_exceptions))
 
 # GCC or Clang
 if is_gcc or is_clang
-	add_project_arguments(
-		'-march=native',
-		'-fvisibility=hidden',
-		'-fvisibility-inlines-hidden',
-		language: 'cpp'
-	)
-	if is_release
-		add_project_arguments(
-			'-fdata-sections',
-			'-ffunction-sections',
-			'-Wl,--gc-sections',
-			'-Wl,-s',
-			'-mfma',
-			language: 'cpp'
-		)
-	endif
+	devel_args += '-march=native'
 endif
-
 
 # GCC
 if is_gcc
-	add_project_arguments(
+	universal_args += [
 		'-fmax-errors=5',
 		'-Wno-init-list-lifetime',
-		language: 'cpp'
-	)
+	]
 	if is_pedantic
-		add_project_arguments(
+		universal_args += [
 			'-Wcast-align',
 			'-Wcast-qual',
 			'-Wctor-dtor-privacy',
@@ -122,25 +106,22 @@ if is_gcc
 			'-Wvariadic-macros',
 			'-Wwrite-strings',
 			'-Wmissing-noreturn',
-			language: 'cpp'
-		)
+		]
 	endif
-	if is_release
-		add_project_arguments(
-			'-fmerge-constants',
+	if is_release and is_pedantic
+		universal_args += [
 			'-Wsuggest-attribute=const',
 			'-Wsuggest-attribute=pure',
-			language: 'cpp'
-		)
+		]
 	endif
 endif
 
 # Clang
 if is_clang
 	if is_pedantic
-		add_project_arguments('-Weverything', language: 'cpp')
+		universal_args += '-Weverything'
 	endif
-	add_project_arguments(
+	universal_args += [
 		'-ferror-limit=5',
 		'-Wno-unused-command-line-argument',
 
@@ -151,54 +132,45 @@ if is_clang
 		'-Wno-documentation-unknown-command',
 		'-Wno-switch-enum',
 		'-Wno-covered-switch-default',
-		language: 'cpp'
-	)
+	]
 	if get_option('time_trace')
-		add_project_arguments('-ftime-trace', language: 'cpp')
+		universal_args += ['-ftime-trace']
 	endif
 endif
 
 # MSVC or icc-cl
 if is_msvc or is_icc_cl
-	add_project_arguments(
+	universal_args += [
 		'/bigobj',
 		'/fp:except-', # disable floating-point exceptions
 		'/Gy', # function-level linking
 		'/GF', # string pooling
 		'/openmp-',
 		'/permissive-',
-		'/sdl-',
 		'/utf-8',
-		'/volatile:iso',
-		'/Zc:__cplusplus',
-		'/Zc:inline',
-		'/Zc:throwingNew',
-		'/Zi', # generate debug info (doesn't affect optimization)
-		language: 'cpp'
-	)
-	add_project_link_arguments('/DEBUG', language: 'cpp') # generate PDB (doesn't affect optimization)
+		'/Zc:inline'
+	]
+	if has_exceptions
+		universal_args += '/Zc:throwingNew'
+	endif
 	if is_release
-		add_project_arguments(
+		universal_args += [
 			'/GL', # whole program optimization
 			'/Gw', # Optimize Global Data
 			'/Ob3', # aggressive inlining
 			'/Oy', # omit frame pointers
 			'/Oi', # generate intrinsics
-			language: 'cpp'
-		)
+		]
 		add_project_link_arguments('/ltcg', language: 'cpp')
 	endif
 	if is_pedantic
-		add_project_arguments('/W4', language: 'cpp')
-	endif
-	if is_x64
-		add_project_arguments('/arch:AVX', language: 'cpp')
+		universal_args += '/W4'
 	endif
 endif
 
 # icc-cl
 if is_icc_cl
-	add_project_arguments(
+	universal_args += [
 		'/wd82', # storage class is not first
 		'/wd177', # unreferenced var
 		'/wd280', # selector expression is constant (why the fuck is that a warning?)
@@ -209,37 +181,27 @@ if is_icc_cl
 		'/wd2261', # assume with side effects discarded
 		'/wd2557', # mismatched sign compare
 		'/wd3280', # declaration hides member (triggered in Catch2)
-		language: 'cpp'
-	)
+	]
 endif
 
 # icc (any)
 if is_icc
-	add_project_arguments(
+	universal_args += [
 		'/Qdiag-error-limit:5',
 		'/Qoption,cpp,--unicode_source_kind,UTF-8',
 		'/D__builtin_bit_cast(T, v)=([&]()noexcept{ T val; memcpy(&val, &v, sizeof(T)); return val; })()', # __builtin_bit_cast workaround
-		language: 'cpp'
-	)
+	]
 endif
 
 # windows stuff
 if is_windows
-	add_project_arguments(
-		'-D_ITERATOR_DEBUG_LEVEL=0',
-		'-D_WINSOCK_DEPRECATED_NO_WARNINGS',
-		'-D_SCL_SECURE_NO_WARNINGS',
-		'-D_CRT_SECURE_NO_WARNINGS',
-		language: 'cpp'
-	)
-	add_project_arguments(has_exceptions ? '-D_HAS_EXCEPTIONS=1' : '-D_HAS_EXCEPTIONS=0', language: 'cpp')
+	universal_args += has_exceptions ? '-D_HAS_EXCEPTIONS=1' : '-D_HAS_EXCEPTIONS=0'
 elif is_release
 	overrides += 'strip=true'
 endif
 
-
 # LTO
-if is_lld or is_debug
+if is_lld or is_debug or (is_windows and is_clang)
 	overrides += 'b_lto=false'
 endif
 
@@ -418,7 +380,7 @@ compiler_supports_float16 = compiler.links('''
 	args: compiler_supports_float16_args
 )
 if compiler_supports_fp16 or compiler_supports_float16
-	additional_arguments += compiler_supports_float16_args
+	devel_args += compiler_supports_float16_args
 endif
 
 #######################################################################################################################
@@ -484,6 +446,17 @@ endif
 # subdirectories
 #######################################################################################################################
 
+include_dir = include_directories('include')
+
+# Empty dependency that will be filled either in src/ or include/
+tomlplusplus_dep = dependency('', required: false)
+
+if get_option('compile_library')
+	subdir('src')
+else
+	subdir('include')
+endif
+
 build_tests = get_option('build_tests') and not is_subproject
 if build_tests
 	run_command('git', 'submodule', 'update', '--init', '--depth', '1', 'external/Catch2')
@@ -502,51 +475,8 @@ if build_tt
 endif
 
 if not is_subproject
-	install_subdir('include'/'toml++',
-		strip_directory: true,
-		install_dir: get_option('includedir')/'toml++'
-	)
+	install_subdir('include'/'toml++', install_dir: get_option('includedir'))
 endif
 
-#######################################################################################################################
-# dependencies, cmake etc.
-#######################################################################################################################
-
-tomlplusplus_dep = declare_dependency(include_directories: 'include')
-
+# Allow subproject usage
 meson.override_dependency(meson.project_name(), tomlplusplus_dep)
-
-if not is_subproject
-	import('pkgconfig').generate(
-		name: meson.project_name(),
-		description: 'Header-only TOML config file parser and serializer for C++',
-		install_dir: get_option('datadir')/'pkgconfig',
-	)
-endif
-
-# cmake
-if get_option('generate_cmake_config') and not is_subproject
-	cmake = import('cmake')
-	# Can't use until Meson 0.62.0, see https://github.com/mesonbuild/meson/pull/9916
-	# and https://github.com/marzer/tomlplusplus/issues/140
-	#cmake.write_basic_package_version_file(
-	#	name: meson.project_name(),
-	#	version: meson.project_version(),
-	#	install_dir: get_option('datadir')/'cmake'/meson.project_name(),
-	#	arch_independent: true
-	#)
-	# In the meantime, install a pre-generated Package Version file
-	configure_file(
-		configuration: {'version': meson.project_version()},
-		input: 'cmake'/'tomlplusplusConfigVersion.cmake.in',
-		output: 'tomlplusplusConfigVersion.cmake',
-		install_dir: get_option('datadir')/'cmake'/meson.project_name()
-	)
-
-	cmake.configure_package_config_file(
-		name: meson.project_name(),
-		input: 'cmake'/'tomlplusplus.cmake.in',
-		configuration: configuration_data({'includedir': get_option('includedir')}),
-		install_dir: get_option('datadir')/'cmake'/meson.project_name(),
-	)
-endif

@@ -1,5 +1,5 @@
 example_args = []
-example_args += additional_arguments
+example_args += devel_args
 example_overrides = []
 example_overrides += overrides
 if is_gcc or is_clang
@@ -25,8 +25,8 @@ foreach example : examples
 		executable(
 			example,
 			[ example+'.cpp' ],
-			include_directories: include_dirs,
 			cpp_args: example_args,
+			dependencies: tomlplusplus_dep,
 			override_options: example_overrides
 		)
 	]]
