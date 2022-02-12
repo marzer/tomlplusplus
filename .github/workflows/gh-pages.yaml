@@ -1,0 +1,36 @@
+name: gh-pages
+
+on:
+  push:
+    branches: master
+    paths: docs/**
+
+jobs:
+  gh-pages:
+    runs-on: ubuntu-latest
+    container:
+      image: debian:testing
+
+    defaults:
+      run:
+        shell: sh
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          apt-get -y update
+          apt-get -y install --no-install-recommends python3-pip doxygen
+          pip3 install --upgrade --requirement tools/requirements.txt
+
+      - name: Generate docs
+        run: |
+          cd docs
+          poxy --verbose
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs/html

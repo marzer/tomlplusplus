@@ -1,0 +1,109 @@
+name: ci
+
+on: [push, pull_request]
+
+# This ensures that jobs get canceled when force-pushing
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        compiler: [ 'g++', 'clang' ]
+        compile: [ true, false ]
+
+    runs-on: ubuntu-latest
+    container:
+      image: debian:testing
+
+    defaults:
+      run:
+        shell: sh
+
+    steps:
+    - name: Install dependencies
+      run: |
+        apt-get -y update
+        apt-get -y install --no-install-recommends ${{ matrix.compiler }} lld meson pkgconf git ca-certificates locales-all python3-pip
+
+    - uses: actions/checkout@v2
+      with:
+        submodules: true
+
+    - name: Check toml.hpp
+      run: |
+        pip3 install --upgrade --requirement tools/requirements.txt 
+        cd tools
+        ./ci_single_header_check.py
+
+    - name: Configure Meson
+      run: |
+        if [ ${{ matrix.compiler }} = g++ ]; then linker=gold; else linker=lld; fi
+        CXX_LD=$linker meson setup build --buildtype=debug -Dcompile_library=${{ matrix.compile }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
+
+    - name: Build
+      run: meson compile -C build
+
+    - name: Test
+      run: meson test -C build --verbose
+
+  # The Windows job is a mess, but it's a mess with some advantages.
+  # The job is ran in a clean Docker container, and we have full control on
+  # the software present there. This also means that every single program
+  # needs to be manually installed, and since Windows doesn't have a
+  # package manager installing stuff in scripts is pure pain.
+  # Also, GitHub's support for Windows containers is really, really bad,
+  # and the only way of running a job in Docker is by passing everything to
+  # `docker run`, as a single cmd.exe command.
+  # Lastly, altering the PATH is almost impossible, and as far as I know
+  # the only thing that does that reliably is vcvars64.bat; so to make an
+  # executable available it is necessary to manually move it in a directory
+  # already in Path, like C:\vs\Common7\Tools\
+  windows:
+    strategy:
+      fail-fast: false
+      matrix:
+        compile: [ true, false ]
+
+    runs-on: windows-2022
+
+    defaults:
+      run:
+        shell: cmd
+
+    steps:
+    # When the job is triggered by a pull request, we need to fetch the
+    # "test" merge commit with this command. More info here:
+    # https://docs.github.com/en/rest/reference/pulls#get-a-pull-request
+    - name: pull_request fetch command
+      if: github.event_name == 'pull_request'
+      run: echo pull_request_fetch_command=git fetch origin +${{ github.event.pull_request.merge_commit_sha }}:${{ github.ref_name }} ^&^& >> %GITHUB_ENV%
+
+    - name: Docker
+      run: docker run mcr.microsoft.com/windows/servercore:ltsc2022 cmd.exe /c "
+        mkdir C:\dev &&
+        cd C:\dev &&
+        curl -LO https://aka.ms/vs/17/release.ltsc.17.0/vs_buildtools.exe &&
+        .\vs_buildtools.exe --installPath C:\vs --quiet --norestart --wait --nocache --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 --add Microsoft.VisualStudio.Component.Windows10SDK.19041 &&
+        C:\vs\VC\Auxiliary\Build\vcvars64.bat &&
+        curl -Lo meson.msi https://github.com/mesonbuild/meson/releases/download/0.61.1/meson-0.61.1-64.msi &&
+        msiexec /a meson.msi TARGETDIR=C:\meson /quiet /qn &&
+        move C:\meson\Meson\* C:\vs\Common7\Tools\ &&
+        curl -Lo git.zip https://github.com/git-for-windows/git/releases/download/v2.35.1.windows.2/MinGit-2.35.1.2-busybox-64-bit.zip &&
+        mkdir git &&
+        cd git &&
+        tar -xf ..\git.zip &&
+        cd .. &&
+        move git\cmd\* C:\vs\Common7\Tools\ &&
+        move git\etc C:\vs\Common7\ &&
+        move git\mingw64 C:\vs\Common7\ &&
+        move git\usr C:\vs\Common7\ &&
+        git clone ${{ github.repositoryUrl }} &&
+        cd tomlplusplus && ${{ env.pull_request_fetch_command }}
+        git checkout ${{ github.ref_name }} &&
+        meson setup -Dcompile_library=${{ matrix.compile }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false build &&
+        meson compile -C build &&
+        meson test -C build"
