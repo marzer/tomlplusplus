@@ -217,6 +217,7 @@ def main():
 				r'TOML_SMALL_INT_TYPE',
 				r'TOML_UNDEF_MACROS',
 				r'TOMLPLUSPLUS_H',
+				r'TOML_SHARED_LIB'
 			)
 			set_defines = []
 			for define, currently_set in defines.items():

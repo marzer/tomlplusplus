@@ -1,4 +1,4 @@
-option('build_tests', 			type: 'boolean', value: false,	description: 'Build tests (default: false - no effect when included as a subproject)')
+option('build_tests',			type: 'boolean', value: false,	description: 'Build tests (default: false - no effect when included as a subproject)')
 option('build_examples',		type: 'boolean', value: false,	description: 'Build examples (default: false - no effect when included as a subproject)')
 option('generate_cmake_config',	type: 'boolean', value: true,	description: 'Generate a cmake package config file (default: true - no effect when included as a subproject)')
 option('pedantic',				type: 'boolean', value: false,	description: 'Enable as many compiler warnings as possible (default: false)')
@@ -7,4 +7,4 @@ option('asan_examples',			type: 'boolean', value: false)
 option('asan_tests',			type: 'boolean', value: false)
 option('build_tt_encoder',		type: 'boolean', value: false,	description: 'Enable to build the toml-test encoder.')
 option('build_tt_decoder',		type: 'boolean', value: false,	description: 'Enable to build the toml-test decoder.')
-
+option('compile_library',		type: 'boolean', value: false,	description: 'Compile as a library')

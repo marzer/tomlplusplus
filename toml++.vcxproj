@@ -94,6 +94,7 @@
     <None Include="CHANGELOG.md" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
+    <None Include="include\meson.build" />
     <None Include="include\toml++\impl\at_path.inl" />
     <None Include="include\toml++\impl\unicode.inl" />
     <None Include="include\toml++\impl\yaml_formatter.inl" />
@@ -108,6 +109,7 @@
     <None Include="docs\pages\main_page.dox" />
     <None Include="docs\poxy.toml" />
     <None Include="meson.build" />
+    <None Include="src\meson.build" />
     <None Include="toml++.props" />
     <None Include="tools\ci_single_header_check.py" />
     <None Include="tools\clang_format.bat" />

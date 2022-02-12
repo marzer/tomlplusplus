@@ -60,26 +60,34 @@ unreleased_feature_modes = [ false, true ]
 cpp20_modes = [ false, true ]
 test_executables = []
 counter = 0
+test_base_args = []
+test_base_args += universal_args
+test_base_args += devel_args
 
 foreach cpp20 : cpp20_modes
-	if cpp20 and not compiler_supports_cpp20
+	if cpp20 and (not compiler_supports_cpp20 or get_option('compile_library'))
 		continue
 	endif
 	foreach unrel : unreleased_feature_modes
+		if unrel and get_option('compile_library')
+			continue
+		endif
 		foreach fast_math : fast_math_modes
-			if fast_math and not compiler_supports_fast_math
+			if fast_math and (not compiler_supports_fast_math or get_option('compile_library'))
 				continue
 			endif
 			foreach exceptions : exception_modes
-
+				if (not exceptions) and get_option('compile_library')
+					continue
+				endif
 				test_name = ''
 				test_overrides = []
 				test_overrides += overrides
 				test_args = []
-				test_args += additional_arguments
+				test_args += test_base_args
 
 				single_header = (counter % 2 == 1)
-				tl_optional = (counter % 4 == 2 and exceptions)
+				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library'))
 				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
 
 				if cpp20
@@ -155,6 +163,7 @@ foreach cpp20 : cpp20_modes
 						test_sources,
 						include_directories: include_dirs,
 						cpp_args: test_args,
+						dependencies: tomlplusplus_dep,
 						override_options: test_overrides
 					)
 				]]
@@ -195,6 +204,6 @@ executable(
 	'odr_test',
 	[ 'odr_test_1.cpp', 'odr_test_2.cpp' ],
 	include_directories: include_dirs,
-	cpp_args: additional_arguments,
+	cpp_args: test_base_args,
 	override_options: overrides
 )

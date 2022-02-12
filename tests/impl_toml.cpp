@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #include "settings.h"
-#if !TOML_HEADER_ONLY
+#if !TOML_HEADER_ONLY && !TOML_SHARED_LIB
 #define TOML_IMPLEMENTATION
 #endif
 

@@ -112,16 +112,7 @@
     <ClInclude Include="include\toml++\impl\formatter.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
-    <ClInclude Include="include\toml++\impl\node_view.inl">
-      <Filter>include\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\toml++\impl\value.inl">
-      <Filter>include\impl</Filter>
-    </ClInclude>
     <ClInclude Include="include\toml++\impl\std_initializer_list.h">
-      <Filter>include\impl</Filter>
-    </ClInclude>
-    <ClInclude Include="include\toml++\impl\value_extern.inl">
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\yaml_formatter.h">
@@ -195,9 +186,6 @@
     <None Include="tools\clang_format.bat">
       <Filter>tools</Filter>
     </None>
-    <None Include="include\toml++\impl\node_view_extern.inl">
-      <Filter>include\impl</Filter>
-    </None>
     <None Include=".github\pull_request_template.md">
       <Filter>.github</Filter>
     </None>
@@ -226,6 +214,12 @@
     <None Include="include\toml++\impl\at_path.inl">
       <Filter>include\impl</Filter>
     </None>
+    <None Include="src\meson.build">
+      <Filter>src</Filter>
+    </None>
+    <None Include="include\meson.build">
+      <Filter>include</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -251,6 +245,9 @@
     </Filter>
     <Filter Include=".github">
       <UniqueIdentifier>{e3ab5e86-e053-48a6-9fee-f6442a63aaa6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{5ae94dae-1dce-4522-a33a-230bdb075921}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

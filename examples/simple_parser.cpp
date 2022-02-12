@@ -6,8 +6,6 @@
 // This example demonstrates how to parse TOML from a file or stdin and re-serialize it (print it out) to stdout.
 
 #include "examples.h"
-
-#define TOML_ENABLE_UNRELEASED_FEATURES 1
 #include <toml++/toml.h>
 
 using namespace std::string_view_literals;

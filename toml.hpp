@@ -124,6 +124,7 @@
 		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
 		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
 		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
+		_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -382,6 +383,11 @@
 	#include TOML_CONFIG_HEADER
 #endif
 
+// is the library being built as a shared lib/dll using meson and friends?
+#ifndef TOML_SHARED_LIB
+	#define TOML_SHARED_LIB 0
+#endif
+
 // header-only mode
 #if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
 	#define TOML_HEADER_ONLY TOML_ALL_INLINE
@@ -390,18 +396,9 @@
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 1
 #endif
-#ifdef DOXYGEN
+#if defined(DOXYGEN) || TOML_SHARED_LIB
 	#undef TOML_HEADER_ONLY
 	#define TOML_HEADER_ONLY 0
-#endif
-
-// extern templates (for !TOML_HEADER_ONLY)
-#ifndef TOML_EXTERN_TEMPLATES
-	#define TOML_EXTERN_TEMPLATES 1
-#endif
-#if (defined(DOXYGEN) || TOML_HEADER_ONLY)
-	#undef TOML_EXTERN_TEMPLATES
-	#define TOML_EXTERN_TEMPLATES 0
 #endif
 
 // internal implementation switch
@@ -412,9 +409,49 @@
 	#define TOML_IMPLEMENTATION 0
 #endif
 
-// dllexport etc
-#ifndef TOML_API
-	#define TOML_API
+// dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
+#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)		   \
+		&& !defined(TOML_EXPORTED_STATIC_FUNCTION) \
+		&& !defined(TOML_EXPORTED_FREE_FUNCTION)   \
+		&& defined(TOML_API)
+	#define TOML_EXPORTED_MEMBER_FUNCTION	TOML_API
+	#define TOML_EXPORTED_STATIC_FUNCTION	TOML_API
+	#define TOML_EXPORTED_FREE_FUNCTION		TOML_API
+#endif
+
+// dll/shared lib exports
+#if TOML_SHARED_LIB
+	#undef TOML_API
+	#undef TOML_EXPORTED_CLASS
+	#undef TOML_EXPORTED_MEMBER_FUNCTION
+	#undef TOML_EXPORTED_STATIC_FUNCTION
+	#undef TOML_EXPORTED_FREE_FUNCTION
+	#if defined(_WIN32) || defined(__CYGWIN__)
+		#if TOML_IMPLEMENTATION
+			#define TOML_EXPORTED_CLASS			__declspec(dllexport)
+			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllexport)
+		#else
+			#define TOML_EXPORTED_CLASS			__declspec(dllimport)
+			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllimport)
+		#endif
+	#elif defined(__GNUC__) && __GNUC__ >= 4
+		#define TOML_EXPORTED_CLASS				__attribute__((visibility("default")))
+		#define TOML_EXPORTED_MEMBER_FUNCTION	__attribute__((visibility("default")))
+		#define TOML_EXPORTED_STATIC_FUNCTION	__attribute__((visibility("default")))
+		#define TOML_EXPORTED_FREE_FUNCTION		__attribute__((visibility("default")))
+	#endif
+#endif
+#ifndef TOML_EXPORTED_CLASS
+	#define TOML_EXPORTED_CLASS
+#endif
+#ifndef TOML_EXPORTED_MEMBER_FUNCTION
+	#define TOML_EXPORTED_MEMBER_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_STATIC_FUNCTION
+	#define TOML_EXPORTED_STATIC_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_FREE_FUNCTION
+	#define TOML_EXPORTED_FREE_FUNCTION
 #endif
 
 // experimental language features
@@ -738,17 +775,6 @@
 	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
 
-#if TOML_IMPLEMENTATION
-	#define TOML_EXTERN
-#else
-	#define TOML_EXTERN extern
-#endif
-#if TOML_CLANG
-	#define TOML_EXTERN_NOEXCEPT(...)
-#else
-	#define TOML_EXTERN_NOEXCEPT(...) noexcept(__VA_ARGS__)
-#endif
-
 #ifdef NDEBUG
 	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_ATTR(pure)
 	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_ATTR(const)
@@ -955,6 +981,9 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 // misc warning false-positives
 #if TOML_MSVC
 #pragma warning(disable : 5031) // #pragma warning(pop): likely mismatch
+#if TOML_SHARED_LIB
+#pragma warning(disable : 4251) // dll exports for std lib types
+#endif
 #elif TOML_CLANG
 #pragma clang diagnostic ignored "-Wheader-hygiene"
 #if TOML_CLANG >= 12
@@ -1005,17 +1034,17 @@ namespace toml // non-abi namespace; this is not an error
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	std::string narrow(std::wstring_view);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	std::wstring widen(std::string_view);
 
 #if TOML_HAS_CHAR8
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	std::wstring widen(std::u8string_view);
 
 #endif
@@ -2002,97 +2031,97 @@ TOML_IMPL_NAMESPACE_START
 	//    - I can (potentially) avoid forcing users to drag in <sstream> and <iomanip>.
 	//    - Strings in C++. Honestly.
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	TOML_ATTR(nonnull)
 	void print_to_stream(std::ostream&, const char*, size_t);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, std::string_view);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const std::string&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, char);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, double, value_flags = {}, bool relaxed_precision = false);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, bool);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::date&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::time&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::time_offset&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const toml::date_time&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const source_position&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const source_region&);
 
 #if TOML_ENABLE_FORMATTERS
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const array&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const table&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<std::string>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<int64_t>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<double>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<bool>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<date>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<time>&);
 
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	void print_to_stream(std::ostream&, const value<date_time>&);
 
 #endif
@@ -2544,21 +2573,21 @@ TOML_POP_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	node_view<node> at_path(node & root, std::string_view path) noexcept;
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	node_view<const node> at_path(const node& root, std::string_view path) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	node_view<node> at_path(node & root, std::wstring_view path);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	node_view<const node> at_path(const node& root, std::wstring_view path);
 
 #endif
@@ -2580,7 +2609,7 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class TOML_ABSTRACT_BASE node
+	class TOML_ABSTRACT_BASE TOML_EXPORTED_CLASS node
 	{
 	  private:
 
@@ -2629,18 +2658,19 @@ TOML_NAMESPACE_START
 		}
 
 	  protected:
-		node() noexcept = default;
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node() noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node(const node&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node(node&&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& operator=(const node&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& operator=(node&&) noexcept;
 
 		template <typename T, typename N>
@@ -2694,7 +2724,7 @@ TOML_NAMESPACE_START
 		}
 
 	  public:
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		virtual ~node() noexcept;
 
 		TOML_PURE_GETTER
@@ -3129,21 +3159,21 @@ TOML_NAMESPACE_START
 		explicit operator node_view<const node>() const noexcept;
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<node> at_path(std::string_view path) noexcept;
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::string_view path) const noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<node> at_path(std::wstring_view path);
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::wstring_view path) const;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -3154,7 +3184,7 @@ TOML_NAMESPACE_END;
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_PURE_GETTER
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	bool node_deep_equality(const node*, const node*) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
@@ -3644,72 +3674,6 @@ TOML_NAMESPACE_START
 	node_view(T*) -> node_view<node>;
 }
 TOML_NAMESPACE_END;
-
-#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
-
-TOML_NAMESPACE_START
-{
-	TOML_EXTERN
-	template class TOML_API node_view<node>;
-	TOML_EXTERN
-	template class TOML_API node_view<const node>;
-
-#define TOML_EXTERN_FUNC(name, T)                                                                                      \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN_FUNC(value_exact, std::string_view);
-	TOML_EXTERN_FUNC(value_exact, std::string);
-	TOML_EXTERN_FUNC(value_exact, const char*);
-	TOML_EXTERN_FUNC(value_exact, int64_t);
-	TOML_EXTERN_FUNC(value_exact, double);
-	TOML_EXTERN_FUNC(value_exact, date);
-	TOML_EXTERN_FUNC(value_exact, time);
-	TOML_EXTERN_FUNC(value_exact, date_time);
-	TOML_EXTERN_FUNC(value_exact, bool);
-	TOML_EXTERN_FUNC(value, std::string_view);
-	TOML_EXTERN_FUNC(value, std::string);
-	TOML_EXTERN_FUNC(value, const char*);
-	TOML_EXTERN_FUNC(value, signed char);
-	TOML_EXTERN_FUNC(value, signed short);
-	TOML_EXTERN_FUNC(value, signed int);
-	TOML_EXTERN_FUNC(value, signed long);
-	TOML_EXTERN_FUNC(value, signed long long);
-	TOML_EXTERN_FUNC(value, unsigned char);
-	TOML_EXTERN_FUNC(value, unsigned short);
-	TOML_EXTERN_FUNC(value, unsigned int);
-	TOML_EXTERN_FUNC(value, unsigned long);
-	TOML_EXTERN_FUNC(value, unsigned long long);
-	TOML_EXTERN_FUNC(value, double);
-	TOML_EXTERN_FUNC(value, float);
-	TOML_EXTERN_FUNC(value, date);
-	TOML_EXTERN_FUNC(value, time);
-	TOML_EXTERN_FUNC(value, date_time);
-	TOML_EXTERN_FUNC(value, bool);
-
-#if TOML_HAS_CHAR8
-	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
-	TOML_EXTERN_FUNC(value_exact, std::u8string);
-	TOML_EXTERN_FUNC(value_exact, const char8_t*);
-	TOML_EXTERN_FUNC(value, std::u8string_view);
-	TOML_EXTERN_FUNC(value, std::u8string);
-	TOML_EXTERN_FUNC(value, const char8_t*);
-#endif
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-	TOML_EXTERN_FUNC(value_exact, std::wstring);
-	TOML_EXTERN_FUNC(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN_FUNC
-}
-TOML_NAMESPACE_END;
-
-#endif
 
 TOML_NAMESPACE_START
 {
@@ -4802,77 +4766,6 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
-
-TOML_NAMESPACE_START
-{
-	TOML_EXTERN
-	template class TOML_API value<std::string>;
-	TOML_EXTERN
-	template class TOML_API value<int64_t>;
-	TOML_EXTERN
-	template class TOML_API value<double>;
-	TOML_EXTERN
-	template class TOML_API value<bool>;
-	TOML_EXTERN
-	template class TOML_API value<date>;
-	TOML_EXTERN
-	template class TOML_API value<time>;
-	TOML_EXTERN
-	template class TOML_API value<date_time>;
-
-#define TOML_EXTERN_FUNC(name, T)                                                                                      \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN_FUNC(value_exact, std::string_view);
-	TOML_EXTERN_FUNC(value_exact, std::string);
-	TOML_EXTERN_FUNC(value_exact, const char*);
-	TOML_EXTERN_FUNC(value_exact, int64_t);
-	TOML_EXTERN_FUNC(value_exact, double);
-	TOML_EXTERN_FUNC(value_exact, date);
-	TOML_EXTERN_FUNC(value_exact, time);
-	TOML_EXTERN_FUNC(value_exact, date_time);
-	TOML_EXTERN_FUNC(value_exact, bool);
-	TOML_EXTERN_FUNC(value, std::string_view);
-	TOML_EXTERN_FUNC(value, std::string);
-	TOML_EXTERN_FUNC(value, const char*);
-	TOML_EXTERN_FUNC(value, signed char);
-	TOML_EXTERN_FUNC(value, signed short);
-	TOML_EXTERN_FUNC(value, signed int);
-	TOML_EXTERN_FUNC(value, signed long);
-	TOML_EXTERN_FUNC(value, signed long long);
-	TOML_EXTERN_FUNC(value, unsigned char);
-	TOML_EXTERN_FUNC(value, unsigned short);
-	TOML_EXTERN_FUNC(value, unsigned int);
-	TOML_EXTERN_FUNC(value, unsigned long);
-	TOML_EXTERN_FUNC(value, unsigned long long);
-	TOML_EXTERN_FUNC(value, double);
-	TOML_EXTERN_FUNC(value, float);
-	TOML_EXTERN_FUNC(value, date);
-	TOML_EXTERN_FUNC(value, time);
-	TOML_EXTERN_FUNC(value, date_time);
-	TOML_EXTERN_FUNC(value, bool);
-#if TOML_HAS_CHAR8
-	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
-	TOML_EXTERN_FUNC(value_exact, std::u8string);
-	TOML_EXTERN_FUNC(value_exact, const char8_t*);
-	TOML_EXTERN_FUNC(value, std::u8string_view);
-	TOML_EXTERN_FUNC(value, std::u8string);
-	TOML_EXTERN_FUNC(value, const char8_t*);
-#endif
-#if TOML_ENABLE_WINDOWS_COMPAT
-	TOML_EXTERN_FUNC(value_exact, std::wstring);
-	TOML_EXTERN_FUNC(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN_FUNC
-}
-TOML_NAMESPACE_END;
-
-#endif
-
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
@@ -5236,7 +5129,7 @@ TOML_NAMESPACE_START
 
 	using const_array_iterator = POXY_IMPLEMENTATION_DETAIL(impl::array_iterator<true>);
 
-	class array : public node
+	class TOML_EXPORTED_CLASS array : public node
 	{
 	  private:
 
@@ -5246,7 +5139,7 @@ TOML_NAMESPACE_START
 		vector_type elems_;
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(const impl::array_init_elem*, const impl::array_init_elem*);
 
 		TOML_NODISCARD_CTOR
@@ -5254,13 +5147,13 @@ TOML_NAMESPACE_START
 			: array{ elems.begin(), elems.end() }
 		{}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void preinsertion_resize(size_t idx, size_t count);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void insert_at_back(impl::node_ptr&&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		vector_iterator insert_at(const_vector_iterator, impl::node_ptr&&);
 
 		template <typename T>
@@ -5275,10 +5168,10 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		size_t total_leaf_count() const noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void flatten_child(array&& child, size_t& dest_index) noexcept;
 
 	  public:
@@ -5288,32 +5181,19 @@ TOML_NAMESPACE_START
 		using reference		  = node&;
 		using const_reference = const node&;
 
-#if TOML_LIFETIME_HOOKS
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		array() noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~array() noexcept;
 
 		TOML_NODISCARD_CTOR
-		array() noexcept
-		{
-			TOML_ARRAY_CREATED;
-		}
-
-		~array() noexcept
-		{
-			TOML_ARRAY_DESTROYED;
-		}
-
-#else
-
-		TOML_NODISCARD_CTOR
-		array() noexcept = default;
-
-#endif
-
-		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(const array&);
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(array&& other) noexcept;
 
 		TOML_CONSTRAINED_TEMPLATE((sizeof...(ElemTypes) > 0 || !std::is_same_v<impl::remove_cvref<ElemType>, array>),
@@ -5326,10 +5206,10 @@ TOML_NAMESPACE_START
 																   static_cast<ElemTypes&&>(vals)... } }
 		{}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(const array&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(array&& rhs) noexcept;
 
 		TOML_CONST_INLINE_GETTER
@@ -5339,15 +5219,15 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
@@ -5583,7 +5463,7 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& at(size_t index);
 
 		TOML_NODISCARD
@@ -5680,13 +5560,13 @@ TOML_NAMESPACE_START
 			return elems_.capacity();
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void reserve(size_t new_capacity);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void shrink_to_fit();
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void truncate(size_t new_size);
 
 		template <typename ElemType>
@@ -5705,13 +5585,13 @@ TOML_NAMESPACE_START
 				truncate(new_size);
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator erase(const_iterator pos) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator erase(const_iterator first, const_iterator last) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& flatten() &;
 
 		array&& flatten() &&
@@ -5719,7 +5599,7 @@ TOML_NAMESPACE_START
 			return static_cast<toml::array&&>(this->flatten());
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& prune(bool recursive = true) & noexcept;
 
 		array&& prune(bool recursive = true) && noexcept
@@ -5727,10 +5607,10 @@ TOML_NAMESPACE_START
 			return static_cast<toml::array&&>(this->prune(recursive));
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void pop_back() noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
 		template <typename ElemType>
@@ -5885,7 +5765,7 @@ TOML_NAMESPACE_START
 	  private:
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_STATIC_FUNCTION
 		static bool equal(const array&, const array&) noexcept;
 
 		template <typename T>
@@ -6400,7 +6280,7 @@ TOML_NAMESPACE_START
 
 	using const_table_iterator = POXY_IMPLEMENTATION_DETAIL(impl::table_iterator<true>);
 
-	class table : public node
+	class TOML_EXPORTED_CLASS table : public node
 	{
 	  private:
 
@@ -6412,47 +6292,36 @@ TOML_NAMESPACE_START
 		bool inline_ = false;
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(const impl::table_init_pair*, const impl::table_init_pair*);
 
 	  public:
-#if TOML_LIFETIME_HOOKS
 
 		TOML_NODISCARD_CTOR
-		table() noexcept
-		{
-			TOML_TABLE_CREATED;
-		}
+		TOML_EXPORTED_MEMBER_FUNCTION
+		table() noexcept;
 
-		~table() noexcept
-		{
-			TOML_TABLE_DESTROYED;
-		}
-#else
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~table() noexcept;
 
 		TOML_NODISCARD_CTOR
-		table() noexcept = default;
-
-#endif
-
-		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(const table&);
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table(table&& other) noexcept;
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		explicit table(std::initializer_list<impl::table_init_pair> kvps) //
 			: table(kvps.begin(), kvps.end())
 		{}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(const table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(table&& rhs) noexcept;
 
 		TOML_CONST_INLINE_GETTER
@@ -6462,15 +6331,15 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		template <typename ElemType = void>
@@ -6679,7 +6548,7 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node* get(std::string_view key) noexcept;
 
 		TOML_PURE_INLINE_GETTER
@@ -6744,7 +6613,7 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& at(std::string_view key);
 
 		TOML_NODISCARD
@@ -6824,7 +6693,7 @@ TOML_NAMESPACE_START
 	  private:
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator get_lower_bound(std::string_view) noexcept;
 
 	  public:
@@ -6864,11 +6733,11 @@ TOML_NAMESPACE_START
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator find(std::string_view key) noexcept;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		const_iterator find(std::string_view key) const noexcept;
 
 		TOML_PURE_GETTER
@@ -6904,10 +6773,10 @@ TOML_NAMESPACE_START
 
 	  private:
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator erase(const_map_iterator) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator erase(const_map_iterator, const_map_iterator) noexcept;
 
 	  public:
@@ -6927,7 +6796,7 @@ TOML_NAMESPACE_START
 			return iterator{ erase(const_map_iterator{ begin }, const_map_iterator{ end }) };
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		size_t erase(std::string_view key) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -6942,7 +6811,7 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		table& prune(bool recursive = true) & noexcept;
 
 		table&& prune(bool recursive = true) && noexcept
@@ -6950,12 +6819,12 @@ TOML_NAMESPACE_START
 			return static_cast<toml::table&&>(this->prune(recursive));
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
 	  private:
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		map_iterator insert_with_hint(const_iterator, key&&, impl::node_ptr&&);
 
 	  public:
@@ -7197,7 +7066,7 @@ TOML_NAMESPACE_START
 	  private:
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_STATIC_FUNCTION
 		static bool equal(const table&, const table&) noexcept;
 
 	  public:
@@ -8673,29 +8542,29 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::string_view doc, std::string_view source_path = {});
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::string_view doc, std::string && source_path);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse_file(std::string_view file_path);
 
 #if TOML_HAS_CHAR8
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::u8string_view doc, std::string_view source_path = {});
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::u8string_view doc, std::string && source_path);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse_file(std::u8string_view file_path);
 
 #endif // TOML_HAS_CHAR8
@@ -8703,15 +8572,15 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::string_view doc, std::wstring_view source_path);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::istream & doc, std::wstring_view source_path);
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse_file(std::wstring_view file_path);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -8719,17 +8588,17 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::u8string_view doc, std::wstring_view source_path);
 
 #endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::istream & doc, std::string_view source_path = {});
 
 	TOML_NODISCARD
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	parse_result parse(std::istream & doc, std::string && source_path);
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
@@ -8800,7 +8669,7 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view indent;
 	};
 
-	class formatter
+	class TOML_EXPORTED_CLASS formatter
 	{
 	  private:
 		const node* source_;
@@ -8891,57 +8760,57 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::allow_unicode_strings);
 		}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void detach() noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_newline(bool force = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_indent();
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_unformatted(char);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_unformatted(std::string_view);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_string(std::string_view str, bool allow_multi_line = true, bool allow_bare = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<std::string>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<int64_t>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<double>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<bool>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<date>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<time>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<date_time>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_value(const node&, node_type);
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool dump_failed_parse_result();
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		formatter(const node*, const parse_result*, const formatter_constants&, const formatter_config&) noexcept;
 	};
 }
@@ -8969,7 +8838,7 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class toml_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS toml_formatter : impl::formatter
 	{
 	  private:
 
@@ -8977,22 +8846,22 @@ TOML_NAMESPACE_START
 		std::vector<const key*> key_path_;
 		bool pending_table_separator_ = false;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_pending_table_separator();
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const key&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_inline(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory
@@ -9068,19 +8937,19 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class json_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS json_formatter : impl::formatter
 	{
 	  private:
 
 		using base = impl::formatter;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = {
@@ -9152,22 +9021,22 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class yaml_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS yaml_formatter : impl::formatter
 	{
 	  private:
 
 		using base = impl::formatter;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_yaml_string(const value<std::string>&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&, bool = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&, bool = false);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = {
@@ -9808,6 +9677,12 @@ TOML_PUSH_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	node::node() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
+	node::~node() noexcept = default;
+
+	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
 		: source_{ std::exchange(other.source_, {}) }
 	{}
@@ -9838,9 +9713,6 @@ TOML_NAMESPACE_START
 			source_ = std::exchange(rhs.source_, {});
 		return *this;
 	}
-
-	TOML_EXTERNAL_LINKAGE
-	node::~node() noexcept = default;
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> node::at_path(std::string_view path) noexcept
@@ -9905,88 +9777,6 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/node_view.inl  ****************************************************************************************
-
-TOML_PUSH_WARNINGS;
-#ifdef _MSC_VER
-#pragma push_macro("min")
-#pragma push_macro("max")
-#undef min
-#undef max
-#endif
-
-#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
-
-TOML_NAMESPACE_START
-{
-	TOML_EXTERN
-	template class TOML_API node_view<node>;
-	TOML_EXTERN
-	template class TOML_API node_view<const node>;
-
-#define TOML_EXTERN_FUNC(name, T)                                                                                      \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node_view<node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>);            \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node_view<const node>::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN_FUNC(value_exact, std::string_view);
-	TOML_EXTERN_FUNC(value_exact, std::string);
-	TOML_EXTERN_FUNC(value_exact, const char*);
-	TOML_EXTERN_FUNC(value_exact, int64_t);
-	TOML_EXTERN_FUNC(value_exact, double);
-	TOML_EXTERN_FUNC(value_exact, date);
-	TOML_EXTERN_FUNC(value_exact, time);
-	TOML_EXTERN_FUNC(value_exact, date_time);
-	TOML_EXTERN_FUNC(value_exact, bool);
-	TOML_EXTERN_FUNC(value, std::string_view);
-	TOML_EXTERN_FUNC(value, std::string);
-	TOML_EXTERN_FUNC(value, const char*);
-	TOML_EXTERN_FUNC(value, signed char);
-	TOML_EXTERN_FUNC(value, signed short);
-	TOML_EXTERN_FUNC(value, signed int);
-	TOML_EXTERN_FUNC(value, signed long);
-	TOML_EXTERN_FUNC(value, signed long long);
-	TOML_EXTERN_FUNC(value, unsigned char);
-	TOML_EXTERN_FUNC(value, unsigned short);
-	TOML_EXTERN_FUNC(value, unsigned int);
-	TOML_EXTERN_FUNC(value, unsigned long);
-	TOML_EXTERN_FUNC(value, unsigned long long);
-	TOML_EXTERN_FUNC(value, double);
-	TOML_EXTERN_FUNC(value, float);
-	TOML_EXTERN_FUNC(value, date);
-	TOML_EXTERN_FUNC(value, time);
-	TOML_EXTERN_FUNC(value, date_time);
-	TOML_EXTERN_FUNC(value, bool);
-
-#if TOML_HAS_CHAR8
-	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
-	TOML_EXTERN_FUNC(value_exact, std::u8string);
-	TOML_EXTERN_FUNC(value_exact, const char8_t*);
-	TOML_EXTERN_FUNC(value, std::u8string_view);
-	TOML_EXTERN_FUNC(value, std::u8string);
-	TOML_EXTERN_FUNC(value, const char8_t*);
-#endif
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-	TOML_EXTERN_FUNC(value_exact, std::wstring);
-	TOML_EXTERN_FUNC(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN_FUNC
-}
-TOML_NAMESPACE_END;
-
-#endif // TOML_EXTERN_TEMPLATES
-
-#ifdef _MSC_VER
-#pragma pop_macro("min")
-#pragma pop_macro("max")
-#endif
-TOML_POP_WARNINGS;
-
 //********  impl/at_path.inl  ******************************************************************************************
 
 TOML_DISABLE_WARNINGS;
@@ -10018,7 +9808,7 @@ TOML_ANON_NAMESPACE_START
 		bool prev_was_array_indexer = false;
 		bool prev_was_dot			= root.is_table(); // implicit '.' at the start for tables
 
-		do
+		while (pos < end && current)
 		{
 			// start of an array indexer
 			if (path[pos] == '[')
@@ -10134,7 +9924,6 @@ TOML_ANON_NAMESPACE_START
 				prev_was_array_indexer = false;
 			}
 		}
-		while (pos < end && current);
 
 		// a dot at the end is as if we'd asked for an empty child at the end, e.g.
 		//
@@ -10212,93 +10001,6 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/value.inl  ********************************************************************************************
-
-TOML_PUSH_WARNINGS;
-#ifdef _MSC_VER
-#pragma push_macro("min")
-#pragma push_macro("max")
-#undef min
-#undef max
-#endif
-
-#if TOML_EXTERN_TEMPLATES && TOML_IMPLEMENTATION
-
-TOML_NAMESPACE_START
-{
-	TOML_EXTERN
-	template class TOML_API value<std::string>;
-	TOML_EXTERN
-	template class TOML_API value<int64_t>;
-	TOML_EXTERN
-	template class TOML_API value<double>;
-	TOML_EXTERN
-	template class TOML_API value<bool>;
-	TOML_EXTERN
-	template class TOML_API value<date>;
-	TOML_EXTERN
-	template class TOML_API value<time>;
-	TOML_EXTERN
-	template class TOML_API value<date_time>;
-
-#define TOML_EXTERN_FUNC(name, T)                                                                                      \
-	TOML_EXTERN                                                                                                        \
-	template TOML_API                                                                                                  \
-	optional<T> node::name<T>() const TOML_EXTERN_NOEXCEPT(impl::value_retrieval_is_nothrow<T>)
-
-	TOML_EXTERN_FUNC(value_exact, std::string_view);
-	TOML_EXTERN_FUNC(value_exact, std::string);
-	TOML_EXTERN_FUNC(value_exact, const char*);
-	TOML_EXTERN_FUNC(value_exact, int64_t);
-	TOML_EXTERN_FUNC(value_exact, double);
-	TOML_EXTERN_FUNC(value_exact, date);
-	TOML_EXTERN_FUNC(value_exact, time);
-	TOML_EXTERN_FUNC(value_exact, date_time);
-	TOML_EXTERN_FUNC(value_exact, bool);
-	TOML_EXTERN_FUNC(value, std::string_view);
-	TOML_EXTERN_FUNC(value, std::string);
-	TOML_EXTERN_FUNC(value, const char*);
-	TOML_EXTERN_FUNC(value, signed char);
-	TOML_EXTERN_FUNC(value, signed short);
-	TOML_EXTERN_FUNC(value, signed int);
-	TOML_EXTERN_FUNC(value, signed long);
-	TOML_EXTERN_FUNC(value, signed long long);
-	TOML_EXTERN_FUNC(value, unsigned char);
-	TOML_EXTERN_FUNC(value, unsigned short);
-	TOML_EXTERN_FUNC(value, unsigned int);
-	TOML_EXTERN_FUNC(value, unsigned long);
-	TOML_EXTERN_FUNC(value, unsigned long long);
-	TOML_EXTERN_FUNC(value, double);
-	TOML_EXTERN_FUNC(value, float);
-	TOML_EXTERN_FUNC(value, date);
-	TOML_EXTERN_FUNC(value, time);
-	TOML_EXTERN_FUNC(value, date_time);
-	TOML_EXTERN_FUNC(value, bool);
-#if TOML_HAS_CHAR8
-	TOML_EXTERN_FUNC(value_exact, std::u8string_view);
-	TOML_EXTERN_FUNC(value_exact, std::u8string);
-	TOML_EXTERN_FUNC(value_exact, const char8_t*);
-	TOML_EXTERN_FUNC(value, std::u8string_view);
-	TOML_EXTERN_FUNC(value, std::u8string);
-	TOML_EXTERN_FUNC(value, const char8_t*);
-#endif
-#if TOML_ENABLE_WINDOWS_COMPAT
-	TOML_EXTERN_FUNC(value_exact, std::wstring);
-	TOML_EXTERN_FUNC(value, std::wstring);
-#endif
-
-#undef TOML_EXTERN_FUNC
-}
-TOML_NAMESPACE_END;
-
-#endif // TOML_EXTERN_TEMPLATES
-
-#ifdef _MSC_VER
-#pragma pop_macro("min")
-#pragma pop_macro("max")
-#endif
-TOML_POP_WARNINGS;
-
 //********  impl/array.inl  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
@@ -10311,6 +10013,22 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
+	TOML_EXTERNAL_LINKAGE
+	array::array() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_ARRAY_CREATED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	array::~array() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_ARRAY_DESTROYED;
+#endif
+	}
+
 	TOML_EXTERNAL_LINKAGE
 	array::array(const impl::array_init_elem* b, const impl::array_init_elem* e)
 	{
@@ -10672,6 +10390,22 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
+	TOML_EXTERNAL_LINKAGE
+	table::table() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_CREATED;
+#endif
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	table::~table() noexcept
+	{
+#if TOML_LIFETIME_HOOKS
+		TOML_TABLE_DESTROYED;
+#endif
+	}
+
 	TOML_EXTERNAL_LINKAGE
 	table::table(const impl::table_init_pair* b, const impl::table_init_pair* e)
 	{
@@ -16122,8 +15856,6 @@ TOML_POP_WARNINGS;
 #undef TOML_ENABLE_WARNINGS
 #undef TOML_EVAL_BOOL_0
 #undef TOML_EVAL_BOOL_1
-#undef TOML_EXTERN
-#undef TOML_EXTERN_NOEXCEPT
 #undef TOML_EXTERNAL_LINKAGE
 #undef TOML_FLAGS_ENUM
 #undef TOML_FLOAT_CHARCONV
