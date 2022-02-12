@@ -4,7 +4,7 @@
 [![C++20](docs/images/badge-C++20.svg)][cpp_compilers]
 [![TOML](docs/images/badge-TOML.svg)][v1.0.0]
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
-[![CircleCI](https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square)](https://circleci.com/gh/marzer/tomlplusplus)
+[![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 ====
 
