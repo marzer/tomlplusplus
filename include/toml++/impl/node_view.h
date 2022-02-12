@@ -796,10 +796,6 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 /// \cond
-#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
-#include "node_view_extern.inl"
-#endif
-
 TOML_NAMESPACE_START
 {
 	inline node::operator node_view<node>() noexcept

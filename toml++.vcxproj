@@ -55,7 +55,6 @@
     <ClInclude Include="include\toml++\impl\node.h" />
     <ClInclude Include="include\toml++\impl\node.inl" />
     <ClInclude Include="include\toml++\impl\node_view.h" />
-    <ClInclude Include="include\toml++\impl\node_view.inl" />
     <ClInclude Include="include\toml++\impl\parse_error.h" />
     <ClInclude Include="include\toml++\impl\parse_result.h" />
     <ClInclude Include="include\toml++\impl\parser.h" />
@@ -75,8 +74,6 @@
     <ClInclude Include="include\toml++\impl\table.inl" />
     <ClInclude Include="include\toml++\impl\unicode.h" />
     <ClInclude Include="include\toml++\impl\value.h" />
-    <ClInclude Include="include\toml++\impl\value.inl" />
-    <ClInclude Include="include\toml++\impl\value_extern.inl" />
     <ClInclude Include="include\toml++\impl\version.h" />
     <ClInclude Include="include\toml++\impl\std_string.inl" />
     <ClInclude Include="include\toml++\impl\yaml_formatter.h" />
@@ -99,7 +96,6 @@
     <None Include="CONTRIBUTING.md" />
     <None Include="include\toml++\impl\at_path.inl" />
     <None Include="include\toml++\impl\unicode.inl" />
-    <None Include="include\toml++\impl\node_view_extern.inl" />
     <None Include="include\toml++\impl\yaml_formatter.inl" />
     <None Include="LICENSE" />
     <None Include="README.md" />

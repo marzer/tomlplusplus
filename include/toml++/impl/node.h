@@ -15,7 +15,7 @@ TOML_NAMESPACE_START
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
 	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
-	class TOML_ABSTRACT_BASE node
+	class TOML_ABSTRACT_BASE TOML_EXPORTED_CLASS node
 	{
 	  private:
 		/// \cond
@@ -65,18 +65,19 @@ TOML_NAMESPACE_START
 		}
 
 	  protected:
-		node() noexcept = default;
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node() noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node(const node&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node(node&&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& operator=(const node&) noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& operator=(node&&) noexcept;
 
 		template <typename T, typename N>
@@ -132,7 +133,7 @@ TOML_NAMESPACE_START
 		/// \endcond
 
 	  public:
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		virtual ~node() noexcept;
 
 		/// \name Type checks
@@ -998,14 +999,14 @@ TOML_NAMESPACE_START
 		///
 		/// \param path		The "TOML path" to traverse.
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<node> at_path(std::string_view path) noexcept;
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
 		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::string_view path) const noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -1016,7 +1017,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<node> at_path(std::wstring_view path);
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
@@ -1025,7 +1026,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see #at_path(std::string_view)
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::wstring_view path) const;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -1039,7 +1040,7 @@ TOML_NAMESPACE_END;
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_PURE_GETTER
-	TOML_API
+	TOML_EXPORTED_FREE_FUNCTION
 	bool node_deep_equality(const node*, const node*) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;

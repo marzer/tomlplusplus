@@ -37,7 +37,7 @@ TOML_ANON_NAMESPACE_START
 		bool prev_was_array_indexer = false;
 		bool prev_was_dot			= root.is_table(); // implicit '.' at the start for tables
 
-		do
+		while (pos < end && current)
 		{
 			// start of an array indexer
 			if (path[pos] == '[')
@@ -153,7 +153,6 @@ TOML_ANON_NAMESPACE_START
 				prev_was_array_indexer = false;
 			}
 		}
-		while (pos < end && current);
 
 		// a dot at the end is as if we'd asked for an empty child at the end, e.g.
 		//

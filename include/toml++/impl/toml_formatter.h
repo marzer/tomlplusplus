@@ -41,7 +41,7 @@ TOML_NAMESPACE_START
 	/// [table]
 	/// foo = "bar"
 	/// \eout
-	class toml_formatter : impl::formatter
+	class TOML_EXPORTED_CLASS toml_formatter : impl::formatter
 	{
 	  private:
 		/// \cond
@@ -50,22 +50,22 @@ TOML_NAMESPACE_START
 		std::vector<const key*> key_path_;
 		bool pending_table_separator_ = false;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_pending_table_separator();
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const key&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_inline(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::array&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
 
 		static constexpr impl::formatter_constants constants = { format_flags::none, // mandatory

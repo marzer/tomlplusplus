@@ -261,7 +261,7 @@ TOML_NAMESPACE_START
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine' ]
 	/// [ 3, 4, 5, 'six', 7, 8.0, 'nine', 'ten', [ 11, 12.0 ] ]
 	/// \eout
-	class array : public node
+	class TOML_EXPORTED_CLASS array : public node
 	{
 	  private:
 		/// \cond
@@ -272,7 +272,7 @@ TOML_NAMESPACE_START
 		vector_type elems_;
 
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(const impl::array_init_elem*, const impl::array_init_elem*);
 
 		TOML_NODISCARD_CTOR
@@ -280,13 +280,13 @@ TOML_NAMESPACE_START
 			: array{ elems.begin(), elems.end() }
 		{}
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void preinsertion_resize(size_t idx, size_t count);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void insert_at_back(impl::node_ptr&&);
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		vector_iterator insert_at(const_vector_iterator, impl::node_ptr&&);
 
 		template <typename T>
@@ -301,10 +301,10 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		size_t total_leaf_count() const noexcept;
 
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void flatten_child(array&& child, size_t& dest_index) noexcept;
 
 		/// \endcond
@@ -316,35 +316,22 @@ TOML_NAMESPACE_START
 		using reference		  = node&;
 		using const_reference = const node&;
 
-#if TOML_LIFETIME_HOOKS
-
-		TOML_NODISCARD_CTOR
-		array() noexcept
-		{
-			TOML_ARRAY_CREATED;
-		}
-
-		~array() noexcept
-		{
-			TOML_ARRAY_DESTROYED;
-		}
-
-#else
-
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
-		array() noexcept = default;
+		TOML_EXPORTED_MEMBER_FUNCTION
+		array() noexcept;
 
-#endif
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~array() noexcept;
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(const array&);
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array(array&& other) noexcept;
 
 		/// \brief	Constructs an array with one or more initial elements.
@@ -390,11 +377,11 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief	Copy-assignment operator.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(const array&);
 
 		/// \brief	Move-assignment operator.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(array&& rhs) noexcept;
 
 		/// \name Type checks
@@ -408,15 +395,15 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
 		TOML_PURE_GETTER
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
 		/// \cond
@@ -746,7 +733,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		node& at(size_t index);
 
 		/// \brief	Gets a reference to the element at a specific index, throwing `std::out_of_range` if none existed.
@@ -871,11 +858,11 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Reserves internal storage capacity up to a pre-determined number of elements.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void reserve(size_t new_capacity);
 
 		/// \brief	Requests the removal of any unused internal storage capacity.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void shrink_to_fit();
 
 		/// \brief	Shrinks the array to the given size.
@@ -900,7 +887,7 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \remarks	Does nothing if the requested size is larger than or equal to the current size.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void truncate(size_t new_size);
 
 		/// \brief	Resizes the array.
@@ -969,7 +956,7 @@ TOML_NAMESPACE_START
 		/// \param 	pos		Iterator to the element being erased.
 		///
 		/// \returns Iterator to the first element immediately following the removed element.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator erase(const_iterator pos) noexcept;
 
 		/// \brief	Removes the elements in the range [first, last) from the array.
@@ -991,7 +978,7 @@ TOML_NAMESPACE_START
 		/// \param 	last	Iterator to the one-past-the-last element being erased.
 		///
 		/// \returns Iterator to the first element immediately following the last removed element.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		iterator erase(const_iterator first, const_iterator last) noexcept;
 
 		/// \brief	Flattens this array, recursively hoisting the contents of child arrays up into itself.
@@ -1013,7 +1000,7 @@ TOML_NAMESPACE_START
 		/// \remarks	Arrays inside child tables are not flattened.
 		///
 		/// \returns A reference to the array.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& flatten() &;
 
 		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
@@ -1043,7 +1030,7 @@ TOML_NAMESPACE_START
 		/// \param recursive Should child arrays and tables themselves be pruned?
 		///
 		/// \returns A reference to the array.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		array& prune(bool recursive = true) & noexcept;
 
 		/// \brief	Removes empty child arrays and tables (rvalue overload).
@@ -1057,11 +1044,11 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Removes the last element from the array.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void pop_back() noexcept;
 
 		/// \brief	Removes all elements from the array.
-		TOML_API
+		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
 		/// @}
@@ -1406,7 +1393,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_NODISCARD
-		TOML_API
+		TOML_EXPORTED_STATIC_FUNCTION
 		static bool equal(const array&, const array&) noexcept;
 
 		template <typename T>

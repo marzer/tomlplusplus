@@ -14,6 +14,20 @@ template:
 -->
 
 
+## Unreleased
+
+#### Fixes:
+- Fixed potential segfault when calling `at_path()` with an empty string
+
+#### Additions:
+- Added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
+
+#### Removals/Deprecations:
+- Deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
+	(it will continue to work as it did before if none of the new function export options are defined)
+
+
+
 ## [v3.0.1](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.1) - 2022-01-13
 
 This is a single-bugfix release to fix an ODR issue for people using header-only mode in multiple

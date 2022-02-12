@@ -1256,10 +1256,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-/// \cond
-#if TOML_EXTERN_TEMPLATES && !TOML_IMPLEMENTATION
-#include "value_extern.inl"
-#endif
-/// \endcond
-
 #include "header_end.h"
