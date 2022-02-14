@@ -24,6 +24,8 @@
 
 #if __has_include(<Catch2/single_include/catch2/catch.hpp>)
 #include <Catch2/single_include/catch2/catch.hpp>
+#elif __has_include(<catch2/catch.hpp>)
+#include <catch2/catch.hpp>
 #else
 #error Catch2 is missing! You probably need to fetch submodules ("git submodule update --init --depth 1 external/Catch2")
 #endif

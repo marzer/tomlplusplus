@@ -367,3 +367,6 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk
+
+# Clangd cache
+/.cache/clangd

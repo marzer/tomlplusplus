@@ -1,4 +1,5 @@
 example_args = []
+example_args += universal_args
 example_args += devel_args
 example_overrides = []
 example_overrides += overrides
