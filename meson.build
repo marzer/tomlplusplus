@@ -4,6 +4,7 @@ project(
 	version: '3.0.1',
 	meson_version: '>=0.54.0',
 	license: 'MIT',
+	subproject_dir: 'external',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
 		# core options
 		'buildtype=release',
@@ -42,7 +43,7 @@ is_windows = host_machine.system() == 'windows'
 is_x64 = host_machine.cpu_family() == 'x86_64'
 is_subproject = meson.is_subproject()
 has_exceptions = get_option('cpp_eh') != 'none'
-include_dirs = include_directories('include', 'external')
+include_dir = include_directories('include')
 overrides = []
 universal_args = [] # args used in tests, examples, lib, everything
 devel_args = [] # args used in everything *but* the lib
@@ -446,8 +447,6 @@ endif
 # subdirectories
 #######################################################################################################################
 
-include_dir = include_directories('include')
-
 # Empty dependency that will be filled either in src/ or include/
 tomlplusplus_dep = dependency('', required: false)
 
@@ -459,8 +458,6 @@ endif
 
 build_tests = get_option('build_tests') and not is_subproject
 if build_tests
-	run_command('git', 'submodule', 'update', '--init', '--depth', '1', 'external/Catch2')
-	run_command('git', 'submodule', 'update', '--init', '--depth', '1', 'external/tloptional')
 	subdir('tests')
 endif
 

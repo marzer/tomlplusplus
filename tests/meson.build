@@ -26,6 +26,33 @@ test_sources = [
 	'windows_compat.cpp'
 ]
 
+test_deps = [tomlplusplus_dep]
+
+fs = import('fs')
+
+catch2_dep = dependency('catch2', required: false)
+if catch2_dep.found()
+	test_deps += catch2_dep
+elif fs.exists('..'/'external'/'Catch2'/'single_include')
+	catch2_dep = declare_dependency(include_directories: '..'/'external'/'Catch2'/'single_include')
+	test_deps += catch2_dep
+else
+	error('Catch2 is missing! You probably need to fetch submodules ("git submodule update --init --depth 1 external/Catch2"')
+endif
+
+has_tl_optional = false
+tl_optional_dep = dependency('tl-optional', required: false)
+if tl_optional_dep.found()
+	test_deps += tl_optional_dep
+	has_tl_optional = true
+elif fs.exists('..'/'external'/'tloptional'/'include')
+	tl_optional_dep = declare_dependency(include_directories: '..'/'external'/'tloptional'/'include')
+	test_deps += tl_optional_dep
+	has_tl_optional = true
+else
+	warning('tl-optional not found, skipping its tests')
+endif
+
 #######################################################################################################################
 # fast math check
 #######################################################################################################################
@@ -87,7 +114,7 @@ foreach cpp20 : cpp20_modes
 				test_args += test_base_args
 
 				single_header = (counter % 2 == 1)
-				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library'))
+				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library') and has_tl_optional)
 				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
 
 				if cpp20
@@ -161,9 +188,8 @@ foreach cpp20 : cpp20_modes
 					executable(
 						test_name,
 						test_sources,
-						include_directories: include_dirs,
 						cpp_args: test_args,
-						dependencies: tomlplusplus_dep,
+						dependencies: test_deps,
 						override_options: test_overrides
 					)
 				]]
@@ -203,7 +229,7 @@ endforeach
 executable(
 	'odr_test',
 	[ 'odr_test_1.cpp', 'odr_test_2.cpp' ],
-	include_directories: include_dirs,
 	cpp_args: test_base_args,
+	dependencies: tomlplusplus_dep,
 	override_options: overrides
 )
