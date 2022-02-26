@@ -116,6 +116,7 @@ foreach cpp20 : cpp20_modes
 				single_header = (counter % 2 == 1)
 				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library') and has_tl_optional)
 				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
+				ub_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('ubsan_tests')
 
 				if cpp20
 					test_name = 'cpp20'
@@ -143,9 +144,15 @@ foreach cpp20 : cpp20_modes
 					endif
 				endif
 
-				if address_sanitizer
+				if address_sanitizer or ub_sanitizer
 					test_args += [ '-g3' ]
-					test_overrides += 'b_sanitize=address'
+					if address_sanitizer and ub_sanitizer
+						test_overrides += 'b_sanitize=address,undefined'
+					elif address_sanitizer
+						test_overrides += 'b_sanitize=address'
+					else
+						test_overrides += 'b_sanitize=undefined'
+					endif
 				endif
 
 				if fast_math

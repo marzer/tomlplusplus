@@ -42,9 +42,17 @@ fruit = []
   "Entry 2",
 ])"sv;
 
-	static constexpr auto bool_mixed_case		= R"(valid = False)"sv;
-	static constexpr auto bool_wrong_case_false = R"(b = FALSE)"sv;
-	static constexpr auto bool_wrong_case_true	= R"(a = TRUE)"sv;
+	static constexpr auto bool_almost_false_with_extra = R"(a = falsify)"sv;
+	static constexpr auto bool_almost_false			   = R"(a = fals)"sv;
+	static constexpr auto bool_almost_true_with_extra  = R"(a = truthy)"sv;
+	static constexpr auto bool_almost_true			   = R"(a = tru)"sv;
+	static constexpr auto bool_just_f				   = R"(a = f)"sv;
+	static constexpr auto bool_just_t				   = R"(a = t)"sv;
+	static constexpr auto bool_mixed_case			   = R"(valid = False)"sv;
+	static constexpr auto bool_starting_same_false	   = R"(a = falsey)"sv;
+	static constexpr auto bool_starting_same_true	   = R"(a = truer)"sv;
+	static constexpr auto bool_wrong_case_false		   = R"(b = FALSE)"sv;
+	static constexpr auto bool_wrong_case_true		   = R"(a = TRUE)"sv;
 
 	static constexpr auto control_bare_cr =
 		"# The following line contains a single carriage return control character\r\n"
@@ -318,7 +326,6 @@ k = """t\ """)"sv;
 	static constexpr auto string_multiline_no_close					 = R"(invalid = """
     this will fail)"sv;
 	static constexpr auto string_multiline_quotes_1					 = R"(a = """6 quotes: """""")"sv;
-	static constexpr auto string_multiline_quotes_2					 = R"(a = """6 quotes: """""")"sv;
 	static constexpr auto string_no_close							 = R"(no-ending-quote = "One time, at band camp)"sv;
 	static constexpr auto string_text_after_string = R"(string = "Is there life after strings?" No.)"sv;
 	static constexpr auto string_wrong_close	   = R"(bad-ending-quote = "double and single')"sv;
@@ -441,7 +448,23 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, array_text_in_array); // array-text-in-array
 
+	parsing_should_fail(FILE_LINE_ARGS, bool_almost_false_with_extra); // bool-almost-false-with-extra
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_almost_false); // bool-almost-false
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_almost_true_with_extra); // bool-almost-true-with-extra
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_almost_true); // bool-almost-true
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_just_f); // bool-just-f
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_just_t); // bool-just-t
+
 	parsing_should_fail(FILE_LINE_ARGS, bool_mixed_case); // bool-mixed-case
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_false); // bool-starting-same-false
+
+	parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_true); // bool-starting-same-true
 
 	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false); // bool-wrong-case-false
 
@@ -812,8 +835,6 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close); // string-multiline-no-close
 
 	parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_1); // string-multiline-quotes-1
-
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_2); // string-multiline-quotes-2
 
 	parsing_should_fail(FILE_LINE_ARGS, string_no_close); // string-no-close
 

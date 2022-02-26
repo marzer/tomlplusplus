@@ -466,7 +466,11 @@ one_space = """ "one quote" """
 two_space = """ ""two quotes"" """
 
 mismatch1 = """aaa'''bbb"""
-mismatch2 = '''aaa"""bbb''')"sv;
+mismatch2 = '''aaa"""bbb'''
+
+# Three opening """, then one escaped ", then two "" (allowed), and then three
+# closing """
+escaped = """lol\"""""")"sv;
 	static constexpr auto string_multiline =
 		"# NOTE: this file includes some literal tab characters.\n"
 		"\n"
@@ -2170,20 +2174,25 @@ another line)"sv },
 							   REQUIRE(tbl == expected);
 						   });
 
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		string_multiline_quotes,
-		[](toml::table&& tbl) // string-multiline-quotes
-		{
-			const auto expected = toml::table{
-				{ R"(lit_one)"sv, R"('one quote')"sv },	   { R"(lit_one_space)"sv, R"( 'one quote' )"sv },
-				{ R"(lit_two)"sv, R"(''two quotes'')"sv }, { R"(lit_two_space)"sv, R"( ''two quotes'' )"sv },
-				{ R"(mismatch1)"sv, R"(aaa'''bbb)"sv },	   { R"(mismatch2)"sv, R"(aaa"""bbb)"sv },
-				{ R"(one)"sv, R"("one quote")"sv },		   { R"(one_space)"sv, R"( "one quote" )"sv },
-				{ R"(two)"sv, R"(""two quotes"")"sv },	   { R"(two_space)"sv, R"( ""two quotes"" )"sv },
-			};
-			REQUIRE(tbl == expected);
-		});
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   string_multiline_quotes,
+						   [](toml::table&& tbl) // string-multiline-quotes
+						   {
+							   const auto expected = toml::table{
+								   { R"(escaped)"sv, R"(lol""")"sv },
+								   { R"(lit_one)"sv, R"('one quote')"sv },
+								   { R"(lit_one_space)"sv, R"( 'one quote' )"sv },
+								   { R"(lit_two)"sv, R"(''two quotes'')"sv },
+								   { R"(lit_two_space)"sv, R"( ''two quotes'' )"sv },
+								   { R"(mismatch1)"sv, R"(aaa'''bbb)"sv },
+								   { R"(mismatch2)"sv, R"(aaa"""bbb)"sv },
+								   { R"(one)"sv, R"("one quote")"sv },
+								   { R"(one_space)"sv, R"( "one quote" )"sv },
+								   { R"(two)"sv, R"(""two quotes"")"sv },
+								   { R"(two_space)"sv, R"( ""two quotes"" )"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
 
 	parsing_should_succeed(FILE_LINE_ARGS,
 						   string_multiline,

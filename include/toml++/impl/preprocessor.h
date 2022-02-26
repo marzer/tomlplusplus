@@ -75,6 +75,7 @@
 	#if TOML_CLANG >= 10
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
 			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
+			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 			static_assert(true)
 	#else
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
@@ -88,7 +89,6 @@
 		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
 		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
 		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
-		_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \

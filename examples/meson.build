@@ -6,9 +6,15 @@ example_overrides += overrides
 if is_gcc or is_clang
 	example_args += [ '-Wno-switch', '-Wno-switch-default', '-Wno-switch-enum' ]
 endif
-if is_clang and get_option('asan_examples')
+if is_clang and (get_option('asan_examples') or get_option('ubsan_examples'))
 	example_args += [ '-g3' ]
-	example_overrides += 'b_sanitize=address'
+	if get_option('asan_examples') and get_option('ubsan_examples')
+		example_overrides += 'b_sanitize=address,undefined'
+	elif get_option('asan_examples')
+		example_overrides += 'b_sanitize=address'
+	else
+		example_overrides += 'b_sanitize=undefined'
+	endif
 endif
 
 examples = [

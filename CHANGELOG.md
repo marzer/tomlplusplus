@@ -18,13 +18,20 @@ template:
 
 #### Fixes:
 - Fixed potential segfault when calling `at_path()` with an empty string
+- Fixed UB in internal unicode machinery (#144) (@kchalmer)
 
 #### Additions:
 - Added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
 
+
 #### Removals/Deprecations:
 - Deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
 	(it will continue to work as it did before if none of the new function export options are defined)
+
+#### Build system:
+- Meson: Added `compile_library` option (@Tachi107)
+- Meson: Added `ubsan_tests` and `ubsan_examples` options
+- Meson: Use system dependencies where available when building tests (@Tachi107)
 
 
 

@@ -3364,7 +3364,7 @@ TOML_IMPL_NAMESPACE_START
 						{
 							set_error_at(key_buffer.starts[i],
 										 "cannot redefine existing "sv,
-										 to_sv(p->type()),
+										 to_sv(pit->second.type()),
 										 " as dotted key-value pair"sv);
 							return_after_error({});
 						}
