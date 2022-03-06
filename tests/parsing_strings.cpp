@@ -164,6 +164,14 @@ str = ''''That's still pointless', she said.'''
 	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\x00\x10\x20\x30\x40\x50\x60\x70\x80\x90\x11\xFF\xEE")"sv);
 #endif
 
+	// toml/pull/790
+#if TOML_LANG_UNRELEASED
+	parse_expected_value(FILE_LINE_ARGS, R"("\e[31mfoo\e[0m")"sv, "\x1B[31mfoo\x1B[0m"sv);
+
+#else
+	parsing_should_fail(FILE_LINE_ARGS, R"("\e[31mfoo\e[0m")"sv);
+#endif
+
 	// check 8-digit \U scalars with insufficient digits
 	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U1234567")"sv);
 	parsing_should_fail(FILE_LINE_ARGS, R"(str = "\U123456")"sv);

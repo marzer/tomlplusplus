@@ -8138,10 +8138,6 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#if TOML_GCC && TOML_GCC < 9
-#pragma GCC pop_options
-#endif
-
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
@@ -12197,14 +12193,23 @@ TOML_IMPL_NAMESPACE_START
 						case U'"': str += '"'; break;
 						case U'\\': str += '\\'; break;
 
-						// unicode scalar sequences
-						case U'x':
-#if TOML_LANG_UNRELEASED // toml/pull/796 (\xHH unicode scalar sequences)
-							[[fallthrough]];
+#if TOML_LANG_UNRELEASED // toml/pull/790 (\e shorthand for \x1B)
+						case U'e': str += '\x1B'; break;
 #else
+						case U'e':
+							set_error_and_return_default(
+								"escape sequence '\\e' is not supported in TOML 1.0.0 and earlier"sv);
+#endif
+
+#if TOML_LANG_UNRELEASED // toml/pull/796 (\xHH unicode scalar sequences)
+						case U'x': [[fallthrough]];
+#else
+						case U'x':
 							set_error_and_return_default(
 								"escape sequence '\\x' is not supported in TOML 1.0.0 and earlier"sv);
 #endif
+
+						// unicode scalar sequences
 						case U'u': [[fallthrough]];
 						case U'U':
 						{

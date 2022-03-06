@@ -181,7 +181,8 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#644]: Support `+` in key names
 - [#671]: Local time of day format should support `09:30` as opposed to `09:30:00`
 - [#687]: Relax bare key restrictions to allow additional unicode characters
-- [#796]: Include an \xHH escape code sequence
+- [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`)
+- [#796]: Include an `\xHH` escape code sequence
 
 > ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
@@ -272,7 +273,8 @@ though you're welcome to reach out via other means. In order of likely response 
 [#665]: https://github.com/toml-lang/toml/issues/665
 [#671]: https://github.com/toml-lang/toml/issues/671
 [#687]: https://github.com/toml-lang/toml/issues/687
-[#796]: https://github.com/toml-lang/toml/pull/796
 [#766]: https://github.com/toml-lang/toml/issues/766
+[#790]: https://github.com/toml-lang/toml/pull/790
+[#796]: https://github.com/toml-lang/toml/pull/796
 [something better than std::optional]: https://github.com/TartanLlama/optional
 [m.css]: https://mcss.mosra.cz/documentation/doxygen

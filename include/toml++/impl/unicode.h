@@ -175,9 +175,5 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#if TOML_GCC && TOML_GCC < 9
-#pragma GCC pop_options
-#endif
-
 /// \endcond
 #include "header_end.h"
