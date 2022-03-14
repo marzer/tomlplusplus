@@ -75,14 +75,22 @@
 	#if TOML_CLANG >= 10
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
 			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
-			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 			static_assert(true)
 	#else
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
 	#endif
 
+	#if TOML_CLANG >= 11
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 \
+			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
+			static_assert(true)
+	#else
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 static_assert(true)
+	#endif
+
 	#define TOML_DISABLE_SPAM_WARNINGS \
 		TOML_DISABLE_SPAM_WARNINGS_CLANG_10; \
+		TOML_DISABLE_SPAM_WARNINGS_CLANG_11; \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
