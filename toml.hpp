@@ -111,14 +111,22 @@
 	#if TOML_CLANG >= 10
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
 			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
-			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
 			static_assert(true)
 	#else
 		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
 	#endif
 
+	#if TOML_CLANG >= 11
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 \
+			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
+			static_assert(true)
+	#else
+		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 static_assert(true)
+	#endif
+
 	#define TOML_DISABLE_SPAM_WARNINGS \
 		TOML_DISABLE_SPAM_WARNINGS_CLANG_10; \
+		TOML_DISABLE_SPAM_WARNINGS_CLANG_11; \
 		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
 		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
 		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
@@ -989,7 +997,7 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #if TOML_CLANG >= 12
 #pragma clang diagnostic ignored "-Wc++20-extensions"
 #endif
-#if TOML_CLANG == 13
+#if (TOML_CLANG == 13) && !defined(__APPLE__)
 #pragma clang diagnostic ignored "-Wreserved-identifier"
 #endif
 #endif
@@ -11032,7 +11040,7 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
-#ifdef __APPLE__ // because, honestly, what the fuck mac OS??
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__) // because, honestly, what the fuck macOS & MinGW??
 #define TOML_OVERALIGNED
 #else
 #define TOML_OVERALIGNED alignas(32)
@@ -15910,6 +15918,7 @@ TOML_POP_WARNINGS;
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS
 #undef TOML_DISABLE_SPAM_WARNINGS_CLANG_10
+#undef TOML_DISABLE_SPAM_WARNINGS_CLANG_11
 #undef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
 #undef TOML_DISABLE_SWITCH_WARNINGS
 #undef TOML_DISABLE_WARNINGS

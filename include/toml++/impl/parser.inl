@@ -223,7 +223,7 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
-#ifdef __APPLE__ // because, honestly, what the fuck mac OS??
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__) // because, honestly, what the fuck macOS & MinGW??
 #define TOML_OVERALIGNED
 #else
 #define TOML_OVERALIGNED alignas(32)
