@@ -95,10 +95,10 @@ jobs:
       - run: mkdir -p ~/.tipi
 
       # checking if the tomlplusplus project builds and passes tests
-      - name: Build as project target linux-cxx17 (run test multiInclude)
+      - name: Build as project target linux-cxx17 (run tests 'odr_test_1' and 'main')
         run: tipi . --dont-upgrade --verbose -t linux-cxx17 --test "odr_test_1|main"
 
-      - name: Build as project target linux-cxx20 (run test multiInclude)
+      - name: Build as project target linux-cxx20 (run tests 'odr_test_1' and 'main')
         run: tipi . --dont-upgrade --verbose -t linux-cxx20 --test "odr_test_1|main"
       
       - name: Cleanup project builds
