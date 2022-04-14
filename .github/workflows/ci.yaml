@@ -80,3 +80,33 @@ jobs:
 
     - name: Test
       run: meson test -C build --verbose
+
+
+  tipi-build-linux:
+    name: tipi.build project build and dependency resolution 
+    runs-on: ubuntu-latest
+    container: tipibuild/tipi-ubuntu
+
+    env:
+      HOME: /root
+
+    steps:
+      - uses: actions/checkout@v2
+      - run: mkdir -p ~/.tipi
+
+      # checking if the tomlplusplus project builds and passes tests
+      - name: Build as project target linux-cxx17 (run test multiInclude)
+        run: tipi . --dont-upgrade --verbose -t linux-cxx17 --test "odr_test_1|main"
+
+      - name: Build as project target linux-cxx20 (run test multiInclude)
+        run: tipi . --dont-upgrade --verbose -t linux-cxx20 --test "odr_test_1|main"
+      
+      - name: Cleanup project builds
+        run: rm -r ./build
+      
+      # trying if pulling the dependency with tipi works properly
+      - name: Build as dependency
+        run: |
+          cd ./examples/tipi-example
+          tipi . --dont-upgrade --verbose -t linux-cxx17
+          ./build/linux-cxx17/bin/simple_parser_tipi ../example.toml
