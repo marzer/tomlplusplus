@@ -107,6 +107,18 @@ jobs:
       # trying if pulling the dependency with tipi works properly
       - name: Build as dependency
         run: |
-          cd ./examples/tipi-example
+          cd examples/
+          
+          # create test directory and copy the simple_parser.cpp in there
+          mkdir test-as-dep
+          cp examples.h test-as-dep/.
+          cp simple_parser.cpp test-as-dep/.
+          cd test-as-dep/
+
+          # create a deps file referencing the commit that triggered this build as dependency
+          mkdir .tipi
+          echo '{ "requires": { "${{github.repository}}": { "@": "${{github.ref_name}}" } } }' > .tipi/deps
+
+          # build
           tipi . --dont-upgrade --verbose -t linux-cxx17
-          ./build/linux-cxx17/bin/simple_parser_tipi ../example.toml
+          ./build/linux-cxx17/bin/simple_parser ../example.toml
