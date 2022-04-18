@@ -100,8 +100,8 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			map_		  = std::move(rhs.map_);
-			inline_		  = rhs.inline_;
+			map_	= std::move(rhs.map_);
+			inline_ = rhs.inline_;
 		}
 		return *this;
 	}

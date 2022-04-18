@@ -223,7 +223,7 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
-#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__) // because, honestly, what the fuck macOS & MinGW??
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__)
 #define TOML_OVERALIGNED
 #else
 #define TOML_OVERALIGNED alignas(32)
@@ -3745,10 +3745,7 @@ TOML_ANON_NAMESPACE_START
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
-	throw parse_error                                                                                                  \
-	{                                                                                                                  \
-		msg, source_position{}, std::make_shared<const std::string>(std::move(path))                                   \
-	}
+	throw parse_error{ msg, source_position{}, std::make_shared<const std::string>(std::move(path)) }
 #else
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
 	return parse_result                                                                                                \

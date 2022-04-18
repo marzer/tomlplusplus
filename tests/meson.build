@@ -86,7 +86,7 @@ exception_modes = [ true, false ]
 unreleased_feature_modes = [ false, true ]
 cpp20_modes = [ false, true ]
 test_executables = []
-counter = 0
+test_counter = 0
 test_base_args = []
 test_base_args += universal_args
 test_base_args += devel_args
@@ -104,19 +104,76 @@ foreach cpp20 : cpp20_modes
 				continue
 			endif
 			foreach exceptions : exception_modes
-				if (not exceptions) and get_option('compile_library')
+
+				# skip this target if exceptions are disabled and we're compiling the library;
+				# disabling exceptions requires header-only mode here
+				if not exceptions and get_option('compile_library')
 					continue
 				endif
+
+				# skip this target if we've disabled exceptions and enabled fast math, because both are already tested
+				# separately and don't interact in any way meaningful enough to warrant a combined permutation
+				if not exceptions and fast_math
+					continue
+				endif
+
+				# ... same for 'unreleased features' and fast math
+				if unrel and fast_math
+					continue
+				endif
+
 				test_name = ''
 				test_overrides = []
 				test_overrides += overrides
 				test_args = []
 				test_args += test_base_args
 
-				single_header = (counter % 2 == 1)
-				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library') and has_tl_optional)
-				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
-				ub_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('ubsan_tests')
+				# use the single-header version for some tests to ensure it is the same (no header generation failures)
+				single_header_conditions = [
+					test_counter % 2 == 1,
+					not get_option('compile_library')
+				]
+				single_header = true
+				foreach cond : single_header_conditions
+					single_header = single_header and cond
+				endforeach
+
+				# use tl::optional to test that the TOML_OPTIONAL_TYPE config option works as advertised
+				tl_optional_conditions = [
+					test_counter % 3 == 2,
+					not get_option('compile_library'),
+					exceptions # requires exceptions in its API
+				]
+				tl_optional = true
+				foreach cond : tl_optional_conditions
+					tl_optional = tl_optional and cond
+				endforeach
+
+				# use asan in the tests
+				address_sanitizer_conditions = [
+					get_option('asan_tests'),
+					is_clang,
+					not tl_optional,
+					not fast_math,
+					not get_option('compile_library')
+				]
+				address_sanitizer = true
+				foreach cond : address_sanitizer_conditions
+					address_sanitizer = address_sanitizer and cond
+				endforeach
+
+				# use ubsan in the tests
+				ub_sanitizer_conditions = [
+					get_option('ubsan_tests'),
+					is_clang,
+					not tl_optional,
+					not fast_math,
+					not get_option('compile_library')
+				]
+				ub_sanitizer = true
+				foreach cond : ub_sanitizer_conditions
+					ub_sanitizer = ub_sanitizer and cond
+				endforeach
 
 				if cpp20
 					test_name = 'cpp20'
@@ -185,10 +242,13 @@ foreach cpp20 : cpp20_modes
 				if single_header
 					test_args += '-DUSE_SINGLE_HEADER=1'
 				endif
-				if tl_optional
-					test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
-					test_name = test_name + '_tlopt'
-				endif
+
+				# uncomment this bit to see which tests are using tl-optional
+				# (off by default because it's not super meaningful - tl-optional is itself very thorougly tested)
+				# if tl_optional
+				# 	test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
+				# 	test_name = test_name + '_tlopt'
+				# endif
 
 				test_executables += [[
 					test_name,
@@ -201,7 +261,7 @@ foreach cpp20 : cpp20_modes
 					)
 				]]
 
-				counter = counter + 1
+				test_counter = test_counter + 1
 
 			endforeach # exceptions
 		endforeach # fast_math

@@ -43,7 +43,7 @@ jobs:
         CXX_LD=$linker meson setup build --buildtype=debug -Dcompile_library=${{ matrix.compile }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
 
     - name: Build
-      run: meson compile -C build
+      run: meson compile -C build --jobs -1
 
     - name: Test
       run: meson test -C build --verbose
@@ -76,7 +76,7 @@ jobs:
       run: meson setup --vsenv -Dcompile_library=${{ matrix.compile }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false build
 
     - name: Build
-      run: meson compile -C build
+      run: meson compile -C build  --jobs -1
 
     - name: Test
       run: meson test -C build --verbose

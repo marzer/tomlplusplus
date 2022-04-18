@@ -106,7 +106,7 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			elems_		  = std::move(rhs.elems_);
+			elems_ = std::move(rhs.elems_);
 		}
 		return *this;
 	}

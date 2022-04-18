@@ -107,14 +107,14 @@ TEST_CASE("formatters")
 	const auto data_time = toml::time{ 20, 33, 0 };
 	const auto data		 = toml::table{
 		 { "integers"sv,
-		   toml::table{ { "zero"sv, 0 },
+			   toml::table{ { "zero"sv, 0 },
 						{ "one"sv, 1 },
 						{ "dec"sv, 10 },
 						{ "bin"sv, 10, toml::value_flags::format_as_binary },
 						{ "oct"sv, 10, toml::value_flags::format_as_octal },
 						{ "hex"sv, 10, toml::value_flags::format_as_hexadecimal } } },
 		 { "floats"sv,
-		   toml::table{ { "pos_zero"sv, +0.0 },
+			   toml::table{ { "pos_zero"sv, +0.0 },
 						{ "neg_zero"sv, -0.0 },
 						{ "one"sv, 1.0 },
 						{ "pos_inf"sv, +std::numeric_limits<double>::infinity() },
@@ -125,27 +125,27 @@ TEST_CASE("formatters")
 		   } },
 
 		 { "dates and times"sv,
-		   toml::table{
+			   toml::table{
 
 			   { "dates"sv, toml::table{ { "val"sv, data_date } } },
 
 			   { "times"sv, toml::table{ { "val"sv, data_time } } },
 
 			   { "date-times"sv,
-				 toml::table{
+					 toml::table{
 
 					 { "local"sv, toml::table{ { "val"sv, toml::date_time{ data_date, data_time } } } },
 					 { "offset"sv,
-					   toml::table{
+						   toml::table{
 						   { "val"sv, toml::date_time{ data_date, data_time, toml::time_offset{} } } } } } } } },
 
 		 { "bools"sv,
-		   toml::table{ { "true"sv, true }, //
+			   toml::table{ { "true"sv, true }, //
 						{ "false"sv, false } } },
 
 		 {
-			 "strings"sv,
-			 toml::array{ R"()"sv,
+				 "strings"sv,
+				 toml::array{ R"()"sv,
 						  R"(string)"sv,
 						  R"(string with a single quote in it: ')"sv,
 						  R"(string with a double quote in it: ")"sv,
@@ -154,7 +154,7 @@ TEST_CASE("formatters")
 		 },
 
 		 { "a"sv,
-		   toml::table{ { "val", true },
+			   toml::table{ { "val", true },
 						{ "b"sv, toml::table{ { "val", true }, { "c"sv, toml::table{ { "val", true } } } } } } }
 
 	};

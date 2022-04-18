@@ -90,6 +90,8 @@
     <None Include=".github\ISSUE_TEMPLATE\feature_request.md" />
     <None Include=".github\ISSUE_TEMPLATE\spec_bug_report.md" />
     <None Include=".github\pull_request_template.md" />
+    <None Include=".github\workflows\ci.yaml" />
+    <None Include=".github\workflows\gh-pages.yaml" />
     <None Include=".gitignore" />
     <None Include=".runsettings" />
     <None Include="CHANGELOG.md" />

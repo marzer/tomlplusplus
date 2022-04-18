@@ -19,9 +19,10 @@ class Preprocessor:
 	__re_pragma_once = re.compile(r'^\s*#\s*pragma\s+once\s*$', re.M)
 
 	def __init__(self, file):
+		self.__processed_files = set()
 		self.__once_only = set()
-		self.__current_level = 0
 		self.__directory_stack = [ Path.cwd() ]
+		self.__include_stack = []
 		self.__entry_root = ''
 		self.__string = self.__preprocess(file)
 
@@ -33,9 +34,10 @@ class Preprocessor:
 			incl = Path(incl.strip().replace('\\',r'/'))
 		if not incl.is_absolute():
 			incl = Path(self.__directory_stack[-1], incl).resolve()
+		self.__processed_files.add(incl)
 		if incl in self.__once_only:
 			return ''
-
+		self.__include_stack.append(incl)
 
 		text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
 		text = text.replace('\r\n', '\n') # convert windows newlines
@@ -43,27 +45,39 @@ class Preprocessor:
 		self.__directory_stack.append(incl.parent)
 		if self.__re_pragma_once.search(text):
 			self.__once_only.add(incl)
-		if self.__current_level == 0 and self.__entry_root == '':
+		if len(self.__include_stack) == 1 and self.__entry_root == '':
 			self.__entry_root = str(incl.parent).replace('\\',r'/')
-		if self.__current_level > 0:
+		if len(self.__include_stack) > 1:
 			text = self.__re_pragma_once.sub('', text)
 
-		self.__current_level += 1
 		text = self.__re_includes.sub(lambda m : self.__preprocess(m), text, 0)
-		self.__current_level -= 1
 
-		if self.__current_level == 1:
-			header = str(incl).replace('\\',r'/')
-			if header.startswith(self.__entry_root):
-				header = header[len(self.__entry_root):].strip('/')
-			header = utils.make_divider(header, 10, pattern = r'*')
-			text = f'\n\n{header}\n\n{text}'
+		incl_normalized = str(incl).replace('\\',r'/')
+		if incl_normalized.startswith(self.__entry_root):
+			incl_normalized = incl_normalized[len(self.__entry_root):].strip('/')
 
+		if len(self.__include_stack) > 1 and incl_normalized not in (r'impl/header_start.h', r'impl/header_end.h'):
+			header = utils.make_divider(incl_normalized, 10, pattern = r'*')
+			footer = ''
+			if len(self.__include_stack) > 2:
+				footer = str(self.__include_stack[-2]).replace('\\',r'/')
+				if footer.startswith(self.__entry_root):
+					footer = footer[len(self.__entry_root):].strip('/')
+				footer = utils.make_divider(footer, 10, pattern = r'*')
+
+			text = f'\n\n{header}\n\n{text}\n\n{footer}'.rstrip()
+
+		self.__include_stack.pop()
 		self.__directory_stack.pop()
 		return '\n\n' + text + '\n\n'
 
 	def __str__(self):
 		return self.__string
+
+	def processed_files(self):
+		out = list(self.__processed_files)
+		out.sort()
+		return out
 
 
 
@@ -93,6 +107,9 @@ def main():
 			toml_h = re.sub(rf'\n{comment_line}{blank_line}+{comment_line}', '\n', toml_h)
 			toml_h = re.sub(rf'([{{,])\s*\n(?:{comment_line}|{blank_line})+', r'\1\n', toml_h)
 			toml_h = re.sub(rf'{comment_line}+', '\n', toml_h)
+			# consecutive header separators
+			header_separator = r'(?://\*\*\*\**[ \t]+[a-zA-Z0-9_/.-]+[ \t]+\*\*\*\*+\n)'
+			toml_h = re.sub(rf'(?:{header_separator}{blank_line}*)+({header_separator})', r'\1', toml_h)
 			# weird spacing edge case between } and pp directives
 			toml_h = re.sub('\n[}]\n#', r'\n}\n\n#', toml_h, re.S)
 			# enable warnings -> disable warnings
@@ -201,6 +218,7 @@ def main():
 				r'TOML_EXPORTED_CLASS',
 				r'TOML_EXPORTED_FREE_FUNCTION',
 				r'TOML_EXPORTED_MEMBER_FUNCTION',
+				r'TOML_EXPORTED_STATIC_FUNCTION',
 				r'TOML_HEADER_ONLY',
 				r'TOML_LANG_MAJOR',
 				r'TOML_LANG_MINOR',

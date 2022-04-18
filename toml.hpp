@@ -842,6 +842,8 @@
 	#define TOML_UINT128	__uint128_t
 #endif
 
+//********  impl/version.h  ********************************************************************************************
+
 #define TOML_LIB_MAJOR 3
 #define TOML_LIB_MINOR 0
 #define TOML_LIB_PATCH 1
@@ -849,6 +851,8 @@
 #define TOML_LANG_MAJOR 1
 #define TOML_LANG_MINOR 0
 #define TOML_LANG_PATCH 0
+
+//********  impl/preprocessor.h  ***************************************************************************************
 
 #define	TOML_LIB_SINGLE_HEADER 1
 
@@ -2602,11 +2606,14 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-//********  impl/node.h  ***********************************************************************************************
+//********  impl/std_utility.h  ****************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <utility>
 TOML_ENABLE_WARNINGS;
+
+//********  impl/node.h  ***********************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -3203,13 +3210,21 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/node_view.h  ******************************************************************************************
+//********  impl/std_vector.h  *****************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <vector>
 #include <iterator>
+TOML_ENABLE_WARNINGS;
+
+//********  impl/std_initializer_list.h  *******************************************************************************
+
+TOML_DISABLE_WARNINGS;
 #include <initializer_list>
 TOML_ENABLE_WARNINGS;
+
+//********  impl/node_view.h  ******************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -3989,8 +4004,8 @@ TOML_NAMESPACE_START
 		value& operator=(const value& rhs) noexcept
 		{
 			node::operator=(rhs);
-			val_		  = rhs.val_;
-			flags_		  = rhs.flags_;
+			val_   = rhs.val_;
+			flags_ = rhs.flags_;
 			return *this;
 		}
 
@@ -3999,8 +4014,8 @@ TOML_NAMESPACE_START
 			if (&rhs != this)
 			{
 				node::operator=(std::move(rhs));
-				val_		  = std::move(rhs.val_);
-				flags_		  = rhs.flags_;
+				val_   = std::move(rhs.val_);
+				flags_ = rhs.flags_;
 			}
 			return *this;
 		}
@@ -6106,12 +6121,15 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/table.h  **********************************************************************************************
+//********  impl/std_map.h  ********************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <map>
 #include <iterator>
 TOML_ENABLE_WARNINGS;
+
+//********  impl/table.h  **********************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -8156,11 +8174,16 @@ TOML_POP_WARNINGS;
 
 #if TOML_ENABLE_PARSER
 
+//********  impl/std_except.h  *****************************************************************************************
+
 TOML_DISABLE_WARNINGS;
 #if TOML_EXCEPTIONS
 #include <stdexcept>
 #endif
 TOML_ENABLE_WARNINGS;
+
+//********  impl/parse_error.h  ****************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -10164,7 +10187,7 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			elems_		  = std::move(rhs.elems_);
+			elems_ = std::move(rhs.elems_);
 		}
 		return *this;
 	}
@@ -10534,8 +10557,8 @@ TOML_NAMESPACE_START
 		if (&rhs != this)
 		{
 			node::operator=(std::move(rhs));
-			map_		  = std::move(rhs.map_);
-			inline_		  = rhs.inline_;
+			map_	= std::move(rhs.map_);
+			inline_ = rhs.inline_;
 		}
 		return *this;
 	}
@@ -10747,7 +10770,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/unicode.inl  ******************************************************************************************
+//********  impl/simd.h  ***********************************************************************************************
 
 #if TOML_ENABLE_SIMD
 
@@ -10777,6 +10800,9 @@ TOML_DISABLE_WARNINGS;
 #include <emmintrin.h>
 #endif
 TOML_ENABLE_WARNINGS;
+
+//********  impl/unicode.inl  ******************************************************************************************
+
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #pragma push_macro("min")
@@ -11040,7 +11066,7 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
-#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__) // because, honestly, what the fuck macOS & MinGW??
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__)
 #define TOML_OVERALIGNED
 #else
 #define TOML_OVERALIGNED alignas(32)
@@ -14552,10 +14578,7 @@ TOML_ANON_NAMESPACE_START
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
-	throw parse_error                                                                                                  \
-	{                                                                                                                  \
-		msg, source_position{}, std::make_shared<const std::string>(std::move(path))                                   \
-	}
+	throw parse_error{ msg, source_position{}, std::make_shared<const std::string>(std::move(path)) }
 #else
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
 	return parse_result                                                                                                \
