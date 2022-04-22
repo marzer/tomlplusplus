@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_error <span class="m-thin">class</span>
         </h1>
         <p>An error generated when parsing fails.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -72,7 +72,7 @@
               </ul>
             </li>
           </ul>
-        </div>
+        </nav>
 <aside class="m-note m-default"><h4>Remark</h4><p>This class inherits from <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/error/runtime_error.html" target="_blank">std::<wbr/>runtime_error</a> when exceptions are enabled. The public interface is the same regardless of exception mode.</p></aside>
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
@@ -135,11 +135,11 @@
             </table>
 <pre class="m-code"><span class="k">try</span>
 <span class="p">{</span>
-    <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"enabled = trUe"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"enabled = trUe"</span><span class="sa">sv</span><span class="p">);</span>
 <span class="p">}</span>
-<span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">parse_error</span> <span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
+<span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">parse_error</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">err</span><span class="p">)</span>
 <span class="p">{</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">Parsing failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
 <span class="go">    (error occurred at line 1, column 13)</span></pre>
@@ -183,8 +183,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

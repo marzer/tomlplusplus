@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>toml_formatter <span class="m-thin">class</span>
         </h1>
         <p>A wrapper for printing TOML objects out to a stream as formatted TOML.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -73,17 +73,17 @@
               </ul>
             </li>
           </ul>
-        </div>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p>You generally don't need to create an instance of this class explicitly; the stream operators of the TOML node types already print themselves out using this formatter.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="p">{</span>
-    <span class="p">{</span> <span class="s">"description"</span><span class="p">,</span> <span class="s">"This is some TOML, yo."</span> <span class="p">},</span>
-    <span class="p">{</span> <span class="s">"fruit"</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="s">"apple"</span><span class="p">,</span> <span class="s">"orange"</span><span class="p">,</span> <span class="s">"pear"</span> <span class="p">}</span> <span class="p">},</span>
-    <span class="p">{</span> <span class="s">"numbers"</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span> <span class="p">}</span> <span class="p">},</span>
-    <span class="p">{</span> <span class="s">"table"</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="p">{</span> <span class="p">{</span> <span class="s">"foo"</span><span class="p">,</span> <span class="s">"bar"</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
+        </nav>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><aside class="m-note m-default"><h4>Remark</h4><p>You generally don't need to create an instance of this class explicitly; the stream operators of the TOML node types already print themselves out using this formatter.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"description"</span><span class="p">,</span><span class="w"> </span><span class="s">"This is some TOML, yo."</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"fruit"</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span><span class="w"> </span><span class="s">"apple"</span><span class="p">,</span><span class="w"> </span><span class="s">"orange"</span><span class="p">,</span><span class="w"> </span><span class="s">"pear"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"numbers"</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">4</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"table"</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="p">{</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="s">"foo"</span><span class="p">,</span><span class="w"> </span><span class="s">"bar"</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
 <span class="p">};</span>
 
 <span class="c1">// these two lines are equivalent:</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">description = "This is some TOML, yo."</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">description = "This is some TOML, yo."</span>
 <span class="go">fruit = ["apple", "orange", "pear"]</span>
 <span class="go">numbers = [1, 2, 3, 4, 5]</span>
 
@@ -173,10 +173,10 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
-          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
-          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
-          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 'b'</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">toml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// malformed</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 'b'</span>
 
 <span class="go">Error while parsing key-value pair: encountered end-of-file</span>
 <span class="go">        (error occurred at line 1, column 5)</span></pre><p>Use the library with exceptions if you want to avoid this scenario.</p></aside>
@@ -220,8 +220,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

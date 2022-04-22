@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<tagfile doxygen_version="1.9.2" doxygen_gitid="98c67549bc3cd855873e0ef5eeab7c6410699d78">
+<tagfile doxygen_version="1.9.1">
   <compound kind="class">
     <name>toml::array</name>
     <filename>classtoml_1_1array.html</filename>
@@ -8,8 +8,8 @@
       <type></type>
       <name>array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a0955d4edc2415406a5f7c6c43fd3a606</anchor>
-      <arglist>() noexcept=default</arglist>
+      <anchor>a29fc707cf66a79f3c3d93dadbe3b2719</anchor>
+      <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type></type>
@@ -1661,7 +1661,7 @@
   <compound kind="struct">
     <name>toml::inserter</name>
     <filename>structtoml_1_1inserter.html</filename>
-    <templarg>typename T</templarg>
+    <templarg></templarg>
   </compound>
   <compound kind="class">
     <name>toml::json_formatter</name>
@@ -2931,7 +2931,7 @@
   <compound kind="class">
     <name>toml::node_view</name>
     <filename>classtoml_1_1node__view.html</filename>
-    <templarg>typename ViewedType</templarg>
+    <templarg></templarg>
     <member kind="typedef">
       <type>ViewedType</type>
       <name>viewed_type</name>
@@ -4189,8 +4189,8 @@
       <type></type>
       <name>table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a2a7795e3ab96d9549ac17e30c53c66d0</anchor>
-      <arglist>() noexcept=default</arglist>
+      <anchor>a823f0d3385d2d8d8320a72f78c677a35</anchor>
+      <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type></type>
@@ -5916,7 +5916,7 @@
   <compound kind="class">
     <name>toml::value</name>
     <filename>classtoml_1_1value.html</filename>
-    <templarg>typename ValueType</templarg>
+    <templarg></templarg>
     <base>toml::node</base>
     <member kind="typedef">
       <type>ValueType</type>
@@ -7671,9 +7671,23 @@
     </member>
     <member kind="define">
       <type>#define</type>
-      <name>TOML_API</name>
+      <name>TOML_EXPORTED_CLASS</name>
       <anchorfile>group__configuration.html</anchorfile>
-      <anchor>gad443ebc67d9e196f296f2038b2ad5e46</anchor>
+      <anchor>ga3d7aebf91431575688d573f09a17559a</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>TOML_EXPORTED_MEMBER_FUNCTION</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>gadf515bb7a6b8ce6b14bf86c8961a63cb</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>TOML_EXPORTED_FREE_FUNCTION</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>gac40a454cde06de4e76df3d6d460a3544</anchor>
       <arglist></arglist>
     </member>
     <member kind="define">

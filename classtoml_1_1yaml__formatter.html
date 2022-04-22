@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>yaml_formatter <span class="m-thin">class</span>
         </h1>
         <p>A wrapper for printing TOML objects out to a stream as formatted YAML.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -73,8 +73,8 @@
               </ul>
             </li>
           </ul>
-        </div>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+        </nav>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">some_toml</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">    [fruit]</span>
 <span class="s">    apple.color = "red"</span>
 <span class="s">    apple.taste.sweet = true</span>
@@ -82,7 +82,7 @@
 <span class="s">    [fruit.apple.texture]</span>
 <span class="s">    smooth = true</span>
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">fruit:</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="n">some_toml</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">fruit:</span>
 <span class="go">  apple:</span>
 <span class="go">    color: red</span>
 <span class="go">    taste:</span>
@@ -173,10 +173,10 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid YAML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
-          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
-          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
-          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a: b</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid YAML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// ok</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// malformed</span>
+<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a: b</span>
 
 <span class="go">Error while parsing key-value pair: encountered end-of-file</span>
 <span class="go">        (error occurred at line 1, column 5)</span></pre><p>Use the library with exceptions if you want to avoid this scenario.</p></aside>
@@ -220,8 +220,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

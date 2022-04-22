@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           toml <span class="m-thin">namespace</span>
         </h1>
         <p>The root namespace for all toml++ functions and types.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -76,7 +76,7 @@
               </ul>
             </li>
           </ul>
-        </div>
+        </nav>
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
@@ -664,10 +664,10 @@
               using toml::<wbr/><a class="m-doc-self" href="#aef1f0bbcdd3686e268f4b81d9da701be">inserted_type_of</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </h3>
             <p>Metafunction for determining which node type would be constructed if an object of this type was inserted into a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</p>
-<pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">const</span> <span class="k">char</span><span class="o">*&gt;</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">int</span><span class="o">&gt;</span><span class="p">,</span>         <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">float</span><span class="o">&gt;</span><span class="p">,</span>       <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">double</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">,</span>        <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a>, even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
+<pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="k">char</span><span class="o">*&gt;</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w">         </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">float</span><span class="o">&gt;</span><span class="p">,</span><span class="w">       </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">double</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">,</span><span class="w">        </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a>, even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af34a9fb3305e419784104609e6bbb7ac"><div>
             <h3>
@@ -703,21 +703,21 @@
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 
 <span class="s">[foo]</span>
 <span class="s">bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
 
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
 
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[2]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[3][0]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[4].kek"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[2]"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[3][0]"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[4].kek"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
 <span class="go">3</span>
-<span class="go">4</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar"</span><span class="p">)</span>  <span class="c1">// same as config["foo"]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo. bar"</span><span class="p">)</span> <span class="c1">// same as config["foo"][" bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo..bar"</span><span class="p">)</span> <span class="c1">// same as config["foo"][""]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">".foo.bar"</span><span class="p">)</span> <span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters. If you have periods in your table keys, first consider:</p><ol><li>Not doing that</li><li>Using <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a> instead.</li></ol></aside>
+<span class="go">4</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar"</span><span class="p">)</span><span class="w">  </span><span class="c1">// same as config["foo"]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo. bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config["foo"][" bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo..bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config["foo"][""]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">".foo.bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters. If you have periods in your table keys, first consider:</p><ol><li>Not doing that</li><li>Using <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a> instead.</li></ol></aside>
           </div></section>
           <section class="m-doc-details" id="acecea9874ff621405e1c3f38433ba56d"><div>
             <h3>
@@ -752,9 +752,9 @@
               <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs)</span></span>
             </h3>
             <p>Pretty-prints the value of a node_type to a stream.</p>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
-<span class="k">for</span> <span class="p">(</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="s">"3"</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">};</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Element ["</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"] is: "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
 <span class="go">Element [1] is: floating-point</span>
 <span class="go">Element [2] is: string</span>
 <span class="go">Element [3] is: boolean</span></pre>
@@ -786,8 +786,8 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a20fa3e08d72759083fb17c772a357043"><div>
             <h3>
@@ -816,8 +816,8 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="ae9ee4300ddfbd72b7237283ab8d97618"><div>
             <h3>
@@ -846,8 +846,8 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a02a2724564149ad8439c0457357308b8"><div>
             <h3>
@@ -876,8 +876,8 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a01565f26a7982d162949bac3b554a334"><div>
             <h3>
@@ -906,8 +906,8 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="ac7767943620762c22b6341dc6682cc2d"><div>
             <h3>
@@ -936,11 +936,11 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a38852451309f406db281f17334ea8dfe"><div>
             <h3>
@@ -969,8 +969,8 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a2ee84ffccded737ab40afcb8122d8277"><div>
             <h3>
@@ -999,11 +999,11 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a8079e71bd86722701ca91828c6709305"><div>
             <h3>
@@ -1032,11 +1032,11 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
           <section class="m-doc-details" id="a8dbc58dad43c3b66f4476a7131f5741a"><div>
             <h3>
@@ -1060,9 +1060,9 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
           </div></section>
           <section class="m-doc-details" id="acdbabd4b771d221fe98b0053d848d69d"><div>
@@ -1087,9 +1087,9 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">u8</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">u8</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
           </div></section>
           <section class="m-doc-details" id="ad425af491341206589ca6acc37c3b19e"><div>
@@ -1114,9 +1114,9 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
           </div></section>
         </section>
@@ -1158,8 +1158,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

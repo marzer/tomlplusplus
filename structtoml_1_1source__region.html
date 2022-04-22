@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>source_region <span class="m-thin">struct</span>
         </h1>
         <p>A source document region.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -73,13 +73,13 @@
               </ul>
             </li>
           </ul>
-        </div>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="k">if</span> <span class="p">(</span><span class="k">auto</span> <span class="n">server</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">))</span>
+        </nav>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"server"</span><span class="p">))</span>
 <span class="p">{</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"begin: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"end: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">end</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"path: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">path</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"begin: "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">begin</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"end: "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">end</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"path: "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="o">*</span><span class="n">server</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">().</span><span class="n">path</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="p">}</span></pre><pre class="m-console"><span class="go">begin: line 3, column 1</span>
 <span class="go">end: line 3, column 22</span>
 <span class="go">path: config.toml</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>toml++'s parser is unicode-aware insofar as it knows how to handle non-ASCII whitespace and newline characters, but it doesn't give much thought to combining marks, grapheme clusters vs. characters, et cetera. If a TOML document contains lots of codepoints outside of the ASCII range you may find that your <a class="m-doc poxy-injected" href="structtoml_1_1source__position.html">source_positions</a> don't match those given by a text editor (typically the line numbers will be accurate but column numbers will be too high). <strong>This is not an error.</strong> I've chosen this behaviour as a deliberate trade-off between parser complexity and correctness.</p></aside>
@@ -155,11 +155,11 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="p">,</span> <span class="s">"config.toml"</span><span class="p">);</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"bar = 42"</span><span class="p">,</span><span class="w"> </span><span class="s">"config.toml"</span><span class="p">);</span>
 
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
-    <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
-    <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7 of 'config.toml'</span></pre>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"The value for 'bar' was found on "</span><span class="sa">sv</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">"bar"</span><span class="p">)</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span>
+<span class="w">    </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The value for 'bar' was found on line 1, column 7 of 'config.toml'</span></pre>
           </div></section>
         </section>
         <section>
@@ -210,8 +210,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

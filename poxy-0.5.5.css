@@ -337,7 +337,7 @@ h6:last-child
 		z-index: 5;
 		margin: 0px 20px 0px 0px !important;
 	}
-	div.poxy-toc + section
+	.poxy-toc + section
 	{
 		margin-top: 2rem;
 	}

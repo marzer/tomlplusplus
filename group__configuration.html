@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -60,7 +60,7 @@
         <h1>
           Library Configuration <span class="m-thin">module</span></h1>
         <p>Preprocessor macros for configuring library functionality.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -70,15 +70,11 @@
               </ul>
             </li>
           </ul>
-        </div>
+        </nav>
 <p>Define these before including toml++ to alter the way it functions.</p><aside class="m-note m-default"><h4>Remark</h4><p>Some of these options have ABI implications; inline namespaces are used to prevent you from trying to link incompatible combinations together.</p></aside>
         <section id="define-members">
           <h2><a href="#define-members">Defines</a></h2>
           <dl class="m-doc">
-            <dt>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gad443ebc67d9e196f296f2038b2ad5e46">TOML_API</a></span>
-            </dt>
-            <dd>An annotation to add to public symbols.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga8c407a8f6fe52a795db35be3f00393f8">TOML_ASSERT</a>(</span><span class="m-doc-wrap">expr)</span>
             </dt>
@@ -108,6 +104,18 @@
             </dt>
             <dd>Sets whether the library uses exceptions to report parsing failures.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga3d7aebf91431575688d573f09a17559a">TOML_EXPORTED_CLASS</a></span>
+            </dt>
+            <dd>An 'export' annotation to add to classes.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gac40a454cde06de4e76df3d6d460a3544">TOML_EXPORTED_FREE_FUNCTION</a></span>
+            </dt>
+            <dd>An 'export' annotation to add to free functions.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gadf515bb7a6b8ce6b14bf86c8961a63cb">TOML_EXPORTED_MEMBER_FUNCTION</a></span>
+            </dt>
+            <dd>An 'export' annotation to add to non-static class member functions.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga8219bfd7e75587516385b6022b28abc2">TOML_HEADER_ONLY</a></span>
             </dt>
             <dd>Sets whether the library is entirely inline.</dd>
@@ -131,13 +139,6 @@
         </section>
         <section>
           <h2>Define documentation</h2>
-          <section class="m-doc-details" id="gad443ebc67d9e196f296f2038b2ad5e46"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gad443ebc67d9e196f296f2038b2ad5e46">TOML_API</a></span>
-            </h3>
-            <p>An annotation to add to public symbols.</p>
-<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You'd override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
-          </div></section>
           <section class="m-doc-details" id="ga8c407a8f6fe52a795db35be3f00393f8"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga8c407a8f6fe52a795db35be3f00393f8">TOML_ASSERT</a>(</span><span class="m-doc-wrap">expr)</span>
@@ -187,6 +188,27 @@
             <p>Sets whether the library uses exceptions to report parsing failures.</p>
 <p>Defaults to <code>1</code> or <code>0</code> according to your compiler's exception mode.</p>
           </div></section>
+          <section class="m-doc-details" id="ga3d7aebf91431575688d573f09a17559a"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga3d7aebf91431575688d573f09a17559a">TOML_EXPORTED_CLASS</a></span>
+            </h3>
+            <p>An 'export' annotation to add to classes.</p>
+<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You might override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="gac40a454cde06de4e76df3d6d460a3544"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gac40a454cde06de4e76df3d6d460a3544">TOML_EXPORTED_FREE_FUNCTION</a></span>
+            </h3>
+            <p>An 'export' annotation to add to free functions.</p>
+<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You might override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="gadf515bb7a6b8ce6b14bf86c8961a63cb"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gadf515bb7a6b8ce6b14bf86c8961a63cb">TOML_EXPORTED_MEMBER_FUNCTION</a></span>
+            </h3>
+            <p>An 'export' annotation to add to non-static class member functions.</p>
+<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You might override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
+          </div></section>
           <section class="m-doc-details" id="ga8219bfd7e75587516385b6022b28abc2"><div>
             <h3>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga8219bfd7e75587516385b6022b28abc2">TOML_HEADER_ONLY</a></span>
@@ -194,11 +216,11 @@
             <p>Sets whether the library is entirely inline.</p>
 <p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <a class="m-doc" href="group__configuration.html#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_<wbr/>IMPLEMENTATION</a> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
 <span class="cp">#define TOML_HEADER_ONLY 0</span>
-<span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;toml.hpp&gt;</span>
 
 <span class="c1">// some_code_file.cpp</span>
 <span class="cp">#define TOML_IMPLEMENTATION </span>
-<span class="cp">#include</span> <span class="cpf">"global_header_that_includes_toml++.h"</span></pre></aside>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"global_header_that_includes_toml++.h"</span></pre></aside>
           </div></section>
           <section class="m-doc-details" id="ga27ee69835a1ddff9dbaf3015b4b08a11"><div>
             <h3>
@@ -267,8 +289,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

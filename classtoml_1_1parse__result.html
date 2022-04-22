@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_result <span class="m-thin">class</span>
         </h1>
         <p>The result of a parsing operation.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -78,16 +78,16 @@
               </ul>
             </li>
           </ul>
-        </div>
+        </nav>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if TOML_EXCEPTIONS</span>
-    <span class="k">using</span> <span class="ut">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
+<span class="w">    </span><span class="k">using</span><span class="w"> </span><span class="n">parse_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">table</span><span class="p">;</span>
 <span class="cp">#else</span>
-    <span class="k">class</span> <span class="nc">parse_result</span> <span class="p">{</span> <span class="c1">// ...</span>
-<span class="cp">#endif</span></pre></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">result</span><span class="p">)</span>
-    <span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span> <span class="c1">//implicitly converts to table&amp;</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="nc">parse_result</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// ...</span>
+<span class="cp">#endif</span></pre></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">parse_result</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+<span class="w">    </span><span class="n">do_stuff_with_a_table</span><span class="p">(</span><span class="n">result</span><span class="p">);</span><span class="w"> </span><span class="c1">//implicitly converts to table&amp;</span>
 <span class="k">else</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parse failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">example output:</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Parse failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">result</span><span class="p">.</span><span class="n">error</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">example output:</span>
 
 <span class="go">Parse failed:</span>
 <span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
@@ -471,8 +471,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">

@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.3" name="generator"/>
+  <meta content="Poxy v0.5.5" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.3.css" rel="stylesheet"/>
-  <link href="poxy-0.5.3-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.3.js"></script>
+  <link href="poxy-0.5.5.css" rel="stylesheet"/>
+  <link href="poxy-0.5.5-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.5.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -61,7 +61,7 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>key <span class="m-thin">class</span>
         </h1>
         <p>A key parsed from a TOML document.</p>
-        <div class="m-block m-default poxy-toc">
+        <nav class="m-block m-default poxy-toc">
           <h3>Contents</h3>
           <ul>
             <li>
@@ -76,15 +76,15 @@
               </ul>
             </li>
           </ul>
-        </div>
-<p>These are used as the internal keys for a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="k">const</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+        </nav>
+<p>These are used as the internal keys for a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="k">const</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">    a = 1</span>
 <span class="s">      b = 2</span>
 <span class="s">        c = 3</span>
 <span class="dl">)</span><span class="s">"</span><span class="sa">_toml</span><span class="p">;</span>
 
-<span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="o">:</span> <span class="n">tbl</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"key '"</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"' defined at "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span><span class="p">.</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">key 'a' defined at line 2, column 5</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="p">[</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">]</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">tbl</span><span class="p">)</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"key '"</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"' defined at "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">k</span><span class="p">.</span><span class="n">source</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">key 'a' defined at line 2, column 5</span>
 <span class="go">key 'b' defined at line 3, column 7</span>
 <span class="go">key 'c' defined at line 4, column 9</span></pre>
         <section id="typeless-methods">
@@ -354,8 +354,8 @@
     </div>
   </div>
 </div>
-<script src="search-v1.js"></script>
-<script async="async" src="searchdata-v1.js"></script>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
 <footer><nav>
   <div class="m-container">
     <div class="m-row">
