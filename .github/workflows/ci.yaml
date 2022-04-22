@@ -1,6 +1,30 @@
 name: ci
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '**.h'
+      - '**.hpp'
+      - '**.cpp'
+      - '**.inl'
+      - '**.py'
+      - '**/meson.build'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**.h'
+      - '**.hpp'
+      - '**.cpp'
+      - '**.inl'
+      - '**.py'
+      - '**/meson.build'
+  workflow_dispatch:
+    branches:
+      - master
+
 
 # This ensures that jobs get canceled when force-pushing
 concurrency:
