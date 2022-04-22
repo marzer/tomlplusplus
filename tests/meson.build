@@ -91,28 +91,44 @@ test_base_args = []
 test_base_args += universal_args
 test_base_args += devel_args
 
+# there are a number of skips here for builds that choose to precompile the library for their tests;
+# that's 'fine', it just means that the tests for the compiled library only test settings exactly compatible with
+# the way the library itself was compiled (otherwise we risk ABI errors, link errors, etc.)
+#
+# regular header-only mode tests all the things like normal.
+
 foreach cpp20 : cpp20_modes
+
+	# skip this target if we're testing c++20 mode and precompiling the library
 	if cpp20 and (not compiler_supports_cpp20 or get_option('compile_library'))
 		continue
 	endif
+
 	foreach unrel : unreleased_feature_modes
+
+		# skip this target if it's using 'unreleased features' and precompiling the library
 		if unrel and get_option('compile_library')
 			continue
 		endif
+
 		foreach fast_math : fast_math_modes
+
+			# skip this target if it's testing fast math and the compiler doesn't support a known fast-math mode
+			# (or if we're precompiling the library)
 			if fast_math and (not compiler_supports_fast_math or get_option('compile_library'))
 				continue
 			endif
+
 			foreach exceptions : exception_modes
 
-				# skip this target if exceptions are disabled and we're compiling the library;
-				# disabling exceptions requires header-only mode here
+				# skip this target if exceptions are disabled and precompiling the library;
 				if not exceptions and get_option('compile_library')
 					continue
 				endif
 
-				# skip this target if we've disabled exceptions and enabled fast math, because both are already tested
-				# separately and don't interact in any way meaningful enough to warrant a combined permutation
+				# skip this target if we've disabled exceptions and enabled fast math;
+				# both are already tested separately and don't interact in any way meaningful enough to warrant
+				# a combined permutation.
 				if not exceptions and fast_math
 					continue
 				endif
@@ -129,51 +145,30 @@ foreach cpp20 : cpp20_modes
 				test_args += test_base_args
 
 				# use the single-header version for some tests to ensure it is the same (no header generation failures)
-				single_header_conditions = [
-					test_counter % 2 == 1,
-					not get_option('compile_library')
-				]
-				single_header = true
-				foreach cond : single_header_conditions
-					single_header = single_header and cond
-				endforeach
+				single_header = (
+					test_counter % 2 == 0
+					and not get_option('compile_library')
+				)
 
 				# use tl::optional to test that the TOML_OPTIONAL_TYPE config option works as advertised
-				tl_optional_conditions = [
-					test_counter % 3 == 2,
-					not get_option('compile_library'),
-					exceptions # requires exceptions in its API
-				]
-				tl_optional = true
-				foreach cond : tl_optional_conditions
-					tl_optional = tl_optional and cond
-				endforeach
+				tl_optional = (
+					test_counter % 2 == 1
+					and has_tl_optional
+					and not get_option('compile_library')
+					and exceptions # requires exceptions in its API
+				)
 
 				# use asan in the tests
-				address_sanitizer_conditions = [
-					get_option('asan_tests'),
-					is_clang,
-					not tl_optional,
-					not fast_math,
-					not get_option('compile_library')
-				]
-				address_sanitizer = true
-				foreach cond : address_sanitizer_conditions
-					address_sanitizer = address_sanitizer and cond
-				endforeach
+				address_sanitizer = (
+					get_option('asan_tests')
+					and is_clang
+				)
 
 				# use ubsan in the tests
-				ub_sanitizer_conditions = [
-					get_option('ubsan_tests'),
-					is_clang,
-					not tl_optional,
-					not fast_math,
-					not get_option('compile_library')
-				]
-				ub_sanitizer = true
-				foreach cond : ub_sanitizer_conditions
-					ub_sanitizer = ub_sanitizer and cond
-				endforeach
+				ub_sanitizer = (
+					get_option('ubsan_tests')
+					and is_clang
+				)
 
 				if cpp20
 					test_name = 'cpp20'
@@ -243,12 +238,10 @@ foreach cpp20 : cpp20_modes
 					test_args += '-DUSE_SINGLE_HEADER=1'
 				endif
 
-				# uncomment this bit to see which tests are using tl-optional
-				# (off by default because it's not super meaningful - tl-optional is itself very thorougly tested)
-				# if tl_optional
-				# 	test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
-				# 	test_name = test_name + '_tlopt'
-				# endif
+				if tl_optional
+					test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
+					test_name = test_name + '_tlopt'
+				endif
 
 				test_executables += [[
 					test_name,

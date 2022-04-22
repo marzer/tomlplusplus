@@ -41,7 +41,7 @@ jobs:
     - name: Configure Meson
       run: |
         if [ ${{ matrix.compiler }} = g++ ]; then linker=gold; else linker=lld; fi
-        CXX_LD=$linker meson setup build --buildtype=${{ matrix.type }} -Dcompile_library=${{ matrix.compile_library }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dasan_examples=true
+        CXX_LD=$linker meson setup build --buildtype=${{ matrix.type }} -Dcompile_library=${{ matrix.compile_library }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dubsan_examples=true -Dasan_examples=true
 
     - name: Build
       run: meson compile -C build --jobs -1
