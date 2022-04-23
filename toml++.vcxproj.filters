@@ -223,6 +223,12 @@
     <None Include="include\meson.build">
       <Filter>include</Filter>
     </None>
+    <None Include=".github\workflows\ci.yaml">
+      <Filter>.github\workflows</Filter>
+    </None>
+    <None Include=".github\workflows\gh-pages.yaml">
+      <Filter>.github\workflows</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -251,6 +257,9 @@
     </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{5ae94dae-1dce-4522-a33a-230bdb075921}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".github\workflows">
+      <UniqueIdentifier>{f9731b43-6c33-4209-9e53-e65af54f80c4}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

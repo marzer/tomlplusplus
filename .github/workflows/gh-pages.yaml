@@ -2,8 +2,14 @@ name: gh-pages
 
 on:
   push:
-    branches: master
-    paths: docs/**
+    branches:
+      - master
+    paths:
+      - '**.h'
+      - '**.hpp'
+      - '**.dox'
+      - 'docs/**'
+  workflow_dispatch:
 
 jobs:
   gh-pages:
@@ -21,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           apt-get -y update
-          apt-get -y install --no-install-recommends python3-pip doxygen
+          apt-get -y install --no-install-recommends python3-pip doxygen git
           pip3 install --upgrade --requirement tools/requirements.txt
 
       - name: Generate docs

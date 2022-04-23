@@ -323,6 +323,7 @@
 		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
 		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
+		_Pragma("GCC diagnostic ignored \"-Wnoexcept\"")					\
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \

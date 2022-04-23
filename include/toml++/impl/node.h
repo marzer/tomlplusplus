@@ -797,10 +797,6 @@ TOML_NAMESPACE_START
 		template <typename A, typename B>
 		using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
-		//# these functions are static helpers to preserve const and ref categories
-		//# (otherwise I'd have to implement them thrice)
-		//# ((propagation in C++: a modern horror story))
-
 		template <typename N, typename Func>
 		static decltype(auto) do_visit(N&& n, Func&& visitor) noexcept(visit_is_nothrow<Func&&, N&&>)
 		{

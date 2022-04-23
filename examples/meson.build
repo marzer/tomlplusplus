@@ -39,7 +39,7 @@ foreach example : examples
 	]]
 endforeach
 
-if is_clang and get_option('asan_examples')
+if is_clang and (get_option('asan_examples') or get_option('ubsan_examples'))
 	foreach executable : example_executables
 
 		# skip the transcoder (it waits on stdin) and the benchmark (might be slow and cause CI to fail)

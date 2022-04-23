@@ -17,7 +17,7 @@ git submodule update --init --depth 1 external/json
 ```
 4. **Linux only:** Install `ninja` and `meson`:
 ```bash
-sudo apt update && sudo apt install -y locales python3 python3-pip ninja-build
+sudo apt update && sudo apt install -y python3 python3-pip ninja-build
 sudo pip3 install meson
 ```
 

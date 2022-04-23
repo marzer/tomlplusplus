@@ -223,7 +223,7 @@ TOML_ANON_NAMESPACE_START
 
 #endif
 
-#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__) // because, honestly, what the fuck macOS & MinGW??
+#if defined(__APPLE__) || defined(__MINGW32__) || defined(__MINGW64__)
 #define TOML_OVERALIGNED
 #else
 #define TOML_OVERALIGNED alignas(32)
@@ -3035,11 +3035,6 @@ TOML_IMPL_NAMESPACE_START
 
 			while (!is_error())
 			{
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
-				if (is_combining_mark(*cp))
-					set_error_and_return_default("bare keys may not begin with unicode combining marks"sv);
-#endif
-
 				std::string_view key_segment;
 				const auto key_begin = current_position();
 
@@ -3745,10 +3740,7 @@ TOML_ANON_NAMESPACE_START
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
-	throw parse_error                                                                                                  \
-	{                                                                                                                  \
-		msg, source_position{}, std::make_shared<const std::string>(std::move(path))                                   \
-	}
+	throw parse_error{ msg, source_position{}, std::make_shared<const std::string>(std::move(path)) }
 #else
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
 	return parse_result                                                                                                \

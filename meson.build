@@ -85,7 +85,6 @@ if is_gcc
 			'-Wmissing-format-attribute',
 			'-Wmissing-include-dirs',
 			'-Wmissing-noreturn',
-			'-Wnoexcept',
 			'-Wold-style-cast',
 			'-Woverloaded-virtual',
 			'-Wpacked',

@@ -147,6 +147,7 @@ def main():
 		</ClCompile>
 		<ClCompile Include="..\user_feedback.cpp" />
 		<ClCompile Include="..\using_iterators.cpp" />
+		<ClCompile Include="..\visit.cpp" />
 		<ClCompile Include="..\windows_compat.cpp" />
 	</ItemGroup>
 	<ItemGroup>

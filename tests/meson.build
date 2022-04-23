@@ -21,6 +21,7 @@ test_sources = [
 	'manipulating_arrays.cpp',
 	'manipulating_tables.cpp',
 	'manipulating_values.cpp',
+	'visit.cpp',
 	'user_feedback.cpp',
 	'using_iterators.cpp',
 	'windows_compat.cpp'
@@ -86,37 +87,89 @@ exception_modes = [ true, false ]
 unreleased_feature_modes = [ false, true ]
 cpp20_modes = [ false, true ]
 test_executables = []
-counter = 0
+test_counter = 0
 test_base_args = []
 test_base_args += universal_args
 test_base_args += devel_args
 
+# there are a number of skips here for builds that choose to precompile the library for their tests;
+# that's 'fine', it just means that the tests for the compiled library only test settings exactly compatible with
+# the way the library itself was compiled (otherwise we risk ABI errors, link errors, etc.)
+#
+# regular header-only mode tests all the things like normal.
+
 foreach cpp20 : cpp20_modes
+
+	# skip this target if we're testing c++20 mode and precompiling the library
 	if cpp20 and (not compiler_supports_cpp20 or get_option('compile_library'))
 		continue
 	endif
+
 	foreach unrel : unreleased_feature_modes
+
+		# skip this target if it's using 'unreleased features' and precompiling the library
 		if unrel and get_option('compile_library')
 			continue
 		endif
+
 		foreach fast_math : fast_math_modes
+
+			# skip this target if it's testing fast math and the compiler doesn't support a known fast-math mode
+			# (or if we're precompiling the library)
 			if fast_math and (not compiler_supports_fast_math or get_option('compile_library'))
 				continue
 			endif
+
 			foreach exceptions : exception_modes
-				if (not exceptions) and get_option('compile_library')
+
+				# skip this target if exceptions are disabled and precompiling the library;
+				if not exceptions and get_option('compile_library')
 					continue
 				endif
+
+				# skip this target if we've disabled exceptions and enabled fast math;
+				# both are already tested separately and don't interact in any way meaningful enough to warrant
+				# a combined permutation.
+				if not exceptions and fast_math
+					continue
+				endif
+
+				# ... same for 'unreleased features' and fast math
+				if unrel and fast_math
+					continue
+				endif
+
 				test_name = ''
 				test_overrides = []
 				test_overrides += overrides
 				test_args = []
 				test_args += test_base_args
 
-				single_header = (counter % 2 == 1)
-				tl_optional = (counter % 4 == 2 and exceptions and not get_option('compile_library') and has_tl_optional)
-				address_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('asan_tests')
-				ub_sanitizer = (is_clang and not (single_header or tl_optional or fast_math)) and get_option('ubsan_tests')
+				# use the single-header version for some tests to ensure it is the same (no header generation failures)
+				single_header = (
+					test_counter % 2 == 0
+					and not get_option('compile_library')
+				)
+
+				# use tl::optional to test that the TOML_OPTIONAL_TYPE config option works as advertised
+				tl_optional = (
+					test_counter % 2 == 1
+					and has_tl_optional
+					and not get_option('compile_library')
+					and exceptions # requires exceptions in its API
+				)
+
+				# use asan in the tests
+				address_sanitizer = (
+					get_option('asan_tests')
+					and is_clang
+				)
+
+				# use ubsan in the tests
+				ub_sanitizer = (
+					get_option('ubsan_tests')
+					and is_clang
+				)
 
 				if cpp20
 					test_name = 'cpp20'
@@ -185,6 +238,7 @@ foreach cpp20 : cpp20_modes
 				if single_header
 					test_args += '-DUSE_SINGLE_HEADER=1'
 				endif
+
 				if tl_optional
 					test_args += '-DUSE_TARTANLLAMA_OPTIONAL=1'
 					test_name = test_name + '_tlopt'
@@ -201,7 +255,7 @@ foreach cpp20 : cpp20_modes
 					)
 				]]
 
-				counter = counter + 1
+				test_counter = test_counter + 1
 
 			endforeach # exceptions
 		endforeach # fast_math

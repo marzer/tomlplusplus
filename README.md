@@ -4,7 +4,7 @@
 [![C++20](docs/images/badge-C++20.svg)][cpp_compilers]
 [![TOML](docs/images/badge-TOML.svg)][v1.0.0]
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
-[![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
+[![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
 ====
 
@@ -200,6 +200,7 @@ defines `TOML_LANG_MAJOR`, `TOML_LANG_MINOR` and `TOML_LANG_PATCH`.
 - [#687]: Relax bare key restrictions to allow additional unicode characters
 - [#790]: Include an `\e` escape code sequence (shorthand for `\u001B`)
 - [#796]: Include an `\xHH` escape code sequence
+- [#891]: Allow non-English scripts for unquoted keys
 
 > ℹ&#xFE0F; _`#define TOML_ENABLE_UNRELEASED_FEATURES 1` to enable these features (see [Configuration](#Configuration))._
 
@@ -293,5 +294,6 @@ though you're welcome to reach out via other means. In order of likely response 
 [#766]: https://github.com/toml-lang/toml/issues/766
 [#790]: https://github.com/toml-lang/toml/pull/790
 [#796]: https://github.com/toml-lang/toml/pull/796
+[#891]: https://github.com/toml-lang/toml/pull/891
 [something better than std::optional]: https://github.com/TartanLlama/optional
 [m.css]: https://mcss.mosra.cz/documentation/doxygen

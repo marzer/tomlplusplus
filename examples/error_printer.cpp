@@ -58,6 +58,7 @@ namespace
 		R"('''val''' = 1)"sv,
 		R"(a."""val""" = 1)"sv,
 		"1= 0x6cA#+\xf1"sv,
+		R"(😂 = 3)"sv, // allowed when TOML_ENABLE_UNRELEASED_FEATURES == 1
 
 		"########## values"sv,
 		"val = _"sv,

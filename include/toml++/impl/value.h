@@ -316,8 +316,8 @@ TOML_NAMESPACE_START
 		value& operator=(const value& rhs) noexcept
 		{
 			node::operator=(rhs);
-			val_		  = rhs.val_;
-			flags_		  = rhs.flags_;
+			val_   = rhs.val_;
+			flags_ = rhs.flags_;
 			return *this;
 		}
 
@@ -327,8 +327,8 @@ TOML_NAMESPACE_START
 			if (&rhs != this)
 			{
 				node::operator=(std::move(rhs));
-				val_		  = std::move(rhs.val_);
-				flags_		  = rhs.flags_;
+				val_   = std::move(rhs.val_);
+				flags_ = rhs.flags_;
 			}
 			return *this;
 		}

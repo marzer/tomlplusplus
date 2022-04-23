@@ -19,10 +19,12 @@ template:
 #### Fixes:
 - Fixed potential segfault when calling `at_path()` with an empty string
 - Fixed UB in internal unicode machinery (#144) (@kchalmer)
+- Fixed a number of spurious warnings with Clang 10 (#145, #146) (@chronoxor)
 
 #### Additions:
 - Added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
-
+- Add support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
+- Add support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
 
 #### Removals/Deprecations:
 - Deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
@@ -34,6 +36,8 @@ template:
 - Meson: Use system dependencies where available when building tests (@Tachi107)
 
 
+<br><br>
+
 
 ## [v3.0.1](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.1) - 2022-01-13
 
@@ -44,6 +48,8 @@ this release holds nothing of value over v3.0.0.
 #### Fixes:
 - fixed erroneous use of `TOML_API` causing ODR issue (#136) (@Azarael)
 
+
+<br><br>
 
 
 ## [v3.0.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.0) - 2022-01-11
@@ -135,6 +141,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - used `override_dependency` where supported (#116) (@Tachi107)
 
 
+<br><br>
+
 
 ## [v2.5.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.5.0) - 2021-07-11
 
@@ -155,6 +163,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - modernized the CMake build files (#102, #103, #105) (@friendlyanon) 
 - updated conformance tests
 
+
+<br><br>
 
 
 ## [v2.4.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.4.0) - 2021-05-19
@@ -184,6 +194,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - removed explicit `#include <fstream>` requirement for `parse_file()`
 
 
+<br><br>
+
 
 ## [v2.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.3.0) - 2020-12-29
 
@@ -199,6 +211,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - fixed array and table iterators not converting between const and non-const versions of themselves (#67) (@std-any-emplace)
 - fixed some parser crashes when given pathologically-malformed UTF-8 (#65) (@sneves)
 
+
+<br><br>
 
 
 ## [v2.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.2.0) - 2020-08-09
@@ -228,6 +242,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - bumped minimum meson version to 0.53
 
 
+<br><br>
+
 
 ## [v2.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.1.0) - 2020-07-11
 
@@ -254,6 +270,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 - renamed `TOML_ALL_INLINE` to `TOML_HEADER_ONLY` (the old name will still work, but is no longer documented)
 - general cleanup
 
+
+<br><br>
 
 
 ## [v2.0.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.0.0) - 2020-07-20
@@ -298,6 +316,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - ⚠&#xFE0F; removed `TOML_CHAR_8_STRINGS` since it no longer makes sense
 
 
+<br><br>
+
 
 ## [v1.3.3](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.3) - 2020-06-29
 
@@ -318,6 +338,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - refactored the parser to reduce binary size
 
 
+<br><br>
+
 
 ## [v1.3.2](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.2) - 2020-06-19
 
@@ -331,6 +353,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - improved the performance of toml::parse_file
 - improved the performance of printing to streams for deepy-nested TOML data
 
+
+<br><br>
 
 
 ## [v1.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.0) - 2020-06-02
@@ -351,6 +375,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - renamed table iterator proxy pair members to `first` and `second` to match STL
 
 
+<br><br>
+
 
 ## [v1.2.5](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.5) - 2020-04-24
 
@@ -369,6 +395,8 @@ break (hence the version number bump). Changes that might block a migration are 
 #### Changes:
 - improved unicode-related codegen
 
+
+<br><br>
 
 
 ## [v1.2.3](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.3) - 2020-04-11
@@ -391,6 +419,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - refactored and greatly simplified parser
 
 
+<br><br>
+
 
 ## [v1.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.0) - 2020-04-07
 
@@ -407,6 +437,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added build config feature option `GENERATE_CMAKE_CONFIG`
 - added many new tests
 
+
+<br><br>
 
 
 ## [v1.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.1.0) - 2020-04-03
@@ -425,6 +457,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added the array and table iterators to the `toml` namespace
 
 
+<br><br>
+
 
 ## [v1.0.0](https://github.com/marzer/tomlplusplus/releases/tag/1.0.0) - 2020-03-28
 
@@ -434,6 +468,8 @@ break (hence the version number bump). Changes that might block a migration are 
 #### Changes:
 - refactoring of ABI-based inline namespaces
 
+
+<br><br>
 
 
 ## [v0.6.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.6.0) - 2020-03-24
@@ -446,6 +482,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added `<cassert>` include directly in 'debug' builds when `TOML_ASSERT` isn't defined
 - added Clang's `[[trivial_abi]]` attribute to `date`, `time`, `time_offset`
 
+
+<br><br>
 
 
 ## [v0.5.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.5.0) - 2020-03-18
@@ -465,6 +503,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added build configuration option for compiling examples
 
 
+<br><br>
+
 
 ## [v0.4.3](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.3) - 2020-03-10
 
@@ -477,6 +517,8 @@ break (hence the version number bump). Changes that might block a migration are 
 #### Changes:
 - parsing performance improvements
 
+
+<br><br>
 
 
 ## [v0.4.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.0) - 2020-03-05
@@ -491,6 +533,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added `TOML_OPTIONAL_TYPE` customization point
 - added `node::ref()` and `node_view::ref()`
 
+
+<br><br>
 
 
 ## [v0.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.3.0) - 2020-03-01
@@ -510,6 +554,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - removed `<cmath>` dependency
 
 
+<br><br>
+
 
 ## [v0.2.1](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.1) - 2020-02-26
 
@@ -523,6 +569,8 @@ break (hence the version number bump). Changes that might block a migration are 
 #### Changes:
 - improved quality of error messages for boolean and inf/nan parsing
 
+
+<br><br>
 
 
 ## [v0.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.0) - 2020-02-23
@@ -540,6 +588,8 @@ break (hence the version number bump). Changes that might block a migration are 
 - added `node_view::value_or()`
 - added hexfloat parsing support for all implementations (not just `<charconv>` ones)
 
+
+<br><br>
 
 
 ## [v0.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.1.0) - 2020-02-20
