@@ -10,8 +10,6 @@ on:
       - '**.dox'
       - 'docs/**'
   workflow_dispatch:
-    branches:
-      - master
 
 jobs:
   gh-pages:

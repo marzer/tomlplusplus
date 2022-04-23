@@ -60,10 +60,28 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
+	constexpr bool is_horizontal_whitespace(char32_t c) noexcept
+	{
+		return is_ascii_horizontal_whitespace(c) || is_non_ascii_horizontal_whitespace(c);
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	{
+		return is_ascii_vertical_whitespace(c) || is_non_ascii_vertical_whitespace(c);
+	}
+
+	TOML_CONST_GETTER
+	constexpr bool is_whitespace(char32_t c) noexcept
+	{
+		return is_horizontal_whitespace(c) || is_vertical_whitespace(c);
+	}
+
+	TOML_CONST_GETTER
 	constexpr bool is_bare_key_character(char32_t c) noexcept
 	{
 		return is_ascii_bare_key_character(c)
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
+#if TOML_LANG_UNRELEASED // toml/pull/891 (unicode bare keys)
 			|| is_non_ascii_bare_key_character(c)
 #endif
 			;

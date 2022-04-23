@@ -3035,11 +3035,6 @@ TOML_IMPL_NAMESPACE_START
 
 			while (!is_error())
 			{
-#if TOML_LANG_UNRELEASED // toml/issues/687 (unicode bare keys)
-				if (is_combining_mark(*cp))
-					set_error_and_return_default("bare keys may not begin with unicode combining marks"sv);
-#endif
-
 				std::string_view key_segment;
 				const auto key_begin = current_position();
 

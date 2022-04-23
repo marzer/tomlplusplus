@@ -139,25 +139,33 @@ TEST_CASE("parsing - key-value pairs (dotted)")
 							   CHECK(tbl["orange"]["color"] == "orange"sv);
 						   });
 
-// toml/issues/644 ('+' in bare keys) & toml/issues/687 (unicode bare keys)
+// toml/issues/644 ('+' in bare keys)
+#if TOML_LANG_UNRELEASED
+	parsing_should_succeed(FILE_LINE_ARGS, "key+1 = 0"sv, [](table&& tbl) { CHECK(tbl["key+1"] == 0); });
+#else
+	parsing_should_fail(FILE_LINE_ARGS, "key+1 = 0"sv);
+#endif
+
+// toml/pull/891 (unicode bare keys)
+// clang-format off
 #if UNICODE_LITERALS_OK
 #if TOML_LANG_UNRELEASED
-	parsing_should_succeed(FILE_LINE_ARGS,
-						   R"(
-								key+1 = 0
-								ʎǝʞ2 = 0
-							)"sv,
-						   [](table&& tbl)
-						   {
-							   CHECK(tbl.size() == 2);
-							   CHECK(tbl["key+1"] == 0);
-							   CHECK(tbl["ʎǝʞ2"] == 0);
-						   });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(ʎǝʞ = 1)"sv,			[](table&& tbl) { CHECK(tbl[R"(ʎǝʞ)"] == 1); });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(Fuß = 2)"sv,			[](table&& tbl) { CHECK(tbl[R"(Fuß)"] == 2); });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(😂 = 3)"sv,			[](table&& tbl) { CHECK(tbl[R"(😂)"] == 3); });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(汉语大字典 = 4)"sv,	[](table&& tbl) { CHECK(tbl[R"(汉语大字典)"] == 4); });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(辭源 = 5)"sv,			[](table&& tbl) { CHECK(tbl[R"(辭源)"] == 5); });
+	parsing_should_succeed(FILE_LINE_ARGS,	R"(பெண்டிரேம் = 6)"sv,	[](table&& tbl) { CHECK(tbl[R"(பெண்டிரேம்)"] == 6); });
 #else
-	parsing_should_fail(FILE_LINE_ARGS, R"(key+1 = 0)"sv);
-	parsing_should_fail(FILE_LINE_ARGS, R"(ʎǝʞ2 = 0)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(ʎǝʞ = 1)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(Fuß = 2)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(😂 = 3)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(汉语大字典 = 4)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(辭源 = 5)"sv);
+	parsing_should_fail(FILE_LINE_ARGS,		R"(பெண்டிரேம் = 6)"sv);
 #endif
 #endif // UNICODE_LITERALS_OK
+	// clang-format on
 }
 
 TEST_CASE("parsing - key-value pairs (string keys)")
