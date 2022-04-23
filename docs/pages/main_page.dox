@@ -481,7 +481,15 @@
  After that, you can use it like a regular dependency: `tomlplusplus_dep = dependency('tomlplusplus')`.
  You can also add it as a subproject directly.
 
+ \subsection mainpage-adding-lib-tipi Tipi.build
 
+`tomlplusplus` can be easily used in [tipi.build](https://tipi.build) projects by adding the following entry to your `.tipi/deps`:
+
+ \bash
+{
+    "marzer/tomlplusplus": { }
+}
+ \ebash
 
  \subsection mainpage-adding-lib-vcpkg Vcpkg
  \bash

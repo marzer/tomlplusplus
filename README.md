@@ -121,12 +121,6 @@ depends: [
 }
 ```
 
-> Try this by running the following command in `/examples/tipi-example` (change the `<target>` name appropriately to `linux` or `macos` or `windows`):
->
-> ```bash
-> tipi . -t linux # or -t windows / -t macos
-> ```
-
 ### Vcpkg
 ```
 vcpkg install tomlplusplus
