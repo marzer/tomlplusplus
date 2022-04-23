@@ -68,9 +68,9 @@ string_literals   = [ '_toml' ]
     'badge-TOML.svg',
     'https://toml.io/en/v1.0.0'
 ]
-'3. CircleCI'     = [
-    'https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&logo=circleci&logoColor=white&style=flat-square',
-    'https://circleci.com/gh/marzer/tomlplusplus'
+'3. CI'     = [
+    'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master',
+    'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml'
 ]
 '4. Mentioned in Awesome C++' = [
     'badge-awesome.svg',

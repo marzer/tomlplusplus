@@ -72,9 +72,6 @@ TOML_NAMESPACE_START
 
 		mutable viewed_type* node_ = nullptr;
 
-		template <typename Func>
-		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
-
 	  public:
 		/// \brief	Constructs an empty node view.
 		TOML_NODISCARD_CTOR
@@ -567,6 +564,13 @@ TOML_NAMESPACE_START
 		/// \name Visitation
 		/// @{
 
+	  private:
+		/// \cond
+		template <typename Func>
+		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
+		/// \endcond
+
+	  public:
 		/// \brief	Invokes a visitor on the viewed node based on its concrete type.
 		///
 		/// \remarks Has no effect if the view does not reference a node.

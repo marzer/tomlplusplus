@@ -64,6 +64,9 @@ cd build-gcc-debug && ninja && ninja test               \
     && cd ..
 ```
 
+> ℹ&#xFE0F; Note: To ensure parity between single-header and regular versions of the library, 50% of the tests
+will be compiled using one, and 50% with the other. Ensure you've regenerated toml.hpp before running tests.
+
 <br>
 
 ## Testing with the [toml-test] suite

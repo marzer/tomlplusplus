@@ -347,6 +347,7 @@
 		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
 		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
 		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
+		_Pragma("GCC diagnostic ignored \"-Wnoexcept\"")					\
 		static_assert(true)
 
 	#define TOML_POP_WARNINGS \
@@ -3253,9 +3254,6 @@ TOML_NAMESPACE_START
 
 		mutable viewed_type* node_ = nullptr;
 
-		template <typename Func>
-		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
-
 	  public:
 
 		TOML_NODISCARD_CTOR
@@ -3528,6 +3526,13 @@ TOML_NAMESPACE_START
 			TOML_ASSERT_ASSUME(node_ && "toml::node_view::ref() called on a node_view that did not reference a node");
 			return node_->template ref<T>();
 		}
+
+	  private:
+
+		template <typename Func>
+		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
+
+	  public:
 
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) const noexcept(visit_is_nothrow<Func&&>)
