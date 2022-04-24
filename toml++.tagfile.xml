@@ -782,6 +782,34 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
+      <type>array &amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1array.html</anchorfile>
+      <anchor>a1154a3d27b1af41ffaa498c8d6070b88</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>array &amp;&amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1array.html</anchorfile>
+      <anchor>aa7d6dd4f662a93b97d1e750a57df7efc</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp;&amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>const array &amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1array.html</anchorfile>
+      <anchor>a335c0d9bac1ca2b03a961dbe4dabc386</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>const array &amp;&amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1array.html</anchorfile>
+      <anchor>a944a1130f3dd2b7aa13c38bd600295b5</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp;&amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
       <type>node_type</type>
       <name>type</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
@@ -4998,6 +5026,34 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
+      <type>table &amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1table.html</anchorfile>
+      <anchor>ac22ee86d5b83fd73a8013d39be1cc698</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>table &amp;&amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1table.html</anchorfile>
+      <anchor>aca50cb292d1029b5df558847a0fec7c5</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp;&amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>const table &amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1table.html</anchorfile>
+      <anchor>a58267a6238a414e7b6db9f59218e790f</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
+      <type>const table &amp;&amp;</type>
+      <name>for_each</name>
+      <anchorfile>classtoml_1_1table.html</anchorfile>
+      <anchor>ab89cdd042f443f05a07e032494b650c2</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp;&amp; &gt;)</arglist>
+    </member>
+    <member kind="function">
       <type>node_type</type>
       <name>type</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
@@ -7789,6 +7845,7 @@
     <docanchor file="index.html" title="Meson">mainpage-adding-lib-meson</docanchor>
     <docanchor file="index.html" title="Vcpkg">mainpage-adding-lib-vcpkg</docanchor>
     <docanchor file="index.html" title="CMake FetchContent">mainpage-adding-lib-cmake-fetch-content</docanchor>
+    <docanchor file="index.html" title="Git submodules">mainpage-adding-lib-git-submodules</docanchor>
     <docanchor file="index.html" title="Other environments and package managers">mainpage-adding-lib-other</docanchor>
     <docanchor file="index.html" title="Special mention: Python">mainpage-adding-lib-python</docanchor>
     <docanchor file="index.html" title="Library configuration options">mainpage-configuration</docanchor>

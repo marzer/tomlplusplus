@@ -73,7 +73,7 @@
                 <li><a href="#equality">Equality</a></li>
                 <li><a href="#erasure">Erasure</a></li>
                 <li><a href="#insertion-and-emplacement">Insertion and Emplacement</a></li>
-                <li><a href="#iterators">Iterators</a></li>
+                <li><a href="#iteration">Iteration</a></li>
                 <li><a href="#metadata">Metadata</a></li>
                 <li><a href="#node-views">Node views</a></li>
                 <li><a href="#searching">Searching</a></li>
@@ -241,8 +241,8 @@
             <dd>Inserts or assigns a value at a specific key.</dd>
           </dl>
         </section>
-        <section id="iterators">
-          <h2><a href="#iterators">Iterators</a></h2>
+        <section id="iteration">
+          <h2><a href="#iteration">Iteration</a></h2>
           <dl class="m-doc">
             <dt id="a68fea8ca9b1018f9675fd346b9f4512e">
               using <a class="m-doc-self" href="#a68fea8ca9b1018f9675fd346b9f4512e">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">toml::<wbr/>const_table_iterator</a>
@@ -276,6 +276,26 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a40c72e81de1da66b7083cad11442cb05">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1table.html#a68fea8ca9b1018f9675fd346b9f4512e">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
+            <dt>
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac22ee86d5b83fd73a8013d39be1cc698">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Invokes a visitor on each key-value pair in the table.</dd>
+            <dt id="aca50cb292d1029b5df558847a0fec7c5">
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aca50cb292d1029b5df558847a0fec7c5">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Invokes a visitor on each key-value pair in the table (rvalue overload).</dd>
+            <dt id="a58267a6238a414e7b6db9f59218e790f">
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a58267a6238a414e7b6db9f59218e790f">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Invokes a visitor on each key-value pair in the table (const lvalue overload).</dd>
+            <dt id="ab89cdd042f443f05a07e032494b650c2">
+              <div class="m-doc-template">template&lt;typename Func&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab89cdd042f443f05a07e032494b650c2">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+            </dt>
+            <dd>Invokes a visitor on each key-value pair in the table (const rvalue overload).</dd>
           </dl>
         </section>
         <section id="metadata">
@@ -1313,6 +1333,95 @@
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
 <span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="classtoml_1_1table.html#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion or assignment can take place. This is the only circumstance in which this can occur.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ac22ee86d5b83fd73a8013d39be1cc698"><div>
+            <h3>
+              <div class="m-doc-template">
+                template&lt;typename Func&gt;
+              </div>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac22ee86d5b83fd73a8013d39be1cc698">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
+            </h3>
+            <p>Invokes a visitor on each key-value pair in the table.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Template parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">Func</td>
+                  <td><p>A callable type invocable with one of the following signatures:</p><ul><li><code>func(key, val)</code></li><li><code>func(val)</code></li></ul><p>Where:</p><ul><li><code>key</code> will recieve a const reference to a <a class="m-doc" href="classtoml_1_1key.html">toml::<wbr/>key</a></li><li><code>val</code> will recieve the value as it's concrete type with cvref-qualifications matching the table</li></ul><p>Visitors returning <code>bool</code> (or something convertible to <code>bool</code>) will cause iteration to stop if they return <code>false</code>.</p></td>
+                </tr>
+              </tbody>
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>visitor</td>
+                  <td>The visitor object.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>A reference to the table.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">table</span><span class="w"> </span><span class="n">tbl</span><span class="p">{</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"0"</span><span class="p">,</span><span class="w">  </span><span class="mi">0</span><span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"1"</span><span class="p">,</span><span class="w">  </span><span class="mi">1</span><span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"2"</span><span class="p">,</span><span class="w">  </span><span class="mi">2</span><span class="w">      </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"3"</span><span class="p">,</span><span class="w">  </span><span class="mf">3.0</span><span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"4"</span><span class="p">,</span><span class="w">  </span><span class="s">"four"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"5"</span><span class="p">,</span><span class="w">  </span><span class="s">"five"</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span><span class="w"> </span><span class="s">"6"</span><span class="p">,</span><span class="w">  </span><span class="mi">6</span><span class="w">      </span><span class="p">}</span>
+<span class="p">};</span>
+
+<span class="c1">// select only the integers using a strongly-typed visitor</span>
+<span class="n">tbl</span><span class="p">.</span><span class="n">for_each</span><span class="p">([](</span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", "</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="c1">// select all the numeric values using a generic visitor + is_number&lt;&gt; metafunction</span>
+<span class="n">tbl</span><span class="p">.</span><span class="n">for_each</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="w">        </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", "</span><span class="p">;</span>
+<span class="p">});</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="c1">// select all the numeric values until we encounter something non-numeric</span>
+<span class="n">tbl</span><span class="p">.</span><span class="n">for_each</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="k">constexpr</span><span class="w"> </span><span class="p">(</span><span class="ns">toml</span><span class="o">::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">        </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">", "</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">true</span><span class="p">;</span><span class="w"> </span><span class="c1">// "keep going"</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">false</span><span class="p">;</span><span class="w"> </span><span class="c1">// "stop!"</span>
+
+<span class="p">});</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+
+<span class="c1">// visitors may also recieve the key</span>
+<span class="n">tbl</span><span class="p">.</span><span class="n">for_each</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">key</span><span class="o">&amp;</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">auto</span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">val</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">": "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">});</span></pre><pre class="m-console"><span class="go">0, 1, 2, 6,</span>
+<span class="go">0, 1, 2, 3.0, 6,</span>
+<span class="go">0, 1, 2, 3.0,</span>
+
+<span class="go">0: 0</span>
+<span class="go">1: 1</span>
+<span class="go">2: 2</span>
+<span class="go">3: 3.0</span>
+<span class="go">4: 'four'</span>
+<span class="go">5: 'five'</span>
+<span class="go">6: 6</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#ad47390f3832260db7bf06cd282598240">node::<wbr/>visit()</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a53be1b93aa90608ed378323df835a2f3"><div>
             <h3>
