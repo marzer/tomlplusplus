@@ -916,6 +916,10 @@ TOML_IMPL_NAMESPACE_START
 	};
 	template <typename T>
 	inline constexpr node_type node_type_of = node_type_getter<unwrap_node<remove_cvref<T>>>::value;
+
+	template <typename T, typename ConvertFrom>
+	inline constexpr bool is_constructible_or_convertible = std::is_constructible_v<T, ConvertFrom> //
+														 || std::is_convertible_v<ConvertFrom, T>;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
@@ -990,8 +994,8 @@ TOML_NAMESPACE_START
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::node (or one of its subclasses).
 	template <typename T>
-	inline constexpr bool is_node =
-		std::is_same_v<toml::node, impl::remove_cvref<T>> || std::is_base_of_v<toml::node, impl::remove_cvref<T>>;
+	inline constexpr bool is_node = std::is_same_v<toml::node, impl::remove_cvref<T>> //
+								 || std::is_base_of_v<toml::node, impl::remove_cvref<T>>;
 
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::node_view.
 	template <typename T>

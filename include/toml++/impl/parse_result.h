@@ -269,7 +269,7 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Iterators
+		/// \name Iteration
 		/// @{
 
 		/// \brief A BidirectionalIterator for iterating over key-value pairs in a wrapped toml::table.

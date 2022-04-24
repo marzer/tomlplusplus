@@ -457,7 +457,7 @@
 
 
  \subsection mainpage-adding-lib-conan Conan
- Add `tomlplusplus/3.0.1` to your conanfile.
+ Add `tomlplusplus/3.1.0` to your conanfile.
 
 
 
@@ -465,7 +465,7 @@
  Add `tomlpp` to your `package.json5`, e.g.:
  \bash
  depends: [
-		'tomlpp^3.0.1',
+		'tomlpp^3.1.0',
  ]
  \ebash
 
@@ -497,12 +497,22 @@
  FetchContent_Declare(
      tomlplusplus
      GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-     GIT_TAG        v3.0.1
+     GIT_TAG        v3.1.0
  )
  FetchContent_MakeAvailable(tomlplusplus)
  \endcode
 
  \see [What is FetchContent?](https://cmake.org/cmake/help/latest/module/FetchContent.html)
+
+
+
+\subsection mainpage-adding-lib-git-submodules Git submodules
+\bash
+git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusplus
+git config -f .gitmodules submodule.tomlplusplus.shallow true
+\ebash
+\note The toml++ repository has some submodules of its own, but **they are only used for testing**! You do not need to
+use the `--recursive` option for regular library consumption.
 
 
 

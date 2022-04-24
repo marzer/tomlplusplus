@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version: '3.0.1',
+	version: '3.1.0',
 	meson_version: '>=0.54.0',
 	license: 'MIT',
 	subproject_dir: 'external',

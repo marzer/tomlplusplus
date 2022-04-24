@@ -14,7 +14,7 @@ template:
 -->
 
 
-## Unreleased
+## [v3.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) - 2022-04-22
 
 #### Fixes:
 - Fixed potential segfault when calling `at_path()` with an empty string
@@ -22,9 +22,11 @@ template:
 - Fixed a number of spurious warnings with Clang 10 (#145, #146) (@chronoxor)
 
 #### Additions:
+- Added `toml::array::for_each()`
+- Added `toml::table::for_each()`
 - Added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
-- Add support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
-- Add support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
+- Added support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
+- Added support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
 
 #### Removals/Deprecations:
 - Deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options

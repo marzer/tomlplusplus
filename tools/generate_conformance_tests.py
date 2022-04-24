@@ -446,6 +446,9 @@ def load_valid_inputs(tests, extern_root):
 	add_condition(tests['valid']['burntsushi'], '!TOML_MSVC', (
 		'inline-table-key-dotted', # causes MSVC to run out of heap space during compilation O_o
 	))
+	add_condition(tests['valid']['burntsushi'], 'TOML_LANG_UNRELEASED', (
+		'string-escape-esc', # \e in strings
+	))
 
 	tests['valid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'values'), True, (
 		# these are stress-tests for 'large' datasets. I test these separately. Having them inline in C++ code is insane.

@@ -1102,8 +1102,8 @@
 /// \def TOML_SMALL_FLOAT_TYPE
 /// \brief If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.
 /// \detail Not defined by default.
-/// \remark	If you're building for a platform that has a built-in half precision float (e.g. `_Float16`), you don't
-/// 		need to use this configuration option to make toml++ aware of it; the library comes with that built-in.
+/// \remark	If you're building for a platform that has `_Float16` and/or `__fp16`, you don't
+/// 		need to use this configuration option to make toml++ aware of them. The library comes with that built-in.
 
 
 #define TOML_SMALL_INT_TYPE

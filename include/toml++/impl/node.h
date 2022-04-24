@@ -530,7 +530,7 @@ TOML_NAMESPACE_START
 		/// 	{
 		/// 		std::cout << "- " << std::setw(18) << std::left << type_name;
 		/// 		using type = std::remove_pointer_t<decltype(dummy)>;
-		/// 		if (std::optional<type> val = tbl.get(key)->value<type>())
+		/// 		if (auto val = tbl.get(key)->value<type>(); val)
 		/// 			std::cout << *val << "\n";
 		/// 		else
 		/// 			std::cout << "n/a\n";
@@ -732,145 +732,141 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
+		template <typename Func, typename Node, typename T>
+		static constexpr bool can_visit = std::is_invocable_v<Func, ref_cast_type<T, Node>>;
+
+		template <typename Func, typename Node, typename T>
+		static constexpr bool can_visit_nothrow = std::is_nothrow_invocable_v<Func, ref_cast_type<T, Node>>;
+
+		template <typename Func, typename Node>
+		static constexpr bool can_visit_any = can_visit<Func, Node, table>		 //
+										   || can_visit<Func, Node, array>		 //
+										   || can_visit<Func, Node, std::string> //
+										   || can_visit<Func, Node, int64_t>	 //
+										   || can_visit<Func, Node, double>		 //
+										   || can_visit<Func, Node, bool>		 //
+										   || can_visit<Func, Node, date>		 //
+										   || can_visit<Func, Node, time>		 //
+										   || can_visit<Func, Node, date_time>;
+
 		// clang-format off
 
-		template <typename Func, typename N, typename T>
-		static constexpr bool can_visit = std::is_invocable_v<Func, ref_cast_type<T, N>>;
+		template <typename Func, typename Node>
+		static constexpr bool can_visit_all = can_visit<Func, Node, table>		 //
+										   && can_visit<Func, Node, array>		 //
+										   && can_visit<Func, Node, std::string> //
+										   && can_visit<Func, Node, int64_t>	 //
+										   && can_visit<Func, Node, double>		 //
+										   && can_visit<Func, Node, bool>		 //
+										   && can_visit<Func, Node, date>		 //
+										   && can_visit<Func, Node, time>		 //
+										   && can_visit<Func, Node, date_time>;
 
-		template <typename Func, typename N>
-		static constexpr bool can_visit_any =
-			can_visit<Func, N, table>
-			|| can_visit<Func, N, array>
-			|| can_visit<Func, N, std::string>
-			|| can_visit<Func, N, int64_t>
-			|| can_visit<Func, N, double>
-			|| can_visit<Func, N, bool>
-			|| can_visit<Func, N, date>
-			|| can_visit<Func, N, time>
-			|| can_visit<Func, N, date_time>;
+		template <typename Func, typename Node, typename T>
+		static constexpr bool visit_is_nothrow_one = !can_visit<Func, Node, T> || can_visit_nothrow<Func, Node, T>;
 
-		template <typename Func, typename N>
-		static constexpr bool can_visit_all =
-			can_visit<Func, N, table>
-			&& can_visit<Func, N, array>
-			&& can_visit<Func, N, std::string>
-			&& can_visit<Func, N, int64_t>
-			&& can_visit<Func, N, double>
-			&& can_visit<Func, N, bool>
-			&& can_visit<Func, N, date>
-			&& can_visit<Func, N, time>
-			&& can_visit<Func, N, date_time>;
-
-		template <typename Func, typename N, typename T>
-		static constexpr bool visit_is_nothrow_one =
-			!can_visit<Func, N, T>
-			|| std::is_nothrow_invocable_v<Func, ref_cast_type<T, N>>;
-
-		template <typename Func, typename N>
-		static constexpr bool visit_is_nothrow =
-			visit_is_nothrow_one<Func, N, table>
-			&& visit_is_nothrow_one<Func, N, array>
-			&& visit_is_nothrow_one<Func, N, std::string>
-			&& visit_is_nothrow_one<Func, N, int64_t>
-			&& visit_is_nothrow_one<Func, N, double>
-			&& visit_is_nothrow_one<Func, N, bool>
-			&& visit_is_nothrow_one<Func, N, date>
-			&& visit_is_nothrow_one<Func, N, time>
-			&& visit_is_nothrow_one<Func, N, date_time>;
+		template <typename Func, typename Node>
+		static constexpr bool visit_is_nothrow = visit_is_nothrow_one<Func, Node, table>	   //
+											  && visit_is_nothrow_one<Func, Node, array>	   //
+											  && visit_is_nothrow_one<Func, Node, std::string> //
+											  && visit_is_nothrow_one<Func, Node, int64_t>	   //
+											  && visit_is_nothrow_one<Func, Node, double>	   //
+											  && visit_is_nothrow_one<Func, Node, bool>		   //
+											  && visit_is_nothrow_one<Func, Node, date>		   //
+											  && visit_is_nothrow_one<Func, Node, time>		   //
+											  && visit_is_nothrow_one<Func, Node, date_time>;
 
 		// clang-format on
 
-		template <typename Func, typename N, typename T, bool = can_visit<Func, N, T>>
+		template <typename Func, typename Node, typename T, bool = can_visit<Func, Node, T>>
 		struct visit_return_type_
 		{
-			using type = decltype(std::declval<Func>()(std::declval<ref_cast_type<T, N>>()));
+			using type = decltype(std::declval<Func>()(std::declval<ref_cast_type<T, Node>>()));
 		};
-		template <typename Func, typename N, typename T>
-		struct visit_return_type_<Func, N, T, false>
+		template <typename Func, typename Node, typename T>
+		struct visit_return_type_<Func, Node, T, false>
 		{
 			using type = void;
 		};
 
-		template <typename Func, typename N, typename T>
-		using visit_return_type = typename visit_return_type_<Func, N, T>::type;
+		template <typename Func, typename Node, typename T>
+		using visit_return_type = typename visit_return_type_<Func, Node, T>::type;
 
 		template <typename A, typename B>
 		using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
-		template <typename N, typename Func>
-		static decltype(auto) do_visit(N&& n, Func&& visitor) noexcept(visit_is_nothrow<Func&&, N&&>)
+		template <typename Func, typename Node>
+		static decltype(auto) do_visit(Func&& visitor, Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
 		{
-			static_assert(can_visit_any<Func&&, N&&>,
+			static_assert(can_visit_any<Func&&, Node&&>,
 						  "TOML node visitors must be invocable for at least one of the toml::node "
 						  "specializations:" TOML_SA_NODE_TYPE_LIST);
 
 			switch (n.type())
 			{
 				case node_type::table:
-					if constexpr (can_visit<Func&&, N&&, table>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<table>());
+					if constexpr (can_visit<Func&&, Node&&, table>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<table>());
 					break;
 
 				case node_type::array:
-					if constexpr (can_visit<Func&&, N&&, array>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<array>());
+					if constexpr (can_visit<Func&&, Node&&, array>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<array>());
 					break;
 
 				case node_type::string:
-					if constexpr (can_visit<Func&&, N&&, std::string>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<std::string>());
+					if constexpr (can_visit<Func&&, Node&&, std::string>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<std::string>());
 					break;
 
 				case node_type::integer:
-					if constexpr (can_visit<Func&&, N&&, int64_t>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<int64_t>());
+					if constexpr (can_visit<Func&&, Node&&, int64_t>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<int64_t>());
 					break;
 
 				case node_type::floating_point:
-					if constexpr (can_visit<Func&&, N&&, double>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<double>());
+					if constexpr (can_visit<Func&&, Node&&, double>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<double>());
 					break;
 
 				case node_type::boolean:
-					if constexpr (can_visit<Func&&, N&&, bool>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<bool>());
+					if constexpr (can_visit<Func&&, Node&&, bool>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<bool>());
 					break;
 
 				case node_type::date:
-					if constexpr (can_visit<Func&&, N&&, date>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date>());
+					if constexpr (can_visit<Func&&, Node&&, date>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<date>());
 					break;
 
 				case node_type::time:
-					if constexpr (can_visit<Func&&, N&&, time>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<time>());
+					if constexpr (can_visit<Func&&, Node&&, time>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<time>());
 					break;
 
 				case node_type::date_time:
-					if constexpr (can_visit<Func&&, N&&, date_time>)
-						return static_cast<Func&&>(visitor)(static_cast<N&&>(n).template ref_cast<date_time>());
+					if constexpr (can_visit<Func&&, Node&&, date_time>)
+						return static_cast<Func&&>(visitor)(static_cast<Node&&>(n).template ref_cast<date_time>());
 					break;
 
 				case node_type::none: TOML_UNREACHABLE;
 				default: TOML_UNREACHABLE;
 			}
 
-			if constexpr (can_visit_all<Func&&, N&&>)
-				TOML_UNREACHABLE;
-			else
+			if constexpr (!can_visit_all<Func&&, Node&&>)
 			{
 				// clang-format off
 
 				using return_type =
-					nonvoid<visit_return_type<Func&&, N&&, table>,
-					nonvoid<visit_return_type<Func&&, N&&, array>,
-					nonvoid<visit_return_type<Func&&, N&&, std::string>,
-					nonvoid<visit_return_type<Func&&, N&&, int64_t>,
-					nonvoid<visit_return_type<Func&&, N&&, double>,
-					nonvoid<visit_return_type<Func&&, N&&, bool>,
-					nonvoid<visit_return_type<Func&&, N&&, date>,
-					nonvoid<visit_return_type<Func&&, N&&, time>,
-							visit_return_type<Func&&, N&&, date_time>
+					nonvoid<visit_return_type<Func&&, Node&&, table>,
+					nonvoid<visit_return_type<Func&&, Node&&, array>,
+					nonvoid<visit_return_type<Func&&, Node&&, std::string>,
+					nonvoid<visit_return_type<Func&&, Node&&, int64_t>,
+					nonvoid<visit_return_type<Func&&, Node&&, double>,
+					nonvoid<visit_return_type<Func&&, Node&&, bool>,
+					nonvoid<visit_return_type<Func&&, Node&&, date>,
+					nonvoid<visit_return_type<Func&&, Node&&, time>,
+							visit_return_type<Func&&, Node&&, date_time>
 				>>>>>>>>;
 
 				// clang-format on
@@ -903,13 +899,17 @@ TOML_NAMESPACE_START
 		///			do_something_with_a_string(*n)); //n is a toml::value<std::string>
 		///		else if constexpr (toml::is_integer<decltype(n)>)
 		///			do_something_with_an_int(*n); //n is a toml::value<int64_t>
-		///		else
-		///			throw std::exception{ "Expected string or integer" };
 		/// });
 		/// \ecpp
 		///
-		/// \tparam	Func	A callable type invocable with one or more of the
-		/// 				toml++ node types.
+		/// Visitor functions need not be generic; specifying a concrete node type as the input argument type
+		/// effectively acts a 'filter', only invoking the visitor if the concrete type is compatible.
+		/// Thus the example above can be re-written as: \cpp
+		/// node.visit([](toml::value<std::string>& s) { do_something_with_a_string(*s)); });
+		/// node.visit([](toml::value<int64_t>& i)     { do_something_with_an_int(*i)); });
+		/// \ecpp
+		///
+		/// \tparam	Func	A callable type invocable with one or more of the toml++ node types.
 		///
 		/// \param 	visitor	The visitor object.
 		///
@@ -920,28 +920,28 @@ TOML_NAMESPACE_START
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) & noexcept(visit_is_nothrow<Func&&, node&>)
 		{
-			return do_visit(*this, static_cast<Func&&>(visitor));
+			return do_visit(static_cast<Func&&>(visitor), *this);
 		}
 
 		/// \brief	Invokes a visitor on the node based on the node's concrete type (rvalue overload).
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) && noexcept(visit_is_nothrow<Func&&, node&&>)
 		{
-			return do_visit(static_cast<node&&>(*this), static_cast<Func&&>(visitor));
+			return do_visit(static_cast<Func&&>(visitor), static_cast<node&&>(*this));
 		}
 
 		/// \brief	Invokes a visitor on the node based on the node's concrete type (const lvalue overload).
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) const& noexcept(visit_is_nothrow<Func&&, const node&>)
 		{
-			return do_visit(*this, static_cast<Func&&>(visitor));
+			return do_visit(static_cast<Func&&>(visitor), *this);
 		}
 
 		/// \brief	Invokes a visitor on the node based on the node's concrete type (const rvalue overload).
 		template <typename Func>
 		decltype(auto) visit(Func&& visitor) const&& noexcept(visit_is_nothrow<Func&&, const node&&>)
 		{
-			return do_visit(static_cast<const node&&>(*this), static_cast<Func&&>(visitor));
+			return do_visit(static_cast<Func&&>(visitor), static_cast<const node&&>(*this));
 		}
 
 		/// @}

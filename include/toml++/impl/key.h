@@ -287,7 +287,7 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Iterators
+		/// \name Iteration
 		/// @{
 
 		/// A const iterator for iterating over the characters in the key.
@@ -327,8 +327,8 @@ TOML_NAMESPACE_START
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::key,
 	///			or is implicitly or explicitly convertible to one.
 	template <typename T>
-	inline constexpr bool is_key_or_convertible =
-		is_key<T> || std::is_constructible_v<toml::key, T> || std::is_convertible_v<T, toml::key>;
+	inline constexpr bool is_key_or_convertible = is_key<T> //
+											   || impl::is_constructible_or_convertible<toml::key, T>;
 }
 TOML_NAMESPACE_END;
 

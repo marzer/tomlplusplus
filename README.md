@@ -99,13 +99,13 @@ You'll find some more code examples in the `examples` directory, and plenty more
 2. `#include <toml++/toml.h>`
 
 ### Conan
-Add `tomlplusplus/3.0.1` to your conanfile.
+Add `tomlplusplus/3.1.0` to your conanfile.
 
 ### DDS
 Add `tomlpp` to your `package.json5`, e.g.:
 ```
 depends: [
-    'tomlpp^3.0.1',
+    'tomlpp^3.1.0',
 ]
 ```
 > ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
@@ -121,11 +121,20 @@ include(FetchContent)
 FetchContent_Declare(
     tomlplusplus
     GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-    GIT_TAG        v3.0.1
+    GIT_TAG        v3.1.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 ```
 > ℹ&#xFE0F; _[What is FetchContent?](https://cmake.org/cmake/help/latest/module/FetchContent.html)_
+
+### Git submodules
+```
+git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusplus
+git config -f .gitmodules submodule.tomlplusplus.shallow true
+```
+> ℹ&#xFE0F; The toml++ repository has some submodules of its own, but **they are only used for testing**!
+> You do not need to use the `--recursive` option for regular library consumption.
+
 
 ### Other environments and package managers
 `toml++` is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options
