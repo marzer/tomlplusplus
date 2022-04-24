@@ -5625,7 +5625,10 @@ TOML_NAMESPACE_START
 				const auto keep_going =
 					static_cast<node_ref>(static_cast<Array&&>(arr)[i])
 						.visit(
-							[&](auto&& elem) noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>)
+							[&](auto&& elem)
+#if !TOML_MSVC || TOML_MSVC >= 1932 // older MSVC thinks this is invalid syntax O_o
+								noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>)
+#endif
 							{
 								using elem_ref = for_each_elem_ref<decltype(elem), Array&&>;
 								static_assert(std::is_reference_v<elem_ref>);
@@ -6931,7 +6934,10 @@ TOML_NAMESPACE_START
 				const auto keep_going =
 					static_cast<node_ref>(*kvp.second)
 						.visit(
-							[&](auto&& v) noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>)
+							[&](auto&& v)
+#if !TOML_MSVC || TOML_MSVC >= 1932 // older MSVC thinks this is invalid syntax O_o
+								noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>)
+#endif
 							{
 								using value_ref = for_each_value_ref<decltype(v), Table&&>;
 								static_assert(std::is_reference_v<value_ref>);
