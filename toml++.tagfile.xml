@@ -7748,6 +7748,13 @@
     </member>
     <member kind="define">
       <type>#define</type>
+      <name>TOML_EXPORTED_STATIC_FUNCTION</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>ga8436c6f378c73f3446a3b6f1e2c5e81c</anchor>
+      <arglist></arglist>
+    </member>
+    <member kind="define">
+      <type>#define</type>
       <name>TOML_ASSERT</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga8c407a8f6fe52a795db35be3f00393f8</anchor>

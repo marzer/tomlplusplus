@@ -116,6 +116,10 @@
             </dt>
             <dd>An 'export' annotation to add to non-static class member functions.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga8436c6f378c73f3446a3b6f1e2c5e81c">TOML_EXPORTED_STATIC_FUNCTION</a></span>
+            </dt>
+            <dd>An 'export' annotation to add to <code>static</code> class member functions.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga8219bfd7e75587516385b6022b28abc2">TOML_HEADER_ONLY</a></span>
             </dt>
             <dd>Sets whether the library is entirely inline.</dd>
@@ -207,6 +211,13 @@
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gadf515bb7a6b8ce6b14bf86c8961a63cb">TOML_EXPORTED_MEMBER_FUNCTION</a></span>
             </h3>
             <p>An 'export' annotation to add to non-static class member functions.</p>
+<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You might override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="ga8436c6f378c73f3446a3b6f1e2c5e81c"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga8436c6f378c73f3446a3b6f1e2c5e81c">TOML_EXPORTED_STATIC_FUNCTION</a></span>
+            </h3>
+            <p>An 'export' annotation to add to <code>static</code> class member functions.</p>
 <p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>You might override this with <code>__declspec(dllexport)</code> if you were building the library into the public API of a DLL on Windows.</p></aside>
           </div></section>
           <section class="m-doc-details" id="ga8219bfd7e75587516385b6022b28abc2"><div>
