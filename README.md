@@ -18,15 +18,16 @@
 
 # Library features
 
- - Header-only
- - Supports the latest [TOML] release ([v1.0.0]), plus optional support for some [unreleased TOML language features]
- - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
- - Proper UTF-8 handling (incl. BOM)
- - Works with or without exceptions
- - Doesn't require RTTI
- - Support for serializing to JSON and YAML
- - Tested on Clang (6+), GCC (7+) and MSVC (VS2019, VS2022)
- - Tested on x64, x86 and ARM
+- Header-only (optional!)
+- Supports the latest [TOML] release ([v1.0.0]), plus optional support for some unreleased TOML features
+- Passes all tests in the [toml-test](https://github.com/BurntSushi/toml-test) suite
+- Supports serializing to JSON and YAML
+- Proper UTF-8 handling (incl. BOM)
+- C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
+- Doesn't require RTTI
+- Works with or without exceptions
+- Tested on Clang (6+), GCC (7+) and MSVC (VS2019)
+- Tested on x64, x86 and ARM
 
 <br>
 
@@ -62,15 +63,18 @@ config.insert_or_assign("alternatives", toml::array{
     "Boost.TOML"
 });
 
-// iterate & visit over the data
+// use a visitor to iterate over heterogenous data
+config.for_each([](auto& key, auto& value)
+{
+    std::cout << value << "\n";
+    if constexpr (toml::is_string<decltype(value)>)
+        do_something_with_string_values(value);
+});
+
+// you can also iterate more 'traditionally' using a ranged-for
 for (auto&& [k, v] : config)
 {
-    v.visit([](auto& node) noexcept
-    {
-        std::cout << node << "\n";
-        if constexpr (toml::is_string<decltype(node)>)
-            do_something_with_string_values(node);
-    });
+    // ...
 }
 
 // re-serialize as TOML
@@ -91,12 +95,13 @@ You'll find some more code examples in the `examples` directory, and plenty more
 `toml++` comes in two flavours: Single-header and Regular. The API is the same for both. 
 
 ### 🍦&#xFE0F; Single-header flavour
-1. Drop `toml.hpp` wherever you like in your source tree
+1. Drop [`toml.hpp`] wherever you like in your source tree
 2. There is no step two
 
 ### 🍨&#xFE0F; Regular flavour
-1. Add `tomlplusplus/include` to your include paths
-2. `#include <toml++/toml.h>`
+1. Clone the repository
+2. Add `tomlplusplus/include` to your include paths
+3. `#include <toml++/toml.h>`
 
 ### Conan
 Add `tomlplusplus/3.1.0` to your conanfile.
@@ -114,6 +119,20 @@ depends: [
 ```
 vcpkg install tomlplusplus
 ```
+
+### Meson
+You can install the wrap with:
+
+```
+meson wrap install tomlplusplus
+```
+
+After that, you can use it like a regular dependency:
+```
+tomlplusplus_dep = dependency('tomlplusplus')
+```
+
+You can also add it as a subproject directly.
 
 ### CMake FetchContent
 ```
@@ -133,13 +152,14 @@ git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusp
 git config -f .gitmodules submodule.tomlplusplus.shallow true
 ```
 > ℹ&#xFE0F; The toml++ repository has some submodules of its own, but **they are only used for testing**!
-> You do not need to use the `--recursive` option for regular library consumption.
+> You should not use the `--recursive` option for regular library consumption.
 
 
 ### Other environments and package managers
-`toml++` is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options
-in the C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be
-assured that I fully support it being added, and welcome [pull requests](./CONTRIBUTING.md)!
+The C++ tooling ecosystem is a fractal nightmare of unbridled chaos so naturally I'm not up-to-speed with all of the
+available packaging and integration options. I'm always happy to see new ones supported, though! If there's some
+integration you'd like to see and have the technical know-how to make it happen, feel free to
+[make a pull request](./CONTRIBUTING.md).
 
 ### What about dependencies?
 If you just want to consume `toml++` as a regular library then you don't have any dependencies to worry about.
@@ -289,3 +309,5 @@ though you're welcome to reach out via other means. In order of likely response 
 [#891]: https://github.com/toml-lang/toml/pull/891
 [something better than std::optional]: https://github.com/TartanLlama/optional
 [m.css]: https://mcss.mosra.cz/documentation/doxygen
+[toml.hpp]: https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp
+[`toml.hpp`]: https://raw.githubusercontent.com/marzer/tomlplusplus/master/toml.hpp

@@ -1050,6 +1050,13 @@
 /// 		into the public API of a DLL on Windows.
 
 
+/// \def TOML_EXPORTED_STATIC_FUNCTION
+/// \brief An 'export' annotation to add to `static` class member functions.
+/// \detail Not defined by default.
+///	\remark You might override this with `__declspec(dllexport)` if you were building the library
+/// 		into the public API of a DLL on Windows.
+
+
 /// \def TOML_ASSERT(expr)
 /// \brief Sets the assert function used by the library.
 /// \detail Defaults to the standard C `assert()`.
