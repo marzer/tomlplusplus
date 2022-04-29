@@ -115,6 +115,17 @@ depends: [
 ```
 > ℹ&#xFE0F; _[What is DDS?](https://dds.pizza/)_
 
+### Tipi.build
+
+
+`tomlplusplus` can be easily used in [tipi.build](https://tipi.build) projects by adding the following entry to your `.tipi/deps`:
+
+```json
+{
+    "marzer/tomlplusplus": { }
+}
+```
+
 ### Vcpkg
 ```
 vcpkg install tomlplusplus
