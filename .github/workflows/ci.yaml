@@ -154,7 +154,7 @@ jobs:
 
           # create a deps file referencing the commit that triggered this build as dependency
           mkdir .tipi
-          echo '{ "requires": { "${{ github.event.repository.name }}": { "@": "${{ env.BRANCH_NAME }}" } } }' > .tipi/deps
+          echo '{ "requires": { "${{ github.event.repository.full_name }}": { "@": "${{ env.BRANCH_NAME }}" } } }' > .tipi/deps
 
           # build
           tipi . --dont-upgrade --verbose -t linux-cxx17
