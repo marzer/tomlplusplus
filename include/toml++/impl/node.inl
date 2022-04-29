@@ -102,16 +102,13 @@ TOML_IMPL_NAMESPACE_START
 		if ((!lhs != !rhs) || lhs->type() != rhs->type())
 			return false;
 
-		bool same;
-		lhs->visit(
-			[=, &same](auto& l) noexcept
+		return lhs->visit(
+			[=](auto& l) noexcept
 			{
 				using concrete_type = remove_cvref<decltype(l)>;
 
-				same = (l == *(rhs->as<concrete_type>()));
+				return l == *(rhs->as<concrete_type>());
 			});
-
-		return same;
 	}
 }
 TOML_IMPL_NAMESPACE_END;

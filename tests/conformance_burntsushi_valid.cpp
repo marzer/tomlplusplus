@@ -555,6 +555,12 @@ backslash = 'This string has a \\ backslash character.')"sv;
 	static constexpr auto string_with_pound	   = R"(pound = "We see no # comments here."
 poundcomment = "But there are # some comments here." # Did I # mess you up?)"sv;
 
+#if TOML_LANG_UNRELEASED
+
+	static constexpr auto string_escape_esc = R"(esc = "\e There is no escape! \e")"sv;
+
+#endif // TOML_LANG_UNRELEASED
+
 #if UNICODE_LITERALS_OK
 
 	static constexpr auto string_escape_tricky	 = R"(end_esc = "String does not end here\" but ends here\\"
@@ -2286,6 +2292,20 @@ in it.)"sv },
 							   };
 							   REQUIRE(tbl == expected);
 						   });
+
+#if TOML_LANG_UNRELEASED
+
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   string_escape_esc,
+						   [](toml::table&& tbl) // string-escape-esc
+						   {
+							   const auto expected = toml::table{
+								   { R"(esc)"sv, "\x1B There is no escape! \x1B"sv },
+							   };
+							   REQUIRE(tbl == expected);
+						   });
+
+#endif // TOML_LANG_UNRELEASED
 
 #if UNICODE_LITERALS_OK
 

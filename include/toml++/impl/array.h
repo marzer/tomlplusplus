@@ -773,7 +773,7 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \name Iterators
+		/// \name Iteration
 		/// @{
 
 		/// \brief A RandomAccessIterator for iterating over elements in a toml::array.
@@ -822,6 +822,235 @@ TOML_NAMESPACE_START
 		const_iterator cend() const noexcept
 		{
 			return const_iterator{ elems_.cend() };
+		}
+
+	  private:
+		/// \cond
+
+		template <typename T, typename Array>
+		using for_each_elem_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Array>;
+
+		template <typename Func, typename Array, typename T>
+		static constexpr bool can_for_each = std::is_invocable_v<Func, for_each_elem_ref<T, Array>, size_t> //
+										  || std::is_invocable_v<Func, size_t, for_each_elem_ref<T, Array>> //
+										  || std::is_invocable_v<Func, for_each_elem_ref<T, Array>>;
+
+		template <typename Func, typename Array, typename T>
+		static constexpr bool can_for_each_nothrow =
+			std::is_nothrow_invocable_v<Func, for_each_elem_ref<T, Array>, size_t>	  //
+			|| std::is_nothrow_invocable_v<Func, size_t, for_each_elem_ref<T, Array>> //
+			|| std::is_nothrow_invocable_v<Func, for_each_elem_ref<T, Array>>;
+
+		template <typename Func, typename Array>
+		static constexpr bool can_for_each_any = can_for_each<Func, Array, table>		//
+											  || can_for_each<Func, Array, array>		//
+											  || can_for_each<Func, Array, std::string> //
+											  || can_for_each<Func, Array, int64_t>		//
+											  || can_for_each<Func, Array, double>		//
+											  || can_for_each<Func, Array, bool>		//
+											  || can_for_each<Func, Array, date>		//
+											  || can_for_each<Func, Array, time>		//
+											  || can_for_each<Func, Array, date_time>;
+
+		template <typename Func, typename Array, typename T>
+		static constexpr bool for_each_is_nothrow_one = !can_for_each<Func, Array, T> //
+													 || can_for_each_nothrow<Func, Array, T>;
+
+		// clang-format off
+
+
+		template <typename Func, typename Array>
+		static constexpr bool for_each_is_nothrow = for_each_is_nothrow_one<Func, Array, table>		  //
+												 && for_each_is_nothrow_one<Func, Array, array>		  //
+												 && for_each_is_nothrow_one<Func, Array, std::string> //
+												 && for_each_is_nothrow_one<Func, Array, int64_t>	  //
+												 && for_each_is_nothrow_one<Func, Array, double>	  //
+												 && for_each_is_nothrow_one<Func, Array, bool>		  //
+												 && for_each_is_nothrow_one<Func, Array, date>		  //
+												 && for_each_is_nothrow_one<Func, Array, time>		  //
+												 && for_each_is_nothrow_one<Func, Array, date_time>;
+
+		// clang-format on
+
+		template <typename Func, typename Array>
+		static void do_for_each(Func&& visitor, Array&& arr) noexcept(for_each_is_nothrow<Func&&, Array&&>)
+		{
+			static_assert(can_for_each_any<Func&&, Array&&>,
+						  "TOML array for_each visitors must be invocable for at least one of the toml::node "
+						  "specializations:" TOML_SA_NODE_TYPE_LIST);
+
+			for (size_t i = 0; i < arr.size(); i++)
+			{
+				using node_ref = impl::copy_cvref<toml::node, Array&&>;
+				static_assert(std::is_reference_v<node_ref>);
+
+				const auto keep_going =
+					static_cast<node_ref>(static_cast<Array&&>(arr)[i])
+						.visit(
+							[&](auto&& elem)
+#if !TOML_MSVC || TOML_MSVC >= 1932 // older MSVC thinks this is invalid syntax O_o
+								noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>)
+#endif
+							{
+								using elem_ref = for_each_elem_ref<decltype(elem), Array&&>;
+								static_assert(std::is_reference_v<elem_ref>);
+
+								// func(elem, i)
+								if constexpr (std::is_invocable_v<Func&&, elem_ref, size_t>)
+								{
+									using return_type =
+										decltype(static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem), i));
+
+									if constexpr (impl::is_constructible_or_convertible<bool, return_type>)
+									{
+										return static_cast<bool>(
+											static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem), i));
+									}
+									else
+									{
+										static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem), i);
+										return true;
+									}
+								}
+
+								// func(i, elem)
+								else if constexpr (std::is_invocable_v<Func&&, size_t, elem_ref>)
+								{
+									using return_type =
+										decltype(static_cast<Func&&>(visitor)(i, static_cast<elem_ref>(elem)));
+
+									if constexpr (impl::is_constructible_or_convertible<bool, return_type>)
+									{
+										return static_cast<bool>(
+											static_cast<Func&&>(visitor)(i, static_cast<elem_ref>(elem)));
+									}
+									else
+									{
+										static_cast<Func&&>(visitor)(i, static_cast<elem_ref>(elem));
+										return true;
+									}
+								}
+
+								// func(elem)
+								else if constexpr (std::is_invocable_v<Func&&, elem_ref>)
+								{
+									using return_type =
+										decltype(static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem)));
+
+									if constexpr (impl::is_constructible_or_convertible<bool, return_type>)
+									{
+										return static_cast<bool>(
+											static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem)));
+									}
+									else
+									{
+										static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem));
+										return true;
+									}
+								}
+
+								// visitor not compatible with this particular type
+								else
+									return true;
+							});
+
+				if (!keep_going)
+					return;
+			}
+		}
+
+		/// \endcond
+
+	  public:
+		/// \brief	Invokes a visitor on each element in the array.
+		///
+		/// \tparam	Func	A callable type invocable with one of the following signatures:
+		///					<ul>
+		///					<li> `func(elem, index)`
+		///					<li> `func(elem)`
+		///					<li> `func(index, elem)`
+		///					</ul>
+		///					Where:
+		///					<ul>
+		///					<li> `elem` will recieve the element as it's concrete type with cvref-qualifications matching the array
+		///					<li> `index` will recieve a `size_t` indicating the element's index
+		///					</ul>
+		///					Visitors returning `bool` (or something convertible to `bool`) will cause iteration to
+		///					stop if they return `false`.
+		///
+		/// \param 	visitor	The visitor object.
+		///
+		/// \returns A reference to the array.
+		///
+		/// \details \cpp
+		/// toml::array arr{ 0, 1, 2, 3.0, "four", "five", 6 };
+		///
+		/// // select only the integers using a strongly-typed visitor
+		/// arr.for_each([](toml::value<int64_t>& elem)
+		/// {
+		///		std::cout << elem << ", ";
+		/// });
+		/// std::cout << "\n";
+		///
+		/// // select all the numeric values using a generic visitor + is_number<> metafunction
+		/// arr.for_each([](auto&& elem)
+		/// {
+		///		if constexpr (toml::is_number<decltype(elem)>)
+		///			std::cout << elem << ", ";
+		/// });
+		/// std::cout << "\n";
+		///
+		/// // select all the numeric values until we encounter something non-numeric
+		/// arr.for_each([](auto&& elem)
+		/// {
+		///		if constexpr (toml::is_number<decltype(elem)>)
+		///		{
+		///			std::cout << elem << ", ";
+		///			return true; // "keep going"
+		///		}
+		///		else
+		///			return false; // "stop!"
+		///
+		/// });
+		/// std::cout << "\n";
+		///
+		/// \ecpp
+		/// \out
+		/// 0, 1, 2, 6,
+		/// 0, 1, 2, 3.0, 6,
+		/// 0, 1, 2, 3.0,
+		/// \eout
+		///
+		/// \see node::visit()
+		template <typename Func>
+		array& for_each(Func&& visitor) & noexcept(for_each_is_nothrow<Func&&, array&>)
+		{
+			do_for_each(static_cast<Func&&>(visitor), *this);
+			return *this;
+		}
+
+		/// \brief	Invokes a visitor on each element in the array (rvalue overload).
+		template <typename Func>
+		array&& for_each(Func&& visitor) && noexcept(for_each_is_nothrow<Func&&, array&&>)
+		{
+			do_for_each(static_cast<Func&&>(visitor), static_cast<array&&>(*this));
+			return static_cast<array&&>(*this);
+		}
+
+		/// \brief	Invokes a visitor on each element in the array (const lvalue overload).
+		template <typename Func>
+		const array& for_each(Func&& visitor) const& noexcept(for_each_is_nothrow<Func&&, const array&>)
+		{
+			do_for_each(static_cast<Func&&>(visitor), *this);
+			return *this;
+		}
+
+		/// \brief	Invokes a visitor on each element in the array (const rvalue overload).
+		template <typename Func>
+		const array&& for_each(Func&& visitor) const&& noexcept(for_each_is_nothrow<Func&&, const array&&>)
+		{
+			do_for_each(static_cast<Func&&>(visitor), static_cast<const array&&>(*this));
+			return static_cast<const array&&>(*this);
 		}
 
 		/// @}
@@ -1004,8 +1233,6 @@ TOML_NAMESPACE_START
 		array& flatten() &;
 
 		/// \brief	 Flattens this array, recursively hoisting the contents of child arrays up into itself (rvalue overload).
-		///
-		/// \returns An rvalue reference to the array.
 		array&& flatten() &&
 		{
 			return static_cast<toml::array&&>(this->flatten());
