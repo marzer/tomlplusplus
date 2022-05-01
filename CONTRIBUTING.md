@@ -21,7 +21,7 @@ If you wish to submit a PR, please be aware that:
 <br>
 
 ## Building and running the tests
-Testing is done using [Catch2], vendored in the respository at `vendor/catch.hpp`.
+Testing is done using [Catch2].
 
 ### Testing on Windows with Visual Studio
 
@@ -60,8 +60,11 @@ cd build-gcc-debug && ninja && ninja test               \
     && cd ..
 ```
 
-> ℹ&#xFE0F; Note: To ensure parity between single-header and regular versions of the library, 50% of the tests
+> ℹ&#xFE0F; To ensure parity between single-header and regular versions of the library, 50% of the tests
 will be compiled using one, and 50% with the other. Ensure you've regenerated toml.hpp before running tests.
+
+> ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to meson if you wish to use the system-installed version
+of Catch2 rather than the vendored one.
 
 <br>
 

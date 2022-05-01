@@ -29,9 +29,10 @@ test_sources = [
 	'windows_compat.cpp'
 ]
 
-test_deps = [tomlplusplus_dep]
-
-fs = import('fs')
+test_deps = [ tomlplusplus_dep ]
+if not get_option('use_vendored_libs')
+	test_deps += dependency('catch2')
+endif
 
 #######################################################################################################################
 # fast math check
@@ -208,6 +209,10 @@ foreach cpp20 : cpp20_modes
 
 				if single_header
 					test_args += '-DUSE_SINGLE_HEADER=1'
+				endif
+
+				if not get_option('use_vendored_libs')
+					test_args += '-DUSE_VENDORED_LIBS=0'
 				endif
 
 				test_executables += [[

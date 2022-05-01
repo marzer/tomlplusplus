@@ -22,7 +22,15 @@
 #pragma warning(disable : 5105)
 #endif
 
+#if !defined(USE_VENDORED_LIBS) || USE_VENDORED_LIBS
 #include "../vendor/catch.hpp"
+#elif __has_include(<Catch2/single_include/catch2/catch.hpp>)
+#include <Catch2/single_include/catch2/catch.hpp>
+#elif __has_include(<catch2/catch.hpp>)
+#include <catch2/catch.hpp>
+#else
+#error Catch2 is missing!
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic pop
