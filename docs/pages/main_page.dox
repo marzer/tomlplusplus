@@ -521,8 +521,8 @@ FetchContent_MakeAvailable(tomlplusplus)
 git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusplus
 git config -f .gitmodules submodule.tomlplusplus.shallow true
 \ebash
-\note The toml++ repository has some submodules of its own, but **they are only used for testing**! You should not use
-the `--recursive` option for regular library consumption.
+\attention The toml++ repository has some submodules of its own, but **they are only used for testing**!
+You should **not** use the `--recursive` option for regular library consumption.
 
 
 
@@ -535,7 +535,7 @@ integration you'd like to see and have the technical know-how to make it happen,
 
 \subsection mainpage-adding-lib-python Special mention: Python
 There exists a python wrapper library built around toml++ called
-\github{bobfang1992/pytomlpp, pytomlpp} which is, at the time of writing, the one of only two natively-compiled
+\github{bobfang1992/pytomlpp, pytomlpp} which is, at the time of writing, one of only two natively-compiled
 TOML libraries available for python, and thus one of the fastest options available:
 
 \out
@@ -554,8 +554,8 @@ Install it using `pip`:
 pip install pytomlpp
 \ebash
 
-Note that I'm not the owner of that project so if you wish to report a bug relating to the python
-implementation, please do so at their repository, not on the main toml++ one.
+Note that I'm not the owner of that project, so if you wish to report a bug relating to the python
+implementation please do so at their repository, not on the main toml++ one.
 
 
 

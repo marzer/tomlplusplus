@@ -404,9 +404,10 @@
 #endif
 
 // dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
-#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)		   \
+#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)        \
 		&& !defined(TOML_EXPORTED_STATIC_FUNCTION) \
 		&& !defined(TOML_EXPORTED_FREE_FUNCTION)   \
+		&& !defined(TOML_EXPORTED_CLASS)           \
 		&& defined(TOML_API)
 	#define TOML_EXPORTED_MEMBER_FUNCTION	TOML_API
 	#define TOML_EXPORTED_STATIC_FUNCTION	TOML_API

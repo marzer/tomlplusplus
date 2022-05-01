@@ -60,7 +60,7 @@
 	<PropertyGroup>
 		<OutDir>$(TomlOutRoot)bin\win$(PlatformArchitecture)_vc$(PlatformToolsetVersion)_$(Configuration)_$(ConfigurationType)\</OutDir>
 		<IntDir>$(TomlOutRoot)build\$(ProjectName)_win$(PlatformArchitecture)_vc$(PlatformToolsetVersion)_$(Configuration)\</IntDir>
-		<IncludePath>$(TomlRepoRoot)include;$(TomlRepoRoot)external;$(IncludePath)</IncludePath>
+		<IncludePath>$(TomlRepoRoot)include;$(IncludePath)</IncludePath>
 	</PropertyGroup>
 
 	<!-- :: base compiler settings -->
@@ -197,4 +197,3 @@
 	</Target>
 	
 </Project>
-

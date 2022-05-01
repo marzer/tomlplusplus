@@ -22,14 +22,6 @@
 #define LEAK_TESTS 0
 #endif
 
-// use tl::optional?
-#if defined(USE_TARTANLLAMA_OPTIONAL) && USE_TARTANLLAMA_OPTIONAL
-#define TOML_OPTIONAL_TYPE tl::optional
-#else
-#undef USE_TARTANLLAMA_OPTIONAL
-#define USE_TARTANLLAMA_OPTIONAL 0
-#endif
-
 // catch2 config
 #define CATCH_CONFIG_CPP11_TO_STRING
 #define CATCH_CONFIG_CPP17_OPTIONAL

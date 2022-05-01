@@ -93,8 +93,12 @@
     <None Include=".github\workflows\ci.yaml" />
     <None Include=".github\workflows\gh-pages.yaml" />
     <None Include=".gitignore" />
+    <None Include=".gitmodules" />
     <None Include=".runsettings" />
+    <None Include=".tipi\deps" />
     <None Include="CHANGELOG.md" />
+    <None Include="cmake\tomlplusplusConfig.cmake.meson.in" />
+    <None Include="cmake\tomlplusplusConfigVersion.cmake.meson.in" />
     <None Include="CODE_OF_CONDUCT.md" />
     <None Include="CONTRIBUTING.md" />
     <None Include="include\meson.build" />
@@ -105,7 +109,6 @@
     <None Include="README.md" />
     <None Include="cmake\install-rules.cmake" />
     <None Include="cmake\project-is-top-level.cmake" />
-    <None Include="cmake\tomlplusplus.cmake.in" />
     <None Include="cmake\tomlplusplusConfig.cmake" />
     <None Include="cmake\variables.cmake" />
     <None Include="cpp.hint" />
@@ -121,6 +124,7 @@
     <None Include="tools\generate_single_header.py" />
     <None Include="tools\generate_windows_test_targets.py" />
     <None Include="tools\utils.py" />
+    <None Include="vendor\README.md" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="toml++.natvis" />

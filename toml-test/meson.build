@@ -1,6 +1,5 @@
 tt_deps = [
-	tomlplusplus_dep,
-	dependency('nlohmann_json', fallback: ['json', 'nlohmann_json_dep'])
+	tomlplusplus_dep
 ]
 
 if get_option('build_tt_encoder')

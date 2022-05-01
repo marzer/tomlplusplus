@@ -419,9 +419,10 @@
 #endif
 
 // dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
-#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)		   \
+#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)        \
 		&& !defined(TOML_EXPORTED_STATIC_FUNCTION) \
 		&& !defined(TOML_EXPORTED_FREE_FUNCTION)   \
+		&& !defined(TOML_EXPORTED_CLASS)           \
 		&& defined(TOML_API)
 	#define TOML_EXPORTED_MEMBER_FUNCTION	TOML_API
 	#define TOML_EXPORTED_STATIC_FUNCTION	TOML_API
@@ -3530,7 +3531,7 @@ TOML_NAMESPACE_START
 	  private:
 
 		template <typename Func>
-		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
+		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func>()));
 
 	  public:
 

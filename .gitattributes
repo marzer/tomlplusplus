@@ -63,3 +63,5 @@ meson.build        text         eol=lf      encoding=UTF-8
 *.psd              binary
 *.rc               binary
 *.xlsx             binary
+
+vendor/* linguist-vendored

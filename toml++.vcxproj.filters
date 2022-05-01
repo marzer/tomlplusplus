@@ -181,9 +181,6 @@
     <None Include="cmake\variables.cmake">
       <Filter>cmake</Filter>
     </None>
-    <None Include="cmake\tomlplusplus.cmake.in">
-      <Filter>cmake</Filter>
-    </None>
     <None Include=".clang-format" />
     <None Include=".editorconfig" />
     <None Include="tools\clang_format.bat">
@@ -229,6 +226,19 @@
     <None Include=".github\workflows\gh-pages.yaml">
       <Filter>.github\workflows</Filter>
     </None>
+    <None Include="cmake\tomlplusplusConfig.cmake.meson.in">
+      <Filter>cmake</Filter>
+    </None>
+    <None Include="cmake\tomlplusplusConfigVersion.cmake.meson.in">
+      <Filter>cmake</Filter>
+    </None>
+    <None Include=".tipi\deps">
+      <Filter>.tipi</Filter>
+    </None>
+    <None Include=".gitmodules" />
+    <None Include="vendor\README.md">
+      <Filter>vendor</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include=".circleci">
@@ -260,6 +270,12 @@
     </Filter>
     <Filter Include=".github\workflows">
       <UniqueIdentifier>{f9731b43-6c33-4209-9e53-e65af54f80c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include=".tipi">
+      <UniqueIdentifier>{f34bec4a-27c1-478d-bdff-2f672cb564db}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="vendor">
+      <UniqueIdentifier>{d6d69e89-b238-4dee-9f6a-68b755154539}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

@@ -52,7 +52,7 @@ jobs:
     - name: Install dependencies
       run: |
         apt-get -y update
-        apt-get -y install --no-install-recommends ${{ matrix.compiler }} lld meson pkgconf git ca-certificates locales-all python3-pip catch2 nlohmann-json3-dev
+        apt-get -y install --no-install-recommends ${{ matrix.compiler }} lld meson pkgconf git ca-certificates locales-all python3-pip
 
     - uses: actions/checkout@v2
 
@@ -93,8 +93,6 @@ jobs:
         pip3 install meson ninja
 
     - uses: actions/checkout@v2
-      with:
-        submodules: true
 
     - uses: ilammy/msvc-dev-cmd@v1
 

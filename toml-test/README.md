@@ -11,11 +11,7 @@
 For this document to make sense, you will need to:
 1. Follow the installation instructions from the [toml-test] README to compile the `toml-test` runner
 2. Add `toml-test` as an alias or have it on the system PATH
-3. Clone the toml++ repository's [nlohmann/json] submodule:
-```bash
-git submodule update --init --depth 1 external/json
-```
-4. **Linux only:** Install `ninja` and `meson`:
+3. **Linux only:** Install `ninja` and `meson`:
 ```bash
 sudo apt update && sudo apt install -y python3 python3-pip ninja-build
 sudo pip3 install meson
@@ -46,5 +42,4 @@ ninja && toml-test ./toml-test/tt_decoder && toml-test ./toml-test/tt_encoder --
 
 [toml-test]: https://github.com/BurntSushi/toml-test
 [CONTRIBUTING]: ../CONTRIBUTING.md
-[nlohmann/json]: https://github.com/nlohmann/json
 [meson]: https://mesonbuild.com/

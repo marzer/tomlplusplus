@@ -6,10 +6,6 @@
 #pragma once
 #include "settings.h"
 
-#if USE_TARTANLLAMA_OPTIONAL
-#include "lib_tloptional.h"
-#endif
-
 #if USE_SINGLE_HEADER
 #include "../toml.hpp"
 #else

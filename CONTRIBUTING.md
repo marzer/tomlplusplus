@@ -21,11 +21,7 @@ If you wish to submit a PR, please be aware that:
 <br>
 
 ## Building and running the tests
-Testing is done using [Catch2], included in the respository as a submodule under `extern/Catch2`.
-The first time you want to begin testing you'll need to ensure submodules have been fetched:  
-```bash
-git submodule update --init --depth 1 external/Catch2 external/tloptional
-```
+Testing is done using [Catch2], vendored in the respository at `vendor/catch.hpp`.
 
 ### Testing on Windows with Visual Studio
 

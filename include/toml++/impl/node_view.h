@@ -567,7 +567,7 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 		template <typename Func>
-		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func&&>()));
+		static constexpr bool visit_is_nothrow = noexcept(std::declval<viewed_type*>()->visit(std::declval<Func>()));
 		/// \endcond
 
 	  public:

@@ -4,7 +4,6 @@ project(
 	version: '3.1.0',
 	meson_version: '>=0.54.0',
 	license: 'MIT',
-	subproject_dir: 'external',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
 		# core options
 		'buildtype=release',

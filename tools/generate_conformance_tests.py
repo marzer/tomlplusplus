@@ -438,8 +438,30 @@ def add_condition(tests, condition, names):
 
 
 
-def load_valid_inputs(tests, extern_root):
-	tests['valid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'valid'), True, (
+def find_tests_dir(*relative_path):
+	paths = (
+		(Path.cwd(),),
+		('.',),
+		(utils.entry_script_dir(), '..', '..') # side-by-side with toml_++ repo folder
+	)
+	for p in paths:
+		try:
+			path = Path(*p, *relative_path).resolve()
+			if path.exists() and path.is_dir():
+				return path
+		except:
+			pass
+	return None
+
+
+
+def load_burnsushi_tests(tests):
+
+	root_dir = find_tests_dir('toml-test', 'tests')
+	if root_dir is None:
+		raise Exception(r'could not find burntsushi/toml-test')
+
+	tests['valid']['burntsushi'] = load_tests(Path(root_dir, 'valid'), True, (
 		# broken by the json reader
 		'key-alphanum',
 	))
@@ -450,7 +472,30 @@ def load_valid_inputs(tests, extern_root):
 		'string-escape-esc', # \e in strings
 	))
 
-	tests['valid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'values'), True, (
+	tests['invalid']['burntsushi'] = load_tests(Path(root_dir, 'invalid'), False)
+	add_condition(tests['invalid']['burntsushi'], '!TOML_LANG_UNRELEASED', (
+		'datetime-no-secs',
+		re.compile(r'inline-table-linebreak-.*'),
+		'inline-table-trailing-comma',
+		'key-special-character',
+		'multi-line-inline-table',
+		'string-basic-byte-escapes',
+	))
+
+
+
+def load_iarna_tests(tests):
+
+	root_dir = find_tests_dir('toml-spec-tests')
+	if root_dir is None:
+		raise Exception(r'could not find iarni/toml-spec-tests')
+
+	tests['invalid']['iarna'] = load_tests(Path(root_dir, 'errors'), False)
+	add_condition(tests['invalid']['iarna'], '!TOML_LANG_UNRELEASED', (
+		'inline-table-trailing-comma',
+	))
+
+	tests['valid']['iarna'] = load_tests(Path(root_dir, 'values'), True, (
 		# these are stress-tests for 'large' datasets. I test these separately. Having them inline in C++ code is insane.
 		'qa-array-inline-1000',
 		'qa-array-inline-nested-1000',
@@ -466,24 +511,6 @@ def load_valid_inputs(tests, extern_root):
 		'spec-date-time-6',
 		'spec-date-time-local-2',
 		'spec-time-2',
-	))
-
-
-
-def load_invalid_inputs(tests, extern_root):
-	tests['invalid']['burntsushi'] = load_tests(Path(extern_root, 'toml-test', 'tests', 'invalid'), False)
-	add_condition(tests['invalid']['burntsushi'], '!TOML_LANG_UNRELEASED', (
-		'datetime-no-secs',
-		re.compile(r'inline-table-linebreak-.*'),
-		'inline-table-trailing-comma',
-		'key-special-character',
-		'multi-line-inline-table',
-		'string-basic-byte-escapes',
-	))
-
-	tests['invalid']['iarna'] = load_tests(Path(extern_root, 'toml-spec-tests', 'errors'), False)
-	add_condition(tests['invalid']['iarna'], '!TOML_LANG_UNRELEASED', (
-		'inline-table-trailing-comma',
 	))
 
 
@@ -586,12 +613,9 @@ def write_test_file(name, all_tests):
 
 
 def main():
-	extern_root = Path(utils.entry_script_dir(), '..', 'external').resolve()
-	utils.assert_existing_directory(extern_root)
-	assert extern_root.exists()
 	all_tests = { 'valid': dict(), 'invalid': dict() }
-	load_valid_inputs(all_tests, extern_root)
-	load_invalid_inputs(all_tests, extern_root)
+	load_burnsushi_tests(all_tests)
+	load_iarna_tests(all_tests)
 	for validity, sources in all_tests.items():
 		for source, tests in sources.items():
 			write_test_file('{}/{}'.format(source, validity), tests )
