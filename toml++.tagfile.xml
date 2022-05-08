@@ -533,8 +533,8 @@
       <type>decltype(auto)</type>
       <name>emplace_back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae9ceab13446e118333e3a486e81c2448</anchor>
-      <arglist>(ElemArgs &amp;&amp;... args)</arglist>
+      <anchor>ad1383e120e7f8d8fe54e07dab164bd6d</anchor>
+      <arglist>(Args &amp;&amp;... args)</arglist>
     </member>
     <member kind="function">
       <type>bool</type>
@@ -1296,8 +1296,8 @@
       <type>decltype(auto)</type>
       <name>emplace_back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae9ceab13446e118333e3a486e81c2448</anchor>
-      <arglist>(ElemArgs &amp;&amp;... args)</arglist>
+      <anchor>ad1383e120e7f8d8fe54e07dab164bd6d</anchor>
+      <arglist>(Args &amp;&amp;... args)</arglist>
     </member>
     <member kind="function">
       <type>bool</type>

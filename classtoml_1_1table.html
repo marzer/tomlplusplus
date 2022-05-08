@@ -206,13 +206,13 @@
           <h2><a href="#insertion-and-emplacement">Insertion and Emplacement</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;</div>
+              <div class="m-doc-template">template&lt;typename ValueType = void, typename KeyType, typename... ValueArgs&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a485d7763c578d716b4f22abb1db3c975">emplace</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
               ValueArgs &amp;&amp; ... args) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#a87e055bad435d5332dc496c518733a4d">iterator</a>, bool&gt;</span>
             </dt>
             <dd>Emplaces a new value at a specific key if one did not already exist.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;</div>
+              <div class="m-doc-template">template&lt;typename ValueType = void, typename KeyType, typename... ValueArgs&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0d2378b5d13432bf8e325c388c650189">emplace_hint</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a68fea8ca9b1018f9675fd346b9f4512e">const_<wbr/>iterator</a> hint,
               KeyType&amp;&amp; key,
               ValueArgs &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1table.html#a87e055bad435d5332dc496c518733a4d">iterator</a></span>
@@ -1014,7 +1014,7 @@
           <section class="m-doc-details" id="a485d7763c578d716b4f22abb1db3c975"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;
+                template&lt;typename ValueType = void, typename KeyType, typename... ValueArgs&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/utility/pair.html" target="_blank">std::<wbr/>pair</a>&lt;<a class="m-doc" href="classtoml_1_1table.html#a87e055bad435d5332dc496c518733a4d">iterator</a>, bool&gt; toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a485d7763c578d716b4f22abb1db3c975">emplace</a>(</span><span class="m-doc-wrap">KeyType&amp;&amp; key,
               ValueArgs &amp;&amp; ... args)</span></span>
@@ -1079,7 +1079,7 @@
           <section class="m-doc-details" id="a0d2378b5d13432bf8e325c388c650189"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename ValueType, typename KeyType, typename... ValueArgs&gt;
+                template&lt;typename ValueType = void, typename KeyType, typename... ValueArgs&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html#a87e055bad435d5332dc496c518733a4d">iterator</a> toml::<wbr/>table::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0d2378b5d13432bf8e325c388c650189">emplace_hint</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html#a68fea8ca9b1018f9675fd346b9f4512e">const_<wbr/>iterator</a> hint,
               KeyType&amp;&amp; key,

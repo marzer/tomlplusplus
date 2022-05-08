@@ -115,7 +115,7 @@
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 
 <span class="c1">// emplace elements</span>
-<span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">"ten"</span><span class="p">);</span>
+<span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="p">(</span><span class="s">"ten"</span><span class="p">);</span>
 <span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mf">12.0</span><span class="p">);</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3, 4, 'five' ]</span>
 <span class="go">[ 2, 3, 4, 5, 'six' ]</span>
@@ -235,14 +235,14 @@
           <h2><a href="#insertion-and-emplacement">Insertion and Emplacement</a></h2>
           <dl class="m-doc">
             <dt>
-              <div class="m-doc-template">template&lt;typename ElemType, typename... Args&gt;</div>
+              <div class="m-doc-template">template&lt;typename ElemType = void, typename... Args&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4110b96386b33097a255f3694ac01d4a">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               Args &amp;&amp; ... args) -&gt; <a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a></span>
             </dt>
             <dd>Emplaces a new element at a specific position in the array.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename ElemType, typename... ElemArgs&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae9ceab13446e118333e3a486e81c2448">emplace_back</a>(</span><span class="m-doc-wrap">ElemArgs &amp;&amp; ... args) -&gt; decltype(auto)</span>
+              <div class="m-doc-template">template&lt;typename ElemType = void, typename... Args&gt;</div>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad1383e120e7f8d8fe54e07dab164bd6d">emplace_back</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) -&gt; decltype(auto)</span>
             </dt>
             <dd>Emplaces a new element at the end of the array.</dd>
             <dt>
@@ -959,7 +959,7 @@
           <section class="m-doc-details" id="a4110b96386b33097a255f3694ac01d4a"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename ElemType, typename... Args&gt;
+                template&lt;typename ElemType = void, typename... Args&gt;
               </div>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html#a62a18471ca7c5b06204d2e26c963f833">iterator</a> toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4110b96386b33097a255f3694ac01d4a">emplace</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1array.html#adfd38318d3390a76f073a83fd2f2aa21">const_<wbr/>iterator</a> pos,
               Args &amp;&amp; ... args)</span></span>
@@ -1005,12 +1005,12 @@
 <span class="n">arr</span><span class="p">.</span><span class="n">emplace</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">cbegin</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="s">"this is not a drill"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="mi">14</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 'drill', 2 ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#a17c7e34b433ea8907186dbb1788c9d37">insert()</a> and <a class="m-doc" href="classtoml_1_1array.html#a4110b96386b33097a255f3694ac01d4a">emplace()</a> for trivial value types (floats, ints, bools).</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ae9ceab13446e118333e3a486e81c2448"><div>
+          <section class="m-doc-details" id="ad1383e120e7f8d8fe54e07dab164bd6d"><div>
             <h3>
               <div class="m-doc-template">
-                template&lt;typename ElemType, typename... ElemArgs&gt;
+                template&lt;typename ElemType = void, typename... Args&gt;
               </div>
-              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae9ceab13446e118333e3a486e81c2448">emplace_back</a>(</span><span class="m-doc-wrap">ElemArgs &amp;&amp; ... args)</span></span>
+              <span class="m-doc-wrap-bumper">decltype(auto) toml::<wbr/>array::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad1383e120e7f8d8fe54e07dab164bd6d">emplace_back</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args)</span></span>
             </h3>
             <p>Emplaces a new element at the end of the array.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1023,7 +1023,7 @@
                   <td><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>, or a native TOML value type</td>
                 </tr>
                 <tr>
-                  <td>ElemArgs</td>
+                  <td>Args</td>
                   <td>Element constructor argument types.</td>
                 </tr>
               </tbody>
@@ -1045,7 +1045,7 @@
             </table>
 <pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="p">};</span>
 <span class="n">arr</span><span class="p">.</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="s">"four"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, [ 3, 'four' ] ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#ab7188537b351ef3a756b54b83e4b05b3">push_<wbr/>back()</a> and <a class="m-doc" href="classtoml_1_1array.html#ae9ceab13446e118333e3a486e81c2448">emplace_<wbr/>back()</a> For trivial value types (floats, ints, bools).</p></aside>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, [ 3, 'four' ] ]</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>There is no difference between <a class="m-doc" href="classtoml_1_1array.html#ab7188537b351ef3a756b54b83e4b05b3">push_<wbr/>back()</a> and <a class="m-doc" href="classtoml_1_1array.html#ad1383e120e7f8d8fe54e07dab164bd6d">emplace_<wbr/>back()</a> For trivial value types (floats, ints, bools).</p></aside>
           </div></section>
           <section class="m-doc-details" id="a17c7e34b433ea8907186dbb1788c9d37"><div>
             <h3>
