@@ -13,6 +13,12 @@ template:
 
 -->
 
+## Unreleased
+
+#### Additions:
+- Added value type deduction to `emplace()` methods
+
+<br><br>
 
 ## [v3.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) - 2022-04-22
 

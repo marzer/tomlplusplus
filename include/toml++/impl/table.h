@@ -1430,7 +1430,7 @@ TOML_NAMESPACE_START
 		///
 		/// \note This function has exactly the same semantics as [std::map::emplace_hint()](https://en.cppreference.com/w/cpp/container/map/emplace_hint).
 		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
-								  typename ValueType,
+								  typename ValueType = void,
 								  typename KeyType,
 								  typename... ValueArgs)
 		iterator emplace_hint(const_iterator hint, KeyType&& key, ValueArgs&&... args)
@@ -1440,23 +1440,25 @@ TOML_NAMESPACE_START
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
+			using value_type =
+				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace_hint<ValueType>(hint,
-											   impl::narrow(static_cast<KeyType&&>(key)),
-											   static_cast<ValueArgs&&>(args)...);
+				return emplace_hint<value_type>(hint,
+												impl::narrow(static_cast<KeyType&&>(key)),
+												static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
 			{
-				static constexpr auto moving_node_ptr = std::is_same_v<ValueType, impl::node_ptr> //
-													 && sizeof...(ValueArgs) == 1u				  //
+				static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
+													 && sizeof...(ValueArgs) == 1u				   //
 													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
-				using unwrapped_type = impl::unwrap_node<ValueType>;
+				using unwrapped_type = impl::unwrap_node<value_type>;
 
 				static_assert(moving_node_ptr										//
 								  || impl::is_native<unwrapped_type>				//
@@ -1774,7 +1776,7 @@ TOML_NAMESPACE_START
 		///
 		/// \remark There is no difference between insert() and emplace() for trivial value types (floats, ints, bools).
 		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
-								  typename ValueType,
+								  typename ValueType = void,
 								  typename KeyType,
 								  typename... ValueArgs)
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
@@ -1784,18 +1786,21 @@ TOML_NAMESPACE_START
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
+			using value_type =
+				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace<ValueType>(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueArgs&&>(args)...);
+				return emplace<value_type>(impl::narrow(static_cast<KeyType&&>(key)),
+										   static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
 			{
-				using unwrapped_type = impl::unwrap_node<ValueType>;
+				using unwrapped_type = impl::unwrap_node<value_type>;
 				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
 							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);

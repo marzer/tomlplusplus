@@ -25,8 +25,6 @@ on:
       - '**/workflows/**.yaml'
   workflow_dispatch:
 
-
-# This ensures that jobs get canceled when force-pushing
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,36 +34,39 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [ 'g++', 'clang' ]
-        type: [ 'debug', 'release' ]
-        compile_library: [ true, false ]
+        compiler:
+          - 'clang++'
+          - 'g++'
+        linker:
+          - 'lld'
+        type:
+          - 'debug'
+          - 'release'
+        compile_library:
+          - 'true'
+          - 'false'
 
     runs-on: ubuntu-latest
-    container:
-      image: debian:testing
-
-    defaults:
-      run:
-        shell: sh
 
     steps:
     - name: Install dependencies
       run: |
-        apt-get -y update
-        apt-get -y install --no-install-recommends ${{ matrix.compiler }} lld meson pkgconf git ca-certificates locales-all python3-pip
+        sudo apt -y update
+        if [ ${{ matrix.compiler }} = clang++ ]; then compiler=clang; else compiler=${{ matrix.compiler }}; fi
+        sudo apt -y install --no-install-recommends $compiler ${{ matrix.linker }} pkgconf git ca-certificates locales-all python3 python3-pip python3-setuptools python3-wheel ninja-build
+        sudo pip3 install --upgrade meson
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: Check toml.hpp
       run: |
-        pip3 install --upgrade --requirement tools/requirements.txt 
+        sudo pip3 install --upgrade --requirement tools/requirements.txt
         cd tools
-        ./ci_single_header_check.py
+        python3 ci_single_header_check.py
 
     - name: Configure Meson
       run: |
-        if [ ${{ matrix.compiler }} = g++ ]; then linker=gold; else linker=lld; fi
-        CXX_LD=$linker meson setup build --buildtype=${{ matrix.type }} -Dcompile_library=${{ matrix.compile_library }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dubsan_examples=true -Dasan_examples=true
+        CXX=${{ matrix.compiler }} CXX_LD=${{ matrix.linker }} meson setup build --buildtype=${{ matrix.type }} -Dcompile_library=${{ matrix.compile_library }} -Dpedantic=true -Dbuild_tests=true -Dbuild_examples=true -Dgenerate_cmake_config=false -Db_lto=false -Dubsan_examples=true -Dasan_examples=true
 
     - name: Build
       run: meson compile -C build --jobs -1
@@ -77,8 +78,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        type: [ 'debug', 'release' ]
-        compile_library: [ true ] # , false ] # ... header-only mode takes far too long on github's windows runner
+        type:
+          - 'debug'
+          - 'release'
+        compile_library:
+          - 'true'
+          # - 'false' # ... header-only mode takes far too long on github's windows runner
 
     runs-on: windows-2022
 

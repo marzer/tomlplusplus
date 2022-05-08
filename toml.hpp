@@ -4921,7 +4921,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct inserted_type_of_<inserter<T>, false>
 	{
-		using type = typename inserted_type_of_<T>::type;
+		using type = typename inserted_type_of_<remove_cvref<T>>::type;
 	};
 
 	template <typename T>
@@ -4936,6 +4936,29 @@ TOML_IMPL_NAMESPACE_START
 	{
 		return node_ptr{ make_node_impl(static_cast<T&&>(val), flags) };
 	}
+
+	template <typename... T>
+	struct emplaced_type_of_
+	{
+		using type = void;
+	};
+
+	template <typename T>
+	struct emplaced_type_of_<T>
+	{
+		using type = std::conditional_t<is_one_of<T, node, node_view<node>, node_view<const node>>,
+										void,
+										typename inserted_type_of_<T>::type>;
+	};
+
+	template <typename T>
+	struct emplaced_type_of_<inserter<T>>
+	{
+		using type = typename emplaced_type_of_<remove_cvref<T>>::type;
+	};
+
+	template <typename... T>
+	using emplaced_type_of = typename emplaced_type_of_<remove_cvref<T>...>::type;
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -5891,10 +5914,13 @@ TOML_NAMESPACE_START
 			return insert(pos, ilist.begin(), ilist.end(), flags);
 		}
 
-		template <typename ElemType, typename... Args>
+		template <typename ElemType = void, typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
-			using type = impl::unwrap_node<ElemType>;
+			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
+			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
+
+			using type = impl::unwrap_node<elem_type>;
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
@@ -5924,16 +5950,17 @@ TOML_NAMESPACE_START
 			emplace_back_if_not_empty_view(static_cast<ElemType&&>(val), flags);
 		}
 
-		template <typename ElemType, typename... ElemArgs>
-		decltype(auto) emplace_back(ElemArgs&&... args)
+		template <typename ElemType = void, typename... Args>
+		decltype(auto) emplace_back(Args&&... args)
 		{
 			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
+			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
 
-			static constexpr auto moving_node_ptr = std::is_same_v<ElemType, impl::node_ptr> //
-												 && sizeof...(ElemArgs) == 1u				 //
-												 && impl::first_is_same<impl::node_ptr&&, ElemArgs&&...>;
+			static constexpr auto moving_node_ptr = std::is_same_v<elem_type, impl::node_ptr> //
+												 && sizeof...(Args) == 1u					  //
+												 && impl::first_is_same<impl::node_ptr&&, Args&&...>;
 
-			using unwrapped_type = impl::unwrap_node<ElemType>;
+			using unwrapped_type = impl::unwrap_node<elem_type>;
 
 			static_assert(
 				moving_node_ptr										  //
@@ -5943,12 +5970,12 @@ TOML_NAMESPACE_START
 
 			if constexpr (moving_node_ptr)
 			{
-				insert_at_back(static_cast<ElemArgs&&>(args)...);
+				insert_at_back(static_cast<Args&&>(args)...);
 				return *elems_.back();
 			}
 			else
 			{
-				auto ptr = new impl::wrap_node<unwrapped_type>{ static_cast<ElemArgs&&>(args)... };
+				auto ptr = new impl::wrap_node<unwrapped_type>{ static_cast<Args&&>(args)... };
 				insert_at_back(impl::node_ptr{ ptr });
 				return *ptr;
 			}
@@ -7172,7 +7199,7 @@ TOML_NAMESPACE_START
 	  public:
 
 		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
-								  typename ValueType,
+								  typename ValueType = void,
 								  typename KeyType,
 								  typename... ValueArgs)
 		iterator emplace_hint(const_iterator hint, KeyType&& key, ValueArgs&&... args)
@@ -7182,23 +7209,25 @@ TOML_NAMESPACE_START
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
+			using value_type =
+				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace_hint<ValueType>(hint,
-											   impl::narrow(static_cast<KeyType&&>(key)),
-											   static_cast<ValueArgs&&>(args)...);
+				return emplace_hint<value_type>(hint,
+												impl::narrow(static_cast<KeyType&&>(key)),
+												static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
 			{
-				static constexpr auto moving_node_ptr = std::is_same_v<ValueType, impl::node_ptr> //
-													 && sizeof...(ValueArgs) == 1u				  //
+				static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
+													 && sizeof...(ValueArgs) == 1u				   //
 													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
-				using unwrapped_type = impl::unwrap_node<ValueType>;
+				using unwrapped_type = impl::unwrap_node<value_type>;
 
 				static_assert(moving_node_ptr										//
 								  || impl::is_native<unwrapped_type>				//
@@ -7337,7 +7366,7 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_CONSTRAINED_TEMPLATE((is_key_or_convertible<KeyType&&> || impl::is_wide_string<KeyType>),
-								  typename ValueType,
+								  typename ValueType = void,
 								  typename KeyType,
 								  typename... ValueArgs)
 		std::pair<iterator, bool> emplace(KeyType&& key, ValueArgs&&... args)
@@ -7347,18 +7376,21 @@ TOML_NAMESPACE_START
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
 			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
+			using value_type =
+				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
 #if TOML_ENABLE_WINDOWS_COMPAT
-				return emplace<ValueType>(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueArgs&&>(args)...);
+				return emplace<value_type>(impl::narrow(static_cast<KeyType&&>(key)),
+										   static_cast<ValueArgs&&>(args)...);
 #else
 				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
 			{
-				using unwrapped_type = impl::unwrap_node<ValueType>;
+				using unwrapped_type = impl::unwrap_node<value_type>;
 				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
 							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);

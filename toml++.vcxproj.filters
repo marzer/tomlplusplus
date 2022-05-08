@@ -143,9 +143,6 @@
     <None Include="LICENSE" />
     <None Include="meson.build" />
     <None Include="README.md" />
-    <None Include=".circleci\config.yml">
-      <Filter>.circleci</Filter>
-    </None>
     <None Include="tools\ci_single_header_check.py">
       <Filter>tools</Filter>
     </None>
@@ -241,9 +238,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include=".circleci">
-      <UniqueIdentifier>{a987f817-4ce2-4fd7-9d86-50e619d8d97b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="docs">
       <UniqueIdentifier>{5ed0949f-6855-4664-ad86-2b38ceeb400b}</UniqueIdentifier>
     </Filter>

@@ -118,7 +118,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct inserted_type_of_<inserter<T>, false>
 	{
-		using type = typename inserted_type_of_<T>::type;
+		using type = typename inserted_type_of_<remove_cvref<T>>::type;
 	};
 
 	template <typename T>
@@ -133,6 +133,29 @@ TOML_IMPL_NAMESPACE_START
 	{
 		return node_ptr{ make_node_impl(static_cast<T&&>(val), flags) };
 	}
+
+	template <typename... T>
+	struct emplaced_type_of_
+	{
+		using type = void;
+	};
+
+	template <typename T>
+	struct emplaced_type_of_<T>
+	{
+		using type = std::conditional_t<is_one_of<T, node, node_view<node>, node_view<const node>>,
+										void,
+										typename inserted_type_of_<T>::type>;
+	};
+
+	template <typename T>
+	struct emplaced_type_of_<inserter<T>>
+	{
+		using type = typename emplaced_type_of_<remove_cvref<T>>::type;
+	};
+
+	template <typename... T>
+	using emplaced_type_of = typename emplaced_type_of_<remove_cvref<T>...>::type;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

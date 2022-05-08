@@ -250,7 +250,7 @@ TOML_NAMESPACE_START
 	/// std::cout << arr << "\n";
 	///
 	/// // emplace elements
-	/// arr.emplace_back<std::string>("ten");
+	/// arr.emplace_back("ten");
 	/// arr.emplace_back<toml::array>(11, 12.0);
 	/// std::cout << arr << "\n";
 	/// \ecpp
@@ -1484,10 +1484,13 @@ TOML_NAMESPACE_START
 		///
 		/// \remarks There is no difference between insert() and emplace()
 		/// 		 for trivial value types (floats, ints, bools).
-		template <typename ElemType, typename... Args>
+		template <typename ElemType = void, typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
-			using type = impl::unwrap_node<ElemType>;
+			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
+			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
+
+			using type = impl::unwrap_node<elem_type>;
 			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
@@ -1577,23 +1580,24 @@ TOML_NAMESPACE_START
 		/// \eout
 		///
 		/// \tparam ElemType	toml::table, toml::array, or a native TOML value type
-		/// \tparam	ElemArgs	Element constructor argument types.
+		/// \tparam	Args	Element constructor argument types.
 		/// \param 	args		Arguments to forward to the elements's constructor.
 		///
 		/// \returns A reference to the newly-constructed element.
 		///
 		/// \remarks There is no difference between push_back() and emplace_back()
 		/// 		 For trivial value types (floats, ints, bools).
-		template <typename ElemType, typename... ElemArgs>
-		decltype(auto) emplace_back(ElemArgs&&... args)
+		template <typename ElemType = void, typename... Args>
+		decltype(auto) emplace_back(Args&&... args)
 		{
 			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
+			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
 
-			static constexpr auto moving_node_ptr = std::is_same_v<ElemType, impl::node_ptr> //
-												 && sizeof...(ElemArgs) == 1u				 //
-												 && impl::first_is_same<impl::node_ptr&&, ElemArgs&&...>;
+			static constexpr auto moving_node_ptr = std::is_same_v<elem_type, impl::node_ptr> //
+												 && sizeof...(Args) == 1u					  //
+												 && impl::first_is_same<impl::node_ptr&&, Args&&...>;
 
-			using unwrapped_type = impl::unwrap_node<ElemType>;
+			using unwrapped_type = impl::unwrap_node<elem_type>;
 
 			static_assert(
 				moving_node_ptr										  //
@@ -1603,12 +1607,12 @@ TOML_NAMESPACE_START
 
 			if constexpr (moving_node_ptr)
 			{
-				insert_at_back(static_cast<ElemArgs&&>(args)...);
+				insert_at_back(static_cast<Args&&>(args)...);
 				return *elems_.back();
 			}
 			else
 			{
-				auto ptr = new impl::wrap_node<unwrapped_type>{ static_cast<ElemArgs&&>(args)... };
+				auto ptr = new impl::wrap_node<unwrapped_type>{ static_cast<Args&&>(args)... };
 				insert_at_back(impl::node_ptr{ ptr });
 				return *ptr;
 			}

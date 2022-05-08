@@ -10,7 +10,7 @@ from pathlib import Path
 
 
 def main():
-	hpp_path = Path(utils.entry_script_dir(), '..', 'toml.hpp').resolve()
+	hpp_path = Path(Path(__file__).resolve().parents[1], 'toml.hpp').resolve()
 	hash1 = utils.sha1(utils.read_all_text_from_file(hpp_path, logger=True))
 	print(rf'Hash 1: {hash1}')
 	utils.run_python_script(r'generate_single_header.py')
