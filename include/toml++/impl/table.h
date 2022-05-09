@@ -900,7 +900,7 @@ TOML_NAMESPACE_START
 					static_cast<node_ref>(*kvp.second)
 						.visit(
 							[&](auto&& v)
-#if !TOML_MSVC || TOML_MSVC >= 1932 // older MSVC thinks this is invalid syntax O_o
+#if !TOML_MSVC // MSVC thinks this is invalid syntax O_o
 								noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>)
 #endif
 							{
