@@ -18,6 +18,7 @@
 
 #include <cstdlib>
 #include <ctime>
+#include <cassert>
 #include <iostream>
 #include <sstream>
 #include <string>
