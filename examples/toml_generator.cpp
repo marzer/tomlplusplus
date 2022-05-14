@@ -68,6 +68,12 @@ namespace
 			return static_cast<T>(incl_min + integer(excl_max - incl_min));
 		}
 
+		[[nodiscard]] static bool chance(float val) noexcept
+		{
+			val = (val < 0.0f ? 0.0f : (val > 1.0f ? 1.0f : val)) * 1000.0f;
+			return static_cast<float>(integer(0, 1000)) <= val;
+		}
+
 		[[nodiscard]] static toml::date date() noexcept
 		{
 			return toml::date{ integer(1900, 2021), //
@@ -80,7 +86,7 @@ namespace
 			return toml::time{ integer(24), //
 							   integer(60),
 							   integer(60),
-							   integer(100) > 80 ? integer(1000000000u) : 0u };
+							   boolean() ? integer(1000000000u) : 0u };
 		}
 
 		[[nodiscard]] static toml::time_offset time_offset() noexcept
@@ -90,8 +96,8 @@ namespace
 
 		[[nodiscard]] static toml::date_time date_time() noexcept
 		{
-			return integer(100) >= 75 ? toml::date_time{ date(), time() }
-									  : toml::date_time{ date(), time(), time_offset() };
+			return boolean() ? toml::date_time{ date(), time() } //
+							 : toml::date_time{ date(), time(), time_offset() };
 		}
 
 		[[nodiscard]] static std::string_view word() noexcept
@@ -116,11 +122,6 @@ namespace
 			return random::string(random::integer(1u, 4u), '-');
 		}
 
-		[[nodiscard]] static bool chance(float val) noexcept
-		{
-			val = (val < 0.0f ? 0.0f : (val > 1.0f ? 1.0f : val)) * 1000.0f;
-			return static_cast<float>(integer(0, 1000)) <= val;
-		}
 	}
 
 	template <typename T>
@@ -149,7 +150,7 @@ namespace
 	{
 		static_assert(toml::is_container<Container>);
 
-		switch (rand() % 7)
+		switch (random::integer(7))
 		{
 			case 0: add_to(container, random::string(random::integer(8u))); break;
 			case 1: add_to(container, random::integer(1000)); break;

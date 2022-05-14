@@ -15,6 +15,9 @@ template:
 
 ## Unreleased
 
+#### Fixes:
+- Fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
+
 #### Additions:
 - Added value type deduction to `emplace()` methods
 

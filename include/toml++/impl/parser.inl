@@ -3225,7 +3225,7 @@ TOML_IMPL_NAMESPACE_START
 				{
 					pit		  = parent->emplace_hint<table>(pit, make_key(i));
 					table& p  = pit->second.ref_cast<table>();
-					p.source_ = pit->first.source();
+					p.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
 
 					implicit_tables.push_back(&p);
 					parent = &p;

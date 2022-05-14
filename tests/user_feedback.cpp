@@ -320,4 +320,34 @@ b = []
 							"1=1\n"
 							"2=2\n"sv);
 	}
+
+	SECTION("github/issues/152") // https://github.com/marzer/tomlplusplus/issues/152
+	{
+		// clang-format off
+		static constexpr auto data = R"([shaders.room_darker])" "\n"
+									 R"(file = "room_darker.frag")" "\n"
+									 R"(args = { n = "integer", ambientLightLevel = "float" })";
+		// clang-format on
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   data,
+							   [](auto&& tbl)
+							   {
+								   const auto check_location = [&](std::string_view path, auto line, auto col)
+								   {
+									   INFO("Checking source location of  \""sv << path << "\""sv)
+									   auto v = tbl.at_path(path);
+									   REQUIRE(v.node());
+									   CHECK(v.node()->source().begin.line == static_cast<toml::source_index>(line));
+									   CHECK(v.node()->source().begin.column == static_cast<toml::source_index>(col));
+								   };
+
+								   check_location("shaders"sv, 1, 1);
+								   check_location("shaders.room_darker"sv, 1, 1);
+								   check_location("shaders.room_darker.file"sv, 2, 8);
+								   check_location("shaders.room_darker.args"sv, 3, 8);
+								   check_location("shaders.room_darker.args.n"sv, 3, 14);
+								   check_location("shaders.room_darker.args.ambientLightLevel"sv, 3, 45);
+							   });
+	}
 }
