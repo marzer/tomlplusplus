@@ -30,13 +30,9 @@ target_include_directories(
 
 target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
 
-# ---- Install rules ----
-
-include(cmake/install-rules.cmake)
-
-# ---- Examples ----
-
+# ---- Install rules and examples ----
 if(PROJECT_IS_TOP_LEVEL)
+  include(cmake/install-rules.cmake)
   option(BUILD_EXAMPLES "Build examples tree." OFF)
   if(BUILD_EXAMPLES)
     add_subdirectory(examples)
