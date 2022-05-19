@@ -6,6 +6,8 @@
 
 #include "forward_declarations.h"
 
+#include "path.h"
+
 TOML_NAMESPACE_START
 {
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".
@@ -56,6 +58,57 @@ TOML_NAMESPACE_START
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
 	node_view<const node> at_path(const node& root, std::string_view path) noexcept;
+
+	/// \brief Returns a view of the node matching a fully-qualified "TOML path".
+	///
+	/// \detail \cpp
+	/// auto config = toml::parse(R"(
+	///
+	/// [foo]
+	/// bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]
+	///
+	/// )"sv);
+	///
+	/// toml::path path1("foo.bar[2]");
+	/// toml::path path2("foo.bar[4].kek");
+	/// std::cout << toml::at_path(config, path1) << "\n";
+	/// std::cout << toml::at_path(config, path1.parent_path()) << "\n";
+	/// std::cout << toml::at_path(config, path2) << "\n";
+	/// std::cout << toml::at_path(config, path2.parent_path()) << "\n";
+	/// \ecpp
+	///
+	/// \out
+	/// 2
+	/// [ 0, 1, 2, [ 3 ], { kek = 4 } ]
+	/// 4
+	/// { kek  = 4 }
+	/// \eout
+	///
+	///
+	/// \note Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
+	/// \cpp
+	/// toml::at_path(config, toml::path("foo.bar"))  // same as config["foo"]["bar"]
+	/// toml::at_path(config, toml::path("foo. bar")) // same as config["foo"][" bar"]
+	/// toml::at_path(config, toml::path("foo..bar")) // same as config["foo"][""]["bar"]
+	/// toml::at_path(config, toml::path(".foo.bar")) // same as config[""]["foo"]["bar"]
+	/// \ecpp
+	/// <br>
+	/// Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings.
+	/// This function makes no allowance for this, instead treating all period characters as sub-table delimiters.
+	///
+	/// \param root		The root node from which the path will be traversed.
+	/// \param path		The "TOML path" to traverse.
+	TOML_NODISCARD
+	TOML_EXPORTED_FREE_FUNCTION
+	node_view<node> at_path(node & root, const toml::path& path) noexcept;
+
+	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
+	///
+	/// \see #toml::at_path(node&, const toml::path& path)
+	TOML_NODISCARD
+	TOML_EXPORTED_FREE_FUNCTION
+	node_view<const node> at_path(const node& root, const toml::path& path) noexcept;
+
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 

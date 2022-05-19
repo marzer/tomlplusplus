@@ -71,6 +71,18 @@ TOML_NAMESPACE_START
 		return toml::at_path(*this, path);
 	}
 
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> node::at_path(const toml::path& path) noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> node::at_path(const toml::path& path) const noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE

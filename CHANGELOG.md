@@ -20,6 +20,8 @@ template:
 
 #### Additions:
 - Added value type deduction to `emplace()` methods
+- Added toml::path type to parse and manipulate a path to a node in a toml::table
+- Added at_path overloads to accept toml::path
 
 <br><br>
 
