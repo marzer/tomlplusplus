@@ -280,6 +280,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 # Contact
 For bug reports and feature requests please consider using the [issues] system here on GitHub. For anything else
 though you're welcome to reach out via other means. In order of likely response time:
+- Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 - Twitter: [marzer8789](https://twitter.com/marzer8789)
 - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
 - Facebook: [marzer](https://www.facebook.com/marzer)

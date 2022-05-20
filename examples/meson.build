@@ -23,6 +23,7 @@ examples = [
 	'toml_generator',
 	'error_printer',
 	'parse_benchmark',
+	'toml_merger',
 ]
 
 example_executables = []
