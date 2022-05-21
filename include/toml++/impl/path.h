@@ -7,6 +7,8 @@
 #include "header_start.h"
 #include "std_vector.h"
 #include "std_string.h"
+#include "std_variant.h"
+
 /// \cond
 TOML_IMPL_NAMESPACE_START
 {
@@ -17,6 +19,24 @@ TOML_IMPL_NAMESPACE_END;
 
 TOML_NAMESPACE_START
 {
+
+	/// \brief Indicates type of path component, either a key, an index in an array, or invalid
+	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
+	{
+		INVALID		= 0x0,
+		KEY			= 0x1,
+		ARRAY_INDEX = 0x2
+	};
+
+	/// \brief Holds the value of a path component, either the name of the key in a string_view, or the index of an array as a size_t
+	using path_component_value = std::variant<std::string, size_t>;
+
+	/// \brief Represents a single component of a complete 'TOML-path': either a key or an array index
+	struct path_component
+	{
+		path_component_value value;
+		path_component_type type;
+	};
 
 	/// \brief	A TOML path.
 	///
@@ -39,32 +59,14 @@ TOML_NAMESPACE_START
 	/// \eout
 	class TOML_EXPORTED_CLASS path
 	{
-	  public:
-		/// \brief indicates type of path component, either a key, an index in an array, or invalid
-		enum path_component_type
-		{
-			INVALID		= 0x0,
-			KEY			= 0x1,
-			ARRAY_INDEX = 0x2
-		};
-
 	  private:
 		/// \cond
 
-		std::string full_path_;
-
 		bool parse_error_ = false;
-
-		struct path_component
-		{
-			size_t start;
-			size_t length;
-			path_component_type type;
-		};
 
 		std::vector<path_component> components_;
 
-		void parse_(std::string_view path);
+		std::vector<path_component> parse_(std::string_view, bool& parse_success);
 
 		/// \endcond
 
@@ -72,38 +74,58 @@ TOML_NAMESPACE_START
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path() noexcept;
+		path() noexcept = default;
 
 		/// \brief Construct from string
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path(std::string_view path);
+		explicit path(std::string_view);
+
+		/// \brief	Default destructor.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~path() noexcept = default;
+
+		/// \brief	Copy constructor.
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		inline path(const path& other) { *this = other; }
+
+		/// \brief	Move constructor.
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path(path&& other) noexcept { *this = std::move(other); }
+
+		/// \brief	Copy-assignment operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator=(const path&);
+
+		/// \brief	Move-assignment operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator=(path&&) noexcept;
 
 		/// \brief Evaluate whether path parsing succeeded
-		TOML_EXPORTED_MEMBER_FUNCTION
 		inline operator bool() const noexcept
 		{
-			return parse_error_;
+			return !parse_error_;
 		};
+
+		/// \brief Evaluate whether two paths are the same
+		bool operator==(const path& compare) const noexcept;
+
+		/// \brief Evaluate whether two paths are different
+		bool operator!=(const path& compare) const noexcept;
 
 		/// \brief Fetch a path component by index
-		TOML_EXPORTED_MEMBER_FUNCTION
-		inline std::tuple<std::string_view, path_component_type> operator[](size_t index) const noexcept
+		inline path_component* operator[](size_t index) noexcept
 		{
-			// TODO: Rethink this - string_view in tuple could be held by someone else and become invalid.
 			if (index < components_.size())
-			{
-				auto sv = std::string_view(full_path_).substr(components_[index].start, components_[index].length);
+				return &components_[index];
 
-				return std::make_tuple(sv, components_[index].type);
-			}
-
-			return std::make_tuple("", path_component_type::INVALID);
+			return nullptr;
 		};
 
-		/// \brief number of components in the path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		inline size_t length() const noexcept
+		/// \brief Number of components in the path
+		inline size_t size() const noexcept
 		{
 			return components_.size();
 		};
@@ -121,6 +143,15 @@ TOML_NAMESPACE_START
 		/// \brief	Returns a toml::path object representing the path of the parent node
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path parent_path() const;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(const toml::path&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(toml::path&&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(std::string_view);
 
 		/// \brief Returns a string representing the path currently pointed at
 		TOML_EXPORTED_MEMBER_FUNCTION

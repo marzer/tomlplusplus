@@ -719,6 +719,15 @@ TOML_NAMESPACE_START
 			return node_ ? node_->at_path(path) : node_view{};
 		}
 
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #toml::node::at_path(const toml::path&)
+		TOML_NODISCARD
+		node_view at_path(const toml::path& path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
+		}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Returns a view of the selected subnode.

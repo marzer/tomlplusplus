@@ -70,7 +70,7 @@ TOML_ANON_NAMESPACE_START
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
-					if (fc_result.ec != std::errc{})
+					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 
 #else
@@ -180,51 +180,31 @@ TOML_ANON_NAMESPACE_START
 		if (root.is_value()) // values don't have child nodes
 			return nullptr;
 
+		// special check if table has a key that is an empty string, and the path is empty,
+		// return the node at that empty key.
+		if (path.size() == 0 && root.is_table() && root.as_table()->contains(""))
+			return root.as_table()->get("");
+
 		node* current = &root;
 
-		// TODO: switch this implementation out for iterators
-		for (size_t i = 0; i < path.length(); i++)
+		for (const auto& component: path)
 		{
-			auto node_str = std::get<0>(path[i]);
-			auto type = std::get<1>(path[i]);
-
-			if (type == path::path_component_type::ARRAY_INDEX)
+			auto type = component.type;
+			if (type == path_component_type::ARRAY_INDEX)
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
 					return nullptr; // not an array, using array index doesn't work
 
-				// parse the actual array index
-				size_t index;
-				if (node_str.length() == 1u && node_str[0] >= '0' && node_str[0] <= '9')
-					index = static_cast<size_t>(node_str[0] - '0');
-				else
-				{
-#if TOML_INT_CHARCONV
-
-					auto fc_result = std::from_chars(node_str.data(), node_str.data() + node_str.length(), index);
-					if (fc_result.ec != std::errc{})
-						return nullptr;
-
-#else
-
-					std::stringstream ss;
-					ss.imbue(std::locale::classic());
-					ss.write(node_str.data(), static_cast<std::streamsize>(node_str.length()));
-					if (!(ss >> index))
-						return nullptr;
-
-#endif
-				}
-				current = current_array->get(index);
+				current = current_array->get(std::get<size_t>(component.value));
 			}
-			else if (type == path::path_component_type::KEY)
+			else if (type == path_component_type::KEY)
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return nullptr;
 
-				current = current_table->get(node_str);
+				current = current_table->get(std::get<std::string>(component.value));
 			}
 		}
 
