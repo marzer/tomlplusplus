@@ -2586,6 +2586,145 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
+//********  impl/path.h  ***********************************************************************************************
+
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
+//********  impl/std_vector.h  *****************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <vector>
+#include <iterator>
+TOML_ENABLE_WARNINGS;
+
+//********  impl/std_variant.h  ****************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <variant>
+TOML_ENABLE_WARNINGS;
+
+//********  impl/path.h  ***********************************************************************************************
+
+TOML_IMPL_NAMESPACE_START
+{
+}
+TOML_IMPL_NAMESPACE_END;
+
+TOML_NAMESPACE_START
+{
+	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
+	{
+		INVALID		= 0x0,
+		KEY			= 0x1,
+		ARRAY_INDEX = 0x2
+	};
+
+	using path_component_value = std::variant<std::string, size_t>;
+
+	struct path_component
+	{
+		path_component_value value;
+		path_component_type type;
+	};
+
+	class TOML_EXPORTED_CLASS path
+	{
+	  private:
+
+		bool parse_error_ = false;
+
+		std::vector<path_component> components_;
+
+		std::vector<path_component> parse_(std::string_view, bool& parse_success);
+
+	  public:
+
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path() noexcept = default;
+
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		explicit path(std::string_view);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		~path() noexcept = default;
+
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		inline path(const path& other) { *this = other; }
+
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path(path&& other) noexcept { *this = std::move(other); }
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator=(const path&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator=(path&&) noexcept;
+
+		inline operator bool() const noexcept
+		{
+			return !parse_error_;
+		};
+
+		bool operator==(const path& compare) const noexcept;
+
+		bool operator!=(const path& compare) const noexcept;
+
+		inline path_component* operator[](size_t index) noexcept
+		{
+			if (index < components_.size())
+				return &components_[index];
+
+			return nullptr;
+		};
+
+		inline size_t size() const noexcept
+		{
+			return components_.size();
+		};
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void clear() noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		inline auto begin() const noexcept { return components_.begin(); }
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		inline auto end() const noexcept { return components_.end(); }
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path parent_path() const;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(const toml::path&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(toml::path&&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& append(std::string_view);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		std::string string() const;
+	};
+}
+TOML_NAMESPACE_END;
+
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
+TOML_POP_WARNINGS;
+
 //********  impl/at_path.h  ********************************************************************************************
 
 TOML_NAMESPACE_START
@@ -2597,6 +2736,14 @@ TOML_NAMESPACE_START
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
 	node_view<const node> at_path(const node& root, std::string_view path) noexcept;
+
+	TOML_NODISCARD
+	TOML_EXPORTED_FREE_FUNCTION
+	node_view<node> at_path(node & root, const toml::path& path) noexcept;
+
+	TOML_NODISCARD
+	TOML_EXPORTED_FREE_FUNCTION
+	node_view<const node> at_path(const node& root, const toml::path& path) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -3183,6 +3330,14 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::string_view path) const noexcept;
 
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<node> at_path(const toml::path& path) noexcept;
+
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<const node> at_path(const toml::path& path) const noexcept;
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
@@ -3211,13 +3366,6 @@ TOML_IMPL_NAMESPACE_END;
 #pragma pop_macro("max")
 #endif
 TOML_POP_WARNINGS;
-
-//********  impl/std_vector.h  *****************************************************************************************
-
-TOML_DISABLE_WARNINGS;
-#include <vector>
-#include <iterator>
-TOML_ENABLE_WARNINGS;
 
 //********  impl/std_initializer_list.h  *******************************************************************************
 
@@ -3648,6 +3796,12 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD
 		node_view at_path(std::string_view path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
+		}
+
+		TOML_NODISCARD
+		node_view at_path(const toml::path& path) const noexcept
 		{
 			return node_ ? node_->at_path(path) : node_view{};
 		}
@@ -9502,6 +9656,18 @@ TOML_NAMESPACE_START
 		return toml::at_path(*this, path);
 	}
 
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> node::at_path(const toml::path& path) noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> node::at_path(const toml::path& path) const noexcept
+	{
+		return toml::at_path(*this, path);
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
@@ -9614,7 +9780,7 @@ TOML_ANON_NAMESPACE_START
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
-					if (fc_result.ec != std::errc{})
+					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 
 #else
@@ -9718,6 +9884,43 @@ TOML_ANON_NAMESPACE_START
 		return current;
 	}
 
+	TOML_INTERNAL_LINKAGE
+	node* get_at_path(node & root, const toml::path& path)
+	{
+		if (root.is_value()) // values don't have child nodes
+			return nullptr;
+
+		// special check if table has a key that is an empty string, and the path is empty,
+		// return the node at that empty key.
+		if (path.size() == 0 && root.is_table() && root.as_table()->contains(""))
+			return root.as_table()->get("");
+
+		node* current = &root;
+
+		for (const auto& component: path)
+		{
+			auto type = component.type;
+			if (type == path_component_type::ARRAY_INDEX)
+			{
+				const auto current_array = current->as<array>();
+				if (!current_array)
+					return nullptr; // not an array, using array index doesn't work
+
+				current = current_array->get(std::get<size_t>(component.value));
+			}
+			else if (type == path_component_type::KEY)
+			{
+				const auto current_table = current->as<table>();
+				if (!current_table)
+					return nullptr;
+
+				current = current_table->get(std::get<std::string>(component.value));
+			}
+		}
+
+		return current;
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_INTERNAL_LINKAGE
@@ -9750,6 +9953,18 @@ TOML_NAMESPACE_START
 		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
 	}
 
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> at_path(node & root, const toml::path& path) noexcept
+	{
+		return node_view<node>{ TOML_ANON_NAMESPACE::get_at_path(root, path) };
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> at_path(const node& root, const toml::path& path) noexcept
+	{
+		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
@@ -9765,6 +9980,326 @@ TOML_NAMESPACE_START
 	}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+}
+TOML_NAMESPACE_END;
+
+#ifdef _MSC_VER
+#pragma pop_macro("min")
+#pragma pop_macro("max")
+#endif
+TOML_POP_WARNINGS;
+
+//********  impl/path.inl  *********************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <sstream>
+#if TOML_INT_CHARCONV
+#include <charconv>
+#endif
+TOML_ENABLE_WARNINGS;
+TOML_PUSH_WARNINGS;
+#ifdef _MSC_VER
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+#endif
+
+TOML_NAMESPACE_START
+{
+	TOML_EXTERNAL_LINKAGE
+	path::path(std::string_view path_str)
+	{
+		components_ = parse_(path_str, parse_error_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator=(const path& rhs)
+	{
+		if (&rhs != this && rhs.components_.size() > 0)
+		{
+			components_.resize(rhs.size());
+			std::copy(rhs.components_.begin(), rhs.components_.end(), components_.begin());
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator=(path&& rhs) noexcept
+	{
+		if (&rhs != this && rhs.components_.size() > 0)
+		{
+			components_ = std::move(rhs.components_);
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator==(const path& compare) const noexcept
+	{
+		if (components_.size() != compare.components_.size())
+			return false;
+
+		for (size_t i = 0; i < components_.size(); ++i)
+		{
+			if (components_[i].type != compare.components_[i].type
+				|| components_[i].value != compare.components_[i].value)
+				return false;
+		}
+
+		return true;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator!=(const path& compare) const noexcept
+	{
+		return !(*this == compare);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	std::vector<path_component> path::parse_(std::string_view path_str, bool& parse_error)
+	{
+		std::vector<path_component> parsed_components;
+		parse_error = false; // success by default, set to true if fails to parse.
+
+		if (path_str == "") // empty path
+			return parsed_components;
+
+		auto str_start				= path_str.data();
+		size_t pos					= 0;
+		const auto end				= path_str.length();
+		bool prev_was_array_indexer = false;
+		bool prev_was_dot			= true; // invisible root 'dot'
+
+		while (pos < end)
+		{
+			// start of an array indexer
+			if (path_str[pos] == '[')
+			{
+				// get array index substring
+				const auto index_start = pos + 1u;									 // first position after '['
+				const auto index_end   = path_str.find(']', index_start);			 // position of ']'
+				if (index_end == std::string_view::npos || index_end == index_start) // nothing in brackets, error
+				{
+					parsed_components.clear(); // empty object in case of error
+					parse_error = true;
+					return parsed_components;
+				}
+				auto index_str = std::string_view(&path_str[index_start], index_end - index_start);
+
+				// trim whitespace from either side of the index
+				const auto first_non_ws = index_str.find_first_not_of(" \t"sv);
+				const auto last_non_ws	= index_str.find_last_not_of(" \t"sv);
+				if (first_non_ws == std::string_view::npos)
+				{
+					parsed_components.clear(); // empty object in case of error
+					parse_error = true;
+					return parsed_components;
+				}
+				TOML_ASSERT_ASSUME(last_non_ws != std::string_view::npos);
+				index_str = index_str.substr(first_non_ws, (last_non_ws - first_non_ws) + 1u);
+
+				// parse the actual array index to an integer type
+				size_t index;
+				if (index_str.length() == 1u && index_str[0] >= '0' && index_str[0] <= '9')
+					index = static_cast<size_t>(index_str[0] - '0');
+				else
+				{
+#if TOML_INT_CHARCONV
+
+					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
+					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
+					{
+						parsed_components.clear(); // empty object in case of error
+						parse_error_ = true;
+						return parsed_components;
+					}
+
+#else
+
+					std::stringstream ss;
+					ss.imbue(std::locale::classic());
+					ss.write(index_str.data(), static_cast<std::streamsize>(index_str.length()));
+					if (!(ss >> index))
+					{
+						clear(); // empty object in case of error
+						parse_error_ = true;
+						return;
+					}
+
+#endif
+				}
+
+				pos					   = index_end + 1u;
+				prev_was_dot		   = false;
+				prev_was_array_indexer = true;
+
+				parsed_components.emplace_back(path_component{ { index }, path_component_type::ARRAY_INDEX });
+			}
+
+			// start of a new table child
+			else if (path_str[pos] == '.')
+			{
+				// a dot immediately following another dot (or at the beginning of the string) is as if we'd asked
+				// for an empty child in between, e.g.
+				//
+				//     foo..bar
+				//
+				// is equivalent to
+				//
+				//     "foo".""."bar"
+				//
+				if (prev_was_dot)
+					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::KEY });
+
+				pos++;
+				prev_was_dot		   = true;
+				prev_was_array_indexer = false;
+			}
+
+			// some regular subkey
+			else
+			{
+				const auto subkey_start = pos;
+				const auto subkey_len =
+					impl::min(path_str.find_first_of(".["sv, subkey_start + 1u), path_str.length()) - subkey_start;
+				const auto subkey = path_str.substr(subkey_start, subkey_len);
+
+				// a regular subkey segment immediately after an array indexer is OK if it was all whitespace, e.g.:
+				//
+				//     "foo[0]  .bar"
+				//            ^^ skip this
+				//
+				// otherwise its an error (since it would have to be preceeded by a dot)
+				if (prev_was_array_indexer)
+				{
+					auto non_ws = subkey.find_first_not_of(" \t");
+					if (non_ws == std::string_view::npos)
+					{
+						pos += subkey_len;
+						prev_was_dot		   = false;
+						prev_was_array_indexer = false;
+						continue;
+					}
+					else
+					{
+						parsed_components.clear(); // empty object in case of error
+						parse_error = true;
+						return parsed_components;
+					}
+				}
+
+				pos += subkey_len;
+				prev_was_dot		   = false;
+				prev_was_array_indexer = false;
+
+				parsed_components.emplace_back(path_component{
+					std::string(std::string_view{ str_start + subkey_start, subkey_len }),
+					path_component_type::KEY
+				});
+			}
+		}
+
+		if (prev_was_dot) // Last character was a '.', which implies an empty string key at the end of the path
+		{
+			parsed_components.emplace_back(path_component{ ""s, path_component_type::KEY });
+		}
+
+		return parsed_components;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void path::clear() noexcept
+	{
+		this->components_.clear();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path path::parent_path() const
+	{
+		path parent{};
+
+		// Copy all components except one
+		// Need at least two path components to have a parent, since if there is
+		// only one path component, the parent is the root/null path ""
+		if (components_.size() > 1)
+		{
+			// End iterator is one short of the end of the path
+			auto end_it	 = --components_.end();
+
+			for (auto it = components_.begin(); it != end_it; ++it)
+			{
+				path_component new_component = *it;
+				parent.components_.emplace_back(new_component);
+			}
+		}
+
+		return parent;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::append(const toml::path& source)
+	{
+		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
+							  // empty)
+
+		// Copy path parts to this object
+		for (const auto& component : source.components_)
+		{
+			components_.push_back(component);
+		}
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::append(toml::path&& source)
+	{
+		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
+							  // empty)
+
+		// Copy path parts to this object
+		for (auto& component : source.components_)
+		{
+			components_.emplace_back(std::move(component));
+		}
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::append(std::string_view source)
+	{
+		auto components_to_append = parse_(source, parse_error_);
+		for (auto& component : components_to_append)
+		{
+			components_.emplace_back(std::move(component));
+		}
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	std::string path::string() const
+	{
+		std::stringstream ss;
+		bool atRoot = true;
+
+		for (const auto& component : components_)
+		{
+			if (component.type == path_component_type::KEY) // key
+			{
+				ss << (atRoot ? "" : ".") << std::get<std::string>(component.value);
+			}
+			else if (component.type == path_component_type::ARRAY_INDEX) // array
+			{
+				ss << "[" << std::get<size_t>(component.value) << "]";
+			}
+			atRoot = false;
+		}
+
+		return ss.str();
+	}
 }
 TOML_NAMESPACE_END;
 
