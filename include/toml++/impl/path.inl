@@ -12,6 +12,8 @@
 
 #include "path.h"
 
+#include <algorithm>
+
 TOML_DISABLE_WARNINGS;
 #include <sstream>
 #if TOML_INT_CHARCONV
@@ -51,6 +53,30 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	path& path::operator/=(path&& rhs) noexcept
+	{
+		return append(std::move(rhs));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator/=(std::string_view source)
+	{
+		return append(source);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(path&& rhs) noexcept
+	{
+		return append(std::move(rhs));
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(std::string_view source)
+	{
+		return append(source);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	bool path::operator==(const path& compare) const noexcept
 	{
 		if (components_.size() != compare.components_.size())
@@ -67,9 +93,33 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
+	bool path::operator==(std::string_view compare) const noexcept
+	{
+		return string() == compare;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator==(const char* compare) const noexcept
+	{
+		return string() == std::string_view(compare);
+	}
+
+	TOML_EXTERNAL_LINKAGE
 	bool path::operator!=(const path& compare) const noexcept
 	{
 		return !(*this == compare);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator!=(std::string_view compare) const noexcept
+	{
+		return !(*this == compare);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator!=(const char* compare) const noexcept
+	{
+		return !(*this == std::string_view(compare));
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -231,26 +281,67 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::parent_path() const
+	path& path::truncate(unsigned int n)
 	{
-		path parent{};
+		if (components_.size() > n)
+		{
+			auto it_end	  = components_.end();
+			auto it_start = it_end - n; 
+			components_.erase(it_start, it_end);
+		}
+		else
+		{
+			// Want to remove more path components than exist, so return empty path
+			clear();
+		}
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path path::truncated(unsigned int n) const
+	{
+		path truncated_path {};
 
 		// Copy all components except one
 		// Need at least two path components to have a parent, since if there is
 		// only one path component, the parent is the root/null path ""
-		if (components_.size() > 1)
+		if (components_.size() > n)
 		{
 			// End iterator is one short of the end of the path
-			auto end_it	 = --components_.end();
+			auto end_it = components_.end() - n;
 			
 			for (auto it = components_.begin(); it != end_it; ++it)
 			{
 				path_component new_component = *it;
-				parent.components_.emplace_back(new_component);
+				truncated_path.components_.emplace_back(new_component);
 			}
 		}
 
-		return parent;
+		return truncated_path;
+	}
+
+
+	TOML_EXTERNAL_LINKAGE
+	path path::parent_path() const
+	{
+		return truncated(1);
+	}
+
+	path path::leaf(unsigned int n) const
+	{
+		toml::path leaf_path {};
+
+		n = std::min(n, static_cast<unsigned int>(components_.size())); // Limit to number of elements in path
+
+		if (n > 0)
+		{
+			leaf_path.components_.insert(leaf_path.components_.begin(),
+										 components_.end() - n,
+										 components_.end());
+		}
+
+		return leaf_path;
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -290,6 +381,61 @@ TOML_NAMESPACE_START
 		for (auto& component : components_to_append)
 		{
 			components_.emplace_back(std::move(component));
+		}
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(const toml::path& source)
+	{
+		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
+							  // empty)
+
+		components_.insert(components_.begin(), source.components_.begin(), source.components_.end());
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(toml::path&& source)
+	{
+		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
+							  // empty)
+
+		components_.insert(components_.begin(), std::make_move_iterator(source.components_.begin()), std::make_move_iterator(source.components_.end()));
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(std::string_view source)
+	{
+		auto components_to_prepend = parse_(source, parse_error_);
+
+		components_.insert(components_.begin(), components_to_prepend.begin(), components_to_prepend.end());
+
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::assign(std::string_view source)
+	{
+		components_ = parse_(source, parse_error_);
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::assign(const path& source)
+	{
+		if (source)
+		{
+			components_ = source.components_;
+		}
+		else // propagate error of source
+		{
+			clear();
+			parse_error_ = true;
 		}
 
 		return *this;

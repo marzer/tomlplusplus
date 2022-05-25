@@ -43,7 +43,7 @@ TEST_CASE("path - parsing")
 
 TEST_CASE("path - manipulating")
 {
-	SECTION("parent_nodes")
+	SECTION("parent_node and truncation")
 	{
 		toml::path p0("");
 		CHECK(p0.parent_path().string() == "");
@@ -72,6 +72,42 @@ TEST_CASE("path - manipulating")
 		CHECK(p5.parent_path().parent_path().string() == "test.key");
 		CHECK(p5.parent_path().parent_path().parent_path().string() == "test");
 		CHECK(p5.parent_path().parent_path().parent_path().parent_path().string() == "");
+
+		toml::path p6("test.key1.key2.key3.key4");
+		CHECK(p6.truncated(1).string() == "test.key1.key2.key3");
+		CHECK(p6.truncated(4).string() == "test");
+		CHECK(p6.truncated(5).string() == "");
+		CHECK(p6.truncated(20).string() == "");
+		CHECK(p6.string() == "test.key1.key2.key3.key4");
+
+		p6.truncate(2);
+		CHECK(p6.string() == "test.key1.key2");
+		p6.truncate(3);
+		CHECK(p6.string() == "");
+	}
+
+	SECTION("leaf")
+	{
+		toml::path p0("one.two.three.four.five");
+		CHECK(p0.leaf(0).string() == "");
+		CHECK(p0.leaf().string() == "five");
+		CHECK(p0.leaf(3).string() == "three.four.five");
+		CHECK(p0.leaf(5).string() == "one.two.three.four.five");
+		CHECK(p0.leaf(10).string() == "one.two.three.four.five");
+
+		toml::path p1("[10][2][30][4][50]");
+		CHECK(p1.leaf(0).string() == "");
+		CHECK(p1.leaf().string() == "[50]");
+		CHECK(p1.leaf(3).string() == "[30][4][50]");
+		CHECK(p1.leaf(5).string() == "[10][2][30][4][50]");
+		CHECK(p1.leaf(10).string() == "[10][2][30][4][50]");
+
+		toml::path p2("one[1].two.three[3]");
+		CHECK(p2.leaf(0).string() == "");
+		CHECK(p2.leaf().string() == "[3]");
+		CHECK(p2.leaf(3).string() == "two.three[3]");
+		CHECK(p2.leaf(4).string() == "[1].two.three[3]");
+		CHECK(p2.leaf(10).string() == "one[1].two.three[3]");
 	}
 
 	SECTION("append - string")
@@ -114,6 +150,46 @@ TEST_CASE("path - manipulating")
 		CHECK(p1.append(toml::path("[1].key")).string() == "[1].key");
 	}
 
+	SECTION("prepend - string")
+	{
+		toml::path p0("start");
+		CHECK(p0.prepend("middle.end").string() == "middle.end.start");
+		CHECK(p0.prepend("[12]").string() == "[12].middle.end.start");
+
+		toml::path p1("");
+		CHECK(p1.prepend("[1].key").string() == "[1].key");
+	}
+
+	SECTION("prepend - toml::path copy")
+	{
+		toml::path p0("start");
+		toml::path prependee1("middle.end");
+		toml::path prependee2("[12]");
+		CHECK(p0.prepend(prependee1).string() == "middle.end.start");
+		CHECK(p0.prepend(prependee2).string() == "[12].middle.end.start");
+
+		// Ensure copies and not moves
+		CHECK(prependee1.string() == "middle.end");
+		CHECK(prependee2.string() == "[12]");
+
+		toml::path p1("");
+		toml::path prependee3("[1].key");
+		CHECK(p1.prepend(prependee3).string() == "[1].key");
+
+		// Ensure copies and not moves
+		CHECK(prependee3.string() == "[1].key");
+	}
+
+	SECTION("prepend - toml::path move")
+	{
+		toml::path p0("start");
+		CHECK(p0.prepend(toml::path("middle.end")).string() == "middle.end.start");
+		CHECK(p0.prepend(toml::path("[12]")).string() == "[12].middle.end.start");
+
+		toml::path p1("");
+		CHECK(p1.prepend(toml::path("[1].key")).string() == "[1].key");
+	}
+
 	SECTION("alter components")
 	{
 		toml::path p0("start.mid[1][2].end");
@@ -130,11 +206,36 @@ TEST_CASE("path - manipulating")
 		CHECK(p0.string() == "[2].mid[1].newkey.end");
 	}
 
+	SECTION("assign")
+	{
+		toml::path p0("start.mid[1][2].end");
+		p0.assign("test.key[1]");
+		CHECK(p0.string() == "test.key[1]");
+		p0.assign("");
+		CHECK(p0.string() == "");
+
+		toml::path p1("a.test.path[1]");
+		p1.assign("invalid[abc]");
+		CHECK(!p1);
+		CHECK(p1.string() == "");
+
+		toml::path p2("another[1].test.path");
+		p2.assign(toml::path("test"));
+		CHECK(p2.string() == "test");
+		p2.assign(toml::path(""));
+		CHECK(p2.string() == "");
+
+		toml::path p3("final.test[1]");
+		p3.assign(toml::path("invalid[abc"));
+		CHECK(!p3);
+		CHECK(p3.string() == "");
+	}
+
 }
 
-TEST_CASE("path - comparison")
+TEST_CASE("path - operators")
 {
-	SECTION("equality")
+	SECTION("object equality")
 	{
 		CHECK(toml::path("a.b.c") == toml::path("a.b.c"));
 		CHECK(toml::path("[1].a") == toml::path("[1].a"));
@@ -142,6 +243,49 @@ TEST_CASE("path - comparison")
 		CHECK(toml::path("a.b.c") != toml::path("a.b"));
 		CHECK(toml::path("[1].b") != toml::path("[1].b.c"));
 	}
+
+	SECTION("string equality")
+	{
+		CHECK(toml::path("a.b.c") == "a.b.c");
+		CHECK(toml::path("[1].a") == "[1].a");
+
+		CHECK(toml::path("a.b.c") != "a.b");
+		CHECK(toml::path("[1].b") != "[1].b.c");
+	}
+
+	SECTION("arithmetic")
+	{
+		CHECK(toml::path("a.b.c") / "a[1]" == "a.b.c.a[1]");
+		CHECK((toml::path("a.b.c") / "a[1]") == "a.b.c.a[1]");
+
+		CHECK(toml::path("a.b.c") + toml::path("a[1]") == "a.b.c.a[1]");
+		CHECK(toml::path("a.b.c") / toml::path("a[1]") == "a.b.c.a[1]");
+
+		toml::path p1("a.b");
+		toml::path p2("c[1]");
+		CHECK((p1 + p2) == "a.b.c[1]");
+		CHECK(p1 / p2 == "a.b.c[1]");
+
+		CHECK(p1 + "c[1]" == "a.b.c[1]");
+		CHECK(p1 / "c[1]" == "a.b.c[1]");
+
+		CHECK("a.b" + p2 == "a.b.c[1]");
+		CHECK("a.b" / p2 == "a.b.c[1]");
+	}
+}
+
+TEST_CASE("path - misc")
+{
+
+	CHECK(toml::path("a.b.c").string() == "a.b.c");
+
+	CHECK(!toml::path("a").empty());
+	CHECK(toml::path("").empty());
+
+	CHECK(static_cast<std::string>(toml::path("a.b[1]")) == "a.b[1]");
+	CHECK(static_cast<bool>(toml::path("a.b[1]")));
+	CHECK(!static_cast<bool>(toml::path("a.b[a b]")));
+
 }
 
 TEST_CASE("path - accessing")
@@ -250,5 +394,16 @@ TEST_CASE("path - accessing")
 		CHECK(tbl["b"][2]["c"]);
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2].c")));
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2]   \t.c"))); // whitespace is allowed after array indexers
+	}
+
+	SECTION("std::variant mismatches")
+	{
+		toml::path p0("b[2].c");
+		p0[1]->value = "abc";
+		CHECK(!at_path(tbl, p0));
+
+		toml::path p1("b[2].c");
+		p1[0]->value = 1;
+		CHECK(!at_path(tbl, p1));
 	}
 }

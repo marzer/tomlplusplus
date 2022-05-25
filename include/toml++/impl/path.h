@@ -55,7 +55,7 @@ TOML_NAMESPACE_START
 	///
 	/// \out
 	/// second cat: lion
-	/// cats: ['tiger', 'lion', 'puma']
+	/// cats: ['tiger', 'lion', 'puma'] 
 	/// \eout
 	class TOML_EXPORTED_CLASS path
 	{
@@ -103,17 +103,48 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator=(path&&) noexcept;
 
+		/// \brief	Append operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator/=(path&&) noexcept;
+
+		/// \brief	Append operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator/=(std::string_view);
+
+		/// \brief	Append operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(path&&) noexcept;
+
+		/// \brief	Append operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(std::string_view);
+
 		/// \brief Evaluate whether path parsing succeeded
 		inline operator bool() const noexcept
 		{
 			return !parse_error_;
 		};
 
+		/// \brief Implicitly case to a std::string
+		inline operator std::string() const { return string(); }
+
 		/// \brief Evaluate whether two paths are the same
 		bool operator==(const path& compare) const noexcept;
 
+		/// \brief Evaluate whether two paths are the same
+		bool operator==(std::string_view compare) const noexcept;
+
+		/// \brief Evaluate whether two paths are the same
+		bool operator==(const char* compare) const noexcept;
+
 		/// \brief Evaluate whether two paths are different
 		bool operator!=(const path& compare) const noexcept;
+
+		/// \brief Evaluate whether two paths are different
+		bool operator!=(std::string_view compare) const noexcept;
+
+		/// \brief Evaluate whether two paths are different
+		bool operator!=(const char* compare) const noexcept;
 
 		/// \brief Fetch a path component by index
 		inline path_component* operator[](size_t index) noexcept
@@ -130,6 +161,9 @@ TOML_NAMESPACE_START
 			return components_.size();
 		};
 
+		/// \brief Whether (true) or not (false) the path is empty
+		inline bool empty() const { return size() <= 0; }
+
 		/// \brief	Erases the contents of the path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
@@ -140,24 +174,134 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		inline auto end() const noexcept { return components_.end(); }
 
+		/// \brief Removes the number of terminal path components specified by n
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& truncate(unsigned int n);
+
+		/// \brief Returns a toml::path object which has had n terminal path components removed
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path truncated(unsigned int n) const;
+
 		/// \brief	Returns a toml::path object representing the path of the parent node
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path parent_path() const;
 
+		/// \brief	Returns a toml::path object representing terminal n-parts of a TOML path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path leaf(unsigned int n = 1) const;
+
+		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(const toml::path&);
 
+		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(toml::path&&);
 
+		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(std::string_view);
 
-		/// \brief Returns a string representing the path currently pointed at
+		/// \brief	Prepends elements to the beginning of the TOML path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(const toml::path&);
+
+		/// \brief	Prepends elements to the beginning of the TOML path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(toml::path&&);
+
+		/// \brief	Prepends elements to the beginning of the TOML path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(std::string_view);
+
+		/// \brief	Replaces the contents of the path object by a new path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& assign(std::string_view);
+
+		/// \brief	Replaces the contents of the path object by a new path
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& assign(const path&);
+
+		/// \brief Returns a string representing the path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		std::string string() const;
 
 	};
+
+	inline std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
+	{
+		os << rhs.string();
+		return os;
+	}
+
+	inline std::istream& operator>>(std::istream& is, toml::path& rhs)
+	{
+		std::string s;
+		is >> s;
+		rhs.assign(s);
+
+		return is;
+	}
+
+	inline path operator+(const toml::path& lhs, const toml::path& rhs)
+	{
+		toml::path result = { lhs };
+		result.append(rhs);
+
+		return result;
+	}
+
+	inline path operator+(const toml::path& lhs, std::string_view rhs)
+	{
+		return lhs + toml::path(rhs);
+	}
+
+	inline path operator+(const toml::path& lhs, const char* rhs)
+	{
+		return lhs + toml::path(rhs);
+	}
+
+	inline path operator+(std::string_view lhs, const toml::path& rhs)
+	{
+		toml::path result = { rhs };
+		result.prepend(lhs);
+
+		return result;
+	}
+
+	inline path operator+(const char* lhs, const toml::path& rhs)
+	{
+		toml::path result = { rhs };
+		result.prepend(lhs);
+
+		return result;
+	}
+
+	inline path operator/(const toml::path& lhs, const toml::path& rhs)
+	{
+		return lhs + rhs;
+	}
+
+	inline path operator/(const toml::path& lhs, std::string_view rhs)
+	{
+		return lhs + rhs;
+	}
+
+	inline path operator/(const toml::path& lhs, const char* rhs)
+	{
+		return lhs + toml::path(rhs);
+	}
+
+	inline path operator/(std::string_view lhs, const toml::path& rhs)
+	{
+		return lhs + rhs;
+	}
+
+	inline path operator/(const char* lhs, const toml::path& rhs)
+	{
+		return lhs + rhs;
+	}
+
 }
 TOML_NAMESPACE_END;
 
