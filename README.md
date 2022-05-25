@@ -257,6 +257,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 - **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
 - **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
+- **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 - **[@levicki](https://github.com/levicki)** - Helped design some new features
 - **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 - **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
