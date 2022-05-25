@@ -190,7 +190,7 @@ TOML_ANON_NAMESPACE_START
 		for (const auto& component: path)
 		{
 			auto type = component.type;
-			if (type == path_component_type::ARRAY_INDEX)
+			if (type == path_component_type::ARRAY_INDEX && std::holds_alternative<size_t>(component.value))
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
@@ -198,13 +198,18 @@ TOML_ANON_NAMESPACE_START
 
 				current = current_array->get(std::get<size_t>(component.value));
 			}
-			else if (type == path_component_type::KEY)
+			else if (type == path_component_type::KEY && std::holds_alternative<std::string>(component.value))
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return nullptr;
 
 				current = current_table->get(std::get<std::string>(component.value));
+			}
+			else
+			{
+				// Error: invalid component
+				return nullptr;
 			}
 		}
 
