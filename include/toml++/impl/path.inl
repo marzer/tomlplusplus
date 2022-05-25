@@ -11,8 +11,7 @@
 //# }}
 
 #include "path.h"
-
-#include <algorithm>
+#include "std_algorithm.h"
 
 TOML_DISABLE_WARNINGS;
 #include <sstream>
