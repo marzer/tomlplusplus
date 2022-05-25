@@ -260,12 +260,12 @@ TEST_CASE("path - manipulating")
 		p0[3]->value = std::size_t{ 13 };
 		CHECK(p0.string() == "start.mid[1][13].end");
 
-		p0[3]->type = path_component_type::KEY;
+		p0[3]->type = path_component_type::key;
 		p0[3]->value = "newkey";
 		CHECK(p0.string() == "start.mid[1].newkey.end");
 
 		p0[0]->value = std::size_t{ 2 };
-		p0[0]->type	 = path_component_type::ARRAY_INDEX;
+		p0[0]->type	 = path_component_type::array_index;
 		CHECK(p0.string() == "[2].mid[1].newkey.end");
 	}
 

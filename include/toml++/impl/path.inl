@@ -198,7 +198,7 @@ TOML_NAMESPACE_START
 				prev_was_dot		   = false;
 				prev_was_array_indexer = true;
 
-				parsed_components.emplace_back(path_component{ { index }, path_component_type::ARRAY_INDEX });
+				parsed_components.emplace_back(path_component{ { index }, path_component_type::array_index });
 			}
 
 			// start of a new table child
@@ -214,7 +214,7 @@ TOML_NAMESPACE_START
 				//     "foo".""."bar"
 				//
 				if (prev_was_dot)
-					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::KEY });
+					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::key });
 
 				pos++;
 				prev_was_dot		   = true;
@@ -259,14 +259,14 @@ TOML_NAMESPACE_START
 
 				parsed_components.emplace_back(path_component{
 					std::string(std::string_view{ str_start + subkey_start, subkey_len }),
-					path_component_type::KEY
+					path_component_type::key
 				});
 			}
 		}
 
 		if (prev_was_dot) // Last character was a '.', which implies an empty string key at the end of the path
 		{
-			parsed_components.emplace_back(path_component{ ""s, path_component_type::KEY });
+			parsed_components.emplace_back(path_component{ ""s, path_component_type::key });
 		}
 
 		return parsed_components;
@@ -435,11 +435,11 @@ TOML_NAMESPACE_START
 		 
 		for (const auto& component : components_)
 		{
-			if (component.type == path_component_type::KEY) // key
+			if (component.type == path_component_type::key) // key
 			{
 				ss << (atRoot ? "" : ".") << std::get<std::string>(component.value);
 			}
-			else if (component.type == path_component_type::ARRAY_INDEX) // array
+			else if (component.type == path_component_type::array_index) // array
 			{
 				ss << "[" << std::get<size_t>(component.value) << "]";
 			}

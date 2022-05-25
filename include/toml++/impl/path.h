@@ -15,9 +15,9 @@ TOML_NAMESPACE_START
 	/// \brief Indicates type of path component, either a key, an index in an array, or invalid
 	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
 	{
-		INVALID		= 0x0,
-		KEY			= 0x1,
-		ARRAY_INDEX = 0x2
+		invalid		= 0x0,
+		key			= 0x1,
+		array_index = 0x2
 	};
 
 	/// \brief Holds the value of a path component, either the name of the key in a string_view, or the index of an array as a size_t
