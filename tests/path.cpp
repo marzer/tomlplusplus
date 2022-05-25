@@ -403,7 +403,7 @@ TEST_CASE("path - accessing")
 		CHECK(!at_path(tbl, p0));
 
 		toml::path p1("b[2].c");
-		p1[0]->value = 1;
+		p1[0]->value = std::size_t{ 1 };
 		CHECK(!at_path(tbl, p1));
 	}
 }
