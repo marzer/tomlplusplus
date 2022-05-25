@@ -9,14 +9,6 @@
 #include "std_string.h"
 #include "std_variant.h"
 
-/// \cond
-TOML_IMPL_NAMESPACE_START
-{
-
-}
-TOML_IMPL_NAMESPACE_END;
-/// \endcond
-
 TOML_NAMESPACE_START
 {
 
@@ -182,11 +174,11 @@ TOML_NAMESPACE_START
 
 		/// \brief Removes the number of terminal path components specified by n
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& truncate(int n);
+		path& truncate(size_t n);
 
 		/// \brief Returns a toml::path object which has had n terminal path components removed
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path truncated(int n) const;
+		path truncated(size_t n) const;
 
 		/// \brief	Returns a toml::path object representing the path of the parent node
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -194,7 +186,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns a toml::path object representing terminal n-parts of a TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path leaf(int n = 1) const;
+		path leaf(size_t n = 1) const;
 
 		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION

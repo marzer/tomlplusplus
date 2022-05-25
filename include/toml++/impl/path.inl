@@ -11,7 +11,6 @@
 //# }}
 
 #include "path.h"
-#include "std_algorithm.h"
 
 TOML_DISABLE_WARNINGS;
 #include <sstream>
@@ -280,29 +279,29 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::truncate(int n)
+	path& path::truncate(size_t n)
 	{
-		n = std::clamp(n, 0, static_cast<int>(components_.size()));
+		n = n > components_.size() ? components_.size() : n;
 
 		auto it_end	  = components_.end();
-		components_.erase(it_end - n, it_end);
+		components_.erase(it_end - static_cast<int>(n), it_end);
 
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::truncated(int n) const
+	path path::truncated(size_t n) const
 	{
 		path truncated_path {};
 
-		n = std::clamp(n, 0, static_cast<int>(components_.size()));
+		n = n > components_.size() ? components_.size() : n;
 
 		// Copy all components except one
 		// Need at least two path components to have a parent, since if there is
 		// only one path component, the parent is the root/null path ""
 		truncated_path.components_.insert(truncated_path.components_.begin(),
 										  components_.begin(),
-										  components_.end() - n);
+										  components_.end() - static_cast<int>(n));
 
 		return truncated_path;
 	}
@@ -315,16 +314,16 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::leaf(int n) const
+	path path::leaf(size_t n) const
 	{
 		toml::path leaf_path {};
 
-		n = std::clamp(n, 0, static_cast<int>(components_.size())); // Limit to number of elements in path and > 0
+		n = n > components_.size() ? components_.size() : n;
 
 		if (n > 0)
 		{
 			leaf_path.components_.insert(leaf_path.components_.begin(),
-										 components_.end() - n,
+										 components_.end() - static_cast<int>(n),
 										 components_.end());
 		}
 
