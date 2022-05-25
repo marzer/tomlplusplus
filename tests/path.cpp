@@ -257,15 +257,15 @@ TEST_CASE("path - manipulating")
 	{
 		toml::path p0("start.mid[1][2].end");
 
-		p0[3]->value = std::size_t{ 13 };
+		p0[3].value = std::size_t{ 13 };
 		CHECK(p0.string() == "start.mid[1][13].end");
 
-		p0[3]->type = path_component_type::key;
-		p0[3]->value = "newkey";
+		p0[3].type = path_component_type::key;
+		p0[3].value = "newkey";
 		CHECK(p0.string() == "start.mid[1].newkey.end");
 
-		p0[0]->value = std::size_t{ 2 };
-		p0[0]->type	 = path_component_type::array_index;
+		p0[0].value = std::size_t{ 2 };
+		p0[0].type	 = path_component_type::array_index;
 		CHECK(p0.string() == "[2].mid[1].newkey.end");
 	}
 
@@ -508,11 +508,11 @@ TEST_CASE("path - accessing")
 	SECTION("std::variant mismatches")
 	{
 		toml::path p0("b[2].c");
-		p0[1]->value = "abc";
+		p0[1].value = "abc";
 		CHECK(!at_path(tbl, p0));
 
 		toml::path p1("b[2].c");
-		p1[0]->value = std::size_t{ 1 };
+		p1[0].value = std::size_t{ 1 };
 		CHECK(!at_path(tbl, p1));
 	}
 }

@@ -144,13 +144,16 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(const char* compare) const noexcept;
 
-		/// \brief Fetch a path component by index
-		inline path_component* operator[](size_t index) noexcept
+		/// \brief Fetch a path component by index for modification
+		inline path_component& operator[](size_t index) noexcept
 		{
-			if (index < components_.size())
-				return &components_[index];
+			return components_[index];
+		};
 
-			return nullptr;
+		/// \brief Fetch a path component by index
+		inline const path_component& operator[](size_t index) const noexcept
+		{
+			return components_[index];
 		};
 
 		/// \brief Number of components in the path
