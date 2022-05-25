@@ -109,12 +109,18 @@ TEST_CASE("path - manipulating")
 		CHECK(p5.parent_path().parent_path().parent_path().parent_path().string() == "");
 
 		toml::path p6("test.key1.key2.key3.key4");
+		CHECK(p6.truncated(-1).string() == "test.key1.key2.key3.key4");
+		CHECK(p6.truncated(0).string() == "test.key1.key2.key3.key4");
 		CHECK(p6.truncated(1).string() == "test.key1.key2.key3");
 		CHECK(p6.truncated(4).string() == "test");
 		CHECK(p6.truncated(5).string() == "");
 		CHECK(p6.truncated(20).string() == "");
 		CHECK(p6.string() == "test.key1.key2.key3.key4");
 
+		p6.truncate(-1);
+		CHECK(p6.string() == "test.key1.key2.key3.key4");
+		p6.truncate(0);
+		CHECK(p6.string() == "test.key1.key2.key3.key4");
 		p6.truncate(2);
 		CHECK(p6.string() == "test.key1.key2");
 		p6.truncate(3);
@@ -125,6 +131,7 @@ TEST_CASE("path - manipulating")
 	SECTION("leaf")
 	{
 		toml::path p0("one.two.three.four.five");
+		CHECK(p0.leaf(-1).string() == "");
 		CHECK(p0.leaf(0).string() == "");
 		CHECK(p0.leaf().string() == "five");
 		CHECK(p0.leaf(3).string() == "three.four.five");
@@ -132,6 +139,7 @@ TEST_CASE("path - manipulating")
 		CHECK(p0.leaf(10).string() == "one.two.three.four.five");
 
 		toml::path p1("[10][2][30][4][50]");
+		CHECK(p0.leaf(-1).string() == "");
 		CHECK(p1.leaf(0).string() == "");
 		CHECK(p1.leaf().string() == "[50]");
 		CHECK(p1.leaf(3).string() == "[30][4][50]");
@@ -139,6 +147,7 @@ TEST_CASE("path - manipulating")
 		CHECK(p1.leaf(10).string() == "[10][2][30][4][50]");
 
 		toml::path p2("one[1].two.three[3]");
+		CHECK(p0.leaf(-1).string() == "");
 		CHECK(p2.leaf(0).string() == "");
 		CHECK(p2.leaf().string() == "[3]");
 		CHECK(p2.leaf(3).string() == "two.three[3]");
