@@ -137,6 +137,7 @@
       <Filter>include\impl</Filter>
     </ClInclude>
     <ClInclude Include="include\toml++\impl\std_variant.h" />
+    <ClInclude Include="include\toml++\impl\std_algorithm.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="toml++.props" />

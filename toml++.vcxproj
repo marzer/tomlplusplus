@@ -42,6 +42,7 @@
     <ClInclude Include="include\toml++\impl\key.h" />
     <ClInclude Include="include\toml++\impl\path.h" />
     <ClInclude Include="include\toml++\impl\simd.h" />
+    <ClInclude Include="include\toml++\impl\std_algorithm.h" />
     <ClInclude Include="include\toml++\impl\std_utility.h" />
     <ClInclude Include="include\toml++\impl\std_variant.h" />
     <ClInclude Include="include\toml++\impl\toml_formatter.h" />
