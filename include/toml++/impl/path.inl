@@ -280,42 +280,29 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::truncate(unsigned int n)
+	path& path::truncate(int n)
 	{
-		if (components_.size() > n)
-		{
-			auto it_end	  = components_.end();
-			auto it_start = it_end - n; 
-			components_.erase(it_start, it_end);
-		}
-		else
-		{
-			// Want to remove more path components than exist, so return empty path
-			clear();
-		}
+		n = std::clamp(n, 0, static_cast<int>(components_.size()));
+
+		auto it_end	  = components_.end();
+		components_.erase(it_end - n, it_end);
 
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::truncated(unsigned int n) const
+	path path::truncated(int n) const
 	{
 		path truncated_path {};
+
+		n = std::clamp(n, 0, static_cast<int>(components_.size()));
 
 		// Copy all components except one
 		// Need at least two path components to have a parent, since if there is
 		// only one path component, the parent is the root/null path ""
-		if (components_.size() > n)
-		{
-			// End iterator is one short of the end of the path
-			auto end_it = components_.end() - n;
-			
-			for (auto it = components_.begin(); it != end_it; ++it)
-			{
-				path_component new_component = *it;
-				truncated_path.components_.emplace_back(new_component);
-			}
-		}
+		truncated_path.components_.insert(truncated_path.components_.begin(),
+										  components_.begin(),
+										  components_.end() - n);
 
 		return truncated_path;
 	}
@@ -328,11 +315,11 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::leaf(unsigned int n) const
+	path path::leaf(int n) const
 	{
 		toml::path leaf_path {};
 
-		n = std::min(n, static_cast<unsigned int>(components_.size())); // Limit to number of elements in path
+		n = std::clamp(n, 0, static_cast<int>(components_.size())); // Limit to number of elements in path and > 0
 
 		if (n > 0)
 		{

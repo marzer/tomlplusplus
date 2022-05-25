@@ -182,11 +182,11 @@ TOML_NAMESPACE_START
 
 		/// \brief Removes the number of terminal path components specified by n
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& truncate(unsigned int n);
+		path& truncate(int n);
 
 		/// \brief Returns a toml::path object which has had n terminal path components removed
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path truncated(unsigned int n) const;
+		path truncated(int n) const;
 
 		/// \brief	Returns a toml::path object representing the path of the parent node
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -194,7 +194,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns a toml::path object representing terminal n-parts of a TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path leaf(unsigned int n = 1) const;
+		path leaf(int n = 1) const;
 
 		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
