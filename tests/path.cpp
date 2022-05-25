@@ -23,6 +23,24 @@ TEST_CASE("path - parsing")
 		CHECK(toml::path("test[1][2]\t .value").string()	== "test[1][2].value");
 		CHECK(toml::path("test[1]\t[2].value").string()		== "test[1][2].value");
 		CHECK(toml::path(".test[1][2]\t ..value").string()	== ".test[1][2]..value");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		CHECK(toml::path(L"").string() == "");
+		CHECK(toml::path(L"[1]").string() == "[1]");
+		CHECK(toml::path(L"[1][2]").string() == "[1][2]");
+		CHECK(toml::path(L"  [1][2]").string() == "  [1][2]");
+		CHECK(toml::path(L"a.  .b").string() == "a.  .b");
+		CHECK(toml::path(L"test[23]").string() == "test[23]");
+		CHECK(toml::path(L"[ 120		]").string() == "[120]");
+		CHECK(toml::path(L"test.value").string() == "test.value");
+		CHECK(toml::path(L"test[0].value").string() == "test[0].value");
+		CHECK(toml::path(L"test[1][2]\t .value").string() == "test[1][2].value");
+		CHECK(toml::path(L"test[1]\t[2].value").string() == "test[1][2].value");
+		CHECK(toml::path(L".test[1][2]\t ..value").string() == ".test[1][2]..value");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 
 	SECTION("parsing - errors")
@@ -38,6 +56,23 @@ TEST_CASE("path - parsing")
 		CHECK(!toml::path("test[1 2]"));
 		CHECK(!toml::path("test[1.2]"));
 		CHECK(!toml::path("test[0.2]"));
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		CHECK(!toml::path(L"test[][2].value"));
+		CHECK(!toml::path(L"test[      "));
+		CHECK(!toml::path(L"test[1]a.b"));
+		CHECK(!toml::path(L"test[1]   a.b"));
+		CHECK(!toml::path(L"test[1a]"));
+		CHECK(!toml::path(L"test[a1]"));
+		CHECK(!toml::path(L"test[1!]"));
+		CHECK(!toml::path(L"test[!1]"));
+		CHECK(!toml::path(L"test[1 2]"));
+		CHECK(!toml::path(L"test[1.2]"));
+		CHECK(!toml::path(L"test[0.2]"));
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 }
 
@@ -84,6 +119,7 @@ TEST_CASE("path - manipulating")
 		CHECK(p6.string() == "test.key1.key2");
 		p6.truncate(3);
 		CHECK(p6.string() == "");
+
 	}
 
 	SECTION("leaf")
@@ -118,6 +154,18 @@ TEST_CASE("path - manipulating")
 
 		toml::path p1("");
 		CHECK(p1.append("[1].key").string() == "[1].key");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		toml::path p2("start");
+		CHECK(p2.append(L"middle.end").string() == "start.middle.end");
+		CHECK(p2.append(L"[12]").string() == "start.middle.end[12]");
+
+		toml::path p3("");
+		CHECK(p3.append(L"[1].key").string() == "[1].key");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 
 	SECTION("append - toml::path copy")
@@ -158,6 +206,18 @@ TEST_CASE("path - manipulating")
 
 		toml::path p1("");
 		CHECK(p1.prepend("[1].key").string() == "[1].key");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		toml::path p2("start");
+		CHECK(p2.prepend(L"middle.end").string() == "middle.end.start");
+		CHECK(p2.prepend(L"[12]").string() == "[12].middle.end.start");
+
+		toml::path p3("");
+		CHECK(p3.prepend(L"[1].key").string() == "[1].key");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 
 	SECTION("prepend - toml::path copy")
@@ -229,6 +289,22 @@ TEST_CASE("path - manipulating")
 		p3.assign(toml::path("invalid[abc"));
 		CHECK(!p3);
 		CHECK(p3.string() == "");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		toml::path p4("start.mid[1][2].end");
+		p4.assign(L"test.key[1]");
+		CHECK(p4.string() == "test.key[1]");
+		p4.assign("");
+		CHECK(p4.string() == "");
+
+		toml::path p5("a.test.path[1]");
+		p5.assign("invalid[abc]");
+		CHECK(!p5);
+		CHECK(p5.string() == "");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 
 }
@@ -251,6 +327,17 @@ TEST_CASE("path - operators")
 
 		CHECK(toml::path("a.b.c") != "a.b");
 		CHECK(toml::path("[1].b") != "[1].b.c");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		CHECK(toml::path("a.b.c") == L"a.b.c");
+		CHECK(toml::path("[1].a") == L"[1].a");
+
+		CHECK(toml::path("a.b.c") != L"a.b");
+		CHECK(toml::path("[1].b") != L"[1].b.c");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
 	}
 
 	SECTION("arithmetic")
@@ -271,6 +358,19 @@ TEST_CASE("path - operators")
 
 		CHECK("a.b" + p2 == "a.b.c[1]");
 		CHECK("a.b" / p2 == "a.b.c[1]");
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		CHECK(toml::path("a.b.c") / L"a[1]" == "a.b.c.a[1]");
+		CHECK((toml::path("a.b.c") / L"a[1]") == "a.b.c.a[1]");
+
+		CHECK(p1 + L"c[1]" == "a.b.c[1]");
+		CHECK(p1 / L"c[1]" == "a.b.c[1]");
+
+		CHECK(L"a.b" + p2 == "a.b.c[1]");
+		CHECK(L"a.b" / p2 == "a.b.c[1]");
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 	}
 }
 
@@ -285,6 +385,12 @@ TEST_CASE("path - misc")
 	CHECK(static_cast<std::string>(toml::path("a.b[1]")) == "a.b[1]");
 	CHECK(static_cast<bool>(toml::path("a.b[1]")));
 	CHECK(!static_cast<bool>(toml::path("a.b[a b]")));
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	CHECK(static_cast<std::wstring>(toml::path("a.b[1]")) == L"a.b[1]");
+
+#endif
 
 }
 

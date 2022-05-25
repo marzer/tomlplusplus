@@ -327,6 +327,7 @@ TOML_NAMESPACE_START
 		return truncated(1);
 	}
 
+	TOML_EXTERNAL_LINKAGE
 	path path::leaf(unsigned int n) const
 	{
 		toml::path leaf_path {};
@@ -461,6 +462,71 @@ TOML_NAMESPACE_START
 		
 		return ss.str();
 	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	/// \brief Construct from wstring
+	TOML_EXTERNAL_LINKAGE
+	path::path(std::wstring_view path_str) : path(impl::narrow(path_str))
+	{ }
+
+	/// \brief	Append operator
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator/=(std::wstring_view rhs)
+	{
+		return append(rhs);
+	}
+
+	/// \brief	Append operator.
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(std::wstring_view rhs)
+	{
+		return append(rhs);
+	}
+
+	/// \brief Evaluate whether two paths are the same
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator==(std::wstring_view compare) const noexcept
+	{
+		return *this == impl::narrow(compare);
+	}
+
+	/// \brief Evaluate whether two paths are the same
+	TOML_EXTERNAL_LINKAGE
+	bool path::operator!=(std::wstring_view compare) const noexcept
+	{
+		return *this != impl::narrow(compare);
+	}
+
+	/// \brief	Appends elements to the end of the TOML path
+	TOML_EXTERNAL_LINKAGE
+	path& path::append(std::wstring_view source)
+	{
+		return append(impl::narrow(source));
+	}
+
+	/// \brief	Prepends elements to the beginning of the TOML path
+	TOML_EXTERNAL_LINKAGE
+		path& path::prepend(std::wstring_view source)
+	{
+		return prepend(impl::narrow(source));
+	}
+
+	/// \brief	Replaces the contents of the path object by a new path
+	TOML_EXTERNAL_LINKAGE
+	path& path::assign(std::wstring_view source)
+	{
+		return assign(impl::narrow(source));
+	}
+
+	/// \brief Returns a wstring representing the path
+	TOML_EXTERNAL_LINKAGE
+	std::wstring path::wstring() const
+	{
+		return impl::widen(string());
+	}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 }
 TOML_NAMESPACE_END;
