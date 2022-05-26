@@ -400,6 +400,37 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
+	inline namespace literals
+	{
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
+
+		/// \brief	Parses a TOML path from a string literal.
+		///
+		/// \detail \cpp
+		/// using namespace toml::literals;
+		///
+		/// auto path = "main.settings.devices[2]"_tpath;
+		/// std::cout << path.parent_path() << "\n";
+		/// \ecpp
+		///
+		/// \out
+		/// main.settings.devices
+		/// \eout
+		///
+		/// \param 	str	The string data.
+		/// \param 	len	The string length.
+		///
+		/// \returns	\conditional_return{With exceptions}
+		///				A toml::table.
+		/// 			\conditional_return{Without exceptions}
+		///				A toml::parse_result.
+		TOML_NODISCARD
+		inline toml::path operator"" _tpath(const char* str, size_t len)
+		{
+			return toml::path(std::string_view{ str, len });
+		}
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
+	}
 }
 TOML_NAMESPACE_END;
 
