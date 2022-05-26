@@ -106,6 +106,19 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(std::string_view);
 
+		inline path operator+(const toml::path& rhs) const
+		{
+			toml::path result = { *this };
+			result.append(rhs);
+
+			return result;
+		}
+
+		inline path operator/(const toml::path& rhs) const
+		{
+			return *this + rhs;
+		}
+
 		/// \brief Evaluate whether path parsing succeeded
 		TOML_NODISCARD
 		explicit inline operator bool() const noexcept
@@ -274,131 +287,119 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-	};
+		// === Hidden friend operators ========================================
+		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
+		{
+			os << rhs.string();
+			return os;
+		}
 
-	inline std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
-	{
-		os << rhs.string();
-		return os;
-	}
+		friend std::istream& operator>>(std::istream& is, toml::path& rhs)
+		{
+			std::string s;
+			is >> s;
+			rhs.assign(s);
 
-	inline std::istream& operator>>(std::istream& is, toml::path& rhs)
-	{
-		std::string s;
-		is >> s;
-		rhs.assign(s);
+			return is;
+		}
 
-		return is;
-	}
+		friend path operator+(const toml::path& lhs, std::string_view rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(const toml::path& lhs, const toml::path& rhs)
-	{
-		toml::path result = { lhs };
-		result.append(rhs);
+		friend path operator+(const toml::path& lhs, const char* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-		return result;
-	}
+		friend path operator+(std::string_view lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-	inline path operator+(const toml::path& lhs, std::string_view rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+			return result;
+		}
 
-	inline path operator+(const toml::path& lhs, const char* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(const char* lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-	inline path operator+(std::string_view lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+			return result;
+		}
 
-		return result;
-	}
+		friend path operator/(const toml::path& lhs, std::string_view rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator+(const char* lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator/(const toml::path& lhs, const char* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-		return result;
-	}
+		friend path operator/(std::string_view lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const toml::path& lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
-
-	inline path operator/(const toml::path& lhs, std::string_view rhs)
-	{
-		return lhs + rhs;
-	}
-
-	inline path operator/(const toml::path& lhs, const char* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
-
-	inline path operator/(std::string_view lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
-
-	inline path operator/(const char* lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const char* lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-	inline path operator+(const toml::path& lhs, std::wstring_view rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(const toml::path& lhs, std::wstring_view rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(const toml::path& lhs, const wchar_t* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(const toml::path& lhs, const wchar_t* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(std::wstring_view lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator+(std::wstring_view lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-		return result;
-	}
+			return result;
+		}
 
-	inline path operator+(const wchar_t* lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator+(const wchar_t* lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-		return result;
-	}
+			return result;
+		}
 
-	inline path operator/(const toml::path& lhs, std::wstring_view rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const toml::path& lhs, std::wstring_view rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const toml::path& lhs, const wchar_t* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator/(const toml::path& lhs, const wchar_t* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator/(std::wstring_view lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(std::wstring_view lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const wchar_t* lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const wchar_t* lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+	};
 
 	inline namespace literals
 	{
