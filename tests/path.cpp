@@ -74,6 +74,18 @@ TEST_CASE("path - parsing")
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 	}
+
+	SECTION("parsing from literal")
+	{
+		auto p0 = "a.b.c[1][12]"_tpath;
+		CHECK(p0);
+		CHECK(p0.string() == "a.b.c[1][12]");
+
+		CHECK("ab.cd[1]"_tpath == toml::path("ab.cd[1]"));
+
+		CHECK(("an.invalid.path[a1]"_tpath).string() == "");
+	}
+
 }
 
 TEST_CASE("path - manipulating")
@@ -503,6 +515,51 @@ TEST_CASE("path - accessing")
 		CHECK(tbl["b"][2]["c"]);
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2].c")));
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2]   \t.c"))); // whitespace is allowed after array indexers
+	}
+
+	SECTION("indexing operator")
+	{
+		// this section uses the operator[] of table and node_view
+		CHECK(tbl[""]);
+		CHECK(tbl[""] == tbl[toml::path("")]);
+
+		CHECK(tbl["a"]);
+		CHECK(tbl["a"] == tbl[toml::path("a")]);
+		CHECK(tbl["a"] != tbl[toml::path(".a")]); // equivalent to ""."a"
+		CHECK(!tbl[toml::path(".a")]);
+
+		CHECK(tbl["b"]);
+		CHECK(tbl["b"] == tbl[toml::path("b")]);
+
+		CHECK(tbl["b"][0]);
+		CHECK(tbl["b"][0] == tbl[toml::path("b[0]")]);
+		CHECK(tbl["b"][0] == tbl[toml::path("b[0]     ")]);
+		CHECK(tbl["b"][0] == tbl[toml::path("b[ 0\t]")]); // whitespace is allowed inside array indexer
+
+		CHECK(tbl["b"][1]);
+		CHECK(tbl["b"][1] != tbl[toml::path("b")][0]);
+		CHECK(tbl["b"][1] == tbl[toml::path("b[1]")]);
+
+		CHECK(tbl["b"][1][0]);
+		CHECK(tbl["b"][1][0] == tbl[toml::path("b[1]")][0]);
+		CHECK(tbl["b"][1][0] == tbl[toml::path("b[1]    \t   [0]")]); // whitespace is allowed after array
+																			   // indexers
+
+		CHECK(tbl["b"][2]["c"]);
+		CHECK(tbl["b"][2]["c"] == tbl[toml::path("b")][toml::path("[2].c")]);
+		CHECK(tbl["b"][2]["c"] == tbl[toml::path("b[2]   \t.c")]); // whitespace is allowed after array
+																			// indexers
+
+		CHECK(tbl["d"]);
+		CHECK(tbl["d"] == tbl[toml::path("d")]);
+
+		CHECK(tbl["d"]["e"]);
+		CHECK(tbl["d"]["e"] == tbl[toml::path("d.e")]);
+		CHECK(tbl["d"]["e"] != tbl[toml::path("d. e")]); // equivalent to "d"." e"
+		CHECK(!tbl[toml::path("d. e")]);
+
+		CHECK(tbl["d"][""]);
+		CHECK(tbl["d"][""] == tbl[toml::path("d.")]);
 	}
 
 	SECTION("std::variant mismatches")
