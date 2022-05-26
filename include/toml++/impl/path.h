@@ -4,10 +4,13 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "header_start.h"
+#include "forward_declarations.h"
 #include "std_vector.h"
 #include "std_string.h"
 #include "std_variant.h"
+
+#include "header_start.h"
+
 
 TOML_NAMESPACE_START
 {
@@ -65,7 +68,6 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Default constructor.
 		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
 		path() noexcept = default;
 
 		/// \brief Construct from string
@@ -106,6 +108,8 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(std::string_view);
 
+		TOML_NODISCARD
+		/// \brief  Append a path to the current path
 		inline path operator+(const toml::path& rhs) const
 		{
 			toml::path result = { *this };
@@ -114,6 +118,8 @@ TOML_NAMESPACE_START
 			return result;
 		}
 
+		TOML_NODISCARD
+		/// \brief  Append a path to the current path
 		inline path operator/(const toml::path& rhs) const
 		{
 			return *this + rhs;
@@ -131,26 +137,32 @@ TOML_NAMESPACE_START
 		inline operator std::string() const { return string(); }
 
 		/// \brief Evaluate whether two paths are the same
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator==(const path& compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are the same
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator==(std::string_view compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are the same
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator==(const char* compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are different
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(const path& compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are different
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(std::string_view compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are different
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(const char* compare) const noexcept;
 
@@ -183,8 +195,12 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
+		TOML_NODISCARD
+		/// \brief  Iterator at the start of the vector of path components (see #path_component)
 		inline auto begin() const noexcept { return components_.begin(); }
 
+		TOML_NODISCARD
+		/// \brief  Iterator at the end of the vector of path components (see #path_component)
 		inline auto end() const noexcept { return components_.end(); }
 
 		/// \brief Removes the number of terminal path components specified by n
@@ -192,14 +208,17 @@ TOML_NAMESPACE_START
 		path& truncate(size_t n);
 
 		/// \brief Returns a toml::path object which has had n terminal path components removed
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path truncated(size_t n) const;
 
 		/// \brief	Returns a toml::path object representing the path of the parent node
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path parent_path() const;
 
 		/// \brief	Returns a toml::path object representing terminal n-parts of a TOML path
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path leaf(size_t n = 1) const;
 
@@ -236,8 +255,8 @@ TOML_NAMESPACE_START
 		path& assign(const path&);
 
 		/// \brief Returns a string representing the path
-		TOML_EXPORTED_MEMBER_FUNCTION
 		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
 		std::string string() const;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -256,16 +275,19 @@ TOML_NAMESPACE_START
 		path& operator+=(std::wstring_view);
 
 		/// \brief Implicitly cast to a std::wstring
+		TOML_NODISCARD
 		inline operator std::wstring() const
 		{
 			return wstring();
 		}
 
 		/// \brief Evaluate whether two paths are the same
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator==(std::wstring_view compare) const noexcept;
 
 		/// \brief Evaluate whether two paths are the same
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(std::wstring_view compare) const noexcept;
 
@@ -282,37 +304,35 @@ TOML_NAMESPACE_START
 		path& assign(std::wstring_view);
 
 		/// \brief Returns a wstring representing the path
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		std::wstring wstring() const;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		// === Hidden friend operators ========================================
-		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
-		{
-			os << rhs.string();
-			return os;
-		}
+		/// \brief	Writes the #toml::path out to the output stream in a human-readbale format
+		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs);
 
-		friend std::istream& operator>>(std::istream& is, toml::path& rhs)
-		{
-			std::string s;
-			is >> s;
-			rhs.assign(s);
+		/// \brief	Reads and parses a #toml::path from the input stream
+		friend std::istream& operator>>(std::istream& is, toml::path& rhs);
 
-			return is;
-		}
-
+		/// \brief	Appends a string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator+(const toml::path& lhs, std::string_view rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a c-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator+(const toml::path& lhs, const char* rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a #toml::path object to a string-formatted toml path
+		TOML_NODISCARD
 		friend path operator+(std::string_view lhs, const toml::path& rhs)
 		{
 			toml::path result = { rhs };
@@ -321,6 +341,8 @@ TOML_NAMESPACE_START
 			return result;
 		}
 
+		/// \brief	Appends a #toml::path object to a c-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator+(const char* lhs, const toml::path& rhs)
 		{
 			toml::path result = { rhs };
@@ -329,21 +351,29 @@ TOML_NAMESPACE_START
 			return result;
 		}
 
+		/// \brief	Appends a string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator/(const toml::path& lhs, std::string_view rhs)
 		{
 			return lhs + rhs;
 		}
 
+		/// \brief	Appends a c-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator/(const toml::path& lhs, const char* rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a #toml::path object to a string-formatted toml path
+		TOML_NODISCARD
 		friend path operator/(std::string_view lhs, const toml::path& rhs)
 		{
 			return lhs + rhs;
 		}
 
+		/// \brief	Appends a #toml::path object to a c-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator/(const char* lhs, const toml::path& rhs)
 		{
 			return lhs + rhs;
@@ -351,16 +381,22 @@ TOML_NAMESPACE_START
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
+		/// \brief	Appends a wide-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator+(const toml::path& lhs, std::wstring_view rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a wchar_t-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator+(const toml::path& lhs, const wchar_t* rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a #toml::path object to a wide-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator+(std::wstring_view lhs, const toml::path& rhs)
 		{
 			toml::path result = { rhs };
@@ -369,6 +405,8 @@ TOML_NAMESPACE_START
 			return result;
 		}
 
+		/// \brief	Appends a #toml::path object to a wchar_t-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator+(const wchar_t* lhs, const toml::path& rhs)
 		{
 			toml::path result = { rhs };
@@ -377,21 +415,29 @@ TOML_NAMESPACE_START
 			return result;
 		}
 
+		/// \brief	Appends a wide-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator/(const toml::path& lhs, std::wstring_view rhs)
 		{
 			return lhs + rhs;
 		}
 
+		/// \brief	Appends a wchar_t-string-formatted toml path to a #toml::path object
+		TOML_NODISCARD
 		friend path operator/(const toml::path& lhs, const wchar_t* rhs)
 		{
 			return lhs + toml::path(rhs);
 		}
 
+		/// \brief	Appends a #toml::path object to a wide-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator/(std::wstring_view lhs, const toml::path& rhs)
 		{
 			return lhs + rhs;
 		}
 
+		/// \brief	Appends a #toml::path object to a wchar_t-string-formatted toml path
+		TOML_NODISCARD
 		friend path operator/(const wchar_t* lhs, const toml::path& rhs)
 		{
 			return lhs + rhs;
@@ -403,8 +449,6 @@ TOML_NAMESPACE_START
 
 	inline namespace literals
 	{
-		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
-
 		/// \brief	Parses a TOML path from a string literal.
 		///
 		/// \detail \cpp
@@ -421,16 +465,12 @@ TOML_NAMESPACE_START
 		/// \param 	str	The string data.
 		/// \param 	len	The string length.
 		///
-		/// \returns	\conditional_return{With exceptions}
-		///				A toml::table.
-		/// 			\conditional_return{Without exceptions}
-		///				A toml::parse_result.
+		/// \returns	A #toml::path generated from the string literal.
 		TOML_NODISCARD
 		inline toml::path operator"" _tpath(const char* str, size_t len)
 		{
 			return toml::path(std::string_view{ str, len });
 		}
-		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
 }
 TOML_NAMESPACE_END;

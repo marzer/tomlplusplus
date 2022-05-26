@@ -6,8 +6,6 @@
 
 #include "forward_declarations.h"
 
-#include "path.h"
-
 TOML_NAMESPACE_START
 {
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".

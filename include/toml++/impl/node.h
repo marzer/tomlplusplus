@@ -9,8 +9,6 @@
 #include "source_region.h"
 #include "header_start.h"
 
-#include "path.h"
-
 TOML_NAMESPACE_START
 {
 	/// \brief	A TOML node.

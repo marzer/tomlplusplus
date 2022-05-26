@@ -70,6 +70,8 @@ TOML_ANON_NAMESPACE_START
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
+
+					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
 					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 

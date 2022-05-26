@@ -4,13 +4,13 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "forward_declarations.h"
 #include "std_map.h"
 #include "std_initializer_list.h"
 #include "array.h"
 #include "make_node.h"
 #include "node_view.h"
 #include "key.h"
-#include "path.h"
 #include "header_start.h"
 
 /// \cond

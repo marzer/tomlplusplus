@@ -14,6 +14,8 @@
 
 TOML_DISABLE_WARNINGS;
 #include <sstream>
+#include <ostream>
+#include <istream>
 #if TOML_INT_CHARCONV
 #include <charconv>
 #endif
@@ -150,6 +152,8 @@ TOML_NAMESPACE_START
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
+
+					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
 					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 					{
 						parsed_components.clear(); // empty object in case of error
@@ -425,6 +429,23 @@ TOML_NAMESPACE_START
 		}
 		
 		return ss.str();
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
+	{
+		os << rhs.string();
+		return os;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	std::istream& operator>>(std::istream& is, toml::path& rhs)
+	{
+		std::string s;
+		is >> s;
+		rhs.assign(s);
+
+		return is;
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT

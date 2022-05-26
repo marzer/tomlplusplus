@@ -95,6 +95,8 @@ TOML_NAMESPACE_START
 	template <typename>
 	class value;
 
+	class path;
+
 	class toml_formatter;
 	class json_formatter;
 	class yaml_formatter;
