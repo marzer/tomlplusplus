@@ -1876,6 +1876,23 @@ TOML_NAMESPACE_START
 			return node_view<node>{ at_path(path) };
 		}
 
+		/// \brief	Gets a node_view for the provided path (const overload).
+		///
+		/// \param 	path The "TOML path" to the desired key.
+		///
+		/// \returns	A view of the value at the given path if one existed, or an empty node view.
+		///
+		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
+		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
+		/// 		 <strong>This is not an error.</strong>
+		///
+		/// \see toml::node_view
+		TOML_NODISCARD
+		node_view<const node> operator[](const toml::path& path) const noexcept
+		{
+			return node_view<const node>{ at_path(path) };
+		}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets a node_view for the selected value.
