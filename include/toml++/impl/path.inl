@@ -29,28 +29,6 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::operator=(const path& rhs)
-	{
-		if (&rhs != this && rhs.components_.size() > 0)
-		{
-			components_.resize(rhs.size());
-			std::copy(rhs.components_.begin(), rhs.components_.end(), components_.begin());
-		}
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator=(path&& rhs) noexcept
-	{
-		if (&rhs != this && rhs.components_.size() > 0)
-		{
-			components_ = std::move(rhs.components_);
-
-		}
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
 	path& path::operator/=(path&& rhs) noexcept
 	{
 		return append(std::move(rhs));

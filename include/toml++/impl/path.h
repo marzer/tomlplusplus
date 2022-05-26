@@ -74,26 +74,21 @@ TOML_NAMESPACE_START
 		explicit path(std::string_view);
 
 		/// \brief	Default destructor.
-		TOML_EXPORTED_MEMBER_FUNCTION
 		~path() noexcept = default;
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		inline path(const path& other) { *this = other; }
+		path(const path& other) = default;
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path(path&& other) noexcept { *this = std::move(other); }
+		path(path&& other) noexcept = default;
 
 		/// \brief	Copy-assignment operator.
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator=(const path&);
+		path& operator=(const path&) = default;
 
 		/// \brief	Move-assignment operator.
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator=(path&&) noexcept;
+		path& operator=(path&&) = default;
 
 		/// \brief	Append operator.
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -112,12 +107,14 @@ TOML_NAMESPACE_START
 		path& operator+=(std::string_view);
 
 		/// \brief Evaluate whether path parsing succeeded
-		inline operator bool() const noexcept
+		TOML_NODISCARD
+		explicit inline operator bool() const noexcept
 		{
 			return !parse_error_;
 		};
 
 		/// \brief Implicitly cast to a std::string
+		TOML_NODISCARD
 		inline operator std::string() const { return string(); }
 
 		/// \brief Evaluate whether two paths are the same
@@ -145,34 +142,36 @@ TOML_NAMESPACE_START
 		bool operator!=(const char* compare) const noexcept;
 
 		/// \brief Fetch a path component by index for modification
+		TOML_NODISCARD
 		inline path_component& operator[](size_t index) noexcept
 		{
 			return components_[index];
 		};
 
 		/// \brief Fetch a path component by index
+		TOML_NODISCARD
 		inline const path_component& operator[](size_t index) const noexcept
 		{
 			return components_[index];
 		};
 
 		/// \brief Number of components in the path
+		TOML_NODISCARD
 		inline size_t size() const noexcept
 		{
 			return components_.size();
 		};
 
 		/// \brief Whether (true) or not (false) the path is empty
+		TOML_NODISCARD
 		inline bool empty() const { return size() <= 0; }
 
 		/// \brief	Erases the contents of the path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
-		TOML_EXPORTED_MEMBER_FUNCTION
 		inline auto begin() const noexcept { return components_.begin(); }
 
-		TOML_EXPORTED_MEMBER_FUNCTION
 		inline auto end() const noexcept { return components_.end(); }
 
 		/// \brief Removes the number of terminal path components specified by n
@@ -225,6 +224,7 @@ TOML_NAMESPACE_START
 
 		/// \brief Returns a string representing the path
 		TOML_EXPORTED_MEMBER_FUNCTION
+		TOML_NODISCARD
 		std::string string() const;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
