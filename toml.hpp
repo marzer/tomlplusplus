@@ -2611,18 +2611,13 @@ TOML_ENABLE_WARNINGS;
 
 //********  impl/path.h  ***********************************************************************************************
 
-TOML_IMPL_NAMESPACE_START
-{
-}
-TOML_IMPL_NAMESPACE_END;
-
 TOML_NAMESPACE_START
 {
 	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
 	{
-		INVALID		= 0x0,
-		KEY			= 0x1,
-		ARRAY_INDEX = 0x2
+		invalid		= 0x0,
+		key			= 0x1,
+		array_index = 0x2
 	};
 
 	using path_component_value = std::variant<std::string, size_t>;
@@ -2653,22 +2648,17 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		explicit path(std::string_view);
 
-		TOML_EXPORTED_MEMBER_FUNCTION
 		~path() noexcept = default;
 
 		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		inline path(const path& other) { *this = other; }
+		path(const path& other) = default;
 
 		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path(path&& other) noexcept { *this = std::move(other); }
+		path(path&& other) noexcept = default;
 
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator=(const path&);
+		path& operator=(const path&) = default;
 
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator=(path&&) noexcept;
+		path& operator=(path&&) = default;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator/=(path&&) noexcept;
@@ -2682,11 +2672,26 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(std::string_view);
 
-		inline operator bool() const noexcept
+		inline path operator+(const toml::path& rhs) const
+		{
+			toml::path result = { *this };
+			result.append(rhs);
+
+			return result;
+		}
+
+		inline path operator/(const toml::path& rhs) const
+		{
+			return *this + rhs;
+		}
+
+		TOML_NODISCARD
+		explicit inline operator bool() const noexcept
 		{
 			return !parse_error_;
 		};
 
+		TOML_NODISCARD
 		inline operator std::string() const { return string(); }
 
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -2707,41 +2712,45 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool operator!=(const char* compare) const noexcept;
 
-		inline path_component* operator[](size_t index) noexcept
+		TOML_NODISCARD
+		inline path_component& operator[](size_t index) noexcept
 		{
-			if (index < components_.size())
-				return &components_[index];
-
-			return nullptr;
+			return components_[index];
 		};
 
+		TOML_NODISCARD
+		inline const path_component& operator[](size_t index) const noexcept
+		{
+			return components_[index];
+		};
+
+		TOML_NODISCARD
 		inline size_t size() const noexcept
 		{
 			return components_.size();
 		};
 
+		TOML_NODISCARD
 		inline bool empty() const { return size() <= 0; }
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
-		TOML_EXPORTED_MEMBER_FUNCTION
 		inline auto begin() const noexcept { return components_.begin(); }
 
-		TOML_EXPORTED_MEMBER_FUNCTION
 		inline auto end() const noexcept { return components_.end(); }
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& truncate(int n);
+		path& truncate(size_t n);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path truncated(int n) const;
+		path truncated(size_t n) const;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path parent_path() const;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path leaf(int n = 1) const;
+		path leaf(size_t n = 1) const;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(const toml::path&);
@@ -2768,6 +2777,7 @@ TOML_NAMESPACE_START
 		path& assign(const path&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
+		TOML_NODISCARD
 		std::string string() const;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -2806,131 +2816,130 @@ TOML_NAMESPACE_START
 		std::wstring wstring() const;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
-	};
 
-	inline std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
-	{
-		os << rhs.string();
-		return os;
-	}
+		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
+		{
+			os << rhs.string();
+			return os;
+		}
 
-	inline std::istream& operator>>(std::istream& is, toml::path& rhs)
-	{
-		std::string s;
-		is >> s;
-		rhs.assign(s);
+		friend std::istream& operator>>(std::istream& is, toml::path& rhs)
+		{
+			std::string s;
+			is >> s;
+			rhs.assign(s);
 
-		return is;
-	}
+			return is;
+		}
 
-	inline path operator+(const toml::path& lhs, const toml::path& rhs)
-	{
-		toml::path result = { lhs };
-		result.append(rhs);
+		friend path operator+(const toml::path& lhs, std::string_view rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-		return result;
-	}
+		friend path operator+(const toml::path& lhs, const char* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(const toml::path& lhs, std::string_view rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(std::string_view lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-	inline path operator+(const toml::path& lhs, const char* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+			return result;
+		}
 
-	inline path operator+(std::string_view lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator+(const char* lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-		return result;
-	}
+			return result;
+		}
 
-	inline path operator+(const char* lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator/(const toml::path& lhs, std::string_view rhs)
+		{
+			return lhs + rhs;
+		}
 
-		return result;
-	}
+		friend path operator/(const toml::path& lhs, const char* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator/(const toml::path& lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(std::string_view lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const toml::path& lhs, std::string_view rhs)
-	{
-		return lhs + rhs;
-	}
-
-	inline path operator/(const toml::path& lhs, const char* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
-
-	inline path operator/(std::string_view lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
-
-	inline path operator/(const char* lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const char* lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-	inline path operator+(const toml::path& lhs, std::wstring_view rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(const toml::path& lhs, std::wstring_view rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(const toml::path& lhs, const wchar_t* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator+(const toml::path& lhs, const wchar_t* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator+(std::wstring_view lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator+(std::wstring_view lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-		return result;
-	}
+			return result;
+		}
 
-	inline path operator+(const wchar_t* lhs, const toml::path& rhs)
-	{
-		toml::path result = { rhs };
-		result.prepend(lhs);
+		friend path operator+(const wchar_t* lhs, const toml::path& rhs)
+		{
+			toml::path result = { rhs };
+			result.prepend(lhs);
 
-		return result;
-	}
+			return result;
+		}
 
-	inline path operator/(const toml::path& lhs, std::wstring_view rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const toml::path& lhs, std::wstring_view rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const toml::path& lhs, const wchar_t* rhs)
-	{
-		return lhs + toml::path(rhs);
-	}
+		friend path operator/(const toml::path& lhs, const wchar_t* rhs)
+		{
+			return lhs + toml::path(rhs);
+		}
 
-	inline path operator/(std::wstring_view lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(std::wstring_view lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
-	inline path operator/(const wchar_t* lhs, const toml::path& rhs)
-	{
-		return lhs + rhs;
-	}
+		friend path operator/(const wchar_t* lhs, const toml::path& rhs)
+		{
+			return lhs + rhs;
+		}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+	};
+
+	inline namespace literals
+	{
+		TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, lit_ex, lit_noex);
+
+		TOML_NODISCARD
+		inline toml::path operator"" _tpath(const char* str, size_t len)
+		{
+			return toml::path(std::string_view{ str, len });
+		}
+		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
+	}
 }
 TOML_NAMESPACE_END;
 
@@ -4007,6 +4016,12 @@ TOML_NAMESPACE_START
 			if (auto tbl = this->as_table())
 				return node_view{ tbl->get(key) };
 			return {};
+		}
+
+		TOML_NODISCARD
+		node_view operator[](const toml::path& path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
 		}
 
 		TOML_NODISCARD
@@ -7790,6 +7805,18 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ get(key) };
 		}
 
+		TOML_NODISCARD
+		node_view<node> operator[](const toml::path& path) noexcept
+		{
+			return node_view<node>{ at_path(path) };
+		}
+
+		TOML_NODISCARD
+		node_view<const node> operator[](const toml::path& path) const noexcept
+		{
+			return node_view<const node>{ at_path(path) };
+		}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
@@ -10115,7 +10142,7 @@ TOML_ANON_NAMESPACE_START
 		for (const auto& component: path)
 		{
 			auto type = component.type;
-			if (type == path_component_type::ARRAY_INDEX && std::holds_alternative<size_t>(component.value))
+			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
@@ -10123,7 +10150,7 @@ TOML_ANON_NAMESPACE_START
 
 				current = current_array->get(std::get<size_t>(component.value));
 			}
-			else if (type == path_component_type::KEY && std::holds_alternative<std::string>(component.value))
+			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value))
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
@@ -10209,14 +10236,6 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/std_algorithm.h  **************************************************************************************
-
-TOML_DISABLE_WARNINGS;
-#if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
-#include <algorithm>
-#endif
-TOML_ENABLE_WARNINGS;
-
 //********  impl/path.inl  *********************************************************************************************
 
 TOML_DISABLE_WARNINGS;
@@ -10239,27 +10258,6 @@ TOML_NAMESPACE_START
 	path::path(std::string_view path_str)
 	{
 		components_ = parse_(path_str, parse_error_);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator=(const path& rhs)
-	{
-		if (&rhs != this && rhs.components_.size() > 0)
-		{
-			components_.resize(rhs.size());
-			std::copy(rhs.components_.begin(), rhs.components_.end(), components_.begin());
-		}
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator=(path&& rhs) noexcept
-	{
-		if (&rhs != this && rhs.components_.size() > 0)
-		{
-			components_ = std::move(rhs.components_);
-		}
-		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -10410,7 +10408,7 @@ TOML_NAMESPACE_START
 				prev_was_dot		   = false;
 				prev_was_array_indexer = true;
 
-				parsed_components.emplace_back(path_component{ { index }, path_component_type::ARRAY_INDEX });
+				parsed_components.emplace_back(path_component{ { index }, path_component_type::array_index });
 			}
 
 			// start of a new table child
@@ -10426,7 +10424,7 @@ TOML_NAMESPACE_START
 				//     "foo".""."bar"
 				//
 				if (prev_was_dot)
-					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::KEY });
+					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::key });
 
 				pos++;
 				prev_was_dot		   = true;
@@ -10471,14 +10469,14 @@ TOML_NAMESPACE_START
 
 				parsed_components.emplace_back(path_component{
 					std::string(std::string_view{ str_start + subkey_start, subkey_len }),
-					path_component_type::KEY
+					path_component_type::key
 				});
 			}
 		}
 
 		if (prev_was_dot) // Last character was a '.', which implies an empty string key at the end of the path
 		{
-			parsed_components.emplace_back(path_component{ ""s, path_component_type::KEY });
+			parsed_components.emplace_back(path_component{ ""s, path_component_type::key });
 		}
 
 		return parsed_components;
@@ -10491,29 +10489,29 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::truncate(int n)
+	path& path::truncate(size_t n)
 	{
-		n = std::clamp(n, 0, static_cast<int>(components_.size()));
+		n = n > components_.size() ? components_.size() : n;
 
 		auto it_end	  = components_.end();
-		components_.erase(it_end - n, it_end);
+		components_.erase(it_end - static_cast<int>(n), it_end);
 
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::truncated(int n) const
+	path path::truncated(size_t n) const
 	{
 		path truncated_path {};
 
-		n = std::clamp(n, 0, static_cast<int>(components_.size()));
+		n = n > components_.size() ? components_.size() : n;
 
 		// Copy all components except one
 		// Need at least two path components to have a parent, since if there is
 		// only one path component, the parent is the root/null path ""
 		truncated_path.components_.insert(truncated_path.components_.begin(),
 										  components_.begin(),
-										  components_.end() - n);
+										  components_.end() - static_cast<int>(n));
 
 		return truncated_path;
 	}
@@ -10525,16 +10523,16 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::leaf(int n) const
+	path path::leaf(size_t n) const
 	{
 		toml::path leaf_path {};
 
-		n = std::clamp(n, 0, static_cast<int>(components_.size())); // Limit to number of elements in path and > 0
+		n = n > components_.size() ? components_.size() : n;
 
 		if (n > 0)
 		{
 			leaf_path.components_.insert(leaf_path.components_.begin(),
-										 components_.end() - n,
+										 components_.end() - static_cast<int>(n),
 										 components_.end());
 		}
 
@@ -10646,11 +10644,11 @@ TOML_NAMESPACE_START
 
 		for (const auto& component : components_)
 		{
-			if (component.type == path_component_type::KEY) // key
+			if (component.type == path_component_type::key) // key
 			{
 				ss << (atRoot ? "" : ".") << std::get<std::string>(component.value);
 			}
-			else if (component.type == path_component_type::ARRAY_INDEX) // array
+			else if (component.type == path_component_type::array_index) // array
 			{
 				ss << "[" << std::get<size_t>(component.value) << "]";
 			}
