@@ -9,7 +9,7 @@
 
 TEST_CASE("user feedback")
 {
-	SECTION("github/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
+	SECTION("tomlplusplus/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
 	{
 		toml::table t1;
 		t1.insert_or_assign("bar1", toml::array{ 1, 2, 3 });
@@ -73,7 +73,7 @@ TEST_CASE("user feedback")
 							  { "foo3"sv, toml::array{ 1, 2, 3, 4 } } });
 	}
 
-	SECTION("github/issues/65") // https://github.com/marzer/tomlplusplus/issues/65
+	SECTION("tomlplusplus/issues/65") // https://github.com/marzer/tomlplusplus/issues/65
 	{
 		// these test a number of things
 		// - a comment at EOF
@@ -98,7 +98,7 @@ TEST_CASE("user feedback")
 			R"(t =[ 9, 2, 1,"r", 100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0 ])");
 	}
 
-	SECTION("github/issues/67") // https://github.com/marzer/tomlplusplus/issues/67
+	SECTION("tomlplusplus/issues/67") // https://github.com/marzer/tomlplusplus/issues/67
 	{
 		const auto data = R"(array=["v1", "v2", "v3"])"sv;
 
@@ -116,7 +116,7 @@ TEST_CASE("user feedback")
 							   });
 	}
 
-	SECTION("github/issues/68") // https://github.com/marzer/tomlplusplus/issues/68
+	SECTION("tomlplusplus/issues/68") // https://github.com/marzer/tomlplusplus/issues/68
 	{
 		const auto data = R"(array=["v1", "v2", "v3"])"sv;
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -129,13 +129,13 @@ TEST_CASE("user feedback")
 							   });
 	}
 
-	SECTION("github/issues/69") // https://github.com/marzer/tomlplusplus/issues/69
+	SECTION("tomlplusplus/issues/69") // https://github.com/marzer/tomlplusplus/issues/69
 	{
 		using namespace toml::literals; // should compile without namespace ambiguity
 		auto table = "[table]\nkey=\"value\""_toml;
 	}
 
-	SECTION("github/pull/80") // https://github.com/marzer/tomlplusplus/pull/80
+	SECTION("tomlplusplus/pull/80") // https://github.com/marzer/tomlplusplus/pull/80
 	{
 		const auto data = R"(
 			a = { "key" = 1 } # inline table
@@ -156,7 +156,7 @@ b = []
 							   });
 	}
 
-	SECTION("github/issues/100") // https://github.com/marzer/tomlplusplus/issues/100
+	SECTION("tomlplusplus/issues/100") // https://github.com/marzer/tomlplusplus/issues/100
 	{
 		// this tests for two separate things that should fail gracefully, not crash:
 		// 1. pathologically-nested inputs
@@ -170,7 +170,7 @@ b = []
 		parsing_should_fail(FILE_LINE_ARGS, std::string_view{ s });
 	}
 
-	SECTION("github/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
+	SECTION("tomlplusplus/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
 	{
 		parsing_should_fail(FILE_LINE_ARGS,
 							R"(
@@ -193,7 +193,7 @@ b = []
 							4);
 	}
 
-	SECTION("github/issues/125") // https://github.com/marzer/tomlplusplus/issues/125
+	SECTION("tomlplusplus/issues/125") // https://github.com/marzer/tomlplusplus/issues/125
 	{
 		parse_expected_value(FILE_LINE_ARGS, R"("\u0800")"sv, "\xE0\xA0\x80"sv);
 		parse_expected_value(FILE_LINE_ARGS, R"("\u7840")"sv, "\xE7\xA1\x80"sv);
@@ -210,7 +210,7 @@ b = []
 		parse_expected_value(FILE_LINE_ARGS, R"("\u2597")"sv, "\xE2\x96\x97"sv);
 	}
 
-	SECTION("github/issues/127") // https://github.com/marzer/tomlplusplus/issues/127
+	SECTION("tomlplusplus/issues/127") // https://github.com/marzer/tomlplusplus/issues/127
 	{
 		parse_expected_value(FILE_LINE_ARGS,
 							 "12:34:56.11122233345678"sv,
@@ -222,7 +222,7 @@ b = []
 							 });
 	}
 
-	SECTION("github/issues/128") // https://github.com/marzer/tomlplusplus/issues/128
+	SECTION("tomlplusplus/issues/128") // https://github.com/marzer/tomlplusplus/issues/128
 	{
 		parsing_should_fail(FILE_LINE_ARGS, "\f"sv);
 		parsing_should_fail(FILE_LINE_ARGS, "\v"sv);
@@ -231,7 +231,7 @@ b = []
 		parsing_should_succeed(FILE_LINE_ARGS, "\n"sv);
 	}
 
-	SECTION("github/issues/129") // https://github.com/marzer/tomlplusplus/issues/129
+	SECTION("tomlplusplus/issues/129") // https://github.com/marzer/tomlplusplus/issues/129
 	{
 		parsing_should_fail(FILE_LINE_ARGS, R"(
 			hex = 0x
@@ -240,7 +240,7 @@ b = []
 		)"sv);
 	}
 
-	SECTION("github/issues/130") // https://github.com/marzer/tomlplusplus/issues/130
+	SECTION("tomlplusplus/issues/130") // https://github.com/marzer/tomlplusplus/issues/130
 	{
 		parse_expected_value(FILE_LINE_ARGS, "0400-01-01 00:00:00"sv, toml::date_time{ { 400, 1, 1 }, { 0, 0, 0 } });
 		parse_expected_value(FILE_LINE_ARGS, "0400-01-01         "sv, toml::date{ 400, 1, 1 });
@@ -248,7 +248,7 @@ b = []
 		parse_expected_value(FILE_LINE_ARGS, "1000-01-01 00:00:00"sv, toml::date_time{ { 1000, 1, 1 }, { 0, 0, 0 } });
 	}
 
-	SECTION("github/issues/131") // https://github.com/marzer/tomlplusplus/issues/131
+	SECTION("tomlplusplus/issues/131") // https://github.com/marzer/tomlplusplus/issues/131
 	{
 		parsing_should_fail(FILE_LINE_ARGS, R"(
 			a={}
@@ -256,12 +256,12 @@ b = []
 		)"sv);
 	}
 
-	SECTION("github/issues/132") // https://github.com/marzer/tomlplusplus/issues/132
+	SECTION("tomlplusplus/issues/132") // https://github.com/marzer/tomlplusplus/issues/132
 	{
 		parsing_should_fail(FILE_LINE_ARGS, "#\r"sv);
 	}
 
-	SECTION("github/issues/134") // https://github.com/marzer/tomlplusplus/issues/134
+	SECTION("tomlplusplus/issues/134") // https://github.com/marzer/tomlplusplus/issues/134
 	{
 		// binary
 		parsing_should_fail(
@@ -303,7 +303,7 @@ b = []
 		parse_expected_value(FILE_LINE_ARGS, "      0x7FFFFFFFFFFFFFFF"sv, INT64_MAX);
 	}
 
-	SECTION("github/issues/135") // https://github.com/marzer/tomlplusplus/issues/135
+	SECTION("tomlplusplus/issues/135") // https://github.com/marzer/tomlplusplus/issues/135
 	{
 		parsing_should_succeed(FILE_LINE_ARGS, "0=0"sv);
 		parsing_should_succeed(FILE_LINE_ARGS, "1=1"sv);
@@ -321,7 +321,7 @@ b = []
 							"2=2\n"sv);
 	}
 
-	SECTION("github/issues/152") // https://github.com/marzer/tomlplusplus/issues/152
+	SECTION("tomlplusplus/issues/152") // https://github.com/marzer/tomlplusplus/issues/152
 	{
 		// clang-format off
 		static constexpr auto data = R"([shaders.room_darker])" "\n"
@@ -349,5 +349,22 @@ b = []
 								   check_location("shaders.room_darker.args.n"sv, 3, 14);
 								   check_location("shaders.room_darker.args.ambientLightLevel"sv, 3, 45);
 							   });
+	}
+
+	SECTION("toml/issues/908") // https://github.com/toml-lang/toml/issues/908
+	{
+		parsing_should_fail(FILE_LINE_ARGS, R"(
+			a = [{ b = 1 }]
+			[a.c]
+			foo = 1
+		)"sv);
+
+		parsing_should_succeed(FILE_LINE_ARGS, R"(
+			[[a]]
+			b = 1
+
+			[a.c]
+			foo = 1
+		)"sv);
 	}
 }

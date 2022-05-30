@@ -16,7 +16,7 @@ extra_files       = [
     'images/banner_small.png',
     'images/badge-awesome.svg',
     'images/badge-TOML.svg',
-    'images/badge-C++20.svg'
+    'images/badge-gitter.svg'
 ]
 
 
@@ -60,22 +60,22 @@ string_literals   = [ '_toml' ]
 
 
 [badges]
-'1. C++20'        = [
-    'badge-C++20.svg',
-    'https://en.cppreference.com/w/cpp/compiler_support'
- ]
-'2. TOML v1.0.0'  = [
+'1. TOML v1.0.0'  = [
     'badge-TOML.svg',
     'https://toml.io/en/v1.0.0'
 ]
-'3. CI'     = [
+'2. CI'     = [
     'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master',
     'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml'
 ]
-'4. Mentioned in Awesome C++' = [
+'3. Mentioned in Awesome C++' = [
     'badge-awesome.svg',
     'https://github.com/fffaraz/awesome-cpp'
 ]
+'4. Gitter'        = [
+    'badge-gitter.svg',
+    'https://gitter.im/marzer/tomlplusplus'
+ ]
 
 
 
