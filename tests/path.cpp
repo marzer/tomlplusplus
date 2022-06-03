@@ -137,6 +137,25 @@ TEST_CASE("path - manipulating")
 
 	}
 
+	SECTION("subpath")
+	{
+		toml::path p0("a.simple[1].path[2].object");
+
+		CHECK(p0.subpath(p0.begin() + 1, p0.begin() + 4).string() == "simple[1].path");
+		CHECK(p0.subpath(p0.begin() + 1, p0.end() - 1).string() == "simple[1].path[2]");
+		CHECK(p0.subpath(p0.begin(), p0.begin()).string() == "");
+		CHECK(p0.subpath(p0.begin(), p0.end() - 5).string() == "a");
+		CHECK(p0.subpath(p0.begin() + 2, p0.end() - 1).string() == "[1].path[2]");
+
+		CHECK(p0.subpath(p0.begin() + 5, p0.end() - 5).string() == "");
+		CHECK(p0.subpath(p0.end(), p0.begin()) == "");
+
+		CHECK(p0.subpath(1, 4).string() == "simple[1].path[2]");
+		CHECK(p0.subpath(0, 0).string() == "");
+		CHECK(p0.subpath(2, 0).string() == "");
+		CHECK(p0.subpath(2, 1).string() == "[1]");
+	}
+
 	SECTION("leaf")
 	{
 		toml::path p0("one.two.three.four.five");

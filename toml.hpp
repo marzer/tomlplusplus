@@ -2802,6 +2802,15 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path leaf(size_t n = 1) const;
 
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path subpath(std::vector<path_component>::const_iterator start,
+					 std::vector<path_component>::const_iterator end) const;
+
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path subpath(size_t start, size_t length) const;
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(const toml::path&);
 
@@ -10565,6 +10574,28 @@ TOML_NAMESPACE_START
 		}
 
 		return leaf_path;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path path::subpath(std::vector<path_component>::const_iterator start,
+					   std::vector<path_component>::const_iterator end) const
+	{
+		toml::path subpath{};
+
+		if (start > end)
+		{
+			return subpath;
+		}
+
+		subpath.components_.insert(subpath.components_.begin(), start, end);
+
+		return subpath;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path path::subpath(size_t start, size_t length) const
+	{
+		return subpath(begin() + static_cast<int>(start), begin() + static_cast<int>(start + length));
 	}
 
 	TOML_EXTERNAL_LINKAGE

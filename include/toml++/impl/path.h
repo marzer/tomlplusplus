@@ -222,6 +222,19 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path leaf(size_t n = 1) const;
 
+		/// \brief	Returns a toml::path object that is a specified subpath of the current path, representing the
+		/// range of path components from [start, end).
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path subpath(std::vector<path_component>::const_iterator start,
+					 std::vector<path_component>::const_iterator end) const;
+
+		/// \brief	Returns a toml::path object that is a specified subpath of the current path, representing the
+		/// range of path components with indexes from [start, start + length].
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path subpath(size_t start, size_t length) const;
+		
 		/// \brief	Appends elements to the end of the TOML path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& append(const toml::path&);
