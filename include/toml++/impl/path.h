@@ -6,15 +6,11 @@
 
 #include "forward_declarations.h"
 #include "std_vector.h"
-#include "std_string.h"
 #include "std_variant.h"
-
 #include "header_start.h"
-
 
 TOML_NAMESPACE_START
 {
-
 	/// \brief Indicates type of path component, either a key, an index in an array, or invalid
 	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
 	{
@@ -31,6 +27,29 @@ TOML_NAMESPACE_START
 	{
 		path_component_value value;
 		path_component_type type;
+
+	  private:
+		/// \cond
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_STATIC_FUNCTION
+		static bool equal(const path_component&, const path_component&) noexcept;
+
+		/// \endcond
+	  public:
+		/// \brief	Returns true if two path components represent the same key or array index.
+		TOML_PURE_INLINE_GETTER
+		friend bool operator==(const path_component& lhs, const path_component& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		/// \brief	Returns true if two path components do not represent the same key or array index.
+		TOML_PURE_INLINE_GETTER
+		friend bool operator!=(const path_component& lhs, const path_component& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
 	};
 
 	/// \brief	A TOML path.
@@ -50,18 +69,23 @@ TOML_NAMESPACE_START
 	///
 	/// \out
 	/// second cat: lion
-	/// cats: ['tiger', 'lion', 'puma'] 
+	/// cats: ['tiger', 'lion', 'puma']
 	/// \eout
 	class TOML_EXPORTED_CLASS path
 	{
 	  private:
 		/// \cond
 
-		bool parse_error_ = false;
-
 		std::vector<path_component> components_;
 
-		std::vector<path_component> parse_(std::string_view, bool& parse_success);
+		static bool parse_into(std::string_view, std::vector<path_component>&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_to(std::ostream&) const;
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_STATIC_FUNCTION
+		static bool equal(const path&, const path&) noexcept;
 
 		/// \endcond
 
@@ -70,138 +94,434 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		path() noexcept = default;
 
-		/// \brief Construct from string
+		/// \brief Construct a path by parsing from a string.
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
 		explicit path(std::string_view);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Construct a path by parsing from a string.
+		///
+		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		explicit path(std::wstring_view);
+
+#endif
 
 		/// \brief	Default destructor.
 		~path() noexcept = default;
 
 		/// \brief	Copy constructor.
 		TOML_NODISCARD_CTOR
-		path(const path& other) = default;
+		path(const path&) = default;
 
 		/// \brief	Move constructor.
 		TOML_NODISCARD_CTOR
-		path(path&& other) noexcept = default;
+		path(path&&) noexcept = default;
+
+		/// \brief Returns the number of components in the path.
+		TOML_PURE_INLINE_GETTER
+		size_t size() const noexcept
+		{
+			return components_.size();
+		}
+
+		/// \brief Returns true if the path has one or more components.
+		TOML_PURE_INLINE_GETTER
+		explicit operator bool() const noexcept
+		{
+			return !components_.empty();
+		}
+
+		/// \brief Whether (true) or not (false) the path is empty
+		TOML_PURE_INLINE_GETTER
+		bool empty() const noexcept
+		{
+			return components_.empty();
+		}
+
+		/// \brief Fetch a path component by index for modification
+		TOML_PURE_INLINE_GETTER
+		path_component& operator[](size_t index) noexcept
+		{
+			return components_[index];
+		}
+
+		/// \brief Fetch a path component by index
+		TOML_PURE_INLINE_GETTER
+		const path_component& operator[](size_t index) const noexcept
+		{
+			return components_[index];
+		}
+
+		/// \name Assignment
+		/// @{
 
 		/// \brief	Copy-assignment operator.
 		path& operator=(const path&) = default;
 
 		/// \brief	Move-assignment operator.
-		path& operator=(path&&) = default;
+		path& operator=(path&&) noexcept = default;
 
-		/// \brief	Append operator.
+		/// \brief	Replaces the contents of the path by parsing from a string.
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(path&&) noexcept;
+		path& operator=(std::string_view);
 
-		/// \brief	Append operator.
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Replaces the contents of the path by parsing from a string.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(std::string_view);
+		path& operator=(std::wstring_view);
 
-		/// \brief	Append operator.
+#endif
+
+		/// \brief	Replaces the contents of the path with that of another.
+		TOML_ALWAYS_INLINE
+		path& assign(const path& p)
+		{
+			return *this = p;
+		}
+
+		/// \brief	Replaces the contents of the path with that of another.
+		TOML_ALWAYS_INLINE
+		path& assign(path&& p) noexcept
+		{
+			return *this = std::move(p);
+		}
+
+		/// \brief	Replaces the contents of the path object by a new path
+		TOML_ALWAYS_INLINE
+		path& assign(std::string_view str)
+		{
+			return *this = str;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Replaces the contents of the path object by a new path
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_ALWAYS_INLINE
+		path& assign(std::wstring_view str)
+		{
+			return *this = str;
+		}
+
+#endif
+
+		/// @}
+
+		/// \name Appending
+		/// @{
+
+		/// \brief	Appends another path onto the end of this one.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(const path&);
+
+		/// \brief	Appends another path onto the end of this one.
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(path&&) noexcept;
 
-		/// \brief	Append operator.
+		/// \brief	Parses a path and appends it onto the end of this one.
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(std::string_view);
 
-		TOML_NODISCARD
-		/// \brief  Append a path to the current path
-		inline path operator+(const toml::path& rhs) const
-		{
-			toml::path result = { *this };
-			result.append(rhs);
+#if TOML_ENABLE_WINDOWS_COMPAT
 
+		/// \brief	Parses a path and appends it onto the end of this one.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(std::wstring_view);
+
+#endif
+
+		/// \brief	Appends another path onto the end of this one.
+		TOML_ALWAYS_INLINE
+		path& append(const path& p)
+		{
+			return *this += p;
+		}
+
+		/// \brief	Appends another path onto the end of this one.
+		TOML_ALWAYS_INLINE
+		path& append(path&& p) noexcept
+		{
+			return *this += std::move(p);
+		}
+
+		/// \brief	Parses a path and appends it onto the end of this one.
+		TOML_ALWAYS_INLINE
+		path& append(std::string_view str)
+		{
+			return *this += str;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Parses a path and appends it onto the end of this one.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_ALWAYS_INLINE
+		path& append(std::wstring_view str)
+		{
+			return *this += str;
+		}
+
+#endif
+
+		/// @}
+
+		/// \name Prepending
+		/// @{
+
+		/// \brief	Prepends another path onto the beginning of this one.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(const path&);
+
+		/// \brief	Prepends another path onto the beginning of this one.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(path&&);
+
+		/// \brief	Parses a path and prepends it onto the beginning of this one.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(std::string_view);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Parses a path and prepends it onto the beginning of this one.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(std::wstring_view);
+
+#endif
+
+		/// @}
+
+		/// \name Concatenation
+		/// @{
+
+		/// \brief  Concatenates two paths.
+		TOML_NODISCARD
+		friend path operator+(const path& lhs, const path& rhs)
+		{
+			path result = lhs;
+			result += rhs;
 			return result;
 		}
 
+		/// \brief  Concatenates two paths.
 		TOML_NODISCARD
-		/// \brief  Append a path to the current path
-		inline path operator/(const toml::path& rhs) const
+		friend path operator+(const path& lhs, std::string_view rhs)
 		{
-			return *this + rhs;
+			path result = lhs;
+			result += rhs;
+			return result;
 		}
 
-		/// \brief Evaluate whether path parsing succeeded
+		/// \brief  Concatenates two paths.
 		TOML_NODISCARD
-		explicit inline operator bool() const noexcept
+		friend path operator+(std::string_view lhs, const path& rhs)
 		{
-			return !parse_error_;
-		};
+			path result = rhs;
+			result.prepend(lhs);
+			return result;
+		}
 
-		/// \brief Implicitly cast to a std::string
-		TOML_NODISCARD
-		inline operator std::string() const { return string(); }
+#if TOML_ENABLE_WINDOWS_COMPAT
 
-		/// \brief Evaluate whether two paths are the same
+		/// \brief  Concatenates two paths.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(const path& compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are the same
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(std::string_view compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are the same
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(const char* compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are different
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(const path& compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are different
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(std::string_view compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are different
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(const char* compare) const noexcept;
-
-		/// \brief Fetch a path component by index for modification
-		TOML_NODISCARD
-		inline path_component& operator[](size_t index) noexcept
+		friend path operator+(const path& lhs, std::wstring_view rhs)
 		{
-			return components_[index];
-		};
+			path result = lhs;
+			result += rhs;
+			return result;
+		}
 
-		/// \brief Fetch a path component by index
+		/// \brief  Concatenates two paths.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
-		inline const path_component& operator[](size_t index) const noexcept
+		friend path operator+(std::wstring_view lhs, const path& rhs)
 		{
-			return components_[index];
-		};
+			path result = rhs;
+			result.prepend(lhs);
+			return result;
+		}
 
-		/// \brief Number of components in the path
-		TOML_NODISCARD
-		inline size_t size() const noexcept
+#endif
+
+		/// @}
+
+		/// \name String conversion
+		/// @{
+
+		/// \brief	Prints the string representation of a #toml::path out to a stream.
+		TOML_ALWAYS_INLINE
+		friend std::ostream& operator<<(std::ostream& os, const path& rhs)
 		{
-			return components_.size();
-		};
+			rhs.print_to(os);
+			return os;
+		}
 
-		/// \brief Whether (true) or not (false) the path is empty
+		/// \brief Returns a string representation of this path.
 		TOML_NODISCARD
-		inline bool empty() const { return size() <= 0; }
+		TOML_EXPORTED_MEMBER_FUNCTION
+		std::string str() const;
+
+		/// \brief Returns a string representation of this path.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		explicit operator std::string() const
+		{
+			return str();
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Returns a string representation of this path.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		std::wstring wide_str() const;
+
+		/// \brief Returns a string representation of this path.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		explicit operator std::wstring() const
+		{
+			return wide_str();
+		}
+
+#endif
+
+		/// @}
+
+		/// \name Equality
+		/// @{
+
+		/// \brief Returns whether two paths are the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, const path& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		/// \brief Returns whether two paths are not the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, const path& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
+
+		/// \brief Returns whether two paths are the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, std::string_view rhs)
+		{
+			return lhs == path{ rhs };
+		}
+
+		/// \brief Returns whether two paths are the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(std::string_view lhs, const path& rhs)
+		{
+			return rhs == lhs;
+		}
+
+		/// \brief Returns whether two paths are not the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, std::string_view rhs)
+		{
+			return lhs != path{ rhs };
+		}
+
+		/// \brief Returns whether two paths are not the same.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(std::string_view lhs, const path& rhs)
+		{
+			return rhs != lhs;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Returns whether two paths are the same.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, std::wstring_view rhs)
+		{
+			return lhs == path{ rhs };
+		}
+
+		/// \brief Returns whether two paths are the same.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(std::wstring_view lhs, const path& rhs)
+		{
+			return rhs == lhs;
+		}
+
+		/// \brief Returns whether two paths are not the same.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, std::wstring_view rhs)
+		{
+			return lhs != path{ rhs };
+		}
+
+		/// \brief Returns whether two paths are not the same.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(std::wstring_view lhs, const path& rhs)
+		{
+			return rhs != lhs;
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
+
+		/// @}
 
 		/// \brief	Erases the contents of the path
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
-		TOML_NODISCARD
 		/// \brief  Iterator at the start of the vector of path components (see #path_component)
-		inline auto begin() const noexcept { return components_.begin(); }
-
 		TOML_NODISCARD
+		auto begin() const noexcept
+		{
+			return components_.begin();
+		}
+
 		/// \brief  Iterator at the end of the vector of path components (see #path_component)
-		inline auto end() const noexcept { return components_.end(); }
+		TOML_NODISCARD
+		auto end() const noexcept
+		{
+			return components_.end();
+		}
 
 		/// \brief Removes the number of terminal path components specified by n
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -215,7 +535,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns a toml::path object representing the path of the parent node
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path parent_path() const;
+		path parent() const;
 
 		/// \brief	Returns a toml::path object representing terminal n-parts of a TOML path
 		TOML_NODISCARD
@@ -234,230 +554,6 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path subpath(size_t start, size_t length) const;
-		
-		/// \brief	Appends elements to the end of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(const toml::path&);
-
-		/// \brief	Appends elements to the end of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(toml::path&&);
-
-		/// \brief	Appends elements to the end of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(std::string_view);
-
-		/// \brief	Prepends elements to the beginning of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(const toml::path&);
-
-		/// \brief	Prepends elements to the beginning of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(toml::path&&);
-
-		/// \brief	Prepends elements to the beginning of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(std::string_view);
-
-		/// \brief	Replaces the contents of the path object by a new path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(std::string_view);
-
-		/// \brief	Replaces the contents of the path object by a new path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(const path&);
-
-		/// \brief Returns a string representing the path
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		std::string string() const;
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		/// \brief Construct from wstring
-		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		explicit path(std::wstring_view);
-
-		/// \brief	Append operator
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(std::wstring_view);
-
-		/// \brief	Append operator.
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator+=(std::wstring_view);
-
-		/// \brief Implicitly cast to a std::wstring
-		TOML_NODISCARD
-		inline operator std::wstring() const
-		{
-			return wstring();
-		}
-
-		/// \brief Evaluate whether two paths are the same
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(std::wstring_view compare) const noexcept;
-
-		/// \brief Evaluate whether two paths are the same
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(std::wstring_view compare) const noexcept;
-
-		/// \brief	Appends elements to the end of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(std::wstring_view);
-
-		/// \brief	Prepends elements to the beginning of the TOML path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(std::wstring_view);
-
-		/// \brief	Replaces the contents of the path object by a new path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(std::wstring_view);
-
-		/// \brief Returns a wstring representing the path
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		std::wstring wstring() const;
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
-		// === Hidden friend operators ========================================
-		/// \brief	Writes the #toml::path out to the output stream in a human-readbale format
-		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs);
-
-		/// \brief	Reads and parses a #toml::path from the input stream
-		friend std::istream& operator>>(std::istream& is, toml::path& rhs);
-
-		/// \brief	Appends a string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, std::string_view rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a c-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, const char* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a #toml::path object to a string-formatted toml path
-		TOML_NODISCARD
-		friend path operator+(std::string_view lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		/// \brief	Appends a #toml::path object to a c-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator+(const char* lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		/// \brief	Appends a string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, std::string_view rhs)
-		{
-			return lhs + rhs;
-		}
-
-		/// \brief	Appends a c-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, const char* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a #toml::path object to a string-formatted toml path
-		TOML_NODISCARD
-		friend path operator/(std::string_view lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-		/// \brief	Appends a #toml::path object to a c-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator/(const char* lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		/// \brief	Appends a wide-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, std::wstring_view rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a wchar_t-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, const wchar_t* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a #toml::path object to a wide-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator+(std::wstring_view lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		/// \brief	Appends a #toml::path object to a wchar_t-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator+(const wchar_t* lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		/// \brief	Appends a wide-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, std::wstring_view rhs)
-		{
-			return lhs + rhs;
-		}
-
-		/// \brief	Appends a wchar_t-string-formatted toml path to a #toml::path object
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, const wchar_t* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		/// \brief	Appends a #toml::path object to a wide-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator/(std::wstring_view lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-		/// \brief	Appends a #toml::path object to a wchar_t-string-formatted toml path
-		TOML_NODISCARD
-		friend path operator/(const wchar_t* lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
 	};
 
 	inline namespace literals

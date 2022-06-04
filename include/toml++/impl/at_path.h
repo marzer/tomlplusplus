@@ -107,7 +107,6 @@ TOML_NAMESPACE_START
 	TOML_EXPORTED_FREE_FUNCTION
 	node_view<const node> at_path(const node& root, const toml::path& path) noexcept;
 
-
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".

@@ -2660,17 +2660,42 @@ TOML_NAMESPACE_START
 	{
 		path_component_value value;
 		path_component_type type;
+
+	  private:
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_STATIC_FUNCTION
+		static bool equal(const path_component&, const path_component&) noexcept;
+
+	  public:
+
+		TOML_PURE_INLINE_GETTER
+		friend bool operator==(const path_component& lhs, const path_component& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		TOML_PURE_INLINE_GETTER
+		friend bool operator!=(const path_component& lhs, const path_component& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
 	};
 
 	class TOML_EXPORTED_CLASS path
 	{
 	  private:
 
-		bool parse_error_ = false;
-
 		std::vector<path_component> components_;
 
-		std::vector<path_component> parse_(std::string_view, bool& parse_success);
+		static bool parse_into(std::string_view, std::vector<path_component>&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_to(std::ostream&) const;
+
+		TOML_PURE_GETTER
+		TOML_EXPORTED_STATIC_FUNCTION
+		static bool equal(const path&, const path&) noexcept;
 
 	  public:
 
@@ -2681,23 +2706,96 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		explicit path(std::string_view);
 
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		explicit path(std::wstring_view);
+
+#endif
+
 		~path() noexcept = default;
 
 		TOML_NODISCARD_CTOR
-		path(const path& other) = default;
+		path(const path&) = default;
 
 		TOML_NODISCARD_CTOR
-		path(path&& other) noexcept = default;
+		path(path&&) noexcept = default;
+
+		TOML_PURE_INLINE_GETTER
+		size_t size() const noexcept
+		{
+			return components_.size();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		explicit operator bool() const noexcept
+		{
+			return !components_.empty();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		bool empty() const noexcept
+		{
+			return components_.empty();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		path_component& operator[](size_t index) noexcept
+		{
+			return components_[index];
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const path_component& operator[](size_t index) const noexcept
+		{
+			return components_[index];
+		}
 
 		path& operator=(const path&) = default;
 
-		path& operator=(path&&) = default;
+		path& operator=(path&&) noexcept = default;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(path&&) noexcept;
+		path& operator=(std::string_view);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(std::string_view);
+		path& operator=(std::wstring_view);
+
+#endif
+
+		TOML_ALWAYS_INLINE
+		path& assign(const path& p)
+		{
+			return *this = p;
+		}
+
+		TOML_ALWAYS_INLINE
+		path& assign(path&& p) noexcept
+		{
+			return *this = std::move(p);
+		}
+
+		TOML_ALWAYS_INLINE
+		path& assign(std::string_view str)
+		{
+			return *this = str;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_ALWAYS_INLINE
+		path& assign(std::wstring_view str)
+		{
+			return *this = str;
+		}
+
+#endif
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(const path&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(path&&) noexcept;
@@ -2705,87 +2803,222 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& operator+=(std::string_view);
 
-		TOML_NODISCARD
+#if TOML_ENABLE_WINDOWS_COMPAT
 
-		inline path operator+(const toml::path& rhs) const
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& operator+=(std::wstring_view);
+
+#endif
+
+		TOML_ALWAYS_INLINE
+		path& append(const path& p)
 		{
-			toml::path result = { *this };
-			result.append(rhs);
+			return *this += p;
+		}
 
+		TOML_ALWAYS_INLINE
+		path& append(path&& p) noexcept
+		{
+			return *this += std::move(p);
+		}
+
+		TOML_ALWAYS_INLINE
+		path& append(std::string_view str)
+		{
+			return *this += str;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_ALWAYS_INLINE
+		path& append(std::wstring_view str)
+		{
+			return *this += str;
+		}
+
+#endif
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(const path&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(path&&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(std::string_view);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path& prepend(std::wstring_view);
+
+#endif
+
+		TOML_NODISCARD
+		friend path operator+(const path& lhs, const path& rhs)
+		{
+			path result = lhs;
+			result += rhs;
 			return result;
 		}
 
 		TOML_NODISCARD
-
-		inline path operator/(const toml::path& rhs) const
+		friend path operator+(const path& lhs, std::string_view rhs)
 		{
-			return *this + rhs;
+			path result = lhs;
+			result += rhs;
+			return result;
 		}
 
 		TOML_NODISCARD
-		explicit inline operator bool() const noexcept
+		friend path operator+(std::string_view lhs, const path& rhs)
 		{
-			return !parse_error_;
-		};
+			path result = rhs;
+			result.prepend(lhs);
+			return result;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD
-		inline operator std::string() const { return string(); }
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(const path& compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(std::string_view compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(const char* compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(const path& compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(std::string_view compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(const char* compare) const noexcept;
-
-		TOML_NODISCARD
-		inline path_component& operator[](size_t index) noexcept
+		friend path operator+(const path& lhs, std::wstring_view rhs)
 		{
-			return components_[index];
-		};
+			path result = lhs;
+			result += rhs;
+			return result;
+		}
 
 		TOML_NODISCARD
-		inline const path_component& operator[](size_t index) const noexcept
+		friend path operator+(std::wstring_view lhs, const path& rhs)
 		{
-			return components_[index];
-		};
+			path result = rhs;
+			result.prepend(lhs);
+			return result;
+		}
 
-		TOML_NODISCARD
-		inline size_t size() const noexcept
+#endif
+
+		TOML_ALWAYS_INLINE
+		friend std::ostream& operator<<(std::ostream& os, const path& rhs)
 		{
-			return components_.size();
-		};
+			rhs.print_to(os);
+			return os;
+		}
 
 		TOML_NODISCARD
-		inline bool empty() const { return size() <= 0; }
+		TOML_EXPORTED_MEMBER_FUNCTION
+		std::string str() const;
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		explicit operator std::string() const
+		{
+			return str();
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		std::wstring wide_str() const;
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		explicit operator std::wstring() const
+		{
+			return wide_str();
+		}
+
+#endif
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, const path& rhs) noexcept
+		{
+			return equal(lhs, rhs);
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, const path& rhs) noexcept
+		{
+			return !equal(lhs, rhs);
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, std::string_view rhs)
+		{
+			return lhs == path{ rhs };
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(std::string_view lhs, const path& rhs)
+		{
+			return rhs == lhs;
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, std::string_view rhs)
+		{
+			return lhs != path{ rhs };
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(std::string_view lhs, const path& rhs)
+		{
+			return rhs != lhs;
+		}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(const path& lhs, std::wstring_view rhs)
+		{
+			return lhs == path{ rhs };
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator==(std::wstring_view lhs, const path& rhs)
+		{
+			return rhs == lhs;
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(const path& lhs, std::wstring_view rhs)
+		{
+			return lhs != path{ rhs };
+		}
+
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		friend bool operator!=(std::wstring_view lhs, const path& rhs)
+		{
+			return rhs != lhs;
+		}
+
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void clear() noexcept;
 
 		TOML_NODISCARD
-
-		inline auto begin() const noexcept { return components_.begin(); }
+		auto begin() const noexcept
+		{
+			return components_.begin();
+		}
 
 		TOML_NODISCARD
-
-		inline auto end() const noexcept { return components_.end(); }
+		auto end() const noexcept
+		{
+			return components_.end();
+		}
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& truncate(size_t n);
@@ -2796,7 +3029,7 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path parent_path() const;
+		path parent() const;
 
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -2810,191 +3043,6 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path subpath(size_t start, size_t length) const;
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(const toml::path&);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(toml::path&&);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(std::string_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(const toml::path&);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(toml::path&&);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(std::string_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(std::string_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(const path&);
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		std::string string() const;
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		TOML_NODISCARD_CTOR
-		TOML_EXPORTED_MEMBER_FUNCTION
-		explicit path(std::wstring_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator/=(std::wstring_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator+=(std::wstring_view);
-
-		TOML_NODISCARD
-		inline operator std::wstring() const
-		{
-			return wstring();
-		}
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator==(std::wstring_view compare) const noexcept;
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		bool operator!=(std::wstring_view compare) const noexcept;
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& append(std::wstring_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& prepend(std::wstring_view);
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path& assign(std::wstring_view);
-
-		TOML_NODISCARD
-		TOML_EXPORTED_MEMBER_FUNCTION
-		std::wstring wstring() const;
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
-		friend std::ostream& operator<<(std::ostream& os, const toml::path& rhs);
-
-		friend std::istream& operator>>(std::istream& is, toml::path& rhs);
-
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, std::string_view rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, const char* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator+(std::string_view lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		TOML_NODISCARD
-		friend path operator+(const char* lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, std::string_view rhs)
-		{
-			return lhs + rhs;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, const char* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator/(std::string_view lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const char* lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, std::wstring_view rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator+(const toml::path& lhs, const wchar_t* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator+(std::wstring_view lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		TOML_NODISCARD
-		friend path operator+(const wchar_t* lhs, const toml::path& rhs)
-		{
-			toml::path result = { rhs };
-			result.prepend(lhs);
-
-			return result;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, std::wstring_view rhs)
-		{
-			return lhs + rhs;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const toml::path& lhs, const wchar_t* rhs)
-		{
-			return lhs + toml::path(rhs);
-		}
-
-		TOML_NODISCARD
-		friend path operator/(std::wstring_view lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-		TOML_NODISCARD
-		friend path operator/(const wchar_t* lhs, const toml::path& rhs)
-		{
-			return lhs + rhs;
-		}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
 	};
 
 	inline namespace literals
@@ -10050,7 +10098,7 @@ TOML_ANON_NAMESPACE_START
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
 
-					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
+					// fail if unable to parse or entire index not parseable (otherwise would allow a[1bc] == a[1])
 					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 
@@ -10168,7 +10216,7 @@ TOML_ANON_NAMESPACE_START
 
 		node* current = &root;
 
-		for (const auto& component: path)
+		for (const auto& component : path)
 		{
 			auto type = component.type;
 			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
@@ -10270,7 +10318,6 @@ TOML_POP_WARNINGS;
 TOML_DISABLE_WARNINGS;
 #include <sstream>
 #include <ostream>
-#include <istream>
 #if TOML_INT_CHARCONV
 #include <charconv>
 #endif
@@ -10286,95 +10333,37 @@ TOML_PUSH_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	path::path(std::string_view path_str)
+	bool path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
-		components_ = parse_(path_str, parse_error_);
+		return lhs.type == rhs.type && lhs.value == rhs.value;
 	}
+}
+TOML_NAMESPACE_END;
 
+TOML_NAMESPACE_START
+{
 	TOML_EXTERNAL_LINKAGE
-	path& path::operator/=(path&& rhs) noexcept
+	bool path::parse_into(std::string_view path_str, std::vector<path_component> & components)
 	{
-		return append(std::move(rhs));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator/=(std::string_view source)
-	{
-		return append(source);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(path&& rhs) noexcept
-	{
-		return append(std::move(rhs));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(std::string_view source)
-	{
-		return append(source);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator==(const path& compare) const noexcept
-	{
-		if (components_.size() != compare.components_.size())
-			return false;
-
-		for (size_t i = 0; i < components_.size(); ++i)
+		// a blank string is a valid path; it's just one component representing the "" key
+		if (path_str.empty())
 		{
-			if (components_[i].type != compare.components_[i].type
-				|| components_[i].value != compare.components_[i].value)
-				return false;
+			components.emplace_back(path_component{ ""s, path_component_type::key });
+			return true;
 		}
-
-		return true;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator==(std::string_view compare) const noexcept
-	{
-		return string() == compare;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator==(const char* compare) const noexcept
-	{
-		return string() == std::string_view(compare);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator!=(const path& compare) const noexcept
-	{
-		return !(*this == compare);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator!=(std::string_view compare) const noexcept
-	{
-		return !(*this == compare);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator!=(const char* compare) const noexcept
-	{
-		return !(*this == std::string_view(compare));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	std::vector<path_component> path::parse_(std::string_view path_str, bool& parse_error)
-	{
-		std::vector<path_component> parsed_components;
-		parse_error = false; // success by default, set to true if fails to parse.
-
-		if (path_str == "") // empty path
-			return parsed_components;
 
 		auto str_start				= path_str.data();
 		size_t pos					= 0;
 		const auto end				= path_str.length();
 		bool prev_was_array_indexer = false;
 		bool prev_was_dot			= true; // invisible root 'dot'
+
+		const auto parse_failed = [&, original_len = components.size()]() noexcept -> bool
+		{
+			if (components.size() > original_len)
+				components.resize(original_len);
+			return false;
+		};
 
 		while (pos < end)
 		{
@@ -10386,9 +10375,7 @@ TOML_NAMESPACE_START
 				const auto index_end   = path_str.find(']', index_start);			 // position of ']'
 				if (index_end == std::string_view::npos || index_end == index_start) // nothing in brackets, error
 				{
-					parsed_components.clear(); // empty object in case of error
-					parse_error = true;
-					return parsed_components;
+					return parse_failed();
 				}
 				auto index_str = std::string_view(&path_str[index_start], index_end - index_start);
 
@@ -10397,9 +10384,7 @@ TOML_NAMESPACE_START
 				const auto last_non_ws	= index_str.find_last_not_of(" \t"sv);
 				if (first_non_ws == std::string_view::npos)
 				{
-					parsed_components.clear(); // empty object in case of error
-					parse_error = true;
-					return parsed_components;
+					return parse_failed();
 				}
 				TOML_ASSERT_ASSUME(last_non_ws != std::string_view::npos);
 				index_str = index_str.substr(first_non_ws, (last_non_ws - first_non_ws) + 1u);
@@ -10414,12 +10399,10 @@ TOML_NAMESPACE_START
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
 
-					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
+					// fail if unable to parse or entire index not parseable (otherwise would allow a[1bc] == a[1])
 					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 					{
-						parsed_components.clear(); // empty object in case of error
-						parse_error_ = true;
-						return parsed_components;
+						return parse_failed();
 					}
 
 #else
@@ -10429,9 +10412,7 @@ TOML_NAMESPACE_START
 					ss.write(index_str.data(), static_cast<std::streamsize>(index_str.length()));
 					if (!(ss >> index))
 					{
-						clear(); // empty object in case of error
-						parse_error_ = true;
-						return;
+						return parse_failed();
 					}
 
 #endif
@@ -10441,7 +10422,7 @@ TOML_NAMESPACE_START
 				prev_was_dot		   = false;
 				prev_was_array_indexer = true;
 
-				parsed_components.emplace_back(path_component{ { index }, path_component_type::array_index });
+				components.emplace_back(path_component{ { index }, path_component_type::array_index });
 			}
 
 			// start of a new table child
@@ -10457,7 +10438,7 @@ TOML_NAMESPACE_START
 				//     "foo".""."bar"
 				//
 				if (prev_was_dot)
-					parsed_components.emplace_back(path_component{ { ""s }, path_component_type::key });
+					components.emplace_back(path_component{ ""s, path_component_type::key });
 
 				pos++;
 				prev_was_dot		   = true;
@@ -10490,9 +10471,7 @@ TOML_NAMESPACE_START
 					}
 					else
 					{
-						parsed_components.clear(); // empty object in case of error
-						parse_error = true;
-						return parsed_components;
+						return parse_failed();
 					}
 				}
 
@@ -10500,25 +10479,170 @@ TOML_NAMESPACE_START
 				prev_was_dot		   = false;
 				prev_was_array_indexer = false;
 
-				parsed_components.emplace_back(path_component{
-					std::string(std::string_view{ str_start + subkey_start, subkey_len }),
-					path_component_type::key
-				});
+				components.emplace_back(
+					path_component{ std::string(str_start + subkey_start, subkey_len), path_component_type::key });
 			}
 		}
 
 		if (prev_was_dot) // Last character was a '.', which implies an empty string key at the end of the path
 		{
-			parsed_components.emplace_back(path_component{ ""s, path_component_type::key });
+			components.emplace_back(path_component{ ""s, path_component_type::key });
 		}
 
-		return parsed_components;
+		return true;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	void path::print_to(std::ostream & os) const
+	{
+		bool root = true;
+		for (const auto& component : components_)
+		{
+			if (component.type == path_component_type::key) // key
+			{
+				if (!root)
+					impl::print_to_stream(os, '.');
+				impl::print_to_stream(os, std::get<std::string>(component.value));
+			}
+			else if (component.type == path_component_type::array_index) // array
+			{
+				impl::print_to_stream(os, '[');
+				impl::print_to_stream(os, std::get<size_t>(component.value));
+				impl::print_to_stream(os, ']');
+			}
+			root = false;
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	bool path::equal(const path& lhs, const path& rhs) noexcept
+	{
+		return lhs.components_ == rhs.components_;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path::path(std::string_view str) //
+	{
+		parse_into(str, components_);
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path::path(std::wstring_view str) //
+		: path(impl::narrow(str))
+	{}
+
+#endif
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator=(std::string_view rhs)
+	{
+		components_.clear();
+		parse_into(rhs, components_);
+		return *this;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator=(std::wstring_view rhs)
+	{
+		return assign(impl::narrow(rhs));
+	}
+
+#endif
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(const path& rhs)
+	{
+		components_.insert(components_.cend(), rhs.begin(), rhs.end());
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(path&& rhs) noexcept
+	{
+		components_.insert(components_.end(),
+						   std::make_move_iterator(rhs.components_.begin()),
+						   std::make_move_iterator(rhs.components_.end()));
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(std::string_view str)
+	{
+		parse_into(str, components_);
+		return *this;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::operator+=(std::wstring_view str)
+	{
+		return *this += impl::narrow(str);
+	}
+
+#endif
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(const path& source)
+	{
+		components_.insert(components_.begin(), source.components_.begin(), source.components_.end());
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(path && source)
+	{
+		components_.insert(components_.begin(),
+						   std::make_move_iterator(source.components_.begin()),
+						   std::make_move_iterator(source.components_.end()));
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(std::string_view source)
+	{
+		return prepend(path{ source });
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path& path::prepend(std::wstring_view source)
+	{
+		return prepend(impl::narrow(source));
+	}
+
+#endif
+
+	TOML_EXTERNAL_LINKAGE
+	std::string path::str() const
+	{
+		if (empty())
+			return "";
+
+		std::ostringstream ss;
+		print_to(ss);
+		return std::move(ss).str();
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	std::wstring path::wide_str() const
+	{
+		return impl::widen(str());
+	}
+
+#endif
 
 	TOML_EXTERNAL_LINKAGE
 	void path::clear() noexcept
 	{
-		this->components_.clear();
+		components_.clear();
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -10526,7 +10650,7 @@ TOML_NAMESPACE_START
 	{
 		n = n > components_.size() ? components_.size() : n;
 
-		auto it_end	  = components_.end();
+		auto it_end = components_.end();
 		components_.erase(it_end - static_cast<int>(n), it_end);
 
 		return *this;
@@ -10535,7 +10659,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::truncated(size_t n) const
 	{
-		path truncated_path {};
+		path truncated_path{};
 
 		n = n > components_.size() ? components_.size() : n;
 
@@ -10550,7 +10674,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path path::parent_path() const
+	path path::parent() const
 	{
 		return truncated(1);
 	}
@@ -10558,7 +10682,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path path::leaf(size_t n) const
 	{
-		toml::path leaf_path {};
+		path leaf_path{};
 
 		n = n > components_.size() ? components_.size() : n;
 
@@ -10576,15 +10700,11 @@ TOML_NAMESPACE_START
 	path path::subpath(std::vector<path_component>::const_iterator start,
 					   std::vector<path_component>::const_iterator end) const
 	{
-		toml::path subpath{};
+		if (start >= end)
+			return {};
 
-		if (start > end)
-		{
-			return subpath;
-		}
-
+		path subpath;
 		subpath.components_.insert(subpath.components_.begin(), start, end);
-
 		return subpath;
 	}
 
@@ -10593,198 +10713,6 @@ TOML_NAMESPACE_START
 	{
 		return subpath(begin() + static_cast<int>(start), begin() + static_cast<int>(start + length));
 	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::append(const toml::path& source)
-	{
-		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
-							  // empty)
-
-		// Copy path parts to this object
-		for (const auto& component : source.components_)
-		{
-			components_.push_back(component);
-		}
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::append(toml::path&& source)
-	{
-		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
-							  // empty)
-
-		// Copy path parts to this object
-		for (auto& component : source.components_)
-		{
-			components_.emplace_back(std::move(component));
-		}
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::append(std::string_view source)
-	{
-		auto components_to_append = parse_(source, parse_error_);
-		for (auto& component : components_to_append)
-		{
-			components_.emplace_back(std::move(component));
-		}
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::prepend(const toml::path& source)
-	{
-		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
-							  // empty)
-
-		components_.insert(components_.begin(), source.components_.begin(), source.components_.end());
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::prepend(toml::path&& source)
-	{
-		parse_error_ = false; // This will end up being a valid path when appended (even if previously failed and now
-							  // empty)
-
-		components_.insert(components_.begin(), std::make_move_iterator(source.components_.begin()), std::make_move_iterator(source.components_.end()));
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::prepend(std::string_view source)
-	{
-		auto components_to_prepend = parse_(source, parse_error_);
-
-		components_.insert(components_.begin(), components_to_prepend.begin(), components_to_prepend.end());
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::assign(std::string_view source)
-	{
-		components_ = parse_(source, parse_error_);
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::assign(const path& source)
-	{
-		if (source)
-		{
-			components_ = source.components_;
-		}
-		else // propagate error of source
-		{
-			clear();
-			parse_error_ = true;
-		}
-
-		return *this;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	std::string path::string() const
-	{
-		std::stringstream ss;
-		bool atRoot = true;
-
-		for (const auto& component : components_)
-		{
-			if (component.type == path_component_type::key) // key
-			{
-				ss << (atRoot ? "" : ".") << std::get<std::string>(component.value);
-			}
-			else if (component.type == path_component_type::array_index) // array
-			{
-				ss << "[" << std::get<size_t>(component.value) << "]";
-			}
-			atRoot = false;
-		}
-
-		return ss.str();
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	std::ostream& operator<<(std::ostream& os, const toml::path& rhs)
-	{
-		os << rhs.string();
-		return os;
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	std::istream& operator>>(std::istream& is, toml::path& rhs)
-	{
-		std::string s;
-		is >> s;
-		rhs.assign(s);
-
-		return is;
-	}
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_EXTERNAL_LINKAGE
-	path::path(std::wstring_view path_str) : path(impl::narrow(path_str))
-	{ }
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator/=(std::wstring_view rhs)
-	{
-		return append(rhs);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(std::wstring_view rhs)
-	{
-		return append(rhs);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator==(std::wstring_view compare) const noexcept
-	{
-		return *this == impl::narrow(compare);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	bool path::operator!=(std::wstring_view compare) const noexcept
-	{
-		return *this != impl::narrow(compare);
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::append(std::wstring_view source)
-	{
-		return append(impl::narrow(source));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-		path& path::prepend(std::wstring_view source)
-	{
-		return prepend(impl::narrow(source));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	path& path::assign(std::wstring_view source)
-	{
-		return assign(impl::narrow(source));
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	std::wstring path::wstring() const
-	{
-		return impl::widen(string());
-	}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
 }
 TOML_NAMESPACE_END;
 

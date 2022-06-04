@@ -71,7 +71,7 @@ TOML_ANON_NAMESPACE_START
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
 
-					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
+					// fail if unable to parse or entire index not parseable (otherwise would allow a[1bc] == a[1])
 					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 
@@ -189,7 +189,7 @@ TOML_ANON_NAMESPACE_START
 
 		node* current = &root;
 
-		for (const auto& component: path)
+		for (const auto& component : path)
 		{
 			auto type = component.type;
 			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
@@ -261,7 +261,6 @@ TOML_NAMESPACE_START
 	{
 		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
 	}
-
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
