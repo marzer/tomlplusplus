@@ -1,11 +1,11 @@
 [![banner](docs/images/banner_small.png)][homepage]  
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
 [![C++17](docs/images/badge-C++17.svg)][cpp_compilers]
-[![C++20](docs/images/badge-C++20.svg)][cpp_compilers]
 [![TOML](docs/images/badge-TOML.svg)][v1.0.0]
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
 [![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
+[![Gitter](docs/images/badge-gitter.svg)](https://gitter.im/marzer/tomlplusplus)
 ====
 
 # toml++ homepage
@@ -281,6 +281,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 # Contact
 For bug reports and feature requests please consider using the [issues] system here on GitHub. For anything else
 though you're welcome to reach out via other means. In order of likely response time:
+- Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 - Twitter: [marzer8789](https://twitter.com/marzer8789)
 - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
 - Facebook: [marzer](https://www.facebook.com/marzer)

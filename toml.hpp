@@ -3163,13 +3163,12 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<ElemType>>;
-			static_assert(std::is_void_v<unwrapped_type> //
-							  || (toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>),
+			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
+			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
 						  "The template type argument of node::is_homogeneous() must be void or one "
 						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return is_homogeneous(impl::node_type_of<unwrapped_type>);
+			return is_homogeneous(impl::node_type_of<type>);
 		}
 
 		TOML_PURE_GETTER
@@ -3215,27 +3214,27 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		bool is() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<T>>;
-			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
+			using type = impl::remove_cvref<impl::unwrap_node<T>>;
+			static_assert(toml::is_value<type> || toml::is_container<type>,
 						  "The template type argument of node::is() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			if constexpr (std::is_same_v<unwrapped_type, table>)
+			if constexpr (std::is_same_v<type, table>)
 				return is_table();
-			else if constexpr (std::is_same_v<unwrapped_type, array>)
+			else if constexpr (std::is_same_v<type, array>)
 				return is_array();
-			else if constexpr (std::is_same_v<unwrapped_type, std::string>)
+			else if constexpr (std::is_same_v<type, std::string>)
 				return is_string();
-			else if constexpr (std::is_same_v<unwrapped_type, int64_t>)
+			else if constexpr (std::is_same_v<type, int64_t>)
 				return is_integer();
-			else if constexpr (std::is_same_v<unwrapped_type, double>)
+			else if constexpr (std::is_same_v<type, double>)
 				return is_floating_point();
-			else if constexpr (std::is_same_v<unwrapped_type, bool>)
+			else if constexpr (std::is_same_v<type, bool>)
 				return is_boolean();
-			else if constexpr (std::is_same_v<unwrapped_type, date>)
+			else if constexpr (std::is_same_v<type, date>)
 				return is_date();
-			else if constexpr (std::is_same_v<unwrapped_type, time>)
+			else if constexpr (std::is_same_v<type, time>)
 				return is_time();
-			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
+			else if constexpr (std::is_same_v<type, date_time>)
 				return is_date_time();
 		}
 
@@ -4486,14 +4485,11 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			using type = impl::unwrap_node<ElemType>;
-			static_assert(
-				std::is_void_v<
-					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
-				"The template type argument of value::is_homogeneous() must be void or one "
-				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
+			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
+						  "The template type argument of value::is_homogeneous() must be void or one "
+						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			using type = impl::unwrap_node<ElemType>;
 			if constexpr (std::is_void_v<type>)
 				return true;
 			else
@@ -5701,13 +5697,12 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<ElemType>>;
-			static_assert(std::is_void_v<unwrapped_type> //
-							  || (impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
+			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
+			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
 						  "The template type argument of array::is_homogeneous() must be void or one "
 						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return is_homogeneous(impl::node_type_of<unwrapped_type>);
+			return is_homogeneous(impl::node_type_of<type>);
 		}
 		TOML_CONST_INLINE_GETTER
 		bool is_table() const noexcept final
@@ -6332,11 +6327,13 @@ TOML_NAMESPACE_START
 		template <typename ElemType = void, typename... Args>
 		iterator emplace(const_iterator pos, Args&&... args)
 		{
-			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
-			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
+			using raw_elem_type = impl::remove_cvref<ElemType>;
+			using elem_type		= std::conditional_t<std::is_void_v<raw_elem_type>, //
+												 impl::emplaced_type_of<Args&&...>,
+												 raw_elem_type>;
 
-			using type = impl::unwrap_node<elem_type>;
-			static_assert((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>,
+			using type = impl::remove_cvref<impl::unwrap_node<elem_type>>;
+			static_assert(impl::is_native<type> || impl::is_one_of<type, table, array>,
 						  "Emplacement type parameter must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
 			return iterator{ insert_at(const_vector_iterator{ pos },
@@ -6368,14 +6365,16 @@ TOML_NAMESPACE_START
 		template <typename ElemType = void, typename... Args>
 		decltype(auto) emplace_back(Args&&... args)
 		{
-			static_assert(!impl::is_cvref<ElemType>, "ElemType may not be const, volatile, or a reference.");
-			using elem_type = std::conditional_t<std::is_void_v<ElemType>, impl::emplaced_type_of<Args&&...>, ElemType>;
+			using raw_elem_type = impl::remove_cvref<ElemType>;
+			using elem_type		= std::conditional_t<std::is_void_v<raw_elem_type>, //
+												 impl::emplaced_type_of<Args&&...>,
+												 raw_elem_type>;
 
 			static constexpr auto moving_node_ptr = std::is_same_v<elem_type, impl::node_ptr> //
 												 && sizeof...(Args) == 1u					  //
 												 && impl::first_is_same<impl::node_ptr&&, Args&&...>;
 
-			using unwrapped_type = impl::unwrap_node<elem_type>;
+			using unwrapped_type = impl::remove_cvref<impl::unwrap_node<elem_type>>;
 
 			static_assert(
 				moving_node_ptr										  //
@@ -6984,13 +6983,10 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			using type = impl::unwrap_node<ElemType>;
-
-			static_assert(
-				std::is_void_v<
-					type> || ((impl::is_native<type> || impl::is_one_of<type, table, array>)&&!impl::is_cvref<type>),
-				"The template type argument of table::is_homogeneous() must be void or one "
-				"of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
+			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
+			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
+						  "The template type argument of table::is_homogeneous() must be void or one "
+						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
 			return is_homogeneous(impl::node_type_of<type>);
 		}
@@ -7623,9 +7619,9 @@ TOML_NAMESPACE_START
 						  "Emplacement using wide-character keys is only supported on Windows with "
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
-			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
-			using value_type =
-				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
+			using raw_value_type = impl::remove_cvref<ValueType>;
+			using value_type	 = std::
+				conditional_t<std::is_void_v<raw_value_type>, impl::emplaced_type_of<ValueArgs&&...>, raw_value_type>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
@@ -7642,7 +7638,7 @@ TOML_NAMESPACE_START
 				static constexpr auto moving_node_ptr = std::is_same_v<value_type, impl::node_ptr> //
 													 && sizeof...(ValueArgs) == 1u				   //
 													 && impl::first_is_same<impl::node_ptr&&, ValueArgs&&...>;
-				using unwrapped_type = impl::unwrap_node<value_type>;
+				using unwrapped_type = impl::remove_cvref<impl::unwrap_node<value_type>>;
 
 				static_assert(moving_node_ptr										//
 								  || impl::is_native<unwrapped_type>				//
@@ -7790,9 +7786,9 @@ TOML_NAMESPACE_START
 						  "Emplacement using wide-character keys is only supported on Windows with "
 						  "TOML_ENABLE_WINDOWS_COMPAT enabled.");
 
-			static_assert(!impl::is_cvref<ValueType>, "ValueType may not be const, volatile, or a reference.");
-			using value_type =
-				std::conditional_t<std::is_void_v<ValueType>, impl::emplaced_type_of<ValueArgs&&...>, ValueType>;
+			using raw_value_type = impl::remove_cvref<ValueType>;
+			using value_type	 = std::
+				conditional_t<std::is_void_v<raw_value_type>, impl::emplaced_type_of<ValueArgs&&...>, raw_value_type>;
 
 			if constexpr (impl::is_wide_string<KeyType>)
 			{
@@ -7805,7 +7801,7 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
-				using unwrapped_type = impl::unwrap_node<value_type>;
+				using unwrapped_type = impl::remove_cvref<impl::unwrap_node<value_type>>;
 				static_assert((impl::is_native<unwrapped_type> || impl::is_one_of<unwrapped_type, table, array>),
 							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);

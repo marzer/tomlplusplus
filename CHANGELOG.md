@@ -23,6 +23,9 @@ template:
 - Added toml::path type to parse and manipulate a path to a node in a toml::table
 - Added at_path overloads to accept toml::path
 
+#### Changes:
+- Relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`
+
 <br><br>
 
 ## [v3.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) - 2022-04-22

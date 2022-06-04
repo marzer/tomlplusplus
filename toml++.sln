@@ -91,6 +91,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "tt_encoder", "toml-test\tt_
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "odr_test", "tests\vs\odr_test.vcxproj", "{723FC4CA-0E24-4956-8FDC-E537EA3847AA}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toml_merger", "examples\toml_merger.vcxproj", "{E467EB97-B066-4D38-B3DB-60961E3F96A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -259,6 +261,10 @@ Global
 		{723FC4CA-0E24-4956-8FDC-E537EA3847AA}.Debug|x64.Build.0 = Debug|x64
 		{723FC4CA-0E24-4956-8FDC-E537EA3847AA}.Release|x64.ActiveCfg = Release|x64
 		{723FC4CA-0E24-4956-8FDC-E537EA3847AA}.Release|x64.Build.0 = Release|x64
+		{E467EB97-B066-4D38-B3DB-60961E3F96A1}.Debug|x64.ActiveCfg = Debug|x64
+		{E467EB97-B066-4D38-B3DB-60961E3F96A1}.Debug|x64.Build.0 = Debug|x64
+		{E467EB97-B066-4D38-B3DB-60961E3F96A1}.Release|x64.ActiveCfg = Release|x64
+		{E467EB97-B066-4D38-B3DB-60961E3F96A1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -304,6 +310,7 @@ Global
 		{8D19DE49-9687-4305-B59E-21F398415F5A} = {5DE43BF4-4EDD-4A7A-A422-764415BB3224}
 		{8F673261-5DFE-4B67-937A-61FC3F0082A2} = {5DE43BF4-4EDD-4A7A-A422-764415BB3224}
 		{723FC4CA-0E24-4956-8FDC-E537EA3847AA} = {4E25CF88-D7D8-4A9C-A52E-0D78281E82EC}
+		{E467EB97-B066-4D38-B3DB-60961E3F96A1} = {412816A5-9D22-4A30-BCDF-ABFB54BB3735}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0926DDCC-88CD-4839-A82D-D9B99E02A0B1}

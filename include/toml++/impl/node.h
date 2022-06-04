@@ -236,13 +236,12 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		bool is_homogeneous() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<ElemType>>;
-			static_assert(std::is_void_v<unwrapped_type> //
-							  || (toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>),
+			using type = impl::remove_cvref<impl::unwrap_node<ElemType>>;
+			static_assert(std::is_void_v<type> || toml::is_value<type> || toml::is_container<type>,
 						  "The template type argument of node::is_homogeneous() must be void or one "
 						  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			return is_homogeneous(impl::node_type_of<unwrapped_type>);
+			return is_homogeneous(impl::node_type_of<type>);
 		}
 
 		/// \brief	Returns the node's type identifier.
@@ -306,27 +305,27 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		bool is() const noexcept
 		{
-			using unwrapped_type = impl::unwrap_node<impl::remove_cvref<T>>;
-			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
+			using type = impl::remove_cvref<impl::unwrap_node<T>>;
+			static_assert(toml::is_value<type> || toml::is_container<type>,
 						  "The template type argument of node::is() must be one of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
-			if constexpr (std::is_same_v<unwrapped_type, table>)
+			if constexpr (std::is_same_v<type, table>)
 				return is_table();
-			else if constexpr (std::is_same_v<unwrapped_type, array>)
+			else if constexpr (std::is_same_v<type, array>)
 				return is_array();
-			else if constexpr (std::is_same_v<unwrapped_type, std::string>)
+			else if constexpr (std::is_same_v<type, std::string>)
 				return is_string();
-			else if constexpr (std::is_same_v<unwrapped_type, int64_t>)
+			else if constexpr (std::is_same_v<type, int64_t>)
 				return is_integer();
-			else if constexpr (std::is_same_v<unwrapped_type, double>)
+			else if constexpr (std::is_same_v<type, double>)
 				return is_floating_point();
-			else if constexpr (std::is_same_v<unwrapped_type, bool>)
+			else if constexpr (std::is_same_v<type, bool>)
 				return is_boolean();
-			else if constexpr (std::is_same_v<unwrapped_type, date>)
+			else if constexpr (std::is_same_v<type, date>)
 				return is_date();
-			else if constexpr (std::is_same_v<unwrapped_type, time>)
+			else if constexpr (std::is_same_v<type, time>)
 				return is_time();
-			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
+			else if constexpr (std::is_same_v<type, date_time>)
 				return is_date_time();
 		}
 
