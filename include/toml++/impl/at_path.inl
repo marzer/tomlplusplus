@@ -70,7 +70,9 @@ TOML_ANON_NAMESPACE_START
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
-					if (fc_result.ec != std::errc{})
+
+					// If not able to parse, or entire index not parseable, then fail (otherwise would allow a[1bc] == a[1]
+					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
 						return nullptr;
 
 #else
@@ -174,6 +176,48 @@ TOML_ANON_NAMESPACE_START
 		return current;
 	}
 
+	TOML_INTERNAL_LINKAGE
+	node* get_at_path(node & root, const toml::path& path)
+	{
+		if (root.is_value()) // values don't have child nodes
+			return nullptr;
+
+		// special check if table has a key that is an empty string, and the path is empty,
+		// return the node at that empty key.
+		if (path.size() == 0 && root.is_table() && root.as_table()->contains(""))
+			return root.as_table()->get("");
+
+		node* current = &root;
+
+		for (const auto& component: path)
+		{
+			auto type = component.type;
+			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
+			{
+				const auto current_array = current->as<array>();
+				if (!current_array)
+					return nullptr; // not an array, using array index doesn't work
+
+				current = current_array->get(std::get<size_t>(component.value));
+			}
+			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value))
+			{
+				const auto current_table = current->as<table>();
+				if (!current_table)
+					return nullptr;
+
+				current = current_table->get(std::get<std::string>(component.value));
+			}
+			else
+			{
+				// Error: invalid component
+				return nullptr;
+			}
+		}
+
+		return current;
+	}
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_INTERNAL_LINKAGE
@@ -205,6 +249,19 @@ TOML_NAMESPACE_START
 	{
 		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> at_path(node & root, const toml::path& path) noexcept
+	{
+		return node_view<node>{ TOML_ANON_NAMESPACE::get_at_path(root, path) };
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> at_path(const node& root, const toml::path& path) noexcept
+	{
+		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
+	}
+
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 

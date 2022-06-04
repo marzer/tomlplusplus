@@ -710,11 +710,32 @@ TOML_NAMESPACE_START
 			return {};
 		}
 
+		/// \brief	Returns a view of the selected subnode.
+		///
+		/// \param 	path	A "TOML path" to the desired subnode
+		///
+		/// \returns	A view of the selected node if this node represented a table and it contained a
+		/// 			value at the given key, or an empty view.
+		TOML_NODISCARD
+		node_view operator[](const toml::path& path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
+		}
+
 		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
 		///
 		/// \see #toml::node::at_path(std::string_view)
 		TOML_NODISCARD
 		node_view at_path(std::string_view path) const noexcept
+		{
+			return node_ ? node_->at_path(path) : node_view{};
+		}
+
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #toml::node::at_path(const toml::path&)
+		TOML_NODISCARD
+		node_view at_path(const toml::path& path) const noexcept
 		{
 			return node_ ? node_->at_path(path) : node_view{};
 		}
