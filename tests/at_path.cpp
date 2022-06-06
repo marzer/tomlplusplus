@@ -61,7 +61,7 @@ TEST_CASE("at_path")
 		CHECK(tbl["b"][0]);
 		CHECK(tbl["b"][0] == at_path(tbl, "b[0]"));
 		CHECK(tbl["b"][0] == at_path(tbl, "b[0]     "));
-		CHECK(tbl["b"][0] == at_path(tbl, "b[ 0\t]")); // whitespace is allowed inside array indexer
+		CHECK(tbl["b"][0] == at_path(tbl, "b[ 0\t]")); // whitespace is allowed inside indexer
 
 		CHECK(tbl["b"][1]);
 		CHECK(tbl["b"][1] != tbl["b"][0]);
@@ -69,12 +69,17 @@ TEST_CASE("at_path")
 
 		CHECK(tbl["b"][1][0]);
 		CHECK(tbl["b"][1][0] == at_path(tbl, "b[1][0]"));
-		CHECK(tbl["b"][1][0] == at_path(tbl, "b[1]    \t   [0]")); // whitespace is allowed after array
-																   // indexers
+		CHECK(tbl["b"][1][0] == at_path(tbl, "b[1]    \t   [0]")); // whitespace is allowed after indexers
 
 		CHECK(tbl["b"][2]["c"]);
 		CHECK(tbl["b"][2]["c"] == at_path(tbl, "b[2].c"));
-		CHECK(tbl["b"][2]["c"] == at_path(tbl, "b[2]   \t.c")); // whitespace is allowed after array indexers
+		CHECK(tbl["b"][2]["c"] == at_path(tbl, "b[2]   \t.c")); // whitespace is allowed after indexers
+
+		// permissivity checks for missing trailing ']'
+		// (this permissivity is undocumented but serves to reduce error paths in user code)
+		CHECK(tbl["b"][1][0] == at_path(tbl, "b[1[0]"));
+		CHECK(tbl["b"][1][0] == at_path(tbl, "b[1[0"));
+		CHECK(tbl["b"][2]["c"] == at_path(tbl, "b[2.c"));
 
 		CHECK(tbl["d"]);
 		CHECK(tbl["d"] == at_path(tbl, "d"));
@@ -97,7 +102,7 @@ TEST_CASE("at_path")
 		CHECK(tbl["b"][0]);
 		CHECK(tbl["b"][0] == arr.at_path("[0]"));
 		CHECK(tbl["b"][0] == arr.at_path("[0]     "));
-		CHECK(tbl["b"][0] == arr.at_path("[ 0\t]")); // whitespace is allowed inside array indexer
+		CHECK(tbl["b"][0] == arr.at_path("[ 0\t]")); // whitespace is allowed inside indexer
 
 		CHECK(tbl["b"][1]);
 		CHECK(tbl["b"][1].node() != arr[0].node());
@@ -105,11 +110,10 @@ TEST_CASE("at_path")
 
 		CHECK(tbl["b"][1][0]);
 		CHECK(tbl["b"][1][0] == arr.at_path("[1][0]"));
-		CHECK(tbl["b"][1][0] == arr.at_path("[1]    \t   [0]")); // whitespace is allowed after array
-																 // indexers
+		CHECK(tbl["b"][1][0] == arr.at_path("[1]    \t   [0]")); // whitespace is allowed after indexers
 
 		CHECK(tbl["b"][2]["c"]);
 		CHECK(tbl["b"][2]["c"] == arr.at_path("[2].c"));
-		CHECK(tbl["b"][2]["c"] == arr.at_path("[2]   \t.c")); // whitespace is allowed after array indexers
+		CHECK(tbl["b"][2]["c"] == arr.at_path("[2]   \t.c")); // whitespace is allowed after indexers
 	}
 }

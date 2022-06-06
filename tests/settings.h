@@ -21,6 +21,9 @@
 #undef LEAK_TESTS
 #define LEAK_TESTS 0
 #endif
+#ifdef _MSC_VER
+#define TOML_CALLCONV __stdcall // just to test that TOML_CALLCONV doesn't cause linker failures
+#endif
 
 // catch2 config
 #define CATCH_CONFIG_CPP11_TO_STRING

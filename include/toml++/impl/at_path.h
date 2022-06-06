@@ -48,14 +48,14 @@ TOML_NAMESPACE_START
 	/// \param path		The "TOML path" to traverse.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<node> at_path(node & root, std::string_view path) noexcept;
+	node_view<node> TOML_CALLCONV at_path(node & root, std::string_view path) noexcept;
 
 	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
 	///
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<const node> at_path(const node& root, std::string_view path) noexcept;
+	node_view<const node> TOML_CALLCONV at_path(const node& root, std::string_view path) noexcept;
 
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".
 	///
@@ -98,14 +98,14 @@ TOML_NAMESPACE_START
 	/// \param path		The "TOML path" to traverse.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<node> at_path(node & root, const toml::path& path) noexcept;
+	node_view<node> TOML_CALLCONV at_path(node & root, const toml::path& path) noexcept;
 
 	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
 	///
 	/// \see #toml::at_path(node&, const toml::path& path)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<const node> at_path(const node& root, const toml::path& path) noexcept;
+	node_view<const node> TOML_CALLCONV at_path(const node& root, const toml::path& path) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -116,7 +116,7 @@ TOML_NAMESPACE_START
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<node> at_path(node & root, std::wstring_view path);
+	node_view<node> TOML_CALLCONV at_path(node & root, std::wstring_view path);
 
 	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
 	///
@@ -125,7 +125,7 @@ TOML_NAMESPACE_START
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<const node> at_path(const node& root, std::wstring_view path);
+	node_view<const node> TOML_CALLCONV at_path(const node& root, std::wstring_view path);
 
 #endif
 }

@@ -149,13 +149,13 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.iter_ == rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.iter_ != rhs.iter_;
 		}
@@ -881,7 +881,8 @@ TOML_NAMESPACE_START
 		// clang-format on
 
 		template <typename Func, typename Table>
-		static void do_for_each(Func&& visitor, Table&& tbl) noexcept(for_each_is_nothrow<Func&&, Table&&>)
+		static void TOML_CALLCONV do_for_each(Func&& visitor,
+											  Table&& tbl) noexcept(for_each_is_nothrow<Func&&, Table&&>)
 		{
 			static_assert(can_for_each_any<Func&&, Table&&>,
 						  "TOML table for_each visitors must be invocable for at least one of the toml::node "
@@ -1942,7 +1943,7 @@ TOML_NAMESPACE_START
 
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
-		static bool equal(const table&, const table&) noexcept;
+		static bool TOML_CALLCONV equal(const table&, const table&) noexcept;
 
 		/// \endcond
 	  public:
@@ -1953,7 +1954,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the tables contained the same keys and map.
 		TOML_NODISCARD
-		friend bool operator==(const table& lhs, const table& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const table& lhs, const table& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
@@ -1965,7 +1966,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the tables did not contain the same keys and map.
 		TOML_NODISCARD
-		friend bool operator!=(const table& lhs, const table& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const table& lhs, const table& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
 		}
@@ -1977,7 +1978,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints the table out to a stream as formatted TOML.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& operator<<(std::ostream& lhs, const table& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const table& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

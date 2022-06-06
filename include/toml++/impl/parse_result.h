@@ -54,21 +54,21 @@ TOML_NAMESPACE_START
 	  private:
 		struct storage_t
 		{
-			static constexpr size_t size_ =
+			static constexpr size_t size =
 				(sizeof(toml::table) < sizeof(parse_error) ? sizeof(parse_error) : sizeof(toml::table));
-			static constexpr size_t align_ =
+			static constexpr size_t align =
 				(alignof(toml::table) < alignof(parse_error) ? alignof(parse_error) : alignof(toml::table));
 
-			alignas(align_) unsigned char bytes[size_];
+			alignas(align) unsigned char bytes[size];
 		};
 
-		mutable storage_t storage_;
+		alignas(storage_t::align) mutable storage_t storage_;
 		bool err_;
 
 		template <typename Type>
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		static Type* get_as(storage_t& s) noexcept
+		static Type* TOML_CALLCONV get_as(storage_t& s) noexcept
 		{
 			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
 		}
@@ -439,7 +439,7 @@ TOML_NAMESPACE_START
 		/// \brief Prints the held error or table object out to a text stream.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& operator<<(std::ostream& os, const parse_result& result)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& os, const parse_result& result)
 		{
 			return result.err_ ? (os << result.error()) : (os << result.table());
 		}

@@ -250,15 +250,15 @@ TOML_NAMESPACE_START // abi namespace
 	/// Element [3] is: boolean
 	/// \eout
 	template <typename Char>
-	inline std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>& lhs, node_type rhs)
+	inline std::basic_ostream<Char>& TOML_CALLCONV operator<<(std::basic_ostream<Char>& lhs, node_type rhs)
 	{
-		using underlying_t = std::underlying_type_t<node_type>;
-		const auto str	   = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-		if constexpr (std::is_same_v<Char, char>)
+		const auto str	 = impl::node_type_friendly_names[static_cast<std::underlying_type_t<node_type>>(rhs)];
+		using str_char_t = decltype(str)::value_type;
+		if constexpr (std::is_same_v<Char, str_char_t>)
 			return lhs << str;
 		else
 		{
-			if constexpr (sizeof(Char) == 1)
+			if constexpr (sizeof(Char) == sizeof(str_char_t))
 				return lhs << std::basic_string_view<Char>{ reinterpret_cast<const Char*>(str.data()), str.length() };
 			else
 				return lhs << str.data();
@@ -1013,7 +1013,7 @@ TOML_IMPL_NAMESPACE_START
 {
 	template <typename T>
 	TOML_CONST_INLINE_GETTER
-	constexpr std::underlying_type_t<T> unwrap_enum(T val) noexcept
+	constexpr std::underlying_type_t<T> TOML_CALLCONV unwrap_enum(T val) noexcept
 	{
 		return static_cast<std::underlying_type_t<T>>(val);
 	}
@@ -1029,7 +1029,7 @@ TOML_IMPL_NAMESPACE_START
 	};
 
 	TOML_PURE_GETTER
-	inline fp_class fpclassify(const double& val) noexcept
+	inline fp_class TOML_CALLCONV fpclassify(const double& val) noexcept
 	{
 		static_assert(sizeof(uint64_t) == sizeof(double));
 
@@ -1052,7 +1052,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename Iterator, typename T>
 	TOML_PURE_GETTER
-	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
+	inline auto TOML_CALLCONV find(Iterator start, Iterator end, const T& needle) noexcept //
 		->decltype(&(*start))
 	{
 		for (; start != end; start++)
@@ -1063,7 +1063,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_PURE_GETTER
-	constexpr const T& min(const T& a, const T& b) noexcept //
+	constexpr const T& TOML_CALLCONV min(const T& a, const T& b) noexcept //
 	{
 		return a < b ? a : b;
 	}

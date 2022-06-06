@@ -131,7 +131,7 @@ TOML_NAMESPACE_START
 #endif
 
 		/// \brief	Prints the bound TOML object out to the stream as formatted TOML.
-		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, toml_formatter& rhs)
 		{
 			rhs.attach(lhs);
 			rhs.key_path_.clear();
@@ -141,7 +141,7 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Prints the bound TOML object out to the stream as formatted TOML (rvalue overload).
-		friend std::ostream& operator<<(std::ostream& lhs, toml_formatter&& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, toml_formatter&& rhs)
 		{
 			return lhs << rhs; // as lvalue
 		}

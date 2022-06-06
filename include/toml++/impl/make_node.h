@@ -13,7 +13,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_impl_specialized(T && val, [[maybe_unused]] value_flags flags)
+	auto* TOML_CALLCONV make_node_impl_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
 		using unwrapped_type = unwrap_node<remove_cvref<T>>;
 		static_assert(!std::is_same_v<unwrapped_type, node>);
@@ -81,7 +81,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node_impl(T && val, value_flags flags = preserve_source_value_flags)
+	auto* TOML_CALLCONV make_node_impl(T && val, value_flags flags = preserve_source_value_flags)
 	{
 		using unwrapped_type = unwrap_node<remove_cvref<T>>;
 		if constexpr (std::is_same_v<unwrapped_type, node> || is_node_view<unwrapped_type>)
@@ -104,7 +104,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	auto* make_node_impl(inserter<T> && val, value_flags flags = preserve_source_value_flags)
+	auto* TOML_CALLCONV make_node_impl(inserter<T> && val, value_flags flags = preserve_source_value_flags)
 	{
 		return make_node_impl(static_cast<T&&>(val.value), flags);
 	}
@@ -129,7 +129,7 @@ TOML_IMPL_NAMESPACE_START
 
 	template <typename T>
 	TOML_NODISCARD
-	node_ptr make_node(T && val, value_flags flags = preserve_source_value_flags)
+	node_ptr TOML_CALLCONV make_node(T && val, value_flags flags = preserve_source_value_flags)
 	{
 		return node_ptr{ make_node_impl(static_cast<T&&>(val), flags) };
 	}

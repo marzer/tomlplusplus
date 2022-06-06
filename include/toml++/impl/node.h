@@ -43,7 +43,7 @@ TOML_NAMESPACE_START
 
 		template <typename T, typename N>
 		TOML_PURE_GETTER
-		static ref_type<T, N&&> do_ref(N&& n) noexcept
+		static ref_type<T, N&&> TOML_CALLCONV do_ref(N&& n) noexcept
 		{
 			using unwrapped_type = impl::unwrap_node<T>;
 			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
@@ -795,7 +795,8 @@ TOML_NAMESPACE_START
 		using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
 		template <typename Func, typename Node>
-		static decltype(auto) do_visit(Func&& visitor, Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
+		static decltype(auto) TOML_CALLCONV do_visit(Func&& visitor,
+													 Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
 		{
 			static_assert(can_visit_any<Func&&, Node&&>,
 						  "TOML node visitors must be invocable for at least one of the toml::node "

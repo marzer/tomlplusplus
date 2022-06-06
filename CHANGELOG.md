@@ -21,6 +21,7 @@ template:
 #### Additions:
 - Added value type deduction to `emplace()` methods
 - Added `toml::path` utility type (#153, #156) (@jonestristand)
+- Added config option `TOML_CALLCONV`
 
 #### Changes:
 - Relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`

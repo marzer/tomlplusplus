@@ -33,20 +33,20 @@ TOML_NAMESPACE_START
 
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
-		static bool equal(const path_component&, const path_component&) noexcept;
+		static bool TOML_CALLCONV equal(const path_component&, const path_component&) noexcept;
 
 		/// \endcond
 	  public:
 		/// \brief	Returns true if two path components represent the same key or array index.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(const path_component& lhs, const path_component& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const path_component& lhs, const path_component& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
 
 		/// \brief	Returns true if two path components do not represent the same key or array index.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(const path_component& lhs, const path_component& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const path_component& lhs, const path_component& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
 		}
@@ -78,14 +78,14 @@ TOML_NAMESPACE_START
 
 		std::vector<path_component> components_;
 
-		static bool parse_into(std::string_view, std::vector<path_component>&);
+		static bool TOML_CALLCONV parse_into(std::string_view, std::vector<path_component>&);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print_to(std::ostream&) const;
 
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
-		static bool equal(const path&, const path&) noexcept;
+		static bool TOML_CALLCONV equal(const path&, const path&) noexcept;
 
 		/// \endcond
 
@@ -224,7 +224,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Appends another path onto the end of this one.
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path& operator+=(path&&) noexcept;
+		path& operator+=(path&&);
 
 		/// \brief	Parses a path and appends it onto the end of this one.
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -249,7 +249,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Appends another path onto the end of this one.
 		TOML_ALWAYS_INLINE
-		path& append(path&& p) noexcept
+		path& append(path&& p)
 		{
 			return *this += std::move(p);
 		}
@@ -308,7 +308,7 @@ TOML_NAMESPACE_START
 
 		/// \brief  Concatenates two paths.
 		TOML_NODISCARD
-		friend path operator+(const path& lhs, const path& rhs)
+		friend path TOML_CALLCONV operator+(const path& lhs, const path& rhs)
 		{
 			path result = lhs;
 			result += rhs;
@@ -317,7 +317,7 @@ TOML_NAMESPACE_START
 
 		/// \brief  Concatenates two paths.
 		TOML_NODISCARD
-		friend path operator+(const path& lhs, std::string_view rhs)
+		friend path TOML_CALLCONV operator+(const path& lhs, std::string_view rhs)
 		{
 			path result = lhs;
 			result += rhs;
@@ -326,7 +326,7 @@ TOML_NAMESPACE_START
 
 		/// \brief  Concatenates two paths.
 		TOML_NODISCARD
-		friend path operator+(std::string_view lhs, const path& rhs)
+		friend path TOML_CALLCONV operator+(std::string_view lhs, const path& rhs)
 		{
 			path result = rhs;
 			result.prepend(lhs);
@@ -339,7 +339,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
-		friend path operator+(const path& lhs, std::wstring_view rhs)
+		friend path TOML_CALLCONV operator+(const path& lhs, std::wstring_view rhs)
 		{
 			path result = lhs;
 			result += rhs;
@@ -350,7 +350,7 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
-		friend path operator+(std::wstring_view lhs, const path& rhs)
+		friend path TOML_CALLCONV operator+(std::wstring_view lhs, const path& rhs)
 		{
 			path result = rhs;
 			result.prepend(lhs);
@@ -366,7 +366,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Prints the string representation of a #toml::path out to a stream.
 		TOML_ALWAYS_INLINE
-		friend std::ostream& operator<<(std::ostream& os, const path& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& os, const path& rhs)
 		{
 			rhs.print_to(os);
 			return os;
@@ -414,7 +414,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator==(const path& lhs, const path& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const path& lhs, const path& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
@@ -422,7 +422,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are not the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator!=(const path& lhs, const path& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const path& lhs, const path& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
 		}
@@ -430,7 +430,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator==(const path& lhs, std::string_view rhs)
+		friend bool TOML_CALLCONV operator==(const path& lhs, std::string_view rhs)
 		{
 			return lhs == path{ rhs };
 		}
@@ -438,7 +438,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator==(std::string_view lhs, const path& rhs)
+		friend bool TOML_CALLCONV operator==(std::string_view lhs, const path& rhs)
 		{
 			return rhs == lhs;
 		}
@@ -446,7 +446,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are not the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator!=(const path& lhs, std::string_view rhs)
+		friend bool TOML_CALLCONV operator!=(const path& lhs, std::string_view rhs)
 		{
 			return lhs != path{ rhs };
 		}
@@ -454,7 +454,7 @@ TOML_NAMESPACE_START
 		/// \brief Returns whether two paths are not the same.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator!=(std::string_view lhs, const path& rhs)
+		friend bool TOML_CALLCONV operator!=(std::string_view lhs, const path& rhs)
 		{
 			return rhs != lhs;
 		}
@@ -466,7 +466,7 @@ TOML_NAMESPACE_START
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator==(const path& lhs, std::wstring_view rhs)
+		friend bool TOML_CALLCONV operator==(const path& lhs, std::wstring_view rhs)
 		{
 			return lhs == path{ rhs };
 		}
@@ -476,7 +476,7 @@ TOML_NAMESPACE_START
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator==(std::wstring_view lhs, const path& rhs)
+		friend bool TOML_CALLCONV operator==(std::wstring_view lhs, const path& rhs)
 		{
 			return rhs == lhs;
 		}
@@ -486,7 +486,7 @@ TOML_NAMESPACE_START
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator!=(const path& lhs, std::wstring_view rhs)
+		friend bool TOML_CALLCONV operator!=(const path& lhs, std::wstring_view rhs)
 		{
 			return lhs != path{ rhs };
 		}
@@ -496,7 +496,7 @@ TOML_NAMESPACE_START
 		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		friend bool operator!=(std::wstring_view lhs, const path& rhs)
+		friend bool TOML_CALLCONV operator!=(std::wstring_view lhs, const path& rhs)
 		{
 			return rhs != lhs;
 		}
@@ -576,9 +576,10 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	A #toml::path generated from the string literal.
 		TOML_NODISCARD
-		inline toml::path operator"" _tpath(const char* str, size_t len)
+		TOML_ALWAYS_INLINE
+		path TOML_CALLCONV operator"" _tpath(const char* str, size_t len)
 		{
-			return toml::path(std::string_view{ str, len });
+			return path(std::string_view{ str, len });
 		}
 	}
 }

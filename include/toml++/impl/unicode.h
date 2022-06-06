@@ -11,44 +11,44 @@
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_CONST_GETTER
-	constexpr bool is_string_delimiter(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_string_delimiter(char32_t c) noexcept
 	{
 		return c == U'"' || c == U'\'';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_ascii_letter(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_ascii_letter(char32_t c) noexcept
 	{
 		return (c >= U'a' && c <= U'z') || (c >= U'A' && c <= U'Z');
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_binary_digit(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_binary_digit(char32_t c) noexcept
 	{
 		return c == U'0' || c == U'1';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_octal_digit(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_octal_digit(char32_t c) noexcept
 	{
 		return (c >= U'0' && c <= U'7');
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_decimal_digit(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_decimal_digit(char32_t c) noexcept
 	{
 		return (c >= U'0' && c <= U'9');
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_hexadecimal_digit(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_hexadecimal_digit(char32_t c) noexcept
 	{
 		return U'0' <= c && c <= U'f' && (1ull << (static_cast<uint_least64_t>(c) - 0x30u)) & 0x7E0000007E03FFull;
 	}
 
 	template <typename T>
 	TOML_CONST_GETTER
-	constexpr uint_least32_t hex_to_dec(const T c) noexcept
+	constexpr uint_least32_t TOML_CALLCONV hex_to_dec(const T c) noexcept
 	{
 		if constexpr (std::is_same_v<remove_cvref<T>, uint_least32_t>)
 			return c >= 0x41u					 // >= 'A'
@@ -60,25 +60,25 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_horizontal_whitespace(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_horizontal_whitespace(char32_t c) noexcept
 	{
 		return is_ascii_horizontal_whitespace(c) || is_non_ascii_horizontal_whitespace(c);
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_vertical_whitespace(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_vertical_whitespace(char32_t c) noexcept
 	{
 		return is_ascii_vertical_whitespace(c) || is_non_ascii_vertical_whitespace(c);
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_whitespace(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_whitespace(char32_t c) noexcept
 	{
 		return is_horizontal_whitespace(c) || is_vertical_whitespace(c);
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_bare_key_character(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_bare_key_character(char32_t c) noexcept
 	{
 		return is_ascii_bare_key_character(c)
 #if TOML_LANG_UNRELEASED // toml/pull/891 (unicode bare keys)
@@ -88,31 +88,31 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_value_terminator(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_value_terminator(char32_t c) noexcept
 	{
 		return is_whitespace(c) || c == U']' || c == U'}' || c == U',' || c == U'#';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_control_character(char c) noexcept
+	constexpr bool TOML_CALLCONV is_control_character(char c) noexcept
 	{
 		return c <= '\u001F' || c == '\u007F';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_control_character(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_control_character(char32_t c) noexcept
 	{
 		return c <= U'\u001F' || c == U'\u007F';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_nontab_control_character(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_nontab_control_character(char32_t c) noexcept
 	{
 		return c <= U'\u0008' || (c >= U'\u000A' && c <= U'\u001F') || c == U'\u007F';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool is_unicode_surrogate(char32_t c) noexcept
+	constexpr bool TOML_CALLCONV is_unicode_surrogate(char32_t c) noexcept
 	{
 		return c >= 0xD800u && c <= 0xDFFF;
 	}
@@ -189,7 +189,7 @@ TOML_IMPL_NAMESPACE_START
 
 	TOML_PURE_GETTER
 	TOML_ATTR(nonnull)
-	bool is_ascii(const char* str, size_t len) noexcept;
+	bool TOML_CALLCONV is_ascii(const char* str, size_t len) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 

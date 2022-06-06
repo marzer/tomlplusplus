@@ -123,61 +123,61 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		friend array_iterator operator+(const array_iterator& lhs, ptrdiff_t rhs) noexcept
+		friend array_iterator TOML_CALLCONV operator+(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
 			return array_iterator{ lhs.iter_ + rhs };
 		}
 
 		TOML_NODISCARD
-		friend array_iterator operator+(ptrdiff_t lhs, const array_iterator& rhs) noexcept
+		friend array_iterator TOML_CALLCONV operator+(ptrdiff_t lhs, const array_iterator& rhs) noexcept
 		{
 			return array_iterator{ rhs.iter_ + lhs };
 		}
 
 		TOML_NODISCARD
-		friend array_iterator operator-(const array_iterator& lhs, ptrdiff_t rhs) noexcept
+		friend array_iterator TOML_CALLCONV operator-(const array_iterator& lhs, ptrdiff_t rhs) noexcept
 		{
 			return array_iterator{ lhs.iter_ - rhs };
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend ptrdiff_t operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend ptrdiff_t TOML_CALLCONV operator-(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ - rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ == rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ != rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator<(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ < rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ <= rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator>(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ > rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(const array_iterator& lhs, const array_iterator& rhs) noexcept
 		{
 			return lhs.iter_ >= rhs.iter_;
 		}
@@ -872,7 +872,8 @@ TOML_NAMESPACE_START
 		// clang-format on
 
 		template <typename Func, typename Array>
-		static void do_for_each(Func&& visitor, Array&& arr) noexcept(for_each_is_nothrow<Func&&, Array&&>)
+		static void TOML_CALLCONV do_for_each(Func&& visitor,
+											  Array&& arr) noexcept(for_each_is_nothrow<Func&&, Array&&>)
 		{
 			static_assert(can_for_each_any<Func&&, Array&&>,
 						  "TOML array for_each visitors must be invocable for at least one of the toml::node "
@@ -1628,11 +1629,11 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_EXPORTED_STATIC_FUNCTION
-		static bool equal(const array&, const array&) noexcept;
+		static bool TOML_CALLCONV equal(const array&, const array&) noexcept;
 
 		template <typename T>
 		TOML_NODISCARD
-		static bool equal_to_container(const array& lhs, const T& rhs) noexcept
+		static bool TOML_CALLCONV equal_to_container(const array& lhs, const T& rhs) noexcept
 		{
 			using element_type = std::remove_const_t<typename T::value_type>;
 			static_assert(impl::is_losslessly_convertible_to_native<element_type>,
@@ -1667,7 +1668,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the arrays contained the same elements.
 		TOML_NODISCARD
-		friend bool operator==(const array& lhs, const array& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const array& lhs, const array& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
@@ -1679,7 +1680,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the arrays did not contain the same elements.
 		TOML_NODISCARD
-		friend bool operator!=(const array& lhs, const array& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const array& lhs, const array& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
 		}
@@ -1687,7 +1688,7 @@ TOML_NAMESPACE_START
 		/// \brief	Initializer list equality operator.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator==(const array& lhs, const std::initializer_list<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const array& lhs, const std::initializer_list<T>& rhs) noexcept
 		{
 			return equal_to_container(lhs, rhs);
 		}
@@ -1696,7 +1697,7 @@ TOML_NAMESPACE_START
 		/// \brief	Vector equality operator.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator==(const array& lhs, const std::vector<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const array& lhs, const std::vector<T>& rhs) noexcept
 		{
 			return equal_to_container(lhs, rhs);
 		}
@@ -1709,7 +1710,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints the array out to a stream as formatted TOML.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& operator<<(std::ostream& lhs, const array& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const array& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

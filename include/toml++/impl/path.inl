@@ -29,7 +29,7 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	bool path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
+	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
 		return lhs.type == rhs.type && lhs.value == rhs.value;
 	}
@@ -43,7 +43,7 @@ TOML_NAMESPACE_END;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	bool path::parse_into(std::string_view path_str, std::vector<path_component> & components)
+	bool TOML_CALLCONV path::parse_into(std::string_view path_str, std::vector<path_component> & components)
 	{
 		// a blank string is a valid path; it's just one component representing the "" key
 		if (path_str.empty())
@@ -70,37 +70,77 @@ TOML_NAMESPACE_START
 			// start of an array indexer
 			if (path_str[pos] == '[')
 			{
-				// get array index substring
-				const auto index_start = pos + 1u;									 // first position after '['
-				const auto index_end   = path_str.find(']', index_start);			 // position of ']'
-				if (index_end == std::string_view::npos || index_end == index_start) // nothing in brackets, error
+				// find first digit in index
+				size_t index_start = pos + 1u;
+				while (true)
 				{
-					return parse_failed();
-				}
-				auto index_str = std::string_view(&path_str[index_start], index_end - index_start);
+					if TOML_UNLIKELY(index_start >= path_str.length())
+						return parse_failed();
 
-				// trim whitespace from either side of the index
-				const auto first_non_ws = index_str.find_first_not_of(" \t"sv);
-				const auto last_non_ws	= index_str.find_last_not_of(" \t"sv);
-				if (first_non_ws == std::string_view::npos)
-				{
-					return parse_failed();
+					const auto c = path_str[index_start];
+					if TOML_LIKELY(c >= '0' && c <= '9')
+						break;
+					else if (c == ' ' || c == '\t')
+						index_start++;
+					else
+						return parse_failed();
 				}
-				TOML_ASSERT_ASSUME(last_non_ws != std::string_view::npos);
-				index_str = index_str.substr(first_non_ws, (last_non_ws - first_non_ws) + 1u);
+				TOML_ASSERT(path_str[index_start] >= '0');
+				TOML_ASSERT(path_str[index_start] <= '9');
+
+				// find end of index (first non-digit character)
+				size_t index_end = index_start + 1u;
+				while (true)
+				{
+					// if an array indexer is missing the trailing ']' at the end of the string, permissively accept it
+					if TOML_UNLIKELY(index_end >= path_str.length())
+						break;
+
+					const auto c = path_str[index_end];
+					if (c >= '0' && c <= '9')
+						index_end++;
+					else if (c == ']' || c == ' ' || c == '\t' || c == '.' || c == '[')
+						break;
+					else
+						return parse_failed();
+				}
+				TOML_ASSERT(path_str[index_end - 1u] >= '0');
+				TOML_ASSERT(path_str[index_end - 1u] <= '9');
+
+				// move pos to after indexer (char after closing ']' or permissively EOL/subkey '.'/next opening '[')
+				pos = index_end;
+				while (true)
+				{
+					if TOML_UNLIKELY(pos >= path_str.length())
+						break;
+
+					const auto c = path_str[pos];
+					if (c == ']')
+					{
+						pos++;
+						break;
+					}
+					else if TOML_UNLIKELY(c == '.' || c == '[')
+						break;
+					else if (c == '\t' || c == '.')
+						pos++;
+					else
+						return parse_failed();
+				}
+
+				// get array index substring
+				auto index_str = path_str.substr(index_start, index_end - index_start);
 
 				// parse the actual array index to an integer type
 				size_t index;
-				if (index_str.length() == 1u && index_str[0] >= '0' && index_str[0] <= '9')
+				if (index_str.length() == 1u)
 					index = static_cast<size_t>(index_str[0] - '0');
 				else
 				{
 #if TOML_INT_CHARCONV
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
-
-					// fail if unable to parse or entire index not parseable (otherwise would allow a[1bc] == a[1])
-					if (fc_result.ec != std::errc{} || fc_result.ptr != index_str.data() + index_str.length())
+					if (fc_result.ec != std::errc{})
 					{
 						return parse_failed();
 					}
@@ -118,7 +158,6 @@ TOML_NAMESPACE_START
 #endif
 				}
 
-				pos					   = index_end + 1u;
 				prev_was_dot		   = false;
 				prev_was_array_indexer = true;
 
@@ -145,12 +184,16 @@ TOML_NAMESPACE_START
 				prev_was_array_indexer = false;
 			}
 
+			// an errant closing ']'
+			else if TOML_UNLIKELY(path_str[pos] == ']')
+				return parse_failed();
+
 			// some regular subkey
 			else
 			{
 				const auto subkey_start = pos;
 				const auto subkey_len =
-					impl::min(path_str.find_first_of(".["sv, subkey_start + 1u), path_str.length()) - subkey_start;
+					impl::min(path_str.find_first_of(".[]"sv, subkey_start + 1u), path_str.length()) - subkey_start;
 				const auto subkey = path_str.substr(subkey_start, subkey_len);
 
 				// a regular subkey segment immediately after an array indexer is OK if it was all whitespace, e.g.:
@@ -215,7 +258,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool path::equal(const path& lhs, const path& rhs) noexcept
+	bool TOML_CALLCONV path::equal(const path& lhs, const path& rhs) noexcept
 	{
 		return lhs.components_ == rhs.components_;
 	}
@@ -267,7 +310,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path& path::operator+=(path&& rhs) noexcept
+	path& path::operator+=(path&& rhs)
 	{
 		components_.insert(components_.end(),
 						   std::make_move_iterator(rhs.components_.begin()),

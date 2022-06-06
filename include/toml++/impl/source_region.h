@@ -58,28 +58,28 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns true if two source_positions represent the same line and column.
 		TOML_NODISCARD
-		friend constexpr bool operator==(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool TOML_CALLCONV operator==(const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line == rhs.line && lhs.column == rhs.column;
 		}
 
 		/// \brief	Returns true if two source_positions do not represent the same line and column.
 		TOML_NODISCARD
-		friend constexpr bool operator!=(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool TOML_CALLCONV operator!=(const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line != rhs.line || lhs.column != rhs.column;
 		}
 
 		/// \brief	Returns true if the LHS position is before the RHS position.
 		TOML_NODISCARD
-		friend constexpr bool operator<(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool TOML_CALLCONV operator<(const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.column < rhs.column);
 		}
 
 		/// \brief	Returns true if the LHS position is before the RHS position or equal to it.
 		TOML_NODISCARD
-		friend constexpr bool operator<=(const source_position& lhs, const source_position& rhs) noexcept
+		friend constexpr bool TOML_CALLCONV operator<=(const source_position& lhs, const source_position& rhs) noexcept
 		{
 			return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.column <= rhs.column);
 		}
@@ -102,7 +102,7 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The source_position.
 		///
 		/// \returns	The input stream.
-		friend std::ostream& operator<<(std::ostream& lhs, const source_position& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const source_position& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
@@ -183,7 +183,7 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The source_position.
 		///
 		/// \returns	The input stream.
-		friend std::ostream& operator<<(std::ostream& lhs, const source_region& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const source_region& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

@@ -536,10 +536,14 @@
 	#define TOML_EXCEPTIONS	0
 #endif
 
+// calling convention for static/free/friend functions
+#ifndef TOML_CALLCONV
+	#define TOML_CALLCONV
+#endif
+
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
-
 
 #ifndef TOML_MAX_NESTED_VALUES
 	#define TOML_MAX_NESTED_VALUES 256
@@ -714,9 +718,9 @@
 #endif
 
 #define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)															\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
+	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
 	static_assert(true)
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
@@ -1028,6 +1032,11 @@
 /// #define TOML_IMPLEMENTATION 
 /// #include "global_header_that_includes_toml++.h"
 /// \ecpp
+
+
+/// \def TOML_CALLCONV
+/// \brief Calling convention to apply to all free/static functions in the library.
+/// \detail Not defined by default (let the compiler decide).
 
 
 /// \def TOML_EXPORTED_CLASS

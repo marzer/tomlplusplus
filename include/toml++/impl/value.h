@@ -80,7 +80,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		template <typename... Args>
 		TOML_NODISCARD
-		static T make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
+		static T TOML_CALLCONV make(Args&&... args) noexcept(std::is_nothrow_constructible_v<T, Args&&...>)
 		{
 			if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
@@ -95,7 +95,7 @@ TOML_IMPL_NAMESPACE_START
 		template <typename U>
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		static U&& make(U&& val) noexcept
+		static U&& TOML_CALLCONV make(U&& val) noexcept
 		{
 			return static_cast<U&&>(val);
 		}
@@ -107,7 +107,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		template <typename T>
 		TOML_NODISCARD
-		static std::string make(T&& arg) noexcept
+		static std::string TOML_CALLCONV make(T&& arg) noexcept
 		{
 			using arg_type = std::decay_t<T>;
 #if TOML_HAS_CHAR8
@@ -221,7 +221,7 @@ TOML_NAMESPACE_START
 
 		template <typename T, typename U>
 		TOML_CONST_INLINE_GETTER
-		static auto as_value([[maybe_unused]] U* ptr) noexcept
+		static auto TOML_CALLCONV as_value([[maybe_unused]] U* ptr) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return ptr;
@@ -772,7 +772,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Value equality operator.
 		TOML_NODISCARD
-		friend bool operator==(const value& lhs, value_arg rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const value& lhs, value_arg rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, double>)
 			{
@@ -789,56 +789,56 @@ TOML_NAMESPACE_START
 
 		/// \brief	Value less-than operator.
 		TOML_NODISCARD
-		friend bool operator<(const value& lhs, value_arg rhs) noexcept
+		friend bool TOML_CALLCONV operator<(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ < rhs;
 		}
 
 		/// \brief	Value less-than operator.
 		TOML_NODISCARD
-		friend bool operator<(value_arg lhs, const value& rhs) noexcept
+		friend bool TOML_CALLCONV operator<(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs < rhs.val_;
 		}
 
 		/// \brief	Value less-than-or-equal-to operator.
 		TOML_NODISCARD
-		friend bool operator<=(const value& lhs, value_arg rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ <= rhs;
 		}
 
 		/// \brief	Value less-than-or-equal-to operator.
 		TOML_NODISCARD
-		friend bool operator<=(value_arg lhs, const value& rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs <= rhs.val_;
 		}
 
 		/// \brief	Value greater-than operator.
 		TOML_NODISCARD
-		friend bool operator>(const value& lhs, value_arg rhs) noexcept
+		friend bool TOML_CALLCONV operator>(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ > rhs;
 		}
 
 		/// \brief	Value greater-than operator.
 		TOML_NODISCARD
-		friend bool operator>(value_arg lhs, const value& rhs) noexcept
+		friend bool TOML_CALLCONV operator>(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs > rhs.val_;
 		}
 
 		/// \brief	Value greater-than-or-equal-to operator.
 		TOML_NODISCARD
-		friend bool operator>=(const value& lhs, value_arg rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ >= rhs;
 		}
 
 		/// \brief	Value greater-than-or-equal-to operator.
 		TOML_NODISCARD
-		friend bool operator>=(value_arg lhs, const value& rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs >= rhs.val_;
 		}
@@ -851,7 +851,7 @@ TOML_NAMESPACE_START
 		/// \returns	True if the values were of the same type and contained the same value.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator==(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return lhs == rhs.val_; // calls asymmetrical value-equality operator defined above
@@ -867,7 +867,7 @@ TOML_NAMESPACE_START
 		/// \returns	True if the values were not of the same type, or did not contain the same value.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator!=(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -883,7 +883,7 @@ TOML_NAMESPACE_START
 		///				`lhs.type() < rhs.type()`
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator<(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator<(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return lhs.val_ < rhs.val_;
@@ -902,7 +902,7 @@ TOML_NAMESPACE_START
 		///				`lhs.type() <= rhs.type()`
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator<=(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return lhs.val_ <= rhs.val_;
@@ -921,7 +921,7 @@ TOML_NAMESPACE_START
 		///				`lhs.type() > rhs.type()`
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator>(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator>(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return lhs.val_ > rhs.val_;
@@ -940,7 +940,7 @@ TOML_NAMESPACE_START
 		///				`lhs.type() >= rhs.type()`
 		template <typename T>
 		TOML_NODISCARD
-		friend bool operator>=(const value& lhs, const value<T>& rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
 				return lhs.val_ >= rhs.val_;
@@ -955,7 +955,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints the value out to a stream as formatted TOML.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& operator<<(std::ostream& lhs, const value& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const value& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

@@ -161,126 +161,126 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns true if `lhs.str() == rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ == rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() != rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ != rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() < rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator<(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ < rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() <= rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<=(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ <= rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() > rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator>(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ > rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() >= rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>=(const key& lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(const key& lhs, const key& rhs) noexcept
 		{
 			return lhs.key_ >= rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs.str() == rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator==(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ == rhs;
 		}
 
 		/// \brief	Returns true if `lhs.str() != rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ != rhs;
 		}
 
 		/// \brief	Returns true if `lhs.str() < rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator<(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ < rhs;
 		}
 
 		/// \brief	Returns true if `lhs.str() <= rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<=(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ <= rhs;
 		}
 
 		/// \brief	Returns true if `lhs.str() > rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator>(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ > rhs;
 		}
 
 		/// \brief	Returns true if `lhs.str() >= rhs`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>=(const key& lhs, std::string_view rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(const key& lhs, std::string_view rhs) noexcept
 		{
 			return lhs.key_ >= rhs;
 		}
 
 		/// \brief	Returns true if `lhs == rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator==(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator==(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs == rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs != rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator!=(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator!=(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs != rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs < rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator<(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs < rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs <= rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator<=(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator<=(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs <= rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs > rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator>(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs > rhs.key_;
 		}
 
 		/// \brief	Returns true if `lhs >= rhs.str()`.
 		TOML_PURE_INLINE_GETTER
-		friend bool operator>=(std::string_view lhs, const key& rhs) noexcept
+		friend bool TOML_CALLCONV operator>=(std::string_view lhs, const key& rhs) noexcept
 		{
 			return lhs >= rhs.key_;
 		}
@@ -313,7 +313,7 @@ TOML_NAMESPACE_START
 		/// @}
 
 		/// \brief	Prints the key's underlying string out to the stream.
-		friend std::ostream& operator<<(std::ostream& lhs, const key& rhs)
+		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const key& rhs)
 		{
 			impl::print_to_stream(lhs, rhs.key_);
 			return lhs;

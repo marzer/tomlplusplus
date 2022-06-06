@@ -24,7 +24,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 TOML_ANON_NAMESPACE_START
 {
 	TOML_INTERNAL_LINKAGE
-	size_t toml_formatter_count_inline_columns(const node& node, size_t line_wrap_cols) noexcept
+	size_t TOML_CALLCONV toml_formatter_count_inline_columns(const node& node, size_t line_wrap_cols) noexcept
 	{
 		switch (node.type())
 		{
@@ -107,7 +107,9 @@ TOML_ANON_NAMESPACE_START
 	}
 
 	TOML_INTERNAL_LINKAGE
-	bool toml_formatter_forces_multiline(const node& node, size_t line_wrap_cols, size_t starting_column_bias) noexcept
+	bool TOML_CALLCONV toml_formatter_forces_multiline(const node& node,
+													   size_t line_wrap_cols,
+													   size_t starting_column_bias) noexcept
 	{
 		return (toml_formatter_count_inline_columns(node, line_wrap_cols) + starting_column_bias) >= line_wrap_cols;
 	}

@@ -186,6 +186,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | Option                            |      Type      | Description                                                                                              | Default                |
 |-----------------------------------|:--------------:|----------------------------------------------------------------------------------------------------------|------------------------|
 | `TOML_ASSERT(expr)`               | function macro | Sets the assert function used by the library.                                                            | `assert()`             |
+| `TOML_CALLCONV`                   |     define     | Calling convention to apply to all free/static functions in the library.                                 | undefined              |
 | `TOML_CONFIG_HEADER`              | string literal | Includes the given header file before the rest of the library.                                           | undefined              |
 | `TOML_ENABLE_FORMATTERS`          |     boolean    | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.      | `1`                    |
 | `TOML_ENABLE_PARSER`              |     boolean    | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.            | `1`                    |
