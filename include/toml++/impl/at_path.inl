@@ -23,35 +23,34 @@ TOML_DISABLE_WARNINGS;
 TOML_ENABLE_WARNINGS;
 #include "header_start.h"
 
-TOML_ANON_NAMESPACE_START
+TOML_IMPL_NAMESPACE_START
 {
-	TOML_INTERNAL_LINKAGE
-	node* TOML_CALLCONV get_at_path(node & root, std::string_view path) noexcept
+	TOML_EXTERNAL_LINKAGE
+	bool TOML_CALLCONV parse_path(const std::string_view path,
+								  void* const data,
+								  const parse_path_callback<std::string_view> on_key,
+								  const parse_path_callback<size_t> on_index)
 	{
-		if (root.is_value()) // values don't have child nodes
-			return nullptr;
+		// a blank string is a valid path; it's just one component representing the "" key
+		if (path.empty())
+			return on_key(data, ""sv);
 
 		size_t pos					= 0;
 		const auto end				= path.length();
-		node* current				= &root;
 		bool prev_was_array_indexer = false;
-		bool prev_was_dot			= root.is_table(); // implicit '.' at the start for tables
+		bool prev_was_dot			= true; // invisible root 'dot'
 
-		while (pos < end && current)
+		while (pos < end)
 		{
 			// start of an array indexer
 			if (path[pos] == '[')
 			{
-				const auto current_array = current->as<array>();
-				if (!current_array)
-					return nullptr;
-
 				// find first digit in index
 				size_t index_start = pos + 1u;
 				while (true)
 				{
 					if TOML_UNLIKELY(index_start >= path.length())
-						return nullptr;
+						return false;
 
 					const auto c = path[index_start];
 					if TOML_LIKELY(c >= '0' && c <= '9')
@@ -59,7 +58,7 @@ TOML_ANON_NAMESPACE_START
 					else if (c == ' ' || c == '\t')
 						index_start++;
 					else
-						return nullptr;
+						return false;
 				}
 				TOML_ASSERT(path[index_start] >= '0');
 				TOML_ASSERT(path[index_start] <= '9');
@@ -78,7 +77,7 @@ TOML_ANON_NAMESPACE_START
 					else if (c == ']' || c == ' ' || c == '\t' || c == '.' || c == '[')
 						break;
 					else
-						return nullptr;
+						return false;
 				}
 				TOML_ASSERT(path[index_end - 1u] >= '0');
 				TOML_ASSERT(path[index_end - 1u] <= '9');
@@ -101,13 +100,13 @@ TOML_ANON_NAMESPACE_START
 					else if (c == '\t' || c == '.')
 						pos++;
 					else
-						return nullptr;
+						return false;
 				}
 
 				// get array index substring
 				auto index_str = path.substr(index_start, index_end - index_start);
 
-				// parse the actual array index
+				// parse the actual array index to an integer type
 				size_t index;
 				if (index_str.length() == 1u)
 					index = static_cast<size_t>(index_str[0] - '0');
@@ -117,7 +116,7 @@ TOML_ANON_NAMESPACE_START
 
 					auto fc_result = std::from_chars(index_str.data(), index_str.data() + index_str.length(), index);
 					if (fc_result.ec != std::errc{})
-						return nullptr;
+						return false;
 
 #else
 
@@ -125,23 +124,21 @@ TOML_ANON_NAMESPACE_START
 					ss.imbue(std::locale::classic());
 					ss.write(index_str.data(), static_cast<std::streamsize>(index_str.length()));
 					if (!(ss >> index))
-						return nullptr;
+						return false;
 
 #endif
 				}
 
-				current				   = current_array->get(index);
 				prev_was_dot		   = false;
 				prev_was_array_indexer = true;
+
+				if (!on_index(data, index))
+					return false;
 			}
 
 			// start of a new table child
 			else if (path[pos] == '.')
 			{
-				const auto current_table = current->as<table>();
-				if (!current_table)
-					return nullptr;
-
 				// a dot immediately following another dot (or at the beginning of the string) is as if we'd asked
 				// for an empty child in between, e.g.
 				//
@@ -151,8 +148,8 @@ TOML_ANON_NAMESPACE_START
 				//
 				//     "foo".""."bar"
 				//
-				if (prev_was_dot)
-					current = current_table->get(""sv);
+				if (prev_was_dot && !on_key(data, ""sv))
+					return false;
 
 				pos++;
 				prev_was_dot		   = true;
@@ -161,12 +158,11 @@ TOML_ANON_NAMESPACE_START
 
 			// an errant closing ']'
 			else if TOML_UNLIKELY(path[pos] == ']')
-				return nullptr;
+				return false;
 
 			// some regular subkey
 			else
 			{
-				// get subkey text
 				const auto subkey_start = pos;
 				const auto subkey_len =
 					impl::min(path.find_first_of(".[]"sv, subkey_start + 1u), path.length()) - subkey_start;
@@ -189,45 +185,33 @@ TOML_ANON_NAMESPACE_START
 						continue;
 					}
 					else
-						return nullptr;
+						return false;
 				}
 
-				const auto current_table = current->as<table>();
-				if (!current_table)
-					return nullptr;
-
-				current = current_table->get(subkey);
 				pos += subkey_len;
 				prev_was_dot		   = false;
 				prev_was_array_indexer = false;
+
+				if (!on_key(data, subkey))
+					return false;
 			}
 		}
 
-		// a dot at the end is as if we'd asked for an empty child at the end, e.g.
-		//
-		//     foo.bar.
-		//
-		// is equivalent to
-		//
-		//     "foo"."bar".""
-		//
-		if (current && prev_was_dot)
-		{
-			const auto current_table = current->as<table>();
-			if (!current_table)
-				return nullptr;
+		// Last character was a '.', which implies an empty string key at the end of the path
+		if (prev_was_dot && !on_key(data, ""sv))
+			return false;
 
-			current = current_table->get(""sv);
-		}
-
-		return current;
+		return true;
 	}
+}
+TOML_IMPL_NAMESPACE_END;
 
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_INTERNAL_LINKAGE
-	node* TOML_CALLCONV get_at_path(node & root, std::wstring_view path) noexcept
+TOML_NAMESPACE_START
+{
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> TOML_CALLCONV at_path(node & root, std::string_view path) noexcept
 	{
+		// early-exit sanity-checks
 		if (root.is_value())
 			return {};
 		if (auto tbl = root.as_table(); tbl && tbl->empty())
@@ -235,75 +219,44 @@ TOML_ANON_NAMESPACE_START
 		if (auto arr = root.as_array(); arr && arr->empty())
 			return {};
 
-		return get_at_path(root, impl::narrow(path));
-	}
-
-#endif // TOML_ENABLE_WINDOWS_COMPAT
-
-	TOML_INTERNAL_LINKAGE
-	node* TOML_CALLCONV get_at_path(node & root, const toml::path& path)
-	{
-		if (root.is_value()) // values don't have child nodes
-			return nullptr;
-
 		node* current = &root;
 
-		for (const auto& component : path)
+		static constexpr auto on_key = [](void* data, std::string_view key) noexcept -> bool
 		{
-			auto type = component.type;
-			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
-			{
-				const auto current_array = current->as<array>();
-				if (!current_array)
-					return nullptr; // not an array, using array index doesn't work
+			auto& curr = *static_cast<node**>(data);
+			TOML_ASSERT_ASSUME(curr);
 
-				current = current_array->get(std::get<size_t>(component.value));
-			}
-			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value))
-			{
-				const auto current_table = current->as<table>();
-				if (!current_table)
-					return nullptr;
+			const auto current_table = curr->as<table>();
+			if (!current_table)
+				return false;
 
-				current = current_table->get(std::get<std::string>(component.value));
-			}
-			else
-			{
-				// Error: invalid component
-				return nullptr;
-			}
-		}
+			curr = current_table->get(key);
+			return curr != nullptr;
+		};
 
-		return current;
-	}
-}
+		static constexpr auto on_index = [](void* data, size_t index) noexcept -> bool
+		{
+			auto& curr = *static_cast<node**>(data);
+			TOML_ASSERT_ASSUME(curr);
 
-TOML_ANON_NAMESPACE_END;
+			const auto current_array = curr->as<array>();
+			if (!current_array)
+				return false;
 
-TOML_NAMESPACE_START
-{
-	TOML_EXTERNAL_LINKAGE
-	node_view<node> TOML_CALLCONV at_path(node & root, std::string_view path) noexcept
-	{
-		return node_view<node>{ TOML_ANON_NAMESPACE::get_at_path(root, path) };
+			curr = current_array->get(index);
+			return curr != nullptr;
+		};
+
+		if (!impl::parse_path(path, &current, on_key, on_index))
+			current = nullptr;
+
+		return node_view{ current };
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> TOML_CALLCONV at_path(const node& root, std::string_view path) noexcept
 	{
-		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	node_view<node> TOML_CALLCONV at_path(node & root, const toml::path& path) noexcept
-	{
-		return node_view<node>{ TOML_ANON_NAMESPACE::get_at_path(root, path) };
-	}
-
-	TOML_EXTERNAL_LINKAGE
-	node_view<const node> TOML_CALLCONV at_path(const node& root, const toml::path& path) noexcept
-	{
-		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
+		return node_view<const node>{ at_path(const_cast<node&>(root), path).node() };
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -311,13 +264,23 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node_view<node> TOML_CALLCONV at_path(node & root, std::wstring_view path)
 	{
-		return node_view<node>{ TOML_ANON_NAMESPACE::get_at_path(root, path) };
+		// these are the same top-level checks from the narrow-string version;
+		// they're hoisted up here to avoid doing the wide -> narrow conversion where it would not be necessary
+		// (avoids an allocation)
+		if (root.is_value())
+			return {};
+		if (auto tbl = root.as_table(); tbl && tbl->empty())
+			return {};
+		if (auto arr = root.as_array(); arr && arr->empty())
+			return {};
+
+		return at_path(root, impl::narrow(path));
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	node_view<const node> TOML_CALLCONV at_path(const node& root, std::wstring_view path)
 	{
-		return node_view<const node>{ TOML_ANON_NAMESPACE::get_at_path(const_cast<node&>(root), path) };
+		return node_view<const node>{ at_path(const_cast<node&>(root), path).node() };
 	}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
