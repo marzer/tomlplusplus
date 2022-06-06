@@ -50,38 +50,66 @@ TOML_NAMESPACE_START
 		source_index column;
 
 		/// \brief	Returns true if both line and column numbers are non-zero.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		explicit constexpr operator bool() const noexcept
 		{
-			return line > source_index{} && column > source_index{};
+			return line > source_index{} //
+				&& column > source_index{};
 		}
 
-		/// \brief	Returns true if two source_positions represent the same line and column.
-		TOML_NODISCARD
-		friend constexpr bool TOML_CALLCONV operator==(const source_position& lhs, const source_position& rhs) noexcept
+		/// \brief	Equality operator.
+		TOML_PURE_GETTER
+		friend constexpr bool operator==(const source_position& lhs, const source_position& rhs) noexcept
 		{
-			return lhs.line == rhs.line && lhs.column == rhs.column;
+			return lhs.line == rhs.line //
+				&& lhs.column == rhs.column;
 		}
 
-		/// \brief	Returns true if two source_positions do not represent the same line and column.
-		TOML_NODISCARD
-		friend constexpr bool TOML_CALLCONV operator!=(const source_position& lhs, const source_position& rhs) noexcept
+		/// \brief	Inequality operator.
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator!=(const source_position& lhs, const source_position& rhs) noexcept
 		{
-			return lhs.line != rhs.line || lhs.column != rhs.column;
+			return !(lhs == rhs);
 		}
 
-		/// \brief	Returns true if the LHS position is before the RHS position.
-		TOML_NODISCARD
-		friend constexpr bool TOML_CALLCONV operator<(const source_position& lhs, const source_position& rhs) noexcept
+	  private:
+		/// \cond
+
+		TOML_PURE_GETTER
+		static constexpr uint64_t pack(const source_position& pos) noexcept
 		{
-			return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.column < rhs.column);
+			return static_cast<uint64_t>(pos.line) << 32 | static_cast<uint64_t>(pos.column);
 		}
 
-		/// \brief	Returns true if the LHS position is before the RHS position or equal to it.
-		TOML_NODISCARD
-		friend constexpr bool TOML_CALLCONV operator<=(const source_position& lhs, const source_position& rhs) noexcept
+		/// \endcond
+
+	  public:
+		/// \brief	Less-than operator.
+		TOML_PURE_GETTER
+		friend constexpr bool operator<(const source_position& lhs, const source_position& rhs) noexcept
 		{
-			return lhs.line < rhs.line || (lhs.line == rhs.line && lhs.column <= rhs.column);
+			return pack(lhs) < pack(rhs);
+		}
+
+		/// \brief	Less-than-or-equal-to operator.
+		TOML_PURE_GETTER
+		friend constexpr bool operator<=(const source_position& lhs, const source_position& rhs) noexcept
+		{
+			return pack(lhs) <= pack(rhs);
+		}
+
+		/// \brief	Greater-than operator.
+		TOML_PURE_GETTER
+		friend constexpr bool operator>(const source_position& lhs, const source_position& rhs) noexcept
+		{
+			return pack(lhs) > pack(rhs);
+		}
+
+		/// \brief	Greater-than-or-equal-to operator.
+		TOML_PURE_GETTER
+		friend constexpr bool operator>=(const source_position& lhs, const source_position& rhs) noexcept
+		{
+			return pack(lhs) >= pack(rhs);
 		}
 
 		/// \brief	Prints a source_position to a stream.
@@ -102,7 +130,7 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The source_position.
 		///
 		/// \returns	The input stream.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const source_position& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const source_position& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
@@ -183,7 +211,7 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The source_position.
 		///
 		/// \returns	The input stream.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const source_region& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const source_region& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

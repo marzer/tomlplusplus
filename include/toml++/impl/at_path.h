@@ -13,7 +13,6 @@ TOML_IMPL_NAMESPACE_START
 	using parse_path_callback = bool(TOML_CALLCONV*)(void*, T);
 
 	TOML_NODISCARD
-	TOML_EXPORTED_FREE_FUNCTION
 	bool TOML_CALLCONV parse_path(std::string_view,
 								  void*,
 								  parse_path_callback<std::string_view>,

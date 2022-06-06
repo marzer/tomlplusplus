@@ -608,7 +608,7 @@ TOML_ANON_NAMESPACE_START
 	template <typename... T>
 	TOML_CONST_GETTER
 	TOML_INTERNAL_LINKAGE
-	constexpr bool TOML_CALLCONV is_match(char32_t codepoint, T... vals) noexcept
+	constexpr bool is_match(char32_t codepoint, T... vals) noexcept
 	{
 		static_assert((std::is_same_v<char32_t, T> && ...));
 		return ((codepoint == vals) || ...);
@@ -3464,7 +3464,7 @@ TOML_IMPL_NAMESPACE_START
 				current_table->source_.end = eof_pos;
 		}
 
-		static void TOML_CALLCONV update_region_ends(node& nde) noexcept
+		static void update_region_ends(node& nde) noexcept
 		{
 			const auto type = nde.type();
 			if (type > node_type::array)
@@ -3729,14 +3729,14 @@ TOML_ANON_NAMESPACE_START
 {
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result TOML_CALLCONV do_parse(utf8_reader_interface && reader)
+	parse_result do_parse(utf8_reader_interface && reader)
 	{
 		return impl::parser{ std::move(reader) };
 	}
 
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result TOML_CALLCONV do_parse_file(std::string_view file_path)
+	parse_result do_parse_file(std::string_view file_path)
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \

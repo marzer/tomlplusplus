@@ -72,15 +72,15 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node_view<node> node::at_path(const toml::path& path) noexcept
+	node_view<node> node::at_path(const path& p) noexcept
 	{
-		return toml::at_path(*this, path);
+		return toml::at_path(*this, p);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node_view<const node> node::at_path(const toml::path& path) const noexcept
+	node_view<const node> node::at_path(const path& p) const noexcept
 	{
-		return toml::at_path(*this, path);
+		return toml::at_path(*this, p);
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -98,6 +98,18 @@ TOML_NAMESPACE_START
 	}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<node> node::operator[](const path& p) noexcept
+	{
+		return toml::at_path(*this, p);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	node_view<const node> node::operator[](const path& p) const noexcept
+	{
+		return toml::at_path(*this, p);
+	}
 }
 TOML_NAMESPACE_END;
 

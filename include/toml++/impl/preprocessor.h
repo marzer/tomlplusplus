@@ -429,6 +429,9 @@
 			#define TOML_EXPORTED_CLASS			__declspec(dllimport)
 			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllimport)
 		#endif
+		#ifndef TOML_CALLCONV
+			#define TOML_CALLCONV __cdecl
+		#endif
 	#elif defined(__GNUC__) && __GNUC__ >= 4
 		#define TOML_EXPORTED_CLASS				__attribute__((visibility("default")))
 		#define TOML_EXPORTED_MEMBER_FUNCTION	__attribute__((visibility("default")))
@@ -718,9 +721,9 @@
 #endif
 
 #define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)															\
-	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
-	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-	__VA_ARGS__ TOML_NODISCARD friend bool TOML_CALLCONV operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
+	__VA_ARGS__ TOML_NODISCARD friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
 	static_assert(true)
 
 #ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
@@ -1035,7 +1038,7 @@
 
 
 /// \def TOML_CALLCONV
-/// \brief Calling convention to apply to all free/static functions in the library.
+/// \brief Calling convention to apply to exported free/static functions.
 /// \detail Not defined by default (let the compiler decide).
 
 

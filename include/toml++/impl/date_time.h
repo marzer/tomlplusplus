@@ -37,23 +37,25 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator==(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator==(const date& lhs, const date& rhs) noexcept
 		{
-			return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day;
+			return lhs.year == rhs.year	  //
+				&& lhs.month == rhs.month //
+				&& lhs.day == rhs.day;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator!=(const date& lhs, const date& rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator!=(const date& lhs, const date& rhs) noexcept
 		{
-			return lhs.year != rhs.year || lhs.month != rhs.month || lhs.day != rhs.day;
+			return !(lhs == rhs);
 		}
 
 	  private:
 		/// \cond
 
 		TOML_PURE_GETTER
-		static constexpr uint32_t TOML_CALLCONV pack(const date& d) noexcept
+		static constexpr uint32_t pack(const date& d) noexcept
 		{
 			return (static_cast<uint32_t>(d.year) << 16) | (static_cast<uint32_t>(d.month) << 8)
 				 | static_cast<uint32_t>(d.day);
@@ -64,28 +66,28 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator<(const date& lhs, const date& rhs) noexcept
 		{
 			return pack(lhs) < pack(rhs);
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<=(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator<=(const date& lhs, const date& rhs) noexcept
 		{
 			return pack(lhs) <= pack(rhs);
 		}
 
 		/// \brief	Greater-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator>(const date& lhs, const date& rhs) noexcept
 		{
 			return pack(lhs) > pack(rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>=(const date& lhs, const date& rhs) noexcept
+		friend constexpr bool operator>=(const date& lhs, const date& rhs) noexcept
 		{
 			return pack(lhs) >= pack(rhs);
 		}
@@ -99,7 +101,7 @@ TOML_NAMESPACE_START
 		/// \out
 		/// 1987-03-16
 		/// \eout
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const date& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const date& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
@@ -141,15 +143,17 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator==(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator==(const time& lhs, const time& rhs) noexcept
 		{
-			return lhs.hour == rhs.hour && lhs.minute == rhs.minute && lhs.second == rhs.second
+			return lhs.hour == rhs.hour		//
+				&& lhs.minute == rhs.minute //
+				&& lhs.second == rhs.second //
 				&& lhs.nanosecond == rhs.nanosecond;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator!=(const time& lhs, const time& rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator!=(const time& lhs, const time& rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
@@ -158,7 +162,7 @@ TOML_NAMESPACE_START
 		/// \cond
 
 		TOML_PURE_GETTER
-		static constexpr uint64_t TOML_CALLCONV pack(const time& t) noexcept
+		static constexpr uint64_t pack(const time& t) noexcept
 		{
 			return static_cast<uint64_t>(t.hour) << 48 | static_cast<uint64_t>(t.minute) << 40
 				 | static_cast<uint64_t>(t.second) << 32 | static_cast<uint64_t>(t.nanosecond);
@@ -169,28 +173,28 @@ TOML_NAMESPACE_START
 	  public:
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator<(const time& lhs, const time& rhs) noexcept
 		{
 			return pack(lhs) < pack(rhs);
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<=(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator<=(const time& lhs, const time& rhs) noexcept
 		{
 			return pack(lhs) <= pack(rhs);
 		}
 
 		/// \brief	Greater-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator>(const time& lhs, const time& rhs) noexcept
 		{
 			return pack(lhs) > pack(rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>=(const time& lhs, const time& rhs) noexcept
+		friend constexpr bool operator>=(const time& lhs, const time& rhs) noexcept
 		{
 			return pack(lhs) >= pack(rhs);
 		}
@@ -205,7 +209,7 @@ TOML_NAMESPACE_START
 		/// 10:20:34
 		/// 10:20:34.5
 		/// \eout
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const time& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const time& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
@@ -252,43 +256,43 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief	Equality operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator==(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator==(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes == rhs.minutes;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator!=(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator!=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes != rhs.minutes;
 		}
 
 		/// \brief	Less-than operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator<(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes < rhs.minutes;
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<=(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator<=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes <= rhs.minutes;
 		}
 
 		/// \brief	Greater-than operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator>(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes > rhs.minutes;
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>=(time_offset lhs, time_offset rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator>=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes >= rhs.minutes;
 		}
@@ -309,7 +313,7 @@ TOML_NAMESPACE_START
 		/// -01:30
 		/// -02:30
 		/// \eout
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const time_offset& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const time_offset& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;
@@ -380,7 +384,7 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief	Returns true if this date_time does not contain timezone offset information.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		constexpr bool is_local() const noexcept
 		{
 			return !offset.has_value();
@@ -388,21 +392,23 @@ TOML_NAMESPACE_START
 
 		/// \brief	Equality operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator==(const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator==(const date_time& lhs, const date_time& rhs) noexcept
 		{
-			return lhs.date == rhs.date && lhs.time == rhs.time && lhs.offset == rhs.offset;
+			return lhs.date == rhs.date //
+				&& lhs.time == rhs.time //
+				&& lhs.offset == rhs.offset;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator!=(const date_time& lhs, const date_time& rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator!=(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs == rhs);
 		}
 
 		/// \brief	Less-than operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<(const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator<(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			if (lhs.date != rhs.date)
 				return lhs.date < rhs.date;
@@ -413,7 +419,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Less-than-or-equal-to operator.
 		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator<=(const date_time& lhs, const date_time& rhs) noexcept
+		friend constexpr bool operator<=(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			if (lhs.date != rhs.date)
 				return lhs.date < rhs.date;
@@ -423,15 +429,15 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Greater-than operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>(const date_time& lhs, const date_time& rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator>(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs <= rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
-		TOML_PURE_GETTER
-		friend constexpr bool TOML_CALLCONV operator>=(const date_time& lhs, const date_time& rhs) noexcept
+		TOML_PURE_INLINE_GETTER
+		friend constexpr bool operator>=(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs < rhs);
 		}
@@ -448,7 +454,7 @@ TOML_NAMESPACE_START
 		/// 1987-03-16T10:20:34-02:30
 		/// 1987-03-16T10:20:34Z
 		/// \eout
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const date_time& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const date_time& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

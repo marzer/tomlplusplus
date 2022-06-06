@@ -43,7 +43,7 @@ TOML_NAMESPACE_START
 
 		template <typename T, typename N>
 		TOML_PURE_GETTER
-		static ref_type<T, N&&> TOML_CALLCONV do_ref(N&& n) noexcept
+		static ref_type<T, N&&> do_ref(N&& n) noexcept
 		{
 			using unwrapped_type = impl::unwrap_node<T>;
 			static_assert(toml::is_value<unwrapped_type> || toml::is_container<unwrapped_type>,
@@ -795,8 +795,7 @@ TOML_NAMESPACE_START
 		using nonvoid = std::conditional_t<std::is_void_v<A>, B, A>;
 
 		template <typename Func, typename Node>
-		static decltype(auto) TOML_CALLCONV do_visit(Func&& visitor,
-													 Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
+		static decltype(auto) do_visit(Func&& visitor, Node&& n) noexcept(visit_is_nothrow<Func&&, Node&&>)
 		{
 			static_assert(can_visit_any<Func&&, Node&&>,
 						  "TOML node visitors must be invocable for at least one of the toml::node "
@@ -1048,7 +1047,7 @@ TOML_NAMESPACE_START
 
 		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
 		///
-		/// \see #at_path(const toml::path& path)
+		/// \see #at_path(const toml::path&)
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(const toml::path& path) const noexcept;
@@ -1075,6 +1074,28 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \param 	path The "TOML path" to the desired child.
+		///
+		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
+		///
+		/// \see toml::node_view
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<node> operator[](const toml::path& path) noexcept;
+
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \param 	path The "TOML path" to the desired child.
+		///
+		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
+		///
+		/// \see toml::node_view
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<const node> operator[](const toml::path& path) const noexcept;
+
 		/// @}
 	};
 }
@@ -1085,7 +1106,7 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_PURE_GETTER
 	TOML_EXPORTED_FREE_FUNCTION
-	bool node_deep_equality(const node*, const node*) noexcept;
+	bool TOML_CALLCONV node_deep_equality(const node*, const node*) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

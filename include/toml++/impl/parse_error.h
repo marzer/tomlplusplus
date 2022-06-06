@@ -119,7 +119,7 @@ TOML_NAMESPACE_START
 		/// \param 	rhs	The parse_error.
 		///
 		/// \returns	The input stream.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const parse_error& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const parse_error& rhs)
 		{
 			impl::print_to_stream(lhs, rhs.description());
 			impl::print_to_stream(lhs, "\n\t(error occurred at "sv);

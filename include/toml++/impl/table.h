@@ -149,13 +149,13 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool TOML_CALLCONV operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
+		friend bool operator==(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.iter_ == rhs.iter_;
 		}
 
 		TOML_PURE_INLINE_GETTER
-		friend bool TOML_CALLCONV operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
+		friend bool operator!=(const table_iterator& lhs, const table_iterator& rhs) noexcept
 		{
 			return lhs.iter_ != rhs.iter_;
 		}
@@ -881,8 +881,7 @@ TOML_NAMESPACE_START
 		// clang-format on
 
 		template <typename Func, typename Table>
-		static void TOML_CALLCONV do_for_each(Func&& visitor,
-											  Table&& tbl) noexcept(for_each_is_nothrow<Func&&, Table&&>)
+		static void do_for_each(Func&& visitor, Table&& tbl) noexcept(for_each_is_nothrow<Func&&, Table&&>)
 		{
 			static_assert(can_for_each_any<Func&&, Table&&>,
 						  "TOML table for_each visitors must be invocable for at least one of the toml::node "
@@ -1823,6 +1822,10 @@ TOML_NAMESPACE_START
 		/// \name Node views
 		/// @{
 
+		/// \cond
+		using node::operator[]; // inherit operator[toml::path]
+		/// \endcond
+
 		/// \brief	Gets a node_view for the selected value.
 		///
 		/// \param 	key The key used for the lookup.
@@ -1857,40 +1860,6 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ get(key) };
 		}
 
-		/// \brief	Gets a node_view for the provided path.
-		///
-		/// \param 	path The "TOML path" to the desired key.
-		///
-		/// \returns	A view of the value at the given path if one existed, or an empty node view.
-		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
-		///
-		/// \see toml::node_view
-		TOML_NODISCARD
-		node_view<node> operator[](const toml::path& path) noexcept
-		{
-			return node_view<node>{ at_path(path) };
-		}
-
-		/// \brief	Gets a node_view for the provided path (const overload).
-		///
-		/// \param 	path The "TOML path" to the desired key.
-		///
-		/// \returns	A view of the value at the given path if one existed, or an empty node view.
-		///
-		/// \remarks std::map::operator[]'s behaviour of default-constructing a value at a key if it
-		/// 		 didn't exist is a crazy bug factory so I've deliberately chosen not to emulate it.
-		/// 		 <strong>This is not an error.</strong>
-		///
-		/// \see toml::node_view
-		TOML_NODISCARD
-		node_view<const node> operator[](const toml::path& path) const noexcept
-		{
-			return node_view<const node>{ at_path(path) };
-		}
-
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief	Gets a node_view for the selected value.
@@ -1907,7 +1876,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<node> operator[](std::wstring_view key) noexcept
+		node_view<node> operator[](std::wstring_view key)
 		{
 			return node_view<node>{ get(key) };
 		}
@@ -1926,7 +1895,7 @@ TOML_NAMESPACE_START
 		///
 		/// \see toml::node_view
 		TOML_NODISCARD
-		node_view<const node> operator[](std::wstring_view key) const noexcept
+		node_view<const node> operator[](std::wstring_view key) const
 		{
 			return node_view<const node>{ get(key) };
 		}
@@ -1954,7 +1923,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the tables contained the same keys and map.
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const table& lhs, const table& rhs) noexcept
+		friend bool operator==(const table& lhs, const table& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
@@ -1966,7 +1935,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the tables did not contain the same keys and map.
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator!=(const table& lhs, const table& rhs) noexcept
+		friend bool operator!=(const table& lhs, const table& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
 		}
@@ -1978,7 +1947,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints the table out to a stream as formatted TOML.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& lhs, const table& rhs)
+		friend std::ostream& operator<<(std::ostream& lhs, const table& rhs)
 		{
 			impl::print_to_stream(lhs, rhs);
 			return lhs;

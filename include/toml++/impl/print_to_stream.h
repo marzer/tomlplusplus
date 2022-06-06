@@ -112,7 +112,7 @@ TOML_IMPL_NAMESPACE_START
 #endif
 
 	template <typename T, typename U>
-	inline void TOML_CALLCONV print_to_stream_bookended(std::ostream & stream, const T& val, const U& bookend)
+	inline void print_to_stream_bookended(std::ostream & stream, const T& val, const U& bookend)
 	{
 		print_to_stream(stream, bookend);
 		print_to_stream(stream, val);

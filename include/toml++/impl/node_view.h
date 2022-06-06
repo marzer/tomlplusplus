@@ -595,7 +595,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the two views refer to nodes of the same type and value.
 		template <typename T>
 		TOML_PURE_GETTER
-		friend bool TOML_CALLCONV operator==(const node_view& lhs, const node_view<T>& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const node_view<T>& rhs) noexcept
 		{
 			return impl::node_deep_equality(lhs.node_, rhs.node_);
 		}
@@ -603,14 +603,14 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the two views do not refer to nodes of the same type and value.
 		template <typename T>
 		TOML_PURE_GETTER
-		friend bool TOML_CALLCONV operator!=(const node_view& lhs, const node_view<T>& rhs) noexcept
+		friend bool operator!=(const node_view& lhs, const node_view<T>& rhs) noexcept
 		{
 			return !impl::node_deep_equality(lhs.node_, rhs.node_);
 		}
 
 		/// \brief	Returns true if the viewed node is a table with the same contents as RHS.
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs, const table& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const table& rhs) noexcept
 		{
 			if (lhs.node_ == &rhs)
 				return true;
@@ -621,7 +621,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns true if the viewed node is an array with the same contents as RHS.
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs, const array& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const array& rhs) noexcept
 		{
 			if (lhs.node_ == &rhs)
 				return true;
@@ -633,7 +633,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs, const toml::value<T>& rhs) noexcept
+		friend bool operator==(const node_view& lhs, const toml::value<T>& rhs) noexcept
 		{
 			if (lhs.node_ == &rhs)
 				return true;
@@ -645,7 +645,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is a value with the same value as RHS.
 		TOML_CONSTRAINED_TEMPLATE(impl::is_losslessly_convertible_to_native<T>, typename T)
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
+		friend bool operator==(const node_view& lhs, const T& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			static_assert(!impl::is_wide_string<T> || TOML_ENABLE_WINDOWS_COMPAT,
 						  "Comparison with wide-character strings is only "
@@ -673,8 +673,8 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is an array with the same contents as the RHS initializer list.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs,
-											 const std::initializer_list<T>& rhs) noexcept(!impl::is_wide_string<T>)
+		friend bool operator==(const node_view& lhs,
+							   const std::initializer_list<T>& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			const auto arr = lhs.as<array>();
 			return arr && *arr == rhs;
@@ -684,8 +684,7 @@ TOML_NAMESPACE_START
 		/// \brief	Returns true if the viewed node is an array with the same contents as the RHS vector.
 		template <typename T>
 		TOML_NODISCARD
-		friend bool TOML_CALLCONV operator==(const node_view& lhs,
-											 const std::vector<T>& rhs) noexcept(!impl::is_wide_string<T>)
+		friend bool operator==(const node_view& lhs, const std::vector<T>& rhs) noexcept(!impl::is_wide_string<T>)
 		{
 			const auto arr = lhs.as<array>();
 			return arr && *arr == rhs;
@@ -793,7 +792,7 @@ TOML_NAMESPACE_START
 		/// \brief	Prints the viewed node out to a stream.
 		///
 		/// \availability This operator is only available when #TOML_ENABLE_FORMATTERS is enabled.
-		friend std::ostream& TOML_CALLCONV operator<<(std::ostream& os, const node_view& nv)
+		friend std::ostream& operator<<(std::ostream& os, const node_view& nv)
 		{
 			if (nv.node_)
 				nv.node_->visit([&os](const auto& n) { os << n; });

@@ -18,13 +18,13 @@
 TOML_IMPL_NAMESPACE_START
 {
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_ascii_horizontal_whitespace(char32_t c) noexcept
+	constexpr bool is_ascii_horizontal_whitespace(char32_t c) noexcept
 	{
 		return c == U'\t' || c == U' ';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_non_ascii_horizontal_whitespace(char32_t c) noexcept
+	constexpr bool is_non_ascii_horizontal_whitespace(char32_t c) noexcept
 	{
 		// 20 code units from 8 ranges (spanning a search area of 65120)
 
@@ -48,19 +48,19 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_ascii_vertical_whitespace(char32_t c) noexcept
+	constexpr bool is_ascii_vertical_whitespace(char32_t c) noexcept
 	{
 		return c >= U'\n' && c <= U'\r';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_non_ascii_vertical_whitespace(char32_t c) noexcept
+	constexpr bool is_non_ascii_vertical_whitespace(char32_t c) noexcept
 	{
 		return (U'\u2028' <= c && c <= U'\u2029') || c == U'\x85';
 	}
 
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_ascii_bare_key_character(char32_t c) noexcept
+	constexpr bool is_ascii_bare_key_character(char32_t c) noexcept
 	{
 #if TOML_LANG_UNRELEASED // toml/issues/644 ('+' in bare keys)
 		if TOML_UNLIKELY(c == U'+')
@@ -78,7 +78,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_LANG_UNRELEASED // toml/pull/891 (unicode bare keys)
 
 	TOML_CONST_GETTER
-	constexpr bool TOML_CALLCONV is_non_ascii_bare_key_character(char32_t c) noexcept
+	constexpr bool is_non_ascii_bare_key_character(char32_t c) noexcept
 	{
 		// 971732 code units from 16 ranges (spanning a search area of 982862)
 

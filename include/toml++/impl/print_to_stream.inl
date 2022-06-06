@@ -69,10 +69,7 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void TOML_CALLCONV print_integer_to_stream(std::ostream & stream,
-											   T val,
-											   value_flags format = {},
-											   size_t min_digits  = 0)
+	void print_integer_to_stream(std::ostream & stream, T val, value_flags format = {}, size_t min_digits = 0)
 	{
 		if (!val)
 		{
@@ -159,10 +156,10 @@ TOML_ANON_NAMESPACE_START
 
 	template <typename T>
 	TOML_INTERNAL_LINKAGE
-	void TOML_CALLCONV print_floating_point_to_stream(std::ostream & stream,
-													  T val,
-													  value_flags format,
-													  [[maybe_unused]] bool relaxed_precision)
+	void print_floating_point_to_stream(std::ostream & stream,
+										T val,
+										value_flags format,
+										[[maybe_unused]] bool relaxed_precision)
 	{
 		switch (impl::fpclassify(val))
 		{

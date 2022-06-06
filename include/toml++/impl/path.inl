@@ -40,10 +40,10 @@ TOML_NAMESPACE_END;
 //# toml::path
 //#=====================================================================================================================
 
-TOML_NAMESPACE_START
+TOML_ANON_NAMESPACE_START
 {
-	TOML_EXTERNAL_LINKAGE
-	bool TOML_CALLCONV path::parse_into(std::string_view path_str, std::vector<path_component> & components)
+	TOML_INTERNAL_LINKAGE
+	bool parse_path_into(std::string_view path_str, std::vector<path_component> & components)
 	{
 		using components_type = std::remove_reference_t<decltype(components)>;
 
@@ -71,7 +71,11 @@ TOML_NAMESPACE_START
 
 		return true;
 	}
+}
+TOML_ANON_NAMESPACE_END;
 
+TOML_NAMESPACE_START
+{
 	TOML_EXTERNAL_LINKAGE
 	void path::print_to(std::ostream & os) const
 	{
@@ -105,7 +109,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path::path(std::string_view str) //
 	{
-		parse_into(str, components_);
+		TOML_ANON_NAMESPACE::parse_path_into(str, components_);
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -123,7 +127,7 @@ TOML_NAMESPACE_START
 	path& path::operator=(std::string_view rhs)
 	{
 		components_.clear();
-		parse_into(rhs, components_);
+		TOML_ANON_NAMESPACE::parse_path_into(rhs, components_);
 		return *this;
 	}
 
@@ -158,7 +162,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path& path::operator+=(std::string_view str)
 	{
-		parse_into(str, components_);
+		TOML_ANON_NAMESPACE::parse_path_into(str, components_);
 		return *this;
 	}
 
