@@ -29,8 +29,20 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(path_component_value value, path_component_type type) : value_(value), type_(type)
+	path_component::path_component(size_t index) : value_(index), type_(path_component_type::array_index)
 	{ }
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::string_view key) : value_(key.data()), type_(path_component_type::key)
+	{ }
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::wstring_view key) : value_(impl::narrow(key)), type_(path_component_type::key)
+	{ }
+
+#endif
 
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
@@ -85,14 +97,14 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto on_key = [](void* data, std::string_view key) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ std::string(key), path_component_type::key });
+			comps.emplace_back(path_component{ std::string(key) });
 			return true;
 		};
 
 		static constexpr auto on_index = [](void* data, size_t index) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ index, path_component_type::array_index });
+			comps.emplace_back(path_component{ index });
 			return true;
 		};
 

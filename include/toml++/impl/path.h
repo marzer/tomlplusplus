@@ -43,10 +43,24 @@ TOML_NAMESPACE_START
 		TOML_NODISCARD_CTOR
 		path_component() noexcept = default;
 
-		/// \brief	Constructor with path component fields specified.
+		/// \brief	Constructor for a path component that is an array index
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component(path_component_value value, path_component_type type);
+		path_component(size_t index);
+
+		/// \brief	Constructor for a path component that is a key string
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(std::string_view key);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Constructor for a path component that is a key specified witha wide-char string
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(std::wstring_view key);
+
+#endif
 
 		/// \brief Retrieve the value of this path component, either the key name or the aray index
 		TOML_PURE_INLINE_GETTER
