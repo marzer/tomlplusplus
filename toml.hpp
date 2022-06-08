@@ -2754,14 +2754,16 @@ TOML_NAMESPACE_START
 			return !equal(lhs, rhs);
 		}
 
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(size_t index) noexcept;
 
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(std::string_view key);
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(std::wstring_view key);
-
 #endif
 	};
 
@@ -10522,7 +10524,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator = (size_t index) noexcept
+	path_component& path_component::operator= (size_t index) noexcept
 	{
 		value_ = static_cast<size_t>(index);
 		type_  = path_component_type::array_index;

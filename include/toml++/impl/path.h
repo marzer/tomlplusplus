@@ -77,14 +77,17 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief Assigns an array index to this path component. Index must castable to size_t
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(size_t index) noexcept;
 
 		/// \brief Assigns a path key to this path component. Key must be a string type
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(std::string_view key);
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief Assigns a path key to this path component using window wide char strings. Key must be a wide char string type
+		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component& operator=(std::wstring_view key);
 
 #endif

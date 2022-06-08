@@ -39,7 +39,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator = (size_t index) noexcept
+	path_component& path_component::operator= (size_t index) noexcept
 	{
 		value_ = static_cast<size_t>(index);
 		type_  = path_component_type::array_index;
