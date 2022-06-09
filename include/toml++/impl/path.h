@@ -23,8 +23,7 @@ TOML_NAMESPACE_START
 	using path_component_value = std::variant<std::string, size_t>;
 
 	/// \brief Represents a single component of a complete 'TOML-path': either a key or an array index
-	TOML_EXPORTED_CLASS
-	struct path_component
+	struct TOML_EXPORTED_CLASS path_component
 	{
 		friend class path;
 

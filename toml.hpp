@@ -2708,8 +2708,7 @@ TOML_NAMESPACE_START
 
 	using path_component_value = std::variant<std::string, size_t>;
 
-	TOML_EXPORTED_CLASS
-	struct path_component
+	struct TOML_EXPORTED_CLASS path_component
 	{
 		friend class path;
 
