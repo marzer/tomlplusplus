@@ -29,10 +29,55 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(size_t index) noexcept : value_(index), type_(path_component_type::array_index)
+	{ }
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::string_view key) : value_(std::string(key)), type_(path_component_type::key)
+	{ }
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::wstring_view key) : value_(impl::narrow(key)), type_(path_component_type::key)
+	{ }
+
+#endif
+
+	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
-		return lhs.type == rhs.type && lhs.value == rhs.value;
+		return lhs.type_ == rhs.type_ && lhs.value_ == rhs.value_;
 	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator= (size_t index) noexcept
+	{
+		value_ = static_cast<size_t>(index);
+		type_  = path_component_type::array_index;
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator= (std::string_view key)
+	{
+		value_ = std::string(key);
+		type_  = path_component_type::key;
+		return *this;
+	}
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator= (std::wstring_view key)
+	{
+		value_ = std::string(impl::narrow(key));
+		type_  = path_component_type::key;
+		return *this;
+	}
+
+#endif
+
 }
 TOML_NAMESPACE_END;
 
@@ -52,14 +97,14 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto on_key = [](void* data, std::string_view key) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ std::string(key), path_component_type::key });
+			comps.emplace_back(key);
 			return true;
 		};
 
 		static constexpr auto on_index = [](void* data, size_t index) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ index, path_component_type::array_index });
+			comps.emplace_back(index);
 			return true;
 		};
 
@@ -82,16 +127,16 @@ TOML_NAMESPACE_START
 		bool root = true;
 		for (const auto& component : components_)
 		{
-			if (component.type == path_component_type::key) // key
+			if (component.type_ == path_component_type::key) // key
 			{
 				if (!root)
 					impl::print_to_stream(os, '.');
-				impl::print_to_stream(os, std::get<std::string>(component.value));
+				impl::print_to_stream(os, std::get<std::string>(component.value_));
 			}
-			else if (component.type == path_component_type::array_index) // array
+			else if (component.type_ == path_component_type::array_index) // array
 			{
 				impl::print_to_stream(os, '[');
-				impl::print_to_stream(os, std::get<size_t>(component.value));
+				impl::print_to_stream(os, std::get<size_t>(component.value_));
 				impl::print_to_stream(os, ']');
 			}
 			root = false;
@@ -333,22 +378,22 @@ TOML_NAMESPACE_START
 
 		for (const auto& component : path)
 		{
-			auto type = component.type;
-			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value))
+			auto type = component.type();
+			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value()))
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
 					return {}; // not an array, using array index doesn't work
 
-				current = current_array->get(std::get<size_t>(component.value));
+				current = current_array->get(std::get<size_t>(component.value()));
 			}
-			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value))
+			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value()))
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return {};
 
-				current = current_table->get(std::get<std::string>(component.value));
+				current = current_table->get(std::get<std::string>(component.value()));
 			}
 			else
 			{

@@ -23,13 +23,15 @@ TOML_NAMESPACE_START
 	using path_component_value = std::variant<std::string, size_t>;
 
 	/// \brief Represents a single component of a complete 'TOML-path': either a key or an array index
-	struct path_component
+	struct TOML_EXPORTED_CLASS path_component
 	{
-		path_component_value value;
-		path_component_type type;
+		friend class path;
 
 	  private:
 		/// \cond
+
+	  	path_component_value value_;
+		path_component_type type_;
 
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
@@ -37,6 +39,43 @@ TOML_NAMESPACE_START
 
 		/// \endcond
 	  public:
+		/// \brief	Default constructor.
+		TOML_NODISCARD_CTOR
+		path_component() noexcept = default;
+
+		/// \brief	Constructor for a path component that is an array index
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(size_t index) noexcept;
+
+		/// \brief	Constructor for a path component that is a key string
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(std::string_view key);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief	Constructor for a path component that is a key specified witha wide-char string
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(std::wstring_view key);
+
+#endif
+
+		/// \brief Retrieve the value of this path component, either the key name or the aray index
+		TOML_PURE_INLINE_GETTER
+		const path_component_value& value() const noexcept
+		{
+			return value_;
+		}
+
+		/// \brief Retrieve the type of this path component, either path_component::key or path_component::array_index
+		TOML_PURE_INLINE_GETTER
+		path_component_type type() const noexcept
+		{
+			return type_;
+		}
+
 		/// \brief	Returns true if two path components represent the same key or array index.
 		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const path_component& lhs, const path_component& rhs) noexcept
@@ -50,6 +89,23 @@ TOML_NAMESPACE_START
 		{
 			return !equal(lhs, rhs);
 		}
+
+		/// \brief Assigns an array index to this path component. Index must castable to size_t
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(size_t index) noexcept;
+
+		/// \brief Assigns a path key to this path component. Key must be a string type
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::string_view key);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Assigns a path key to this path component using window wide char strings. Key must be a wide char string type
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::wstring_view key);
+
+#endif
+
 	};
 
 	/// \brief	A TOML path.
