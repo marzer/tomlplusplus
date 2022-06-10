@@ -29,11 +29,11 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(size_t index) : value_(index), type_(path_component_type::array_index)
+	path_component::path_component(size_t index) noexcept : value_(index), type_(path_component_type::array_index)
 	{ }
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(std::string_view key) : value_(key.data()), type_(path_component_type::key)
+	path_component::path_component(std::string_view key) : value_(std::string(key)), type_(path_component_type::key)
 	{ }
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -97,14 +97,14 @@ TOML_ANON_NAMESPACE_START
 		static constexpr auto on_key = [](void* data, std::string_view key) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ std::string(key) });
+			comps.emplace_back(key);
 			return true;
 		};
 
 		static constexpr auto on_index = [](void* data, size_t index) -> bool
 		{
 			auto& comps = *static_cast<components_type*>(data);
-			comps.emplace_back(path_component{ index });
+			comps.emplace_back(index);
 			return true;
 		};
 
@@ -378,22 +378,22 @@ TOML_NAMESPACE_START
 
 		for (const auto& component : path)
 		{
-			auto type = component.get_type();
-			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.get_value()))
+			auto type = component.type();
+			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value()))
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
 					return {}; // not an array, using array index doesn't work
 
-				current = current_array->get(std::get<size_t>(component.get_value()));
+				current = current_array->get(std::get<size_t>(component.value()));
 			}
-			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.get_value()))
+			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value()))
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return {};
 
-				current = current_table->get(std::get<std::string>(component.get_value()));
+				current = current_table->get(std::get<std::string>(component.value()));
 			}
 			else
 			{

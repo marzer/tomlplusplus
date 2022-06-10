@@ -46,7 +46,7 @@ TOML_NAMESPACE_START
 		/// \brief	Constructor for a path component that is an array index
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component(size_t index);
+		path_component(size_t index) noexcept;
 
 		/// \brief	Constructor for a path component that is a key string
 		TOML_NODISCARD_CTOR
@@ -64,14 +64,14 @@ TOML_NAMESPACE_START
 
 		/// \brief Retrieve the value of this path component, either the key name or the aray index
 		TOML_PURE_INLINE_GETTER
-		const path_component_value& get_value() const noexcept
+		const path_component_value& value() const noexcept
 		{
 			return value_;
 		}
 
 		/// \brief Retrieve the type of this path component, either path_component::key or path_component::array_index
 		TOML_PURE_INLINE_GETTER
-		path_component_type get_type() const noexcept
+		path_component_type type() const noexcept
 		{
 			return type_;
 		}
