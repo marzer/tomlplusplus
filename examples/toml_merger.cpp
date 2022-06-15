@@ -17,31 +17,63 @@ namespace
 	// note that this implementation always prioritizes 'rhs' over 'lhs' in the event of a conflict;
 	// extending it to handle conflicts in some other manner is left as an exercise to the reader :)
 
-	static void merge(toml::table& lhs, toml::table&& rhs)
+	static void merge_left(toml::table& lhs, toml::table&& rhs);
+
+	static void merge_left(toml::array& lhs, toml::array&& rhs)
+	{
+		rhs.for_each(
+			[&](std::size_t index, auto&& rhs_val)
+			{
+				// rhs index not found in lhs - direct move
+				if (lhs.size() <= index)
+				{
+					lhs.push_back(std::move(rhs_val));
+					return;
+				}
+
+				// both elements were the same container type -  recurse into them
+				if constexpr (toml::is_container<decltype(rhs_val)>)
+				{
+					using rhs_type = std::remove_cv_t<std::remove_reference_t<decltype(rhs_val)>>;
+					if (auto lhs_child = lhs[index].as<rhs_type>())
+					{
+						merge_left(*lhs_child, std::move(rhs_val));
+						return;
+					}
+				}
+
+				// replace lhs element with rhs
+				lhs.replace(lhs.cbegin() + static_cast<std::ptrdiff_t>(index), std::move(rhs_val));
+			});
+	}
+
+	static void merge_left(toml::table& lhs, toml::table&& rhs)
 	{
 		rhs.for_each(
 			[&](const toml::key& rhs_key, auto&& rhs_val)
 			{
 				auto lhs_it = lhs.lower_bound(rhs_key);
 
-				// not found in lhs - direct move
+				// rhs key not found in lhs - direct move
 				if (lhs_it == lhs.cend() || lhs_it->first != rhs_key)
 				{
-					lhs.emplace_hint(lhs_it, rhs_key, std::move(rhs_val));
+					using rhs_type = std::remove_cv_t<std::remove_reference_t<decltype(rhs_val)>>;
+					lhs.emplace_hint<rhs_type>(lhs_it, rhs_key, std::move(rhs_val));
 					return;
 				}
 
-				// both nodes were tables -  recurse into them
-				if constexpr (toml::is_table<decltype(rhs_val)>)
+				// both children were the same container type -  recurse into them
+				if constexpr (toml::is_container<decltype(rhs_val)>)
 				{
-					if (auto lhs_child_table = lhs_it->second.as_table())
+					using rhs_type = std::remove_cv_t<std::remove_reference_t<decltype(rhs_val)>>;
+					if (auto lhs_child = lhs_it->second.as<rhs_type>())
 					{
-						merge(*lhs_child_table, std::move(rhs_val));
+						merge_left(*lhs_child, std::move(rhs_val));
 						return;
 					}
 				}
 
-				// one or both weren't tables - replace lhs with rhs
+				// replace lhs value with rhs
 				lhs.insert_or_assign(rhs_key, std::move(rhs_val));
 			});
 	}
@@ -56,7 +88,7 @@ int main(int argc, char** argv)
 	try
 	{
 		tbl = toml::parse_file(base_path);
-		merge(tbl, toml::parse_file(overrides_path));
+		merge_left(tbl, toml::parse_file(overrides_path));
 	}
 	catch (const toml::parse_error& err)
 	{
