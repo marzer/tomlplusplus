@@ -6,7 +6,6 @@
 
 #include "forward_declarations.h"
 #include "std_vector.h"
-#include "std_variant.h"
 #include "header_start.h"
 
 TOML_NAMESPACE_START
@@ -14,34 +13,62 @@ TOML_NAMESPACE_START
 	/// \brief Indicates type of path component, either a key, an index in an array, or invalid
 	enum class TOML_CLOSED_ENUM path_component_type : uint8_t
 	{
-		invalid		= 0x0,
 		key			= 0x1,
 		array_index = 0x2
 	};
-
-	/// \brief Holds the value of a path component, either the name of the key in a string_view, or the index of an array as a size_t
-	using path_component_value = std::variant<std::string, size_t>;
 
 	/// \brief Represents a single component of a complete 'TOML-path': either a key or an array index
 	struct TOML_EXPORTED_CLASS path_component
 	{
 		friend class path;
 
-	  private:
-		/// \cond
+		struct storage_t
+		{
+			static constexpr size_t size =
+				(sizeof(size_t) < sizeof(std::string) ? sizeof(std::string) : sizeof(size_t));
+			static constexpr size_t align =
+				(alignof(size_t) < alignof(std::string) ? alignof(std::string) : alignof(size_t));
 
-	  	path_component_value value_;
+			alignas(align) unsigned char bytes[size];
+		};
+		alignas(storage_t::align) mutable storage_t value_storage_;
+
 		path_component_type type_;
 
 		TOML_PURE_GETTER
 		TOML_EXPORTED_STATIC_FUNCTION
 		static bool TOML_CALLCONV equal(const path_component&, const path_component&) noexcept;
 
+		template <typename Type>
+		TOML_NODISCARD
+		TOML_ALWAYS_INLINE
+		static Type* get_as(storage_t& s) noexcept
+		{
+			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
+		}
+
+		static void store_key(std::string_view key, storage_t& storage_)
+		{
+			::new (static_cast<void*>(storage_.bytes)) std::string{ key };
+		}
+
+		static void store_index(size_t index, storage_t& storage_)
+		{
+			::new (static_cast<void*>(storage_.bytes)) std::size_t{ index };
+		}
+
+		void destroy() noexcept
+		{
+			if (type_ == path_component_type::key)
+				get_as<std::string>(value_storage_)->~basic_string();
+		}
+
 		/// \endcond
 	  public:
-		/// \brief	Default constructor.
+		/// \brief	Default constructor (creates an empty key).
 		TOML_NODISCARD_CTOR
-		path_component() noexcept = default;
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component();
 
 		/// \brief	Constructor for a path component that is an array index
 		TOML_NODISCARD_CTOR
@@ -62,12 +89,129 @@ TOML_NAMESPACE_START
 
 #endif
 
-		/// \brief Retrieve the value of this path component, either the key name or the aray index
-		TOML_PURE_INLINE_GETTER
-		const path_component_value& value() const noexcept
+		/// \brief	Copy constructor.
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(const path_component& pc);
+
+		/// \brief	Move constructor.
+		TOML_NODISCARD_CTOR
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component(path_component&& pc) noexcept;
+
+		/// \brief	Copy-assignment operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(const path_component & rhs);
+
+		/// \brief	Move-assignment operator.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(path_component && rhs) noexcept;
+
+		/// \brief	Destructor.
+		~path_component() noexcept
 		{
-			return value_;
+			destroy();
 		}
+
+		/// \name Array index accessors and casts
+		/// @{
+
+		/// \brief	Returns the array index.
+		TOML_NODISCARD
+		size_t& index() & noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
+			return *get_as<size_t>(value_storage_);
+		}
+
+		/// \brief	Returns the array index (rvalue overload).
+		TOML_NODISCARD
+		size_t&& index() && noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
+			return static_cast<size_t&&>(*get_as<size_t>(value_storage_));
+		}
+
+		/// \brief	Returns the array index (const lvalue overload).
+		TOML_NODISCARD
+		const size_t& index() const& noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
+			return *get_as<const size_t>(value_storage_);
+		}
+
+		/// \brief	Returns the array index.
+		TOML_NODISCARD
+		/* implicit */ operator size_t&() noexcept
+		{
+			return index();
+		}
+
+		/// \brief	Returns the array index (rvalue overload).
+		TOML_NODISCARD
+		/* implicit */ operator size_t&&() noexcept
+		{
+			return std::move(index());
+		}
+
+		/// \brief	Returns the array index (const lvalue overload).
+		TOML_NODISCARD
+		/* implicit */ operator const size_t&() const noexcept
+		{
+			return index();
+		}
+
+		/// @}
+
+		/// \name Key accessors and casts
+		/// @{
+
+		/// \brief	Returns the key string.
+		TOML_NODISCARD
+		std::string& key() & noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
+			return *get_as<std::string>(value_storage_);
+		}
+
+		/// \brief	Returns the internal key string (rvalue overload).
+		TOML_NODISCARD
+		std::string&& key() && noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
+			return static_cast<std::string&&>(*get_as<std::string>(value_storage_));
+		}
+
+		/// \brief	Returns the key string (const lvalue overload).
+		TOML_NODISCARD
+		const std::string& key() const& noexcept
+		{
+			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
+			return *get_as<const std::string>(value_storage_);
+		}
+
+		/// \brief	Returns the key string.
+		TOML_NODISCARD
+		explicit operator std::string&() noexcept
+		{
+			return key();
+		}
+
+		/// \brief	Returns the key string (rvalue overload).
+		TOML_NODISCARD
+		explicit operator std::string&&() noexcept
+		{
+			return std::move(key());
+		}
+
+		/// \brief	Returns the key string (const lvalue overload).
+		TOML_NODISCARD
+		explicit operator const std::string&() const noexcept
+		{
+			return key();
+		}
+
+		/// @}
 
 		/// \brief Retrieve the type of this path component, either path_component::key or path_component::array_index
 		TOML_PURE_INLINE_GETTER

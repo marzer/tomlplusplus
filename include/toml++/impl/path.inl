@@ -29,40 +29,122 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(size_t index) noexcept : value_(index), type_(path_component_type::array_index)
-	{ }
+	path_component::path_component() //
+		: type_{ path_component_type::key }
+	{
+		path_component::store_key("", value_storage_);
+	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(std::string_view key) : value_(std::string(key)), type_(path_component_type::key)
-	{ }
+	path_component::path_component(size_t index) noexcept //
+		: type_(path_component_type::array_index)
+	{
+		path_component::store_index(index, value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::string_view key) //
+		: type_(path_component_type::key)
+	{
+		path_component::store_key(key, value_storage_);
+	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(std::wstring_view key) : value_(impl::narrow(key)), type_(path_component_type::key)
+	path_component::path_component(std::wstring_view key) //
+		: path_component(impl::narrow(key))
 	{ }
 
-#endif
+#endif 
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(const path_component & pc) //
+		: type_{ pc.type_ }
+	{
+		if (type_ == path_component_type::array_index)
+			path_component::store_index(pc.index(), value_storage_);
+		else
+			path_component::store_key(pc.key(), value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(path_component && pc) noexcept //
+		: type_{ pc.type_ }
+	{
+		if (type_ == path_component_type::array_index)
+			path_component::store_index(pc.index(), value_storage_);
+		else
+			path_component::store_key(std::move(pc).key(), value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator=(const path_component& rhs)
+	{
+		destroy();
+		type_ = rhs.type_;
+		if (type_ == path_component_type::array_index)
+			path_component::store_index(rhs.index(), value_storage_);
+		else
+			path_component::store_key(rhs.key(), value_storage_);
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator=(path_component&& rhs) noexcept
+	{
+		destroy();
+
+		if (type_ != rhs.type_)
+		{
+			type_ = rhs.type_;
+			if (type_ == path_component_type::array_index)
+				path_component::store_index(std::move(rhs).index(), value_storage_);
+			else
+				path_component::store_key(std::move(rhs).key(), value_storage_);
+		}
+		else
+		{
+			if (type_ == path_component_type::array_index)
+				index() = std::move(rhs).index();
+			else
+				key() = std::move(rhs).key();
+		}
+		return *this;
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
-		return lhs.type_ == rhs.type_ && lhs.value_ == rhs.value_;
+		// Different comparison depending on contents
+		if (lhs.type_ != rhs.type_)
+			return false;
+
+		if (lhs.type_ == path_component_type::array_index)
+			return *get_as<size_t>(lhs.value_storage_) == *get_as<size_t>(rhs.value_storage_);
+		else // path_component_type::key
+			return *get_as<std::string>(lhs.value_storage_) == *get_as<std::string>(rhs.value_storage_);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	path_component& path_component::operator= (size_t index) noexcept
 	{
-		value_ = static_cast<size_t>(index);
-		type_  = path_component_type::array_index;
+		destroy();
+
+		type_ = path_component_type::array_index;
+		path_component::store_index(index, value_storage_);
+
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	path_component& path_component::operator= (std::string_view key)
 	{
-		value_ = std::string(key);
-		type_  = path_component_type::key;
+		destroy();
+
+		type_ = path_component_type::key;
+		path_component::store_key(key, value_storage_);
+		
 		return *this;
 	}
 
@@ -71,8 +153,11 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path_component& path_component::operator= (std::wstring_view key)
 	{
-		value_ = std::string(impl::narrow(key));
-		type_  = path_component_type::key;
+		destroy();
+
+		type_ = path_component_type::key;
+		store_key(impl::narrow(key), value_storage_);
+		
 		return *this;
 	}
 
@@ -131,12 +216,12 @@ TOML_NAMESPACE_START
 			{
 				if (!root)
 					impl::print_to_stream(os, '.');
-				impl::print_to_stream(os, std::get<std::string>(component.value_));
+				impl::print_to_stream(os, component.key());
 			}
 			else if (component.type_ == path_component_type::array_index) // array
 			{
 				impl::print_to_stream(os, '[');
-				impl::print_to_stream(os, std::get<size_t>(component.value_));
+				impl::print_to_stream(os, component.index());
 				impl::print_to_stream(os, ']');
 			}
 			root = false;
@@ -379,21 +464,21 @@ TOML_NAMESPACE_START
 		for (const auto& component : path)
 		{
 			auto type = component.type();
-			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value()))
+			if (type == path_component_type::array_index)
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
 					return {}; // not an array, using array index doesn't work
 
-				current = current_array->get(std::get<size_t>(component.value()));
+				current = current_array->get(component.index());
 			}
-			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value()))
+			else if (type == path_component_type::key)
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return {};
 
-				current = current_table->get(std::get<std::string>(component.value()));
+				current = current_table->get(component.key());
 			}
 			else
 			{
