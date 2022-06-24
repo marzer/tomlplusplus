@@ -81,7 +81,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path_component& path_component::operator=(const path_component& rhs)
 	{
-		destroy();
+
 		if (type_ != rhs.type_)
 		{
 			destroy();
