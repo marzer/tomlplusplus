@@ -29,50 +29,153 @@ TOML_ENABLE_WARNINGS;
 TOML_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(size_t index) noexcept : value_(index), type_(path_component_type::array_index)
-	{ }
+	path_component::path_component() //
+		: type_{ path_component_type::key }
+	{
+		store_key("", value_storage_);
+	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(std::string_view key) : value_(std::string(key)), type_(path_component_type::key)
-	{ }
+	path_component::path_component(size_t index) noexcept //
+		: type_(path_component_type::array_index)
+	{
+		store_index(index, value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(std::string_view key) //
+		: type_(path_component_type::key)
+	{
+		store_key(key, value_storage_);
+	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(std::wstring_view key) : value_(impl::narrow(key)), type_(path_component_type::key)
+	path_component::path_component(std::wstring_view key) //
+		: path_component(impl::narrow(key))
 	{ }
 
-#endif
+#endif 
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(const path_component & pc) //
+		: type_{ pc.type_ }
+	{
+		if (type_ == path_component_type::array_index)
+			store_index(pc.index(), value_storage_);
+		else
+			store_key(pc.key(), value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component::path_component(path_component && pc) noexcept //
+		: type_{ pc.type_ }
+	{
+		if (type_ == path_component_type::array_index)
+			store_index(pc.index(), value_storage_);
+		else
+			store_key(std::move(pc).key(), value_storage_);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator=(const path_component& rhs)
+	{
+		if (type_ != rhs.type_)
+		{
+			destroy();
+
+			type_ = rhs.type_;
+			if (type_ == path_component_type::array_index)
+				store_index(rhs.index(), value_storage_);
+			else
+				store_key(rhs.key(), value_storage_);
+		}
+		else
+		{
+			if (type_ == path_component_type::array_index)
+				index() = rhs.index();
+			else
+				key() = rhs.key();
+		}
+		return *this;
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	path_component& path_component::operator=(path_component&& rhs) noexcept
+	{
+		if (type_ != rhs.type_)
+		{
+			destroy();
+
+			type_ = rhs.type_;
+			if (type_ == path_component_type::array_index)
+				store_index(std::move(rhs).index(), value_storage_);
+			else
+				store_key(std::move(rhs).key(), value_storage_);
+		}
+		else
+		{
+			if (type_ == path_component_type::array_index)
+				index() = std::move(rhs).index();
+			else
+				key() = std::move(rhs).key();
+		}
+		return *this;
+	}
 
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
-		return lhs.type_ == rhs.type_ && lhs.value_ == rhs.value_;
+		// Different comparison depending on contents
+		if (lhs.type_ != rhs.type_)
+			return false;
+
+		if (lhs.type_ == path_component_type::array_index)
+			return lhs.index() == rhs.index();
+		else // path_component_type::key
+			return lhs.key() == rhs.key();
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (size_t index) noexcept
+	path_component& path_component::operator= (size_t new_index) noexcept
 	{
-		value_ = static_cast<size_t>(index);
-		type_  = path_component_type::array_index;
+		// If currently a key, string will need to be destroyed regardless
+		destroy();
+
+		type_ = path_component_type::array_index;
+		store_index(new_index, value_storage_);
+
 		return *this;
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::string_view key)
+	path_component& path_component::operator= (std::string_view new_key)
 	{
-		value_ = std::string(key);
-		type_  = path_component_type::key;
+		if (type_ == path_component_type::key)
+			key() = new_key;
+		else
+		{
+			type_ = path_component_type::key;
+			store_key(new_key, value_storage_);
+		}
+		
 		return *this;
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::wstring_view key)
+	path_component& path_component::operator= (std::wstring_view new_key)
 	{
-		value_ = std::string(impl::narrow(key));
-		type_  = path_component_type::key;
+		if (type_ == path_component_type::key)
+			key() = impl::narrow(new_key);
+		else
+		{
+			type_ = path_component_type::key;
+			store_key(impl::narrow(new_key), value_storage_);
+		}
+
 		return *this;
 	}
 
@@ -127,16 +230,16 @@ TOML_NAMESPACE_START
 		bool root = true;
 		for (const auto& component : components_)
 		{
-			if (component.type_ == path_component_type::key) // key
+			if (component.type() == path_component_type::key) // key
 			{
 				if (!root)
 					impl::print_to_stream(os, '.');
-				impl::print_to_stream(os, std::get<std::string>(component.value_));
+				impl::print_to_stream(os, component.key());
 			}
-			else if (component.type_ == path_component_type::array_index) // array
+			else if (component.type() == path_component_type::array_index) // array
 			{
 				impl::print_to_stream(os, '[');
-				impl::print_to_stream(os, std::get<size_t>(component.value_));
+				impl::print_to_stream(os, component.index());
 				impl::print_to_stream(os, ']');
 			}
 			root = false;
@@ -379,21 +482,21 @@ TOML_NAMESPACE_START
 		for (const auto& component : path)
 		{
 			auto type = component.type();
-			if (type == path_component_type::array_index && std::holds_alternative<size_t>(component.value()))
+			if (type == path_component_type::array_index)
 			{
 				const auto current_array = current->as<array>();
 				if (!current_array)
 					return {}; // not an array, using array index doesn't work
 
-				current = current_array->get(std::get<size_t>(component.value()));
+				current = current_array->get(component.index());
 			}
-			else if (type == path_component_type::key && std::holds_alternative<std::string>(component.value()))
+			else if (type == path_component_type::key)
 			{
 				const auto current_table = current->as<table>();
 				if (!current_table)
 					return {};
 
-				current = current_table->get(std::get<std::string>(component.value()));
+				current = current_table->get(component.key());
 			}
 			else
 			{
