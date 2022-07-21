@@ -6,7 +6,6 @@ if not is_subproject
 	import('pkgconfig').generate(
 		name: meson.project_name(),
 		description: 'Header-only TOML config file parser and serializer for C++',
-		install_dir: get_option('datadir')/'pkgconfig',
 		url: 'https://marzer.github.io/tomlplusplus'
 	)
 endif
@@ -19,7 +18,7 @@ if get_option('generate_cmake_config') and not is_subproject
 	#cmake.write_basic_package_version_file(
 	#	name: meson.project_name(),
 	#	version: meson.project_version(),
-	#	install_dir: get_option('datadir')/'cmake'/meson.project_name(),
+	#	install_dir: get_option('libdir')/'cmake'/meson.project_name(),
 	#	arch_independent: true
 	#)
 	# In the meantime, install a pre-generated Package Version file
@@ -27,13 +26,13 @@ if get_option('generate_cmake_config') and not is_subproject
 		configuration: {'version': meson.project_version()},
 		input: '..'/'cmake'/'tomlplusplusConfigVersion.cmake.meson.in',
 		output: 'tomlplusplusConfigVersion.cmake',
-		install_dir: get_option('datadir')/'cmake'/meson.project_name()
+		install_dir: get_option('libdir')/'cmake'/meson.project_name()
 	)
 
 	cmake.configure_package_config_file(
 		name: meson.project_name(),
 		input: '..'/'cmake'/'tomlplusplusConfig.cmake.meson.in',
 		configuration: configuration_data({'includedir': get_option('includedir')}),
-		install_dir: get_option('datadir')/'cmake'/meson.project_name(),
+		install_dir: get_option('libdir')/'cmake'/meson.project_name(),
 	)
 endif
