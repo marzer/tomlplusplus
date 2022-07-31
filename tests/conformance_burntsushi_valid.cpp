@@ -30,7 +30,14 @@ comments = [
 	static constexpr auto array_mixed_string_table	 = R"(contributors = [
   "Foo Bar <foo@example.com>",
   { name = "Baz Qux", email = "bazqux@example.com", url = "https://example.com/bazqux" }
-])"sv;
+]
+
+# Start with a table as the first element. This tests a case that some libraries
+# might have where they will check if the first entry is a table/map/hash/assoc
+# array and then encode it as a table array. This was a reasonable thing to do
+# before TOML 1.0 since arrays could only contain one type, but now it's no
+# longer.
+mixed = [{k="a"}, "b", 1])"sv;
 	static constexpr auto array_nested_double		 = R"(nest = [
 	[
 		["a"],
@@ -361,8 +368,13 @@ plain = 3
 [table.withdot]
 plain = 5
 "key.with.dots" = 6)"sv;
-	static constexpr auto key_space			 = R"("a b" = 1)"sv;
-	static constexpr auto key_special_chars	 = R"("~!@$^&*()_+-`1234567890[]|/?><.,;:'" = 1)"sv;
+	static constexpr auto key_space			 = R"(# Keep whitespace inside quotes keys at all positions.
+"a b"   = 1
+" c d " = 2
+
+[ " tbl " ]
+"\ttab\ttab\t" = "tab")"sv;
+	static constexpr auto key_special_chars	 = R"("=~!@$^&*()_+-`1234567890[]|/?><.,;:'=" = 1)"sv;
 	static constexpr auto key_special_word	 = R"(false = false
 true = 1
 inf = 100000000
@@ -821,6 +833,14 @@ TEST_CASE("conformance - burntsushi/valid")
 											 { R"(name)"sv, R"(Baz Qux)"sv },
 											 { R"(url)"sv, R"(https://example.com/bazqux)"sv },
 										 },
+									 } },
+								   { R"(mixed)"sv,
+									 toml::array{
+										 toml::table{
+											 { R"(k)"sv, R"(a)"sv },
+										 },
+										 R"(b)"sv,
+										 1,
 									 } },
 							   };
 							   REQUIRE(tbl == expected);
@@ -1949,6 +1969,11 @@ another line)"sv },
 						   [](toml::table&& tbl) // key-space
 						   {
 							   const auto expected = toml::table{
+								   { R"( c d )"sv, 2 },
+								   { R"( tbl )"sv,
+									 toml::table{
+										 { R"(	tab	tab	)"sv, R"(tab)"sv },
+									 } },
 								   { R"(a b)"sv, 1 },
 							   };
 							   REQUIRE(tbl == expected);
@@ -1959,7 +1984,7 @@ another line)"sv },
 						   [](toml::table&& tbl) // key-special-chars
 						   {
 							   const auto expected = toml::table{
-								   { R"(~!@$^&*()_+-`1234567890[]|/?><.,;:')"sv, 1 },
+								   { R"(=~!@$^&*()_+-`1234567890[]|/?><.,;:'=)"sv, 1 },
 							   };
 							   REQUIRE(tbl == expected);
 						   });

@@ -139,6 +139,7 @@ TOML_NAMESPACE_START
 		return elems_.insert(pos, std::move(elem));
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype) const noexcept
 	{
@@ -155,6 +156,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
@@ -176,6 +178,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
@@ -188,7 +191,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node& array::at(size_t index)
 	{
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 
 		return *elems_.at(index);
 

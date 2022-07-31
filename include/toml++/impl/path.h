@@ -38,8 +38,7 @@ TOML_NAMESPACE_START
 		static bool TOML_CALLCONV equal(const path_component&, const path_component&) noexcept;
 
 		template <typename Type>
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		static Type* get_as(storage_t& s) noexcept
 		{
 			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
@@ -50,7 +49,7 @@ TOML_NAMESPACE_START
 			::new (static_cast<void*>(storage_.bytes)) std::string{ key };
 		}
 
-		static void store_index(size_t index, storage_t& storage_)
+		static void store_index(size_t index, storage_t& storage_) noexcept
 		{
 			::new (static_cast<void*>(storage_.bytes)) std::size_t{ index };
 		}
@@ -62,28 +61,20 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		size_t& index() & noexcept
+		size_t& index_ref() noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
 			return *get_as<size_t>(value_storage_);
 		}
 
 		TOML_NODISCARD
-		std::string& key() & noexcept
+		std::string& key_ref() noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
 			return *get_as<std::string>(value_storage_);
 		}
-
-		/// \brief	Returns the key string (const rvalue overload).
-		TOML_NODISCARD
-		std::string&& key() && noexcept
-		{
-			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
-			return static_cast<std::string&&>(*get_as<std::string>(value_storage_));
-		}
-
 		/// \endcond
+
 	  public:
 		/// \brief	Default constructor (creates an empty key).
 		TOML_NODISCARD_CTOR
@@ -102,7 +93,9 @@ TOML_NAMESPACE_START
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
-		/// \brief	Constructor for a path component that is a key specified witha wide-char string
+		/// \brief	Constructor for a path component that is a key string
+		///
+		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path_component(std::wstring_view key);
@@ -121,11 +114,29 @@ TOML_NAMESPACE_START
 
 		/// \brief	Copy-assignment operator.
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(const path_component & rhs);
+		path_component& operator=(const path_component& rhs);
 
 		/// \brief	Move-assignment operator.
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(path_component && rhs) noexcept;
+		path_component& operator=(path_component&& rhs) noexcept;
+
+		/// \brief Assigns an array index to this path component.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(size_t new_index) noexcept;
+
+		/// \brief Assigns a path key to this path component.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::string_view new_key);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		/// \brief Assigns a path key to this path component.
+		///
+		/// \availability This overload is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::wstring_view new_key);
+
+#endif
 
 		/// \brief	Destructor.
 		~path_component() noexcept
@@ -133,61 +144,43 @@ TOML_NAMESPACE_START
 			destroy();
 		}
 
-		/// \name Array index accessors and casts
+		/// \name Array index accessors
+		/// \warning It is undefined behaviour to call these functions when the path component does not represent an array index.
+		/// Check #type() to determine the component's value type.
 		/// @{
 
 		/// \brief	Returns the array index (const lvalue overload).
-		TOML_NODISCARD
-		const size_t& index() const& noexcept
+		TOML_PURE_GETTER
+		size_t index() const noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
 			return *get_as<const size_t>(value_storage_);
 		}
 
 		/// \brief	Returns the array index (const lvalue).
-		TOML_NODISCARD
-		/* implicit */ operator const size_t&() const noexcept
+		TOML_PURE_INLINE_GETTER
+		explicit operator size_t() const noexcept
 		{
 			return index();
 		}
 
 		/// @}
 
-		/// \name Key accessors and casts
+		/// \name Key accessors
+		/// \warning It is undefined behaviour to call these functions when the path component does not represent a key.
+		/// Check #type() to determine the component's value type.
 		/// @{
 
-		/// \brief	Returns the key string (const lvalue overload).
-		TOML_NODISCARD
-		const std::string& key() const& noexcept
+		/// \brief	Returns the key string.
+		TOML_PURE_GETTER
+		const std::string& key() const noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
 			return *get_as<const std::string>(value_storage_);
 		}
 
-		/// \brief	Returns the key string (const rvalue overload).
-		TOML_NODISCARD
-		const std::string&& key() const&& noexcept
-		{
-			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
-			return static_cast<const std::string&&>(*get_as<const std::string>(value_storage_));
-		}
-
 		/// \brief	Returns the key string.
-		TOML_NODISCARD
-		explicit operator const std::string&() noexcept
-		{
-			return key();
-		}
-
-		/// \brief	Returns the key string (rvalue overload).
-		TOML_NODISCARD
-		explicit operator const std::string&&() noexcept
-		{
-			return std::move(key());
-		}
-
-		/// \brief	Returns the key string (const lvalue overload).
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator const std::string&() const noexcept
 		{
 			return key();
@@ -201,6 +194,9 @@ TOML_NAMESPACE_START
 		{
 			return type_;
 		}
+
+		/// \name Equality
+		/// @{
 
 		/// \brief	Returns true if two path components represent the same key or array index.
 		TOML_PURE_INLINE_GETTER
@@ -216,22 +212,7 @@ TOML_NAMESPACE_START
 			return !equal(lhs, rhs);
 		}
 
-		/// \brief Assigns an array index to this path component. Index must castable to size_t
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(size_t new_index) noexcept;
-
-		/// \brief Assigns a path key to this path component. Key must be a string type
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(std::string_view new_key);
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		/// \brief Assigns a path key to this path component using window wide char strings. Key must be a wide char string type
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(std::wstring_view new_key);
-
-#endif
-
+		/// @}
 	};
 
 	/// \brief	A TOML path.
@@ -322,17 +303,19 @@ TOML_NAMESPACE_START
 			return components_.empty();
 		}
 
-		/// \brief Fetch a path component by index for modification
+		/// \brief Fetch a path component by index.
 		TOML_PURE_INLINE_GETTER
 		path_component& operator[](size_t index) noexcept
 		{
+			TOML_ASSERT(index < size());
 			return components_[index];
 		}
 
-		/// \brief Fetch a path component by index
+		/// \brief Fetch a path component by index (const overload).
 		TOML_PURE_INLINE_GETTER
 		const path_component& operator[](size_t index) const noexcept
 		{
+			TOML_ASSERT(index < size());
 			return components_[index];
 		}
 
@@ -592,16 +575,14 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief Returns whether two paths are the same.
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const path& lhs, const path& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
 
 		/// \brief Returns whether two paths are not the same.
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const path& lhs, const path& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
@@ -685,23 +666,73 @@ TOML_NAMESPACE_START
 
 		/// @}
 
-		/// \brief	Erases the contents of the path
-		TOML_EXPORTED_MEMBER_FUNCTION
-		void clear() noexcept;
+		/// \name Iteration
+		/// @{
 
-		/// \brief  Iterator at the start of the vector of path components (see #toml::path_component)
-		TOML_NODISCARD
-		auto begin() const noexcept
+		/// An iterator for iterating over the components in the path.
+		/// \see #toml::path_component
+		using iterator = std::vector<path_component>::iterator;
+
+		/// A const iterator for iterating over the components in the path.
+		/// \see #toml::path_component
+		using const_iterator = std::vector<path_component>::const_iterator;
+
+		/// \brief  Returns an iterator to the first component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		iterator begin() noexcept
 		{
 			return components_.begin();
 		}
 
-		/// \brief  Iterator at the end of the vector of path components (see #toml::path_component)
-		TOML_NODISCARD
-		auto end() const noexcept
+		/// \brief  Returns an iterator to one-past-the-last component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		iterator end() noexcept
 		{
 			return components_.end();
 		}
+
+		/// \brief  Returns a const iterator to the first component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		const_iterator begin() const noexcept
+		{
+			return components_.begin();
+		}
+
+		/// \brief  Returns a const iterator to one-past-the-last component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		const_iterator end() const noexcept
+		{
+			return components_.end();
+		}
+
+		/// \brief  Returns a const iterator to the first component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		const_iterator cbegin() const noexcept
+		{
+			return components_.begin();
+		}
+
+		/// \brief  Returns a const iterator to one-past-the-last component in the path.
+		/// \see #toml::path_component
+		TOML_PURE_INLINE_GETTER
+		const_iterator cend() const noexcept
+		{
+			return components_.end();
+		}
+
+		/// @}
+
+		/// \name Subpaths and Truncation
+		/// @{
+
+		/// \brief	Erases the contents of the path.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void clear() noexcept;
 
 		/// \brief Removes the number of terminal path components specified by n
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -726,14 +757,15 @@ TOML_NAMESPACE_START
 		/// range of path components from [start, end).
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path subpath(std::vector<path_component>::const_iterator start,
-					 std::vector<path_component>::const_iterator end) const;
+		path subpath(const_iterator start, const_iterator end) const;
 
 		/// \brief	Returns a toml::path object that is a specified subpath of the current path, representing the
 		/// range of path components with indexes from [start, start + length].
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path subpath(size_t start, size_t length) const;
+
+		/// @}
 	};
 
 	inline namespace literals

@@ -10,7 +10,7 @@ TOML_DISABLE_WARNINGS;
 #include <string>
 TOML_ENABLE_WARNINGS;
 
-#if defined(DOXYGEN)                                                                                                   \
+#if TOML_DOXYGEN                                                                                                       \
 	|| (defined(__cpp_char8_t) && __cpp_char8_t >= 201811 && defined(__cpp_lib_char8_t)                                \
 		&& __cpp_lib_char8_t >= 201907)
 #define TOML_HAS_CHAR8 1

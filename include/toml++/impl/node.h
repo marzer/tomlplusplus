@@ -15,7 +15,7 @@ TOML_NAMESPACE_START
 	///
 	/// \detail A parsed TOML document forms a tree made up of tables, arrays and values.
 	/// 		This type is the base of each of those, providing a lot of the polymorphic plumbing.
-	class TOML_ABSTRACT_BASE TOML_EXPORTED_CLASS node
+	class TOML_ABSTRACT_INTERFACE TOML_EXPORTED_CLASS node
 	{
 	  private:
 		/// \cond

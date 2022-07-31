@@ -17,6 +17,7 @@
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool is_ascii(const char* str, size_t len) noexcept
 	{

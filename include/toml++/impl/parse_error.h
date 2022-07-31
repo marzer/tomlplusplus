@@ -12,7 +12,7 @@
 #include "print_to_stream.h"
 #include "header_start.h"
 
-#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
 #else
 #define TOML_PARSE_ERROR_BASE	 : public std::runtime_error

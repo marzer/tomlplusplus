@@ -24,11 +24,12 @@ AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
-  - TOML_ABSTRACT_BASE
+  - TOML_ABSTRACT_INTERFACE
   - TOML_CALLCONV
   - TOML_CLOSED_ENUM
   - TOML_CLOSED_FLAGS_ENUM
   - TOML_EMPTY_BASES
+  - TOML_EXPORTED_CLASS
   - TOML_FLAGS_ENUM
   - TOML_LIKELY_CASE
   - TOML_OPEN_ENUM
@@ -132,7 +133,6 @@ PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 1000000
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Left
-ReferenceAlignment: Left
 ReflowComments:  true
 SortIncludes:    false
 SortJavaStaticImport: Before
@@ -161,6 +161,8 @@ SpaceBeforeSquareBrackets: false
 BitFieldColonSpacing: Both
 Standard:        Latest
 StatementMacros:
+  - __pragma
+  - _Pragma
   - TOML_ALWAYS_INLINE
   - TOML_API
   - TOML_ATTR
@@ -177,6 +179,13 @@ StatementMacros:
   - TOML_NEVER_INLINE
   - TOML_NODISCARD
   - TOML_NODISCARD_CTOR
+  - TOML_PRAGMA_CLANG
+  - TOML_PRAGMA_CLANG_GE_9
+  - TOML_PRAGMA_CLANG_GE_10
+  - TOML_PRAGMA_CLANG_GE_11
+  - TOML_PRAGMA_GCC
+  - TOML_PRAGMA_MSVC
+  - TOML_PRAGMA_ICC
   - TOML_PURE_GETTER
   - TOML_PURE_INLINE_GETTER
   - TOML_RETURNS_BY_THROWING
@@ -190,13 +199,16 @@ WhitespaceSensitiveMacros:
   - BOOST_PP_STRINGIZE
   - TOML_ATTR
   - TOML_CONCAT
+  - TOML_HAS_INCLUDE
   - TOML_LIKELY
-  - TOML_MAKE_RAW_STRING
   - TOML_MAKE_STRING
-  - TOML_MAKE_STRING_VIEW
   - TOML_PRAGMA_CLANG
+  - TOML_PRAGMA_CLANG_GE_9
+  - TOML_PRAGMA_CLANG_GE_10
+  - TOML_PRAGMA_CLANG_GE_11
   - TOML_PRAGMA_GCC
   - TOML_PRAGMA_MSVC
+  - TOML_PRAGMA_ICC
   - TOML_UNLIKELY
 ...
 

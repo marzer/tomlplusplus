@@ -26,11 +26,11 @@
 #if defined(TOML_INT128) ^ defined(TOML_UINT128)
 #error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
 #endif
-#if TOML_COMPILER_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
-#error TOML_COMPILER_EXCEPTIONS was not deduced correctly
+#if TOML_COMPILER_HAS_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
+#error TOML_COMPILER_HAS_EXCEPTIONS was not deduced correctly
 #endif
-#if TOML_COMPILER_EXCEPTIONS ^ TOML_EXCEPTIONS
-#error TOML_EXCEPTIONS does not match TOML_COMPILER_EXCEPTIONS (default behaviour should be to match)
+#if TOML_COMPILER_HAS_EXCEPTIONS ^ TOML_EXCEPTIONS
+#error TOML_EXCEPTIONS does not match TOML_COMPILER_HAS_EXCEPTIONS (default behaviour should be to match)
 #endif
 #if defined(_WIN32) ^ TOML_ENABLE_WINDOWS_COMPAT
 #error TOML_ENABLE_WINDOWS_COMPAT does not match _WIN32 (default behaviour should be to match)

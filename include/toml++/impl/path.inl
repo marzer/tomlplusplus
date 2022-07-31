@@ -54,12 +54,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path_component::path_component(std::wstring_view key) //
 		: path_component(impl::narrow(key))
-	{ }
+	{}
 
-#endif 
+#endif
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(const path_component & pc) //
+	path_component::path_component(const path_component& pc) //
 		: type_{ pc.type_ }
 	{
 		if (type_ == path_component_type::array_index)
@@ -73,9 +73,9 @@ TOML_NAMESPACE_START
 		: type_{ pc.type_ }
 	{
 		if (type_ == path_component_type::array_index)
-			store_index(pc.index(), value_storage_);
+			store_index(pc.index_ref(), value_storage_);
 		else
-			store_key(std::move(pc).key(), value_storage_);
+			store_key(std::move(pc.key_ref()), value_storage_);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -94,9 +94,9 @@ TOML_NAMESPACE_START
 		else
 		{
 			if (type_ == path_component_type::array_index)
-				index() = rhs.index();
+				index_ref() = rhs.index();
 			else
-				key() = rhs.key();
+				key_ref() = rhs.key();
 		}
 		return *this;
 	}
@@ -110,20 +110,21 @@ TOML_NAMESPACE_START
 
 			type_ = rhs.type_;
 			if (type_ == path_component_type::array_index)
-				store_index(std::move(rhs).index(), value_storage_);
+				store_index(rhs.index(), value_storage_);
 			else
-				store_key(std::move(rhs).key(), value_storage_);
+				store_key(std::move(rhs.key_ref()), value_storage_);
 		}
 		else
 		{
 			if (type_ == path_component_type::array_index)
-				index() = std::move(rhs).index();
+				index_ref() = rhs.index();
 			else
-				key() = std::move(rhs).key();
+				key_ref() = std::move(rhs.key_ref());
 		}
 		return *this;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
@@ -138,7 +139,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (size_t new_index) noexcept
+	path_component& path_component::operator=(size_t new_index) noexcept
 	{
 		// If currently a key, string will need to be destroyed regardless
 		destroy();
@@ -150,26 +151,26 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::string_view new_key)
+	path_component& path_component::operator=(std::string_view new_key)
 	{
 		if (type_ == path_component_type::key)
-			key() = new_key;
+			key_ref() = new_key;
 		else
 		{
 			type_ = path_component_type::key;
 			store_key(new_key, value_storage_);
 		}
-		
+
 		return *this;
 	}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::wstring_view new_key)
+	path_component& path_component::operator=(std::wstring_view new_key)
 	{
 		if (type_ == path_component_type::key)
-			key() = impl::narrow(new_key);
+			key_ref() = impl::narrow(new_key);
 		else
 		{
 			type_ = path_component_type::key;
@@ -180,7 +181,6 @@ TOML_NAMESPACE_START
 	}
 
 #endif
-
 }
 TOML_NAMESPACE_END;
 
@@ -246,6 +246,7 @@ TOML_NAMESPACE_START
 		}
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path::equal(const path& lhs, const path& rhs) noexcept
 	{

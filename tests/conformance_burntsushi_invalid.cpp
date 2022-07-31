@@ -9,6 +9,14 @@
 
 namespace
 {
+	static constexpr auto array_double_comma_1				= R"(array = [1,,2])"sv;
+	static constexpr auto array_double_comma_2				= R"(array = [1,2,,])"sv;
+	static constexpr auto array_extending_table				= R"(a = [{ b = 1 }]
+
+# Cannot extend tables within static arrays
+# https://github.com/toml-lang/toml/issues/908
+[a.c]
+foo = 1)"sv;
 	static constexpr auto array_missing_separator			= R"(wrong = [ 1 2 3 ])"sv;
 	static constexpr auto array_no_close_2					= R"(x = [42 #)"sv;
 	static constexpr auto array_no_close_table_2			= R"(x = [{ key = 42 #)"sv;
@@ -276,16 +284,21 @@ key""" = 1)"sv;
 	static constexpr auto key_no_eol				 = R"(a = 1 b = 2)"sv;
 	static constexpr auto key_open_bracket			 = R"([abc = 1)"sv;
 	static constexpr auto key_partial_quoted		 = R"(partial"quoted" = 5)"sv;
+	static constexpr auto key_quoted_unclosed_1		 = R"("key = x)"sv;
+	static constexpr auto key_quoted_unclosed_2		 = R"("key)"sv;
 	static constexpr auto key_single_open_bracket	 = R"([)"sv;
 	static constexpr auto key_space					 = R"(a b = 1)"sv;
 	static constexpr auto key_start_bracket			 = R"([a]
 [xyz = 5
 [b])"sv;
+	static constexpr auto key_start_dot				 = R"(.key = 1)"sv;
 	static constexpr auto key_two_equals			 = R"(key= = 1)"sv;
 	static constexpr auto key_two_equals2			 = R"(a==1)"sv;
 	static constexpr auto key_two_equals3			 = R"(a=b=1)"sv;
 	static constexpr auto key_without_value_1		 = R"(key)"sv;
 	static constexpr auto key_without_value_2		 = R"(key = )"sv;
+	static constexpr auto key_without_value_3		 = R"("key")"sv;
+	static constexpr auto key_without_value_4		 = R"("key" = )"sv;
 
 #if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
@@ -303,7 +316,11 @@ key""" = 1)"sv;
 second line")"sv;
 	static constexpr auto string_bad_slash_escape =
 		R"(invalid-escape = "This string has a bad \/ escape character.")"sv;
-	static constexpr auto string_bad_uni_esc								   = R"(str = "val\ue")"sv;
+	static constexpr auto string_bad_uni_esc_1								   = R"(str = "val\ue")"sv;
+	static constexpr auto string_bad_uni_esc_2								   = R"(str = "val\Ux")"sv;
+	static constexpr auto string_bad_uni_esc_3								   = R"(str = "val\U0000000")"sv;
+	static constexpr auto string_bad_uni_esc_4								   = R"(str = "val\U0000")"sv;
+	static constexpr auto string_bad_uni_esc_5								   = R"(str = "val\Ugggggggg")"sv;
 	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_1 = R"(a = """\UFFFFFFFF""")"sv;
 	static constexpr auto string_basic_multiline_out_of_range_unicode_escape_2 = R"(a = """\U00D80000""")"sv;
 	static constexpr auto string_basic_multiline_quotes = R"(str5 = """Here are three quotation marks: """.""")"sv;
@@ -428,6 +445,12 @@ answer = 42)"sv;
 
 TEST_CASE("conformance - burntsushi/invalid")
 {
+	parsing_should_fail(FILE_LINE_ARGS, array_double_comma_1); // array-double-comma-1
+
+	parsing_should_fail(FILE_LINE_ARGS, array_double_comma_2); // array-double-comma-2
+
+	parsing_should_fail(FILE_LINE_ARGS, array_extending_table); // array-extending-table
+
 	parsing_should_fail(FILE_LINE_ARGS, array_missing_separator); // array-missing-separator
 
 	parsing_should_fail(FILE_LINE_ARGS, array_no_close_2); // array-no-close-2
@@ -758,11 +781,17 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, key_partial_quoted); // key-partial-quoted
 
+	parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_1); // key-quoted-unclosed-1
+
+	parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_2); // key-quoted-unclosed-2
+
 	parsing_should_fail(FILE_LINE_ARGS, key_single_open_bracket); // key-single-open-bracket
 
 	parsing_should_fail(FILE_LINE_ARGS, key_space); // key-space
 
 	parsing_should_fail(FILE_LINE_ARGS, key_start_bracket); // key-start-bracket
+
+	parsing_should_fail(FILE_LINE_ARGS, key_start_dot); // key-start-dot
 
 	parsing_should_fail(FILE_LINE_ARGS, key_two_equals); // key-two-equals
 
@@ -773,6 +802,10 @@ TEST_CASE("conformance - burntsushi/invalid")
 	parsing_should_fail(FILE_LINE_ARGS, key_without_value_1); // key-without-value-1
 
 	parsing_should_fail(FILE_LINE_ARGS, key_without_value_2); // key-without-value-2
+
+	parsing_should_fail(FILE_LINE_ARGS, key_without_value_3); // key-without-value-3
+
+	parsing_should_fail(FILE_LINE_ARGS, key_without_value_4); // key-without-value-4
 
 #if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
@@ -794,7 +827,15 @@ TEST_CASE("conformance - burntsushi/invalid")
 
 	parsing_should_fail(FILE_LINE_ARGS, string_bad_slash_escape); // string-bad-slash-escape
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc); // string-bad-uni-esc
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_1); // string-bad-uni-esc-1
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_2); // string-bad-uni-esc-2
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_3); // string-bad-uni-esc-3
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_4); // string-bad-uni-esc-4
+
+	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_5); // string-bad-uni-esc-5
 
 	parsing_should_fail(
 		FILE_LINE_ARGS,

@@ -581,5 +581,4 @@ TEST_CASE("path - accessing")
 		CHECK(tbl["d"][""]);
 		CHECK(tbl["d"][""] == tbl[toml::path("d.")]);
 	}
-
 }

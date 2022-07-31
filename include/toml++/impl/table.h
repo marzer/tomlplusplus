@@ -1474,13 +1474,13 @@ TOML_NAMESPACE_START
 						ipos->second = std::move(static_cast<ValueArgs&&>(args)...);
 					else
 					{
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 						try
 						{
 #endif
 							ipos->second.reset(
 								new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 						}
 						catch (...)
 						{

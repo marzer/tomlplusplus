@@ -87,7 +87,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		/// \brief	Constructs a JSON formatter and binds it to a toml::parse_result.
 		///

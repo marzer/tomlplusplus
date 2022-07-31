@@ -5,7 +5,7 @@
 #pragma once
 
 #include "preprocessor.h"
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 #include "table.h"
 #include "parse_error.h"
@@ -170,6 +170,8 @@ TOML_NAMESPACE_START
 		/// @}
 
 		/// \name Successful parses
+		/// \warning It is undefined behaviour to call these functions when the result respresents a failed parse.
+		/// Check #failed(), #succeeded or #operator bool() to determine the result's state.
 		/// @{
 
 		/// \brief	Returns the internal toml::table.
@@ -220,6 +222,8 @@ TOML_NAMESPACE_START
 		/// @}
 
 		/// \name Failed parses
+		/// \warning It is undefined behaviour to call these functions when the result respresents a successful parse.
+		/// Check #failed(), #succeeded or #operator bool() to determine the result's state.
 		/// @{
 
 		/// \brief	Returns the internal toml::parse_error.

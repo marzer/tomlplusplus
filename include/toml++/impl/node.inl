@@ -115,6 +115,7 @@ TOML_NAMESPACE_END;
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV node_deep_equality(const node* lhs, const node* rhs) noexcept
 	{

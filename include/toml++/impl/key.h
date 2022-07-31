@@ -290,10 +290,10 @@ TOML_NAMESPACE_START
 		/// \name Iteration
 		/// @{
 
-		/// A const iterator for iterating over the characters in the key.
+		/// \brief A const iterator for iterating over the characters in the key.
 		using const_iterator = const char*;
 
-		/// A const iterator for iterating over the characters in the key.
+		/// \brief A const iterator for iterating over the characters in the key.
 		using iterator = const_iterator;
 
 		/// \brief Returns an iterator to the first character in the key's backing string.

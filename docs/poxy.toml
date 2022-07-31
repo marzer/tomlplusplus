@@ -86,6 +86,7 @@ string_literals   = [ '_toml' ]
 '(?:toml::)?node[_ ]views?'         = 'classtoml_1_1node__view.html'
 '(?:toml::)?parse[_ ]errors?'       = 'classtoml_1_1parse__error.html'
 '(?:toml::)?parse[_ ]results?'      = 'classtoml_1_1parse__result.html'
+'(?:toml::)?path[_ ]components?'    = 'classtoml_1_1path__component.html'
 '(?:toml::)?source[_ ]positions?'   = 'structtoml_1_1source__position.html'
 '(?:toml::)?source[_ ]regions?'     = 'structtoml_1_1source__region.html'
 '(?:toml::)?time[_ ]offsets?'       = 'structtoml_1_1time__offset.html'

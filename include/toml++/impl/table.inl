@@ -106,6 +106,7 @@ TOML_NAMESPACE_START
 		return *this;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype) const noexcept
 	{
@@ -125,6 +126,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
@@ -147,6 +149,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
@@ -156,6 +159,7 @@ TOML_NAMESPACE_START
 		return result;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	node* table::get(std::string_view key) noexcept
 	{
@@ -169,7 +173,7 @@ TOML_NAMESPACE_START
 	{
 		auto n = get(key);
 
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 
 		if (!n)
 		{
@@ -188,18 +192,21 @@ TOML_NAMESPACE_START
 		return *n;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::get_lower_bound(std::string_view key) noexcept
 	{
 		return map_.lower_bound(key);
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
 		return iterator{ map_.find(key) };
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
@@ -277,6 +284,7 @@ TOML_NAMESPACE_START
 		return map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV table::equal(const table& lhs, const table& rhs) noexcept
 	{

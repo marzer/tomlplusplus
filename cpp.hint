@@ -1,6 +1,6 @@
 #define TOML_ABI_NAMESPACE_BOOL(...)			static_assert(true)
 #define TOML_ABI_NAMESPACE_END					static_assert(true)
-#define TOML_ABSTRACT_BASE
+#define TOML_ABSTRACT_INTERFACE
 #define TOML_ALWAYS_INLINE						inline
 #define TOML_ANON_NAMESPACE_END					static_assert(true)
 #define TOML_ANON_NAMESPACE_START				namespace

@@ -48,780 +48,852 @@
 
 //********  impl/preprocessor.h  ***************************************************************************************
 
-// clang-format off
-
 #ifndef __cplusplus
-	#error toml++ is a C++ library.
+#error toml++ is a C++ library.
+#endif
+#ifdef _MSVC_LANG
+#define TOML_CPP _MSVC_LANG
+#else
+#define TOML_CPP __cplusplus
+#endif
+#if TOML_CPP >= 202002L
+#undef TOML_CPP
+#define TOML_CPP 20
+#elif TOML_CPP >= 201703L
+#undef TOML_CPP
+#define TOML_CPP 17
+#else
+#if TOML_CPP < 201103L
+#error toml++ requires C++17 or higher. For a pre-C++11 TOML library see https://github.com/ToruNiina/Boost.toml
+#elif TOML_CPP < 201703L
+#error toml++ requires C++17 or higher. For a C++11 TOML library see https://github.com/ToruNiina/toml11
+#endif
 #endif
 
-#ifdef __INTELLISENSE__
-	#define TOML_INTELLISENSE		1
-#else
-	#define TOML_INTELLISENSE		0
-#endif
 #ifdef __clang__
-	#define TOML_CLANG				__clang_major__
+#define TOML_CLANG __clang_major__
 #else
-	#define TOML_CLANG				0
+#define TOML_CLANG 0
 #endif
 #ifdef __INTEL_COMPILER
-	#define TOML_ICC				__INTEL_COMPILER
-	#ifdef __ICL
-		#define TOML_ICC_CL			TOML_ICC
-	#else
-		#define TOML_ICC_CL			0
-	#endif
+#define TOML_ICC __INTEL_COMPILER
+#ifdef __ICL
+#define TOML_ICC_CL TOML_ICC
 #else
-	#define TOML_ICC				0
-	#define TOML_ICC_CL				0
+#define TOML_ICC_CL 0
+#endif
+#else
+#define TOML_ICC	0
+#define TOML_ICC_CL 0
 #endif
 #if defined(_MSC_VER) && !TOML_CLANG && !TOML_ICC
-	#define TOML_MSVC				_MSC_VER
+#define TOML_MSVC _MSC_VER
 #else
-	#define TOML_MSVC				0
+#define TOML_MSVC 0
 #endif
 #if defined(__GNUC__) && !TOML_CLANG && !TOML_ICC
-	#define TOML_GCC				__GNUC__
+#define TOML_GCC __GNUC__
 #else
-	#define TOML_GCC				0
+#define TOML_GCC 0
+#endif
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(__CYGWIN__)
+#define TOML_WINDOWS 1
+#else
+#define TOML_WINDOWS 0
+#endif
+#if defined(DOXYGEN) || defined(__DOXYGEN__) || defined(__POXY__) || defined(__poxy__)
+#define TOML_DOXYGEN 1
+#else
+#define TOML_DOXYGEN 0
+#endif
+#ifdef __INTELLISENSE__
+#define TOML_INTELLISENSE 1
+#else
+#define TOML_INTELLISENSE 0
+#endif
+#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
+	|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
+#define TOML_ARM 1
+#else
+#define TOML_ARM 0
 #endif
 
+// TOML_HAS_INCLUDE
 #ifdef __has_include
-	#define TOML_HAS_INCLUDE(header)		__has_include(header)
+#define TOML_HAS_INCLUDE(header) __has_include(header)
 #else
-	#define TOML_HAS_INCLUDE(header)		0
+#define TOML_HAS_INCLUDE(header) 0
 #endif
 
-#if TOML_CLANG
-
-	#define TOML_PUSH_WARNINGS \
-		_Pragma("clang diagnostic push") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SWITCH_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wswitch\"") \
-		static_assert(true)
-
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
-		_Pragma("clang diagnostic ignored \"-Wfloat-equal\"") \
-		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-		_Pragma("clang diagnostic ignored \"-Wshift-sign-overflow\"") \
-		static_assert(true)
-
-	#if TOML_CLANG >= 10
-		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 \
-			_Pragma("clang diagnostic ignored \"-Wzero-as-null-pointer-constant\"") \
-			static_assert(true)
-	#else
-		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_10 static_assert(true)
-	#endif
-
-	#if TOML_CLANG >= 11
-		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 \
-			_Pragma("clang diagnostic ignored \"-Wsuggest-destructor-override\"") \
-			static_assert(true)
-	#else
-		#define TOML_DISABLE_SPAM_WARNINGS_CLANG_11 static_assert(true)
-	#endif
-
-	#define TOML_DISABLE_SPAM_WARNINGS \
-		TOML_DISABLE_SPAM_WARNINGS_CLANG_10; \
-		TOML_DISABLE_SPAM_WARNINGS_CLANG_11; \
-		_Pragma("clang diagnostic ignored \"-Wweak-vtables\"")	\
-		_Pragma("clang diagnostic ignored \"-Wweak-template-vtables\"") \
-		_Pragma("clang diagnostic ignored \"-Wdouble-promotion\"") \
-		_Pragma("clang diagnostic ignored \"-Wchar-subscripts\"") \
-		_Pragma("clang diagnostic ignored \"-Wmissing-field-initializers\"") \
-		_Pragma("clang diagnostic ignored \"-Wpadded\"") \
-		static_assert(true)
-
-	#define TOML_POP_WARNINGS \
-		_Pragma("clang diagnostic pop") \
-		static_assert(true)
-
-	#define TOML_DISABLE_WARNINGS \
-		TOML_PUSH_WARNINGS; \
-		_Pragma("clang diagnostic ignored \"-Weverything\"") \
-		static_assert(true)
-
-	#define TOML_ENABLE_WARNINGS				TOML_POP_WARNINGS
-
-	#define TOML_ASSUME(expr)					__builtin_assume(expr)
-	#define TOML_UNREACHABLE					__builtin_unreachable()
-	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
-	#if defined(_MSC_VER) // msvc compat mode
-		#ifdef __has_declspec_attribute
-			#if __has_declspec_attribute(novtable)
-				#define TOML_ABSTRACT_BASE		__declspec(novtable)
-			#endif
-			#if __has_declspec_attribute(empty_bases)
-				#define TOML_EMPTY_BASES	__declspec(empty_bases)
-			#endif
-			#ifndef TOML_ALWAYS_INLINE
-				#define TOML_ALWAYS_INLINE	__forceinline
-			#endif
-			#if __has_declspec_attribute(noinline)
-				#define TOML_NEVER_INLINE	__declspec(noinline)
-			#endif
-		#endif
-	#endif
-	#ifdef __has_attribute
-		#if !defined(TOML_ALWAYS_INLINE) && __has_attribute(always_inline)
-			#define TOML_ALWAYS_INLINE		__attribute__((__always_inline__)) inline
-		#endif
-		#if !defined(TOML_NEVER_INLINE) && __has_attribute(noinline)
-			#define TOML_NEVER_INLINE		__attribute__((__noinline__))
-		#endif
-		#if !defined(TOML_TRIVIAL_ABI) && __has_attribute(trivial_abi)
-			#define TOML_TRIVIAL_ABI		__attribute__((__trivial_abi__))
-		#endif
-		#if !defined(TOML_FLAGS_ENUM) && __has_attribute(flag_enum)
-			#define TOML_FLAGS_ENUM		__attribute__((__flag_enum__))
-		#endif
-		#if __has_attribute(enum_extensibility)
-			#ifndef TOML_OPEN_ENUM
-				#define TOML_OPEN_ENUM		__attribute__((enum_extensibility(open)))
-			#endif
-			#ifndef TOML_CLOSED_ENUM
-				#define TOML_CLOSED_ENUM	__attribute__((enum_extensibility(closed)))
-			#endif
-		#endif
-	#endif
-	#define TOML_LIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 1) )
-	#define TOML_UNLIKELY(...)				(__builtin_expect(!!(__VA_ARGS__), 0) )
-
-	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	1
-
-#endif // clang
-
-#if TOML_MSVC || TOML_ICC_CL
-
-	#define TOML_CPP_VERSION					_MSVC_LANG
-	#if TOML_MSVC // !intel-cl
-
-		#define TOML_PUSH_WARNINGS \
-			__pragma(warning(push)) \
-			static_assert(true)
-
-		#if TOML_HAS_INCLUDE(<CodeAnalysis\Warnings.h>)
-			#pragma warning(push, 0)
-			#include <CodeAnalysis\Warnings.h>
-			#pragma warning(pop)
-			#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS \
-				__pragma(warning(disable: ALL_CODE_ANALYSIS_WARNINGS)) \
-				static_assert(true)
-		#else
-			#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS
-				static_assert(true)
-		#endif
-
-		#define TOML_DISABLE_SWITCH_WARNINGS \
-			__pragma(warning(disable: 4061)) /* enumerator 'identifier' is not explicitly handled by a case label */ \
-			__pragma(warning(disable: 4062)) /* enumerator 'identifier' is not handled */ \
-			__pragma(warning(disable: 4063)) \
-			__pragma(warning(disable: 26819)) \
-			static_assert(true)
-
-		#define TOML_DISABLE_SPAM_WARNINGS \
-			__pragma(warning(disable: 4127)) /* conditional expr is constant */ \
-			__pragma(warning(disable: 4324)) /* structure was padded due to alignment specifier */  \
-			__pragma(warning(disable: 4348)) \
-			__pragma(warning(disable: 4464)) /* relative include path contains '..' */ \
-			__pragma(warning(disable: 4505)) /* unreferenced local function removed */  \
-			__pragma(warning(disable: 4514)) /* unreferenced inline function has been removed */ \
-			__pragma(warning(disable: 4582)) /* constructor is not implicitly called */ \
-			__pragma(warning(disable: 4623)) /* default constructor was implicitly defined as deleted		*/ \
-			__pragma(warning(disable: 4625)) /* copy constructor was implicitly defined as deleted			*/ \
-			__pragma(warning(disable: 4626)) /* assignment operator was implicitly defined as deleted		*/ \
-			__pragma(warning(disable: 4710)) /* function not inlined */ \
-			__pragma(warning(disable: 4711)) /* function selected for automatic expansion */ \
-			__pragma(warning(disable: 4820)) /* N bytes padding added */  \
-			__pragma(warning(disable: 4946)) /* reinterpret_cast used between related classes */ \
-			__pragma(warning(disable: 5026)) /* move constructor was implicitly defined as deleted	*/ \
-			__pragma(warning(disable: 5027)) /* move assignment operator was implicitly defined as deleted	*/ \
-			__pragma(warning(disable: 5039)) /* potentially throwing function passed to 'extern "C"' function */ \
-			__pragma(warning(disable: 5045)) /* Compiler will insert Spectre mitigation */ \
-			__pragma(warning(disable: 26451)) \
-			__pragma(warning(disable: 26490)) \
-			__pragma(warning(disable: 26495)) \
-			__pragma(warning(disable: 26812)) \
-			__pragma(warning(disable: 26819)) \
-			static_assert(true)
-
-		#define TOML_DISABLE_ARITHMETIC_WARNINGS \
-			__pragma(warning(disable: 4365)) /* argument signed/unsigned mismatch */ \
-			__pragma(warning(disable: 4738)) /* storing 32-bit float result in memory */ \
-			__pragma(warning(disable: 5219)) /* implicit conversion from integral to float */ \
-			static_assert(true)
-
-		#define TOML_POP_WARNINGS \
-			__pragma(warning(pop)) \
-			static_assert(true)
-
-		#define TOML_DISABLE_WARNINGS \
-			__pragma(warning(push, 0))			\
-			__pragma(warning(disable: 4348))	\
-			__pragma(warning(disable: 4668))	\
-			__pragma(warning(disable: 5105))	\
-			TOML_DISABLE_CODE_ANALYSIS_WARNINGS;\
-			TOML_DISABLE_SWITCH_WARNINGS;		\
-			TOML_DISABLE_SPAM_WARNINGS;			\
-			TOML_DISABLE_ARITHMETIC_WARNINGS;	\
-			static_assert(true)
-
-		#define TOML_ENABLE_WARNINGS			TOML_POP_WARNINGS
-
-	#endif
-	#ifndef TOML_ALWAYS_INLINE
-		#define TOML_ALWAYS_INLINE				__forceinline
-	#endif
-	#define TOML_NEVER_INLINE					__declspec(noinline)
-	#define TOML_ASSUME(expr)					__assume(expr)
-	#define TOML_UNREACHABLE					__assume(0)
-	#define TOML_ABSTRACT_BASE					__declspec(novtable)
-	#define TOML_EMPTY_BASES					__declspec(empty_bases)
-	#ifdef _CPPUNWIND
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-
-#endif // msvc
-
-#if TOML_ICC
-
-	#define TOML_PUSH_WARNINGS \
-		__pragma(warning(push)) \
-		static_assert(true)
-
-	#define TOML_DISABLE_SPAM_WARNINGS \
-		__pragma(warning(disable: 82))	/* storage class is not first */ \
-		__pragma(warning(disable: 111))	/* statement unreachable (false-positive) */ \
-		__pragma(warning(disable: 869)) /* unreferenced parameter */ \
-		__pragma(warning(disable: 1011)) /* missing return (false-positive) */ \
-		__pragma(warning(disable: 2261)) /* assume expr side-effects discarded */  \
-		static_assert(true)
-
-	#define TOML_POP_WARNINGS \
-		__pragma(warning(pop)) \
-		static_assert(true)
-
-	#define TOML_DISABLE_WARNINGS \
-		__pragma(warning(push, 0)) \
-		static_assert(true)
-
-	#define TOML_ENABLE_WARNINGS \
-		TOML_POP_WARNINGS
-
-#endif // icc
-
-#if TOML_GCC
-
-	#define TOML_PUSH_WARNINGS \
-		_Pragma("GCC diagnostic push") \
-		static_assert(true)
-
-	#define TOML_DISABLE_SWITCH_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wswitch\"")						\
-		_Pragma("GCC diagnostic ignored \"-Wswitch-enum\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wswitch-default\"")				\
-		static_assert(true)
-
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wfloat-equal\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wsign-conversion\"")				\
-		static_assert(true)
-
-	#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=const\"")		\
-		_Pragma("GCC diagnostic ignored \"-Wsuggest-attribute=pure\"")		\
-		static_assert(true)
-
-	#define TOML_DISABLE_SPAM_WARNINGS \
-		_Pragma("GCC diagnostic ignored \"-Wpadded\"")						\
-		_Pragma("GCC diagnostic ignored \"-Wcast-align\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wcomment\"")						\
-		_Pragma("GCC diagnostic ignored \"-Wtype-limits\"")					\
-		_Pragma("GCC diagnostic ignored \"-Wuseless-cast\"")				\
-		_Pragma("GCC diagnostic ignored \"-Wchar-subscripts\"")				\
-		_Pragma("GCC diagnostic ignored \"-Wsubobject-linkage\"")			\
-		_Pragma("GCC diagnostic ignored \"-Wmissing-field-initializers\"")	\
-		_Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")			\
-		_Pragma("GCC diagnostic ignored \"-Wnoexcept\"")					\
-		static_assert(true)
-
-	#define TOML_POP_WARNINGS \
-		_Pragma("GCC diagnostic pop") \
-		static_assert(true)
-
-	#define TOML_DISABLE_WARNINGS \
-		TOML_PUSH_WARNINGS;													\
-		_Pragma("GCC diagnostic ignored \"-Wall\"")							\
-		_Pragma("GCC diagnostic ignored \"-Wextra\"")						\
-		_Pragma("GCC diagnostic ignored \"-Wpedantic\"")					\
-		TOML_DISABLE_SWITCH_WARNINGS;										\
-		TOML_DISABLE_ARITHMETIC_WARNINGS;									\
-		TOML_DISABLE_SPAM_WARNINGS;											\
-		TOML_DISABLE_SUGGEST_ATTR_WARNINGS;									\
-		static_assert(true)
-
-	#define TOML_ENABLE_WARNINGS \
-		TOML_POP_WARNINGS
-
-	#define TOML_ATTR(...)						__attribute__((__VA_ARGS__))
-	#ifndef TOML_ALWAYS_INLINE
-		#define TOML_ALWAYS_INLINE				__attribute__((__always_inline__)) inline
-	#endif
-	#define TOML_NEVER_INLINE					__attribute__((__noinline__))
-	#define TOML_UNREACHABLE					__builtin_unreachable()
-	#define TOML_LIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 1) )
-	#define TOML_UNLIKELY(...)					(__builtin_expect(!!(__VA_ARGS__), 0) )
-
-#endif
-
-#ifndef TOML_CPP_VERSION
-	#define TOML_CPP_VERSION __cplusplus
-#endif
-#if TOML_CPP_VERSION < 201103L
-	#error toml++ requires C++17 or higher. For a TOML library supporting pre-C++11 see https://github.com/ToruNiina/Boost.toml
-#elif TOML_CPP_VERSION < 201703L
-	#error toml++ requires C++17 or higher. For a TOML library supporting C++11 see https://github.com/ToruNiina/toml11
-#endif
-
-#ifdef TOML_CONFIG_HEADER
-	#include TOML_CONFIG_HEADER
-#endif
-
-// is the library being built as a shared lib/dll using meson and friends?
-#ifndef TOML_SHARED_LIB
-	#define TOML_SHARED_LIB 0
-#endif
-
-// header-only mode
-#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
-	#define TOML_HEADER_ONLY TOML_ALL_INLINE
-#endif
-#if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
-	#undef TOML_HEADER_ONLY
-	#define TOML_HEADER_ONLY 1
-#endif
-#if defined(DOXYGEN) || TOML_SHARED_LIB
-	#undef TOML_HEADER_ONLY
-	#define TOML_HEADER_ONLY 0
-#endif
-
-// internal implementation switch
-#if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
-	#undef TOML_IMPLEMENTATION
-	#define TOML_IMPLEMENTATION 1
+#ifdef __has_builtin
+#define TOML_HAS_BUILTIN(name) __has_builtin(name)
 #else
-	#define TOML_IMPLEMENTATION 0
+#define TOML_HAS_BUILTIN(name) 0
 #endif
 
-// dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
-#if !defined(TOML_EXPORTED_MEMBER_FUNCTION)        \
-		&& !defined(TOML_EXPORTED_STATIC_FUNCTION) \
-		&& !defined(TOML_EXPORTED_FREE_FUNCTION)   \
-		&& !defined(TOML_EXPORTED_CLASS)           \
-		&& defined(TOML_API)
-	#define TOML_EXPORTED_MEMBER_FUNCTION	TOML_API
-	#define TOML_EXPORTED_STATIC_FUNCTION	TOML_API
-	#define TOML_EXPORTED_FREE_FUNCTION		TOML_API
-#endif
-
-// dll/shared lib exports
-#if TOML_SHARED_LIB
-	#undef TOML_API
-	#undef TOML_EXPORTED_CLASS
-	#undef TOML_EXPORTED_MEMBER_FUNCTION
-	#undef TOML_EXPORTED_STATIC_FUNCTION
-	#undef TOML_EXPORTED_FREE_FUNCTION
-	#if defined(_WIN32) || defined(__CYGWIN__)
-		#if TOML_IMPLEMENTATION
-			#define TOML_EXPORTED_CLASS			__declspec(dllexport)
-			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllexport)
-		#else
-			#define TOML_EXPORTED_CLASS			__declspec(dllimport)
-			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllimport)
-		#endif
-		#ifndef TOML_CALLCONV
-			#define TOML_CALLCONV __cdecl
-		#endif
-	#elif defined(__GNUC__) && __GNUC__ >= 4
-		#define TOML_EXPORTED_CLASS				__attribute__((visibility("default")))
-		#define TOML_EXPORTED_MEMBER_FUNCTION	__attribute__((visibility("default")))
-		#define TOML_EXPORTED_STATIC_FUNCTION	__attribute__((visibility("default")))
-		#define TOML_EXPORTED_FREE_FUNCTION		__attribute__((visibility("default")))
-	#endif
-#endif
-#ifndef TOML_EXPORTED_CLASS
-	#define TOML_EXPORTED_CLASS
-#endif
-#ifndef TOML_EXPORTED_MEMBER_FUNCTION
-	#define TOML_EXPORTED_MEMBER_FUNCTION
-#endif
-#ifndef TOML_EXPORTED_STATIC_FUNCTION
-	#define TOML_EXPORTED_STATIC_FUNCTION
-#endif
-#ifndef TOML_EXPORTED_FREE_FUNCTION
-	#define TOML_EXPORTED_FREE_FUNCTION
-#endif
-
-// experimental language features
-#if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES pre-3.0
-	#define TOML_ENABLE_UNRELEASED_FEATURES TOML_UNRELEASED_FEATURES
-#endif
-#if (defined(TOML_ENABLE_UNRELEASED_FEATURES) && TOML_ENABLE_UNRELEASED_FEATURES) || TOML_INTELLISENSE
-	#undef TOML_ENABLE_UNRELEASED_FEATURES
-	#define TOML_ENABLE_UNRELEASED_FEATURES 1
-#endif
-#ifndef TOML_ENABLE_UNRELEASED_FEATURES
-	#define TOML_ENABLE_UNRELEASED_FEATURES 0
-#endif
-
-// parser
-#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // was TOML_PARSER pre-3.0
-	#define TOML_ENABLE_PARSER TOML_PARSER
-#endif
-#if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
-	#undef TOML_ENABLE_PARSER
-	#define TOML_ENABLE_PARSER 1
-#endif
-
-// formatters
-#if !defined(TOML_ENABLE_FORMATTERS)									\
-		|| (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS)	\
-		|| TOML_INTELLISENSE
-	#undef TOML_ENABLE_FORMATTERS
-	#define TOML_ENABLE_FORMATTERS 1
-#endif
-
-// SIMD
-#if !defined(TOML_ENABLE_SIMD)									\
-		|| (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD)	\
-		|| TOML_INTELLISENSE
-	#undef TOML_ENABLE_SIMD
-	#define TOML_ENABLE_SIMD 1
-#endif
-
-// windows compat
-#if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
-	#define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
-#endif
-#if !defined(TOML_ENABLE_WINDOWS_COMPAT)										\
-		|| (defined(TOML_ENABLE_WINDOWS_COMPAT) && TOML_ENABLE_WINDOWS_COMPAT)	\
-		|| TOML_INTELLISENSE
-	#undef TOML_ENABLE_WINDOWS_COMPAT
-	#define TOML_ENABLE_WINDOWS_COMPAT 1
-#endif
-
-#ifndef _WIN32
-	#undef TOML_ENABLE_WINDOWS_COMPAT
-	#define TOML_ENABLE_WINDOWS_COMPAT 0
-#endif
-
-#ifndef TOML_INCLUDE_WINDOWS_H
-	#define TOML_INCLUDE_WINDOWS_H 0
-#endif
-
-// custom optional
-#ifdef TOML_OPTIONAL_TYPE
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
+// TOML_HAS_FEATURE
+#ifdef __has_feature
+#define TOML_HAS_FEATURE(name) __has_feature(name)
 #else
-	#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#define TOML_HAS_FEATURE(name) 0
 #endif
 
-// exceptions (compiler support)
-#ifndef TOML_COMPILER_EXCEPTIONS
-	#if defined(__EXCEPTIONS) || defined(__cpp_exceptions)
-		#define TOML_COMPILER_EXCEPTIONS 1
-	#else
-		#define TOML_COMPILER_EXCEPTIONS 0
-	#endif
-#endif
-
-// exceptions (library use)
-#if TOML_COMPILER_EXCEPTIONS
-	#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
-		#undef TOML_EXCEPTIONS
-		#define TOML_EXCEPTIONS 1
-	#endif
+// TOML_HAS_ATTR
+#ifdef __has_attribute
+#define TOML_HAS_ATTR(attr) __has_attribute(attr)
 #else
-	#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
-		#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
-	#endif
-	#undef TOML_EXCEPTIONS
-	#define TOML_EXCEPTIONS	0
+#define TOML_HAS_ATTR(attr) 0
 #endif
 
-// calling convention for static/free/friend functions
-#ifndef TOML_CALLCONV
-	#define TOML_CALLCONV
-#endif
-
-#ifndef TOML_UNDEF_MACROS
-	#define TOML_UNDEF_MACROS 1
-#endif
-
-#ifndef TOML_MAX_NESTED_VALUES
-	#define TOML_MAX_NESTED_VALUES 256
-	// this refers to the depth of nested values, e.g. inline tables and arrays.
-	// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
-#endif
-
-#ifdef TOML_CHAR_8_STRINGS
-	#if TOML_CHAR_8_STRINGS
-		#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
-	#endif
-#endif
-
-#ifdef TOML_LARGE_FILES
-	#if !TOML_LARGE_FILES
-		#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
-	#endif
-#endif
-
-#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
-	// not supported by any version of GCC or Clang as of 26/11/2020
-	// not supported by any version of ICC on Linux as of 11/01/2021
-	#define TOML_FLOAT_CHARCONV 0
-#endif
-#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
-	// causes link errors on emscripten
-	// causes Mac OS SDK version errors on some versions of Apple Clang
-	#define TOML_INT_CHARCONV 0
-#endif
-#ifndef TOML_INT_CHARCONV
-	#define TOML_INT_CHARCONV 1
-#endif
-#ifndef TOML_FLOAT_CHARCONV
-	#define TOML_FLOAT_CHARCONV 1
-#endif
-#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
-	#undef TOML_INT_CHARCONV
-	#undef TOML_FLOAT_CHARCONV
-	#define TOML_INT_CHARCONV 0
-	#define TOML_FLOAT_CHARCONV 0
-#endif
-
-#ifndef TOML_PUSH_WARNINGS
-	#define TOML_PUSH_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
-	#define	TOML_DISABLE_CODE_ANALYSIS_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SWITCH_WARNINGS
-	#define	TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
-	#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_SPAM_WARNINGS
-	#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
-	#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_POP_WARNINGS
-	#define TOML_POP_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_DISABLE_WARNINGS
-	#define TOML_DISABLE_WARNINGS static_assert(true)
-#endif
-#ifndef TOML_ENABLE_WARNINGS
-	#define TOML_ENABLE_WARNINGS static_assert(true)
-#endif
-
-#ifndef TOML_ATTR
-	#define TOML_ATTR(...)
-#endif
-
-#ifndef TOML_ABSTRACT_BASE
-	#define TOML_ABSTRACT_BASE
-#endif
-
-#ifndef TOML_EMPTY_BASES
-	#define TOML_EMPTY_BASES
-#endif
-
-#ifndef TOML_ALWAYS_INLINE
-	#define TOML_ALWAYS_INLINE	inline
-#endif
-#ifndef TOML_NEVER_INLINE
-	#define TOML_NEVER_INLINE
-#endif
-
-#ifndef TOML_ASSUME
-	#define TOML_ASSUME(expr)	static_assert(true)
-#endif
-
-#ifndef TOML_UNREACHABLE
-	#define TOML_UNREACHABLE	TOML_ASSUME(false)
-#endif
-
-#ifndef TOML_FLAGS_ENUM
-	#define TOML_FLAGS_ENUM
-#endif
-
-#ifndef TOML_OPEN_ENUM
-	#define TOML_OPEN_ENUM
-#endif
-
-#ifndef TOML_CLOSED_ENUM
-	#define TOML_CLOSED_ENUM
-#endif
-
-#ifndef TOML_OPEN_FLAGS_ENUM
-	#define TOML_OPEN_FLAGS_ENUM TOML_OPEN_ENUM TOML_FLAGS_ENUM
-#endif
-
-#ifndef TOML_CLOSED_FLAGS_ENUM
-	#define TOML_CLOSED_FLAGS_ENUM TOML_CLOSED_ENUM TOML_FLAGS_ENUM
-#endif
-
+// TOML_HAS_CPP_ATTR
 #ifdef __has_cpp_attribute
-	#define TOML_HAS_ATTR(...)	__has_cpp_attribute(__VA_ARGS__)
+#define TOML_HAS_CPP_ATTR(attr) __has_cpp_attribute(attr)
 #else
-	#define TOML_HAS_ATTR(...)	0
+#define TOML_HAS_CPP_ATTR(attr) 0
 #endif
 
-#if TOML_HAS_ATTR(likely) >= 201803
-	#ifndef TOML_LIKELY
-		#define TOML_LIKELY(...)	(__VA_ARGS__) [[likely]]
-	#endif
-	#ifndef TOML_LIKELY_CASE
-		#define TOML_LIKELY_CASE	[[likely]]
-	#endif
-#endif
-#ifndef TOML_LIKELY
-	#define TOML_LIKELY(...)	(__VA_ARGS__)
-#endif
-#ifndef TOML_LIKELY_CASE
-	#define TOML_LIKELY_CASE
-#endif
-
-#if TOML_HAS_ATTR(unlikely) >= 201803
-	#ifndef TOML_UNLIKELY
-		#define TOML_UNLIKELY(...)	(__VA_ARGS__) [[unlikely]]
-	#endif
-	#ifndef TOML_UNLIKELY_CASE
-		#define TOML_UNLIKELY_CASE	[[unlikely]]
-	#endif
-#endif
-#ifndef TOML_UNLIKELY
-	#define TOML_UNLIKELY(...)	(__VA_ARGS__)
-#endif
-#ifndef TOML_UNLIKELY_CASE
-	#define TOML_UNLIKELY_CASE
-#endif
-
-#if TOML_HAS_ATTR(nodiscard)
-	#define TOML_NODISCARD [[nodiscard]]
+// TOML_COMPILER_HAS_EXCEPTIONS
+#if defined(__EXCEPTIONS) || defined(_CPPUNWIND) || defined(__cpp_exceptions)
+#define TOML_COMPILER_HAS_EXCEPTIONS 1
 #else
-	#define TOML_NODISCARD
+#define TOML_COMPILER_HAS_EXCEPTIONS 0
 #endif
 
-#if TOML_HAS_ATTR(nodiscard) >= 201907
-	#define TOML_NODISCARD_CTOR [[nodiscard]]
+// TOML_COMPILER_HAS_RTTI
+#if defined(_CPPRTTI) || defined(__GXX_RTTI) || TOML_HAS_FEATURE(cxx_rtti)
+#define TOML_COMPILER_HAS_RTTI 1
 #else
-	#define TOML_NODISCARD_CTOR
+#define TOML_COMPILER_HAS_RTTI 0
 #endif
 
-#ifndef TOML_TRIVIAL_ABI
-	#define TOML_TRIVIAL_ABI
+// TOML_ATTR (gnu attributes)
+#if TOML_CLANG || TOML_GCC || defined(__GNUC__)
+#define TOML_ATTR(...) __attribute__((__VA_ARGS__))
+#else
+#define TOML_ATTR(...)
 #endif
 
-#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)															\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator == (RHS rhs, LHS lhs) noexcept { return lhs == rhs; }		\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator != (LHS lhs, RHS rhs) noexcept { return !(lhs == rhs); }	\
-	__VA_ARGS__ TOML_NODISCARD friend bool operator != (RHS rhs, LHS lhs) noexcept { return !(lhs == rhs); }	\
-	static_assert(true)
-
-#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
-	#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES	0
+// TOML_DECLSPEC (msvc attributes)
+#ifdef _MSC_VER
+#define TOML_DECLSPEC(...) __declspec(__VA_ARGS__)
+#else
+#define TOML_DECLSPEC(...)
 #endif
 
+// TOML_CONCAT
 #define TOML_CONCAT_1(x, y) x##y
-#define TOML_CONCAT(x, y) TOML_CONCAT_1(x, y)
+#define TOML_CONCAT(x, y)	TOML_CONCAT_1(x, y)
 
-#define TOML_EVAL_BOOL_1(T, F)	T
-#define TOML_EVAL_BOOL_0(T, F)	F
+// TOML_MAKE_STRING
+#define TOML_MAKE_STRING_1(s) #s
+#define TOML_MAKE_STRING(s)	  TOML_MAKE_STRING_1(s)
 
-#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)	\
-		|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
-	#define TOML_ARM 1
+// TOML_PRAGMA_XXXX (compiler-specific pragmas)
+#if TOML_CLANG
+#define TOML_PRAGMA_CLANG(decl) _Pragma(TOML_MAKE_STRING(clang decl))
 #else
-	#define TOML_ARM 0
+#define TOML_PRAGMA_CLANG(decl)
+#endif
+#if TOML_CLANG >= 9
+#define TOML_PRAGMA_CLANG_GE_9(decl) TOML_PRAGMA_CLANG(decl)
+#else
+#define TOML_PRAGMA_CLANG_GE_9(decl)
+#endif
+#if TOML_CLANG >= 10
+#define TOML_PRAGMA_CLANG_GE_10(decl) TOML_PRAGMA_CLANG(decl)
+#else
+#define TOML_PRAGMA_CLANG_GE_10(decl)
+#endif
+#if TOML_CLANG >= 11
+#define TOML_PRAGMA_CLANG_GE_11(decl) TOML_PRAGMA_CLANG(decl)
+#else
+#define TOML_PRAGMA_CLANG_GE_11(decl)
+#endif
+#if TOML_GCC
+#define TOML_PRAGMA_GCC(decl) _Pragma(TOML_MAKE_STRING(GCC decl))
+#else
+#define TOML_PRAGMA_GCC(decl)
+#endif
+#if TOML_MSVC
+#define TOML_PRAGMA_MSVC(...) __pragma(__VA_ARGS__)
+#else
+#define TOML_PRAGMA_MSVC(...)
+#endif
+#if TOML_ICC
+#define TOML_PRAGMA_ICC(...) __pragma(__VA_ARGS__)
+#else
+#define TOML_PRAGMA_ICC(...)
 #endif
 
-#define TOML_MAKE_FLAGS_(name, op)																	\
-	TOML_CONST_INLINE_GETTER																		\
-	constexpr name operator op(name lhs, name rhs) noexcept											\
-	{																								\
-		using under = std::underlying_type_t<name>;													\
-		return static_cast<name>(static_cast<under>(lhs) op static_cast<under>(rhs));				\
-	}																								\
-	constexpr name& operator TOML_CONCAT(op, =)(name & lhs, name rhs) noexcept						\
-	{																								\
-		return lhs = (lhs op rhs);																	\
-	}																								\
-	static_assert(true, "")
-
-#define TOML_MAKE_FLAGS(name)																		\
-	TOML_MAKE_FLAGS_(name, &);																		\
-	TOML_MAKE_FLAGS_(name, |);																		\
-	TOML_MAKE_FLAGS_(name, ^);																		\
-	TOML_CONST_INLINE_GETTER																		\
-	constexpr name operator~(name val) noexcept														\
-	{																								\
-		using under = std::underlying_type_t<name>;													\
-		return static_cast<name>(~static_cast<under>(val));											\
-	}																								\
-	TOML_CONST_INLINE_GETTER																		\
-	constexpr bool operator!(name val) noexcept														\
-	{																								\
-		using under = std::underlying_type_t<name>;													\
-		return !static_cast<under>(val);															\
-	}																								\
-	static_assert(true, "")
-
-#ifndef TOML_LIFETIME_HOOKS
-	#define TOML_LIFETIME_HOOKS 0
+// TOML_ALWAYS_INLINE
+#ifdef _MSC_VER
+#define TOML_ALWAYS_INLINE __forceinline
+#elif TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__always_inline__)
+#define TOML_ALWAYS_INLINE                                                                                             \
+	TOML_ATTR(__always_inline__)                                                                                       \
+	inline
+#else
+#define TOML_ALWAYS_INLINE inline
 #endif
 
-#if !defined(__POXY__) && !defined(POXY_IMPLEMENTATION_DETAIL)
-	#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
+// TOML_NEVER_INLINE
+#ifdef _MSC_VER
+#define TOML_NEVER_INLINE TOML_DECLSPEC(noinline)
+#elif TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__noinline__)
+#define TOML_NEVER_INLINE TOML_ATTR(__noinline__)
+#else
+#define TOML_NEVER_INLINE
 #endif
 
+// MSVC attributes
+#define TOML_ABSTRACT_INTERFACE TOML_DECLSPEC(novtable)
+#define TOML_EMPTY_BASES		TOML_DECLSPEC(empty_bases)
+
+// TOML_TRIVIAL_ABI
+#if TOML_CLANG || TOML_HAS_ATTR(__trivial_abi__)
+#define TOML_TRIVIAL_ABI TOML_ATTR(__trivial_abi__)
+#else
+#define TOML_TRIVIAL_ABI
+#endif
+
+// TOML_NODISCARD
+#if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201603
+#define TOML_NODISCARD [[nodiscard]]
+#elif TOML_CLANG || TOML_GCC || TOML_HAS_ATTR(__warn_unused_result__)
+#define TOML_NODISCARD TOML_ATTR(__warn_unused_result__)
+#else
+#define TOML_NODISCARD
+#endif
+
+// TOML_NODISCARD_CTOR
+#if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201907
+#define TOML_NODISCARD_CTOR [[nodiscard]]
+#else
+#define TOML_NODISCARD_CTOR
+#endif
+
+// pure + const
+// clang-format off
 #ifdef NDEBUG
-	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_ATTR(pure)
-	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_ATTR(const)
-	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_ATTR(pure)
-	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_ATTR(const)
+	#define TOML_PURE					TOML_DECLSPEC(noalias)	TOML_ATTR(__pure__)
+	#define TOML_CONST					TOML_DECLSPEC(noalias)	TOML_ATTR(__const__)
+	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_PURE
+	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_CONST
+	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_PURE
+	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_CONST
 #else
+	#define TOML_PURE
+	#define TOML_CONST
 	#define TOML_PURE_GETTER			TOML_NODISCARD
 	#define TOML_CONST_GETTER			TOML_NODISCARD
 	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE
 	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE
 #endif
+// clang-format on
+
+// TOML_ASSUME
+#ifdef _MSC_VER
+#define TOML_ASSUME(...) __assume(__VA_ARGS__)
+#elif TOML_ICC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_assume)
+#define TOML_ASSUME(...) __builtin_assume(__VA_ARGS__)
+#else
+#define TOML_ASSUME(...) static_assert(true)
+#endif
+
+// TOML_UNREACHABLE
+#ifdef _MSC_VER
+#define TOML_UNREACHABLE __assume(0)
+#elif TOML_ICC || TOML_CLANG || TOML_GCC || TOML_HAS_BUILTIN(__builtin_unreachable)
+#define TOML_UNREACHABLE __builtin_unreachable()
+#else
+#define TOML_UNREACHABLE static_assert(true)
+#endif
+
+// TOML_LIKELY
+#if TOML_CPP >= 20 && TOML_HAS_CPP_ATTR(likely) >= 201803
+#define TOML_LIKELY(...) (__VA_ARGS__) [[likely]]
+#define TOML_LIKELY_CASE [[likely]]
+#elif TOML_GCC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_expect)
+#define TOML_LIKELY(...) (__builtin_expect(!!(__VA_ARGS__), 1))
+#else
+#define TOML_LIKELY(...) (__VA_ARGS__)
+#endif
+#ifndef TOML_LIKELY_CASE
+#define TOML_LIKELY_CASE
+#endif
+
+// TOML_UNLIKELY
+#if TOML_CPP >= 20 && TOML_HAS_CPP_ATTR(unlikely) >= 201803
+#define TOML_UNLIKELY(...) (__VA_ARGS__) [[unlikely]]
+#define TOML_UNLIKELY_CASE [[unlikely]]
+#elif TOML_GCC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_expect)
+#define TOML_UNLIKELY(...) (__builtin_expect(!!(__VA_ARGS__), 0))
+#else
+#define TOML_UNLIKELY(...) (__VA_ARGS__)
+#endif
+#ifndef TOML_UNLIKELY_CASE
+#define TOML_UNLIKELY_CASE
+#endif
+
+// TOML_FLAGS_ENUM
+#if TOML_CLANG || TOML_HAS_ATTR(flag_enum)
+#define TOML_FLAGS_ENUM __attribute__((flag_enum))
+#else
+#define TOML_FLAGS_ENUM
+#endif
+
+// TOML_OPEN_ENUM + TOML_CLOSED_ENUM
+#if TOML_CLANG || TOML_HAS_ATTR(enum_extensibility)
+#define TOML_OPEN_ENUM	 __attribute__((enum_extensibility(open)))
+#define TOML_CLOSED_ENUM __attribute__((enum_extensibility(closed)))
+#else
+#define TOML_OPEN_ENUM
+#define TOML_CLOSED_ENUM
+#endif
+
+// TOML_OPEN_FLAGS_ENUM + TOML_CLOSED_FLAGS_ENUM
+#define TOML_OPEN_FLAGS_ENUM   TOML_OPEN_ENUM TOML_FLAGS_ENUM
+#define TOML_CLOSED_FLAGS_ENUM TOML_CLOSED_ENUM TOML_FLAGS_ENUM
+
+// TOML_MAKE_FLAGS
+#define TOML_MAKE_FLAGS_2(T, op, linkage)                                                                              \
+	TOML_CONST_INLINE_GETTER                                                                                           \
+	linkage constexpr T operator op(T lhs, T rhs) noexcept                                                             \
+	{                                                                                                                  \
+		using under = std::underlying_type_t<T>;                                                                       \
+		return static_cast<T>(static_cast<under>(lhs) op static_cast<under>(rhs));                                     \
+	}                                                                                                                  \
+                                                                                                                       \
+	linkage constexpr T& operator TOML_CONCAT(op, =)(T & lhs, T rhs) noexcept                                          \
+	{                                                                                                                  \
+		return lhs = (lhs op rhs);                                                                                     \
+	}                                                                                                                  \
+                                                                                                                       \
+	static_assert(true)
+#define TOML_MAKE_FLAGS_1(T, linkage)                                                                                  \
+	static_assert(std::is_enum_v<T>);                                                                                  \
+                                                                                                                       \
+	TOML_MAKE_FLAGS_2(T, &, linkage);                                                                                  \
+	TOML_MAKE_FLAGS_2(T, |, linkage);                                                                                  \
+	TOML_MAKE_FLAGS_2(T, ^, linkage);                                                                                  \
+                                                                                                                       \
+	TOML_CONST_INLINE_GETTER                                                                                           \
+	linkage constexpr T operator~(T val) noexcept                                                                      \
+	{                                                                                                                  \
+		using under = std::underlying_type_t<T>;                                                                       \
+		return static_cast<T>(~static_cast<under>(val));                                                               \
+	}                                                                                                                  \
+                                                                                                                       \
+	TOML_CONST_INLINE_GETTER                                                                                           \
+	linkage constexpr bool operator!(T val) noexcept                                                                   \
+	{                                                                                                                  \
+		using under = std::underlying_type_t<T>;                                                                       \
+		return !static_cast<under>(val);                                                                               \
+	}                                                                                                                  \
+                                                                                                                       \
+	static_assert(true)
+#define TOML_MAKE_FLAGS(T) TOML_MAKE_FLAGS_1(T, )
 
 #define TOML_UNUSED(...) static_cast<void>(__VA_ARGS__)
 
 #define TOML_DELETE_DEFAULTS(T)                                                                                        \
-	T(const T&) = delete;                                                                                              \
-	T(T&&)		= delete;                                                                                              \
+	T(const T&)			   = delete;                                                                                   \
+	T(T&&)				   = delete;                                                                                   \
 	T& operator=(const T&) = delete;                                                                                   \
-	T& operator=(T&&) = delete
+	T& operator=(T&&)	   = delete
 
-// SFINAE
-#if defined(__cpp_concepts) && __cpp_concepts >= 201907
-	#define TOML_REQUIRES(...)	requires(__VA_ARGS__)
-#else
-	#define TOML_REQUIRES(...)
+#define TOML_ASYMMETRICAL_EQUALITY_OPS(LHS, RHS, ...)                                                                  \
+	__VA_ARGS__ TOML_NODISCARD                                                                                         \
+	friend bool operator==(RHS rhs, LHS lhs) noexcept                                                                  \
+	{                                                                                                                  \
+		return lhs == rhs;                                                                                             \
+	}                                                                                                                  \
+	__VA_ARGS__ TOML_NODISCARD                                                                                         \
+	friend bool operator!=(LHS lhs, RHS rhs) noexcept                                                                  \
+	{                                                                                                                  \
+		return !(lhs == rhs);                                                                                          \
+	}                                                                                                                  \
+	__VA_ARGS__ TOML_NODISCARD                                                                                         \
+	friend bool operator!=(RHS rhs, LHS lhs) noexcept                                                                  \
+	{                                                                                                                  \
+		return !(lhs == rhs);                                                                                          \
+	}                                                                                                                  \
+	static_assert(true)
+
+#define TOML_EVAL_BOOL_1(T, F) T
+#define TOML_EVAL_BOOL_0(T, F) F
+
+#if !defined(__POXY__) && !defined(POXY_IMPLEMENTATION_DETAIL)
+#define POXY_IMPLEMENTATION_DETAIL(...) __VA_ARGS__
 #endif
-#define TOML_ENABLE_IF(...)	, typename std::enable_if<(__VA_ARGS__), int>::type = 0
-#define TOML_CONSTRAINED_TEMPLATE(condition, ...)	template <__VA_ARGS__ TOML_ENABLE_IF(condition)> TOML_REQUIRES(condition)
-#define TOML_HIDDEN_CONSTRAINT(condition, ...)	TOML_CONSTRAINED_TEMPLATE(condition, __VA_ARGS__)
+
+// COMPILER-SPECIFIC WARNING MANAGEMENT
+
+#if TOML_CLANG
+
+#define TOML_PUSH_WARNINGS                                                                                             \
+	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
+	static_assert(true)
+
+#define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wswitch")                                                                   \
+	static_assert(true)
+
+#define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wfloat-equal")                                                              \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wdouble-promotion")                                                         \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wchar-subscripts")                                                          \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wshift-sign-overflow")                                                      \
+	static_assert(true)
+
+#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	TOML_PRAGMA_CLANG_GE_9(diagnostic ignored "-Wctad-maybe-unsupported")                                              \
+	TOML_PRAGMA_CLANG_GE_10(diagnostic ignored "-Wzero-as-null-pointer-constant")                                      \
+	TOML_PRAGMA_CLANG_GE_11(diagnostic ignored "-Wsuggest-destructor-override")                                        \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wweak-vtables")                                                             \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wweak-template-vtables")                                                    \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wdouble-promotion")                                                         \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wchar-subscripts")                                                          \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wmissing-field-initializers")                                               \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Wpadded")                                                                   \
+	static_assert(true)
+
+#define TOML_POP_WARNINGS                                                                                              \
+	TOML_PRAGMA_CLANG(diagnostic pop)                                                                                  \
+	static_assert(true)
+
+#define TOML_DISABLE_WARNINGS                                                                                          \
+	TOML_PRAGMA_CLANG(diagnostic push)                                                                                 \
+	TOML_PRAGMA_CLANG(diagnostic ignored "-Weverything")                                                               \
+	static_assert(true, "")
+
+#define TOML_ENABLE_WARNINGS                                                                                           \
+	TOML_PRAGMA_CLANG(diagnostic pop)                                                                                  \
+	static_assert(true)
+
+#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES 1
+
+#elif TOML_MSVC
+
+#define TOML_PUSH_WARNINGS                                                                                             \
+	__pragma(warning(push))                                                                                            \
+	static_assert(true)
+
+#if TOML_HAS_INCLUDE(<CodeAnalysis / Warnings.h>)
+#pragma warning(push, 0)
+#include <CodeAnalysis/Warnings.h>
+#pragma warning(pop)
+#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS                                                                            \
+	__pragma(warning(disable : ALL_CODE_ANALYSIS_WARNINGS))                                                            \
+	static_assert(true)
+#else
+#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS static_assert(true)
+#endif
+
+#define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
+	__pragma(warning(disable : 4061))                                                                                  \
+	__pragma(warning(disable : 4062))                                                                                  \
+	__pragma(warning(disable : 4063))                                                                                  \
+	__pragma(warning(disable : 26819)) /* cg: unannotated fallthrough */                                               \
+	static_assert(true)
+
+#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	__pragma(warning(disable : 4127)) /* conditional expr is constant */                                               \
+	__pragma(warning(disable : 4324)) /* structure was padded due to alignment specifier */                            \
+	__pragma(warning(disable : 4348))                                                                                  \
+	__pragma(warning(disable : 4464)) /* relative include path contains '..' */                                        \
+	__pragma(warning(disable : 4505)) /* unreferenced local function removed */                                        \
+	__pragma(warning(disable : 4514)) /* unreferenced inline function has been removed */                              \
+	__pragma(warning(disable : 4582)) /* constructor is not implicitly called */                                       \
+	__pragma(warning(disable : 4623)) /* default constructor was implicitly defined as deleted		*/                     \
+	__pragma(warning(disable : 4625)) /* copy constructor was implicitly defined as deleted			*/                       \
+	__pragma(warning(disable : 4626)) /* assignment operator was implicitly defined as deleted		*/                     \
+	__pragma(warning(disable : 4710)) /* function not inlined */                                                       \
+	__pragma(warning(disable : 4711)) /* function selected for automatic expansion */                                  \
+	__pragma(warning(disable : 4820)) /* N bytes padding added */                                                      \
+	__pragma(warning(disable : 4946)) /* reinterpret_cast used between related classes */                              \
+	__pragma(warning(disable : 5026)) /* move constructor was implicitly defined as deleted	*/                         \
+	__pragma(warning(disable : 5027)) /* move assignment operator was implicitly defined as deleted	*/                 \
+	__pragma(warning(disable : 5039)) /* potentially throwing function passed to 'extern "C"' function */              \
+	__pragma(warning(disable : 5045)) /* Compiler will insert Spectre mitigation */                                    \
+	__pragma(warning(disable : 26451))                                                                                 \
+	__pragma(warning(disable : 26490))                                                                                 \
+	__pragma(warning(disable : 26495))                                                                                 \
+	__pragma(warning(disable : 26812))                                                                                 \
+	__pragma(warning(disable : 26819))                                                                                 \
+	static_assert(true)
+
+#define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
+	__pragma(warning(disable : 4365)) /* argument signed/unsigned mismatch */                                          \
+	__pragma(warning(disable : 4738)) /* storing 32-bit float result in memory */                                      \
+	__pragma(warning(disable : 5219)) /* implicit conversion from integral to float */                                 \
+	static_assert(true)
+
+#define TOML_POP_WARNINGS                                                                                              \
+	__pragma(warning(pop))                                                                                             \
+	static_assert(true)
+
+#define TOML_DISABLE_WARNINGS                                                                                          \
+	__pragma(warning(push, 0))                                                                                         \
+	__pragma(warning(disable : 4348))                                                                                  \
+	__pragma(warning(disable : 4668))                                                                                  \
+	__pragma(warning(disable : 5105))                                                                                  \
+	TOML_DISABLE_CODE_ANALYSIS_WARNINGS;                                                                               \
+	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
+	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
+	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
+	static_assert(true)
+
+#define TOML_ENABLE_WARNINGS TOML_POP_WARNINGS
+
+#elif TOML_ICC
+
+#define TOML_PUSH_WARNINGS                                                                                             \
+	__pragma(warning(push))                                                                                            \
+	static_assert(true)
+
+#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	__pragma(warning(disable : 82))	  /* storage class is not first */                                                 \
+	__pragma(warning(disable : 111))  /* statement unreachable (false-positive) */                                     \
+	__pragma(warning(disable : 869))  /* unreferenced parameter */                                                     \
+	__pragma(warning(disable : 1011)) /* missing return (false-positive) */                                            \
+	__pragma(warning(disable : 2261)) /* assume expr side-effects discarded */                                         \
+	static_assert(true)
+
+#define TOML_POP_WARNINGS                                                                                              \
+	__pragma(warning(pop))                                                                                             \
+	static_assert(true)
+
+#define TOML_DISABLE_WARNINGS                                                                                          \
+	__pragma(warning(push, 0))                                                                                         \
+	TOML_DISABLE_SPAM_WARNINGS
+
+#define TOML_ENABLE_WARNINGS                                                                                           \
+	__pragma(warning(pop))                                                                                             \
+	static_assert(true)
+
+#elif TOML_GCC
+
+#define TOML_PUSH_WARNINGS                                                                                             \
+	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
+	static_assert(true)
+
+#define TOML_DISABLE_SWITCH_WARNINGS                                                                                   \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch")                                                                     \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch-enum")                                                                \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wswitch-default")                                                             \
+	static_assert(true)
+
+#define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wfloat-equal")                                                                \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wsign-conversion")                                                            \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wchar-subscripts")                                                            \
+	static_assert(true)
+
+#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS                                                                             \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wsuggest-attribute=const")                                                    \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wsuggest-attribute=pure")                                                     \
+	static_assert(true)
+
+#define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wpadded")                                                                     \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wcast-align")                                                                 \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wcomment")                                                                    \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wtype-limits")                                                                \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wuseless-cast")                                                               \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wchar-subscripts")                                                            \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wsubobject-linkage")                                                          \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wmissing-field-initializers")                                                 \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wmaybe-uninitialized")                                                        \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wnoexcept")                                                                   \
+	static_assert(true)
+
+#define TOML_POP_WARNINGS                                                                                              \
+	TOML_PRAGMA_GCC(diagnostic pop)                                                                                    \
+	static_assert(true)
+
+#define TOML_DISABLE_WARNINGS                                                                                          \
+	TOML_PRAGMA_GCC(diagnostic push)                                                                                   \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wall")                                                                        \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wextra")                                                                      \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wpedantic")                                                                   \
+	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
+	TOML_DISABLE_ARITHMETIC_WARNINGS;                                                                                  \
+	TOML_DISABLE_SUGGEST_ATTR_WARNINGS;                                                                                \
+	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \
+	static_assert(true)
+
+#define TOML_ENABLE_WARNINGS                                                                                           \
+	TOML_PRAGMA_GCC(diagnostic pop)                                                                                    \
+	static_assert(true)
+
+#endif
+
+#ifndef TOML_PUSH_WARNINGS
+#define TOML_PUSH_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
+#define TOML_DISABLE_CODE_ANALYSIS_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_SWITCH_WARNINGS
+#define TOML_DISABLE_SWITCH_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
+#define TOML_DISABLE_SUGGEST_ATTR_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_SPAM_WARNINGS
+#define TOML_DISABLE_SPAM_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_ARITHMETIC_WARNINGS
+#define TOML_DISABLE_ARITHMETIC_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_POP_WARNINGS
+#define TOML_POP_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_DISABLE_WARNINGS
+#define TOML_DISABLE_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_ENABLE_WARNINGS
+#define TOML_ENABLE_WARNINGS static_assert(true)
+#endif
+#ifndef TOML_SIMPLE_STATIC_ASSERT_MESSAGES
+#define TOML_SIMPLE_STATIC_ASSERT_MESSAGES 0
+#endif
+
+#ifdef TOML_CONFIG_HEADER
+#include TOML_CONFIG_HEADER
+#endif
+
+// is the library being built as a shared lib/dll using meson and friends?
+#ifndef TOML_SHARED_LIB
+#define TOML_SHARED_LIB 0
+#endif
+
+// header-only mode
+#if !defined(TOML_HEADER_ONLY) && defined(TOML_ALL_INLINE) // was TOML_ALL_INLINE pre-2.0
+#define TOML_HEADER_ONLY TOML_ALL_INLINE
+#endif
+#if !defined(TOML_HEADER_ONLY) || (defined(TOML_HEADER_ONLY) && TOML_HEADER_ONLY) || TOML_INTELLISENSE
+#undef TOML_HEADER_ONLY
+#define TOML_HEADER_ONLY 1
+#endif
+#if TOML_DOXYGEN || TOML_SHARED_LIB
+#undef TOML_HEADER_ONLY
+#define TOML_HEADER_ONLY 0
+#endif
+
+// internal implementation switch
+#if defined(TOML_IMPLEMENTATION) || TOML_HEADER_ONLY
+#undef TOML_IMPLEMENTATION
+#define TOML_IMPLEMENTATION 1
+#else
+#define TOML_IMPLEMENTATION 0
+#endif
+
+// dll/shared lib function exports (legacy - TOML_API was the old name for this setting)
+#if !defined(TOML_EXPORTED_MEMBER_FUNCTION) && !defined(TOML_EXPORTED_STATIC_FUNCTION)                                 \
+	&& !defined(TOML_EXPORTED_FREE_FUNCTION) && !defined(TOML_EXPORTED_CLASS) && defined(TOML_API)
+#define TOML_EXPORTED_MEMBER_FUNCTION TOML_API
+#define TOML_EXPORTED_STATIC_FUNCTION TOML_API
+#define TOML_EXPORTED_FREE_FUNCTION	  TOML_API
+#endif
+
+// dll/shared lib exports
+#if TOML_SHARED_LIB
+#undef TOML_API
+#undef TOML_EXPORTED_CLASS
+#undef TOML_EXPORTED_MEMBER_FUNCTION
+#undef TOML_EXPORTED_STATIC_FUNCTION
+#undef TOML_EXPORTED_FREE_FUNCTION
+#if TOML_WINDOWS
+#if TOML_IMPLEMENTATION
+#define TOML_EXPORTED_CLASS			__declspec(dllexport)
+#define TOML_EXPORTED_FREE_FUNCTION __declspec(dllexport)
+#else
+#define TOML_EXPORTED_CLASS			__declspec(dllimport)
+#define TOML_EXPORTED_FREE_FUNCTION __declspec(dllimport)
+#endif
+#ifndef TOML_CALLCONV
+#define TOML_CALLCONV __cdecl
+#endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define TOML_EXPORTED_CLASS			  __attribute__((visibility("default")))
+#define TOML_EXPORTED_MEMBER_FUNCTION __attribute__((visibility("default")))
+#define TOML_EXPORTED_STATIC_FUNCTION __attribute__((visibility("default")))
+#define TOML_EXPORTED_FREE_FUNCTION	  __attribute__((visibility("default")))
+#endif
+#endif
+#ifndef TOML_EXPORTED_CLASS
+#define TOML_EXPORTED_CLASS
+#endif
+#ifndef TOML_EXPORTED_MEMBER_FUNCTION
+#define TOML_EXPORTED_MEMBER_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_STATIC_FUNCTION
+#define TOML_EXPORTED_STATIC_FUNCTION
+#endif
+#ifndef TOML_EXPORTED_FREE_FUNCTION
+#define TOML_EXPORTED_FREE_FUNCTION
+#endif
+
+// experimental language features
+#if !defined(TOML_ENABLE_UNRELEASED_FEATURES) && defined(TOML_UNRELEASED_FEATURES) // was TOML_UNRELEASED_FEATURES
+																				   // pre-3.0
+#define TOML_ENABLE_UNRELEASED_FEATURES TOML_UNRELEASED_FEATURES
+#endif
+#if (defined(TOML_ENABLE_UNRELEASED_FEATURES) && TOML_ENABLE_UNRELEASED_FEATURES) || TOML_INTELLISENSE
+#undef TOML_ENABLE_UNRELEASED_FEATURES
+#define TOML_ENABLE_UNRELEASED_FEATURES 1
+#endif
+#ifndef TOML_ENABLE_UNRELEASED_FEATURES
+#define TOML_ENABLE_UNRELEASED_FEATURES 0
+#endif
+
+// parser
+#if !defined(TOML_ENABLE_PARSER) && defined(TOML_PARSER) // was TOML_PARSER pre-3.0
+#define TOML_ENABLE_PARSER TOML_PARSER
+#endif
+#if !defined(TOML_ENABLE_PARSER) || (defined(TOML_ENABLE_PARSER) && TOML_ENABLE_PARSER) || TOML_INTELLISENSE
+#undef TOML_ENABLE_PARSER
+#define TOML_ENABLE_PARSER 1
+#endif
+
+// formatters
+#if !defined(TOML_ENABLE_FORMATTERS) || (defined(TOML_ENABLE_FORMATTERS) && TOML_ENABLE_FORMATTERS) || TOML_INTELLISENSE
+#undef TOML_ENABLE_FORMATTERS
+#define TOML_ENABLE_FORMATTERS 1
+#endif
+
+// SIMD
+#if !defined(TOML_ENABLE_SIMD) || (defined(TOML_ENABLE_SIMD) && TOML_ENABLE_SIMD) || TOML_INTELLISENSE
+#undef TOML_ENABLE_SIMD
+#define TOML_ENABLE_SIMD 1
+#endif
+
+// windows compat
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT) && defined(TOML_WINDOWS_COMPAT) // was TOML_WINDOWS_COMPAT pre-3.0
+#define TOML_ENABLE_WINDOWS_COMPAT TOML_WINDOWS_COMPAT
+#endif
+#if !defined(TOML_ENABLE_WINDOWS_COMPAT) || (defined(TOML_ENABLE_WINDOWS_COMPAT) && TOML_ENABLE_WINDOWS_COMPAT)        \
+	|| TOML_INTELLISENSE
+#undef TOML_ENABLE_WINDOWS_COMPAT
+#define TOML_ENABLE_WINDOWS_COMPAT 1
+#endif
+
+#if !TOML_WINDOWS
+#undef TOML_ENABLE_WINDOWS_COMPAT
+#define TOML_ENABLE_WINDOWS_COMPAT 0
+#endif
+
+#ifndef TOML_INCLUDE_WINDOWS_H
+#define TOML_INCLUDE_WINDOWS_H 0
+#endif
+
+// custom optional
+#ifdef TOML_OPTIONAL_TYPE
+#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 1
+#else
+#define TOML_HAS_CUSTOM_OPTIONAL_TYPE 0
+#endif
+
+// exceptions (library use)
+#if TOML_COMPILER_HAS_EXCEPTIONS
+#if !defined(TOML_EXCEPTIONS) || (defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS)
+#undef TOML_EXCEPTIONS
+#define TOML_EXCEPTIONS 1
+#endif
+#else
+#if defined(TOML_EXCEPTIONS) && TOML_EXCEPTIONS
+#error TOML_EXCEPTIONS was explicitly enabled but exceptions are disabled/unsupported by the compiler.
+#endif
+#undef TOML_EXCEPTIONS
+#define TOML_EXCEPTIONS 0
+#endif
+
+// calling convention for static/free/friend functions
+#ifndef TOML_CALLCONV
+#define TOML_CALLCONV
+#endif
+
+#ifndef TOML_UNDEF_MACROS
+#define TOML_UNDEF_MACROS 1
+#endif
+
+#ifndef TOML_MAX_NESTED_VALUES
+#define TOML_MAX_NESTED_VALUES 256
+// this refers to the depth of nested values, e.g. inline tables and arrays.
+// 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
+#endif
+
+#ifdef TOML_CHAR_8_STRINGS
+#if TOML_CHAR_8_STRINGS
+#error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
+#endif
+#endif
+
+#ifdef TOML_LARGE_FILES
+#if !TOML_LARGE_FILES
+#error Support for !TOML_LARGE_FILES (i.e. 'small files') was removed in toml++ 3.0.0.
+#endif
+#endif
+
+#ifndef TOML_LIFETIME_HOOKS
+#define TOML_LIFETIME_HOOKS 0
+#endif
+
+#ifdef NDEBUG
+#undef TOML_ASSERT
+#define TOML_ASSERT(expr) static_assert(true)
+#endif
+#ifndef TOML_ASSERT
+#ifndef assert
+TOML_DISABLE_WARNINGS;
+#include <cassert>
+TOML_ENABLE_WARNINGS;
+#endif
+#define TOML_ASSERT(expr) assert(expr)
+#endif
+#ifdef NDEBUG
+#define TOML_ASSERT_ASSUME(expr) TOML_ASSUME(expr)
+#else
+#define TOML_ASSERT_ASSUME(expr) TOML_ASSERT(expr)
+#endif
+
+#if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
+// not supported by any version of GCC or Clang as of 26/11/2020
+// not supported by any version of ICC on Linux as of 11/01/2021
+#define TOML_FLOAT_CHARCONV 0
+#endif
+#if !defined(TOML_INT_CHARCONV) && (defined(__EMSCRIPTEN__) || defined(__APPLE__))
+// causes link errors on emscripten
+// causes Mac OS SDK version errors on some versions of Apple Clang
+#define TOML_INT_CHARCONV 0
+#endif
+#ifndef TOML_INT_CHARCONV
+#define TOML_INT_CHARCONV 1
+#endif
+#ifndef TOML_FLOAT_CHARCONV
+#define TOML_FLOAT_CHARCONV 1
+#endif
+#if (TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV) && !TOML_HAS_INCLUDE(<charconv>)
+#undef TOML_INT_CHARCONV
+#undef TOML_FLOAT_CHARCONV
+#define TOML_INT_CHARCONV	0
+#define TOML_FLOAT_CHARCONV 0
+#endif
+
+#if defined(__cpp_concepts) && __cpp_concepts >= 201907
+#define TOML_REQUIRES(...) requires(__VA_ARGS__)
+#else
+#define TOML_REQUIRES(...)
+#endif
+#define TOML_ENABLE_IF(...) , typename std::enable_if<(__VA_ARGS__), int>::type = 0
+#define TOML_CONSTRAINED_TEMPLATE(condition, ...)                                                                      \
+	template <__VA_ARGS__ TOML_ENABLE_IF(condition)>                                                                   \
+	TOML_REQUIRES(condition)
+#define TOML_HIDDEN_CONSTRAINT(condition, ...) TOML_CONSTRAINED_TEMPLATE(condition, __VA_ARGS__)
+
+// clang-format off
 
 #ifdef __FLT16_MANT_DIG__
 	#if __FLT_RADIX__ == 2					\
@@ -851,6 +923,10 @@
 	#define TOML_INT128		__int128_t
 	#define TOML_UINT128	__uint128_t
 #endif
+
+// clang-format on
+
+// clang-format off
 
 //********  impl/version.h  ********************************************************************************************
 
@@ -887,7 +963,7 @@
 		TOML_LANG_HIGHER_THAN(TOML_LANG_MAJOR, TOML_LANG_MINOR, TOML_LANG_PATCH)
 
 #ifndef TOML_ABI_NAMESPACES
-	#ifdef DOXYGEN
+	#if TOML_DOXYGEN
 		#define TOML_ABI_NAMESPACES 0
 	#else
 		#define TOML_ABI_NAMESPACES 1
@@ -926,23 +1002,9 @@
 	#define TOML_INTERNAL_LINKAGE				static
 #endif
 
-#ifdef NDEBUG
-	#undef TOML_ASSERT
-	#define TOML_ASSERT(expr)	static_assert(true)
-#endif
-#ifndef TOML_ASSERT
-	#ifndef assert
-		TOML_DISABLE_WARNINGS;
-		#include <cassert>
-		TOML_ENABLE_WARNINGS;
-	#endif
-	#define TOML_ASSERT(expr)	assert(expr)
-#endif
-#ifdef NDEBUG
-	#define TOML_ASSERT_ASSUME(expr)	TOML_ASSUME(expr)
-#else
-	#define TOML_ASSERT_ASSUME(expr)	TOML_ASSERT(expr)
-#endif
+// clang-format on
+
+// clang-format off
 
 #if TOML_SIMPLE_STATIC_ASSERT_MESSAGES
 
@@ -1037,7 +1099,7 @@ TOML_DISABLE_WARNINGS;
 #include <string>
 TOML_ENABLE_WARNINGS;
 
-#if defined(DOXYGEN)                                                                                                   \
+#if TOML_DOXYGEN                                                                                                       \
 	|| (defined(__cpp_char8_t) && __cpp_char8_t >= 201811 && defined(__cpp_lib_char8_t)                                \
 		&& __cpp_lib_char8_t >= 201907)
 #define TOML_HAS_CHAR8 1
@@ -2719,8 +2781,7 @@ TOML_NAMESPACE_START
 		static bool TOML_CALLCONV equal(const path_component&, const path_component&) noexcept;
 
 		template <typename Type>
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		static Type* get_as(storage_t& s) noexcept
 		{
 			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
@@ -2731,7 +2792,7 @@ TOML_NAMESPACE_START
 			::new (static_cast<void*>(storage_.bytes)) std::string{ key };
 		}
 
-		static void store_index(size_t index, storage_t& storage_)
+		static void store_index(size_t index, storage_t& storage_) noexcept
 		{
 			::new (static_cast<void*>(storage_.bytes)) std::size_t{ index };
 		}
@@ -2743,24 +2804,17 @@ TOML_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		size_t& index() & noexcept
+		size_t& index_ref() noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
 			return *get_as<size_t>(value_storage_);
 		}
 
 		TOML_NODISCARD
-		std::string& key() & noexcept
+		std::string& key_ref() noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
 			return *get_as<std::string>(value_storage_);
-		}
-
-		TOML_NODISCARD
-		std::string&& key() && noexcept
-		{
-			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
-			return static_cast<std::string&&>(*get_as<std::string>(value_storage_));
 		}
 
 	  public:
@@ -2794,56 +2848,50 @@ TOML_NAMESPACE_START
 		path_component(path_component&& pc) noexcept;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(const path_component & rhs);
+		path_component& operator=(const path_component& rhs);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(path_component && rhs) noexcept;
+		path_component& operator=(path_component&& rhs) noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(size_t new_index) noexcept;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::string_view new_key);
+
+#if TOML_ENABLE_WINDOWS_COMPAT
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		path_component& operator=(std::wstring_view new_key);
+
+#endif
 
 		~path_component() noexcept
 		{
 			destroy();
 		}
 
-		TOML_NODISCARD
-		const size_t& index() const& noexcept
+		TOML_PURE_GETTER
+		size_t index() const noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::array_index);
 			return *get_as<const size_t>(value_storage_);
 		}
 
-		TOML_NODISCARD
-		/* implicit */ operator const size_t&() const noexcept
+		TOML_PURE_INLINE_GETTER
+		explicit operator size_t() const noexcept
 		{
 			return index();
 		}
 
-		TOML_NODISCARD
-		const std::string& key() const& noexcept
+		TOML_PURE_GETTER
+		const std::string& key() const noexcept
 		{
 			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
 			return *get_as<const std::string>(value_storage_);
 		}
 
-		TOML_NODISCARD
-		const std::string&& key() const&& noexcept
-		{
-			TOML_ASSERT_ASSUME(type_ == path_component_type::key);
-			return static_cast<const std::string&&>(*get_as<const std::string>(value_storage_));
-		}
-
-		TOML_NODISCARD
-		explicit operator const std::string&() noexcept
-		{
-			return key();
-		}
-
-		TOML_NODISCARD
-		explicit operator const std::string&&() noexcept
-		{
-			return std::move(key());
-		}
-
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		explicit operator const std::string&() const noexcept
 		{
 			return key();
@@ -2866,19 +2914,6 @@ TOML_NAMESPACE_START
 		{
 			return !equal(lhs, rhs);
 		}
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(size_t new_index) noexcept;
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(std::string_view new_key);
-
-#if TOML_ENABLE_WINDOWS_COMPAT
-
-		TOML_EXPORTED_MEMBER_FUNCTION
-		path_component& operator=(std::wstring_view new_key);
-
-#endif
 	};
 
 	class TOML_EXPORTED_CLASS path
@@ -2940,12 +2975,14 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		path_component& operator[](size_t index) noexcept
 		{
+			TOML_ASSERT(index < size());
 			return components_[index];
 		}
 
 		TOML_PURE_INLINE_GETTER
 		const path_component& operator[](size_t index) const noexcept
 		{
+			TOML_ASSERT(index < size());
 			return components_[index];
 		}
 
@@ -3128,15 +3165,13 @@ TOML_NAMESPACE_START
 
 #endif
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		friend bool operator==(const path& lhs, const path& rhs) noexcept
 		{
 			return equal(lhs, rhs);
 		}
 
-		TOML_NODISCARD
-		TOML_ALWAYS_INLINE
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const path& lhs, const path& rhs) noexcept
 		{
 			return !equal(lhs, rhs);
@@ -3202,20 +3237,48 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-		TOML_EXPORTED_MEMBER_FUNCTION
-		void clear() noexcept;
+		using iterator = std::vector<path_component>::iterator;
 
-		TOML_NODISCARD
-		auto begin() const noexcept
+		using const_iterator = std::vector<path_component>::const_iterator;
+
+		TOML_PURE_INLINE_GETTER
+		iterator begin() noexcept
 		{
 			return components_.begin();
 		}
 
-		TOML_NODISCARD
-		auto end() const noexcept
+		TOML_PURE_INLINE_GETTER
+		iterator end() noexcept
 		{
 			return components_.end();
 		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator begin() const noexcept
+		{
+			return components_.begin();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator end() const noexcept
+		{
+			return components_.end();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator cbegin() const noexcept
+		{
+			return components_.begin();
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const_iterator cend() const noexcept
+		{
+			return components_.end();
+		}
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void clear() noexcept;
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		path& truncate(size_t n);
@@ -3234,8 +3297,7 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
-		path subpath(std::vector<path_component>::const_iterator start,
-					 std::vector<path_component>::const_iterator end) const;
+		path subpath(const_iterator start, const_iterator end) const;
 
 		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -3288,7 +3350,7 @@ TOML_PUSH_WARNINGS;
 
 TOML_NAMESPACE_START
 {
-	class TOML_ABSTRACT_BASE TOML_EXPORTED_CLASS node
+	class TOML_ABSTRACT_INTERFACE TOML_EXPORTED_CLASS node
 	{
 	  private:
 
@@ -7933,13 +7995,13 @@ TOML_NAMESPACE_START
 						ipos->second = std::move(static_cast<ValueArgs&&>(args)...);
 					else
 					{
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 						try
 						{
 #endif
 							ipos->second.reset(
 								new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... });
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 						}
 						catch (...)
 						{
@@ -8580,7 +8642,7 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
-#if defined(DOXYGEN) || !TOML_EXCEPTIONS
+#if TOML_DOXYGEN || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
 #else
 #define TOML_PARSE_ERROR_BASE	 : public std::runtime_error
@@ -8683,7 +8745,7 @@ TOML_POP_WARNINGS;
 
 //********  impl/parse_result.h  ***************************************************************************************
 
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -9399,7 +9461,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit toml_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
@@ -9486,7 +9548,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { flags, "    "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit json_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
@@ -9577,7 +9639,7 @@ TOML_NAMESPACE_START
 			: base{ &source, nullptr, constants, { flags, "  "sv } }
 		{}
 
-#if defined(DOXYGEN) || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
+#if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
 		TOML_NODISCARD_CTOR
 		explicit yaml_formatter(const toml::parse_result& result, format_flags flags = default_flags) noexcept
@@ -10290,6 +10352,7 @@ TOML_NAMESPACE_END;
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV node_deep_equality(const node* lhs, const node* rhs) noexcept
 	{
@@ -10653,12 +10716,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	path_component::path_component(std::wstring_view key) //
 		: path_component(impl::narrow(key))
-	{ }
+	{}
 
 #endif
 
 	TOML_EXTERNAL_LINKAGE
-	path_component::path_component(const path_component & pc) //
+	path_component::path_component(const path_component& pc) //
 		: type_{ pc.type_ }
 	{
 		if (type_ == path_component_type::array_index)
@@ -10672,9 +10735,9 @@ TOML_NAMESPACE_START
 		: type_{ pc.type_ }
 	{
 		if (type_ == path_component_type::array_index)
-			store_index(pc.index(), value_storage_);
+			store_index(pc.index_ref(), value_storage_);
 		else
-			store_key(std::move(pc).key(), value_storage_);
+			store_key(std::move(pc.key_ref()), value_storage_);
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -10693,9 +10756,9 @@ TOML_NAMESPACE_START
 		else
 		{
 			if (type_ == path_component_type::array_index)
-				index() = rhs.index();
+				index_ref() = rhs.index();
 			else
-				key() = rhs.key();
+				key_ref() = rhs.key();
 		}
 		return *this;
 	}
@@ -10709,20 +10772,21 @@ TOML_NAMESPACE_START
 
 			type_ = rhs.type_;
 			if (type_ == path_component_type::array_index)
-				store_index(std::move(rhs).index(), value_storage_);
+				store_index(rhs.index(), value_storage_);
 			else
-				store_key(std::move(rhs).key(), value_storage_);
+				store_key(std::move(rhs.key_ref()), value_storage_);
 		}
 		else
 		{
 			if (type_ == path_component_type::array_index)
-				index() = std::move(rhs).index();
+				index_ref() = rhs.index();
 			else
-				key() = std::move(rhs).key();
+				key_ref() = std::move(rhs.key_ref());
 		}
 		return *this;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path_component::equal(const path_component& lhs, const path_component& rhs) noexcept
 	{
@@ -10737,7 +10801,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (size_t new_index) noexcept
+	path_component& path_component::operator=(size_t new_index) noexcept
 	{
 		// If currently a key, string will need to be destroyed regardless
 		destroy();
@@ -10749,10 +10813,10 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::string_view new_key)
+	path_component& path_component::operator=(std::string_view new_key)
 	{
 		if (type_ == path_component_type::key)
-			key() = new_key;
+			key_ref() = new_key;
 		else
 		{
 			type_ = path_component_type::key;
@@ -10765,10 +10829,10 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	path_component& path_component::operator= (std::wstring_view new_key)
+	path_component& path_component::operator=(std::wstring_view new_key)
 	{
 		if (type_ == path_component_type::key)
-			key() = impl::narrow(new_key);
+			key_ref() = impl::narrow(new_key);
 		else
 		{
 			type_ = path_component_type::key;
@@ -10840,6 +10904,7 @@ TOML_NAMESPACE_START
 		}
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV path::equal(const path& lhs, const path& rhs) noexcept
 	{
@@ -11237,6 +11302,7 @@ TOML_NAMESPACE_START
 		return elems_.insert(pos, std::move(elem));
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype) const noexcept
 	{
@@ -11253,6 +11319,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
@@ -11274,6 +11341,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool array::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
@@ -11286,7 +11354,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node& array::at(size_t index)
 	{
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 
 		return *elems_.at(index);
 
@@ -11582,6 +11650,7 @@ TOML_NAMESPACE_START
 		return *this;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype) const noexcept
 	{
@@ -11601,6 +11670,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
@@ -11623,6 +11693,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
@@ -11632,6 +11703,7 @@ TOML_NAMESPACE_START
 		return result;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	node* table::get(std::string_view key) noexcept
 	{
@@ -11645,7 +11717,7 @@ TOML_NAMESPACE_START
 	{
 		auto n = get(key);
 
-#if TOML_COMPILER_EXCEPTIONS
+#if TOML_COMPILER_HAS_EXCEPTIONS
 
 		if (!n)
 		{
@@ -11664,18 +11736,21 @@ TOML_NAMESPACE_START
 		return *n;
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::get_lower_bound(std::string_view key) noexcept
 	{
 		return map_.lower_bound(key);
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
 		return iterator{ map_.find(key) };
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
@@ -11753,6 +11828,7 @@ TOML_NAMESPACE_START
 		return map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
 	}
 
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool TOML_CALLCONV table::equal(const table& lhs, const table& rhs) noexcept
 	{
@@ -11834,6 +11910,7 @@ TOML_PUSH_WARNINGS;
 
 TOML_IMPL_NAMESPACE_START
 {
+	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	bool is_ascii(const char* str, size_t len) noexcept
 	{
@@ -11978,7 +12055,7 @@ TOML_ANON_NAMESPACE_START
 
 	  public:
 		TOML_NODISCARD_CTOR
-		explicit utf8_byte_stream(std::istream& stream) noexcept(!TOML_COMPILER_EXCEPTIONS) //
+		explicit utf8_byte_stream(std::istream& stream) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) //
 			: source_{ &stream }
 		{
 			if (!*this) // eof, bad
@@ -12013,14 +12090,14 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			return eof() || source_->peek() == std::istream::traits_type::eof();
 		}
 
 		TOML_NODISCARD
 		TOML_ATTR(nonnull)
-		size_t operator()(void* dest, size_t num) noexcept(!TOML_COMPILER_EXCEPTIONS)
+		size_t operator()(void* dest, size_t num) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			TOML_ASSERT(*this);
 
@@ -12051,16 +12128,16 @@ TOML_ANON_NAMESPACE_START
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	struct TOML_ABSTRACT_BASE utf8_reader_interface
+	struct TOML_ABSTRACT_INTERFACE utf8_reader_interface
 	{
 		TOML_NODISCARD
 		virtual const source_path_ptr& source_path() const noexcept = 0;
 
 		TOML_NODISCARD
-		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
+		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
 
 		TOML_NODISCARD
-		virtual bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
+		virtual bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
 
 #if !TOML_EXCEPTIONS
 
@@ -12123,7 +12200,7 @@ TOML_ANON_NAMESPACE_START
 		optional<parse_error> err_;
 #endif
 
-		bool read_next_block() noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool read_next_block() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			TOML_ASSERT(stream_);
 
@@ -12301,7 +12378,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) final
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
 		{
 			utf8_reader_error_check({});
 
@@ -12320,7 +12397,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) final
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
 		{
 			return stream_.peek_eof();
 		}
@@ -12387,7 +12464,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS)
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			utf8_buffered_reader_error_check({});
 
@@ -12441,7 +12518,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			return reader_.peek_eof();
 		}
@@ -14483,7 +14560,7 @@ TOML_IMPL_NAMESPACE_START
 				char32_t chars[utf8_buffered_reader::max_history_length];
 				size_t char_count = {}, advance_count = {};
 				bool eof_while_scanning = false;
-				const auto scan			= [&]() noexcept(!TOML_COMPILER_EXCEPTIONS)
+				const auto scan			= [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 				{
 					if (is_eof())
 						return;
@@ -16944,7 +17021,7 @@ TOML_POP_WARNINGS;
 #undef TOML_ABI_NAMESPACE_END
 #undef TOML_ABI_NAMESPACE_START
 #undef TOML_ABI_NAMESPACES
-#undef TOML_ABSTRACT_BASE
+#undef TOML_ABSTRACT_INTERFACE
 #undef TOML_ALWAYS_INLINE
 #undef TOML_ANON_NAMESPACE
 #undef TOML_ANON_NAMESPACE_END
@@ -16958,11 +17035,14 @@ TOML_POP_WARNINGS;
 #undef TOML_CLANG
 #undef TOML_CLOSED_ENUM
 #undef TOML_CLOSED_FLAGS_ENUM
-#undef TOML_COMPILER_EXCEPTIONS
+#undef TOML_COMPILER_HAS_EXCEPTIONS
+#undef TOML_COMPILER_HAS_RTTI
+#undef TOML_CONST
 #undef TOML_CONST_GETTER
 #undef TOML_CONST_INLINE_GETTER
 #undef TOML_CONSTRAINED_TEMPLATE
-#undef TOML_CPP_VERSION
+#undef TOML_CPP
+#undef TOML_DECLSPEC
 #undef TOML_DELETE_DEFAULTS
 #undef TOML_DISABLE_ARITHMETIC_WARNINGS
 #undef TOML_DISABLE_CODE_ANALYSIS_WARNINGS
@@ -16972,6 +17052,7 @@ TOML_POP_WARNINGS;
 #undef TOML_DISABLE_SUGGEST_ATTR_WARNINGS
 #undef TOML_DISABLE_SWITCH_WARNINGS
 #undef TOML_DISABLE_WARNINGS
+#undef TOML_DOXYGEN
 #undef TOML_EMPTY_BASES
 #undef TOML_ENABLE_IF
 #undef TOML_ENABLE_WARNINGS
@@ -16985,8 +17066,11 @@ TOML_POP_WARNINGS;
 #undef TOML_FP16
 #undef TOML_GCC
 #undef TOML_HAS_ATTR
+#undef TOML_HAS_BUILTIN
 #undef TOML_HAS_CHAR8
+#undef TOML_HAS_CPP_ATTR
 #undef TOML_HAS_CUSTOM_OPTIONAL_TYPE
+#undef TOML_HAS_FEATURE
 #undef TOML_HAS_INCLUDE
 #undef TOML_HAS_SSE2
 #undef TOML_HAS_SSE4_1
@@ -17011,6 +17095,10 @@ TOML_POP_WARNINGS;
 #undef TOML_LIKELY_CASE
 #undef TOML_MAKE_FLAGS
 #undef TOML_MAKE_FLAGS_
+#undef TOML_MAKE_FLAGS_1
+#undef TOML_MAKE_FLAGS_2
+#undef TOML_MAKE_STRING
+#undef TOML_MAKE_STRING_1
 #undef TOML_MAKE_VERSION
 #undef TOML_MSVC
 #undef TOML_NAMESPACE
@@ -17021,6 +17109,14 @@ TOML_POP_WARNINGS;
 #undef TOML_OPEN_FLAGS_ENUM
 #undef TOML_PARSER_TYPENAME
 #undef TOML_POP_WARNINGS
+#undef TOML_PRAGMA_CLANG
+#undef TOML_PRAGMA_CLANG_GE_10
+#undef TOML_PRAGMA_CLANG_GE_11
+#undef TOML_PRAGMA_CLANG_GE_9
+#undef TOML_PRAGMA_GCC
+#undef TOML_PRAGMA_ICC
+#undef TOML_PRAGMA_MSVC
+#undef TOML_PURE
 #undef TOML_PURE_GETTER
 #undef TOML_PURE_INLINE_GETTER
 #undef TOML_PUSH_WARNINGS
@@ -17046,6 +17142,7 @@ TOML_POP_WARNINGS;
 #undef TOML_UNLIKELY_CASE
 #undef TOML_UNREACHABLE
 #undef TOML_UNUSED
+#undef TOML_WINDOWS
 #endif
 
 #endif // TOMLPLUSPLUS_H

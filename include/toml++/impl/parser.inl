@@ -112,7 +112,7 @@ TOML_ANON_NAMESPACE_START
 
 	  public:
 		TOML_NODISCARD_CTOR
-		explicit utf8_byte_stream(std::istream& stream) noexcept(!TOML_COMPILER_EXCEPTIONS) //
+		explicit utf8_byte_stream(std::istream& stream) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) //
 			: source_{ &stream }
 		{
 			if (!*this) // eof, bad
@@ -147,14 +147,14 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			return eof() || source_->peek() == std::istream::traits_type::eof();
 		}
 
 		TOML_NODISCARD
 		TOML_ATTR(nonnull)
-		size_t operator()(void* dest, size_t num) noexcept(!TOML_COMPILER_EXCEPTIONS)
+		size_t operator()(void* dest, size_t num) noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			TOML_ASSERT(*this);
 
@@ -185,16 +185,16 @@ TOML_ANON_NAMESPACE_START
 	static_assert(std::is_trivial_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
-	struct TOML_ABSTRACT_BASE utf8_reader_interface
+	struct TOML_ABSTRACT_INTERFACE utf8_reader_interface
 	{
 		TOML_NODISCARD
 		virtual const source_path_ptr& source_path() const noexcept = 0;
 
 		TOML_NODISCARD
-		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
+		virtual const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
 
 		TOML_NODISCARD
-		virtual bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) = 0;
+		virtual bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) = 0;
 
 #if !TOML_EXCEPTIONS
 
@@ -257,7 +257,7 @@ TOML_ANON_NAMESPACE_START
 		optional<parse_error> err_;
 #endif
 
-		bool read_next_block() noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool read_next_block() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			TOML_ASSERT(stream_);
 
@@ -435,7 +435,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS) final
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
 		{
 			utf8_reader_error_check({});
 
@@ -454,7 +454,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS) final
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS) final
 		{
 			return stream_.peek_eof();
 		}
@@ -521,7 +521,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_EXCEPTIONS)
+		const utf8_codepoint* read_next() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			utf8_buffered_reader_error_check({});
 
@@ -575,7 +575,7 @@ TOML_ANON_NAMESPACE_START
 		}
 
 		TOML_NODISCARD
-		bool peek_eof() const noexcept(!TOML_COMPILER_EXCEPTIONS)
+		bool peek_eof() const noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 		{
 			return reader_.peek_eof();
 		}
@@ -2622,7 +2622,7 @@ TOML_IMPL_NAMESPACE_START
 				char32_t chars[utf8_buffered_reader::max_history_length];
 				size_t char_count = {}, advance_count = {};
 				bool eof_while_scanning = false;
-				const auto scan			= [&]() noexcept(!TOML_COMPILER_EXCEPTIONS)
+				const auto scan			= [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 				{
 					if (is_eof())
 						return;
