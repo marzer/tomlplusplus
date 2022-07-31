@@ -2,8 +2,8 @@ name: ci
 
 on:
   push:
-    branches:
-      - master
+    branches-ignore:
+      - 'gh-pages'
     paths:
       - '**.h'
       - '**.hpp'
@@ -13,8 +13,8 @@ on:
       - '**/meson.build'
       - '**/workflows/**.yaml'
   pull_request:
-    branches:
-      - master
+    branches-ignore:
+      - 'gh-pages'
     paths:
       - '**.h'
       - '**.hpp'

@@ -40,8 +40,10 @@
     <ClInclude Include="include\toml++\impl\at_path.h" />
     <ClInclude Include="include\toml++\impl\date_time.h" />
     <ClInclude Include="include\toml++\impl\key.h" />
+    <ClInclude Include="include\toml++\impl\path.h" />
     <ClInclude Include="include\toml++\impl\simd.h" />
     <ClInclude Include="include\toml++\impl\std_utility.h" />
+    <ClInclude Include="include\toml++\impl\std_variant.h" />
     <ClInclude Include="include\toml++\impl\toml_formatter.h" />
     <ClInclude Include="include\toml++\impl\toml_formatter.inl" />
     <ClInclude Include="include\toml++\impl\formatter.h" />
@@ -102,6 +104,7 @@
     <None Include="CONTRIBUTING.md" />
     <None Include="include\meson.build" />
     <None Include="include\toml++\impl\at_path.inl" />
+    <None Include="include\toml++\impl\path.inl" />
     <None Include="include\toml++\impl\unicode.inl" />
     <None Include="include\toml++\impl\yaml_formatter.inl" />
     <None Include="LICENSE" />

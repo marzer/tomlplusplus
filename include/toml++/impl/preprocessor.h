@@ -429,6 +429,9 @@
 			#define TOML_EXPORTED_CLASS			__declspec(dllimport)
 			#define TOML_EXPORTED_FREE_FUNCTION	__declspec(dllimport)
 		#endif
+		#ifndef TOML_CALLCONV
+			#define TOML_CALLCONV __cdecl
+		#endif
 	#elif defined(__GNUC__) && __GNUC__ >= 4
 		#define TOML_EXPORTED_CLASS				__attribute__((visibility("default")))
 		#define TOML_EXPORTED_MEMBER_FUNCTION	__attribute__((visibility("default")))
@@ -536,10 +539,14 @@
 	#define TOML_EXCEPTIONS	0
 #endif
 
+// calling convention for static/free/friend functions
+#ifndef TOML_CALLCONV
+	#define TOML_CALLCONV
+#endif
+
 #ifndef TOML_UNDEF_MACROS
 	#define TOML_UNDEF_MACROS 1
 #endif
-
 
 #ifndef TOML_MAX_NESTED_VALUES
 	#define TOML_MAX_NESTED_VALUES 256
@@ -1028,6 +1035,11 @@
 /// #define TOML_IMPLEMENTATION 
 /// #include "global_header_that_includes_toml++.h"
 /// \ecpp
+
+
+/// \def TOML_CALLCONV
+/// \brief Calling convention to apply to exported free/static functions.
+/// \detail Not defined by default (let the compiler decide).
 
 
 /// \def TOML_EXPORTED_CLASS

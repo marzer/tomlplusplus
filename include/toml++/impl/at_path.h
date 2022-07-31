@@ -6,6 +6,21 @@
 
 #include "forward_declarations.h"
 
+/// \cond
+TOML_IMPL_NAMESPACE_START
+{
+	template <typename T>
+	using parse_path_callback = bool(TOML_CALLCONV*)(void*, T);
+
+	TOML_NODISCARD
+	bool TOML_CALLCONV parse_path(std::string_view,
+								  void*,
+								  parse_path_callback<std::string_view>,
+								  parse_path_callback<size_t>);
+}
+TOML_IMPL_NAMESPACE_END;
+/// \endcond
+
 TOML_NAMESPACE_START
 {
 	/// \brief Returns a view of the node matching a fully-qualified "TOML path".
@@ -48,14 +63,14 @@ TOML_NAMESPACE_START
 	/// \param path		The "TOML path" to traverse.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<node> at_path(node & root, std::string_view path) noexcept;
+	node_view<node> TOML_CALLCONV at_path(node & root, std::string_view path) noexcept;
 
 	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
 	///
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<const node> at_path(const node& root, std::string_view path) noexcept;
+	node_view<const node> TOML_CALLCONV at_path(const node& root, std::string_view path) noexcept;
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -66,7 +81,7 @@ TOML_NAMESPACE_START
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<node> at_path(node & root, std::wstring_view path);
+	node_view<node> TOML_CALLCONV at_path(node & root, std::wstring_view path);
 
 	/// \brief Returns a const view of the node matching a fully-qualified "TOML path".
 	///
@@ -75,7 +90,7 @@ TOML_NAMESPACE_START
 	/// \see #toml::at_path(node&, std::string_view)
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	node_view<const node> at_path(const node& root, std::wstring_view path);
+	node_view<const node> TOML_CALLCONV at_path(const node& root, std::wstring_view path);
 
 #endif
 }

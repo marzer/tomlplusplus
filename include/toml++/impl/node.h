@@ -1004,6 +1004,54 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		node_view<const node> at_path(std::string_view path) const noexcept;
 
+		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \detail \cpp
+		/// auto config = toml::parse(R"(
+		///
+		/// [foo]
+		/// bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]
+		///
+		/// )"sv);
+		///
+		/// toml::path path1("foo.bar[2]");
+		/// toml::path path2("foo.bar[4].kek");
+		/// std::cout << config.at_path(path1) << "\n";
+		/// std::cout << config.at_path(path1.parent_path()) << "\n";
+		/// std::cout << config.at_path(path2) << "\n";
+		/// std::cout << config.at_path(path2.parent_path()) << "\n";
+		///
+		/// \out
+		/// 2
+		/// [ 0, 1, 2, [ 3 ], { kek = 4 } ]
+		/// 4
+		/// { kek  = 4 }
+		/// \eout
+		///
+		///
+		/// \note Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:
+		/// \cpp
+		/// config.at_path(toml::path("foo.bar")) // same as node_view{ config }["foo"]["bar"]
+		/// config.at_path(toml::path("foo. bar")) // same as node_view{ config }["foo"][" bar"]
+		/// config.at_path(toml::path("foo..bar")) // same as node_view{ config }["foo"][""]["bar"]
+		/// config.at_path(toml::path(".foo.bar")) // same as node_view{ config }[""]["foo"]["bar"]
+		/// \ecpp
+		/// <br>
+		/// Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings.
+		/// This function makes no allowance for this, instead treating all period characters as sub-table delimiters.
+		///
+		/// \param path		The "TOML path" to traverse.
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<node> at_path(const toml::path& path) noexcept;
+
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \see #at_path(const toml::path&)
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<const node> at_path(const toml::path& path) const noexcept;
+
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		/// \brief Returns a view of the subnode matching a fully-qualified "TOML path".
@@ -1026,6 +1074,28 @@ TOML_NAMESPACE_START
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \param 	path The "TOML path" to the desired child.
+		///
+		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
+		///
+		/// \see toml::node_view
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<node> operator[](const toml::path& path) noexcept;
+
+		/// \brief Returns a const view of the subnode matching a fully-qualified "TOML path".
+		///
+		/// \param 	path The "TOML path" to the desired child.
+		///
+		/// \returns	A view of the child node at the given path if one existed, or an empty node view.
+		///
+		/// \see toml::node_view
+		TOML_NODISCARD
+		TOML_EXPORTED_MEMBER_FUNCTION
+		node_view<const node> operator[](const toml::path& path) const noexcept;
+
 		/// @}
 	};
 }
@@ -1036,7 +1106,7 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_PURE_GETTER
 	TOML_EXPORTED_FREE_FUNCTION
-	bool node_deep_equality(const node*, const node*) noexcept;
+	bool TOML_CALLCONV node_deep_equality(const node*, const node*) noexcept;
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond

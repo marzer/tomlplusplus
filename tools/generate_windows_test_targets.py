@@ -117,6 +117,7 @@ def main():
 	</PropertyGroup>
 	<ItemGroup>
 		<ClCompile Include="..\at_path.cpp" />
+		<ClCompile Include="..\path.cpp" />
 		<ClCompile Include="..\conformance_burntsushi_invalid.cpp" />
 		<ClCompile Include="..\conformance_burntsushi_valid.cpp" />
 		<ClCompile Include="..\conformance_iarna_invalid.cpp" />

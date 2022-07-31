@@ -22,6 +22,7 @@ test_sources = [
 	'parsing_spec_example.cpp',
 	'parsing_strings.cpp',
 	'parsing_tables.cpp',
+	'path.cpp',
 	'tests.cpp',
 	'user_feedback.cpp',
 	'using_iterators.cpp',

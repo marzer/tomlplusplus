@@ -278,7 +278,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	bool table::equal(const table& lhs, const table& rhs) noexcept
+	bool TOML_CALLCONV table::equal(const table& lhs, const table& rhs) noexcept
 	{
 		if (&lhs == &rhs)
 			return true;

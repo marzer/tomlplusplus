@@ -16,38 +16,42 @@ template:
 ## Unreleased
 
 #### Fixes:
-- Fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
+- fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
 
 #### Additions:
-- Added value type deduction to `emplace()` methods
+- added value type deduction to `emplace()` methods
+- added `toml::path` utility type (#153, #156) (@jonestristand)
+- added config option `TOML_CALLCONV`
+- added missing relational operators for `source_position`
+
 
 #### Changes:
-- Relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`
+- relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`
 
 <br><br>
 
 ## [v3.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) - 2022-04-22
 
 #### Fixes:
-- Fixed potential segfault when calling `at_path()` with an empty string
-- Fixed UB in internal unicode machinery (#144) (@kchalmer)
-- Fixed a number of spurious warnings with Clang 10 (#145, #146) (@chronoxor)
+- fixed potential segfault when calling `at_path()` with an empty string
+- fixed UB in internal unicode machinery (#144) (@kchalmer)
+- fixed a number of spurious warnings with Clang 10 (#145, #146) (@chronoxor)
 
 #### Additions:
-- Added `toml::array::for_each()`
-- Added `toml::table::for_each()`
-- Added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
-- Added support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
-- Added support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
+- added `toml::array::for_each()`
+- added `toml::table::for_each()`
+- added config options `TOML_EXPORTED_CLASS`, `TOML_EXPORTED_MEMBER_FUNCTION`, `TOML_EXPORTED_STATIC_FUNCTION` &amp; `TOML_EXPORTED_FREE_FUNCTION`
+- added support for escape sequence `\e` when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/790](https://github.com/toml-lang/toml/pull/790))
+- added support for more unicode in bare keys when using `TOML_ENABLE_UNRELEASED_FEATURES` ([toml/891](https://github.com/toml-lang/toml/pull/891))
 
 #### Removals/Deprecations:
-- Deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
+- deprecated old `TOML_API` option in favour new `TOML_EXPORTED_X` options
 	(it will continue to work as it did before if none of the new function export options are defined)
 
 #### Build system:
-- Meson: Added `compile_library` option (@Tachi107)
-- Meson: Added `ubsan_tests` and `ubsan_examples` options
-- Meson: Use system dependencies where available when building tests (@Tachi107)
+- meson: added `compile_library` option (@Tachi107)
+- meson: added `ubsan_tests` and `ubsan_examples` options
+- meson: use system dependencies where available when building tests (@Tachi107)
 
 
 <br><br>

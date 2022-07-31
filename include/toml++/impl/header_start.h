@@ -5,6 +5,7 @@
 //# }}
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
+#pragma inline_recursion(on)
 #pragma push_macro("min")
 #pragma push_macro("max")
 #undef min

@@ -95,6 +95,8 @@ TOML_NAMESPACE_START
 	template <typename>
 	class value;
 
+	class path;
+
 	class toml_formatter;
 	class json_formatter;
 	class yaml_formatter;
@@ -250,13 +252,13 @@ TOML_NAMESPACE_START // abi namespace
 	template <typename Char>
 	inline std::basic_ostream<Char>& operator<<(std::basic_ostream<Char>& lhs, node_type rhs)
 	{
-		using underlying_t = std::underlying_type_t<node_type>;
-		const auto str	   = impl::node_type_friendly_names[static_cast<underlying_t>(rhs)];
-		if constexpr (std::is_same_v<Char, char>)
+		const auto str	 = impl::node_type_friendly_names[static_cast<std::underlying_type_t<node_type>>(rhs)];
+		using str_char_t = decltype(str)::value_type;
+		if constexpr (std::is_same_v<Char, str_char_t>)
 			return lhs << str;
 		else
 		{
-			if constexpr (sizeof(Char) == 1)
+			if constexpr (sizeof(Char) == sizeof(str_char_t))
 				return lhs << std::basic_string_view<Char>{ reinterpret_cast<const Char*>(str.data()), str.length() };
 			else
 				return lhs << str.data();
@@ -1060,7 +1062,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	template <typename T>
-	TOML_PURE_GETTER
+	TOML_PURE_INLINE_GETTER
 	constexpr const T& min(const T& a, const T& b) noexcept //
 	{
 		return a < b ? a : b;

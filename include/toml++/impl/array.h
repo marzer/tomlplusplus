@@ -716,6 +716,10 @@ TOML_NAMESPACE_START
 			return const_cast<array&>(*this).template get_as<ElemType>(index);
 		}
 
+		/// \cond
+		using node::operator[]; // inherit operator[toml::path]
+		/// \endcond
+
 		/// \brief	Gets a reference to the element at a specific index.
 		TOML_NODISCARD
 		node& operator[](size_t index) noexcept
@@ -1628,7 +1632,7 @@ TOML_NAMESPACE_START
 
 		TOML_NODISCARD
 		TOML_EXPORTED_STATIC_FUNCTION
-		static bool equal(const array&, const array&) noexcept;
+		static bool TOML_CALLCONV equal(const array&, const array&) noexcept;
 
 		template <typename T>
 		TOML_NODISCARD

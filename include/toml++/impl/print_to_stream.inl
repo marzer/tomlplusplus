@@ -228,97 +228,97 @@ TOML_IMPL_NAMESPACE_START
 {
 	TOML_EXTERNAL_LINKAGE
 	TOML_ATTR(nonnull)
-	void print_to_stream(std::ostream & stream, const char* val, size_t len)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const char* val, size_t len)
 	{
 		stream.write(val, static_cast<std::streamsize>(len));
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, std::string_view val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, std::string_view val)
 	{
 		stream.write(val.data(), static_cast<std::streamsize>(val.length()));
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const std::string& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const std::string& val)
 	{
 		stream.write(val.data(), static_cast<std::streamsize>(val.length()));
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, char val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, char val)
 	{
 		stream.put(val);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, float val, value_flags format, bool relaxed_precision)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, float val, value_flags format, bool relaxed_precision)
 	{
 		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, double val, value_flags format, bool relaxed_precision)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, double val, value_flags format, bool relaxed_precision)
 	{
 		TOML_ANON_NAMESPACE::print_floating_point_to_stream(stream, val, format, relaxed_precision);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, bool val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, bool val)
 	{
 		print_to_stream(stream, val ? "true"sv : "false"sv);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const toml::date& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date& val)
 	{
 		print_to_stream(stream, val.year, {}, 4);
 		stream.put('-');
@@ -328,7 +328,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const toml::time& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time& val)
 	{
 		print_to_stream(stream, val.hour, {}, 2);
 		stream.put(':');
@@ -350,7 +350,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const toml::time_offset& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::time_offset& val)
 	{
 		if (!val.minutes)
 		{
@@ -379,7 +379,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const toml::date_time& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const toml::date_time& val)
 	{
 		print_to_stream(stream, val.date);
 		stream.put('T');
@@ -389,7 +389,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const source_position& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const source_position& val)
 	{
 		print_to_stream(stream, "line "sv);
 		print_to_stream(stream, val.line);
@@ -398,7 +398,7 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const source_region& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const source_region& val)
 	{
 		print_to_stream(stream, val.begin);
 		if (val.path)
@@ -412,55 +412,55 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_ENABLE_FORMATTERS
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const array& arr)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const array& arr)
 	{
 		stream << toml_formatter{ arr };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const table& tbl)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const table& tbl)
 	{
 		stream << toml_formatter{ tbl };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<std::string>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<std::string>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<int64_t>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<int64_t>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<double>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<double>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<bool>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<bool>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<date>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<date>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<time>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<time>& val)
 	{
 		stream << toml_formatter{ val };
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void print_to_stream(std::ostream & stream, const value<date_time>& val)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, const value<date_time>& val)
 	{
 		stream << toml_formatter{ val };
 	}

@@ -771,7 +771,7 @@ TOML_NAMESPACE_START
 		/// @{
 
 		/// \brief	Value equality operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator==(const value& lhs, value_arg rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, double>)
@@ -788,56 +788,56 @@ TOML_NAMESPACE_START
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const value&, value_arg, );
 
 		/// \brief	Value less-than operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ < rhs;
 		}
 
 		/// \brief	Value less-than operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs < rhs.val_;
 		}
 
 		/// \brief	Value less-than-or-equal-to operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<=(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ <= rhs;
 		}
 
 		/// \brief	Value less-than-or-equal-to operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<=(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs <= rhs.val_;
 		}
 
 		/// \brief	Value greater-than operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ > rhs;
 		}
 
 		/// \brief	Value greater-than operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs > rhs.val_;
 		}
 
 		/// \brief	Value greater-than-or-equal-to operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>=(const value& lhs, value_arg rhs) noexcept
 		{
 			return lhs.val_ >= rhs;
 		}
 
 		/// \brief	Value greater-than-or-equal-to operator.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>=(value_arg lhs, const value& rhs) noexcept
 		{
 			return lhs >= rhs.val_;
@@ -850,7 +850,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the values were of the same type and contained the same value.
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator==(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
@@ -866,7 +866,7 @@ TOML_NAMESPACE_START
 		///
 		/// \returns	True if the values were not of the same type, or did not contain the same value.
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_INLINE_GETTER
 		friend bool operator!=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			return !(lhs == rhs);
@@ -882,7 +882,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Different value types}
 		///				`lhs.type() < rhs.type()`
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
@@ -901,7 +901,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Different value types}
 		///				`lhs.type() <= rhs.type()`
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator<=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
@@ -920,7 +920,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Different value types}
 		///				`lhs.type() > rhs.type()`
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)
@@ -939,7 +939,7 @@ TOML_NAMESPACE_START
 		/// 			\conditional_return{Different value types}
 		///				`lhs.type() >= rhs.type()`
 		template <typename T>
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		friend bool operator>=(const value& lhs, const value<T>& rhs) noexcept
 		{
 			if constexpr (std::is_same_v<value_type, T>)

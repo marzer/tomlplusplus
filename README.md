@@ -186,6 +186,7 @@ won't need to mess with these at all, but if you do, set them before including t
 | Option                            |      Type      | Description                                                                                              | Default                |
 |-----------------------------------|:--------------:|----------------------------------------------------------------------------------------------------------|------------------------|
 | `TOML_ASSERT(expr)`               | function macro | Sets the assert function used by the library.                                                            | `assert()`             |
+| `TOML_CALLCONV`                   |     define     | Calling convention to apply to exported free/static functions.                                           | undefined              |
 | `TOML_CONFIG_HEADER`              | string literal | Includes the given header file before the rest of the library.                                           | undefined              |
 | `TOML_ENABLE_FORMATTERS`          |     boolean    | Enables the formatters. Set to `0` if you don't need them to improve compile times and binary size.      | `1`                    |
 | `TOML_ENABLE_PARSER`              |     boolean    | Enables the parser. Set to `0` if you don't need it to improve compile times and binary size.            | `1`                    |
@@ -257,6 +258,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 - **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 - **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
 - **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
+- **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 - **[@levicki](https://github.com/levicki)** - Helped design some new features
 - **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 - **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs

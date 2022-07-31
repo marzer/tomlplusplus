@@ -206,6 +206,7 @@ def main():
 				r'POXY_IMPLEMENTATION_DETAIL',
 				r'TOML_ALL_INLINE',
 				r'TOML_API',
+				r'TOML_CALLCONV',
 				r'TOML_CONCAT',
 				r'TOML_CONCAT_1',
 				r'TOML_CONFIG_HEADER',

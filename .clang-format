@@ -25,6 +25,7 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
   - TOML_ABSTRACT_BASE
+  - TOML_CALLCONV
   - TOML_CLOSED_ENUM
   - TOML_CLOSED_FLAGS_ENUM
   - TOML_EMPTY_BASES

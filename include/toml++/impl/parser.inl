@@ -3792,31 +3792,31 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::string_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::string_view file_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse_file(file_path);
 	}
@@ -3824,19 +3824,19 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::u8string_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path)
 	{
 		std::string file_path_str;
 		file_path_str.resize(file_path.length());
@@ -3849,19 +3849,19 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::string_view doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::istream & doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse_file(std::wstring_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path));
 	}
@@ -3871,7 +3871,7 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result parse(std::u8string_view doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path)
 	{
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}

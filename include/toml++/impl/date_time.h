@@ -39,14 +39,16 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		friend constexpr bool operator==(const date& lhs, const date& rhs) noexcept
 		{
-			return lhs.year == rhs.year && lhs.month == rhs.month && lhs.day == rhs.day;
+			return lhs.year == rhs.year	  //
+				&& lhs.month == rhs.month //
+				&& lhs.day == rhs.day;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator!=(const date& lhs, const date& rhs) noexcept
 		{
-			return lhs.year != rhs.year || lhs.month != rhs.month || lhs.day != rhs.day;
+			return !(lhs == rhs);
 		}
 
 	  private:
@@ -143,12 +145,14 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		friend constexpr bool operator==(const time& lhs, const time& rhs) noexcept
 		{
-			return lhs.hour == rhs.hour && lhs.minute == rhs.minute && lhs.second == rhs.second
+			return lhs.hour == rhs.hour		//
+				&& lhs.minute == rhs.minute //
+				&& lhs.second == rhs.second //
 				&& lhs.nanosecond == rhs.nanosecond;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator!=(const time& lhs, const time& rhs) noexcept
 		{
 			return !(lhs == rhs);
@@ -252,42 +256,42 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief	Equality operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator==(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes == rhs.minutes;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator!=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes != rhs.minutes;
 		}
 
 		/// \brief	Less-than operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator<(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes < rhs.minutes;
 		}
 
 		/// \brief	Less-than-or-equal-to operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator<=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes <= rhs.minutes;
 		}
 
 		/// \brief	Greater-than operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator>(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes > rhs.minutes;
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator>=(time_offset lhs, time_offset rhs) noexcept
 		{
 			return lhs.minutes >= rhs.minutes;
@@ -380,7 +384,7 @@ TOML_NAMESPACE_START
 		{}
 
 		/// \brief	Returns true if this date_time does not contain timezone offset information.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		constexpr bool is_local() const noexcept
 		{
 			return !offset.has_value();
@@ -390,11 +394,13 @@ TOML_NAMESPACE_START
 		TOML_PURE_GETTER
 		friend constexpr bool operator==(const date_time& lhs, const date_time& rhs) noexcept
 		{
-			return lhs.date == rhs.date && lhs.time == rhs.time && lhs.offset == rhs.offset;
+			return lhs.date == rhs.date //
+				&& lhs.time == rhs.time //
+				&& lhs.offset == rhs.offset;
 		}
 
 		/// \brief	Inequality operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator!=(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs == rhs);
@@ -423,14 +429,14 @@ TOML_NAMESPACE_START
 		}
 
 		/// \brief	Greater-than operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator>(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs <= rhs);
 		}
 
 		/// \brief	Greater-than-or-equal-to operator.
-		TOML_PURE_GETTER
+		TOML_PURE_INLINE_GETTER
 		friend constexpr bool operator>=(const date_time& lhs, const date_time& rhs) noexcept
 		{
 			return !(lhs < rhs);
