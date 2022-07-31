@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>toml::path_component class | toml++ TOML for C++</title>
+  <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i%7CSource+Code+Pro:400,400i,600" rel="stylesheet"/>
+  <link href="m-dark+documentation.compiled.css" rel="stylesheet"/>
+  <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <meta content="toml++" name="twitter:title"/>
+  <meta content="toml++" property="og:title"/>
+  <meta content="toml++" itemprop="name"/>
+  <meta content="Mark Gillard" name="author"/>
+  <meta content="Mark Gillard" property="article:author"/>
+  <meta content="TOML for C++" name="description"/>
+  <meta content="TOML for C++" name="twitter:description"/>
+  <meta content="TOML for C++" property="og:description"/>
+  <meta content="TOML for C++" itemprop="description"/>
+  <meta content="telephone=no" name="format-detection"/>
+  <meta content="Poxy v0.5.7" name="generator"/>
+  <meta content="no-referrer-when-downgrade" name="referrer"/>
+  <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
+  <link href="poxy-0.5.7.css" rel="stylesheet"/>
+  <link href="poxy-0.5.7-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.5.7.js"></script>
+</head>
+<body>
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img alt="" src="logo.png"/>toml++ <span class="m-thin">TOML for C++</span></a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="annotated.html">Classes</a></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="3">
+            <li><a class="github poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <h1>
+          <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>path_component <span class="m-thin">class</span>
+        </h1>
+        <p>Represents a single component of a complete 'TOML-path': either a key or an array index.</p>
+        <nav class="m-block m-default poxy-toc">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#array-index-accessors">Array index accessors</a></li>
+                <li><a href="#equality">Equality</a></li>
+                <li><a href="#key-accessors">Key accessors</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+        <section id="typeless-methods">
+          <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
+          <dl class="m-doc">
+            <dt id="a71021caeadfba986add66776fde75afc">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a71021caeadfba986add66776fde75afc">path_component</a>(</span><span class="m-doc-wrap">)</span>
+            </dt>
+            <dd>Default constructor (creates an empty key).</dd>
+            <dt id="ae8588444d8e20eedda3c7c9de020211d">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae8588444d8e20eedda3c7c9de020211d">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Constructor for a path component that is an array index.</dd>
+            <dt id="a0a43eb66501060d7904e92ce83992231">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0a43eb66501060d7904e92ce83992231">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key)</span>
+            </dt>
+            <dd>Constructor for a path component that is a key string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ae5cabcb9ca01c6fe1a523ebaf27b8203">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key)</span>
+            </dt>
+            <dd>Constructor for a path component that is a key string.</dd>
+            <dt id="a7b6ed29a247bfb453e67e84c4000ad32">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7b6ed29a247bfb453e67e84c4000ad32">path_component</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; pc)</span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a8510261dadffa958e0dd334fc442bff2">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8510261dadffa958e0dd334fc442bff2">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;&amp; pc) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
+            <dt id="a9023bc344bbf001fb54661491d52ed21">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9023bc344bbf001fb54661491d52ed21">~path_component</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Destructor.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="ab4411fc0fa822591ef4adf0a35d16518">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab4411fc0fa822591ef4adf0a35d16518">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+            </dt>
+            <dd>Copy-assignment operator.</dd>
+            <dt id="a500c0fe2100f162f01b6b91165a1fd19">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a500c0fe2100f162f01b6b91165a1fd19">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move-assignment operator.</dd>
+            <dt id="a176bb0d528b4b60010f013724183b12d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a176bb0d528b4b60010f013724183b12d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_index) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Assigns an array index to this path component.</dd>
+            <dt id="a14fcb83942dc34d3fb3d035eb7dc35ed">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a14fcb83942dc34d3fb3d035eb7dc35ed">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> new_key) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+            </dt>
+            <dd>Assigns a path key to this path component.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+            </dt>
+            <dd>Assigns a path key to this path component.</dd>
+            <dt id="a59858d261f3e4e9e67d83835163312d5">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a59858d261f3e4e9e67d83835163312d5">type</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="namespacetoml.html#a05daf3902d4363b06fb467a3292c0bc5">path_<wbr/>component_<wbr/>type</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Retrieve the type of this path component, either <a class="m-doc" href="classtoml_1_1path__component.html#aee2170006b043b32344c841d88c94519">path_component::<wbr/>key</a> or path_component::array_index.</dd>
+          </dl>
+        </section>
+        <section id="array-index-accessors">
+          <h2><a href="#array-index-accessors">Array index accessors</a></h2>
+<aside class="m-note m-danger"><h4>Warning</h4><p>It is undefined behaviour to call these functions when the path component does not represent an array index. Check <a class="m-doc" href="classtoml_1_1path__component.html#a59858d261f3e4e9e67d83835163312d5">type()</a> to determine the component's value type.</p></aside>
+          <dl class="m-doc">
+            <dt id="aa2c540242b230123321196a87267fd58">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa2c540242b230123321196a87267fd58">index</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the array index (const lvalue overload).</dd>
+            <dt id="a0776d976060500ceba2491dbcffa04e8">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0776d976060500ceba2491dbcffa04e8">operator size_t</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the array index (const lvalue).</dd>
+          </dl>
+        </section>
+        <section id="equality">
+          <h2><a href="#equality">Equality</a></h2>
+          <dl class="m-doc">
+            <dt id="a6ebe7d221b72eff60b9570c9e87aaa9a">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6ebe7d221b72eff60b9570c9e87aaa9a">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if two path components do not represent the same key or array index.</dd>
+            <dt id="a9aef313f246e34a691c7e7475a62f3dd">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9aef313f246e34a691c7e7475a62f3dd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if two path components represent the same key or array index.</dd>
+          </dl>
+        </section>
+        <section id="key-accessors">
+          <h2><a href="#key-accessors">Key accessors</a></h2>
+<aside class="m-note m-danger"><h4>Warning</h4><p>It is undefined behaviour to call these functions when the path component does not represent a key. Check <a class="m-doc" href="classtoml_1_1path__component.html#a59858d261f3e4e9e67d83835163312d5">type()</a> to determine the component's value type.</p></aside>
+          <dl class="m-doc">
+            <dt id="aee2170006b043b32344c841d88c94519">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aee2170006b043b32344c841d88c94519">key</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the key string.</dd>
+            <dt id="aa6f05d78ce148082e85ac7f648ef1b6a">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa6f05d78ce148082e85ac7f648ef1b6a">operator const std::string&amp;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the key string.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="ae5cabcb9ca01c6fe1a523ebaf27b8203"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>path_component::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae5cabcb9ca01c6fe1a523ebaf27b8203">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key)</span></span>
+            </h3>
+            <p>Constructor for a path component that is a key string.</p>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="af2031c3540a29e3282339512f11fc42d"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; toml::<wbr/>path_component::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key)</span></span>
+            </h3>
+            <p>Assigns a path key to this path component.</p>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+          </div></section>
+        </section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script>
+<script async="async" src="searchdata-v2.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        
+    <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
+     • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
+    <br/><br/>
+    Site generated using <a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">Poxy</a>
+
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>

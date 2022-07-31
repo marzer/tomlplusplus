@@ -80,6 +80,10 @@
             </dt>
             <dd>Sets the assert function used by the library.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</a></span>
+            </dt>
+            <dd>Calling convention to apply to exported free/static functions.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
             </dt>
             <dd>An additional header to include before any other toml++ header files.</dd>
@@ -149,6 +153,13 @@
             </h3>
             <p>Sets the assert function used by the library.</p>
 <p>Defaults to the standard C <code>assert()</code>.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga2bfc7ae4747f15378d92249aadce019e"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga2bfc7ae4747f15378d92249aadce019e">TOML_CALLCONV</a></span>
+            </h3>
+            <p>Calling convention to apply to exported free/static functions.</p>
+<p>Not defined by default (let the compiler decide).</p>
           </div></section>
           <section class="m-doc-details" id="ga09204feb4a3ff5534623c2bd052dcec0"><div>
             <h3>
@@ -230,7 +241,7 @@
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;toml.hpp&gt;</span>
 
 <span class="c1">// some_code_file.cpp</span>
-<span class="cp">#define TOML_IMPLEMENTATION </span>
+<span class="cp">#define TOML_IMPLEMENTATION</span>
 <span class="cp">#include</span><span class="w"> </span><span class="cpf">"global_header_that_includes_toml++.h"</span></pre></aside>
           </div></section>
           <section class="m-doc-details" id="ga27ee69835a1ddff9dbaf3015b4b08a11"><div>
