@@ -270,11 +270,11 @@ namespace toml
 #endif
 
 #define CHECK_INSERTED_AS(T, expected)                                                                                 \
-	static_assert(std::is_same_v<expected, toml::inserted_type_of<T>>);                                                \
-	static_assert(std::is_same_v<expected, toml::inserted_type_of<const T>>);                                          \
-	static_assert(std::is_same_v<expected, toml::inserted_type_of<T&>>);                                               \
-	static_assert(std::is_same_v<expected, toml::inserted_type_of<const T&>>);                                         \
-	static_assert(std::is_same_v<expected, toml::inserted_type_of<T&&>>)
+	static_assert(std::is_same_v<toml::inserted_type_of<T>, expected>);                                                \
+	static_assert(std::is_same_v<toml::inserted_type_of<const T>, expected>);                                          \
+	static_assert(std::is_same_v<toml::inserted_type_of<T&>, expected>);                                               \
+	static_assert(std::is_same_v<toml::inserted_type_of<const T&>, expected>);                                         \
+	static_assert(std::is_same_v<toml::inserted_type_of<T&&>, expected>)
 
 	CHECK_INSERTED_AS(table, table);
 	CHECK_INSERTED_AS(array, array);

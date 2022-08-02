@@ -252,49 +252,67 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed char val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed short val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed int val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed long val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream,
+									   signed long long val,
+									   value_flags format,
+									   size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned char val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned short val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned int val, value_flags format, size_t min_digits)
+	{
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned long val, value_flags format, size_t min_digits)
+	{
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void TOML_CALLCONV print_to_stream(std::ostream & stream,
+									   unsigned long long val,
+									   value_flags format,
+									   size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}

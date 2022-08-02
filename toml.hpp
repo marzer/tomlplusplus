@@ -1549,13 +1549,13 @@ TOML_IMPL_NAMESPACE_START
 
 	// integer value_traits specializations - standard types
 	template <typename T>
-	struct integer_value_limits
+	struct integer_limits
 	{
 		static constexpr auto min = (std::numeric_limits<T>::min)();
 		static constexpr auto max = (std::numeric_limits<T>::max)();
 	};
 	template <typename T>
-	struct integer_value_traits_base : integer_value_limits<T>
+	struct integer_traits_base : integer_limits<T>
 	{
 		using native_type				= int64_t;
 		static constexpr bool is_native = std::is_same_v<T, native_type>;
@@ -1564,57 +1564,55 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr bool can_partially_represent_native = true;
 	};
 	template <typename T>
-	struct unsigned_integer_value_traits : integer_value_traits_base<T>
+	struct unsigned_integer_traits : integer_traits_base<T>
 	{
-		static constexpr bool is_losslessly_convertible_to_native =
-			integer_value_limits<T>::max <= 9223372036854775807ULL;
-		static constexpr bool can_represent_native = false;
+		static constexpr bool is_losslessly_convertible_to_native = integer_limits<T>::max <= 9223372036854775807ULL;
+		static constexpr bool can_represent_native				  = false;
 	};
 	template <typename T>
-	struct signed_integer_value_traits : integer_value_traits_base<T>
+	struct signed_integer_traits : integer_traits_base<T>
 	{
 		using native_type = int64_t;
 		static constexpr bool is_losslessly_convertible_to_native =
-			integer_value_limits<T>::min >= (-9223372036854775807LL - 1LL)
-			&& integer_value_limits<T>::max <= 9223372036854775807LL;
-		static constexpr bool can_represent_native = integer_value_limits<T>::min <= (-9223372036854775807LL - 1LL)
-												  && integer_value_limits<T>::max >= 9223372036854775807LL;
+			integer_limits<T>::min >= (-9223372036854775807LL - 1LL) && integer_limits<T>::max <= 9223372036854775807LL;
+		static constexpr bool can_represent_native =
+			integer_limits<T>::min <= (-9223372036854775807LL - 1LL) && integer_limits<T>::max >= 9223372036854775807LL;
 	};
-	template <typename T, bool S = integer_value_traits_base<T>::is_signed>
-	struct integer_value_traits : signed_integer_value_traits<T>
+	template <typename T, bool S = integer_traits_base<T>::is_signed>
+	struct integer_traits : signed_integer_traits<T>
 	{};
 	template <typename T>
-	struct integer_value_traits<T, false> : unsigned_integer_value_traits<T>
+	struct integer_traits<T, false> : unsigned_integer_traits<T>
 	{};
 	template <>
-	struct value_traits<signed char> : integer_value_traits<signed char>
+	struct value_traits<signed char> : integer_traits<signed char>
 	{};
 	template <>
-	struct value_traits<unsigned char> : integer_value_traits<unsigned char>
+	struct value_traits<unsigned char> : integer_traits<unsigned char>
 	{};
 	template <>
-	struct value_traits<signed short> : integer_value_traits<signed short>
+	struct value_traits<signed short> : integer_traits<signed short>
 	{};
 	template <>
-	struct value_traits<unsigned short> : integer_value_traits<unsigned short>
+	struct value_traits<unsigned short> : integer_traits<unsigned short>
 	{};
 	template <>
-	struct value_traits<signed int> : integer_value_traits<signed int>
+	struct value_traits<signed int> : integer_traits<signed int>
 	{};
 	template <>
-	struct value_traits<unsigned int> : integer_value_traits<unsigned int>
+	struct value_traits<unsigned int> : integer_traits<unsigned int>
 	{};
 	template <>
-	struct value_traits<signed long> : integer_value_traits<signed long>
+	struct value_traits<signed long> : integer_traits<signed long>
 	{};
 	template <>
-	struct value_traits<unsigned long> : integer_value_traits<unsigned long>
+	struct value_traits<unsigned long> : integer_traits<unsigned long>
 	{};
 	template <>
-	struct value_traits<signed long long> : integer_value_traits<signed long long>
+	struct value_traits<signed long long> : integer_traits<signed long long>
 	{};
 	template <>
-	struct value_traits<unsigned long long> : integer_value_traits<unsigned long long>
+	struct value_traits<unsigned long long> : integer_traits<unsigned long long>
 	{};
 	static_assert(value_traits<int64_t>::is_native);
 	static_assert(value_traits<int64_t>::is_signed);
@@ -1625,117 +1623,110 @@ TOML_IMPL_NAMESPACE_START
 	// integer value_traits specializations - non-standard types
 #ifdef TOML_INT128
 	template <>
-	struct integer_value_limits<TOML_INT128>
+	struct integer_limits<TOML_INT128>
 	{
 		static constexpr TOML_INT128 max =
 			static_cast<TOML_INT128>((TOML_UINT128{ 1u } << ((__SIZEOF_INT128__ * CHAR_BIT) - 1)) - 1);
 		static constexpr TOML_INT128 min = -max - TOML_INT128{ 1 };
 	};
 	template <>
-	struct integer_value_limits<TOML_UINT128>
+	struct integer_limits<TOML_UINT128>
 	{
 		static constexpr TOML_UINT128 min = TOML_UINT128{};
-		static constexpr TOML_UINT128 max =
-			(2u * static_cast<TOML_UINT128>(integer_value_limits<TOML_INT128>::max)) + 1u;
+		static constexpr TOML_UINT128 max = (2u * static_cast<TOML_UINT128>(integer_limits<TOML_INT128>::max)) + 1u;
 	};
 	template <>
-	struct value_traits<TOML_INT128> : integer_value_traits<TOML_INT128>
+	struct value_traits<TOML_INT128> : integer_traits<TOML_INT128>
 	{};
 	template <>
-	struct value_traits<TOML_UINT128> : integer_value_traits<TOML_UINT128>
+	struct value_traits<TOML_UINT128> : integer_traits<TOML_UINT128>
 	{};
 #endif
 #ifdef TOML_SMALL_INT_TYPE
 	template <>
-	struct value_traits<TOML_SMALL_INT_TYPE> : signed_integer_value_traits<TOML_SMALL_INT_TYPE>
+	struct value_traits<TOML_SMALL_INT_TYPE> : signed_integer_traits<TOML_SMALL_INT_TYPE>
 	{};
 #endif
 
-	// floating-point value_traits specializations - standard types
-	template <typename T>
-	struct float_value_limits
+	// floating-point traits base
+	template <typename T, int MantissaDigits, int DecimalDigits>
+	struct float_traits_base
 	{
-		static constexpr bool is_iec559 = std::numeric_limits<T>::is_iec559;
-		static constexpr int digits		= std::numeric_limits<T>::digits;
-		static constexpr int digits10	= std::numeric_limits<T>::digits10;
-	};
-	template <typename T>
-	struct float_value_traits : float_value_limits<T>
-	{
+		static constexpr auto type		= node_type::floating_point;
 		using native_type				= double;
 		static constexpr bool is_native = std::is_same_v<T, native_type>;
 		static constexpr bool is_signed = true;
 
-		static constexpr bool is_losslessly_convertible_to_native = float_value_limits<T>::is_iec559
-																 && float_value_limits<T>::digits <= 53
-																 && float_value_limits<T>::digits10 <= 15;
+		static constexpr int bits	  = static_cast<int>(sizeof(T) * CHAR_BIT);
+		static constexpr int digits	  = MantissaDigits;
+		static constexpr int digits10 = DecimalDigits;
 
-		static constexpr bool can_represent_native = float_value_limits<T>::is_iec559
-												  && float_value_limits<T>::digits >= 53	// DBL_MANT_DIG
-												  && float_value_limits<T>::digits10 >= 15; // DBL_DIG
+		static constexpr bool is_losslessly_convertible_to_native = bits <= 64		//
+																 && digits <= 53	// DBL_MANT_DIG
+																 && digits10 <= 15; // DBL_DIG
 
-		static constexpr bool can_partially_represent_native // 32-bit float values
-			= float_value_limits<T>::is_iec559				 //
-		   && float_value_limits<T>::digits >= 24			 //
-		   && float_value_limits<T>::digits10 >= 6;
+		static constexpr bool can_represent_native = digits >= 53	 // DBL_MANT_DIG
+												  && digits10 >= 15; // DBL_DIG
 
-		static constexpr auto type = node_type::floating_point;
+		static constexpr bool can_partially_represent_native = digits > 0 && digits10 > 0;
 	};
+	template <typename T>
+	struct float_traits : float_traits_base<T, std::numeric_limits<T>::digits, std::numeric_limits<T>::digits10>
+	{};
+#ifdef TOML_FP16
 	template <>
-	struct value_traits<float> : float_value_traits<float>
+	struct float_traits<TOML_FP16> : float_traits_base<TOML_FP16, __FLT16_MANT_DIG__, __FLT16_DIG__>
+	{};
+#endif
+#ifdef TOML_FLOAT16
+	template <>
+	struct float_traits<TOML_FLOAT16> : float_traits_base<TOML_FLOAT16, __FLT16_MANT_DIG__, __FLT16_DIG__>
+	{};
+#endif
+#ifdef TOML_FLOAT128
+	template <>
+	struct float_traits<TOML_FLOAT128> : float_traits_base<TOML_FLOAT128, __FLT128_MANT_DIG__, __FLT128_DIG__>
+	{};
+#endif
+
+	// floating-point traits
+	template <>
+	struct value_traits<float> : float_traits<float>
 	{};
 	template <>
-	struct value_traits<double> : float_value_traits<double>
+	struct value_traits<double> : float_traits<double>
 	{};
 	template <>
-	struct value_traits<long double> : float_value_traits<long double>
+	struct value_traits<long double> : float_traits<long double>
 	{};
-	template <int mant_dig, int dig>
-	struct extended_float_value_limits
-	{
-		static constexpr bool is_iec559 = true;
-		static constexpr int digits		= mant_dig;
-		static constexpr int digits10	= dig;
-	};
+#ifdef TOML_FP16
+	template <>
+	struct value_traits<TOML_FP16> : float_traits<TOML_FP16>
+	{};
+#endif
+#ifdef TOML_FLOAT16
+	template <>
+	struct value_traits<TOML_FLOAT16> : float_traits<TOML_FLOAT16>
+	{};
+#endif
+#ifdef TOML_FLOAT128
+	template <>
+	struct value_traits<TOML_FLOAT128> : float_traits<TOML_FLOAT128>
+	{};
+#endif
+#ifdef TOML_SMALL_FLOAT_TYPE
+	template <>
+	struct value_traits<TOML_SMALL_FLOAT_TYPE> : float_traits<TOML_SMALL_FLOAT_TYPE>
+	{};
+#endif
 	static_assert(value_traits<double>::is_native);
 	static_assert(value_traits<double>::is_losslessly_convertible_to_native);
 	static_assert(value_traits<double>::can_represent_native);
 	static_assert(value_traits<double>::can_partially_represent_native);
 
-	// floating-point value_traits specializations - non-standard types
-#ifdef TOML_FP16
-	template <>
-	struct float_value_limits<TOML_FP16> : extended_float_value_limits<__FLT16_MANT_DIG__, __FLT16_DIG__>
-	{};
-	template <>
-	struct value_traits<TOML_FP16> : float_value_traits<TOML_FP16>
-	{};
-#endif
-#ifdef TOML_FLOAT16
-	template <>
-	struct float_value_limits<TOML_FLOAT16> : extended_float_value_limits<__FLT16_MANT_DIG__, __FLT16_DIG__>
-	{};
-	template <>
-	struct value_traits<TOML_FLOAT16> : float_value_traits<TOML_FLOAT16>
-	{};
-#endif
-#ifdef TOML_FLOAT128
-	template <>
-	struct float_value_limits<TOML_FLOAT128> : extended_float_value_limits<__FLT128_MANT_DIG__, __FLT128_DIG__>
-	{};
-	template <>
-	struct value_traits<TOML_FLOAT128> : float_value_traits<TOML_FLOAT128>
-	{};
-#endif
-#ifdef TOML_SMALL_FLOAT_TYPE
-	template <>
-	struct value_traits<TOML_SMALL_FLOAT_TYPE> : float_value_traits<TOML_SMALL_FLOAT_TYPE>
-	{};
-#endif
-
 	// string value_traits specializations - char-based strings
 	template <typename T>
-	struct string_value_traits
+	struct string_traits
 	{
 		using native_type										  = std::string;
 		static constexpr bool is_native							  = std::is_same_v<T, native_type>;
@@ -1746,50 +1737,50 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr auto type							 = node_type::string;
 	};
 	template <>
-	struct value_traits<std::string> : string_value_traits<std::string>
+	struct value_traits<std::string> : string_traits<std::string>
 	{};
 	template <>
-	struct value_traits<std::string_view> : string_value_traits<std::string_view>
+	struct value_traits<std::string_view> : string_traits<std::string_view>
 	{};
 	template <>
-	struct value_traits<const char*> : string_value_traits<const char*>
+	struct value_traits<const char*> : string_traits<const char*>
 	{};
 	template <size_t N>
-	struct value_traits<const char[N]> : string_value_traits<const char[N]>
+	struct value_traits<const char[N]> : string_traits<const char[N]>
 	{};
 	template <>
-	struct value_traits<char*> : string_value_traits<char*>
+	struct value_traits<char*> : string_traits<char*>
 	{};
 	template <size_t N>
-	struct value_traits<char[N]> : string_value_traits<char[N]>
+	struct value_traits<char[N]> : string_traits<char[N]>
 	{};
 
 	// string value_traits specializations - char8_t-based strings
 #if TOML_HAS_CHAR8
 	template <>
-	struct value_traits<std::u8string> : string_value_traits<std::u8string>
+	struct value_traits<std::u8string> : string_traits<std::u8string>
 	{};
 	template <>
-	struct value_traits<std::u8string_view> : string_value_traits<std::u8string_view>
+	struct value_traits<std::u8string_view> : string_traits<std::u8string_view>
 	{};
 	template <>
-	struct value_traits<const char8_t*> : string_value_traits<const char8_t*>
+	struct value_traits<const char8_t*> : string_traits<const char8_t*>
 	{};
 	template <size_t N>
-	struct value_traits<const char8_t[N]> : string_value_traits<const char8_t[N]>
+	struct value_traits<const char8_t[N]> : string_traits<const char8_t[N]>
 	{};
 	template <>
-	struct value_traits<char8_t*> : string_value_traits<char8_t*>
+	struct value_traits<char8_t*> : string_traits<char8_t*>
 	{};
 	template <size_t N>
-	struct value_traits<char8_t[N]> : string_value_traits<char8_t[N]>
+	struct value_traits<char8_t[N]> : string_traits<char8_t[N]>
 	{};
 #endif
 
 	// string value_traits specializations - wchar_t-based strings on Windows
 #if TOML_ENABLE_WINDOWS_COMPAT
 	template <typename T>
-	struct wstring_value_traits
+	struct wstring_traits
 	{
 		using native_type										  = std::string;
 		static constexpr bool is_native							  = false;
@@ -1799,22 +1790,22 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr auto type								  = node_type::string;
 	};
 	template <>
-	struct value_traits<std::wstring> : wstring_value_traits<std::wstring>
+	struct value_traits<std::wstring> : wstring_traits<std::wstring>
 	{};
 	template <>
-	struct value_traits<std::wstring_view> : wstring_value_traits<std::wstring_view>
+	struct value_traits<std::wstring_view> : wstring_traits<std::wstring_view>
 	{};
 	template <>
-	struct value_traits<const wchar_t*> : wstring_value_traits<const wchar_t*>
+	struct value_traits<const wchar_t*> : wstring_traits<const wchar_t*>
 	{};
 	template <size_t N>
-	struct value_traits<const wchar_t[N]> : wstring_value_traits<const wchar_t[N]>
+	struct value_traits<const wchar_t[N]> : wstring_traits<const wchar_t[N]>
 	{};
 	template <>
-	struct value_traits<wchar_t*> : wstring_value_traits<wchar_t*>
+	struct value_traits<wchar_t*> : wstring_traits<wchar_t*>
 	{};
 	template <size_t N>
-	struct value_traits<wchar_t[N]> : wstring_value_traits<wchar_t[N]>
+	struct value_traits<wchar_t[N]> : wstring_traits<wchar_t[N]>
 	{};
 #endif
 
@@ -2119,8 +2110,7 @@ TOML_PUSH_WARNINGS;
 TOML_IMPL_NAMESPACE_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
-	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
-	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
+	// A: - I'm using <charconv> to format numerics. Faster and locale-independent.
 	//    - I can (potentially) avoid forcing users to drag in <sstream> and <iomanip>.
 	//    - Strings in C++. Honestly.
 
@@ -2138,28 +2128,34 @@ TOML_IMPL_NAMESPACE_START
 	void TOML_CALLCONV print_to_stream(std::ostream&, char);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed char, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed short, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed int, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed long long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned char, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned short, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned int, value_flags = {}, size_t min_digits = 0);
+
+	TOML_EXPORTED_FREE_FUNCTION
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned long, value_flags = {}, size_t min_digits = 0);
+
+	TOML_EXPORTED_FREE_FUNCTION
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned long long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
 	void TOML_CALLCONV print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
@@ -4528,7 +4524,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 																											\
 	TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"		\
 	TOML_SA_LIST_BEG "any other integer type"																\
-	TOML_SA_LIST_SEP "any floating-point type >= 32 bits"													\
+	TOML_SA_LIST_SEP "any floating-point type"																\
 	TOML_SA_LIST_END																						\
 																											\
 	TOML_SA_LIST_NXT "An immutable view type not requiring additional temporary storage"					\
@@ -5493,7 +5489,7 @@ TOML_NAMESPACE_START
 
 				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
 				TOML_SA_LIST_BEG "any other integer type"
-				TOML_SA_LIST_SEP "any floating-point type >= 32 bits"
+				TOML_SA_LIST_SEP "any floating-point type"
 				TOML_SA_LIST_END
 
 				TOML_SA_LIST_NXT "A compatible view type"
@@ -10021,49 +10017,67 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed char val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed short val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed int val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, int64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, signed long val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint8_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream,
+									   signed long long val,
+									   value_flags format,
+									   size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint16_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned char val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint32_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned short val, value_flags format, size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void TOML_CALLCONV print_to_stream(std::ostream & stream, uint64_t val, value_flags format, size_t min_digits)
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned int val, value_flags format, size_t min_digits)
+	{
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void TOML_CALLCONV print_to_stream(std::ostream & stream, unsigned long val, value_flags format, size_t min_digits)
+	{
+		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void TOML_CALLCONV print_to_stream(std::ostream & stream,
+									   unsigned long long val,
+									   value_flags format,
+									   size_t min_digits)
 	{
 		TOML_ANON_NAMESPACE::print_integer_to_stream(stream, val, format, min_digits);
 	}

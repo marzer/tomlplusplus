@@ -17,6 +17,7 @@ template:
 
 #### Fixes:
 - fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
+- fixed `print_to_stream` ambiguity for `size_t` (#167) (@acronce)
 
 #### Additions:
 - added value type deduction to `emplace()` methods
@@ -24,9 +25,9 @@ template:
 - added config option `TOML_CALLCONV`
 - added missing relational operators for `source_position`
 
-
 #### Changes:
 - relaxed cvref requirements of `is_homogeneous()`, `emplace()`, `emplace_back()`, `emplace_hint()`
+- relaxed mantissa and digits10 requirements of extended float support
 
 <br><br>
 

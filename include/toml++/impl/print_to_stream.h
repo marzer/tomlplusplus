@@ -11,8 +11,7 @@
 TOML_IMPL_NAMESPACE_START
 {
 	// Q: "why does print_to_stream() exist? why not just use ostream::write(), ostream::put() etc?"
-	// A: - I'm supporting C++20's char8_t as well; wrapping streams allows switching string modes transparently.
-	//    - I'm using <charconv> to format numerics. Faster and locale-independent.
+	// A: - I'm using <charconv> to format numerics. Faster and locale-independent.
 	//    - I can (potentially) avoid forcing users to drag in <sstream> and <iomanip>.
 	//    - Strings in C++. Honestly.
 
@@ -30,28 +29,34 @@ TOML_IMPL_NAMESPACE_START
 	void TOML_CALLCONV print_to_stream(std::ostream&, char);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int8_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed char, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int16_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed short, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int32_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed int, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, int64_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint8_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, signed long long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint16_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned char, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint32_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned short, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
-	void TOML_CALLCONV print_to_stream(std::ostream&, uint64_t, value_flags = {}, size_t min_digits = 0);
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned int, value_flags = {}, size_t min_digits = 0);
+
+	TOML_EXPORTED_FREE_FUNCTION
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned long, value_flags = {}, size_t min_digits = 0);
+
+	TOML_EXPORTED_FREE_FUNCTION
+	void TOML_CALLCONV print_to_stream(std::ostream&, unsigned long long, value_flags = {}, size_t min_digits = 0);
 
 	TOML_EXPORTED_FREE_FUNCTION
 	void TOML_CALLCONV print_to_stream(std::ostream&, float, value_flags = {}, bool relaxed_precision = false);
