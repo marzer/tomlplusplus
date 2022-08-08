@@ -234,10 +234,13 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const table& tbl)
 	{
-		static constexpr auto is_non_inline_array_of_tables = [](auto&& nde) noexcept
+		static constexpr auto is_non_inline_array_of_tables = [](const node& n) noexcept
 		{
-			auto arr = nde.as_array();
-			return arr && arr->is_array_of_tables() && !arr->template get_as<table>(0u)->is_inline();
+			const auto arr = n.as_array();
+			if (!arr || !arr->is_array_of_tables())
+				return false;
+
+			return !reinterpret_cast<const table*>(&(*arr)[0])->is_inline();
 		};
 
 		// values, arrays, and inline tables/table arrays

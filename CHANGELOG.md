@@ -17,6 +17,7 @@ template:
 
 #### Fixes:
 - fixed `[dotted.table]` source columns sometimes being off by one (#152) (@vaartis)
+- fixed spurious `Wnull-dereference` warning on GCC (#164) (@zaporozhets)
 - fixed `print_to_stream` ambiguity for `size_t` (#167) (@acronce)
 
 #### Additions:
