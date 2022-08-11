@@ -38,7 +38,7 @@ TOML_IMPL_NAMESPACE_START
 		using map_iterator		   = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
 
 		mutable map_iterator iter_;
-		mutable std::aligned_storage_t<sizeof(proxy_type), alignof(proxy_type)> proxy_;
+		alignas(proxy_type) mutable unsigned char proxy_[sizeof(proxy_type)];
 		mutable bool proxy_instantiated_ = false;
 
 		TOML_NODISCARD
@@ -46,12 +46,12 @@ TOML_IMPL_NAMESPACE_START
 		{
 			if (!proxy_instantiated_)
 			{
-				auto p = ::new (static_cast<void*>(&proxy_)) proxy_type{ iter_->first, *iter_->second.get() };
+				auto p = ::new (static_cast<void*>(proxy_)) proxy_type{ iter_->first, *iter_->second.get() };
 				proxy_instantiated_ = true;
 				return p;
 			}
 			else
-				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(&proxy_));
+				return TOML_LAUNDER(reinterpret_cast<proxy_type*>(proxy_));
 		}
 
 	  public:
