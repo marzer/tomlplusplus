@@ -1,18 +1,19 @@
 # this is a config file for Poxy - a Doxygen + m.css front-end written in Python.
 # https://github.com/marzer/poxy
 
-name              = 'toml++'
-author            = 'Mark Gillard'
-description       = 'TOML for C++'
-cpp               = 17
-github            = 'marzer/tomlplusplus'
-license           = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
-show_includes     = false
-logo              = 'images/logo.png'
-favicon           = 'images/favicon.ico'
-navbar            = [ 'namespaces', 'annotated' ]
-theme             = 'dark'
-extra_files       = [
+name            = 'toml++'
+author          = 'Mark Gillard'
+description     = 'TOML for C++'
+cpp             = 17
+github          = 'marzer/tomlplusplus'
+license         = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
+show_includes   = false
+changelog       = true
+logo            = 'images/logo.png'
+favicon         = 'images/favicon.ico'
+navbar          = [ 'namespaces', 'annotated' ]
+theme           = 'dark'
+extra_files     = [
     'images/banner_small.png',
     'images/badge-awesome.svg',
     'images/badge-TOML.svg',
@@ -22,22 +23,22 @@ extra_files       = [
 
 
 [warnings]
-enabled           = true
-treat_as_errors   = false
-undocumented      = true
+enabled         = true
+treat_as_errors = false
+undocumented    = true
 
 
 
 [sources]
-paths             = [ 'pages' ]
-recursive_paths   = [ '../include' ]
-patterns          = [ '*.h', '*.dox' ]
-strip_paths       = [ '../include' ]
+paths           = [ 'pages' ]
+recursive_paths = [ '../include' ]
+patterns        = [ '*.h', '*.dox' ]
+strip_paths     = [ '../include' ]
 
 
 
 [images]
-paths             = [ 'images' ]
+paths           = [ 'images' ]
 
 
 
@@ -54,8 +55,8 @@ paths             = [ 'images' ]
 
 
 [code_blocks]
-macros            = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
-string_literals   = [ '_toml' ]
+macros          = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
+string_literals = [ '_toml' ]
 
 
 

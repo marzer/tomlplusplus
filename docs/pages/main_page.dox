@@ -519,10 +519,7 @@ FetchContent_MakeAvailable(tomlplusplus)
 \subsection mainpage-adding-lib-git-submodules Git submodules
 \shell
 git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusplus
-git config -f .gitmodules submodule.tomlplusplus.shallow true
 \endshell
-\attention The toml++ repository has some submodules of its own, but **they are only used for testing**!
-You should **not** use the `--recursive` option for regular library consumption.
 
 
 

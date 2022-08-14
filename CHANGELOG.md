@@ -3,7 +3,8 @@
 <!--
 template:
 
-## [vX.X.X](https://github.com/marzer/tomlplusplus/releases/tag/vX.X.X) - YYYY-MM-DD
+## vX.X.X
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/vX.X.X) YYYY-MM-DD
 
 #### Fixes:
 #### Additions:
@@ -32,7 +33,8 @@ template:
 
 <br><br>
 
-## [v3.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) - 2022-04-22
+## v3.1.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.1.0) 2022-04-22
 
 #### Fixes:
 - fixed potential segfault when calling `at_path()` with an empty string
@@ -59,7 +61,8 @@ template:
 <br><br>
 
 
-## [v3.0.1](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.1) - 2022-01-13
+## v3.0.1
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.1) 2022-01-13
 
 This is a single-bugfix release to fix an ODR issue for people using header-only mode in multiple
 translation units. If you aren't seeing linker errors because of `toml::array::insert_at()`,
@@ -72,7 +75,8 @@ this release holds nothing of value over v3.0.0.
 <br><br>
 
 
-## [v3.0.0](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.0) - 2022-01-11
+## v3.0.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.0.0) 2022-01-11
 
 
 This release will be a major version bump, so it's ABI breaks all around.
@@ -110,7 +114,7 @@ Any changes that are likely to cause migration issues (API changes, build system
 - added `toml::table::at()` (same semantics as `std::map::at()`)
 - added `toml::node_view::operator==`
 - added `toml::key` - provides a facility to access the source_regions of parsed keys (#82) (@vaartis)
-- added `toml::is_key<>` and toml::is_key_or_convertible<>` metafunctions
+- added `toml::is_key<>` and `toml::is_key_or_convertible<>` metafunctions
 - added `toml::format_flags::relaxed_float_precision` (#89) (@vaartis)
 - added `toml::format_flags::quote_infinities_and_nans`
 - added `toml::format_flags::indent_sub_tables` (#120) (@W4RH4WK)
@@ -164,7 +168,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.5.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.5.0) - 2021-07-11
+## v2.5.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.5.0) 2021-07-11
 
 #### Fixes:
 - fixed linkage error with windows compat mode 
@@ -187,7 +192,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.4.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.4.0) - 2021-05-19
+## v2.4.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.4.0) 2021-05-19
 
 #### Fixes:
 - fixed `node::value()` not retrieving inf and nan correctly
@@ -217,7 +223,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.3.0) - 2020-12-29
+## v2.3.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.3.0) 2020-12-29
 
 #### Fixes:
 - fixed compiler errors caused by `<charconv>` with Apple-flavoured clang
@@ -235,7 +242,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.2.0) - 2020-08-09
+## v2.2.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.2.0) 2020-08-09
 
 #### Fixes:
 - fixed some issues building with VS2017 (#55) (@sobczyk)
@@ -265,7 +273,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.1.0) - 2020-07-11
+## v2.1.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.1.0) 2020-07-11
 
 #### Fixes:
 - fixed inconsistent emission of leading/trailing newlines when writing a table to an ostream (#48) (@levicki)
@@ -294,7 +303,8 @@ Any changes that are likely to cause migration issues (API changes, build system
 <br><br>
 
 
-## [v2.0.0](https://github.com/marzer/tomlplusplus/releases/tag/v2.0.0) - 2020-07-20
+## v2.0.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v2.0.0) 2020-07-20
 
 This release contains a fairly significant number of 'quality of life' improvements, yay! But also necessitates an ABI
 break (hence the version number bump). Changes that might block a migration are annotated with ⚠&#xFE0F;.
@@ -339,7 +349,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.3.3](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.3) - 2020-06-29
+## v1.3.3
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.3) 2020-06-29
 
 #### Fixes:
 - fixed some minor TOML spec conformance bugs
@@ -361,7 +372,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.3.2](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.2) - 2020-06-19
+## v1.3.2
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.2) 2020-06-19
 
 #### Fixes:
 - fixed single-digit negative integers parsing as positive
@@ -377,7 +389,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.0) - 2020-06-02
+## v1.3.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.3.0) 2020-06-02
 
 #### Fixes:
 - fixed `formatter::print_inline()` causing compilation failures in DLL builds
@@ -398,7 +411,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.2.5](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.5) - 2020-04-24
+## v1.2.5
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.5) 2020-04-24
 
 #### Fixes:
 - fixed some multi-line string parsing issues
@@ -419,7 +433,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.2.3](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.3) - 2020-04-11
+## v1.2.3
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.3) 2020-04-11
 
 #### Fixes:
 - fixed printing of inf and nan
@@ -442,7 +457,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.0) - 2020-04-07
+## v1.2.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.2.0) 2020-04-07
 
 #### Fixes:
 - fixed some parsing and printing ops being locale-dependent
@@ -461,7 +477,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v1.1.0) - 2020-04-03
+## v1.1.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v1.1.0) 2020-04-03
 
 #### Fixes:
 - fixed some parser error paths not returning early enough `TOML_EXCEPTIONS=0` 
@@ -480,7 +497,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v1.0.0](https://github.com/marzer/tomlplusplus/releases/tag/1.0.0) - 2020-03-28
+## v1.0.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/1.0.0) 2020-03-28
 
 #### Fixes:
 - fixed minor documentation issues
@@ -492,7 +510,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.6.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.6.0) - 2020-03-24
+## v0.6.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.6.0) 2020-03-24
 
 #### Fixes:
 - fixed minor preprocessor/macro issues
@@ -506,7 +525,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.5.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.5.0) - 2020-03-18
+## v0.5.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.5.0) 2020-03-18
 
 #### Fixes:
 - fixed crash when reaching EOF while parsing a string when exceptions are disabled
@@ -526,10 +546,11 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.4.3](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.3) - 2020-03-10
+## v0.4.3
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.3) 2020-03-10
 
 #### Fixes:
-- fixed ICE in VS2019 when using `/std:c++17` instead of `/std:c++latest
+- fixed ICE in VS2019 when using `/std:c++17` instead of `/std:c++latest`
 
 #### Additions:
 - added `#error` when `TOML_EXCEPTIONS` is set to `1` but compiler exceptions were disabled
@@ -541,7 +562,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.4.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.0) - 2020-03-05
+## v0.4.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.4.0) 2020-03-05
 
 #### Fixes:
 - fixed `parse_file()` failing to compile with plain string literals
@@ -557,7 +579,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.3.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.3.0) - 2020-03-01
+## v0.3.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.3.0) 2020-03-01
 
 #### Fixes:
 - fixed some pedantic clang warnings
@@ -577,7 +600,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.2.1](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.1) - 2020-02-26
+## v0.2.1
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.1) 2020-02-26
 
 #### Fixes:
 - fixed minor printing bug in `operator<<(ostream, source_position)`
@@ -593,7 +617,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.2.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.0) - 2020-02-23
+## v0.2.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.2.0) 2020-02-23
 
 #### Fixes:
 - fixed truncation of floating-point values when using ostreams
@@ -612,7 +637,8 @@ break (hence the version number bump). Changes that might block a migration are 
 <br><br>
 
 
-## [v0.1.0](https://github.com/marzer/tomlplusplus/releases/tag/v0.1.0) - 2020-02-20
+## v0.1.0
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v0.1.0) 2020-02-20
 
 - First public release, yay! 🎉&#xFE0F;
 
