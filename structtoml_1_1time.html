@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.7" name="generator"/>
+  <meta content="Poxy v0.6.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.7.css" rel="stylesheet"/>
-  <link href="poxy-0.5.7-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.7.js"></script>
+  <link href="poxy-0.6.0.css" rel="stylesheet"/>
+  <link href="poxy-0.6.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.6.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -68,8 +68,8 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
-                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -77,18 +77,23 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a460d6626a20b992f38c676bf5ee62a20">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a460d6626a20b992f38c676bf5ee62a20">time</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Default constructor. Does not initialize the members.</dd>
-            <dt id="acaec3dc6784706c57cc712ab403123e6">
-              <div class="m-doc-template">template&lt;typename H, typename M, typename S = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>, typename NS = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a>&gt;</div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acaec3dc6784706c57cc712ab403123e6">time</a>(</span><span class="m-doc-wrap">H h,
-              M m,
-              S s = S{},
-              NS ns = NS{}) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="af16b84d0525e4281c72625a293c3757b">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af16b84d0525e4281c72625a293c3757b">TOML_CONSTRAINED_TEMPLATE</a>(</span><span class="m-doc-wrap">(impl::all_integral&lt;H, M, S, NS&gt;),
+              typename H,
+              typename M,
+              typename S = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>,
+              typename NS = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a>) TOML_NODISCARD_CTOR const expr time(H h</span>
             </dt>
             <dd>Constructs a time from individual time component values.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a6d0fee402d14174142e5e51b3975b016">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6d0fee402d14174142e5e51b3975b016">time</a>(</span><span class="m-doc-wrap">) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor. Does not initialize the members.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -107,59 +112,6 @@
             </dt>
             <dd>The fractional nanoseconds component, from 0 - 999999999.</dd>
           </dl>
-        </section>
-        <section id="friends">
-          <h2><a href="#friends">Friends</a></h2>
-          <dl class="m-doc">
-            <dt id="a779eb04b76147675a373fb702f54de75">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a779eb04b76147675a373fb702f54de75">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Inequality operator.</dd>
-            <dt id="a640fb738131cd50808a7781df0f57f4f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a640fb738131cd50808a7781df0f57f4f">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Less-than operator.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af108427371dd0c0321e5bcbb3f547842">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
-            </dt>
-            <dd>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</dd>
-            <dt id="a4214cfd149972269cfaea39ec2280832">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4214cfd149972269cfaea39ec2280832">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Less-than-or-equal-to operator.</dd>
-            <dt id="a7ffc48378c7a8c1651afe4c7cca9c054">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7ffc48378c7a8c1651afe4c7cca9c054">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Equality operator.</dd>
-            <dt id="a8c9b9e61d32a2cbf9cf9249e5c5b21d2">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8c9b9e61d32a2cbf9cf9249e5c5b21d2">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Greater-than operator.</dd>
-            <dt id="aa4d76ea98dab8266666eafe8cc79b72e">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa4d76ea98dab8266666eafe8cc79b72e">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Greater-than-or-equal-to operator.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af108427371dd0c0321e5bcbb3f547842"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af108427371dd0c0321e5bcbb3f547842">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs)</span></span>
-            </h3>
-            <p>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time</span><span class="p">{</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"> </span><span class="mi">34</span><span class="p">,</span><span class="w"> </span><span class="mi">500000000</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">10:20:34</span>
-<span class="go">10:20:34.5</span></pre>
-          </div></section>
         </section>
       </div>
     </div>
@@ -208,6 +160,7 @@
         
     <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a href="md_poxy_changelog.html">Changelog</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
      • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
     <br/><br/>

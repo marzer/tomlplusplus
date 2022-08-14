@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.7" name="generator"/>
+  <meta content="Poxy v0.6.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.7.css" rel="stylesheet"/>
-  <link href="poxy-0.5.7-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.7.js"></script>
+  <link href="poxy-0.6.0.css" rel="stylesheet"/>
+  <link href="poxy-0.6.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.6.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -68,8 +68,8 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
-                <li><a href="#friends">Friends</a></li>
               </ul>
             </li>
           </ul>
@@ -77,17 +77,22 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a5cbb79ab52538ec7a74022cf4fcfb129">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5cbb79ab52538ec7a74022cf4fcfb129">date</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Default constructor. Does not initialize the members.</dd>
-            <dt id="a6025b77738bf7ed2db704cc85297e74d">
-              <div class="m-doc-template">template&lt;typename Y, typename M, typename D&gt;</div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6025b77738bf7ed2db704cc85297e74d">date</a>(</span><span class="m-doc-wrap">Y y,
-              M m,
-              D d) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a3a9f605c97507585e6cf429df1e01da1">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3a9f605c97507585e6cf429df1e01da1">TOML_CONSTRAINED_TEMPLATE</a>(</span><span class="m-doc-wrap">(impl::all_integral&lt;Y, M, D&gt;),
+              typename Y,
+              typename M,
+              typename D) TOML_NODISCARD_CTOR const expr date(Y y</span>
             </dt>
             <dd>Constructs a date from individual date component values.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a264966c24b3455a860de1455f5f99735">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a264966c24b3455a860de1455f5f99735">date</a>(</span><span class="m-doc-wrap">) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor. Does not initialize the members.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -103,57 +108,6 @@
             </dt>
             <dd>The day component, from 1 - 31.</dd>
           </dl>
-        </section>
-        <section id="friends">
-          <h2><a href="#friends">Friends</a></h2>
-          <dl class="m-doc">
-            <dt id="a749a0234d295cb7aa694d0b43488cec4">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a749a0234d295cb7aa694d0b43488cec4">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Inequality operator.</dd>
-            <dt id="afaa5e0c51e3510196c29945ad10ae688">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afaa5e0c51e3510196c29945ad10ae688">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Less-than operator.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af56da4d266ccb053fdba60905bca8b3e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
-            </dt>
-            <dd>Prints a date out to a stream as <code>YYYY-MM-DD</code> (per RFC 3339).</dd>
-            <dt id="a516dcfebd0bf3aee7402b6b548722711">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a516dcfebd0bf3aee7402b6b548722711">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Less-than-or-equal-to operator.</dd>
-            <dt id="a0caa07ad9eee6ae58643616be51bb663">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0caa07ad9eee6ae58643616be51bb663">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Equality operator.</dd>
-            <dt id="aa166f5254bd44bade29bd0b6bae1935b">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa166f5254bd44bade29bd0b6bae1935b">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Greater-than operator.</dd>
-            <dt id="a5b36b70c047b28b364396352406ea1ad">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5b36b70c047b28b364396352406ea1ad">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Greater-than-or-equal-to operator.</dd>
-          </dl>
-        </section>
-        <section>
-          <h2>Function documentation</h2>
-          <section class="m-doc-details" id="af56da4d266ccb053fdba60905bca8b3e"><div>
-            <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af56da4d266ccb053fdba60905bca8b3e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1date.html">date</a>&amp; rhs)</span></span>
-            </h3>
-            <p>Prints a date out to a stream as <code>YYYY-MM-DD</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">date</span><span class="p">{</span><span class="w"> </span><span class="mi">1987</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">16</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">1987-03-16</span></pre>
-          </div></section>
         </section>
       </div>
     </div>
@@ -202,6 +156,7 @@
         
     <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a href="md_poxy_changelog.html">Changelog</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
      • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
     <br/><br/>

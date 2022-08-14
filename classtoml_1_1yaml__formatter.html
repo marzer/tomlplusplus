@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.7" name="generator"/>
+  <meta content="Poxy v0.6.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.7.css" rel="stylesheet"/>
-  <link href="poxy-0.5.7-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.7.js"></script>
+  <link href="poxy-0.6.0.css" rel="stylesheet"/>
+  <link href="poxy-0.6.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.6.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -74,7 +74,7 @@
             </li>
           </ul>
         </nav>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">some_toml</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<aside class="m-block m-special"><h4>Conditional availability</h4><p>This class is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 <span class="s">    [fruit]</span>
 <span class="s">    apple.color = "red"</span>
 <span class="s">    apple.taste.sweet = true</span>
@@ -82,7 +82,7 @@
 <span class="s">    [fruit.apple.texture]</span>
 <span class="s">    smooth = true</span>
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="n">some_toml</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">fruit:</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">fruit:</span>
 <span class="go">  apple:</span>
 <span class="go">    color: red</span>
 <span class="go">    taste:</span>
@@ -93,7 +93,7 @@
           <h2><a href="#pub-static-attribs">Public static variables</a></h2>
           <dl class="m-doc">
             <dt id="af161f0a6c794945e85b210ee85cb78e9">
-              static <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> <a class="m-doc-self" href="#af161f0a6c794945e85b210ee85cb78e9">default_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
+              static <a class="m-doc" href="namespacetoml.html#a3d80054cd13c6b6dcf31a4cae5166add">format_<wbr/>flags</a> <a class="m-doc-self" href="#af161f0a6c794945e85b210ee85cb78e9">default_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>The default flags for a <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>.</dd>
           </dl>
@@ -103,12 +103,12 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a0089cdd517d9f6641ed10c8ddb5b1c11">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+              <a class="m-doc" href="namespacetoml.html#a3d80054cd13c6b6dcf31a4cae5166add">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs a YAML formatter and binds it to a TOML object.</dd>
             <dt>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a2eb50c4983f7ec26a417befeface23bf">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+              <a class="m-doc" href="namespacetoml.html#a3d80054cd13c6b6dcf31a4cae5166add">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Constructs a YAML formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</dd>
           </dl>
@@ -116,13 +116,13 @@
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a55b839f979add962931d2ccd5f462bad">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a55b839f979add962931d2ccd5f462bad">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+            <dt id="a10b0c89256eb2ab4ea2b4e23f8ad8eff">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a10b0c89256eb2ab4ea2b4e23f8ad8eff">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
               <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints the bound TOML object out to the stream as YAML.</dd>
-            <dt id="a750f11b016548b8e8cb78cbf944fb02c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a750f11b016548b8e8cb78cbf944fb02c">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+            <dt id="a50d463617bccb66a9cdf01390321bd47">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a50d463617bccb66a9cdf01390321bd47">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
               <a class="m-doc" href="classtoml_1_1yaml__formatter.html">yaml_<wbr/>formatter</a>&amp;&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints the bound TOML object out to the stream as YAML (rvalue overload).</dd>
@@ -133,7 +133,7 @@
           <section class="m-doc-details" id="a0089cdd517d9f6641ed10c8ddb5b1c11"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> toml::<wbr/>yaml_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0089cdd517d9f6641ed10c8ddb5b1c11">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>&amp; source,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <a class="m-doc" href="namespacetoml.html#a3d80054cd13c6b6dcf31a4cae5166add">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Constructs a YAML formatter and binds it to a TOML object.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -155,7 +155,7 @@
           <section class="m-doc-details" id="a2eb50c4983f7ec26a417befeface23bf"><div>
             <h3>
               <span class="m-doc-wrap-bumper"> toml::<wbr/>yaml_formatter::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2eb50c4983f7ec26a417befeface23bf">yaml_formatter</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>&amp; result,
-              <a class="m-doc" href="namespacetoml.html#a2102aa80bc57783d96180f36e1f64f6a">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
+              <a class="m-doc" href="namespacetoml.html#a3d80054cd13c6b6dcf31a4cae5166add">format_<wbr/>flags</a> flags = <a class="m-doc" href="classtoml_1_1yaml__formatter.html#af161f0a6c794945e85b210ee85cb78e9">default_<wbr/>flags</a>) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Constructs a YAML formatter and binds it to a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -173,10 +173,10 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid YAML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// ok</span>
-<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
-<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="c1">// malformed</span>
-<span class="w">          </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a: b</span>
+<aside class="m-block m-special"><h4>Conditional availability</h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid YAML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
+          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
+          <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">yaml_formatter</span><span class="p">{</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="sa">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
+          <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a: b</span>
 
 <span class="go">Error while parsing key-value pair: encountered end-of-file</span>
 <span class="go">        (error occurred at line 1, column 5)</span></pre><p>Use the library with exceptions if you want to avoid this scenario.</p></aside>
@@ -229,6 +229,7 @@
         
     <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a href="md_poxy_changelog.html">Changelog</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
      • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
     <br/><br/>

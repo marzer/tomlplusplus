@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.5.7" name="generator"/>
+  <meta content="Poxy v0.6.0" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.5.7.css" rel="stylesheet"/>
-  <link href="poxy-0.5.7-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.5.7.js"></script>
+  <link href="poxy-0.6.0.css" rel="stylesheet"/>
+  <link href="poxy-0.6.0-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.6.0.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -68,6 +68,7 @@
               Reference
               <ul>
                 <li><a href="#typeless-methods">Constructors, destructors, conversion operators</a></li>
+                <li><a href="#pub-methods">Public functions</a></li>
                 <li><a href="#pub-attribs">Public variables</a></li>
                 <li><a href="#friends">Friends</a></li>
               </ul>
@@ -77,16 +78,21 @@
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
-            <dt id="a49af2cb136f213443f15e108657f5f0e">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a49af2cb136f213443f15e108657f5f0e">time_offset</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Default constructor. Does not initialize the members.</dd>
             <dt>
-              <div class="m-doc-template">template&lt;typename H, typename M&gt;</div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a9e963488f164473ee9af35ddf7d4f93e">time_offset</a>(</span><span class="m-doc-wrap">H h,
-              M m) <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a49e1f06f9a40027c72e73bf0e96d5c52">TOML_CONSTRAINED_TEMPLATE</a>(</span><span class="m-doc-wrap">(impl::all_integral&lt;H, M&gt;),
+              typename H,
+              typename M) TOML_NODISCARD_CTOR const expr time_offset(H h</span>
             </dt>
             <dd>Constructs a timezone offset from individual hour and minute totals.</dd>
+          </dl>
+        </section>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt id="a6a97593a512af4875cca62b7645bef3e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6a97593a512af4875cca62b7645bef3e">time_offset</a>(</span><span class="m-doc-wrap">) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor. Does not initialize the members.</dd>
           </dl>
         </section>
         <section id="pub-attribs">
@@ -100,101 +106,71 @@
         <section id="friends">
           <h2><a href="#friends">Friends</a></h2>
           <dl class="m-doc">
-            <dt id="a337d8610dcca51598cb54bca6831c0a8">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a337d8610dcca51598cb54bca6831c0a8">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="af08ebc1f0c4c0b4a499f1112f9083566">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af08ebc1f0c4c0b4a499f1112f9083566">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
-            <dt id="ad5180d14b229562acb94ad8e5f9a3828">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad5180d14b229562acb94ad8e5f9a3828">operator&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a9e7fda229147193b190dcbc74d1bfeb9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9e7fda229147193b190dcbc74d1bfeb9">operator&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Less-than operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0f8d2f1d0d3dd81facb17ae58dd3df6d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac87df01b4e60bd303d75712470517451">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</dd>
-            <dt id="a63c4153f870f374e6363d177d75db7c8">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a63c4153f870f374e6363d177d75db7c8">operator&lt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="abaa5aeb9a5218f2cdbbf8522d5e0fda9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abaa5aeb9a5218f2cdbbf8522d5e0fda9">operator&lt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Less-than-or-equal-to operator.</dd>
-            <dt id="a724fcd380742ef6fd2581e4d94bdecbb">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a724fcd380742ef6fd2581e4d94bdecbb">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a6e9d26d1a8664c16a9c737eab96ffe75">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6e9d26d1a8664c16a9c737eab96ffe75">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Equality operator.</dd>
-            <dt id="a343c943c3fc47e279a2cf9978bacbc53">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a343c943c3fc47e279a2cf9978bacbc53">operator&gt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="ac23034ab2c168028807d7e29d06c4619">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac23034ab2c168028807d7e29d06c4619">operator&gt;</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Greater-than operator.</dd>
-            <dt id="aba474cd6d6ddb2d2bb8f143889a8440d">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aba474cd6d6ddb2d2bb8f143889a8440d">operator&gt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
-              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aa38a83fc906af4453d2e084d3f3a6342">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa38a83fc906af4453d2e084d3f3a6342">operator&gt;=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> lhs,
+              <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> rhs) -&gt; TOML_PURE_INLINE_GETTER constexpr friend bool <span class="m-label m-flat m-primary">constexpr</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Greater-than-or-equal-to operator.</dd>
           </dl>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a9e963488f164473ee9af35ddf7d4f93e"><div>
+          <section class="m-doc-details" id="a49e1f06f9a40027c72e73bf0e96d5c52"><div>
             <h3>
-              <div class="m-doc-template">
-                template&lt;typename H, typename M&gt;
-              </div>
-              <span class="m-doc-wrap-bumper"> toml::<wbr/>time_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9e963488f164473ee9af35ddf7d4f93e">time_offset</a>(</span><span class="m-doc-wrap">H h,
-              M m) <span class="m-label m-primary">constexpr</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>time_offset::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a49e1f06f9a40027c72e73bf0e96d5c52">TOML_CONSTRAINED_TEMPLATE</a>(</span><span class="m-doc-wrap">(impl::all_integral&lt;H, M&gt;),
+              typename H,
+              typename M) TOML_NODISCARD_CTOR const expr time_offset(H h</span></span>
             </h3>
             <p>Constructs a timezone offset from individual hour and minute totals.</p>
-            <table class="m-table m-fullwidth m-flat">
-              <thead>
-                <tr><th colspan="2">Template parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td style="width: 1%">H</td>
-                  <td>An integral type.</td>
-                </tr>
-                <tr>
-                  <td>M</td>
-                  <td>An integral type.</td>
-                </tr>
-              </tbody>
-              <thead>
-                <tr><th colspan="2">Parameters</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>h</td>
-                  <td>The total hours.</td>
-                </tr>
-                <tr>
-                  <td>m</td>
-                  <td>The total minutes.</td>
-                </tr>
-              </tbody>
-            </table>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">-30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
 <span class="go">-01:30</span>
 <span class="go">-02:30</span>
 <span class="go">Z</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a0f8d2f1d0d3dd81facb17ae58dd3df6d"><div>
+          <section class="m-doc-details" id="ac87df01b4e60bd303d75712470517451"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0f8d2f1d0d3dd81facb17ae58dd3df6d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac87df01b4e60bd303d75712470517451">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a <a class="m-doc" href="structtoml_1_1time__offset.html">time_<wbr/>offset</a> out to a stream as <code>+-HH:MM or Z</code> (per RFC 3339).</p>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">-30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span><span class="w"> </span><span class="mi">-2</span><span class="p">,</span><span class="w"> </span><span class="mi">-30</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">time_offset</span><span class="p">{</span> <span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">30</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">+02:30</span>
 <span class="go">+01:30</span>
 <span class="go">Z</span>
 <span class="go">-01:30</span>
@@ -248,6 +224,7 @@
         
     <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/" target="_blank">Github</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+     • <a href="md_poxy_changelog.html">Changelog</a>
      • <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
      • <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
     <br/><br/>
