@@ -69,6 +69,7 @@
               <ul>
                 <li><a href="#namespaces">Namespaces</a></li>
                 <li><a href="#nested-classes">Classes</a></li>
+                <li><a href="#enum-members">Enums</a></li>
                 <li><a href="#typedef-members">Typedefs</a></li>
                 <li><a href="#func-members">Functions</a></li>
                 <li><a href="#var-members">Variables</a></li>
@@ -79,7 +80,7 @@
         <section id="namespaces">
           <h2><a href="#namespaces">Namespaces</a></h2>
           <dl class="m-doc">
-            <dt>namespace <a class="m-doc" href="namespacetoml_1_1literals.html">literals</a></dt>
+            <dt>namespace <a class="m-doc" href="namespacetoml_1_1literals.html">literals</a> <span class="m-label m-flat m-info">inline</span></dt>
             <dd>Convenience literal operators for working with toml++.</dd>
           </dl>
         </section>
@@ -171,19 +172,66 @@
             <dd>A wrapper for printing TOML objects out to a stream as formatted YAML.</dd>
           </dl>
         </section>
+        <section id="enum-members">
+          <h2><a href="#enum-members">Enums</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6a">format_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint64_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</a> = (1ull &lt;&lt; 0),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aaebc5b9f8f77d6df3c806339479f46098">quote_infinities_and_nans</a> = (1ull &lt;&lt; 1),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa328473763ff1ab919ce0b01d66ad3bf6">allow_literal_strings</a> = (1ull &lt;&lt; 2),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aad9467c39215be4189dc8395a830f9051">allow_multi_line_strings</a> = (1ull &lt;&lt; 3),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa85cd74c0ce79c211961b6db05587778c">allow_real_tabs_in_strings</a> = (1ull &lt;&lt; 4),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aab8d4fc7b15531737d6d22536c5f3881c">allow_unicode_strings</a> = (1ull &lt;&lt; 5),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aae8dbe11e331b30941899ce81fd2fee41">allow_binary_integers</a> = (1ull &lt;&lt; 6),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa3d184bcd6e8f69ebc29b148945f23d4e">allow_octal_integers</a> = (1ull &lt;&lt; 7),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa41e4d7c47742f8f5b60161cc594b169b">allow_hexadecimal_integers</a> = (1ull &lt;&lt; 8),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa4ccbf147a4e194e7d2ae2b242e1eeceb">indent_sub_tables</a> = (1ull &lt;&lt; 9),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b">indent_array_elements</a> = (1ull &lt;&lt; 10),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818">indentation</a> = indent_sub_tables | indent_array_elements,
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</a> = (1ull &lt;&lt; 11) }</span>
+            </dt>
+            <dd>Format flags for modifying how TOML data is printed to streams.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">floating_point</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">boolean</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">date</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">time</a>,
+              <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a> }</span>
+            </dt>
+            <dd>TOML node type identifiers.</dd>
+            <dt id="a05daf3902d4363b06fb467a3292c0bc5">
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc-self" href="#a05daf3902d4363b06fb467a3292c0bc5">path_component_type</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> { </span><span class="m-doc-wrap"><a class="m-doc-self" href="#a05daf3902d4363b06fb467a3292c0bc5">key</a> = 0x1,
+              <a class="m-doc-self" href="#a05daf3902d4363b06fb467a3292c0bc5">array_index</a> = 0x2 }</span>
+            </dt>
+            <dd>Indicates type of <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path component</a>, either a key, an index in an array, or invalid.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">enum class <a class="m-doc" href="#a73eba6a34e7c7c4a4d311100800e1bb5">value_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a> { </span><span class="m-doc-wrap"><a class="m-doc" href="#a73eba6a34e7c7c4a4d311100800e1bb5a334c4a4c42fdb79d7ebc3e73b517e6f8">none</a>,
+              <a class="m-doc" href="#a73eba6a34e7c7c4a4d311100800e1bb5a3d21a9285de175ffffc99cfa13df21df">format_as_binary</a> = 1,
+              <a class="m-doc" href="#a73eba6a34e7c7c4a4d311100800e1bb5adfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</a> = 2,
+              <a class="m-doc" href="#a73eba6a34e7c7c4a4d311100800e1bb5a4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</a> = 3 }</span>
+            </dt>
+            <dd>Metadata associated with TOML values.</dd>
+          </dl>
+        </section>
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a2b0930b7b75df6f189d9815c000bef8b">
-              using <a class="m-doc-self" href="#a2b0930b7b75df6f189d9815c000bef8b">array_iterator</a> = impl::array_iterator&lt;false&gt;
+            <dt id="ac7e383cde1b8d61dba45292b2b0fcb69">
+              using <a class="m-doc-self" href="#ac7e383cde1b8d61dba45292b2b0fcb69">array_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="acc99ae392186dc605aeb233d26f07013">
-              using <a class="m-doc-self" href="#acc99ae392186dc605aeb233d26f07013">const_array_iterator</a> = impl::array_iterator&lt;true&gt;
+            <dt id="aeba9fe3a193c8b641a1fb3a2096d7c13">
+              using <a class="m-doc-self" href="#aeba9fe3a193c8b641a1fb3a2096d7c13">const_array_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="adeb2aa84bcd2bcb46e2cdfaa5dd6572f">
-              using <a class="m-doc-self" href="#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
+            <dt id="a4bccd753f54404e0097457514177fcbb">
+              using <a class="m-doc-self" href="#a4bccd753f54404e0097457514177fcbb">const_table_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt>
@@ -192,7 +240,7 @@
             <dd>The 'default' formatter used by TOML objects when they are printed to a stream.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename T&gt;</div>
-              using <a class="m-doc" href="#ad32f00d2029822e3ddec824b22249075">inserted_type_of</a> = typename impl::inserted_type_of_&lt;impl::remove_cvref&lt;T&gt;&gt;::type
+              using <a class="m-doc" href="#aef1f0bbcdd3686e268f4b81d9da701be">inserted_type_of</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
             <dd>Metafunction for determining which node type would be constructed if an object of this type was inserted into a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
             <dt>
@@ -208,8 +256,8 @@
               using <a class="m-doc-self" href="#ac6cf446b480546ae1f71f5b86442368d">source_path_ptr</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" target="_blank">std::<wbr/>shared_ptr</a>&lt;const <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;
             </dt>
             <dd>A pointer to a shared string resource containing a source path.</dd>
-            <dt id="a57894617837065610e5746a3204fa8e9">
-              using <a class="m-doc-self" href="#a57894617837065610e5746a3204fa8e9">table_iterator</a> = impl::table_iterator&lt;false&gt;
+            <dt id="a19243ec6febf1bb834ea9e366405e317">
+              using <a class="m-doc-self" href="#a19243ec6febf1bb834ea9e366405e317">table_iterator</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
@@ -218,87 +266,111 @@
           <h2><a href="#func-members">Functions</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad5ed4772ef7f3b0d09804e43983a5e82">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3024ba7b40cb19fa565b5ac80ac72c2d">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a45b053e3d3eb1533f68fab53e0b14fa4">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aad864d99bf53e2b53a8fee28c2299d43">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa372b5b59b6a38b126856833d0794375">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af388e5adca27fada36874c8b9bc795ee">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
             </dt>
             <dd>Returns a view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5f156da8d343dd863b2b4c523a6686ca">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a42b45f76519136534c835cc210b5220f">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt;</span>
             </dt>
             <dd>Returns a const view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a895315bb1d8e5e2b3fb587831c236fe4">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a402a1973caa5c848ca494cac31d1085d">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a128ec6cd2d75ba8036432a1fea21a591">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
-              const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3655200a65b1974b8bd13c1a4b5e45c1">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) -&gt; <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a2af33736a9fdbd731949c87d088ee3ad">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses TOML data from a string literal.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#aa726bfdb3e319d0fb1884ad0aa6d1c68">operator""_tpath</a>(</span><span class="m-doc-wrap">const char* str,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#abb2307d66538d0d43dd074040f83224c">operator""_toml</a>(</span><span class="m-doc-wrap">const <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a>* str,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses TOML data from a UTF-8 string literal.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#ad406c84d960dd5bda91564f738f67d47">operator""_tpath</a>(</span><span class="m-doc-wrap">const char* str,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Parses a TOML path from a string literal.</dd>
             <dt>
               <div class="m-doc-template">template&lt;typename Char&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aba6195d5e83ab18f30c9a211384e2c1a">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
-              <a class="m-doc" href="namespacetoml.html#af7357253759591d5f65f01e2d81882ae">node_<wbr/>type</a> rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8a37f07ea9c0a841be1352143b3cbc52">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
+              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;</span>
             </dt>
             <dd>Pretty-prints the value of a node_type to a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8a3b39e77f5b3acb74357f4ed9316045">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ada8654fb4ceef15c20fc1d5e0cc734dd">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a string view.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab6487d1e93530f2716854b1a140125b5">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a string view.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af0a88c60b2365267210c8e3eb7568518">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a01565f26a7982d162949bac3b554a334">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a string view.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a793ffbf491c0b86364a75b859782feaa">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac7767943620762c22b6341dc6682cc2d">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7415a7c765413158349b59af398e763d">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a38852451309f406db281f17334ea8dfe">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2ee84ffccded737ab40afcb8122d8277">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {}) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa095d79ff53e4c9a8dc8bad9fda95b45">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8079e71bd86722701ca91828c6709305">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a stream.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5820964de3582b3a3351b475ae112296">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8dbc58dad43c3b66f4476a7131f5741a">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a file.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aac0965ad7b76771aac7d3e73af897154">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path) -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#acdbabd4b771d221fe98b0053d848d69d">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
+            </dt>
+            <dd>Parses a TOML document from a file.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad425af491341206589ca6acc37c3b19e">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path) -&gt; <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
             <dd>Parses a TOML document from a file.</dd>
           </dl>
@@ -306,86 +378,6 @@
         <section id="var-members">
           <h2><a href="#var-members">Variables</a></h2>
           <dl class="m-doc">
-            <dt id="aa9752525711411b426ac99848526c022">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#aa9752525711411b426ac99848526c022">allow_binary_integers</a>
-            </dt>
-            <dd>Allow integers with #value_flags::format_as_binary to be emitted as binary.</dd>
-            <dt id="a61662e099e6d5b181259c6243d486a07">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a61662e099e6d5b181259c6243d486a07">allow_hexadecimal_integers</a>
-            </dt>
-            <dd>Allow integers with #value_flags::format_as_hexadecimal to be emitted as hexadecimal.</dd>
-            <dt id="a9ca9a8454ab2389bcb948115886baff2">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a9ca9a8454ab2389bcb948115886baff2">allow_literal_strings</a>
-            </dt>
-            <dd>Strings will be emitted as single-quoted literal strings where possible.</dd>
-            <dt id="a0e126569fab4191ffa268a56750206ce">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a0e126569fab4191ffa268a56750206ce">allow_multi_line_strings</a>
-            </dt>
-            <dd>Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.</dd>
-            <dt id="a48b04fc7934a98fd2babf59f69ba2f72">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a48b04fc7934a98fd2babf59f69ba2f72">allow_octal_integers</a>
-            </dt>
-            <dd>Allow integers with #value_flags::format_as_octal to be emitted as octal.</dd>
-            <dt id="ab0e60a8ecb2028d424d668fbb8ce56ba">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#ab0e60a8ecb2028d424d668fbb8ce56ba">allow_real_tabs_in_strings</a>
-            </dt>
-            <dd>Allow real tab characters in string literals (as opposed to the escaped form <code>\t</code>).</dd>
-            <dt id="a38295fa56ed0ad6a650152b66c26ce9e">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a38295fa56ed0ad6a650152b66c26ce9e">allow_unicode_strings</a>
-            </dt>
-            <dd>Allow non-ASCII characters in strings (as opposed to their escaped form, e.g. <code>\u00DA</code>).</dd>
-            <dt id="a4d74763b65b84683e3a4e399fe20c5f7">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a4d74763b65b84683e3a4e399fe20c5f7">array</a>
-            </dt>
-            <dd>The node is a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="a8ba6913dfca310755b73e4fdd270d3d8">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a8ba6913dfca310755b73e4fdd270d3d8">boolean</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;.</dd>
-            <dt id="ad0a4bca35435ad34f632364b84261bf0">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#ad0a4bca35435ad34f632364b84261bf0">date</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;date&gt;.</dd>
-            <dt id="af708cd16b375749264d4b7971fe46947">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#af708cd16b375749264d4b7971fe46947">date_time</a>
-            </dt>
-            <dd>&lt; The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;.</dd>
-            <dt id="ab87451f33cf9830e9b67eee656e5f311">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#ab87451f33cf9830e9b67eee656e5f311">floating_point</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</dd>
-            <dt id="a889b89cd1ac37c9e8569bae7f481e757">
-              enum TOML_OPEN_FLAGS_ENUM <a class="m-doc-self" href="#a889b89cd1ac37c9e8569bae7f481e757">format_as_binary</a>
-            </dt>
-            <dd>Format integer values as binary.</dd>
-            <dt id="a1911a72302059c5e1ff15ca529976b88">
-              enum TOML_OPEN_FLAGS_ENUM <a class="m-doc-self" href="#a1911a72302059c5e1ff15ca529976b88">format_as_hexadecimal</a>
-            </dt>
-            <dd>Format integer values as hexadecimal.</dd>
-            <dt id="ad1c9516b6f03904c65cb5f66a98684a9">
-              enum TOML_OPEN_FLAGS_ENUM <a class="m-doc-self" href="#ad1c9516b6f03904c65cb5f66a98684a9">format_as_octal</a>
-            </dt>
-            <dd>Format integer values as octal.</dd>
-            <dt>
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc" href="#a3d80054cd13c6b6dcf31a4cae5166add">format_flags</a>
-            </dt>
-            <dd>Format flags for modifying how TOML data is printed to streams.</dd>
-            <dt id="ae1967cc15fb4478c1ed2a99a5dbd0312">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#ae1967cc15fb4478c1ed2a99a5dbd0312">indent_array_elements</a>
-            </dt>
-            <dd>Apply indentation to array elements when the array is forced to wrap over multiple lines.</dd>
-            <dt id="aa84e8d53d938bc3f026e8624931b8537">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#aa84e8d53d938bc3f026e8624931b8537">indent_sub_tables</a>
-            </dt>
-            <dd>Apply indentation to tables nested within other tables/arrays.</dd>
-            <dt id="a06da9a129d7bec958e92b7934473a341">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a06da9a129d7bec958e92b7934473a341">indentation</a>
-            </dt>
-            <dd>Combination mask of all indentation-enabling flags.</dd>
-            <dt id="a86c2f2356bbbf7fa1577725de6dc5384">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a86c2f2356bbbf7fa1577725de6dc5384">integer</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
             <dt id="a2251b703f3ec4d1a3036c82ead3d69cc">
               <div class="m-doc-template">template&lt;typename T&gt;</div>
               bool <a class="m-doc-self" href="#a2251b703f3ec4d1a3036c82ead3d69cc">is_array</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -471,47 +463,217 @@
               bool <a class="m-doc-self" href="#a0d9cd265e448130b95305ccd68d2f508">is_value</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
             <dd>Metafunction for determining if a type is, or is a reference to, any of the toml value types. Excludes tables and arrays.</dd>
-            <dt>
-              enum TOML_CLOSED_ENUM <a class="m-doc" href="#af7357253759591d5f65f01e2d81882ae">node_type</a>
-            </dt>
-            <dd>TOML node type identifiers.</dd>
-            <dt id="a6bd482033d5a07c6925c36161551e6c5">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a6bd482033d5a07c6925c36161551e6c5">path_component_type</a>
-            </dt>
-            <dd>Indicates type of <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path component</a>, either a key, an index in an array, or invalid.</dd>
             <dt id="a32f700b152e15c357801e905d626a4fb">
-              <a class="m-doc" href="namespacetoml.html#a2cba5502633cacb7b290b7f822129f92">value_<wbr/>flags</a> <a class="m-doc-self" href="#a32f700b152e15c357801e905d626a4fb">preserve_source_value_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
+              <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> <a class="m-doc-self" href="#a32f700b152e15c357801e905d626a4fb">preserve_source_value_flags</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Special <a class="m-doc" href="namespacetoml.html#a2cba5502633cacb7b290b7f822129f92">toml::<wbr/>value_flags</a> constant used for array + table insert functions to specify that any value nodes being copied should not have their flags property overridden by the inserting function's <code>flags</code> argument.</dd>
-            <dt id="ae86af2a6e30e74e915e578e1bef69508">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#ae86af2a6e30e74e915e578e1bef69508">quote_dates_and_times</a>
-            </dt>
-            <dd>Dates and times will be emitted as quoted strings.</dd>
-            <dt id="a7641972152fb46e31d5b8b9a1d3ea01b">
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc-self" href="#a7641972152fb46e31d5b8b9a1d3ea01b">quote_infinities_and_nans</a>
-            </dt>
-            <dd>Infinities and NaNs will be emitted as quoted strings.</dd>
-            <dt>
-              enum TOML_CLOSED_FLAGS_ENUM <a class="m-doc" href="#a3b3922341cb9a3ecab7e635fa4ce2686">relaxed_float_precision</a>
-            </dt>
-            <dd>Emit floating-point values with relaxed (human-friendly) precision.</dd>
-            <dt id="a9e934e4fca737361d394ea606359db39">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a9e934e4fca737361d394ea606359db39">string</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
-            <dt id="a199742c7457c050829cdde4fa01e89a9">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#a199742c7457c050829cdde4fa01e89a9">table</a>
-            </dt>
-            <dd>The node is a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
-            <dt id="ad15409e3f425b99e0c8ecb3c340c736c">
-              enum TOML_CLOSED_ENUM <a class="m-doc-self" href="#ad15409e3f425b99e0c8ecb3c340c736c">time</a>
-            </dt>
-            <dd>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;time&gt;.</dd>
-            <dt id="a2cba5502633cacb7b290b7f822129f92">
-              enum TOML_OPEN_FLAGS_ENUM <a class="m-doc-self" href="#a2cba5502633cacb7b290b7f822129f92">value_flags</a>
-            </dt>
-            <dd>Metadata associated with TOML values.</dd>
+            <dd>Special <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">toml::<wbr/>value_flags</a> constant used for array + table insert functions to specify that any value nodes being copied should not have their flags property overridden by the inserting function's <code>flags</code> argument.</dd>
           </dl>
+        </section>
+        <section>
+          <h2>Enum documentation</h2>
+          <section class="m-doc-details" id="a2102aa80bc57783d96180f36e1f64f6a"><div>
+            <h3>
+              enum class toml::<wbr/><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6a">format_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint64_t</a>
+            </h3>
+            <p>Format flags for modifying how TOML data is printed to streams.</p>
+<aside class="m-note m-info"><h4>Note</h4><p>Formatters may disregard/override any of these flags according to the requirements of their output target (e.g. <a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a> will always apply quotes to dates and times).</p></aside>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa334c4a4c42fdb79d7ebc3e73b517e6f8" id="a2102aa80bc57783d96180f36e1f64f6aa334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
+                  <td>
+                  <p>None.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa6e569050aafc6eca4c0c5dfab35fd25a" id="a2102aa80bc57783d96180f36e1f64f6aa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</a></td>
+                  <td>
+                  <p>Dates and times will be emitted as quoted strings.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aaebc5b9f8f77d6df3c806339479f46098" id="a2102aa80bc57783d96180f36e1f64f6aaebc5b9f8f77d6df3c806339479f46098">quote_infinities_and_nans</a></td>
+                  <td>
+                  <p>Infinities and NaNs will be emitted as quoted strings.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa328473763ff1ab919ce0b01d66ad3bf6" id="a2102aa80bc57783d96180f36e1f64f6aa328473763ff1ab919ce0b01d66ad3bf6">allow_literal_strings</a></td>
+                  <td>
+                  <p>Strings will be emitted as single-quoted literal strings where possible.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aad9467c39215be4189dc8395a830f9051" id="a2102aa80bc57783d96180f36e1f64f6aad9467c39215be4189dc8395a830f9051">allow_multi_line_strings</a></td>
+                  <td>
+                  <p>Strings containing newlines will be emitted as triple-quoted 'multi-line' strings where possible.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa85cd74c0ce79c211961b6db05587778c" id="a2102aa80bc57783d96180f36e1f64f6aa85cd74c0ce79c211961b6db05587778c">allow_real_tabs_in_strings</a></td>
+                  <td>
+                  <p>Allow real tab characters in string literals (as opposed to the escaped form <code>\t</code>).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aab8d4fc7b15531737d6d22536c5f3881c" id="a2102aa80bc57783d96180f36e1f64f6aab8d4fc7b15531737d6d22536c5f3881c">allow_unicode_strings</a></td>
+                  <td>
+                  <p>Allow non-ASCII characters in strings (as opposed to their escaped form, e.g. <code>\u00DA</code>).</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aae8dbe11e331b30941899ce81fd2fee41" id="a2102aa80bc57783d96180f36e1f64f6aae8dbe11e331b30941899ce81fd2fee41">allow_binary_integers</a></td>
+                  <td>
+                  <p>Allow integers with <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5a3d21a9285de175ffffc99cfa13df21df">value_flags::<wbr/>format_as_binary</a> to be emitted as binary.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa3d184bcd6e8f69ebc29b148945f23d4e" id="a2102aa80bc57783d96180f36e1f64f6aa3d184bcd6e8f69ebc29b148945f23d4e">allow_octal_integers</a></td>
+                  <td>
+                  <p>Allow integers with <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5adfc26763754dabbdf97d3c8833a2e8ba">value_flags::<wbr/>format_as_octal</a> to be emitted as octal.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa41e4d7c47742f8f5b60161cc594b169b" id="a2102aa80bc57783d96180f36e1f64f6aa41e4d7c47742f8f5b60161cc594b169b">allow_hexadecimal_integers</a></td>
+                  <td>
+                  <p>Allow integers with <a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5a4dd3fec464b7da02debfbc0bd4725c29">value_flags::<wbr/>format_as_hexadecimal</a> to be emitted as hexadecimal.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa4ccbf147a4e194e7d2ae2b242e1eeceb" id="a2102aa80bc57783d96180f36e1f64f6aa4ccbf147a4e194e7d2ae2b242e1eeceb">indent_sub_tables</a></td>
+                  <td>
+                  <p>Apply indentation to tables nested within other tables/arrays.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b" id="a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b">indent_array_elements</a></td>
+                  <td>
+                  <p>Apply indentation to array elements when the array is forced to wrap over multiple lines.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818" id="a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818">indentation</a></td>
+                  <td>
+                  <p>Combination mask of all indentation-enabling flags.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078" id="a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</a></td>
+                  <td>
+                  <p>Emit floating-point values with relaxed (human-friendly) precision.</p>
+<aside class="m-note m-danger"><h4>Warning</h4><p>Setting this flag may cause serialized documents to no longer round-trip correctly since floats might have a less precise value upon being written out than they did when being read in. Use this flag at your own risk.</p></aside>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="abac3e84bbf1f2c90717fca107055f48d"><div>
+            <h3>
+              enum class toml::<wbr/><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48d">node_type</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a>
+            </h3>
+            <p>TOML node type identifiers.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8" id="abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
+                  <td>
+                  <p>Not-a-node.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d" id="abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5" id="abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21" id="abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8" id="abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a" id="abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">floating_point</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27" id="abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">boolean</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f" id="abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">date</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;date&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b" id="abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">time</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;time&gt;.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264" id="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a></td>
+                  <td>
+                  <p>The node is a <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
+          <section class="m-doc-details" id="a73eba6a34e7c7c4a4d311100800e1bb5"><div>
+            <h3>
+              enum class toml::<wbr/><a class="m-doc-self" href="#a73eba6a34e7c7c4a4d311100800e1bb5">value_flags</a>: <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
+            </h3>
+            <p>Metadata associated with TOML values.</p>
+            <table class="m-table m-fullwidth m-flat m-doc">
+              <thead><tr><th style="width: 1%">Enumerators</th><th></th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><a class="m-doc-self" href="#a73eba6a34e7c7c4a4d311100800e1bb5a334c4a4c42fdb79d7ebc3e73b517e6f8" id="a73eba6a34e7c7c4a4d311100800e1bb5a334c4a4c42fdb79d7ebc3e73b517e6f8">none</a></td>
+                  <td>
+                  <p>None.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a73eba6a34e7c7c4a4d311100800e1bb5a3d21a9285de175ffffc99cfa13df21df" id="a73eba6a34e7c7c4a4d311100800e1bb5a3d21a9285de175ffffc99cfa13df21df">format_as_binary</a></td>
+                  <td>
+                  <p>Format integer values as binary.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a73eba6a34e7c7c4a4d311100800e1bb5adfc26763754dabbdf97d3c8833a2e8ba" id="a73eba6a34e7c7c4a4d311100800e1bb5adfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</a></td>
+                  <td>
+                  <p>Format integer values as octal.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a73eba6a34e7c7c4a4d311100800e1bb5a4dd3fec464b7da02debfbc0bd4725c29" id="a73eba6a34e7c7c4a4d311100800e1bb5a4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</a></td>
+                  <td>
+                  <p>Format integer values as hexadecimal.</p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div></section>
         </section>
         <section>
           <h2>Typedef documentation</h2>
@@ -522,18 +684,18 @@
             <p>The 'default' formatter used by TOML objects when they are printed to a stream.</p>
 <p>This is an alias for <a class="m-doc" href="classtoml_1_1toml__formatter.html">toml::<wbr/>toml_formatter</a>.</p>
           </div></section>
-          <section class="m-doc-details" id="ad32f00d2029822e3ddec824b22249075"><div>
+          <section class="m-doc-details" id="aef1f0bbcdd3686e268f4b81d9da701be"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename T&gt;
               </div>
-              using toml::<wbr/><a class="m-doc-self" href="#ad32f00d2029822e3ddec824b22249075">inserted_type_of</a> = typename impl::inserted_type_of_&lt;impl::remove_cvref&lt;T&gt;&gt;::type
+              using toml::<wbr/><a class="m-doc-self" href="#aef1f0bbcdd3686e268f4b81d9da701be">inserted_type_of</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </h3>
             <p>Metafunction for determining which node type would be constructed if an object of this type was inserted into a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</p>
-<pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">const</span> <span class="k">char</span><span class="o">*&gt;</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">int</span><span class="o">&gt;</span><span class="p">,</span>         <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">float</span><span class="o">&gt;</span><span class="p">,</span>       <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">double</span><span class="o">&gt;</span><span class="p">);</span>
-<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">,</span>        <span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a>, even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
+<pre class="m-code"><span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">const</span><span class="w"> </span><span class="k">char</span><span class="o">*&gt;</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ns">std</span><span class="o">::</span><span class="ut">string</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w">         </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a></span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">float</span><span class="o">&gt;</span><span class="p">,</span><span class="w">       </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">double</span><span class="o">&gt;</span><span class="p">);</span>
+<span class="k">static_assert</span><span class="p">(</span><span class="ns">std</span><span class="o">::</span><span class="n">is_same_v</span><span class="o">&lt;</span><span class="ns">toml</span><span class="o">::</span><span class="ut">inserted_type_of</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">,</span><span class="w">        </span><span class="ns">toml</span><span class="o">::</span><span class="ut">value</span><span class="o">&lt;</span><span class="k">bool</span><span class="o">&gt;</span><span class="p">);</span></pre><aside class="m-note m-info"><h4>Note</h4><p>This will return <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a> for nodes and <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">node_views</a>, even though a more specific node subclass would actually be inserted. There is no way around this in a compile-time metafunction.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af34a9fb3305e419784104609e6bbb7ac"><div>
             <h3>
@@ -548,9 +710,9 @@
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="ad5ed4772ef7f3b0d09804e43983a5e82"><div>
+          <section class="m-doc-details" id="a3024ba7b40cb19fa565b5ac80ac72c2d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad5ed4772ef7f3b0d09804e43983a5e82">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3024ba7b40cb19fa565b5ac80ac72c2d">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the node matching a fully-qualified "TOML path".</p>
@@ -569,49 +731,49 @@
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 
 <span class="s">[foo]</span>
 <span class="s">bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
 
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
 
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[2]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[3][0]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar[4].kek"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[2]"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[3][0]"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar[4].kek"</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
 <span class="go">3</span>
-<span class="go">4</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo.bar"</span><span class="p">)</span>  <span class="c1">// same as config["foo"]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo. bar"</span><span class="p">)</span> <span class="c1">// same as config["foo"][" bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">"foo..bar"</span><span class="p">)</span> <span class="c1">// same as config["foo"][""]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="s">".foo.bar"</span><span class="p">)</span> <span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters. If you have periods in your table keys, first consider:</p><ol><li>Not doing that</li><li>Using <a class="m-doc" href="classtoml_1_1node__view.html#a1f56b36d52faf24302e154ebb20a33db">node_view::<wbr/>operator[]</a> instead.</li></ol></aside>
+<span class="go">4</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.bar"</span><span class="p">)</span><span class="w">  </span><span class="c1">// same as config["foo"]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo. bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config["foo"][" bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">"foo..bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config["foo"][""]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="s">".foo.bar"</span><span class="p">)</span><span class="w"> </span><span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters. If you have periods in your table keys, first consider:</p><ol><li>Not doing that</li><li>Using <a class="m-doc" href="classtoml_1_1node__view.html#a2dde12894f70530d80de45a03eae78fa">node_view::<wbr/>operator[]</a> instead.</li></ol></aside>
           </div></section>
-          <section class="m-doc-details" id="a45b053e3d3eb1533f68fab53e0b14fa4"><div>
+          <section class="m-doc-details" id="aad864d99bf53e2b53a8fee28c2299d43"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a45b053e3d3eb1533f68fab53e0b14fa4">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aad864d99bf53e2b53a8fee28c2299d43">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the node matching a fully-qualified "TOML path".</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ad5ed4772ef7f3b0d09804e43983a5e82">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a3024ba7b40cb19fa565b5ac80ac72c2d">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa372b5b59b6a38b126856833d0794375"><div>
+          <section class="m-doc-details" id="af388e5adca27fada36874c8b9bc795ee"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa372b5b59b6a38b126856833d0794375">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af388e5adca27fada36874c8b9bc795ee">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path)</span></span>
             </h3>
             <p>Returns a view of the node matching a fully-qualified "TOML path".</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ad5ed4772ef7f3b0d09804e43983a5e82">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a3024ba7b40cb19fa565b5ac80ac72c2d">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a5f156da8d343dd863b2b4c523a6686ca"><div>
+          <section class="m-doc-details" id="a42b45f76519136534c835cc210b5220f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5f156da8d343dd863b2b4c523a6686ca">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a42b45f76519136534c835cc210b5220f">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path)</span></span>
             </h3>
             <p>Returns a const view of the node matching a fully-qualified "TOML path".</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#ad5ed4772ef7f3b0d09804e43983a5e82">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a3024ba7b40cb19fa565b5ac80ac72c2d">toml::<wbr/>at_path(node&amp;, std::<wbr/>string_view)</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a895315bb1d8e5e2b3fb587831c236fe4"><div>
+          <section class="m-doc-details" id="a402a1973caa5c848ca494cac31d1085d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a895315bb1d8e5e2b3fb587831c236fe4">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a402a1973caa5c848ca494cac31d1085d">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the node matching a fully-qualified "TOML path".</p>
@@ -630,53 +792,53 @@
                 </tr>
               </tbody>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">config</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
 
 <span class="s">[foo]</span>
 <span class="s">bar = [ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
 
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
 
-<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span> <span class="n">path1</span><span class="p">(</span><span class="s">"foo.bar[2]"</span><span class="p">);</span>
-<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span> <span class="n">path2</span><span class="p">(</span><span class="s">"foo.bar[4].kek"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path1</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path1</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path2</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">path2</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
+<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="nf">path1</span><span class="p">(</span><span class="s">"foo.bar[2]"</span><span class="p">);</span>
+<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="nf">path2</span><span class="p">(</span><span class="s">"foo.bar[4].kek"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">path1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">path1</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">path2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="n">path2</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">2</span>
 <span class="go">[ 0, 1, 2, [ 3 ], { kek = 4 } ]</span>
 <span class="go">4</span>
-<span class="go">{ kek  = 4 }</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo.bar"</span><span class="p">))</span>  <span class="c1">// same as config["foo"]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo. bar"</span><span class="p">))</span> <span class="c1">// same as config["foo"][" bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo..bar"</span><span class="p">))</span> <span class="c1">// same as config["foo"][""]["bar"]</span>
-<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">".foo.bar"</span><span class="p">))</span> <span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters.</p></aside>
+<span class="go">{ kek  = 4 }</span></pre><aside class="m-note m-info"><h4>Note</h4><p>Keys in paths are interpreted literally, so whitespace (or lack thereof) matters:</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo.bar"</span><span class="p">))</span><span class="w">  </span><span class="c1">// same as config["foo"]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo. bar"</span><span class="p">))</span><span class="w"> </span><span class="c1">// same as config["foo"][" bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">"foo..bar"</span><span class="p">))</span><span class="w"> </span><span class="c1">// same as config["foo"][""]["bar"]</span>
+<span class="ns">toml</span><span class="o">::</span><span class="n">at_path</span><span class="p">(</span><span class="n">config</span><span class="p">,</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="p">(</span><span class="s">".foo.bar"</span><span class="p">))</span><span class="w"> </span><span class="c1">// same as config[""]["foo"]["bar"]</span></pre> <p><br/>Additionally, TOML allows '.' (period) characters to appear in keys if they are quoted strings. This function makes no allowance for this, instead treating all period characters as sub-table delimiters.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a128ec6cd2d75ba8036432a1fea21a591"><div>
+          <section class="m-doc-details" id="a3655200a65b1974b8bd13c1a4b5e45c1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a128ec6cd2d75ba8036432a1fea21a591">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3655200a65b1974b8bd13c1a4b5e45c1">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; root,
               const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the node matching a fully-qualified "TOML path".</p>
-<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a895315bb1d8e5e2b3fb587831c236fe4">toml::<wbr/>at_path(node&amp;, const toml::<wbr/>path&amp; path)</a></p></aside>
+<aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="namespacetoml.html#a402a1973caa5c848ca494cac31d1085d">toml::<wbr/>at_path(node&amp;, const toml::<wbr/>path&amp; path)</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aba6195d5e83ab18f30c9a211384e2c1a"><div>
+          <section class="m-doc-details" id="a8a37f07ea9c0a841be1352143b3cbc52"><div>
             <h3>
               <div class="m-doc-template">
                 template&lt;typename Char&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aba6195d5e83ab18f30c9a211384e2c1a">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
-              <a class="m-doc" href="namespacetoml.html#af7357253759591d5f65f01e2d81882ae">node_<wbr/>type</a> rhs)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a37f07ea9c0a841be1352143b3cbc52">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
+              <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs)</span></span>
             </h3>
             <p>Pretty-prints the value of a node_type to a stream.</p>
-<pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
-<span class="k">for</span> <span class="p">(</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
-    <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "</span><span class="sa">sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">arr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">array</span><span class="p">{</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mf">2.0</span><span class="p">,</span><span class="w"> </span><span class="s">"3"</span><span class="p">,</span><span class="w"> </span><span class="k">false</span><span class="w"> </span><span class="p">};</span>
+<span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="ut"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">arr</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="n">i</span><span class="o">++</span><span class="p">)</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Element ["</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">i</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"] is: "</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="n">type</span><span class="p">()</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>
 <span class="go">Element [1] is: floating-point</span>
 <span class="go">Element [2] is: string</span>
 <span class="go">Element [3] is: boolean</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a8a3b39e77f5b3acb74357f4ed9316045"><div>
+          <section class="m-doc-details" id="ada8654fb4ceef15c20fc1d5e0cc734dd"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a3b39e77f5b3acb74357f4ed9316045">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ada8654fb4ceef15c20fc1d5e0cc734dd">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {})</span></span>
             </h3>
             <p>Parses a TOML document from a string view.</p>
@@ -701,12 +863,12 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="ab6487d1e93530f2716854b1a140125b5"><div>
+          <section class="m-doc-details" id="a20fa3e08d72759083fb17c772a357043"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab6487d1e93530f2716854b1a140125b5">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a20fa3e08d72759083fb17c772a357043">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path)</span></span>
             </h3>
             <p>Parses a TOML document from a string view.</p>
@@ -731,12 +893,72 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="af0a88c60b2365267210c8e3eb7568518"><div>
+          <section class="m-doc-details" id="ae9ee4300ddfbd72b7237283ab8d97618"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af0a88c60b2365267210c8e3eb7568518">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae9ee4300ddfbd72b7237283ab8d97618">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {})</span></span>
+            </h3>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+                <tr>
+                  <td>source_path</td>
+                  <td>The path used to initialize each node's <code>source().path</code>. If you don't have a path (or you have no intention of using paths in diagnostics) then this parameter can safely be left blank.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>With exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>. <strong><em>Without exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a02a2724564149ad8439c0457357308b8"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a02a2724564149ad8439c0457357308b8">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path)</span></span>
+            </h3>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+                <tr>
+                  <td>source_path</td>
+                  <td>The path used to initialize each node's <code>source().path</code>. If you don't have a path (or you have no intention of using paths in diagnostics) then this parameter can safely be left blank.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>With exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>. <strong><em>Without exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a01565f26a7982d162949bac3b554a334"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a01565f26a7982d162949bac3b554a334">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path)</span></span>
             </h3>
             <p>Parses a TOML document from a string view.</p>
@@ -761,12 +983,12 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span> <span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a793ffbf491c0b86364a75b859782feaa"><div>
+          <section class="m-doc-details" id="ac7767943620762c22b6341dc6682cc2d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a793ffbf491c0b86364a75b859782feaa">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac7767943620762c22b6341dc6682cc2d">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path)</span></span>
             </h3>
             <p>Parses a TOML document from a stream.</p>
@@ -791,15 +1013,45 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a7415a7c765413158349b59af398e763d"><div>
+          <section class="m-doc-details" id="a38852451309f406db281f17334ea8dfe"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7415a7c765413158349b59af398e763d">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a38852451309f406db281f17334ea8dfe">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> doc,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> source_path)</span></span>
+            </h3>
+            <p>Parses a TOML document from a <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> string view.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+                <tr>
+                  <td>source_path</td>
+                  <td>The path used to initialize each node's <code>source().path</code>. If you don't have a path (or you have no intention of using paths in diagnostics) then this parameter can safely be left blank.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>With exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>. <strong><em>Without exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="sa">u8</span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">,</span><span class="w"> </span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+          </div></section>
+          <section class="m-doc-details" id="a2ee84ffccded737ab40afcb8122d8277"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2ee84ffccded737ab40afcb8122d8277">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> source_path = {})</span></span>
             </h3>
             <p>Parses a TOML document from a stream.</p>
@@ -824,15 +1076,15 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="aa095d79ff53e4c9a8dc8bad9fda95b45"><div>
+          <section class="m-doc-details" id="a8079e71bd86722701ca91828c6709305"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa095d79ff53e4c9a8dc8bad9fda95b45">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8079e71bd86722701ca91828c6709305">parse</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_istream.html" target="_blank">std::<wbr/>istream</a>&amp; doc,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&amp;&amp; source_path)</span></span>
             </h3>
             <p>Parses a TOML document from a stream.</p>
@@ -857,15 +1109,15 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span> <span class="n">ss</span><span class="p">;</span>
-<span class="n">ss</span> <span class="o">&lt;&lt;</span> <span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
+<pre class="m-code"><span class="ns">std</span><span class="o">::</span><span class="ut">stringstream</span><span class="w"> </span><span class="n">ss</span><span class="p">;</span>
+<span class="n">ss</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"a = 3"</span><span class="sa">sv</span><span class="p">;</span>
 
-<span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="s">"foo.toml"</span><span class="p">);</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
+<span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span><span class="w"> </span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="s">"a"</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">3</span></pre>
           </div></section>
-          <section class="m-doc-details" id="a5820964de3582b3a3351b475ae112296"><div>
+          <section class="m-doc-details" id="a8dbc58dad43c3b66f4476a7131f5741a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5820964de3582b3a3351b475ae112296">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8dbc58dad43c3b66f4476a7131f5741a">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> file_path)</span></span>
             </h3>
             <p>Parses a TOML document from a file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -885,14 +1137,14 @@
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
           </div></section>
-          <section class="m-doc-details" id="aac0965ad7b76771aac7d3e73af897154"><div>
+          <section class="m-doc-details" id="acdbabd4b771d221fe98b0053d848d69d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aac0965ad7b76771aac7d3e73af897154">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acdbabd4b771d221fe98b0053d848d69d">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>u8string_view</a> file_path)</span></span>
             </h3>
             <p>Parses a TOML document from a file.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -912,34 +1164,37 @@
                 </tr>
               </tfoot>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">get_foo_toml</span><span class="p">()</span>
+<pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
 <span class="p">{</span>
-    <span class="k">return</span> <span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">u8</span><span class="s">"foo.toml"</span><span class="p">);</span>
 <span class="p">}</span></pre>
           </div></section>
-        </section>
-        <section>
-          <h2>Variable documentation</h2>
-          <section class="m-doc-details" id="a3d80054cd13c6b6dcf31a4cae5166add"><div>
+          <section class="m-doc-details" id="ad425af491341206589ca6acc37c3b19e"><div>
             <h3>
-              enum TOML_CLOSED_FLAGS_ENUM toml::<wbr/><a class="m-doc-self" href="#a3d80054cd13c6b6dcf31a4cae5166add">format_flags</a>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> toml::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad425af491341206589ca6acc37c3b19e">parse_file</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> file_path)</span></span>
             </h3>
-            <p>Format flags for modifying how TOML data is printed to streams.</p>
-<aside class="m-note m-info"><h4>Note</h4><p>Formatters may disregard/override any of these flags according to the requirements of their output target (e.g. <a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a> will always apply quotes to dates and times).</p></aside>
-          </div></section>
-          <section class="m-doc-details" id="af7357253759591d5f65f01e2d81882ae"><div>
-            <h3>
-              enum TOML_CLOSED_ENUM toml::<wbr/><a class="m-doc-self" href="#af7357253759591d5f65f01e2d81882ae">node_type</a>
-            </h3>
-            <p>TOML node type identifiers.</p>
-<p>Not-a-node.</p>
-          </div></section>
-          <section class="m-doc-details" id="a3b3922341cb9a3ecab7e635fa4ce2686"><div>
-            <h3>
-              enum TOML_CLOSED_FLAGS_ENUM toml::<wbr/><a class="m-doc-self" href="#a3b3922341cb9a3ecab7e635fa4ce2686">relaxed_float_precision</a>
-            </h3>
-            <p>Emit floating-point values with relaxed (human-friendly) precision.</p>
-<aside class="m-note m-danger"><h4>Warning</h4><p>Setting this flag may cause serialized documents to no longer round-trip correctly since floats might have a less precise value upon being written out than they did when being read in. Use this flag at your own risk.</p></aside>
+            <p>Parses a TOML document from a file.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">file_path</td>
+                  <td>The TOML document to parse. Must be valid UTF-8.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td><strong><em>With exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>. <strong><em>Without exceptions:</em></strong> A <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a>.</td>
+                </tr>
+              </tfoot>
+            </table>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span><span class="w"> </span><span class="nf">get_foo_toml</span><span class="p">()</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse_file</span><span class="p">(</span><span class="sa">L</span><span class="s">"foo.toml"</span><span class="p">);</span>
+<span class="p">}</span></pre>
           </div></section>
         </section>
       </div>

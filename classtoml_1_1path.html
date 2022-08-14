@@ -81,15 +81,39 @@
             </li>
           </ul>
         </nav>
-<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span> <span class="n">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
+<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="nf">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
 
 <span class="c1">// can use with tbl.at_path or operator[]</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"second cat: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="n">the_path</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"second cat: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="n">the_path</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cats: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
 <span class="go">cats: ['tiger', 'lion', 'puma']</span></pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
           <dl class="m-doc">
+            <dt id="ac482e0b0187449abdbaf74830e0f1e48">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac482e0b0187449abdbaf74830e0f1e48">operator bool</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns true if the path has one or more components.</dd>
+            <dt id="accc6964f93bc7990f38263894d4daae6">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#accc6964f93bc7990f38263894d4daae6">path</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Default constructor.</dd>
+            <dt id="aabc43d93056c759d389085b32935ec2a">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aabc43d93056c759d389085b32935ec2a">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Construct a path by parsing from a string.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a4f340e37cfb32ca1fdfebf24e5b842b4">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) <span class="m-label m-flat m-info">explicit</span> </span>
+            </dt>
+            <dd>Construct a path by parsing from a string.</dd>
+            <dt id="a3b120d3a25c2f3caffaba984ecf19bdc">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3b120d3a25c2f3caffaba984ecf19bdc">path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) <span class="m-label m-flat m-info">defaulted</span></span>
+            </dt>
+            <dd>Copy constructor.</dd>
+            <dt id="a4b65042b43757e2d509d1563f4ee5342">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4b65042b43757e2d509d1563f4ee5342">path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Move constructor.</dd>
             <dt id="ad585b73db97202e2b4841a64773046e5">
               <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad585b73db97202e2b4841a64773046e5">~path</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -99,44 +123,20 @@
         <section id="pub-methods">
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
-            <dt id="aa887e0a092a8a7337adeebb569b0f9b1">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa887e0a092a8a7337adeebb569b0f9b1">empty</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER bool <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="af22c11324f36da827d4256b904d6e421">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af22c11324f36da827d4256b904d6e421">empty</a>(</span><span class="m-doc-wrap">) const -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Whether (true) or not (false) the path is empty.</dd>
-            <dt id="aa48d1ab227288fd6e1c04c934faa180d">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa48d1ab227288fd6e1c04c934faa180d">operator bool</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <span class="m-label m-flat m-info">explicit</span>  <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Returns true if the path has one or more components.</dd>
-            <dt id="a38a60c9d463574b3f4ec75a8a6d287c9">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a38a60c9d463574b3f4ec75a8a6d287c9">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a494db7a9a8c230fac3c7243309168372">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a494db7a9a8c230fac3c7243309168372">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) -&gt; <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Fetch a <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path component</a> by index.</dd>
-            <dt id="a639b953f0fa1b12cfee68d2253730b83">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a639b953f0fa1b12cfee68d2253730b83">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aeadc566b18975d93cee7b69990625242">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aeadc566b18975d93cee7b69990625242">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> index) const -&gt; const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Fetch a <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path component</a> by index (const overload).</dd>
-            <dt id="a404439f1e425197fdf366106a14bfa35">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a404439f1e425197fdf366106a14bfa35">path</a>(</span><span class="m-doc-wrap">) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Default constructor.</dd>
-            <dt id="a26ac437c2d3afd3d097accf8b8d9ddab">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a26ac437c2d3afd3d097accf8b8d9ddab">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">explicit</span> </span>
-            </dt>
-            <dd>Construct a path by parsing from a string.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7c9e225097d4f07af33865f75a076038">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">explicit</span> </span>
-            </dt>
-            <dd>Construct a path by parsing from a string.</dd>
-            <dt id="ad452f2bab2165b6a7df5ce47413e98af">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad452f2bab2165b6a7df5ce47413e98af">path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span></span>
-            </dt>
-            <dd>Copy constructor.</dd>
-            <dt id="ace6a48a9e29cc3d6b303862752014d05">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ace6a48a9e29cc3d6b303862752014d05">path</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; TOML_NODISCARD_CTOR <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
-            </dt>
-            <dd>Move constructor.</dd>
-            <dt id="afffcedd5c40bfd24eba008ed6f3009b5">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afffcedd5c40bfd24eba008ed6f3009b5">size</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a129b1539ef880b97468f26ac53538120">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a129b1539ef880b97468f26ac53538120">size</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns the number of components in the path.</dd>
           </dl>
@@ -144,36 +144,36 @@
         <section id="appending">
           <h2><a href="#appending">Appending</a></h2>
           <dl class="m-doc">
-            <dt id="ad64db57c72cc189f7aa3d736f1617bf4">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad64db57c72cc189f7aa3d736f1617bf4">append</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; p) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a59e08a1a6d87f46b7a6605c164b8705f">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a59e08a1a6d87f46b7a6605c164b8705f">append</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; p) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Appends another path onto the end of this one.</dd>
-            <dt id="abe4887501e4704e6fbbc23c4936f1d76">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abe4887501e4704e6fbbc23c4936f1d76">append</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp; p) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="ad6908de519364f52046dc5d6b3636b19">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad6908de519364f52046dc5d6b3636b19">append</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp; p) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Appends another path onto the end of this one.</dd>
-            <dt id="a16c2d22c03233b713e3438990ffa927f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a16c2d22c03233b713e3438990ffa927f">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> str) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="ac1977cc290a8c06b55352fc609d2f97c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac1977cc290a8c06b55352fc609d2f97c">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> str) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and appends it onto the end of this one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a7849bfdbac540324666da4ac3a6b93c0">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af682a3bbac05c38e5d60b37c5f6924a9">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and appends it onto the end of this one.</dd>
-            <dt id="aabc9213e26b1db7d87fbfc504e39695f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aabc9213e26b1db7d87fbfc504e39695f">operator+=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="ab68331642a9d309aed27776d02407319">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab68331642a9d309aed27776d02407319">operator+=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Appends another path onto the end of this one.</dd>
-            <dt id="a4eeaed05f49c2b9017bef230754f3777">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4eeaed05f49c2b9017bef230754f3777">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="aa2b48fb15e3d5843b19d71118536752d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa2b48fb15e3d5843b19d71118536752d">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Appends another path onto the end of this one.</dd>
-            <dt id="a71085a959e83687873f72aeffe03a242">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a71085a959e83687873f72aeffe03a242">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a94c55b5261e57914c2adf1a8ccdf95d8">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a94c55b5261e57914c2adf1a8ccdf95d8">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and appends it onto the end of this one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a834f7fe3bfb77ca19faccf5394c4b381">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2c20266ca7dea93506cf4225ede09003">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and appends it onto the end of this one.</dd>
           </dl>
@@ -181,36 +181,36 @@
         <section id="assignment">
           <h2><a href="#assignment">Assignment</a></h2>
           <dl class="m-doc">
-            <dt id="a8848b96b5f746f416e317d0e72402e2f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8848b96b5f746f416e317d0e72402e2f">assign</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; p) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a5782774d7ccc50c93b8773a4e7fcf6f0">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5782774d7ccc50c93b8773a4e7fcf6f0">assign</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; p) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Replaces the contents of the path with that of another.</dd>
-            <dt id="af2b87d08be8de600050cf3a84dc7eecd">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af2b87d08be8de600050cf3a84dc7eecd">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp; p) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="aabc69545a1e9f7aad045c61ada0ffdec">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aabc69545a1e9f7aad045c61ada0ffdec">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp; p) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Replaces the contents of the path with that of another.</dd>
-            <dt id="abf63489c969acc500b7a6378b1549fdd">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#abf63489c969acc500b7a6378b1549fdd">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> str) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="ad1adfd53833c333b63476554a8218167">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad1adfd53833c333b63476554a8218167">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> str) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Replaces the contents of the path object by a new path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af2df309292e59b9b0351738c24680370">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str) -&gt; TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a75b4239f7901d2979e7a828794cf11c1">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Replaces the contents of the path object by a new path.</dd>
-            <dt id="a660ab69db8a42b622bbf623d58397da4">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a660ab69db8a42b622bbf623d58397da4">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
+            <dt id="a5d1d199eeeb01a6fd700a3536bb6f21e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5d1d199eeeb01a6fd700a3536bb6f21e">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-info">defaulted</span></span>
             </dt>
             <dd>Copy-assignment operator.</dd>
-            <dt id="a630751521383d7072a580a9b8e1e3f4f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a630751521383d7072a580a9b8e1e3f4f">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a2405cc1dccd0507b80a923e6f49b4799">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2405cc1dccd0507b80a923e6f49b4799">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; <span class="m-label m-flat m-info">defaulted</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
-            <dt id="af5da17b2697b6d93ed6a111b7a05f569">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af5da17b2697b6d93ed6a111b7a05f569">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a42183133bdd2e1cde0105ad0741a8c17">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a42183133bdd2e1cde0105ad0741a8c17">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Replaces the contents of the path by parsing from a string.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a50ed97223baadcbf26f4c2311394c04b">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a71a4a525dd2e33946ad6d6809fceba10">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Replaces the contents of the path by parsing from a string.</dd>
           </dl>
@@ -218,29 +218,29 @@
         <section id="concatenation">
           <h2><a href="#concatenation">Concatenation</a></h2>
           <dl class="m-doc">
-            <dt id="ad5e5060120620271acb20e8a74f2021f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad5e5060120620271acb20e8a74f2021f">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="a8595d795b316e2ec04e2257cecd2aa7c">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8595d795b316e2ec04e2257cecd2aa7c">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Concatenates two paths.</dd>
-            <dt id="a48d54d0f3eb9f644a45102ee73f1cff5">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a48d54d0f3eb9f644a45102ee73f1cff5">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="aa752dbb500cd4fa6efe4195266852ada">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa752dbb500cd4fa6efe4195266852ada">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Concatenates two paths.</dd>
-            <dt id="a512781b98cad27ab8c8a59b110485fee">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a512781b98cad27ab8c8a59b110485fee">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
-            </dt>
-            <dd>Concatenates two paths.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a991f68ea1c70885c029a64bfbf445d69">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="a238f3a1d147825f4596718983ff4eea2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a238f3a1d147825f4596718983ff4eea2">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Concatenates two paths.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a06a9534d3f26fbcd1b563c5e90b34819">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af6cb0b10895f5308e1b02aec607cb5a0">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            </dt>
+            <dd>Concatenates two paths.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae4c30c186c418ed4e7c9cc0ce1c2d167">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Concatenates two paths.</dd>
           </dl>
@@ -248,54 +248,54 @@
         <section id="equality">
           <h2><a href="#equality">Equality</a></h2>
           <dl class="m-doc">
-            <dt id="a1733dc9036ef632af15486e604c4b477">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1733dc9036ef632af15486e604c4b477">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_PURE_INLINE_GETTER friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt id="a7c09a0a727d62a8a0526df213bf609f2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7c09a0a727d62a8a0526df213bf609f2">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns whether two paths are not the same.</dd>
-            <dt id="a17adb560b17accb885ba871f492e45f2">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a17adb560b17accb885ba871f492e45f2">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+            <dt id="a4aac6128cf3096aad26b0b0a96c2146b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4aac6128cf3096aad26b0b0a96c2146b">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are not the same.</dd>
-            <dt id="a0577876d473c22d81b5e3f6e519af57c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0577876d473c22d81b5e3f6e519af57c">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
-            </dt>
-            <dd>Returns whether two paths are not the same.</dd>
-            <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac3a98d28d7b1e94834ac73759a7789ec">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+            <dt id="ac52129303944b45af80b81ad7661f0b9">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac52129303944b45af80b81ad7661f0b9">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are not the same.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5b024dec835f174a68a456a2da2f8d6d">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6151f164638727d9c4df34087ec43044">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are not the same.</dd>
-            <dt id="a1a468cbd804317b18eafbaa91c06baf8">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1a468cbd804317b18eafbaa91c06baf8">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_PURE_INLINE_GETTER friend bool <span class="m-label m-flat m-success">noexcept</span></span>
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6c525194daf7a573eae71f4b9e33ee58">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool</span>
+            </dt>
+            <dd>Returns whether two paths are not the same.</dd>
+            <dt id="a5d23cf873bac38cf71970fa3710a8cc2">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a5d23cf873bac38cf71970fa3710a8cc2">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns whether two paths are the same.</dd>
-            <dt id="af5859e43bd1db2967505992d3087a193">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af5859e43bd1db2967505992d3087a193">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+            <dt id="a85f0a0111e2b80bebe29d4ce0085e4a6">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a85f0a0111e2b80bebe29d4ce0085e4a6">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are the same.</dd>
-            <dt id="ab673764882b72f84b82f34f51beeea6f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab673764882b72f84b82f34f51beeea6f">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+            <dt id="acaa57e919274df170a42fb906fe2b5a4">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acaa57e919274df170a42fb906fe2b5a4">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are the same.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adb6aa7f1b9da69aac8853c17568130dd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
-              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a87379c0582c782cff4740608e0343158">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are the same.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aee32429464d115ed5e67d0332ddb8fc6">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE friend bool</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a2149371c079844c9891a92fa74a89d38">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; bool</span>
             </dt>
             <dd>Returns whether two paths are the same.</dd>
           </dl>
@@ -304,35 +304,35 @@
           <h2><a href="#iteration">Iteration</a></h2>
           <dl class="m-doc">
             <dt>
-              using <a class="m-doc" href="#aaed31ecb434c644dc316042b744a6a59">const_iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::<a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a>
+              using <a class="m-doc" href="#aaed31ecb434c644dc316042b744a6a59">const_iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::const_iterator
             </dt>
             <dd></dd>
             <dt>
-              using <a class="m-doc" href="#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::<a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a>
+              using <a class="m-doc" href="#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::iterator
             </dt>
             <dd></dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a6271886c2d382065b5727c89b7b31a85">begin</a>(</span><span class="m-doc-wrap">) -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a4d44a1165c0b5dc1b3171db952b56afd">begin</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to the first component in the path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a21b4e3d32014c3a467d1e26c63e0bfec">begin</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ad757a451dd6902f26a8d2ad3c3f15194">begin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the first component in the path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ae423b1549babac2ecfd162f081a8b078">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#adc73ea43ee4542041c58186691f665e8">cbegin</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to the first component in the path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a583735c1e7b0b3d94138252062a2082a">cend</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aae5ffcde5edfbe8ae33cadafdac34bfa">cend</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to one-past-the-last component in the path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afcf06743a9e0438fc5c1cfd4943ff091">end</a>(</span><span class="m-doc-wrap">) -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a884ed05a1f4ad2a2d4fe9133eb72a391">end</a>(</span><span class="m-doc-wrap">) -&gt; <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns an iterator to one-past-the-last component in the path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af31aa15d788b4a9ace7ed7d0f1b6c5ce">end</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#add0dbda00d37c1838b55de73f31c2dc6">end</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const iterator to one-past-the-last component in the path.</dd>
           </dl>
@@ -340,20 +340,20 @@
         <section id="prepending">
           <h2><a href="#prepending">Prepending</a></h2>
           <dl class="m-doc">
-            <dt id="acf3f8ebc882216590047e0fd9ca679e2">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acf3f8ebc882216590047e0fd9ca679e2">prepend</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a387fdf6712f4280e6295e8f3f73620d6">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a387fdf6712f4280e6295e8f3f73620d6">prepend</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Prepends another path onto the beginning of this one.</dd>
-            <dt id="ac0ea4613a8ce311699284d22753a966c">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac0ea4613a8ce311699284d22753a966c">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="ac734db72f7030aa206ab39a8a8b40a90">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac734db72f7030aa206ab39a8a8b40a90">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;&amp;) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Prepends another path onto the beginning of this one.</dd>
-            <dt id="a97cca814a51b425e1baf310d5672fbe4">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a97cca814a51b425e1baf310d5672fbe4">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="af3c7f3160ae2c2f9fb8a7d89f3206f08">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af3c7f3160ae2c2f9fb8a7d89f3206f08">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and prepends it onto the beginning of this one.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa30721d1f0b21c4d42176063dd7ad08a">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac1c3fe68aaf1e77f2e959259f32d175d">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Parses a path and prepends it onto the beginning of this one.</dd>
           </dl>
@@ -361,25 +361,25 @@
         <section id="string-conversion">
           <h2><a href="#string-conversion">String conversion</a></h2>
           <dl class="m-doc">
-            <dt id="a6e049ca5c26474c5b966a7e371474622">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6e049ca5c26474c5b966a7e371474622">operator std::string</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE <span class="m-label m-flat m-info">explicit</span> </span>
+            <dt id="a48e8847229969e912855c71a8c59c094">
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a48e8847229969e912855c71a8c59c094">operator std::string</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Returns a string representation of this path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0a423a19b8dd9225c3e7648e8d06ab61">operator std::wstring</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_NODISCARD TOML_ALWAYS_INLINE <span class="m-label m-flat m-info">explicit</span> </span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ac77a8dffca78bd3091b7db123837097b">operator std::wstring</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-flat m-info">explicit</span> </span>
             </dt>
             <dd>Returns a string representation of this path.</dd>
-            <dt id="a333fb698dd1ae78a6bf73224c4cbdcb5">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a333fb698dd1ae78a6bf73224c4cbdcb5">str</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_NODISCARD <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a></span>
+            <dt id="a8d70d707cbd38ffc03fcb3b6f81069fa">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a8d70d707cbd38ffc03fcb3b6f81069fa">str</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a></span>
             </dt>
             <dd>Returns a string representation of this path.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa60799989e68e86b8a10ebc27a0c8da5">wide_str</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_NODISCARD <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0a824034b0ef08cb2e497af21858a574">wide_str</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a></span>
             </dt>
             <dd>Returns a string representation of this path.</dd>
-            <dt id="a726d1e69b1ec16dae68939c0ef3bdd63">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a726d1e69b1ec16dae68939c0ef3bdd63">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; os,
-              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; TOML_ALWAYS_INLINE friend <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            <dt id="a0c95549719afaf6e62a641c2bdc33c6e">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0c95549719afaf6e62a641c2bdc33c6e">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; os,
+              const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints the string representation of a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> out to a stream.</dd>
           </dl>
@@ -391,30 +391,30 @@
               <span class="m-doc-wrap-bumper">void <a class="m-doc-self" href="#a109a0d82839904cd0808388023305dc4">clear</a>(</span><span class="m-doc-wrap">) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Erases the contents of the path.</dd>
-            <dt id="a01160294c8faa4db595dd7a0d0912f02">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a01160294c8faa4db595dd7a0d0912f02">leaf</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n = 1) const -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="ace0a076c96fb0b46828de5d4f59ade5d">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ace0a076c96fb0b46828de5d4f59ade5d">leaf</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n = 1) const -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object representing terminal n-parts of a TOML path.</dd>
-            <dt id="ad8e63d247e6ac55efe207dbfcfd0632e">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ad8e63d247e6ac55efe207dbfcfd0632e">parent</a>(</span><span class="m-doc-wrap">) const -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="a0efb28707c4366481ca6e549c1d31a78">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a0efb28707c4366481ca6e549c1d31a78">parent</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object representing the path of the parent node.</dd>
-            <dt id="a1265e8aba6dc60bc5ffe8399b1eeb645">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1265e8aba6dc60bc5ffe8399b1eeb645">subpath</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> start,
-              <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> end) const -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="afc5f7494ca4cd2a574619d7ffb080cd3">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#afc5f7494ca4cd2a574619d7ffb080cd3">subpath</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> start,
+              <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> end) const -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object that is a specified subpath of the current path, representing the range of <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path components</a> from [start, end).</dd>
-            <dt id="ae9ae31945d214dfbe684c4354f2324e7">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae9ae31945d214dfbe684c4354f2324e7">subpath</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> start,
-              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> length) const -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="aa7e62837fc83f9a78e942c5f4105b8f0">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa7e62837fc83f9a78e942c5f4105b8f0">subpath</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> start,
+              <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> length) const -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object that is a specified subpath of the current path, representing the range of <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path components</a> with indexes from [start, start + length].</dd>
-            <dt id="aa4140e7e34e06546d509335037d1101b">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa4140e7e34e06546d509335037d1101b">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
+            <dt id="a4fb7f73d84aa72bd8f28532b1e95068a">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a4fb7f73d84aa72bd8f28532b1e95068a">truncate</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n) -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp;</span>
             </dt>
             <dd>Removes the number of terminal <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path components</a> specified by n.</dd>
-            <dt id="aea56433ad4e7bd0a0642dd1c0374d21f">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aea56433ad4e7bd0a0642dd1c0374d21f">truncated</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n) const -&gt; TOML_NODISCARD <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
+            <dt id="a2f4f4b86e0a06edd27668dc12410e86b">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a2f4f4b86e0a06edd27668dc12410e86b">truncated</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> n) const -&gt; <a class="m-doc" href="classtoml_1_1path.html">path</a></span>
             </dt>
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object which has had n terminal <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path components</a> removed.</dd>
           </dl>
@@ -423,164 +423,164 @@
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="aaed31ecb434c644dc316042b744a6a59"><div>
             <h3>
-              using toml::<wbr/>path::<wbr/><a class="m-doc-self" href="#aaed31ecb434c644dc316042b744a6a59">const_iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::<a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a>
+              using toml::<wbr/>path::<wbr/><a class="m-doc-self" href="#aaed31ecb434c644dc316042b744a6a59">const_iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::const_iterator
             </h3>
 <p>A const iterator for iterating over the components in the path.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="ad752d8838221c179af93c94d8a7ed3d2"><div>
             <h3>
-              using toml::<wbr/>path::<wbr/><a class="m-doc-self" href="#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::<a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a>
+              using toml::<wbr/>path::<wbr/><a class="m-doc-self" href="#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> = <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/container/vector.html" target="_blank">std::<wbr/>vector</a>&lt;<a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&gt;::iterator
             </h3>
 <p>An iterator for iterating over the components in the path.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
         </section>
         <section>
           <h2>Function documentation</h2>
-          <section class="m-doc-details" id="a7c9e225097d4f07af33865f75a076038"><div>
+          <section class="m-doc-details" id="a4f340e37cfb32ca1fdfebf24e5b842b4"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD_CTOR toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7c9e225097d4f07af33865f75a076038">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4f340e37cfb32ca1fdfebf24e5b842b4">path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>) <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Construct a path by parsing from a string.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This constructor is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a7849bfdbac540324666da4ac3a6b93c0"><div>
+          <section class="m-doc-details" id="af682a3bbac05c38e5d60b37c5f6924a9"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7849bfdbac540324666da4ac3a6b93c0">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af682a3bbac05c38e5d60b37c5f6924a9">append</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str)</span></span>
             </h3>
             <p>Parses a path and appends it onto the end of this one.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a834f7fe3bfb77ca19faccf5394c4b381"><div>
+          <section class="m-doc-details" id="a2c20266ca7dea93506cf4225ede09003"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a834f7fe3bfb77ca19faccf5394c4b381">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2c20266ca7dea93506cf4225ede09003">operator+=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
             </h3>
             <p>Parses a path and appends it onto the end of this one.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="af2df309292e59b9b0351738c24680370"><div>
+          <section class="m-doc-details" id="a75b4239f7901d2979e7a828794cf11c1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_ALWAYS_INLINE <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af2df309292e59b9b0351738c24680370">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a75b4239f7901d2979e7a828794cf11c1">assign</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> str)</span></span>
             </h3>
             <p>Replaces the contents of the path object by a new path.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a50ed97223baadcbf26f4c2311394c04b"><div>
+          <section class="m-doc-details" id="a71a4a525dd2e33946ad6d6809fceba10"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a50ed97223baadcbf26f4c2311394c04b">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a71a4a525dd2e33946ad6d6809fceba10">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
             </h3>
             <p>Replaces the contents of the path by parsing from a string.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a991f68ea1c70885c029a64bfbf445d69"><div>
+          <section class="m-doc-details" id="af6cb0b10895f5308e1b02aec607cb5a0"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a991f68ea1c70885c029a64bfbf445d69">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af6cb0b10895f5308e1b02aec607cb5a0">operator+</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs)</span></span>
             </h3>
             <p>Concatenates two paths.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a06a9534d3f26fbcd1b563c5e90b34819"><div>
+          <section class="m-doc-details" id="ae4c30c186c418ed4e7c9cc0ce1c2d167"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD friend <a class="m-doc" href="classtoml_1_1path.html">path</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a06a9534d3f26fbcd1b563c5e90b34819">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae4c30c186c418ed4e7c9cc0ce1c2d167">operator+</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
               const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs)</span></span>
             </h3>
             <p>Concatenates two paths.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ac3a98d28d7b1e94834ac73759a7789ec"><div>
+          <section class="m-doc-details" id="a6151f164638727d9c4df34087ec43044"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD TOML_ALWAYS_INLINE friend bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac3a98d28d7b1e94834ac73759a7789ec">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6151f164638727d9c4df34087ec43044">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs)</span></span>
             </h3>
             <p>Returns whether two paths are not the same.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a5b024dec835f174a68a456a2da2f8d6d"><div>
+          <section class="m-doc-details" id="a6c525194daf7a573eae71f4b9e33ee58"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD TOML_ALWAYS_INLINE friend bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5b024dec835f174a68a456a2da2f8d6d">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6c525194daf7a573eae71f4b9e33ee58">operator!=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
               const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs)</span></span>
             </h3>
             <p>Returns whether two paths are not the same.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="adb6aa7f1b9da69aac8853c17568130dd"><div>
+          <section class="m-doc-details" id="a87379c0582c782cff4740608e0343158"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD TOML_ALWAYS_INLINE friend bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adb6aa7f1b9da69aac8853c17568130dd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a87379c0582c782cff4740608e0343158">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; lhs,
               <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> rhs)</span></span>
             </h3>
             <p>Returns whether two paths are the same.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aee32429464d115ed5e67d0332ddb8fc6"><div>
+          <section class="m-doc-details" id="a2149371c079844c9891a92fa74a89d38"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD TOML_ALWAYS_INLINE friend bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aee32429464d115ed5e67d0332ddb8fc6">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
+              <span class="m-doc-wrap-bumper">bool toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2149371c079844c9891a92fa74a89d38">operator==</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> lhs,
               const <a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; rhs)</span></span>
             </h3>
             <p>Returns whether two paths are the same.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a6271886c2d382065b5727c89b7b31a85"><div>
+          <section class="m-doc-details" id="a4d44a1165c0b5dc1b3171db952b56afd"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a6271886c2d382065b5727c89b7b31a85">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4d44a1165c0b5dc1b3171db952b56afd">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a21b4e3d32014c3a467d1e26c63e0bfec"><div>
+          <section class="m-doc-details" id="ad757a451dd6902f26a8d2ad3c3f15194"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a21b4e3d32014c3a467d1e26c63e0bfec">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ad757a451dd6902f26a8d2ad3c3f15194">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the first component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="ae423b1549babac2ecfd162f081a8b078"><div>
+          <section class="m-doc-details" id="adc73ea43ee4542041c58186691f665e8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ae423b1549babac2ecfd162f081a8b078">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#adc73ea43ee4542041c58186691f665e8">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to the first component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="a583735c1e7b0b3d94138252062a2082a"><div>
+          <section class="m-doc-details" id="aae5ffcde5edfbe8ae33cadafdac34bfa"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a583735c1e7b0b3d94138252062a2082a">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aae5ffcde5edfbe8ae33cadafdac34bfa">cend</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to one-past-the-last component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="afcf06743a9e0438fc5c1cfd4943ff091"><div>
+          <section class="m-doc-details" id="a884ed05a1f4ad2a2d4fe9133eb72a391"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afcf06743a9e0438fc5c1cfd4943ff091">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#ad752d8838221c179af93c94d8a7ed3d2">iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a884ed05a1f4ad2a2d4fe9133eb72a391">end</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to one-past-the-last component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="af31aa15d788b4a9ace7ed7d0f1b6c5ce"><div>
+          <section class="m-doc-details" id="add0dbda00d37c1838b55de73f31c2dc6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_PURE_INLINE_GETTER <a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af31aa15d788b4a9ace7ed7d0f1b6c5ce">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html#aaed31ecb434c644dc316042b744a6a59">const_<wbr/>iterator</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#add0dbda00d37c1838b55de73f31c2dc6">end</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const iterator to one-past-the-last component in the path.</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa30721d1f0b21c4d42176063dd7ad08a"><div>
+          <section class="m-doc-details" id="ac1c3fe68aaf1e77f2e959259f32d175d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa30721d1f0b21c4d42176063dd7ad08a">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path.html">path</a>&amp; toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac1c3fe68aaf1e77f2e959259f32d175d">prepend</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a>)</span></span>
             </h3>
             <p>Parses a path and prepends it onto the beginning of this one.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a0a423a19b8dd9225c3e7648e8d06ab61"><div>
+          <section class="m-doc-details" id="ac77a8dffca78bd3091b7db123837097b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD TOML_ALWAYS_INLINE toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0a423a19b8dd9225c3e7648e8d06ab61">operator std::wstring</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span> </span></span>
+              <span class="m-doc-wrap-bumper"> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac77a8dffca78bd3091b7db123837097b">operator std::wstring</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-info">explicit</span> </span></span>
             </h3>
             <p>Returns a string representation of this path.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="aa60799989e68e86b8a10ebc27a0c8da5"><div>
+          <section class="m-doc-details" id="a0a824034b0ef08cb2e497af21858a574"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">TOML_NODISCARD <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aa60799989e68e86b8a10ebc27a0c8da5">wide_str</a>(</span><span class="m-doc-wrap">) const</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>wstring</a> toml::<wbr/>path::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0a824034b0ef08cb2e497af21858a574">wide_str</a>(</span><span class="m-doc-wrap">) const</span></span>
             </h3>
             <p>Returns a string representation of this path.</p>
-<aside class="m-block m-special"><h4>Conditional availability</h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
         </section>
       </div>

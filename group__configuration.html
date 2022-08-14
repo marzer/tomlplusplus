@@ -238,11 +238,11 @@
             <p>Sets whether the library is entirely inline.</p>
 <p>Defaults to <code>1</code>.</p><aside class="m-note m-default"><h4>Remark</h4><p>Disabling this means that you must define <a class="m-doc" href="group__configuration.html#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_<wbr/>IMPLEMENTATION</a> in <strong><em>exactly one</em></strong> translation unit in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
 <span class="cp">#define TOML_HEADER_ONLY 0</span>
-<span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&lt;toml.hpp&gt;</span>
 
 <span class="c1">// some_code_file.cpp</span>
 <span class="cp">#define TOML_IMPLEMENTATION</span>
-<span class="cp">#include</span> <span class="cpf">"global_header_that_includes_toml++.h"</span></pre></aside>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">"global_header_that_includes_toml++.h"</span></pre></aside>
           </div></section>
           <section class="m-doc-details" id="ga27ee69835a1ddff9dbaf3015b4b08a11"><div>
             <h3>

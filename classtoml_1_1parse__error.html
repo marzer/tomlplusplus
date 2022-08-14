@@ -61,7 +61,90 @@
           <span class="m-breadcrumb"><a href="namespacetoml.html">toml</a>::<wbr/></span>parse_error <span class="m-thin">class</span>
         </h1>
         <p>An error generated when parsing fails.</p>
+        <nav class="m-block m-default poxy-toc">
+          <h3>Contents</h3>
+          <ul>
+            <li>
+              Reference
+              <ul>
+                <li><a href="#pub-methods">Public functions</a></li>
+                <li><a href="#friends">Friends</a></li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
 <aside class="m-note m-default"><h4>Remark</h4><p>This class inherits from <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/error/runtime_error.html" target="_blank">std::<wbr/>runtime_error</a> when exceptions are enabled. The public interface is the same regardless of exception mode.</p></aside>
+        <section id="pub-methods">
+          <h2><a href="#pub-methods">Public functions</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns a textual description of the error.</dd>
+            <dt id="acaa5f85a7cc3f4c3c0596ed1dc4eae36">
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acaa5f85a7cc3f4c3c0596ed1dc4eae36">source</a>(</span><span class="m-doc-wrap">) const -&gt; const <a class="m-doc" href="structtoml_1_1source__region.html">source_<wbr/>region</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the region of the source document responsible for the error.</dd>
+          </dl>
+        </section>
+        <section id="friends">
+          <h2><a href="#friends">Friends</a></h2>
+          <dl class="m-doc">
+            <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a3708b936f4344b8ca8a0e6a0de70f687">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+            </dt>
+            <dd>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</dd>
+          </dl>
+        </section>
+        <section>
+          <h2>Function documentation</h2>
+          <section class="m-doc-details" id="a5582e9d66f8aa3f6ef442c0a04d5282f"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> toml::<wbr/>parse_error::<wbr/></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5582e9d66f8aa3f6ef442c0a04d5282f">description</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns a textual description of the error.</p>
+<aside class="m-note m-default"><h4>Remark</h4><p>The backing string is guaranteed to be null-terminated.</p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a3708b936f4344b8ca8a0e6a0de70f687"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3708b936f4344b8ca8a0e6a0de70f687">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>&amp; rhs)</span></span>
+            </h3>
+            <p>Prints a <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a> to a stream.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">lhs</td>
+                  <td>The stream.</td>
+                </tr>
+                <tr>
+                  <td>rhs</td>
+                  <td>The <a class="m-doc" href="classtoml_1_1parse__error.html">parse_<wbr/>error</a>.</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The input stream.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">try</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">tbl</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"enabled = trUe"</span><span class="sa">sv</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">catch</span><span class="w"> </span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="ns">toml</span><span class="o">::</span><span class="ut">parse_error</span><span class="w"> </span><span class="o">&amp;</span><span class="w"> </span><span class="n">err</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="ns">std</span><span class="o">::</span><span class="ut">cerr</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span><span class="sa">sv</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">err</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-console"><span class="go">Parsing failed:</span>
+<span class="go">Encountered unexpected character while parsing boolean; expected 'true', saw 'trU'</span>
+<span class="go">    (error occurred at line 1, column 13)</span></pre>
+          </div></section>
+        </section>
       </div>
     </div>
   </div>
