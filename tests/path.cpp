@@ -510,6 +510,8 @@ TEST_CASE("path - accessing")
 
 		CHECK(tbl["d"][""]);
 		CHECK(tbl["d"][""] == at_path(tbl, toml::path("d.")));
+
+		CHECK(!at_path(tbl, toml::path("has.missing.component")));
 	}
 
 	SECTION("array")
@@ -535,6 +537,8 @@ TEST_CASE("path - accessing")
 		CHECK(tbl["b"][2]["c"]);
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2].c")));
 		CHECK(tbl["b"][2]["c"] == arr.at_path(toml::path("[2]   \t.c"))); // whitespace is allowed after array indexers
+
+		CHECK(!arr.at_path(toml::path("[3].missing.component")));
 	}
 
 	SECTION("indexing operator")
@@ -580,5 +584,7 @@ TEST_CASE("path - accessing")
 
 		CHECK(tbl["d"][""]);
 		CHECK(tbl["d"][""] == tbl[toml::path("d.")]);
+
+		CHECK(!tbl[toml::path("has.missing.component")]);
 	}
 }
