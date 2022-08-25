@@ -504,6 +504,9 @@ TOML_NAMESPACE_START
 				// Error: invalid component
 				return {};
 			}
+
+			if (!current)
+				return {}; // not found
 		}
 
 		return node_view{ current };
