@@ -1,6 +1,13 @@
+html {
+	height:100%;
+}
+
+body {
+	min-height:100%;
+}
+
 html, body
 {
-	height: 100%;
 	scroll-padding-top: 3.5rem;
 }
 
@@ -8,12 +15,11 @@ body
 {
 	display: flex;
 	flex-direction: column;
-	padding-top: 3rem;
 }
 
 body > header
 {
-	position: fixed;
+	position: sticky;
 	top: 0;
 	left: 0;
 	right: 0;

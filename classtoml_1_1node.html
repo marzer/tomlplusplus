@@ -17,12 +17,12 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.6.0" name="generator"/>
+  <meta content="Poxy v0.6.1" name="generator"/>
   <meta content="no-referrer-when-downgrade" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <link href="poxy-0.6.0.css" rel="stylesheet"/>
-  <link href="poxy-0.6.0-dark.css" rel="stylesheet"/>
-  <script src="poxy-0.6.0.js"></script>
+  <link href="poxy-0.6.1.css" rel="stylesheet"/>
+  <link href="poxy-0.6.1-dark.css" rel="stylesheet"/>
+  <script src="poxy-0.6.1.js"></script>
 </head>
 <body>
 <header><nav id="navigation">
@@ -448,8 +448,8 @@
 
 <span class="dl">)</span><span class="s">"</span><span class="sa">sv</span><span class="p">);</span>
 
-<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="nf">path1</span><span class="p">(</span><span class="s">"foo.bar[2]"</span><span class="p">);</span>
-<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="nf">path2</span><span class="p">(</span><span class="s">"foo.bar[4].kek"</span><span class="p">);</span>
+<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="n">path1</span><span class="p">(</span><span class="s">"foo.bar[2]"</span><span class="p">);</span>
+<span class="ns">toml</span><span class="o">::</span><span class="ut">path</span><span class="w"> </span><span class="n">path2</span><span class="p">(</span><span class="s">"foo.bar[4].kek"</span><span class="p">);</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">path1</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">path1</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="ns">std</span><span class="o">::</span><span class="ut">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">config</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">path2</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
