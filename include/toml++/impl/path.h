@@ -20,6 +20,7 @@ TOML_NAMESPACE_START
 	/// \brief Represents a single component of a complete 'TOML-path': either a key or an array index
 	class TOML_EXPORTED_CLASS path_component
 	{
+		/// \cond
 		struct storage_t
 		{
 			static constexpr size_t size =

@@ -1,7 +1,7 @@
 project(
 	'tomlplusplus',
 	'cpp',
-	version: '3.1.0',
+	version: '3.2.0',
 	meson_version: '>=0.54.0',
 	license: 'MIT',
 	default_options: [ # https://mesonbuild.com/Builtin-options.html
