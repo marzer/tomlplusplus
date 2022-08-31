@@ -367,4 +367,12 @@ b = []
 			foo = 1
 		)"sv);
 	}
+
+	SECTION("tomlplusplus/issues/169") // https://github.com/marzer/tomlplusplus/issues/169
+	{
+		parsing_should_fail(FILE_LINE_ARGS, R"(
+			[a]
+			b = [c"]
+		)"sv);
+	}
 }

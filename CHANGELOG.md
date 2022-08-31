@@ -12,7 +12,17 @@ template:
 #### Removals:
 #### Build system:
 
+<br><br>
+
 -->
+
+## Unreleased
+
+#### Fixes:
+- fixed null pointer dereference in parser when exceptions are disabled (#169) (@ncaklovic)
+
+<br><br>
+
 
 ## v3.2.0
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.2.0) 2022-08-29

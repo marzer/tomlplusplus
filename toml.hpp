@@ -11311,6 +11311,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void array::insert_at_back(impl::node_ptr && elem)
 	{
+		TOML_ASSERT(elem);
 		elems_.push_back(std::move(elem));
 	}
 
@@ -15512,13 +15513,13 @@ TOML_IMPL_NAMESPACE_START
 
 		node_ptr arr_ptr{ new array{} };
 		array& arr = arr_ptr->ref_cast<array>();
-		enum TOML_CLOSED_ENUM parse_elem : int
+		enum class TOML_CLOSED_ENUM parse_type : int
 		{
 			none,
 			comma,
 			val
 		};
-		parse_elem prev = none;
+		parse_type prev = parse_type::none;
 
 		while (!is_error())
 		{
@@ -15529,9 +15530,9 @@ TOML_IMPL_NAMESPACE_START
 			// commas - only legal after a value
 			if (*cp == U',')
 			{
-				if (prev == val)
+				if (prev == parse_type::val)
 				{
-					prev = comma;
+					prev = parse_type::comma;
 					advance_and_return_if_error_or_eof({});
 					continue;
 				}
@@ -15548,15 +15549,19 @@ TOML_IMPL_NAMESPACE_START
 			// must be a value
 			else
 			{
-				if (prev == val)
+				if (prev == parse_type::val)
 				{
 					set_error_and_return_default("expected comma or closing ']', saw '"sv, to_sv(*cp), "'"sv);
 					continue;
 				}
-				prev = val;
+				prev = parse_type::val;
+
+				auto val = parse_value();
+				return_if_error({});
+
 				if (!arr.capacity())
 					arr.reserve(4u);
-				arr.emplace_back<node_ptr>(parse_value());
+				arr.emplace_back<node_ptr>(std::move(val));
 			}
 		}
 
@@ -15580,13 +15585,13 @@ TOML_IMPL_NAMESPACE_START
 		tbl.is_inline(true);
 		table_vector_scope table_scope{ open_inline_tables, tbl };
 
-		enum TOML_CLOSED_ENUM parse_elem : int
+		enum class TOML_CLOSED_ENUM parse_type : int
 		{
 			none,
 			comma,
 			kvp
 		};
-		parse_elem prev = none;
+		parse_type prev = parse_type::none;
 		while (!is_error())
 		{
 			if constexpr (TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
@@ -15605,9 +15610,9 @@ TOML_IMPL_NAMESPACE_START
 			// commas - only legal after a key-value pair
 			if (*cp == U',')
 			{
-				if (prev == kvp)
+				if (prev == parse_type::kvp)
 				{
-					prev = comma;
+					prev = parse_type::comma;
 					advance_and_return_if_error_or_eof({});
 				}
 				else
@@ -15619,7 +15624,7 @@ TOML_IMPL_NAMESPACE_START
 			{
 				if constexpr (!TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
 				{
-					if (prev == comma)
+					if (prev == parse_type::comma)
 					{
 						set_error_and_return_default("expected key-value pair, saw closing '}' (dangling comma)"sv);
 						continue;
@@ -15632,11 +15637,11 @@ TOML_IMPL_NAMESPACE_START
 			// key-value pair
 			else if (is_string_delimiter(*cp) || is_bare_key_character(*cp))
 			{
-				if (prev == kvp)
+				if (prev == parse_type::kvp)
 					set_error_and_return_default("expected comma or closing '}', saw '"sv, to_sv(*cp), "'"sv);
 				else
 				{
-					prev = kvp;
+					prev = parse_type::kvp;
 					parse_key_value_pair_and_insert(&tbl);
 				}
 			}

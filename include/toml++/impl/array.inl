@@ -130,6 +130,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void array::insert_at_back(impl::node_ptr && elem)
 	{
+		TOML_ASSERT(elem);
 		elems_.push_back(std::move(elem));
 	}
 
