@@ -1,4 +1,4 @@
-[![banner](docs/images/banner_small.png)][homepage]  
+[![banner](docs/images/banner.png)][homepage]  
 [![Releases](https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square)](https://github.com/marzer/tomlplusplus/releases)
 [![C++17](docs/images/badge-C++17.svg)][cpp_compilers]
 [![TOML](docs/images/badge-TOML.svg)][v1.0.0]

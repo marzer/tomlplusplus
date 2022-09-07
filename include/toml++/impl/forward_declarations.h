@@ -344,8 +344,8 @@ TOML_NAMESPACE_START // abi namespace
 	///
 	/// \detail \cpp
 	/// // desired result: [ [ 42 ] ]
-	/// auto bad = toml::array{ toml::array{ 42 } }
-	/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } }
+	/// auto bad = toml::array{ toml::array{ 42 } };
+	/// auto good = toml::array{ toml::inserter{ toml::array{ 42 } } };
 	/// std::cout << "bad: " << bad << "\n";
 	/// std::cout << "good:" << good << "\n";
 	/// \ecpp
