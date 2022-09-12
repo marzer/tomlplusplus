@@ -577,6 +577,7 @@
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wmaybe-uninitialized")                                                        \
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wnoexcept")                                                                   \
 	TOML_PRAGMA_GCC(diagnostic ignored "-Wnull-dereference")                                                           \
+	TOML_PRAGMA_GCC(diagnostic ignored "-Wduplicated-branches")                                                        \
 	static_assert(true)
 
 #define TOML_POP_WARNINGS                                                                                              \
