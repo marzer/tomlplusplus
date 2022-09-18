@@ -97,7 +97,7 @@ TOML_IMPL_NAMESPACE_START
 					}
 					else if TOML_UNLIKELY(c == '.' || c == '[')
 						break;
-					else if (c == '\t' || c == '.')
+					else if (c == '\t' || c == ' ')
 						pos++;
 					else
 						return false;
