@@ -16,6 +16,7 @@ TEST_CASE("path - parsing")
 		CHECK(toml::path("  [1][2]").str() == "  [1][2]");
 		CHECK(toml::path("a.  .b").str() == "a.  .b");
 		CHECK(toml::path("test[23]").str() == "test[23]");
+		CHECK(toml::path("[ 120  ]").str() == "[120]");
 		CHECK(toml::path("[ 120\t\t]").str() == "[120]");
 		CHECK(toml::path("test.value").str() == "test.value");
 		CHECK(toml::path("test[0].value").str() == "test[0].value");
@@ -31,6 +32,7 @@ TEST_CASE("path - parsing")
 		CHECK(toml::path(L"  [1][2]").str() == "  [1][2]");
 		CHECK(toml::path(L"a.  .b").str() == "a.  .b");
 		CHECK(toml::path(L"test[23]").str() == "test[23]");
+		CHECK(toml::path(L"[ 120  ]").str() == "[120]");
 		CHECK(toml::path(L"[ 120\t\t]").str() == "[120]");
 		CHECK(toml::path(L"test.value").str() == "test.value");
 		CHECK(toml::path(L"test[0].value").str() == "test[0].value");
