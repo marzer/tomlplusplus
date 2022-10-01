@@ -560,8 +560,8 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --footer-link-color: var(--theme-text1);
 --footer-link-active-color:var(--theme-text2);
 --cover-image-background-color: #0f1217;
---search-overlay-color: var(--header-background-color-landing);
---search-background-color: var(--header-background-color);
+--search-overlay-color: hsla(var(--theme-hue), calc(var(--theme-saturation) * 0.5), 75%, 85%);
+--search-background-color: var(--theme-surface4);
 --article-header-color: #f0f0f0;
 --article-footer-color: #c5c5c5;
 --article-heading-color: var(--theme-surface8);
@@ -2636,21 +2636,23 @@ article div > section > section { margin-bottom: 2.25rem; }
 a.poxy-external { font-weight: normal; }
 pre.m-code a,
 pre.m-console a { font-weight: inherit !important; color: inherit !important; }
-nav .m-thin { margin-left: 0.5em; }
-nav .poxy-icon img,
-nav .poxy-icon svg { width: 1.5rem !important; height: 1.5rem !important; vertical-align: -18.5%; }
+body > header > nav .m-thin { margin-left: 0.5em; }
+body > header > nav .poxy-icon img,
+body > header > nav .poxy-icon svg { width: 1.5rem !important; height: 1.5rem !important; vertical-align: -18.5%; }
 body > header > nav #m-navbar-collapse a.m-doc-search-icon svg { width: 1.25rem !important; height: 1.25rem !important; vertical-align: -12.5%; }
-nav #m-navbar-brand img { vertical-align: -17.5% !important; }
-nav a.poxy-icon.theme:hover,
-nav #m-navbar-current:hover {
+body > header > nav a#m-navbar-brand svg,
+body > header > nav #m-navbar-brand a svg { width: 1.75rem; height: 1.75rem; vertical-align: -22.5%; margin-right: 0.5rem; }
+body > header > nav a.poxy-icon.theme:hover,
+body > header > nav #m-navbar-current:hover {
 color: var(--header-link-active-color) !important;
 border-color: var(--header-link-active-color) !important;
 background-color: var(--header-link-active-background-color) !important;
 }
 @media screen and (max-width: 768px) {
-nav .m-thin, nav .repo { display: none; }
+body > header > nav .m-thin,
+body > header > nav .repo { display: none; }
 }
-header nav a:hover { text-decoration: none !important; }
+body > header > nav a:hover { text-decoration: none !important; }
 .m-doc-details div > h4,
 .m-doc-details div > h5,
 .m-doc-details div > h6,
@@ -2675,7 +2677,7 @@ header nav a:hover { text-decoration: none !important; }
 .gh-badges a { margin-left: 0.2rem; margin-right: 0.2rem; margin-bottom: 0.4rem; }
 }
 h1 span.m-thin { color: var(--dim-color); }
-.poxy-main-banner {
+#poxy-main-banner {
 margin-left: -1rem !important;
 margin-right: -1rem !important;
 margin-top: -1.75rem !important;
@@ -2732,7 +2734,7 @@ section > ol li:last-child { margin-bottom: initial; }
 .m-note li > ol > li:first-child { margin-top: 0.2rem; }
 article section.m-doc-details > div > h3:first-child { background-color: var(--detail-section-header-color); }
 article section.m-doc-details > div::before {
-border-color: var(--detail-section-header-color) !important;
+border-color: var(--detail-section-header-color);
 background-color: var(--detail-section-background-color);
 }
 ul.m-doc > li.m-doc-collapsible,
@@ -2758,7 +2760,8 @@ article section:target > .m-container-inflate > .m-code,
 article section:target > .m-container-inflate > .m-console,
 article section:target > .m-container-inflate > .m-note,
 article section:target > .m-container-inflate > .m-block,
-article section:target section.m-doc-details > div > h3:first-child { border-color: var(--article-heading-color) !important; }
+article section:target section.m-doc-details > div > h3:first-child,
+article section.m-doc-details:target > div > h3:first-child { border-color: var(--article-heading-color) !important; }
 article section:target section.m-doc-details > div > h3:first-child { border-left-style: solid; border-left-width: 0.25rem; }
 .m-label:not(.m-flat) { color: var(--background-color) !important; }
 figure.m-figure > figcaption {
