@@ -9,7 +9,7 @@ github          = 'marzer/tomlplusplus'
 license         = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
 show_includes   = false
 changelog       = true
-logo            = 'images/logo.png'
+logo            = 'images/logo.svg'
 favicon         = 'images/favicon.ico'
 navbar          = [ 'namespaces', 'annotated' ]
 theme           = 'dark'
@@ -18,7 +18,7 @@ extra_files     = [
     'images/badge-TOML.svg',
     'images/badge-gitter.svg'
 ]
-html_header     = '<style>div.poxy-main-banner { padding: 2rem; }</style>'
+html_header     = '<style>#poxy-main-banner, .poxy-main-banner { padding: 2rem; }</style>'
 
 
 [warnings]
