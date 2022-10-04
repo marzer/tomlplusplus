@@ -2667,14 +2667,14 @@ body > header > nav a:hover { text-decoration: none !important; }
 .m-doc-details div > table.m-table td > p > strong > em { display: block; }
 .m-doc-details div > table.m-table td > strong:not(:first-child) > em,
 .m-doc-details div > table.m-table td > p:not(:first-child) > strong > em { margin-top: 1.0rem; }
-.gh-badges { padding-bottom: 0.25rem; margin-left: -0.9rem; margin-right: -0.9rem; margin-top: -0.5rem; }
+#poxy-badges { padding-bottom: 0.25rem; margin-left: -0.9rem; margin-right: -0.9rem; margin-top: -0.5rem; }
 @media screen and (min-width: 992px) {
-.gh-badges { display: flex; justify-content: space-between; }
-.gh-badges br { display: none; }
+#poxy-badges { display: flex; justify-content: space-between; }
+#poxy-badges br { display: none; }
 }
 @media screen and (max-width: 992px) {
-.gh-badges { text-align: center; line-height: 1.75rem; }
-.gh-badges a { margin-left: 0.2rem; margin-right: 0.2rem; margin-bottom: 0.4rem; }
+#poxy-badges { text-align: center; line-height: 1.75rem; }
+#poxy-badges a { margin-left: 0.2rem; margin-right: 0.2rem; margin-bottom: 0.4rem; }
 }
 h1 span.m-thin { color: var(--dim-color); }
 #poxy-main-banner {
