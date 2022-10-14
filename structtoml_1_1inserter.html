@@ -18,10 +18,10 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.9.1" name="generator"/>
+  <meta content="Poxy v0.10.0" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <style>#poxy-main-banner, .poxy-main-banner { padding: 2rem; }</style>
+  <style>#poxy-main-banner { padding: 2rem; }</style>
 </head>
 <body>
 <header><nav id="navigation">
@@ -63,10 +63,10 @@
         </h1>
         <p>Helper class for suppressing move-construction in single-argument array constructors.</p>
 <pre class="m-code"><span class="c1">// desired result: [ [ 42 ] ]</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">bad</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span><span class="w"> </span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span><span class="w"> </span><span class="nn">toml</span><span class="o">::</span><span class="nc">inserter</span><span class="p">{</span><span class="w"> </span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span><span class="w"> </span><span class="mi">42</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">};</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"bad: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">bad</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"good:"</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">good</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">bad:  [ 42 ]</span>
+<span class="k">auto</span> <span class="n">bad</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">};</span>
+<span class="k">auto</span> <span class="n">good</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">inserter</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="mi">42</span> <span class="p">}</span> <span class="p">}</span> <span class="p">};</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"bad: "</span> <span class="o">&lt;&lt;</span> <span class="n">bad</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"good:"</span> <span class="o">&lt;&lt;</span> <span class="n">good</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">bad:  [ 42 ]</span>
 <span class="go">good: [ [ 42 ] ]</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a></p></aside>
       </div>
     </div>

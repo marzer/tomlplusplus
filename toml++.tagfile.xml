@@ -9135,6 +9135,7 @@
     <name>md_poxy_changelog</name>
     <title>Changelog</title>
     <filename>md_poxy_changelog.html</filename>
+    <docanchor file="md_poxy_changelog.html">poxy_changelog</docanchor>
   </compound>
   <compound kind="page">
     <name>index</name>

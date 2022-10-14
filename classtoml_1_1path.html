@@ -18,10 +18,10 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.9.1" name="generator"/>
+  <meta content="Poxy v0.10.0" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
-  <style>#poxy-main-banner, .poxy-main-banner { padding: 2rem; }</style>
+  <style>#poxy-main-banner { padding: 2rem; }</style>
 </head>
 <body class="poxy-has-toc">
 <header><nav id="navigation">
@@ -81,11 +81,11 @@
             </li>
           </ul>
         </nav>
-<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">path</span><span class="w"> </span><span class="n">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
+<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">path</span> <span class="n">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
 
 <span class="c1">// can use with tbl.at_path or operator[]</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"second cat: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">[</span><span class="n">the_path</span><span class="p">]</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"cats: "</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">tbl</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"second cat: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="n">the_path</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
 <span class="go">cats: ['tiger', 'lion', 'puma']</span></pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
@@ -419,7 +419,7 @@
             <dd>Returns a <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a> object which has had n terminal <a class="m-doc poxy-injected" href="classtoml_1_1path__component.html">path components</a> removed.</dd>
           </dl>
         </section>
-        <section id="typedef-documentation">
+        <section>
           <h2>Typedef documentation</h2>
           <section class="m-doc-details" id="aaed31ecb434c644dc316042b744a6a59"><div>
             <h3>
@@ -434,7 +434,7 @@
 <p>An iterator for iterating over the components in the path.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1path__component.html">toml::<wbr/>path_component</a></p></aside>
           </div></section>
         </section>
-        <section id="func-documentation">
+        <section>
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a4f340e37cfb32ca1fdfebf24e5b842b4"><div>
             <h3>
