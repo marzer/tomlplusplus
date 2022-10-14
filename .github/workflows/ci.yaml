@@ -148,56 +148,55 @@ jobs:
     - name: Test
       run: meson test -C build --verbose
 
-
-  tipi-build-linux:
-    name: tipi.build project build and dependency resolution 
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    container: tipibuild/tipi-ubuntu
-
-    env:
-      HOME: /root
-
-    steps:
-      - uses: actions/checkout@v3
-      - run: mkdir -p ~/.tipi
-
-      # checking if the tomlplusplus project builds and passes tests
-      - name: Build as project target linux-cxx17 (run tests 'odr_test_1' and 'main')
-        run: tipi . --dont-upgrade --verbose -t linux-cxx17 --test "odr_test_1|main"
-
-      - name: Build as project target linux-cxx20 (run tests 'odr_test_1' and 'main')
-        run: tipi . --dont-upgrade --verbose -t linux-cxx20 --test "odr_test_1|main"
-      
-      - name: Cleanup project builds
-        run: rm -r ./build
-
-      - name: "Get branch name and save to env"
-        env:
-          IS_PR: ${{ github.EVENT_NAME == 'pull_request' }}
-        run: |
-          if ${IS_PR}; then
-            BRANCH_NAME="${GITHUB_HEAD_REF}"
-          else
-            BRANCH_NAME="${GITHUB_REF##*/}"
-          fi
-          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
-      
-      # trying if pulling the dependency with tipi works properly
-      - name: Build as dependency
-        run: |
-          cd examples/
-          
-          # create test directory and copy the simple_parser.cpp in there
-          mkdir test-as-dep
-          cp examples.h test-as-dep/.
-          cp simple_parser.cpp test-as-dep/.
-          cd test-as-dep/
-
-          # create a deps file referencing the commit that triggered this build as dependency
-          mkdir .tipi
-          echo '{ "requires": { "${{ github.event.repository.full_name }}": { "@": "${{ env.BRANCH_NAME }}" } } }' > .tipi/deps
-
-          # build
-          tipi . --dont-upgrade --verbose -t linux-cxx17
-          ./build/linux-cxx17/bin/simple_parser ../example.toml
+#  tipi-build-linux:
+#    name: tipi.build project build and dependency resolution 
+#    runs-on: ubuntu-latest
+#    if: github.ref == 'refs/heads/master'
+#    container: tipibuild/tipi-ubuntu
+#
+#    env:
+#      HOME: /root
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - run: mkdir -p ~/.tipi
+#
+#      # checking if the tomlplusplus project builds and passes tests
+#      - name: Build as project target linux-cxx17 (run tests 'odr_test_1' and 'main')
+#        run: tipi . --dont-upgrade --verbose -t linux-cxx17 --test "odr_test_1|main"
+#
+#      - name: Build as project target linux-cxx20 (run tests 'odr_test_1' and 'main')
+#        run: tipi . --dont-upgrade --verbose -t linux-cxx20 --test "odr_test_1|main"
+#      
+#      - name: Cleanup project builds
+#        run: rm -r ./build
+#
+#      - name: "Get branch name and save to env"
+#        env:
+#          IS_PR: ${{ github.EVENT_NAME == 'pull_request' }}
+#        run: |
+#          if ${IS_PR}; then
+#            BRANCH_NAME="${GITHUB_HEAD_REF}"
+#          else
+#            BRANCH_NAME="${GITHUB_REF##*/}"
+#          fi
+#          echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+#      
+#      # trying if pulling the dependency with tipi works properly
+#      - name: Build as dependency
+#        run: |
+#          cd examples/
+#          
+#          # create test directory and copy the simple_parser.cpp in there
+#          mkdir test-as-dep
+#          cp examples.h test-as-dep/.
+#          cp simple_parser.cpp test-as-dep/.
+#          cd test-as-dep/
+#
+#          # create a deps file referencing the commit that triggered this build as dependency
+#          mkdir .tipi
+#          echo '{ "requires": { "${{ github.event.repository.full_name }}": { "@": "${{ env.BRANCH_NAME }}" } } }' > .tipi/deps
+#
+#          # build
+#          tipi . --dont-upgrade --verbose -t linux-cxx17
+#          ./build/linux-cxx17/bin/simple_parser ../example.toml
