@@ -18,7 +18,8 @@ extra_files     = [
     'images/badge-TOML.svg',
     'images/badge-gitter.svg'
 ]
-html_header     = '<style>#poxy-main-banner, .poxy-main-banner { padding: 2rem; }</style>'
+html_header     = '<style>#poxy-main-banner { padding: 2rem; }</style>'
+
 
 
 [warnings]
@@ -55,7 +56,6 @@ paths           = [ 'images' ]
 
 [code_blocks]
 macros          = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
-string_literals = [ '_toml' ]
 
 
 

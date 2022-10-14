@@ -464,6 +464,7 @@
 	__pragma(warning(disable : 4061))                                                                                  \
 	__pragma(warning(disable : 4062))                                                                                  \
 	__pragma(warning(disable : 4063))                                                                                  \
+	__pragma(warning(disable : 5262))  /* switch-case implicit fallthrough (false-positive) */                         \
 	__pragma(warning(disable : 26819)) /* cg: unannotated fallthrough */                                               \
 	static_assert(true)
 
@@ -475,9 +476,9 @@
 	__pragma(warning(disable : 4505)) /* unreferenced local function removed */                                        \
 	__pragma(warning(disable : 4514)) /* unreferenced inline function has been removed */                              \
 	__pragma(warning(disable : 4582)) /* constructor is not implicitly called */                                       \
-	__pragma(warning(disable : 4623)) /* default constructor was implicitly defined as deleted		*/                     \
-	__pragma(warning(disable : 4625)) /* copy constructor was implicitly defined as deleted			*/                       \
-	__pragma(warning(disable : 4626)) /* assignment operator was implicitly defined as deleted		*/                     \
+	__pragma(warning(disable : 4623)) /* default constructor was implicitly defined as deleted */                      \
+	__pragma(warning(disable : 4625)) /* copy constructor was implicitly defined as deleted */                         \
+	__pragma(warning(disable : 4626)) /* assignment operator was implicitly defined as deleted */                      \
 	__pragma(warning(disable : 4710)) /* function not inlined */                                                       \
 	__pragma(warning(disable : 4711)) /* function selected for automatic expansion */                                  \
 	__pragma(warning(disable : 4820)) /* N bytes padding added */                                                      \
@@ -486,6 +487,7 @@
 	__pragma(warning(disable : 5027)) /* move assignment operator was implicitly defined as deleted	*/                 \
 	__pragma(warning(disable : 5039)) /* potentially throwing function passed to 'extern "C"' function */              \
 	__pragma(warning(disable : 5045)) /* Compiler will insert Spectre mitigation */                                    \
+	__pragma(warning(disable : 5264)) /* const variable is not used (false-positive) */                                \
 	__pragma(warning(disable : 26451))                                                                                 \
 	__pragma(warning(disable : 26490))                                                                                 \
 	__pragma(warning(disable : 26495))                                                                                 \
@@ -508,6 +510,7 @@
 	__pragma(warning(disable : 4348))                                                                                  \
 	__pragma(warning(disable : 4668))                                                                                  \
 	__pragma(warning(disable : 5105))                                                                                  \
+	__pragma(warning(disable : 5264))                                                                                  \
 	TOML_DISABLE_CODE_ANALYSIS_WARNINGS;                                                                               \
 	TOML_DISABLE_SWITCH_WARNINGS;                                                                                      \
 	TOML_DISABLE_SPAM_WARNINGS;                                                                                        \

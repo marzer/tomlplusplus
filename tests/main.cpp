@@ -3,6 +3,11 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
+#ifdef _MSC_VER
+#pragma warning(disable : 5262)
+#pragma warning(disable : 5264)
+#endif
+
 #define CATCH_CONFIG_RUNNER
 #include "lib_catch2.h"
 #include <clocale>

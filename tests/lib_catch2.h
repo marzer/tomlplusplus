@@ -20,6 +20,8 @@
 #pragma warning(disable : 4365)
 #pragma warning(disable : 4868)
 #pragma warning(disable : 5105)
+#pragma warning(disable : 5262)
+#pragma warning(disable : 5264)
 #endif
 
 #if !defined(USE_VENDORED_LIBS) || USE_VENDORED_LIBS
