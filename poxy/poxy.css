@@ -2667,21 +2667,31 @@ body > header > nav a:hover { text-decoration: none !important; }
 .m-doc-details div > table.m-table td > p > strong > em { display: block; }
 .m-doc-details div > table.m-table td > strong:not(:first-child) > em,
 .m-doc-details div > table.m-table td > p:not(:first-child) > strong > em { margin-top: 1.0rem; }
-#poxy-badges { padding-bottom: 0.25rem; margin-left: -0.9rem; margin-right: -0.9rem; margin-top: -0.5rem; }
-@media screen and (min-width: 992px) {
-#poxy-badges { display: flex; justify-content: space-between; }
-#poxy-badges br { display: none; }
+#poxy-badges {
+--extra-width: 2rem;
+text-align: center;
+line-height: 1.75rem;
+padding-bottom: 1.25rem;
+margin-left: calc(var(--extra-width) * -0.5);
+margin-right: calc(var(--extra-width) * -0.5);
+margin-top: -0.5rem;
 }
-@media screen and (max-width: 992px) {
-#poxy-badges { text-align: center; line-height: 1.75rem; }
-#poxy-badges a { margin-left: 0.2rem; margin-right: 0.2rem; margin-bottom: 0.4rem; }
-}
+#poxy-badges > span { display: inline-block; }
+#poxy-badges > span > a,
+#poxy-badges > span > svg,
+#poxy-badges > span > img { margin-left: 0.2rem; margin-right: 0.2rem; }
 h1 span.m-thin { color: var(--dim-color); }
 #poxy-main-banner {
 margin-left: -1rem !important;
 margin-right: -1rem !important;
 margin-top: -1.75rem !important;
 max-width: calc(100% + 2rem) !important;
+}
+@media (min-width: 992px) {
+svg#poxy-main-banner.poxy-injected-svg { padding: 2rem; }
+}
+@media (min-width: 300px) and (max-width: 992px) {
+svg#poxy-main-banner.poxy-injected-svg { padding: 1rem; }
 }
 .m-doc-details div h3 { overflow: auto; }
 h1 .m-doc-include,
