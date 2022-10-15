@@ -5,6 +5,7 @@
 [![MIT license](docs/images/badge-license-MIT.svg)](./LICENSE)
 [![ci](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml)
 [![Mentioned in Awesome C++](docs/images/badge-awesome.svg)](https://github.com/fffaraz/awesome-cpp)
+[![Sponsor](docs/images/badge-sponsor.svg)](https://github.com/sponsors/marzer)
 [![Gitter](docs/images/badge-gitter.svg)](https://gitter.im/marzer/tomlplusplus)
 ====
 
