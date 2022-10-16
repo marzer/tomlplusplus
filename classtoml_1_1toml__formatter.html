@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.10.1" name="generator"/>
+  <meta content="Poxy v0.10.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -172,9 +172,9 @@
                 </tr>
               </tbody>
             </table>
-<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">toml_formatter</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"</span><span class="n">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
+<aside class="m-block m-special"><h4>Conditional availability </h4><p>This constructor is only available when exceptions are disabled.</p></aside><aside class="m-note m-warning"><h4>Attention</h4><p>Formatting a failed <a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse result</a> will simply dump the error message out as-is. This will not be valid TOML, but at least gives you something to log or show up in diagnostics:</p><pre class="m-code"><span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">toml_formatter</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = 'b'"sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// ok</span>
           <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span>
-          <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">toml_formatter</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "</span><span class="n">sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
+          <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">toml_formatter</span><span class="p">{</span> <span class="nn">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"a = "sv</span><span class="p">)</span> <span class="p">}</span> <span class="c1">// malformed</span>
           <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">a = 'b'</span>
 
 <span class="go">Error while parsing key-value pair: encountered end-of-file</span>

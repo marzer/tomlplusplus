@@ -486,6 +486,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --code-color-strings: #d69d85;
 --code-color-escapes: #e07cdc;
 --code-color-preprocessor: #787878;
+--code-color-macros: #beb7ff;
 --special-color: #b65ad7;
 --special-link-active-color: #e4a8ff;
 --special-filled-color: #ce97e8;
@@ -647,6 +648,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --code-color-strings: #a31515;
 --code-color-escapes: #b776fb;
 --code-color-preprocessor: #808080;
+--code-color-macros: #a800d7;
 --special-hue: 284;
 --special-saturation: 50%;
 --special-luminosity: 60%;
@@ -2405,7 +2407,7 @@ border-left-width: 0.125rem;
 .m-code .s1 { color: var(--code-color-strings); }
 .m-code .ss { color: var(--code-color-strings); }
 .m-code .bp { color: var(--code-color-identifiers); font-weight: bold }
-.m-code .fm { color: var(--code-color-identifiers); }
+.m-code .fm { color: var(--code-color-macros); }
 .m-code .vc { color: var(--code-color-identifiers); }
 .m-code .vg { color: var(--code-color-identifiers); }
 .m-code .vi { color: var(--code-color-identifiers); }
@@ -2688,7 +2690,7 @@ margin-top: -1.75rem !important;
 max-width: calc(100% + 2rem) !important;
 }
 @media (min-width: 992px) {
-svg#poxy-main-banner.poxy-injected-svg { padding: 2rem; }
+svg#poxy-main-banner.poxy-injected-svg { padding: 1.5rem; }
 }
 @media (min-width: 300px) and (max-width: 992px) {
 svg#poxy-main-banner.poxy-injected-svg { padding: 1rem; }
