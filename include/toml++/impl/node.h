@@ -1020,6 +1020,7 @@ TOML_NAMESPACE_START
 		/// std::cout << config.at_path(path1.parent_path()) << "\n";
 		/// std::cout << config.at_path(path2) << "\n";
 		/// std::cout << config.at_path(path2.parent_path()) << "\n";
+		/// \ecpp
 		///
 		/// \out
 		/// 2
