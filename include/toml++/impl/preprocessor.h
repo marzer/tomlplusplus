@@ -31,7 +31,7 @@
 #endif
 
 //#=====================================================================================================================
-//# COMPILER/OS/ARCH DETECTION
+//# COMPILER / OS
 //#=====================================================================================================================
 
 #ifdef __clang__
@@ -75,11 +75,46 @@
 #else
 #define TOML_INTELLISENSE 0
 #endif
-#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
-	|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
-#define TOML_ARM 1
+
+//#=====================================================================================================================
+//# ARCHITECTURE
+//#=====================================================================================================================
+
+// IA64
+#if defined(__ia64__) || defined(__ia64) || defined(_IA64) || defined(__IA64__) || defined(_M_IA64)
+#define TOML_ARCH_ITANIUM 1
 #else
-#define TOML_ARM 0
+#define TOML_ARCH_ITANIUM 0
+#endif
+
+// AMD64
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_AMD64)
+#define TOML_ARCH_AMD64 1
+#else
+#define TOML_ARCH_AMD64 0
+#endif
+
+// 32-bit x86
+#if defined(__i386__) || defined(_M_IX86)
+#define TOML_ARCH_X86 1
+#else
+#define TOML_ARCH_X86 0
+#endif
+
+// ARM
+#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
+	|| defined(_M_ARM64EC)
+#define TOML_ARCH_ARM32 0
+#define TOML_ARCH_ARM64 1
+#define TOML_ARCH_ARM	1
+#elif defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
+#define TOML_ARCH_ARM32 1
+#define TOML_ARCH_ARM64 0
+#define TOML_ARCH_ARM	1
+#else
+#define TOML_ARCH_ARM32 0
+#define TOML_ARCH_ARM64 0
+#define TOML_ARCH_ARM	0
 #endif
 
 //#=====================================================================================================================
@@ -1016,40 +1051,62 @@ TOML_ENABLE_WARNINGS;
 //# }}
 
 //#=====================================================================================================================
-//# EXTENDED INT AND FLOAT TYPES
+//# FLOAT16
 //#=====================================================================================================================
-// clang-format off
 
-#ifdef __FLT16_MANT_DIG__
-	#if __FLT_RADIX__ == 2					\
-			&& __FLT16_MANT_DIG__ == 11		\
-			&& __FLT16_DIG__ == 3			\
-			&& __FLT16_MIN_EXP__ == -13		\
-			&& __FLT16_MIN_10_EXP__ == -4	\
-			&& __FLT16_MAX_EXP__ == 16		\
-			&& __FLT16_MAX_10_EXP__ == 4
-		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
-			#define TOML_FP16 __fp16
-		#endif
-		#if TOML_ARM && TOML_CLANG // not present in g++
-			#define TOML_FLOAT16 _Float16
-		#endif
-	#endif
+#if TOML_CLANG
+//# {{
+//	Excerpt from https://clang.llvm.org/docs/LanguageExtensions.html:
+//
+//	_Float16 is currently only supported on the following targets,
+//	with further targets pending ABI standardization:
+//
+//		32-bit ARM
+//		64-bit ARM (AArch64)
+//		AMDGPU
+//		SPIR
+//		X86 as long as SSE2 is available
+//
+//# }}
+#if (TOML_ARCH_ARM || TOML_ARCH_X86 || TOML_ARCH_AMD64) && defined(__FLT16_MANT_DIG__)
+#define TOML_FLOAT16 _Float16
+#endif
+#elif TOML_GCC
+//# {{
+//	Excerpt from https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html:
+//
+//	The _Float16 type is supported on AArch64 systems by default, on ARM systems when the IEEE format for
+//	16-bit floating-point types is selected with -mfp16-format=ieee and,
+//	for both C and C++, on x86 systems with SSE2 enabled.
+//
+//	*** except: the bit about x86 seems incorrect?? ***
+//# }}
+/*
+
+ */
+#if (TOML_ARCH_ARM /*|| TOML_ARCH_X86 || TOML_ARCH_AMD64*/) && defined(__FLT16_MANT_DIG__)
+#define TOML_FLOAT16 _Float16
+#endif
 #endif
 
-#if defined(__SIZEOF_FLOAT128__)		\
-	&& defined(__FLT128_MANT_DIG__)		\
-	&& defined(__LDBL_MANT_DIG__)		\
+//#=====================================================================================================================
+//# FLOAT128
+//#=====================================================================================================================
+
+#if defined(__SIZEOF_FLOAT128__) && defined(__FLT128_MANT_DIG__) && defined(__LDBL_MANT_DIG__)                         \
 	&& __FLT128_MANT_DIG__ > __LDBL_MANT_DIG__
-	#define TOML_FLOAT128	__float128
+#define TOML_FLOAT128 __float128
 #endif
+
+//#=====================================================================================================================
+//# INT128
+//#=====================================================================================================================
 
 #ifdef __SIZEOF_INT128__
-	#define TOML_INT128		__int128_t
-	#define TOML_UINT128	__uint128_t
+#define TOML_INT128	 __int128_t
+#define TOML_UINT128 __uint128_t
 #endif
 
-// clang-format on
 //#====================================================================================================================
 //# VERSIONS AND NAMESPACES
 //#====================================================================================================================

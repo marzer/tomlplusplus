@@ -11,9 +11,6 @@
 #else
 #include "../include/toml++/toml.h"
 #endif
-#if defined(TOML_FP16) ^ SHOULD_HAVE_FP16
-#error TOML_FP16 was not deduced correctly
-#endif
 #if defined(TOML_FLOAT16) ^ SHOULD_HAVE_FLOAT16
 #error TOML_FLOAT16 was not deduced correctly
 #endif
@@ -410,3 +407,20 @@ namespace Catch
 		extern template std::string stringify(const node_view<const node>&);
 	}
 }
+
+#if TOML_CPP >= 20 && TOML_CLANG && TOML_CLANG <= 14 // https://github.com/llvm/llvm-project/issues/55560
+
+TOML_PUSH_WARNINGS;
+TOML_DISABLE_WARNINGS;
+
+namespace
+{
+	[[maybe_unused]] static std::u8string clang_string_workaround(const char8_t* a, const char8_t* b)
+	{
+		return { a, b };
+	}
+}
+
+TOML_POP_WARNINGS;
+
+#endif

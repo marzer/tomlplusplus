@@ -64,9 +64,6 @@ namespace toml
 	CHECK_CAN_REPRESENT_NATIVE(TOML_INT128, true);
 	CHECK_CAN_REPRESENT_NATIVE(TOML_UINT128, false);
 #endif
-#ifdef TOML_FP16
-	CHECK_CAN_REPRESENT_NATIVE(TOML_FP16, false);
-#endif
 #ifdef TOML_FLOAT16
 	CHECK_CAN_REPRESENT_NATIVE(TOML_FLOAT16, false);
 #endif
@@ -292,9 +289,6 @@ namespace toml
 	CHECK_INSERTED_AS(uint32_t, value<int64_t>);
 	CHECK_INSERTED_AS(float, value<double>);
 	CHECK_INSERTED_AS(double, value<double>);
-#ifdef TOML_FP16
-	CHECK_INSERTED_AS(TOML_FP16, value<double>);
-#endif
 #ifdef TOML_FLOAT16
 	CHECK_INSERTED_AS(TOML_FLOAT16, value<double>);
 #endif

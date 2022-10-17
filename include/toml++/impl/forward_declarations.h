@@ -625,11 +625,6 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct float_traits : float_traits_base<T, std::numeric_limits<T>::digits, std::numeric_limits<T>::digits10>
 	{};
-#ifdef TOML_FP16
-	template <>
-	struct float_traits<TOML_FP16> : float_traits_base<TOML_FP16, __FLT16_MANT_DIG__, __FLT16_DIG__>
-	{};
-#endif
 #ifdef TOML_FLOAT16
 	template <>
 	struct float_traits<TOML_FLOAT16> : float_traits_base<TOML_FLOAT16, __FLT16_MANT_DIG__, __FLT16_DIG__>
@@ -651,11 +646,6 @@ TOML_IMPL_NAMESPACE_START
 	template <>
 	struct value_traits<long double> : float_traits<long double>
 	{};
-#ifdef TOML_FP16
-	template <>
-	struct value_traits<TOML_FP16> : float_traits<TOML_FP16>
-	{};
-#endif
 #ifdef TOML_FLOAT16
 	template <>
 	struct value_traits<TOML_FLOAT16> : float_traits<TOML_FLOAT16>

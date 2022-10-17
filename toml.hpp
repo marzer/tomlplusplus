@@ -111,11 +111,42 @@
 #else
 #define TOML_INTELLISENSE 0
 #endif
-#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
-	|| defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
-#define TOML_ARM 1
+
+// IA64
+#if defined(__ia64__) || defined(__ia64) || defined(_IA64) || defined(__IA64__) || defined(_M_IA64)
+#define TOML_ARCH_ITANIUM 1
 #else
-#define TOML_ARM 0
+#define TOML_ARCH_ITANIUM 0
+#endif
+
+// AMD64
+#if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_AMD64)
+#define TOML_ARCH_AMD64 1
+#else
+#define TOML_ARCH_AMD64 0
+#endif
+
+// 32-bit x86
+#if defined(__i386__) || defined(_M_IX86)
+#define TOML_ARCH_X86 1
+#else
+#define TOML_ARCH_X86 0
+#endif
+
+// ARM
+#if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
+	|| defined(_M_ARM64EC)
+#define TOML_ARCH_ARM32 0
+#define TOML_ARCH_ARM64 1
+#define TOML_ARCH_ARM	1
+#elif defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
+#define TOML_ARCH_ARM32 1
+#define TOML_ARCH_ARM64 0
+#define TOML_ARCH_ARM	1
+#else
+#define TOML_ARCH_ARM32 0
+#define TOML_ARCH_ARM64 0
+#define TOML_ARCH_ARM	0
 #endif
 
 // TOML_HAS_INCLUDE
@@ -898,38 +929,28 @@ TOML_ENABLE_WARNINGS;
 	TOML_REQUIRES(condition)
 #define TOML_HIDDEN_CONSTRAINT(condition, ...) TOML_CONSTRAINED_TEMPLATE(condition, __VA_ARGS__)
 
-// clang-format off
+#if TOML_CLANG
+#if (TOML_ARCH_ARM || TOML_ARCH_X86 || TOML_ARCH_AMD64) && defined(__FLT16_MANT_DIG__)
+#define TOML_FLOAT16 _Float16
+#endif
+#elif TOML_GCC
+/*
 
-#ifdef __FLT16_MANT_DIG__
-	#if __FLT_RADIX__ == 2					\
-			&& __FLT16_MANT_DIG__ == 11		\
-			&& __FLT16_DIG__ == 3			\
-			&& __FLT16_MIN_EXP__ == -13		\
-			&& __FLT16_MIN_10_EXP__ == -4	\
-			&& __FLT16_MAX_EXP__ == 16		\
-			&& __FLT16_MAX_10_EXP__ == 4
-		#if TOML_ARM && (TOML_GCC || TOML_CLANG)
-			#define TOML_FP16 __fp16
-		#endif
-		#if TOML_ARM && TOML_CLANG // not present in g++
-			#define TOML_FLOAT16 _Float16
-		#endif
-	#endif
+ */
+#if (TOML_ARCH_ARM /*|| TOML_ARCH_X86 || TOML_ARCH_AMD64*/) && defined(__FLT16_MANT_DIG__)
+#define TOML_FLOAT16 _Float16
+#endif
 #endif
 
-#if defined(__SIZEOF_FLOAT128__)		\
-	&& defined(__FLT128_MANT_DIG__)		\
-	&& defined(__LDBL_MANT_DIG__)		\
+#if defined(__SIZEOF_FLOAT128__) && defined(__FLT128_MANT_DIG__) && defined(__LDBL_MANT_DIG__)                         \
 	&& __FLT128_MANT_DIG__ > __LDBL_MANT_DIG__
-	#define TOML_FLOAT128	__float128
+#define TOML_FLOAT128 __float128
 #endif
 
 #ifdef __SIZEOF_INT128__
-	#define TOML_INT128		__int128_t
-	#define TOML_UINT128	__uint128_t
+#define TOML_INT128	 __int128_t
+#define TOML_UINT128 __uint128_t
 #endif
-
-// clang-format on
 
 // clang-format off
 
@@ -1678,11 +1699,6 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct float_traits : float_traits_base<T, std::numeric_limits<T>::digits, std::numeric_limits<T>::digits10>
 	{};
-#ifdef TOML_FP16
-	template <>
-	struct float_traits<TOML_FP16> : float_traits_base<TOML_FP16, __FLT16_MANT_DIG__, __FLT16_DIG__>
-	{};
-#endif
 #ifdef TOML_FLOAT16
 	template <>
 	struct float_traits<TOML_FLOAT16> : float_traits_base<TOML_FLOAT16, __FLT16_MANT_DIG__, __FLT16_DIG__>
@@ -1704,11 +1720,6 @@ TOML_IMPL_NAMESPACE_START
 	template <>
 	struct value_traits<long double> : float_traits<long double>
 	{};
-#ifdef TOML_FP16
-	template <>
-	struct value_traits<TOML_FP16> : float_traits<TOML_FP16>
-	{};
-#endif
 #ifdef TOML_FLOAT16
 	template <>
 	struct value_traits<TOML_FLOAT16> : float_traits<TOML_FLOAT16>
@@ -17056,7 +17067,12 @@ TOML_POP_WARNINGS;
 #undef TOML_ANON_NAMESPACE
 #undef TOML_ANON_NAMESPACE_END
 #undef TOML_ANON_NAMESPACE_START
-#undef TOML_ARM
+#undef TOML_ARCH_ARM
+#undef TOML_ARCH_AMD64
+#undef TOML_ARCH_ARM32
+#undef TOML_ARCH_ARM64
+#undef TOML_ARCH_ITANIUM
+#undef TOML_ARCH_X86
 #undef TOML_ASSERT
 #undef TOML_ASSERT_ASSUME
 #undef TOML_ASSUME
@@ -17093,7 +17109,6 @@ TOML_POP_WARNINGS;
 #undef TOML_FLOAT_CHARCONV
 #undef TOML_FLOAT128
 #undef TOML_FLOAT16
-#undef TOML_FP16
 #undef TOML_GCC
 #undef TOML_HAS_ATTR
 #undef TOML_HAS_BUILTIN

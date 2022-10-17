@@ -250,9 +250,6 @@ compiler_supports_char8_args = []
 if is_gcc or is_clang
 	compiler_supports_char8_args += '-fchar8_t'
 endif
-compiler_supports_char8_args_private = []
-compiler_supports_char8_args_private += compiler_supports_cpp20_args
-compiler_supports_char8_args_private += compiler_supports_char8_args
 compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	#include <version>
 	#include <string_view>
@@ -278,7 +275,7 @@ compiler_supports_char8 = compiler_supports_cpp20 and compiler.links('''
 	}
 	''',
 	name: 'supports char8_t',
-	args: compiler_supports_char8_args_private
+	args: [ compiler_supports_cpp20_args, compiler_supports_char8_args ]
 )
 
 #######################################################################################################################
@@ -325,27 +322,6 @@ compiler_supports_consteval_properly = compiler_supports_consteval and not compi
 # __fp16 and _Float16 checks
 #######################################################################################################################
 
-float_16_preprocessor_single_check_template = '''
-	#ifndef @0@
-		#error @0@ wasn't defined!
-	#else
-		#pragma message("@0@: " MAKE_STRING(@0@))
-	#endif
-	#if @0@ != @1@
-		#error @0@ was not @1@!
-	#endif
-'''
-float_16_preprocessor_checks = '''
-	#define MAKE_STRING(s)		MAKE_STRING_1(s)
-	#define MAKE_STRING_1(s)	#s
-	''' + float_16_preprocessor_single_check_template.format('__FLT_RADIX__', '2')						\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MANT_DIG__', '11')					\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_DIG__', '3')							\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_EXP__', '-13')					\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MIN_10_EXP__', '-4')					\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_EXP__', '16')						\
-	+ float_16_preprocessor_single_check_template.format('__FLT16_MAX_10_EXP__', '4')
-
 compiler_supports_float16_args = []
 if is_gcc
 	compiler_supports_float16_args += '-mfp16-format=ieee'
@@ -364,8 +340,6 @@ compiler_supports_fp16 = compiler.links('''
 	args: compiler_supports_float16_args
 )
 compiler_supports_float16 = compiler.links('''
-	@0@
-
 	int main()
 	{
 		static_assert(sizeof(_Float16) == 2);
@@ -374,7 +348,7 @@ compiler_supports_float16 = compiler.links('''
 		const auto f3 = static_cast<_Float16>(0.2L);
 		return 0;
 	}
-	'''.format(float_16_preprocessor_checks),
+	''',
 	name: 'supports _Float16',
 	args: compiler_supports_float16_args
 )

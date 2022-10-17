@@ -40,10 +40,10 @@ endif
 #######################################################################################################################
 
 compiler_supports_fast_math_args = []
-if compiler.get_id() == 'gcc' or compiler.get_id() == 'clang'
+if is_gcc or is_clang
 	compiler_supports_fast_math_args += '-ffast-math'
 	compiler_supports_fast_math_args += '-ffp-contract=fast'
-elif compiler.get_id() == 'msvc' or compiler.get_id() == 'intel-cl'
+elif is_msvc or is_icc_cl
 	compiler_supports_fast_math_args += '/fp:fast'
 endif
 compiler_supports_fast_math = compiler.links('''
@@ -186,13 +186,8 @@ foreach cpp20 : cpp20_modes
 					test_args += compiler_supports_fast_math_args
 				endif
 
-				if compiler_supports_float16 or compiler_supports_fp16
-					if compiler_supports_fp16
-						test_args += '-DSHOULD_HAVE_FP16=1'
-					endif
-					if compiler_supports_float16
-						test_args += '-DSHOULD_HAVE_FLOAT16=1'
-					endif
+				if compiler_supports_float16
+					test_args += '-DSHOULD_HAVE_FLOAT16=1'
 				endif
 				if compiler_supports_int128
 					test_args += '-DSHOULD_HAVE_INT128=1'

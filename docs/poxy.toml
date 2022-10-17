@@ -1,5 +1,7 @@
 # this is a config file for Poxy - a Doxygen + m.css front-end written in Python.
 # https://github.com/marzer/poxy
+#
+# config reference: https://github.com/marzer/poxy/wiki/Configuration-options
 
 name            = 'toml++'
 author          = 'Mark Gillard'

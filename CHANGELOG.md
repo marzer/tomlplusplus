@@ -26,6 +26,8 @@ template:
 #### Fixes:
 
 - fixed null pointer dereference in parser when exceptions are disabled (#169) (@ncaklovic)
+- fixed spurious warnings in MSVC 19.34
+- fixed some `_Float16` detection issues
 
 <br><br>
 

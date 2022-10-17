@@ -132,7 +132,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        python3 -m pip install -U pip==21.3.1
+        python3 -m pip install -U pip
         pip3 install meson ninja
 
     - uses: actions/checkout@v3
