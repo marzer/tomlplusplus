@@ -537,6 +537,7 @@
 	__pragma(warning(disable : 4505)) /* unreferenced local function removed */                                        \
 	__pragma(warning(disable : 4514)) /* unreferenced inline function has been removed */                              \
 	__pragma(warning(disable : 4582)) /* constructor is not implicitly called */                                       \
+	__pragma(warning(disable : 4619)) /*  there is no warning number 'XXXX' */                                         \
 	__pragma(warning(disable : 4623)) /* default constructor was implicitly defined as deleted */                      \
 	__pragma(warning(disable : 4625)) /* copy constructor was implicitly defined as deleted */                         \
 	__pragma(warning(disable : 4626)) /* assignment operator was implicitly defined as deleted */                      \

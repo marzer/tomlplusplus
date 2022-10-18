@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: MIT
 
 #ifdef _MSC_VER
+#pragma warning(disable : 4619)
 #pragma warning(disable : 5262)
 #pragma warning(disable : 5264)
 #endif

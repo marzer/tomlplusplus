@@ -17,6 +17,7 @@
 #pragma GCC diagnostic ignored "-Wfloat-equal"
 #elif defined(_MSC_VER)
 #pragma warning(push, 0)
+#pragma warning(disable : 4619)
 #pragma warning(disable : 4365)
 #pragma warning(disable : 4868)
 #pragma warning(disable : 5105)
