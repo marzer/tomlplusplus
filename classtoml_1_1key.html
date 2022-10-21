@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.10.2" name="generator"/>
+  <meta content="Poxy v0.11.0" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -83,7 +83,7 @@
 <span class="dl">)</span><span class="s">"_toml</span><span class="p">;</span>
 
 <span class="k">for</span> <span class="p">(</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">]</span> <span class="o">:</span> <span class="n">tbl</span><span class="p">)</span>
-    <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"key '"sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"' defined at "sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span><span class="p">.</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">key 'a' defined at line 2, column 5</span>
+    <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"key '"sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span> <span class="o">&lt;&lt;</span> <span class="s">"' defined at "sv</span> <span class="o">&lt;&lt;</span> <span class="n">k</span><span class="p">.</span><span class="nf">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">key 'a' defined at line 2, column 5</span>
 <span class="go">key 'b' defined at line 3, column 7</span>
 <span class="go">key 'c' defined at line 4, column 9</span></pre>
         <section id="typeless-methods">

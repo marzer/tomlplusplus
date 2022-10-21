@@ -487,6 +487,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --code-color-escapes: #e07cdc;
 --code-color-preprocessor: #787878;
 --code-color-macros: #beb7ff;
+--code-color-functions: #dcdcaa;
 --special-color: #b65ad7;
 --special-link-active-color: #e4a8ff;
 --special-filled-color: #ce97e8;
@@ -649,6 +650,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --code-color-escapes: #b776fb;
 --code-color-preprocessor: #808080;
 --code-color-macros: #a800d7;
+--code-color-functions: #6f5300;
 --special-hue: 284;
 --special-saturation: 50%;
 --special-luminosity: 60%;
@@ -2349,7 +2351,6 @@ border-left-width: 0.125rem;
 /*==== poxy-pygments.css =============================================================================================*/
 .m-code .hll { background-color: #34424d }
 .m-code .c { color: var(--code-color-comments); }
-.m-code .k { color: var(--code-color-keywords); font-weight: bold }
 .m-code .n { color: var(--code-color-identifiers); }
 .m-code .o { color: var(--code-color-operators); }
 .m-code .p { color: var(--code-color-punctuation); }
@@ -2365,29 +2366,30 @@ border-left-width: 0.125rem;
 .m-code .gi { color: #3bd267 }
 .m-code .gs { color: #e6e6e6; font-weight: bold }
 .m-code .gu { color: #5b9dd9 }
-.m-code .kc { color: var(--code-color-keywords); font-weight: bold }
-.m-code .kd { color: var(--code-color-keywords); font-weight: bold }
-.m-code .kn { color: var(--code-color-keywords); font-weight: bold }
-.m-code .kp { color: var(--code-color-keywords); font-weight: bold }
-.m-code .kr { color: var(--code-color-keywords); font-weight: bold }
-.m-code .kt { color: var(--code-color-keywords); font-weight: bold }
+.m-code .k { color: var(--code-color-keywords); }
+.m-code .kc { color: var(--code-color-keywords); }
+.m-code .kd { color: var(--code-color-keywords); }
+.m-code .kn { color: var(--code-color-keywords); }
+.m-code .kp { color: var(--code-color-keywords); }
+.m-code .kr { color: var(--code-color-keywords); }
+.m-code .kt { color: var(--code-color-keywords); }
 .m-code .m { color: var(--code-color-numbers); }
 .m-code .s { color: var(--code-color-strings); }
-.m-code .na { color: var(--code-color-identifiers); font-weight: bold }
-.m-code .nb { color: var(--code-color-identifiers); font-weight: bold }
-.m-code .nc { color: var(--code-color-typenames); font-weight: bold }
+.m-code .na { color: var(--code-color-identifiers); }
+.m-code .nb { color: var(--code-color-functions); }
+.m-code .nc { color: var(--code-color-typenames); }
 .m-code .no { color: var(--code-color-identifiers); }
 .m-code .nd { color: var(--code-color-identifiers); }
 .m-code .ni { color: var(--code-color-identifiers); }
 .m-code .ne { color: var(--code-color-typenames); }
-.m-code .nf { color: var(--code-color-identifiers); }
+.m-code .nf { color: var(--code-color-functions); }
 .m-code .nl { color: var(--code-color-identifiers); }
 .m-code .nn { color: var(--code-color-namespaces); }
 .m-code .nx { color: var(--code-color-identifiers); }
 .m-code .py { color: var(--code-color-identifiers); }
-.m-code .nt { color: var(--code-color-identifiers); font-weight: bold }
+.m-code .nt { color: var(--code-color-identifiers); }
 .m-code .nv { color: var(--code-color-identifiers); }
-.m-code .ow { color: var(--code-color-operators); font-weight: bold }
+.m-code .ow { color: var(--code-color-operators); }
 .m-code .mb { color: var(--code-color-numbers); }
 .m-code .mf { color: var(--code-color-numbers); }
 .m-code .mh { color: var(--code-color-numbers); }
@@ -2406,7 +2408,7 @@ border-left-width: 0.125rem;
 .m-code .sr { color: var(--code-color-strings); }
 .m-code .s1 { color: var(--code-color-strings); }
 .m-code .ss { color: var(--code-color-strings); }
-.m-code .bp { color: var(--code-color-identifiers); font-weight: bold }
+.m-code .bp { color: var(--code-color-functions); }
 .m-code .fm { color: var(--code-color-macros); }
 .m-code .vc { color: var(--code-color-identifiers); }
 .m-code .vg { color: var(--code-color-identifiers); }
@@ -2754,9 +2756,6 @@ ul.m-doc > li.m-doc-collapsible > a:first-child,
 ul.m-doc > li.m-doc-collapsible li { color: var(--dim-link-color) !important; }
 pre.m-code + pre.m-console { margin-top: -1.0rem; font-size: 0.8rem; }
 .m-note pre.m-code + pre.m-console { color: var(--console-color); background-color: var(--console-background-color); }
-.m-code .kt,
-.m-code .k,
-.m-code .nc { font-weight: normal; }
 pre.poxy-impl,
 code.poxy-impl {
 color: var(--code-color-comments) !important;

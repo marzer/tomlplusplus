@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.10.2" name="generator"/>
+  <meta content="Poxy v0.11.0" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -713,9 +713,8 @@ template&lt;typename T&gt;
                 <tr>
                   <th>Returns</th>
                   <td><strong><em>Same value types:</em></strong>
-								<code>lhs.get() &lt; rhs.get()</code>
-								<strong><em>Different value types:</em></strong>
-								<code>lhs.type() &lt; rhs.type()</code></td>
+								<code>lhs.get() &lt; rhs.get()</code><strong><em>Different value types:</em></strong>
+							<code>lhs.type() &lt; rhs.type()</code></td>
                 </tr>
               </tfoot>
             </table>
@@ -748,9 +747,8 @@ template&lt;typename T&gt;
                 <tr>
                   <th>Returns</th>
                   <td><strong><em>Same value types:</em></strong>
-								<code>lhs.get() &lt;= rhs.get()</code>
-								<strong><em>Different value types:</em></strong>
-								<code>lhs.type() &lt;= rhs.type()</code></td>
+								<code>lhs.get() &lt;= rhs.get()</code><strong><em>Different value types:</em></strong>
+							<code>lhs.type() &lt;= rhs.type()</code></td>
                 </tr>
               </tfoot>
             </table>
@@ -815,9 +813,8 @@ template&lt;typename T&gt;
                 <tr>
                   <th>Returns</th>
                   <td><strong><em>Same value types:</em></strong>
-								<code>lhs.get() &gt; rhs.get()</code>
-								<strong><em>Different value types:</em></strong>
-								<code>lhs.type() &gt; rhs.type()</code></td>
+								<code>lhs.get() &gt; rhs.get()</code><strong><em>Different value types:</em></strong>
+							<code>lhs.type() &gt; rhs.type()</code></td>
                 </tr>
               </tfoot>
             </table>
@@ -850,9 +847,8 @@ template&lt;typename T&gt;
                 <tr>
                   <th>Returns</th>
                   <td><strong><em>Same value types:</em></strong>
-								<code>lhs.get() &gt;= rhs.get()</code>
-								<strong><em>Different value types:</em></strong>
-								<code>lhs.type() &gt;= rhs.type()</code></td>
+								<code>lhs.get() &gt;= rhs.get()</code><strong><em>Different value types:</em></strong>
+							<code>lhs.type() &gt;= rhs.type()</code></td>
                 </tr>
               </tfoot>
             </table>
@@ -900,10 +896,10 @@ template&lt;typename T&gt;
               </tfoot>
             </table>
 <pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span> <span class="p">};</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">none</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all floats: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">floating_point</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">array</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all ints:   "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">integer</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"homogenous: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="nf">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">none</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all floats: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="nf">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">floating_point</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all arrays: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="nf">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">array</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"all ints:   "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="nf">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">integer</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">homogeneous: true</span>
 <span class="go">all floats:  false</span>
 <span class="go">all arrays:  false</span>
 <span class="go">all ints:    true</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
@@ -938,15 +934,15 @@ template&lt;typename T&gt;
                 </tr>
               </tfoot>
             </table>
-<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="n">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3, 4.0 ]"</span><span class="p">);</span>
-<span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="o">&amp;</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">*</span><span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="n">as_array</span><span class="p">();</span>
+<pre class="m-code"><span class="k">auto</span> <span class="n">cfg</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse</span><span class="p">(</span><span class="s">"arr = [ 1, 2, 3, 4.0 ]"</span><span class="p">);</span>
+<span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="o">&amp;</span> <span class="n">arr</span> <span class="o">=</span> <span class="o">*</span><span class="n">cfg</span><span class="p">[</span><span class="s">"arr"</span><span class="p">].</span><span class="nf">as_array</span><span class="p">();</span>
 
 <span class="nn">toml</span><span class="o">::</span><span class="nc">node</span><span class="o">*</span> <span class="n">nonmatch</span><span class="p">{};</span>
-<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="n">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">integer</span><span class="p">,</span> <span class="n">nonmatch</span><span class="p">))</span>
+<span class="k">if</span> <span class="p">(</span><span class="n">arr</span><span class="p">.</span><span class="nf">is_homogeneous</span><span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node_type</span><span class="o">::</span><span class="mi">integer</span><span class="p">,</span> <span class="n">nonmatch</span><span class="p">))</span>
     <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was homogeneous"sv</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
 <span class="k">else</span>
     <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"array was not homogeneous!</span><span class="se">\n</span><span class="s">"</span>
-    <span class="o">&lt;&lt;</span> <span class="s">"first non-match was a "sv</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" at "</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="n">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">array was not homogeneous!</span>
+    <span class="o">&lt;&lt;</span> <span class="s">"first non-match was a "sv</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="nf">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">" at "</span> <span class="o">&lt;&lt;</span> <span class="n">nonmatch</span><span class="o">-&gt;</span><span class="nf">source</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">array was not homogeneous!</span>
 <span class="go">first non-match was a floating-point at line 1, column 18</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Always returns <code>false</code> for empty tables and arrays.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a69ed0d45e2de5929fea3375cd68960eb"><div>

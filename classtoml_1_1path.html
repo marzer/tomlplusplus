@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.10.2" name="generator"/>
+  <meta content="Poxy v0.11.0" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -80,11 +80,11 @@
             </li>
           </ul>
         </nav>
-<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">path</span> <span class="n">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
+<p>This type parses and represents a path to a TOML node. It validates the syntax of the path but does not ensure that the path refers to a valid node in any particular TOML document. If parsing fails, the object will evaluate as 'falsy', and will be empty.</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">path</span> <span class="nf">the_path</span><span class="p">(</span><span class="s">"animals.cats[1]"</span><span class="p">);</span>
 
 <span class="c1">// can use with tbl.at_path or operator[]</span>
 <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"second cat: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="n">the_path</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
-<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="n">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="n">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="nf">at_path</span><span class="p">(</span><span class="n">the_path</span><span class="p">.</span><span class="nf">parent_path</span><span class="p">())</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">second cat: lion</span>
 <span class="go">cats: ['tiger', 'lion', 'puma']</span></pre>
         <section id="typeless-methods">
           <h2><a href="#typeless-methods">Constructors, destructors, conversion operators</a></h2>
