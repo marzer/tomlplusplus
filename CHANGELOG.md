@@ -28,6 +28,7 @@ template:
 - fixed null pointer dereference in parser when exceptions are disabled (#169) (@ncaklovic)
 - fixed spurious warnings in MSVC 19.34
 - fixed some `_Float16` detection issues
+- fixed `toml::parse_file()` on windows for non-ASCII paths
 
 <br><br>
 

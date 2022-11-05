@@ -9690,7 +9690,7 @@ TOML_POP_WARNINGS;
 
 //********  impl/std_string.inl  ***************************************************************************************
 
-#if TOML_ENABLE_WINDOWS_COMPAT
+#if TOML_WINDOWS
 
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
@@ -9789,7 +9789,7 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_WINDOWS
 
 //********  impl/print_to_stream.inl  **********************************************************************************
 
@@ -15730,7 +15730,11 @@ TOML_ANON_NAMESPACE_START
 		std::ifstream file;
 		TOML_OVERALIGNED char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
+#if TOML_WINDOWS
+		file.open(impl::widen(file_path_str), std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+#else
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
+#endif
 		if (!file.is_open())
 			TOML_PARSE_FILE_ERROR("File could not be opened for reading", file_path_str);
 
