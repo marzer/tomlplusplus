@@ -8705,6 +8705,7 @@
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b">indent_array_elements</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818">indentation</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</enumvalue>
+      <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</enumvalue>
     </member>
     <member kind="enumeration">
       <type></type>

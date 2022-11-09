@@ -188,7 +188,8 @@
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa4ccbf147a4e194e7d2ae2b242e1eeceb">indent_sub_tables</a> = (1ull &lt;&lt; 9),
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b">indent_array_elements</a> = (1ull &lt;&lt; 10),
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818">indentation</a> = indent_sub_tables | indent_array_elements,
-              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</a> = (1ull &lt;&lt; 11) }</span>
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</a> = (1ull &lt;&lt; 11),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</a> = (1ull &lt;&lt; 12) }</span>
             </dt>
             <dd>Format flags for modifying how TOML data is printed to streams.</dd>
             <dt>
@@ -562,6 +563,12 @@
                   <td>
                   <p>Emit floating-point values with relaxed (human-friendly) precision.</p>
 <aside class="m-note m-danger"><h4>Warning</h4><p>Setting this flag may cause serialized documents to no longer round-trip correctly since floats might have a less precise value upon being written out than they did when being read in. Use this flag at your own risk.</p></aside>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd" id="a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</a></td>
+                  <td>
+                  <p>Avoids the use of whitespace around key-value pairs.</p>
                   </td>
                 </tr>
               </tbody>
