@@ -430,16 +430,16 @@ zyx = 42)"sv;
 zyx = 42)"sv;
 	static constexpr auto table_quoted_no_close				= R"(["where will it end]
 name = value)"sv;
-	static constexpr auto table_redefine		 = R"(# Define b as int, and try to use it as a table: error
+	static constexpr auto table_redefine					= R"(# Define b as int, and try to use it as a table: error
 [a]
 b = 1
 
 [a.b]
 c = 2)"sv;
-	static constexpr auto table_rrbrace			 = R"([[table] ])"sv;
-	static constexpr auto table_text_after_table = R"([error] this shouldn't be here)"sv;
-	static constexpr auto table_whitespace		 = R"([invalid key])"sv;
-	static constexpr auto table_with_pound		 = R"([key#group]
+	static constexpr auto table_rrbrace						= R"([[table] ])"sv;
+	static constexpr auto table_text_after_table			= R"([error] this shouldn't be here)"sv;
+	static constexpr auto table_whitespace					= R"([invalid key])"sv;
+	static constexpr auto table_with_pound					= R"([key#group]
 answer = 42)"sv;
 }
 

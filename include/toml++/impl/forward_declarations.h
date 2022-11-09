@@ -337,6 +337,9 @@ TOML_NAMESPACE_START // abi namespace
 		///				since floats might have a less precise value upon being written out than they did when being
 		///				read in. Use this flag at your own risk.
 		relaxed_float_precision = (1ull << 11),
+
+		/// \brief Avoids the use of whitespace around key-value pairs.
+		terse_key_value_pairs = (1ull << 12),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 

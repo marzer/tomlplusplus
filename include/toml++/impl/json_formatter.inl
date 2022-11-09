@@ -43,7 +43,10 @@ TOML_NAMESPACE_START
 			print_indent();
 
 			print_string(k.str(), false);
-			print_unformatted(" : "sv);
+			if (terse_kvps())
+				print_unformatted(":"sv);
+			else
+				print_unformatted(" : "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);

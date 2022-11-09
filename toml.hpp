@@ -1433,6 +1433,7 @@ TOML_NAMESPACE_START // abi namespace
 		indent_array_elements = (1ull << 10),
 		indentation = indent_sub_tables | indent_array_elements,
 		relaxed_float_precision = (1ull << 11),
+		terse_key_value_pairs = (1ull << 12),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -9343,6 +9344,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::allow_unicode_strings);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool terse_kvps() const noexcept
+		{
+			return !!(config_.flags & format_flags::terse_key_value_pairs);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
@@ -16525,7 +16532,10 @@ TOML_NAMESPACE_START
 			first = true;
 
 			print(k);
-			print_unformatted(" = "sv);
+			if (terse_kvps())
+				print_unformatted("="sv);
+			else
+				print_unformatted(" = "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -16628,7 +16638,10 @@ TOML_NAMESPACE_START
 			print_newline();
 			print_indent();
 			print(k);
-			print_unformatted(" = "sv);
+			if (terse_kvps())
+				print_unformatted("="sv);
+			else
+				print_unformatted(" = "sv);
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
@@ -16815,7 +16828,10 @@ TOML_NAMESPACE_START
 			print_indent();
 
 			print_string(k.str(), false);
-			print_unformatted(" : "sv);
+			if (terse_kvps())
+				print_unformatted(":"sv);
+			else
+				print_unformatted(" : "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
@@ -16973,7 +16989,10 @@ TOML_NAMESPACE_START
 			parent_is_array = false;
 
 			print_string(k.str(), false, true);
-			print_unformatted(": "sv);
+			if (terse_kvps())
+				print_unformatted(":"sv);
+			else
+				print_unformatted(": "sv);
 
 			const auto type = v.type();
 			TOML_ASSUME(type != node_type::none);
