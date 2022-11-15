@@ -39,13 +39,7 @@ endif
 # fast math check
 #######################################################################################################################
 
-compiler_supports_fast_math_args = []
-if is_gcc or is_clang
-	compiler_supports_fast_math_args += '-ffast-math'
-	compiler_supports_fast_math_args += '-ffp-contract=fast'
-elif is_msvc or is_icc_cl
-	compiler_supports_fast_math_args += '/fp:fast'
-endif
+compiler_supports_fast_math_args = compiler.get_supported_arguments('-ffast-math', '-ffp-contract=fast', '/fp:fast')
 compiler_supports_fast_math = compiler.links('''
 	#include <cmath>
 	#include <iostream>
@@ -58,7 +52,6 @@ compiler_supports_fast_math = compiler.links('''
 	name: 'supports fast-math',
 	args: compiler_supports_fast_math_args
 )
-
 #######################################################################################################################
 # do the thing!
 #######################################################################################################################

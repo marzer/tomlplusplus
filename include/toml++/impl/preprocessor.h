@@ -1055,7 +1055,34 @@ TOML_ENABLE_WARNINGS;
 //# FLOAT16
 //#=====================================================================================================================
 
-#if TOML_CLANG
+#ifndef TOML_ENABLE_FLOAT16
+
+#ifdef __FLT16_MANT_DIG__
+#define TOML_FLOAT16_MANT_DIG	__FLT16_MANT_DIG__
+#define TOML_FLOAT16_DIG		__FLT16_DIG__
+#define TOML_FLOAT16_MIN_EXP	__FLT16_MIN_EXP__
+#define TOML_FLOAT16_MIN_10_EXP __FLT16_MIN_10_EXP__
+#define TOML_FLOAT16_MAX_EXP	__FLT16_MAX_EXP__
+#define TOML_FLOAT16_MAX_10_EXP __FLT16_MAX_10_EXP__
+#else
+#define TOML_FLOAT16_MANT_DIG	0
+#define TOML_FLOAT16_DIG		0
+#define TOML_FLOAT16_MIN_EXP	0
+#define TOML_FLOAT16_MIN_10_EXP 0
+#define TOML_FLOAT16_MAX_EXP	0
+#define TOML_FLOAT16_MAX_10_EXP 0
+#endif
+
+#if (TOML_FLOAT16_MANT_DIG && TOML_FLOAT16_DIG && TOML_FLOAT16_MIN_EXP && TOML_FLOAT16_MIN_10_EXP                      \
+	 && TOML_FLOAT16_MAX_EXP && TOML_FLOAT16_MAX_10_EXP)
+#define TOML_FLOAT16_LIMITS_SET 1
+#else
+#define TOML_FLOAT16_LIMITS_SET 0
+#endif
+
+#if TOML_FLOAT16_LIMITS_SET
+
+#if TOML_CLANG // >= 15
 //# {{
 //	Excerpt from https://clang.llvm.org/docs/LanguageExtensions.html:
 //
@@ -1069,9 +1096,10 @@ TOML_ENABLE_WARNINGS;
 //		X86 as long as SSE2 is available
 //
 //# }}
-#if (TOML_ARCH_ARM || TOML_ARCH_X86 || TOML_ARCH_AMD64) && defined(__FLT16_MANT_DIG__)
-#define TOML_FLOAT16 _Float16
+#if (TOML_ARCH_ARM || TOML_ARCH_AMD64 || TOML_ARCH_X86)
+#define TOML_ENABLE_FLOAT16 1
 #endif
+
 #elif TOML_GCC
 //# {{
 //	Excerpt from https://gcc.gnu.org/onlinedocs/gcc/Floating-Types.html:
@@ -1082,13 +1110,25 @@ TOML_ENABLE_WARNINGS;
 //
 //	*** except: the bit about x86 seems incorrect?? ***
 //# }}
-/*
+#if (TOML_ARCH_ARM || TOML_ARCH_AMD64 /* || TOML_ARCH_X86*/)
+#define TOML_ENABLE_FLOAT16 1
+#endif
 
- */
-#if (TOML_ARCH_ARM /*|| TOML_ARCH_X86 || TOML_ARCH_AMD64*/) && defined(__FLT16_MANT_DIG__)
-#define TOML_FLOAT16 _Float16
+#endif // clang/gcc
+
+#endif // TOML_FLOAT16_LIMITS_SET
+
+#endif // !defined(TOML_ENABLE_FLOAT16)
+
+#ifndef TOML_ENABLE_FLOAT16
+#define TOML_ENABLE_FLOAT16 0
 #endif
-#endif
+//# {{
+/// \def TOML_ENABLE_FLOAT16
+/// \brief Enable support for the built-in `_Float16` type.
+/// \detail Default behaviour is to try to determine support based on compiler, architecture and built-in defines, but
+/// you can override it to force-enable/disable support.
+//# }}
 
 //#=====================================================================================================================
 //# FLOAT128

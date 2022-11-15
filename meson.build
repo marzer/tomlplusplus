@@ -319,27 +319,11 @@ compiler_supports_consteval_properly = compiler_supports_consteval and not compi
 )
 
 #######################################################################################################################
-# __fp16 and _Float16 checks
+# _Float16 checks
 #######################################################################################################################
 
-compiler_supports_float16_args = []
-if is_gcc
-	compiler_supports_float16_args += '-mfp16-format=ieee'
-endif
-compiler_supports_fp16 = compiler.links('''
-	int main()
-	{
-		static_assert(sizeof(__fp16) == 2);
-		__fp16 f = static_cast<__fp16>(1);
-		const auto f2 = static_cast<float>(f);
-		const auto f3 = static_cast<__fp16>(0.2L);
-		return 0;
-	}
-	''',
-	name: 'supports __fp16',
-	args: compiler_supports_float16_args
-)
-compiler_supports_float16 = compiler.links('''
+compiler_supports_float16_args = compiler.get_supported_arguments('-mfp16-format=ieee')
+compiler_supports_float16 = get_option('float16') and compiler.links('''
 	int main()
 	{
 		static_assert(sizeof(_Float16) == 2);
@@ -352,7 +336,7 @@ compiler_supports_float16 = compiler.links('''
 	name: 'supports _Float16',
 	args: compiler_supports_float16_args
 )
-if compiler_supports_fp16 or compiler_supports_float16
+if compiler_supports_float16
 	devel_args += compiler_supports_float16_args
 endif
 
@@ -411,8 +395,8 @@ compiler_supports_float128 = compiler.links('''
 	name: 'supports __float128'
 )
 
-if compiler_supports_float128 and is_gcc and not is_subproject
-	add_global_arguments('-fext-numeric-literals', language: 'cpp')
+if compiler_supports_float16 or compiler_supports_float128 or compiler_supports_int128
+	devel_args += compiler.get_supported_arguments('-fext-numeric-literals')
 endif
 
 #######################################################################################################################

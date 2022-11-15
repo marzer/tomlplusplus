@@ -11,3 +11,4 @@ option('build_tt_encoder',		type: 'boolean', value: false,	description: 'Enable 
 option('build_tt_decoder',		type: 'boolean', value: false,	description: 'Enable to build the toml-test decoder.')
 option('compile_library',		type: 'boolean', value: false,	description: 'Compile as a library')
 option('use_vendored_libs',		type: 'boolean', value: true,	description: 'Use the libs from the vendor dir when building tests.')
+option('float16',				type: 'boolean', value: true,	description: 'Use _Float16 automatically where available.')

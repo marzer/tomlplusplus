@@ -6,6 +6,15 @@ lib_args = ['-DTOML_HEADER_ONLY=0']
 if get_option('default_library') != 'static'
 	lib_args += '-DTOML_SHARED_LIB=1'
 endif
+if compiler_supports_float16
+	lib_args += compiler_supports_float16_args
+	lib_args += '-DTOML_ENABLE_FLOAT16=1'
+else
+	lib_args += '-DTOML_ENABLE_FLOAT16=0'
+endif
+if compiler_supports_float16 or compiler_supports_float128 or compiler_supports_int128
+	lib_args += compiler.get_supported_arguments('-fext-numeric-literals')
+endif
 
 lib = library(
 	meson.project_name(),

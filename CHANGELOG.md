@@ -30,6 +30,7 @@ template:
 - fixed some `_Float16` detection issues
 - fixed `toml::parse_file()` on windows for non-ASCII paths
 - added `toml::format_flags::terse_key_value_pairs`
+- added `TOML_ENABLE_FLOAT16` config to fix #178 (@Scrumplex)
 
 <br><br>
 

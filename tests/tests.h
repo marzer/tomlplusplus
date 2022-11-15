@@ -11,8 +11,8 @@
 #else
 #include "../include/toml++/toml.h"
 #endif
-#if defined(TOML_FLOAT16) ^ SHOULD_HAVE_FLOAT16
-#error TOML_FLOAT16 was not deduced correctly
+#if TOML_ENABLE_FLOAT16 ^ SHOULD_HAVE_FLOAT16
+#error TOML_ENABLE_FLOAT16 was not deduced correctly
 #endif
 #if defined(TOML_FLOAT128) ^ SHOULD_HAVE_FLOAT128
 #error TOML_FLOAT128 was not deduced correctly
