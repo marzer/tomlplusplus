@@ -5,24 +5,8 @@
 
 #pragma once
 #include "settings.h"
+#include <toml++/toml.h>
 
-#if USE_SINGLE_HEADER
-#include "../toml.hpp"
-#else
-#include "../include/toml++/toml.h"
-#endif
-#if TOML_ENABLE_FLOAT16 ^ SHOULD_HAVE_FLOAT16
-#error TOML_ENABLE_FLOAT16 was not deduced correctly
-#endif
-#if defined(TOML_FLOAT128) ^ SHOULD_HAVE_FLOAT128
-#error TOML_FLOAT128 was not deduced correctly
-#endif
-#if defined(TOML_INT128) ^ SHOULD_HAVE_INT128
-#error TOML_INT128 was not deduced correctly
-#endif
-#if defined(TOML_INT128) ^ defined(TOML_UINT128)
-#error TOML_INT128 and TOML_UINT128 must both be defined, or neither be defined
-#endif
 #if TOML_COMPILER_HAS_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
 #error TOML_COMPILER_HAS_EXCEPTIONS was not deduced correctly
 #endif

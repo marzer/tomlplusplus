@@ -1,41 +1,40 @@
-# Compiled library
+# This file is a part of toml++ and is subject to the the terms of the MIT license.
+# Copyright (c) Mark Gillard <mark.gillard@outlook.com.au>
+# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
+# SPDX-License-Identifier: MIT
+
+assert(build_lib) # not header-only mode
 
 # These are the arguments needed to compile and consume the library, and
 # are exposed to users with  the `compile_args` kwarg of declare_dependency()
-lib_args = ['-DTOML_HEADER_ONLY=0']
+lib_args = cpp.get_supported_arguments('-DTOML_HEADER_ONLY=0')
 if get_option('default_library') != 'static'
-	lib_args += '-DTOML_SHARED_LIB=1'
+	lib_args += cpp.get_supported_arguments('-DTOML_SHARED_LIB=1')
 endif
-if compiler_supports_float16
-	lib_args += compiler_supports_float16_args
-	lib_args += '-DTOML_ENABLE_FLOAT16=1'
-else
-	lib_args += '-DTOML_ENABLE_FLOAT16=0'
-endif
-if compiler_supports_float16 or compiler_supports_float128 or compiler_supports_int128
-	lib_args += compiler.get_supported_arguments('-fext-numeric-literals')
+if is_devel
+	lib_args += cpp.get_supported_arguments('-DTOML_ENABLE_UNRELEASED_FEATURES=1')
 endif
 
-lib = library(
+tomlplusplus_lib = library(
 	meson.project_name(),
-	'toml++'/'toml.cpp',
-	cpp_args: [universal_args, lib_args],
+	files('toml.cpp'),
+	cpp_args: [ global_args, lib_args ],
 	gnu_symbol_visibility: 'hidden',
 	include_directories: include_dir,
 	install: not is_subproject,
 	version: meson.project_version(),
-	override_options: overrides
+	override_options: global_overrides
 )
 
 tomlplusplus_dep = declare_dependency(
 	compile_args: lib_args,
 	include_directories: include_dir,
-	link_with: lib
+	link_with: tomlplusplus_lib
 )
 
 if not is_subproject
 	import('pkgconfig').generate(
-		lib,
+		tomlplusplus_lib,
 		description: 'TOML config file parser and serializer for C++',
 		extra_cflags: lib_args,
 		url: 'https://marzer.github.io/tomlplusplus'
@@ -43,7 +42,7 @@ if not is_subproject
 endif
 
 # cmake
-if get_option('generate_cmake_config') and not is_subproject
+if get_option('generate_cmake_config') and not is_subproject and not is_devel
 	cmake = import('cmake')
 	cmake.write_basic_package_version_file(
 		name: meson.project_name(),
@@ -53,12 +52,9 @@ if get_option('generate_cmake_config') and not is_subproject
 	# This gets the full path of the library, then considers just the last
 	# component (i.e. the actual file name), and finally removes the
 	# version suffix from it, because users _should_ link against the .so
-	# file, as opposed to the .so.x.y.z one. This last step is only doable
-	# with str.replace(), introduced in Meson 0.58.0, but it isn't essential
-	lib_name = lib.full_path().split('/')[-1]
-	if meson.version().version_compare('>=0.58.0')
-		lib_name = lib_name.replace('.' + meson.project_version(), '')
-	endif
+	# file, as opposed to the .so.x.y.z one.
+	lib_name = tomlplusplus_lib.full_path().split('/')[-1]
+	lib_name = lib_name.replace('.' + meson.project_version(), '')
 
 	# CMake needs space-separated values since it doesn't have types
 	cmake_compile_options = ''
