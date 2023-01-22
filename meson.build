@@ -48,10 +48,11 @@ is_icc_cl = cpp.get_id() == 'intel-cl'
 is_icc = is_icc_cl or cpp.get_id() == 'intel'
 is_lld = cpp.get_linker_id() == 'ld.lld'
 has_exceptions = get_option('cpp_eh') != 'none'
+unreleased_features = get_option('unreleased_features')
 
 build_tests = (get_option('build_tests') or is_devel) and not is_subproject
 build_examples = (get_option('build_examples') or is_devel) and not is_subproject
-build_tt = (get_option('build_tt') or is_devel) and not is_subproject
+build_tt = (get_option('build_tt') or is_devel) and not is_subproject and has_exceptions and not unreleased_features
 build_lib = get_option('build_lib') or get_option('compile_library') or build_tests or build_examples or build_tt
 
 #-----------------------------------------------------------------------------------------------------------------------
@@ -108,7 +109,6 @@ if is_pedantic
 		'-Wold-style-cast',
 		'-Woverloaded-virtual',
 		'-Wpacked',
-		'-Wpadded',
 		'-Wpointer-arith',
 		'-Wredundant-decls',
 		'-Wshadow',
@@ -125,24 +125,19 @@ if is_pedantic
 		'-Wuseless-cast',
 		'-Wvariadic-macros',
 		'-Wwrite-strings',
-		'-Wmissing-noreturn',
-		# msvc
-		'/Wall'
+		'-Wmissing-noreturn'
 	)
-	if is_release
-		global_args += cpp.get_supported_arguments(
-			'-Wsuggest-attribute=const',
-			'-Wsuggest-attribute=pure'
-		)
-	endif
 endif
+# unnecessary pedantry:
 global_args += cpp.get_supported_arguments(
 	'-Wno-c++98-compat',
 	'-Wno-c++98-compat-pedantic',
 	'-Wno-documentation',
 	'-Wno-documentation-unknown-command',
 	'-Wno-switch-enum',
-	'-Wno-covered-switch-default'
+	'-Wno-covered-switch-default',
+	'-Wno-padded',
+	'-Wno-float-equal'
 )
 if get_option('time_trace')
 	global_args += cpp.get_supported_arguments('-ftime-trace')

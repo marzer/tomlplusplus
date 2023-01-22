@@ -11,14 +11,25 @@ lib_args = cpp.get_supported_arguments('-DTOML_HEADER_ONLY=0')
 if get_option('default_library') != 'static'
 	lib_args += cpp.get_supported_arguments('-DTOML_SHARED_LIB=1')
 endif
-if is_devel
+if unreleased_features
 	lib_args += cpp.get_supported_arguments('-DTOML_ENABLE_UNRELEASED_FEATURES=1')
+endif
+
+# these are the _internal_ args, just for compiling the lib
+lib_internal_args = []
+lib_internal_args += global_args
+lib_internal_args += lib_args
+if is_pedantic and is_release
+	lib_internal_args += cpp.get_supported_arguments(
+		'-Wsuggest-attribute=const',
+		'-Wsuggest-attribute=pure'
+	)
 endif
 
 tomlplusplus_lib = library(
 	meson.project_name(),
 	files('toml.cpp'),
-	cpp_args: [ global_args, lib_args ],
+	cpp_args: lib_internal_args,
 	gnu_symbol_visibility: 'hidden',
 	include_directories: include_dir,
 	install: not is_subproject,

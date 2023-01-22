@@ -40,6 +40,4 @@
 #pragma warning(pop)
 #endif
 
-#define TOML_ENABLE_UNRELEASED_FEATURES 0
-#define TOML_EXCEPTIONS					1
 #include <toml++/toml.h>
