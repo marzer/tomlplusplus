@@ -248,6 +248,9 @@
     <None Include=".github\FUNDING.yml">
       <Filter>.github</Filter>
     </None>
+    <None Include="tools\version.py">
+      <Filter>tools</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="docs">

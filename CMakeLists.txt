@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14)
 
 project(
     tomlplusplus
-    VERSION 3.2.0
+    VERSION 3.3.0
     DESCRIPTION "Header-only TOML config file parser and serializer for C++17"
     HOMEPAGE_URL "https://marzer.github.io/tomlplusplus/"
     LANGUAGES CXX

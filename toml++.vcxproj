@@ -127,6 +127,7 @@
     <None Include="tools\generate_single_header.py" />
     <None Include="tools\generate_windows_test_targets.py" />
     <None Include="tools\utils.py" />
+    <None Include="tools\version.py" />
     <None Include="vendor\README.md" />
   </ItemGroup>
   <ItemGroup>
