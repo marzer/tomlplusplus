@@ -470,6 +470,10 @@ def load_burnsushi_tests(tests):
 	))
 	add_condition(tests['valid']['burntsushi'], 'TOML_LANG_UNRELEASED', (
 		'string-escape-esc', # \e in strings
+		'datetime-no-seconds', # omitting seconds from date-times
+		'inline-table-newline',
+		'key-unicode',
+		'string-hex-escape'
 	))
 
 	tests['invalid']['burntsushi'] = load_tests(Path(root_dir, 'invalid'), False)
@@ -576,6 +580,8 @@ def write_test_file(name, all_tests):
 					write(f'#if {condition}');
 				for test in tests:
 					write('')
+					write(f'\tSECTION("{test.name()}") {{')
+					write('')
 					expected = test.expected()
 					if isinstance(expected, bool):
 						if expected:
@@ -589,6 +595,9 @@ def write_test_file(name, all_tests):
 						write(f'\t\tconst auto expected = {s};')
 						write('\t\tREQUIRE(tbl == expected);')
 						write('\t});')
+					write('')
+					write('\t}')
+					write('')
 				if condition != '':
 					write('')
 					write(f'#endif // {condition}');

@@ -515,7 +515,7 @@
 	__pragma(warning(push))                                                                                            \
 	static_assert(true)
 
-#if TOML_HAS_INCLUDE(<CodeAnalysis / Warnings.h>)
+#if TOML_HAS_INCLUDE(<CodeAnalysis/Warnings.h>)
 #pragma warning(push, 0)
 #include <CodeAnalysis/Warnings.h>
 #pragma warning(pop)

@@ -2262,14 +2262,21 @@ TOML_IMPL_NAMESPACE_START
 				}
 
 				// range check
-				if TOML_UNLIKELY(result > static_cast<uint64_t>((std::numeric_limits<int64_t>::max)()) + (sign < 0 ? 1ull : 0ull))
+				static constexpr auto i64_max = static_cast<uint64_t>((std::numeric_limits<int64_t>::max)());
+				if TOML_UNLIKELY(result > i64_max + (sign < 0 ? 1u : 0u))
 					set_error_and_return_default("'"sv,
 												 traits::full_prefix,
 												 std::string_view{ digits, length },
 												 "' is not representable in 64 bits"sv);
 
 				if constexpr (traits::is_signed)
+				{
+					// avoid signed multiply UB when parsing INT64_MIN
+					if TOML_UNLIKELY(sign < 0 && result == i64_max + 1u)
+						return (std::numeric_limits<int64_t>::min)();
+
 					return static_cast<int64_t>(result) * sign;
+				}
 				else
 					return static_cast<int64_t>(result);
 			}
@@ -3252,13 +3259,28 @@ TOML_IMPL_NAMESPACE_START
 
 				else if (auto tbl = matching_node.as_table(); !is_arr && tbl && !implicit_tables.empty())
 				{
-					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl);
-						found && (tbl->empty() || tbl->is_homogeneous<table>()))
+					if (auto found = impl::find(implicit_tables.begin(), implicit_tables.end(), tbl); found)
 					{
-						implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
-						tbl->source_.begin = header_begin_pos;
-						tbl->source_.end   = header_end_pos;
-						return tbl;
+						bool ok = true;
+						if (!tbl->empty())
+						{
+							for (auto& [_, child] : *tbl)
+							{
+								if (!child.is_table() && !child.is_array_of_tables())
+								{
+									ok = false;
+									break;
+								}
+							}
+						}
+
+						if (ok)
+						{
+							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
+							tbl->source_.begin = header_begin_pos;
+							tbl->source_.end   = header_end_pos;
+							return tbl;
+						}
 					}
 				}
 

@@ -7,9 +7,6 @@
 
 #define INCLUDE_TOMLPLUSPLUS_H // old guard name used pre-v3
 
-//# Note: these would be included transitively as with any normal C++ project but
-//# they're listed explicitly here because this file is used as the source for generate_single_header.py.
-
 #include "impl/preprocessor.h"
 
 TOML_PUSH_WARNINGS;
@@ -24,12 +21,12 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #pragma warning(disable : 4251) // dll exports for std lib types
 #endif
 #elif TOML_CLANG
-#pragma clang diagnostic ignored "-Wheader-hygiene"
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wheader-hygiene")
 #if TOML_CLANG >= 12
-#pragma clang diagnostic ignored "-Wc++20-extensions"
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wc++20-extensions")
 #endif
-#if TOML_CLANG == 13 && !defined(__APPLE__)
-#pragma clang diagnostic ignored "-Wreserved-identifier"
+#if TOML_CLANG == 13
+TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #endif
 #endif
 

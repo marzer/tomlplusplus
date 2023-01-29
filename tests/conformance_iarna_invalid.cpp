@@ -167,122 +167,285 @@ namespace
 
 TEST_CASE("conformance - iarna/invalid")
 {
-	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_1); // array-of-tables-1
+	SECTION("array-of-tables-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_of_tables_1); // array-of-tables-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_of_tables_2); // array-of-tables-2
+	SECTION("array-of-tables-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_of_tables_2); // array-of-tables-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_1); // bare-key-1
+	SECTION("bare-key-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bare_key_1); // bare-key-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_2); // bare-key-2
+	SECTION("bare-key-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bare_key_2); // bare-key-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bare_key_3); // bare-key-3
+	SECTION("bare-key-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bare_key_3); // bare-key-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, comment_control_1); // comment-control-1
+	SECTION("comment-control-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, comment_control_1); // comment-control-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, comment_control_2); // comment-control-2
+	SECTION("comment-control-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, comment_control_2); // comment-control-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, comment_control_3); // comment-control-3
+	SECTION("comment-control-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, comment_control_3); // comment-control-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, comment_control_4); // comment-control-4
+	SECTION("comment-control-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, comment_control_4); // comment-control-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_1); // inline-table-imutable-1
+	SECTION("inline-table-imutable-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_1); // inline-table-imutable-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_2); // inline-table-imutable-2
+	SECTION("inline-table-imutable-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_imutable_2); // inline-table-imutable-2
+	}
 
 #if !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma); // inline-table-trailing-comma
+	SECTION("inline-table-trailing-comma")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma); // inline-table-trailing-comma
+	}
 
 #endif // !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, int_0_padded); // int-0-padded
+	SECTION("int-0-padded")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, int_0_padded); // int-0-padded
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_bin); // int-signed-bin
+	SECTION("int-signed-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, int_signed_bin); // int-signed-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_hex); // int-signed-hex
+	SECTION("int-signed-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, int_signed_hex); // int-signed-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, int_signed_oct); // int-signed-oct
+	SECTION("int-signed-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, int_signed_oct); // int-signed-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_1); // key-value-pair-1
+	SECTION("key-value-pair-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_value_pair_1); // key-value-pair-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_value_pair_2); // key-value-pair-2
+	SECTION("key-value-pair-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_value_pair_2); // key-value-pair-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, multiple_dot_key); // multiple-dot-key
+	SECTION("multiple-dot-key")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, multiple_dot_key); // multiple-dot-key
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, multiple_key); // multiple-key
+	SECTION("multiple-key")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, multiple_key); // multiple-key
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, no_key_name); // no-key-name
+	SECTION("no-key-name")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, no_key_name); // no-key-name
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_1); // string-basic-control-1
+	SECTION("string-basic-control-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_control_1); // string-basic-control-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_2); // string-basic-control-2
+	SECTION("string-basic-control-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_control_2); // string-basic-control-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_3); // string-basic-control-3
+	SECTION("string-basic-control-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_control_3); // string-basic-control-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_control_4); // string-basic-control-4
+	SECTION("string-basic-control-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_control_4); // string-basic-control-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_1); // string-basic-multiline-control-1
+	SECTION("string-basic-multiline-control-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_1); // string-basic-multiline-control-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_2); // string-basic-multiline-control-2
+	SECTION("string-basic-multiline-control-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_2); // string-basic-multiline-control-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_3); // string-basic-multiline-control-3
+	SECTION("string-basic-multiline-control-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_3); // string-basic-multiline-control-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_4); // string-basic-multiline-control-4
+	SECTION("string-basic-multiline-control-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_control_4); // string-basic-multiline-control-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS,
-						string_basic_multiline_invalid_backslash); // string-basic-multiline-invalid-backslash
+	SECTION("string-basic-multiline-invalid-backslash")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_multiline_invalid_backslash); // string-basic-multiline-invalid-backslash
+	}
 
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		string_basic_multiline_out_of_range_unicode_escape_1); // string-basic-multiline-out-of-range-unicode-escape-1
+	SECTION("string-basic-multiline-out-of-range-unicode-escape-1")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			string_basic_multiline_out_of_range_unicode_escape_1); // string-basic-multiline-out-of-range-unicode-escape-1
+	}
 
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		string_basic_multiline_out_of_range_unicode_escape_2); // string-basic-multiline-out-of-range-unicode-escape-2
+	SECTION("string-basic-multiline-out-of-range-unicode-escape-2")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			string_basic_multiline_out_of_range_unicode_escape_2); // string-basic-multiline-out-of-range-unicode-escape-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes); // string-basic-multiline-quotes
+	SECTION("string-basic-multiline-quotes")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes); // string-basic-multiline-quotes
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_unknown_escape); // string-basic-multiline-unknown-escape
+	SECTION("string-basic-multiline-unknown-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_multiline_unknown_escape); // string-basic-multiline-unknown-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS,
-						string_basic_out_of_range_unicode_escape_1); // string-basic-out-of-range-unicode-escape-1
+	SECTION("string-basic-out-of-range-unicode-escape-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_out_of_range_unicode_escape_1); // string-basic-out-of-range-unicode-escape-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS,
-						string_basic_out_of_range_unicode_escape_2); // string-basic-out-of-range-unicode-escape-2
+	SECTION("string-basic-out-of-range-unicode-escape-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_out_of_range_unicode_escape_2); // string-basic-out-of-range-unicode-escape-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape); // string-basic-unknown-escape
+	SECTION("string-basic-unknown-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape); // string-basic-unknown-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_1); // string-literal-control-1
+	SECTION("string-literal-control-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_control_1); // string-literal-control-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_2); // string-literal-control-2
+	SECTION("string-literal-control-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_control_2); // string-literal-control-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_3); // string-literal-control-3
+	SECTION("string-literal-control-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_control_3); // string-literal-control-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_control_4); // string-literal-control-4
+	SECTION("string-literal-control-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_control_4); // string-literal-control-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_1); // string-literal-multiline-control-1
+	SECTION("string-literal-multiline-control-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_1); // string-literal-multiline-control-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_2); // string-literal-multiline-control-2
+	SECTION("string-literal-multiline-control-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_2); // string-literal-multiline-control-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_3); // string-literal-multiline-control-3
+	SECTION("string-literal-multiline-control-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_3); // string-literal-multiline-control-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_4); // string-literal-multiline-control-4
+	SECTION("string-literal-multiline-control-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_control_4); // string-literal-multiline-control-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes); // string-literal-multiline-quotes
+	SECTION("string-literal-multiline-quotes")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes); // string-literal-multiline-quotes
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_1); // table-1
+	SECTION("table-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_1); // table-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_2); // table-2
+	SECTION("table-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_2); // table-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_3); // table-3
+	SECTION("table-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_3); // table-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_4); // table-4
+	SECTION("table-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_4); // table-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_1); // table-invalid-1
+	SECTION("table-invalid-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_invalid_1); // table-invalid-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_2); // table-invalid-2
+	SECTION("table-invalid-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_invalid_2); // table-invalid-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_3); // table-invalid-3
+	SECTION("table-invalid-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_invalid_3); // table-invalid-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_invalid_4); // table-invalid-4
+	SECTION("table-invalid-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_invalid_4); // table-invalid-4
+	}
 }

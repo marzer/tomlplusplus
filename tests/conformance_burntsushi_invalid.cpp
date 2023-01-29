@@ -129,6 +129,9 @@ no-secs = 1987-07-05T17:45Z)"sv;
 
 #endif // !TOML_LANG_UNRELEASED
 
+	static constexpr auto encoding_bad_codepoint =
+		"\x23\x20\x49\x6E\x76\x61\x6C\x69\x64\x20\x63\x6F\x64\x65\x70\x6F\x69\x6E\x74\x20\x55\x2B\x44\x38\x30"
+		"\x30\x20\x3A\x20\xED\xA0\x80\x0A"sv;
 	static constexpr auto encoding_bad_utf8_at_end =
 		"\x23\x20\x54\x68\x65\x72\x65\x20\x69\x73\x20\x61\x20\x30\x78\x64\x61\x20\x61\x74\x20\x61\x66\x74\x65"
 		"\x72\x20\x74\x68\x65\x20\x71\x75\x6F\x74\x65\x73\x2C\x20\x61\x6E\x64\x20\x6E\x6F\x20\x45\x4F\x4C\x20"
@@ -141,6 +144,18 @@ no-secs = 1987-07-05T17:45Z)"sv;
 		"\x61\x75\x73\x65\x20\x69\x74\x27\x73\x20\x74\x68\x65\x20\x65\x6E\x64\x20\x6F\x66\x20\x74\x68\x65\x20"
 		"\x66\x69\x6C\x65\x2E\x0A\x78\x20\x3D\x20\x22\x22\x22\x22\x22\x22\xDA"sv;
 	static constexpr auto encoding_bad_utf8_in_comment = "\x23\x20\xC3\x0A"sv;
+	static constexpr auto encoding_bad_utf8_in_multiline_literal =
+		"\x23\x20\x54\x68\x65\x20\x66\x6F\x6C\x6C\x6F\x77\x69\x6E\x67\x20\x6C\x69\x6E\x65\x20\x63\x6F\x6E\x74"
+		"\x61\x69\x6E\x73\x20\x61\x6E\x20\x69\x6E\x76\x61\x6C\x69\x64\x20\x55\x54\x46\x2D\x38\x20\x73\x65\x71"
+		"\x75\x65\x6E\x63\x65\x2E\x0A\x62\x61\x64\x20\x3D\x20\x27\x27\x27\xC3\x27\x27\x27\x0A"sv;
+	static constexpr auto encoding_bad_utf8_in_multiline =
+		"\x23\x20\x54\x68\x65\x20\x66\x6F\x6C\x6C\x6F\x77\x69\x6E\x67\x20\x6C\x69\x6E\x65\x20\x63\x6F\x6E\x74"
+		"\x61\x69\x6E\x73\x20\x61\x6E\x20\x69\x6E\x76\x61\x6C\x69\x64\x20\x55\x54\x46\x2D\x38\x20\x73\x65\x71"
+		"\x75\x65\x6E\x63\x65\x2E\x0A\x62\x61\x64\x20\x3D\x20\x22\x22\x22\xC3\x22\x22\x22\x0A"sv;
+	static constexpr auto encoding_bad_utf8_in_string_literal =
+		"\x23\x20\x54\x68\x65\x20\x66\x6F\x6C\x6C\x6F\x77\x69\x6E\x67\x20\x6C\x69\x6E\x65\x20\x63\x6F\x6E\x74"
+		"\x61\x69\x6E\x73\x20\x61\x6E\x20\x69\x6E\x76\x61\x6C\x69\x64\x20\x55\x54\x46\x2D\x38\x20\x73\x65\x71"
+		"\x75\x65\x6E\x63\x65\x2E\x0A\x62\x61\x64\x20\x3D\x20\x27\xC3\x27\x0A"sv;
 	static constexpr auto encoding_bad_utf8_in_string =
 		"\x23\x20\x54\x68\x65\x20\x66\x6F\x6C\x6C\x6F\x77\x69\x6E\x67\x20\x6C\x69\x6E\x65\x20\x63\x6F\x6E\x74"
 		"\x61\x69\x6E\x73\x20\x61\x6E\x20\x69\x6E\x76\x61\x6C\x69\x64\x20\x55\x54\x46\x2D\x38\x20\x73\x65\x71"
@@ -164,6 +179,7 @@ no-secs = 1987-07-05T17:45Z)"sv;
 	static constexpr auto float_exp_point_1			= R"(exp-point-1 = 1e2.3)"sv;
 	static constexpr auto float_exp_point_2			= R"(exp-point-2 = 1.e2)"sv;
 	static constexpr auto float_exp_trailing_us		= R"(exp-trailing-us = 1e_23_)"sv;
+	static constexpr auto float_inf_capital			= R"(v = Inf)"sv;
 	static constexpr auto float_inf_incomplete_1	= R"(inf-incomplete-1 = in)"sv;
 	static constexpr auto float_inf_incomplete_2	= R"(inf-incomplete-2 = +in)"sv;
 	static constexpr auto float_inf_incomplete_3	= R"(inf-incomplete-3 = -in)"sv;
@@ -175,6 +191,7 @@ no-secs = 1987-07-05T17:45Z)"sv;
 	static constexpr auto float_leading_zero_neg	= R"(leading-zero-neg = -03.14)"sv;
 	static constexpr auto float_leading_zero_plus	= R"(leading-zero-plus = +03.14)"sv;
 	static constexpr auto float_leading_zero		= R"(leading-zero = 03.14)"sv;
+	static constexpr auto float_nan_capital			= R"(v = NaN)"sv;
 	static constexpr auto float_nan_incomplete_1	= R"(nan-incomplete-1 = na)"sv;
 	static constexpr auto float_nan_incomplete_2	= R"(nan-incomplete-2 = +na)"sv;
 	static constexpr auto float_nan_incomplete_3	= R"(nan-incomplete-3 = -na)"sv;
@@ -190,15 +207,19 @@ trailing-us-exp2 = 1.2_e2)"sv;
 	static constexpr auto float_us_after_point		= R"(us-after-point = 1._2)"sv;
 	static constexpr auto float_us_before_point		= R"(us-before-point = 1_.2)"sv;
 
-	static constexpr auto inline_table_add			 = R"(a={}
+	static constexpr auto inline_table_add				   = R"(a={}
 # Inline tables are immutable and can't be extended
 [a.b])"sv;
-	static constexpr auto inline_table_double_comma	 = R"(t = {x=3,,y=4})"sv;
-	static constexpr auto inline_table_duplicate_key = R"(# Duplicate keys within an inline table are invalid
+	static constexpr auto inline_table_bad_key_syntax	   = R"(tbl = { a = 1, [b] })"sv;
+	static constexpr auto inline_table_dotted_key_conflict = R"(tbl = { a.b = "a_b", a.b.c = "a_b_c" })"sv;
+	static constexpr auto inline_table_double_comma		   = R"(t = {x=3,,y=4})"sv;
+	static constexpr auto inline_table_duplicate_key	   = R"(# Duplicate keys within an inline table are invalid
 a={b=1, b=2})"sv;
-	static constexpr auto inline_table_empty		 = R"(t = {,})"sv;
-	static constexpr auto inline_table_no_comma		 = R"(t = {x = 3 y = 4})"sv;
-	static constexpr auto inline_table_overwrite	 = R"(a.b=0
+	static constexpr auto inline_table_empty			   = R"(t = {,})"sv;
+	static constexpr auto inline_table_nested_key_conflict =
+		R"(tbl = { fruit = { apple.color = "red" }, fruit.apple.texture = { smooth = true } })"sv;
+	static constexpr auto inline_table_no_comma	 = R"(t = {x = 3 y = 4})"sv;
+	static constexpr auto inline_table_overwrite = R"(a.b=0
 # Since table "a" is already defined, it can't be replaced by an inline table.
 a={})"sv;
 
@@ -306,12 +327,60 @@ key""" = 1)"sv;
 
 #endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
+	static constexpr auto spec_inline_table_2_0 = R"([product]
+type = { name = "Nail" }
+type.edible = false  # INVALID)"sv;
+	static constexpr auto spec_inline_table_3_0 = R"([product]
+type.name = "Nail"
+type = { edible = false }  # INVALID)"sv;
+	static constexpr auto spec_key_value_pair_1 = R"(key = # INVALID)"sv;
+	static constexpr auto spec_keys_2			= R"(= "no key name"  # INVALID
+"" = "blank"     # VALID but discouraged
+'' = 'blank'     # VALID but discouraged)"sv;
+	static constexpr auto spec_string_4_0		= R"(str4 = """Here are two quotation marks: "". Simple enough."""
+str5 = """Here are three quotation marks: """."""  # INVALID
+str5 = """Here are three quotation marks: ""\"."""
+str6 = """Here are fifteen quotation marks: ""\"""\"""\"""\"""\"."""
+
+# "This," she said, "is just a pointless statement."
+str7 = """"This," she said, "is just a pointless statement."""")"sv;
+	static constexpr auto spec_string_7_0		= R"(quot15 = '''Here are fifteen quotation marks: """""""""""""""'''
+
+apos15 = '''Here are fifteen apostrophes: ''''''''''''''''''  # INVALID
+apos15 = "Here are fifteen apostrophes: '''''''''''''''"
+
+# 'That,' she said, 'is still pointless.'
+str = ''''That,' she said, 'is still pointless.'''')"sv;
+	static constexpr auto spec_table_9_0		= R"([fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+[fruit.apple]  # INVALID
+# [fruit.apple.taste]  # INVALID
+
+[fruit.apple.texture]  # you can add sub-tables
+smooth = true)"sv;
+	static constexpr auto spec_table_9_1		= R"([fruit]
+apple.color = "red"
+apple.taste.sweet = true
+
+# [fruit.apple]  # INVALID
+[fruit.apple.taste]  # INVALID
+
+[fruit.apple.texture]  # you can add sub-tables
+smooth = true)"sv;
+
 	static constexpr auto string_bad_byte_escape = R"(naughty = "\xAg")"sv;
 	static constexpr auto string_bad_codepoint =
 		R"(invalid-codepoint = "This string contains a non scalar unicode codepoint \uD801")"sv;
 	static constexpr auto string_bad_concat	   = R"(no_concat = "first" "second")"sv;
 	static constexpr auto string_bad_escape_1  = R"(invalid-escape = "This string has a bad \a escape character.")"sv;
 	static constexpr auto string_bad_escape_2  = R"(invalid-escape = "This string has a bad \  escape character.")"sv;
+	static constexpr auto string_bad_hex_esc_1 = R"(bad-hex-esc-1 = "\x0g")"sv;
+	static constexpr auto string_bad_hex_esc_2 = R"(bad-hex-esc-2 = "\xG0")"sv;
+	static constexpr auto string_bad_hex_esc_3 = R"(bad-hex-esc-3 = "\x")"sv;
+	static constexpr auto string_bad_hex_esc_4 = R"(bad-hex-esc-4 = "\x 50")"sv;
+	static constexpr auto string_bad_hex_esc_5 = R"(bad-hex-esc-5 = "\x 50")"sv;
 	static constexpr auto string_bad_multiline = R"(multi = "first line
 second line")"sv;
 	static constexpr auto string_bad_slash_escape =
@@ -353,7 +422,11 @@ k = """t\ """)"sv;
 
 #endif // !TOML_LANG_UNRELEASED
 
-	static constexpr auto table_append_with_dotted_keys_1 = R"(# First a.b.c defines a table: a.b.c = {z=9}
+	static constexpr auto table_append_to_array_with_dotted_keys = R"([[a.b]]
+
+[a]
+b.y = 2)"sv;
+	static constexpr auto table_append_with_dotted_keys_1		 = R"(# First a.b.c defines a table: a.b.c = {z=9}
 #
 # Then we define a.b.c.t = "str" to add a str to the above table, making it:
 #
@@ -398,6 +471,10 @@ name = "Glory Days"
 name = "Born in the USA")"sv;
 	static constexpr auto table_array_missing_bracket		= R"([[albums]
 name = "Born to Run")"sv;
+	static constexpr auto table_duplicate_key_dotted_array	= R"([fruit]
+apple.color = "red"
+
+[[fruit.apple]])"sv;
 	static constexpr auto table_duplicate_key_dotted_table	= R"([fruit]
 apple.color = "red"
 
@@ -445,493 +522,1318 @@ answer = 42)"sv;
 
 TEST_CASE("conformance - burntsushi/invalid")
 {
-	parsing_should_fail(FILE_LINE_ARGS, array_double_comma_1); // array-double-comma-1
+	SECTION("array-double-comma-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_double_comma_1); // array-double-comma-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_double_comma_2); // array-double-comma-2
+	SECTION("array-double-comma-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_double_comma_2); // array-double-comma-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_extending_table); // array-extending-table
+	SECTION("array-extending-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_extending_table); // array-extending-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_missing_separator); // array-missing-separator
+	SECTION("array-missing-separator")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_missing_separator); // array-missing-separator
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_no_close_2); // array-no-close-2
+	SECTION("array-no-close-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_no_close_2); // array-no-close-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_no_close_table_2); // array-no-close-table-2
+	SECTION("array-no-close-table-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_no_close_table_2); // array-no-close-table-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_no_close_table); // array-no-close-table
+	SECTION("array-no-close-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_no_close_table); // array-no-close-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_no_close); // array-no-close
+	SECTION("array-no-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_no_close); // array-no-close
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_tables_1); // array-tables-1
+	SECTION("array-tables-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_tables_1); // array-tables-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_tables_2); // array-tables-2
+	SECTION("array-tables-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_tables_2); // array-tables-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_text_after_array_entries); // array-text-after-array-entries
+	SECTION("array-text-after-array-entries")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_text_after_array_entries); // array-text-after-array-entries
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_text_before_array_separator); // array-text-before-array-separator
+	SECTION("array-text-before-array-separator")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_text_before_array_separator); // array-text-before-array-separator
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, array_text_in_array); // array-text-in-array
+	SECTION("array-text-in-array")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, array_text_in_array); // array-text-in-array
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_almost_false_with_extra); // bool-almost-false-with-extra
+	SECTION("bool-almost-false-with-extra")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_almost_false_with_extra); // bool-almost-false-with-extra
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_almost_false); // bool-almost-false
+	SECTION("bool-almost-false")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_almost_false); // bool-almost-false
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_almost_true_with_extra); // bool-almost-true-with-extra
+	SECTION("bool-almost-true-with-extra")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_almost_true_with_extra); // bool-almost-true-with-extra
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_almost_true); // bool-almost-true
+	SECTION("bool-almost-true")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_almost_true); // bool-almost-true
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_just_f); // bool-just-f
+	SECTION("bool-just-f")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_just_f); // bool-just-f
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_just_t); // bool-just-t
+	SECTION("bool-just-t")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_just_t); // bool-just-t
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_mixed_case); // bool-mixed-case
+	SECTION("bool-mixed-case")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_mixed_case); // bool-mixed-case
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_false); // bool-starting-same-false
+	SECTION("bool-starting-same-false")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_false); // bool-starting-same-false
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_true); // bool-starting-same-true
+	SECTION("bool-starting-same-true")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_starting_same_true); // bool-starting-same-true
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false); // bool-wrong-case-false
+	SECTION("bool-wrong-case-false")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_false); // bool-wrong-case-false
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true); // bool-wrong-case-true
+	SECTION("bool-wrong-case-true")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, bool_wrong_case_true); // bool-wrong-case-true
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_bare_cr); // control-bare-cr
+	SECTION("control-bare-cr")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_bare_cr); // control-bare-cr
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_bare_formfeed); // control-bare-formfeed
+	SECTION("control-bare-formfeed")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_bare_formfeed); // control-bare-formfeed
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_bare_null); // control-bare-null
+	SECTION("control-bare-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_bare_null); // control-bare-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_bare_vertical_tab); // control-bare-vertical-tab
+	SECTION("control-bare-vertical-tab")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_bare_vertical_tab); // control-bare-vertical-tab
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_comment_cr); // control-comment-cr
+	SECTION("control-comment-cr")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_comment_cr); // control-comment-cr
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_comment_del); // control-comment-del
+	SECTION("control-comment-del")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_comment_del); // control-comment-del
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_comment_lf); // control-comment-lf
+	SECTION("control-comment-lf")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_comment_lf); // control-comment-lf
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_comment_null); // control-comment-null
+	SECTION("control-comment-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_comment_null); // control-comment-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_comment_us); // control-comment-us
+	SECTION("control-comment-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_comment_us); // control-comment-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_multi_del); // control-multi-del
+	SECTION("control-multi-del")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_multi_del); // control-multi-del
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_multi_lf); // control-multi-lf
+	SECTION("control-multi-lf")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_multi_lf); // control-multi-lf
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_multi_null); // control-multi-null
+	SECTION("control-multi-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_multi_null); // control-multi-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_multi_us); // control-multi-us
+	SECTION("control-multi-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_multi_us); // control-multi-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_del); // control-rawmulti-del
+	SECTION("control-rawmulti-del")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_del); // control-rawmulti-del
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_lf); // control-rawmulti-lf
+	SECTION("control-rawmulti-lf")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_lf); // control-rawmulti-lf
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_null); // control-rawmulti-null
+	SECTION("control-rawmulti-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_null); // control-rawmulti-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_us); // control-rawmulti-us
+	SECTION("control-rawmulti-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawmulti_us); // control-rawmulti-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_del); // control-rawstring-del
+	SECTION("control-rawstring-del")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawstring_del); // control-rawstring-del
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_lf); // control-rawstring-lf
+	SECTION("control-rawstring-lf")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawstring_lf); // control-rawstring-lf
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_null); // control-rawstring-null
+	SECTION("control-rawstring-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawstring_null); // control-rawstring-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_rawstring_us); // control-rawstring-us
+	SECTION("control-rawstring-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_rawstring_us); // control-rawstring-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_string_bs); // control-string-bs
+	SECTION("control-string-bs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_string_bs); // control-string-bs
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_string_del); // control-string-del
+	SECTION("control-string-del")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_string_del); // control-string-del
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_string_lf); // control-string-lf
+	SECTION("control-string-lf")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_string_lf); // control-string-lf
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_string_null); // control-string-null
+	SECTION("control-string-null")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_string_null); // control-string-null
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, control_string_us); // control-string-us
+	SECTION("control-string-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, control_string_us); // control-string-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_hour_over); // datetime-hour-over
+	SECTION("datetime-hour-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_hour_over); // datetime-hour-over
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_mday_over); // datetime-mday-over
+	SECTION("datetime-mday-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_mday_over); // datetime-mday-over
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_mday_under); // datetime-mday-under
+	SECTION("datetime-mday-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_mday_under); // datetime-mday-under
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_minute_over); // datetime-minute-over
+	SECTION("datetime-minute-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_minute_over); // datetime-minute-over
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_month_over); // datetime-month-over
+	SECTION("datetime-month-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_month_over); // datetime-month-over
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_month_under); // datetime-month-under
+	SECTION("datetime-month-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_month_under); // datetime-month-under
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_with_milli); // datetime-no-leads-with-milli
+	SECTION("datetime-no-leads-with-milli")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_with_milli); // datetime-no-leads-with-milli
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads); // datetime-no-leads
+	SECTION("datetime-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads); // datetime-no-leads
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_no_t); // datetime-no-t
+	SECTION("datetime-no-t")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_no_t); // datetime-no-t
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_second_over); // datetime-second-over
+	SECTION("datetime-second-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_second_over); // datetime-second-over
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads_2); // datetime-time-no-leads-2
+	SECTION("datetime-time-no-leads-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads_2); // datetime-time-no-leads-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads); // datetime-time-no-leads
+	SECTION("datetime-time-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads); // datetime-time-no-leads
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_trailing_t); // datetime-trailing-t
+	SECTION("datetime-trailing-t")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_trailing_t); // datetime-trailing-t
+	}
 
 #if !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, datetime_no_secs); // datetime-no-secs
+	SECTION("datetime-no-secs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_no_secs); // datetime-no-secs
+	}
 
 #endif // !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_at_end); // encoding-bad-utf8-at-end
+	SECTION("encoding-bad-codepoint")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_codepoint); // encoding-bad-codepoint
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_comment); // encoding-bad-utf8-in-comment
+	SECTION("encoding-bad-utf8-at-end")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_at_end); // encoding-bad-utf8-at-end
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_string); // encoding-bad-utf8-in-string
+	SECTION("encoding-bad-utf8-in-comment")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_comment); // encoding-bad-utf8-in-comment
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_1); // encoding-bom-not-at-start-1
+	SECTION("encoding-bad-utf8-in-multiline-literal")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							encoding_bad_utf8_in_multiline_literal); // encoding-bad-utf8-in-multiline-literal
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_2); // encoding-bom-not-at-start-2
+	SECTION("encoding-bad-utf8-in-multiline")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_multiline); // encoding-bad-utf8-in-multiline
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_utf16_bom); // encoding-utf16-bom
+	SECTION("encoding-bad-utf8-in-string-literal")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_string_literal); // encoding-bad-utf8-in-string-literal
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, encoding_utf16); // encoding-utf16
+	SECTION("encoding-bad-utf8-in-string")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bad_utf8_in_string); // encoding-bad-utf8-in-string
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_double_point_1); // float-double-point-1
+	SECTION("encoding-bom-not-at-start-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_1); // encoding-bom-not-at-start-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_double_point_2); // float-double-point-2
+	SECTION("encoding-bom-not-at-start-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_bom_not_at_start_2); // encoding-bom-not-at-start-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_1); // float-exp-double-e-1
+	SECTION("encoding-utf16-bom")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_utf16_bom); // encoding-utf16-bom
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_2); // float-exp-double-e-2
+	SECTION("encoding-utf16")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, encoding_utf16); // encoding-utf16
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_double_us); // float-exp-double-us
+	SECTION("float-double-point-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_double_point_1); // float-double-point-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_leading_us); // float-exp-leading-us
+	SECTION("float-double-point-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_double_point_2); // float-double-point-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_point_1); // float-exp-point-1
+	SECTION("float-exp-double-e-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_1); // float-exp-double-e-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_point_2); // float-exp-point-2
+	SECTION("float-exp-double-e-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_double_e_2); // float-exp-double-e-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_exp_trailing_us); // float-exp-trailing-us
+	SECTION("float-exp-double-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_double_us); // float-exp-double-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_1); // float-inf-incomplete-1
+	SECTION("float-exp-leading-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_leading_us); // float-exp-leading-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_2); // float-inf-incomplete-2
+	SECTION("float-exp-point-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_point_1); // float-exp-point-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_3); // float-inf-incomplete-3
+	SECTION("float-exp-point-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_point_2); // float-exp-point-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_inf_underscore); // float-inf_underscore
+	SECTION("float-exp-trailing-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_exp_trailing_us); // float-exp-trailing-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_point_neg); // float-leading-point-neg
+	SECTION("float-inf-capital")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_inf_capital); // float-inf-capital
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_point_plus); // float-leading-point-plus
+	SECTION("float-inf-incomplete-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_1); // float-inf-incomplete-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_point); // float-leading-point
+	SECTION("float-inf-incomplete-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_2); // float-inf-incomplete-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_us); // float-leading-us
+	SECTION("float-inf-incomplete-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_inf_incomplete_3); // float-inf-incomplete-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_neg); // float-leading-zero-neg
+	SECTION("float-inf_underscore")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_inf_underscore); // float-inf_underscore
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_plus); // float-leading-zero-plus
+	SECTION("float-leading-point-neg")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_point_neg); // float-leading-point-neg
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_leading_zero); // float-leading-zero
+	SECTION("float-leading-point-plus")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_point_plus); // float-leading-point-plus
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_1); // float-nan-incomplete-1
+	SECTION("float-leading-point")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_point); // float-leading-point
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_2); // float-nan-incomplete-2
+	SECTION("float-leading-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_us); // float-leading-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_3); // float-nan-incomplete-3
+	SECTION("float-leading-zero-neg")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_neg); // float-leading-zero-neg
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_nan_underscore); // float-nan_underscore
+	SECTION("float-leading-zero-plus")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_zero_plus); // float-leading-zero-plus
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_min); // float-trailing-point-min
+	SECTION("float-leading-zero")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_leading_zero); // float-leading-zero
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_plus); // float-trailing-point-plus
+	SECTION("float-nan-capital")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_nan_capital); // float-nan-capital
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_trailing_point); // float-trailing-point
+	SECTION("float-nan-incomplete-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_1); // float-nan-incomplete-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp); // float-trailing-us-exp
+	SECTION("float-nan-incomplete-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_2); // float-nan-incomplete-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_trailing_us); // float-trailing-us
+	SECTION("float-nan-incomplete-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_nan_incomplete_3); // float-nan-incomplete-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_us_after_point); // float-us-after-point
+	SECTION("float-nan_underscore")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_nan_underscore); // float-nan_underscore
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, float_us_before_point); // float-us-before-point
+	SECTION("float-trailing-point-min")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_min); // float-trailing-point-min
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_add); // inline-table-add
+	SECTION("float-trailing-point-plus")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_point_plus); // float-trailing-point-plus
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_double_comma); // inline-table-double-comma
+	SECTION("float-trailing-point")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_point); // float-trailing-point
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_duplicate_key); // inline-table-duplicate-key
+	SECTION("float-trailing-us-exp")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp); // float-trailing-us-exp
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_empty); // inline-table-empty
+	SECTION("float-trailing-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_us); // float-trailing-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_no_comma); // inline-table-no-comma
+	SECTION("float-us-after-point")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_us_after_point); // float-us-after-point
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_overwrite); // inline-table-overwrite
+	SECTION("float-us-before-point")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_us_before_point); // float-us-before-point
+	}
+
+	SECTION("inline-table-add")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_add); // inline-table-add
+	}
+
+	SECTION("inline-table-bad-key-syntax")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_bad_key_syntax); // inline-table-bad-key-syntax
+	}
+
+	SECTION("inline-table-dotted-key-conflict")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_dotted_key_conflict); // inline-table-dotted-key-conflict
+	}
+
+	SECTION("inline-table-double-comma")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_double_comma); // inline-table-double-comma
+	}
+
+	SECTION("inline-table-duplicate-key")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_duplicate_key); // inline-table-duplicate-key
+	}
+
+	SECTION("inline-table-empty")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_empty); // inline-table-empty
+	}
+
+	SECTION("inline-table-nested_key_conflict")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_nested_key_conflict); // inline-table-nested_key_conflict
+	}
+
+	SECTION("inline-table-no-comma")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_no_comma); // inline-table-no-comma
+	}
+
+	SECTION("inline-table-overwrite")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_overwrite); // inline-table-overwrite
+	}
 
 #if !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_1); // inline-table-linebreak-1
+	SECTION("inline-table-linebreak-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_1); // inline-table-linebreak-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_2); // inline-table-linebreak-2
+	SECTION("inline-table-linebreak-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_2); // inline-table-linebreak-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_3); // inline-table-linebreak-3
+	SECTION("inline-table-linebreak-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_3); // inline-table-linebreak-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_4); // inline-table-linebreak-4
+	SECTION("inline-table-linebreak-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_linebreak_4); // inline-table-linebreak-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma); // inline-table-trailing-comma
+	SECTION("inline-table-trailing-comma")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, inline_table_trailing_comma); // inline-table-trailing-comma
+	}
 
 #endif // !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_capital_bin); // integer-capital-bin
+	SECTION("integer-capital-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_capital_bin); // integer-capital-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_capital_hex); // integer-capital-hex
+	SECTION("integer-capital-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_capital_hex); // integer-capital-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_capital_oct); // integer-capital-oct
+	SECTION("integer-capital-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_capital_oct); // integer-capital-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_nex); // integer-double-sign-nex
+	SECTION("integer-double-sign-nex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_nex); // integer-double-sign-nex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_plus); // integer-double-sign-plus
+	SECTION("integer-double-sign-plus")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_double_sign_plus); // integer-double-sign-plus
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_double_us); // integer-double-us
+	SECTION("integer-double-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_double_us); // integer-double-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_bin); // integer-incomplete-bin
+	SECTION("integer-incomplete-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_bin); // integer-incomplete-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_hex); // integer-incomplete-hex
+	SECTION("integer-incomplete-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_hex); // integer-incomplete-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_oct); // integer-incomplete-oct
+	SECTION("integer-incomplete-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_incomplete_oct); // integer-incomplete-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_bin); // integer-invalid-bin
+	SECTION("integer-invalid-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_invalid_bin); // integer-invalid-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_hex); // integer-invalid-hex
+	SECTION("integer-invalid-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_invalid_hex); // integer-invalid-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_invalid_oct); // integer-invalid-oct
+	SECTION("integer-invalid-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_invalid_oct); // integer-invalid-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_bin); // integer-leading-us-bin
+	SECTION("integer-leading-us-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_bin); // integer-leading-us-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_hex); // integer-leading-us-hex
+	SECTION("integer-leading-us-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_hex); // integer-leading-us-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_oct); // integer-leading-us-oct
+	SECTION("integer-leading-us-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_us_oct); // integer-leading-us-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_us); // integer-leading-us
+	SECTION("integer-leading-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_us); // integer-leading-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_1); // integer-leading-zero-1
+	SECTION("integer-leading-zero-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_1); // integer-leading-zero-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_2); // integer-leading-zero-2
+	SECTION("integer-leading-zero-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_2); // integer-leading-zero-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_3); // integer-leading-zero-3
+	SECTION("integer-leading-zero-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_3); // integer-leading-zero-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_1); // integer-leading-zero-sign-1
+	SECTION("integer-leading-zero-sign-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_1); // integer-leading-zero-sign-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_2); // integer-leading-zero-sign-2
+	SECTION("integer-leading-zero-sign-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_2); // integer-leading-zero-sign-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_3); // integer-leading-zero-sign-3
+	SECTION("integer-leading-zero-sign-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_leading_zero_sign_3); // integer-leading-zero-sign-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_negative_bin); // integer-negative-bin
+	SECTION("integer-negative-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_negative_bin); // integer-negative-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_negative_hex); // integer-negative-hex
+	SECTION("integer-negative-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_negative_hex); // integer-negative-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_negative_oct); // integer-negative-oct
+	SECTION("integer-negative-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_negative_oct); // integer-negative-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_positive_bin); // integer-positive-bin
+	SECTION("integer-positive-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_positive_bin); // integer-positive-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_positive_hex); // integer-positive-hex
+	SECTION("integer-positive-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_positive_hex); // integer-positive-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_positive_oct); // integer-positive-oct
+	SECTION("integer-positive-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_positive_oct); // integer-positive-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_text_after_integer); // integer-text-after-integer
+	SECTION("integer-text-after-integer")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_text_after_integer); // integer-text-after-integer
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_bin); // integer-trailing-us-bin
+	SECTION("integer-trailing-us-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_bin); // integer-trailing-us-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_hex); // integer-trailing-us-hex
+	SECTION("integer-trailing-us-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_hex); // integer-trailing-us-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_oct); // integer-trailing-us-oct
+	SECTION("integer-trailing-us-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us_oct); // integer-trailing-us-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us); // integer-trailing-us
+	SECTION("integer-trailing-us")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_trailing_us); // integer-trailing-us
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_bin); // integer-us-after-bin
+	SECTION("integer-us-after-bin")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_us_after_bin); // integer-us-after-bin
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_hex); // integer-us-after-hex
+	SECTION("integer-us-after-hex")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_us_after_hex); // integer-us-after-hex
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, integer_us_after_oct); // integer-us-after-oct
+	SECTION("integer-us-after-oct")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, integer_us_after_oct); // integer-us-after-oct
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_after_array); // key-after-array
+	SECTION("key-after-array")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_after_array); // key-after-array
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_after_table); // key-after-table
+	SECTION("key-after-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_after_table); // key-after-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_after_value); // key-after-value
+	SECTION("key-after-value")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_after_value); // key-after-value
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_bare_invalid_character); // key-bare-invalid-character
+	SECTION("key-bare-invalid-character")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_bare_invalid_character); // key-bare-invalid-character
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_dotted_redefine_table); // key-dotted-redefine-table
+	SECTION("key-dotted-redefine-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_dotted_redefine_table); // key-dotted-redefine-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_duplicate_keys); // key-duplicate-keys
+	SECTION("key-duplicate-keys")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_duplicate_keys); // key-duplicate-keys
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_duplicate); // key-duplicate
+	SECTION("key-duplicate")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_duplicate); // key-duplicate
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_empty); // key-empty
+	SECTION("key-empty")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_empty); // key-empty
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_escape); // key-escape
+	SECTION("key-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_escape); // key-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_hash); // key-hash
+	SECTION("key-hash")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_hash); // key-hash
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_multiline); // key-multiline
+	SECTION("key-multiline")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_multiline); // key-multiline
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_newline); // key-newline
+	SECTION("key-newline")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_newline); // key-newline
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_no_eol); // key-no-eol
+	SECTION("key-no-eol")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_no_eol); // key-no-eol
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_open_bracket); // key-open-bracket
+	SECTION("key-open-bracket")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_open_bracket); // key-open-bracket
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_partial_quoted); // key-partial-quoted
+	SECTION("key-partial-quoted")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_partial_quoted); // key-partial-quoted
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_1); // key-quoted-unclosed-1
+	SECTION("key-quoted-unclosed-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_1); // key-quoted-unclosed-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_2); // key-quoted-unclosed-2
+	SECTION("key-quoted-unclosed-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_quoted_unclosed_2); // key-quoted-unclosed-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_single_open_bracket); // key-single-open-bracket
+	SECTION("key-single-open-bracket")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_single_open_bracket); // key-single-open-bracket
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_space); // key-space
+	SECTION("key-space")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_space); // key-space
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_start_bracket); // key-start-bracket
+	SECTION("key-start-bracket")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_start_bracket); // key-start-bracket
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_start_dot); // key-start-dot
+	SECTION("key-start-dot")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_start_dot); // key-start-dot
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_two_equals); // key-two-equals
+	SECTION("key-two-equals")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_two_equals); // key-two-equals
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_two_equals2); // key-two-equals2
+	SECTION("key-two-equals2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_two_equals2); // key-two-equals2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_two_equals3); // key-two-equals3
+	SECTION("key-two-equals3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_two_equals3); // key-two-equals3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_without_value_1); // key-without-value-1
+	SECTION("key-without-value-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_without_value_1); // key-without-value-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_without_value_2); // key-without-value-2
+	SECTION("key-without-value-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_without_value_2); // key-without-value-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_without_value_3); // key-without-value-3
+	SECTION("key-without-value-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_without_value_3); // key-without-value-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, key_without_value_4); // key-without-value-4
+	SECTION("key-without-value-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_without_value_4); // key-without-value-4
+	}
 
 #if !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
-	parsing_should_fail(FILE_LINE_ARGS, key_special_character); // key-special-character
+	SECTION("key-special-character")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, key_special_character); // key-special-character
+	}
 
 #endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_byte_escape); // string-bad-byte-escape
+	SECTION("spec-inline-table-2-0")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_inline_table_2_0); // spec-inline-table-2-0
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_codepoint); // string-bad-codepoint
+	SECTION("spec-inline-table-3-0")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_inline_table_3_0); // spec-inline-table-3-0
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_concat); // string-bad-concat
+	SECTION("spec-key-value-pair-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_key_value_pair_1); // spec-key-value-pair-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_1); // string-bad-escape-1
+	SECTION("spec-keys-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_keys_2); // spec-keys-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_2); // string-bad-escape-2
+	SECTION("spec-string-4-0")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_string_4_0); // spec-string-4-0
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_multiline); // string-bad-multiline
+	SECTION("spec-string-7-0")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_string_7_0); // spec-string-7-0
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_slash_escape); // string-bad-slash-escape
+	SECTION("spec-table-9-0")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_table_9_0); // spec-table-9-0
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_1); // string-bad-uni-esc-1
+	SECTION("spec-table-9-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, spec_table_9_1); // spec-table-9-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_2); // string-bad-uni-esc-2
+	SECTION("string-bad-byte-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_byte_escape); // string-bad-byte-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_3); // string-bad-uni-esc-3
+	SECTION("string-bad-codepoint")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_codepoint); // string-bad-codepoint
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_4); // string-bad-uni-esc-4
+	SECTION("string-bad-concat")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_concat); // string-bad-concat
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_5); // string-bad-uni-esc-5
+	SECTION("string-bad-escape-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_1); // string-bad-escape-1
+	}
 
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		string_basic_multiline_out_of_range_unicode_escape_1); // string-basic-multiline-out-of-range-unicode-escape-1
+	SECTION("string-bad-escape-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_escape_2); // string-bad-escape-2
+	}
 
-	parsing_should_fail(
-		FILE_LINE_ARGS,
-		string_basic_multiline_out_of_range_unicode_escape_2); // string-basic-multiline-out-of-range-unicode-escape-2
+	SECTION("string-bad-hex-esc-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_hex_esc_1); // string-bad-hex-esc-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes); // string-basic-multiline-quotes
+	SECTION("string-bad-hex-esc-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_hex_esc_2); // string-bad-hex-esc-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_unknown_escape); // string-basic-multiline-unknown-escape
+	SECTION("string-bad-hex-esc-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_hex_esc_3); // string-bad-hex-esc-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS,
-						string_basic_out_of_range_unicode_escape_1); // string-basic-out-of-range-unicode-escape-1
+	SECTION("string-bad-hex-esc-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_hex_esc_4); // string-bad-hex-esc-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS,
-						string_basic_out_of_range_unicode_escape_2); // string-basic-out-of-range-unicode-escape-2
+	SECTION("string-bad-hex-esc-5")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_hex_esc_5); // string-bad-hex-esc-5
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape); // string-basic-unknown-escape
+	SECTION("string-bad-multiline")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_multiline); // string-bad-multiline
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_1); // string-literal-multiline-quotes-1
+	SECTION("string-bad-slash-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_slash_escape); // string-bad-slash-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_2); // string-literal-multiline-quotes-2
+	SECTION("string-bad-uni-esc-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_1); // string-bad-uni-esc-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_missing_quotes); // string-missing-quotes
+	SECTION("string-bad-uni-esc-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_2); // string-bad-uni-esc-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_1); // string-multiline-bad-escape-1
+	SECTION("string-bad-uni-esc-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_3); // string-bad-uni-esc-3
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_2); // string-multiline-bad-escape-2
+	SECTION("string-bad-uni-esc-4")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_4); // string-bad-uni-esc-4
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_3); // string-multiline-bad-escape-3
+	SECTION("string-bad-uni-esc-5")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_bad_uni_esc_5); // string-bad-uni-esc-5
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_escape_space); // string-multiline-escape-space
+	SECTION("string-basic-multiline-out-of-range-unicode-escape-1")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			string_basic_multiline_out_of_range_unicode_escape_1); // string-basic-multiline-out-of-range-unicode-escape-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close_2); // string-multiline-no-close-2
+	SECTION("string-basic-multiline-out-of-range-unicode-escape-2")
+	{
+		parsing_should_fail(
+			FILE_LINE_ARGS,
+			string_basic_multiline_out_of_range_unicode_escape_2); // string-basic-multiline-out-of-range-unicode-escape-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close); // string-multiline-no-close
+	SECTION("string-basic-multiline-quotes")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_multiline_quotes); // string-basic-multiline-quotes
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_1); // string-multiline-quotes-1
+	SECTION("string-basic-multiline-unknown-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_multiline_unknown_escape); // string-basic-multiline-unknown-escape
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_no_close); // string-no-close
+	SECTION("string-basic-out-of-range-unicode-escape-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_out_of_range_unicode_escape_1); // string-basic-out-of-range-unicode-escape-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_text_after_string); // string-text-after-string
+	SECTION("string-basic-out-of-range-unicode-escape-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							string_basic_out_of_range_unicode_escape_2); // string-basic-out-of-range-unicode-escape-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, string_wrong_close); // string-wrong-close
+	SECTION("string-basic-unknown-escape")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_unknown_escape); // string-basic-unknown-escape
+	}
+
+	SECTION("string-literal-multiline-quotes-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_1); // string-literal-multiline-quotes-1
+	}
+
+	SECTION("string-literal-multiline-quotes-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_literal_multiline_quotes_2); // string-literal-multiline-quotes-2
+	}
+
+	SECTION("string-missing-quotes")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_missing_quotes); // string-missing-quotes
+	}
+
+	SECTION("string-multiline-bad-escape-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_1); // string-multiline-bad-escape-1
+	}
+
+	SECTION("string-multiline-bad-escape-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_2); // string-multiline-bad-escape-2
+	}
+
+	SECTION("string-multiline-bad-escape-3")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_bad_escape_3); // string-multiline-bad-escape-3
+	}
+
+	SECTION("string-multiline-escape-space")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_escape_space); // string-multiline-escape-space
+	}
+
+	SECTION("string-multiline-no-close-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close_2); // string-multiline-no-close-2
+	}
+
+	SECTION("string-multiline-no-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_no_close); // string-multiline-no-close
+	}
+
+	SECTION("string-multiline-quotes-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_multiline_quotes_1); // string-multiline-quotes-1
+	}
+
+	SECTION("string-no-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_no_close); // string-no-close
+	}
+
+	SECTION("string-text-after-string")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_text_after_string); // string-text-after-string
+	}
+
+	SECTION("string-wrong-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_wrong_close); // string-wrong-close
+	}
 
 #if !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, string_basic_byte_escapes); // string-basic-byte-escapes
+	SECTION("string-basic-byte-escapes")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, string_basic_byte_escapes); // string-basic-byte-escapes
+	}
 
 #endif // !TOML_LANG_UNRELEASED
 
-	parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_1); // table-append-with-dotted-keys-1
+	SECTION("table-append-to-array-with-dotted-keys")
+	{
+		parsing_should_fail(FILE_LINE_ARGS,
+							table_append_to_array_with_dotted_keys); // table-append-to-array-with-dotted-keys
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_2); // table-append-with-dotted-keys-2
+	SECTION("table-append-with-dotted-keys-1")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_1); // table-append-with-dotted-keys-1
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_array_empty); // table-array-empty
+	SECTION("table-append-with-dotted-keys-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_append_with_dotted_keys_2); // table-append-with-dotted-keys-2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_array_implicit); // table-array-implicit
+	SECTION("table-array-empty")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_array_empty); // table-array-empty
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_array_missing_bracket); // table-array-missing-bracket
+	SECTION("table-array-implicit")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_array_implicit); // table-array-implicit
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table); // table-duplicate-key-dotted-table
+	SECTION("table-array-missing-bracket")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_array_missing_bracket); // table-array-missing-bracket
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table2); // table-duplicate-key-dotted-table2
+	SECTION("table-duplicate-key-dotted-array")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_array); // table-duplicate-key-dotted-array
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_table); // table-duplicate-key-table
+	SECTION("table-duplicate-key-dotted-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table); // table-duplicate-key-dotted-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_table_array); // table-duplicate-table-array
+	SECTION("table-duplicate-key-dotted-table2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_dotted_table2); // table-duplicate-key-dotted-table2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate_table_array2); // table-duplicate-table-array2
+	SECTION("table-duplicate-key-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_key_table); // table-duplicate-key-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_duplicate); // table-duplicate
+	SECTION("table-duplicate-table-array")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_table_array); // table-duplicate-table-array
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_empty_implicit_table); // table-empty-implicit-table
+	SECTION("table-duplicate-table-array2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate_table_array2); // table-duplicate-table-array2
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_empty); // table-empty
+	SECTION("table-duplicate")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_duplicate); // table-duplicate
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_equals_sign); // table-equals-sign
+	SECTION("table-empty-implicit-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_empty_implicit_table); // table-empty-implicit-table
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_llbrace); // table-llbrace
+	SECTION("table-empty")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_empty); // table-empty
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_close); // table-nested-brackets-close
+	SECTION("table-equals-sign")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_equals_sign); // table-equals-sign
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_open); // table-nested-brackets-open
+	SECTION("table-llbrace")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_llbrace); // table-llbrace
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_quoted_no_close); // table-quoted-no-close
+	SECTION("table-nested-brackets-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_close); // table-nested-brackets-close
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_redefine); // table-redefine
+	SECTION("table-nested-brackets-open")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_nested_brackets_open); // table-nested-brackets-open
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_rrbrace); // table-rrbrace
+	SECTION("table-quoted-no-close")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_quoted_no_close); // table-quoted-no-close
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_text_after_table); // table-text-after-table
+	SECTION("table-redefine")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_redefine); // table-redefine
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_whitespace); // table-whitespace
+	SECTION("table-rrbrace")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_rrbrace); // table-rrbrace
+	}
 
-	parsing_should_fail(FILE_LINE_ARGS, table_with_pound); // table-with-pound
+	SECTION("table-text-after-table")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_text_after_table); // table-text-after-table
+	}
+
+	SECTION("table-whitespace")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_whitespace); // table-whitespace
+	}
+
+	SECTION("table-with-pound")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, table_with_pound); // table-with-pound
+	}
 }

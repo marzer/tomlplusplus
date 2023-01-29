@@ -21,13 +21,18 @@ template:
 
 -->
 
-## Unreleased
+## v3.3.0
+
+[Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.3.0) 2023-01-29
 
 #### Fixes:
 
 -   fixed null pointer dereference in parser when exceptions are disabled (#169) (@ncaklovic)
 -   fixed spurious warnings in MSVC 19.34
 -   fixed `toml::parse_file()` on windows for non-ASCII paths
+-   fixed a spurious table redefinition error (#187) (@jorisvr)
+-   fixed UB edge-case in integer parsing (#188) (@jorisvr)
+-   fixed some build issues with Apple-flavoured Clang (#189) (@eddelbuettel)
 
 #### Additions:
 
