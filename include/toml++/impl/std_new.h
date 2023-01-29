@@ -9,7 +9,7 @@ TOML_DISABLE_WARNINGS;
 #include <new>
 TOML_ENABLE_WARNINGS;
 
-#if TOML_CLANG >= 8 || TOML_GCC >= 7 || TOML_ICC >= 1910 || TOML_MSVC >= 1914
+#if (!defined(__apple_build_version__) && TOML_CLANG >= 8) || TOML_GCC >= 7 || TOML_ICC >= 1910 || TOML_MSVC >= 1914
 #define TOML_LAUNDER(x) __builtin_launder(x)
 #elif defined(__cpp_lib_launder) && __cpp_lib_launder >= 201606
 #define TOML_LAUNDER(x) std::launder(x)

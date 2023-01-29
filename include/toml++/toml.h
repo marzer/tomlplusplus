@@ -28,7 +28,7 @@ TOML_DISABLE_SUGGEST_ATTR_WARNINGS;
 #if TOML_CLANG >= 12
 #pragma clang diagnostic ignored "-Wc++20-extensions"
 #endif
-#if (TOML_CLANG == 13) && !defined(__APPLE__)
+#if TOML_CLANG == 13 && !defined(__APPLE__)
 #pragma clang diagnostic ignored "-Wreserved-identifier"
 #endif
 #endif
@@ -102,6 +102,7 @@ TOML_POP_WARNINGS;
 #undef TOML_ASYMMETRICAL_EQUALITY_OPS
 #undef TOML_ATTR
 #undef TOML_CLANG
+#undef TOML_CLANG_VERSION
 #undef TOML_CLOSED_ENUM
 #undef TOML_CLOSED_FLAGS_ENUM
 #undef TOML_COMPILER_HAS_EXCEPTIONS
