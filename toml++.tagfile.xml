@@ -9131,6 +9131,13 @@
       <anchor>ga0722fa2c57da6360c7f2ba08c60e1a81</anchor>
       <arglist></arglist>
     </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>TOML_ENABLE_FLOAT16</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>ga56ab81041897681ac38ceba52a380b97</anchor>
+      <arglist></arglist>
+    </member>
   </compound>
   <compound kind="page">
     <name>md_poxy_changelog</name>

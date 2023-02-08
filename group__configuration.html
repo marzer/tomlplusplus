@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.12.1" name="generator"/>
+  <meta content="Poxy v0.12.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -86,6 +86,10 @@
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga09204feb4a3ff5534623c2bd052dcec0">TOML_CONFIG_HEADER</a></span>
             </dt>
             <dd>An additional header to include before any other toml++ header files.</dd>
+            <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga56ab81041897681ac38ceba52a380b97">TOML_ENABLE_FLOAT16</a></span>
+            </dt>
+            <dd>Enable support for the built-in <code><a class="m-doc poxy-injected poxy-external" href="https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html" target="_blank">_Float16</a></code> type.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_ENABLE_FORMATTERS</a></span>
             </dt>
@@ -166,6 +170,13 @@
             </h3>
             <p>An additional header to include before any other toml++ header files.</p>
 <p>Not defined by default.</p>
+          </div></section>
+          <section class="m-doc-details" id="ga56ab81041897681ac38ceba52a380b97"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga56ab81041897681ac38ceba52a380b97">TOML_ENABLE_FLOAT16</a></span>
+            </h3>
+            <p>Enable support for the built-in <code><a class="m-doc poxy-injected poxy-external" href="https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html" target="_blank">_Float16</a></code> type.</p>
+<p>Defaults to <code>0</code>.</p>
           </div></section>
           <section class="m-doc-details" id="ga9fc77582d9de77f59d2ddc9ae1f748ca"><div>
             <h3>
@@ -262,7 +273,7 @@
               <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#ga11a3368da40938a6b5cfd898320706f7">TOML_SMALL_FLOAT_TYPE</a></span>
             </h3>
             <p>If your codebase has an additional 'small' float type (e.g. half-precision), this tells toml++ about it.</p>
-<p>Not defined by default.</p><aside class="m-note m-default"><h4>Remark</h4><p>If you're building for a platform that has <code><a class="m-doc poxy-injected poxy-external" href="https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html" target="_blank">_Float16</a></code> and/or <code><a class="m-doc poxy-injected poxy-external" href="https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html" target="_blank">__fp16</a></code>, you don't need to use this configuration option to make toml++ aware of them. The library comes with that built-in.</p></aside>
+<p>Not defined by default.</p>
           </div></section>
           <section class="m-doc-details" id="ga0722fa2c57da6360c7f2ba08c60e1a81"><div>
             <h3>
