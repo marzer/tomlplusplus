@@ -473,11 +473,11 @@ TOML_ANON_NAMESPACE_START
 	template <typename Char>
 	utf8_reader(std::basic_string_view<Char>, std::string_view) -> utf8_reader<std::basic_string_view<Char>>;
 	template <typename Char>
-	utf8_reader(std::basic_string_view<Char>, std::string &&) -> utf8_reader<std::basic_string_view<Char>>;
+	utf8_reader(std::basic_string_view<Char>, std::string&&) -> utf8_reader<std::basic_string_view<Char>>;
 	template <typename Char>
 	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
 	template <typename Char>
-	utf8_reader(std::basic_istream<Char>&, std::string &&) -> utf8_reader<std::basic_istream<Char>>;
+	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
 
 #if TOML_EXCEPTIONS
 #define utf8_buffered_reader_error_check(...) static_assert(true)
@@ -2122,7 +2122,7 @@ TOML_IMPL_NAMESPACE_START
 
 			return (fragments[0].value + fragments[1].value) * pow(2.0, fragments[2].value * exponent_sign) * sign;
 
-#else // !TOML_LANG_UNRELEASED
+#else  // !TOML_LANG_UNRELEASED
 
 			set_error_and_return_default("hexadecimal floating-point values are not supported "
 										 "in TOML 1.0.0 and earlier"sv);
@@ -3906,7 +3906,7 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
+#endif						// TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }

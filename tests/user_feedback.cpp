@@ -129,7 +129,7 @@ TEST_CASE("user feedback")
 							   });
 	}
 
-	SECTION("tomlplusplus/issues/69") // https://github.com/marzer/tomlplusplus/issues/69
+	SECTION("tomlplusplus/issues/69")	// https://github.com/marzer/tomlplusplus/issues/69
 	{
 		using namespace toml::literals; // should compile without namespace ambiguity
 		auto table = "[table]\nkey=\"value\""_toml;

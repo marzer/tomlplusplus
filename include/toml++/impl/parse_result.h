@@ -474,7 +474,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 

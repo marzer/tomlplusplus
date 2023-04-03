@@ -21,6 +21,16 @@ template:
 
 -->
 
+## Unreleased
+
+#### Fixes
+
+-   fixed `value_flags` not being preserved correctly when inserting into tables and arrays (#108) (@LebJe)
+-   fixed `toml::value::flags()` not being cleared when `std::move`-ing a value
+-   fixed error in README (#195) (@andrewkcorcoran)
+
+<br><br>
+
 ## v3.3.0
 
 [Released](https://github.com/marzer/tomlplusplus/releases/tag/v3.3.0) 2023-01-29

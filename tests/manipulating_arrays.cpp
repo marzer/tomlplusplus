@@ -453,6 +453,23 @@ TEST_CASE("arrays - insertion and erasure")
 	CHECK(*arr.back().as_string() == "test4"sv);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
+
+	// push_back with value_flags
+	{
+		arr.clear();
+
+		auto hex = toml::value{ 1 };
+		hex.flags(value_flags::format_as_hexadecimal);
+		CHECK(hex.flags() == value_flags::format_as_hexadecimal);
+
+		arr.push_back(hex);
+		CHECK(hex.flags() == value_flags::format_as_hexadecimal);
+		CHECK(arr.back().as_integer()->flags() == value_flags::format_as_hexadecimal);
+
+		arr.push_back(std::move(hex));
+		CHECK(hex.flags() == value_flags{});
+		CHECK(arr.back().as_integer()->flags() == value_flags::format_as_hexadecimal);
+	}
 }
 
 TEST_CASE("arrays - flattening")
@@ -533,4 +550,76 @@ TEST_CASE("arrays - resizing and truncation")
 	arr.resize(6u, 42);
 	CHECK(arr.size() == 6u);
 	CHECK(arr == array{ 1, 2, 42, 42, 42, 42 });
+}
+
+TEST_CASE("arrays - for_each")
+{
+	const auto arr = array{ 1, 2.0, 3, "four", false };
+
+	SECTION("type checking")
+	{
+		int count	= 0;
+		int ints	= 0;
+		int floats	= 0;
+		int numbers = 0;
+		int strings = 0;
+		int bools	= 0;
+		arr.for_each(
+			[&](const auto& v) noexcept
+			{
+				count++;
+				if constexpr (toml::is_integer<decltype(v)>)
+					ints++;
+				if constexpr (toml::is_floating_point<decltype(v)>)
+					floats++;
+				if constexpr (toml::is_number<decltype(v)>)
+					numbers++;
+				if constexpr (toml::is_string<decltype(v)>)
+					strings++;
+				if constexpr (toml::is_boolean<decltype(v)>)
+					bools++;
+			});
+		CHECK(count == 5);
+		CHECK(ints == 2);
+		CHECK(floats == 1);
+		CHECK(numbers == (ints + floats));
+		CHECK(strings == 1);
+		CHECK(bools == 1);
+	}
+
+	SECTION("early-exit (elem, index)")
+	{
+		int count = 0;
+		arr.for_each(
+			[&](const auto& elem, size_t /*idx*/) noexcept -> bool
+			{
+				count++;
+				return !toml::is_string<decltype(elem)>;
+			});
+		CHECK(count == 4);
+	}
+
+	SECTION("early-exit (elem)")
+	{
+		int count = 0;
+		arr.for_each(
+			[&](const auto& elem) noexcept -> bool
+			{
+				count++;
+				return !toml::is_string<decltype(elem)>;
+			});
+		CHECK(count == 4);
+	}
+
+	SECTION("early-exit (index, elem)")
+	{
+		int count = 0;
+		arr.for_each(
+			[&](size_t /*idx*/, const auto& elem) noexcept -> bool
+			{
+				count++;
+				return !toml::is_string<decltype(elem)>;
+			});
+		CHECK(count == 4);
+	}
 }

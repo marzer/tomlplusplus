@@ -1216,7 +1216,7 @@ TOML_NAMESPACE_START
 			return contains(impl::narrow(key));
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
@@ -1900,7 +1900,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ get(key) };
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 

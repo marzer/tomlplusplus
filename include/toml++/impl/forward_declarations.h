@@ -119,7 +119,7 @@ TOML_IMPL_NAMESPACE_START
 	class parser;
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
-	// clang-format off
+							// clang-format off
 
 	inline constexpr std::string_view control_char_escapes[] =
 	{
@@ -366,7 +366,7 @@ TOML_NAMESPACE_START // abi namespace
 		T value;
 	};
 	template <typename T>
-	inserter(T &&) -> inserter<T&&>;
+	inserter(T&&) -> inserter<T&&>;
 	template <typename T>
 	inserter(T&) -> inserter<T&>;
 
@@ -620,8 +620,8 @@ TOML_IMPL_NAMESPACE_START
 																 && digits <= 53	// DBL_MANT_DIG
 																 && digits10 <= 15; // DBL_DIG
 
-		static constexpr bool can_represent_native = digits >= 53	 // DBL_MANT_DIG
-												  && digits10 >= 15; // DBL_DIG
+		static constexpr bool can_represent_native = digits >= 53					// DBL_MANT_DIG
+												  && digits10 >= 15;				// DBL_DIG
 
 		static constexpr bool can_partially_represent_native = digits > 0 && digits10 > 0;
 	};

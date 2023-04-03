@@ -168,7 +168,7 @@ TOML_IMPL_NAMESPACE_START
 			const auto type = state_table[byte];
 
 			codepoint = static_cast<char32_t>(has_code_point() ? (uint_least32_t{ 255u } >> type) & byte
-															   : (byte & uint_least32_t{ 63u })
+															   : (byte& uint_least32_t{ 63u })
 																	 | (static_cast<uint_least32_t>(codepoint) << 6));
 
 			state = state_table[state + uint_least32_t{ 256u } + type];

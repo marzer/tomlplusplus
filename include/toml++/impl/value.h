@@ -7,6 +7,7 @@
 #include "date_time.h"
 #include "node.h"
 #include "print_to_stream.h"
+#include "std_utility.h"
 #include "header_start.h"
 TOML_DISABLE_ARITHMETIC_WARNINGS;
 
@@ -192,6 +193,16 @@ TOML_IMPL_NAMESPACE_START
 		}
 		return { static_cast<T>(val) };
 	}
+
+	template <typename...>
+	struct is_val_ctor_with_flags : std::false_type
+	{};
+
+	template <typename T, typename U>
+	struct is_val_ctor_with_flags<T, U> : std::bool_constant<			  //
+											  (is_node<T> && is_value<T>) //
+											  &&(std::is_same_v<remove_cvref<U>, value_flags>)>
+	{};
 }
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
@@ -253,7 +264,7 @@ TOML_NAMESPACE_START
 		///
 		/// \tparam	Args	Constructor argument types.
 		/// \param 	args	Arguments to forward to the internal value's constructor.
-		template <typename... Args>
+		TOML_HIDDEN_CONSTRAINT(!impl::is_val_ctor_with_flags<Args...>::value, typename... Args)
 		TOML_NODISCARD_CTOR
 		explicit value(Args&&... args) noexcept(noexcept(value_type(
 			impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))))
@@ -293,7 +304,7 @@ TOML_NAMESPACE_START
 		value(value&& other) noexcept //
 			: node(std::move(other)),
 			  val_{ std::move(other.val_) },
-			  flags_{ other.flags_ }
+			  flags_{ std::exchange(other.flags_, value_flags{}) }
 		{
 #if TOML_LIFETIME_HOOKS
 			TOML_VALUE_CREATED;
@@ -310,6 +321,7 @@ TOML_NAMESPACE_START
 #if TOML_LIFETIME_HOOKS
 			TOML_VALUE_CREATED;
 #endif
+			other.flags_ = {};
 		}
 
 		/// \brief	Copy-assignment operator.
@@ -328,7 +340,7 @@ TOML_NAMESPACE_START
 			{
 				node::operator=(std::move(rhs));
 				val_   = std::move(rhs.val_);
-				flags_ = rhs.flags_;
+				flags_ = std::exchange(rhs.flags_, value_flags{});
 			}
 			return *this;
 		}
@@ -968,6 +980,8 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	value(T) -> value<impl::native_type_of<impl::remove_cvref<T>>>;
+	template <typename T>
+	value(T, value_flags) -> value<impl::native_type_of<impl::remove_cvref<T>>>;
 
 	template <typename T>
 	TOML_NODISCARD

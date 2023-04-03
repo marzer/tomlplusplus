@@ -1320,7 +1320,7 @@ TOML_IMPL_NAMESPACE_START
 	class parser;
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
-	// clang-format off
+							// clang-format off
 
 	inline constexpr std::string_view control_char_escapes[] =
 	{
@@ -1466,7 +1466,7 @@ TOML_NAMESPACE_START // abi namespace
 		T value;
 	};
 	template <typename T>
-	inserter(T &&) -> inserter<T&&>;
+	inserter(T&&) -> inserter<T&&>;
 	template <typename T>
 	inserter(T&) -> inserter<T&>;
 
@@ -1714,8 +1714,8 @@ TOML_IMPL_NAMESPACE_START
 																 && digits <= 53	// DBL_MANT_DIG
 																 && digits10 <= 15; // DBL_DIG
 
-		static constexpr bool can_represent_native = digits >= 53	 // DBL_MANT_DIG
-												  && digits10 >= 15; // DBL_DIG
+		static constexpr bool can_represent_native = digits >= 53					// DBL_MANT_DIG
+												  && digits10 >= 15;				// DBL_DIG
 
 		static constexpr bool can_partially_represent_native = digits > 0 && digits10 > 0;
 	};
@@ -4721,6 +4721,16 @@ TOML_IMPL_NAMESPACE_START
 		}
 		return { static_cast<T>(val) };
 	}
+
+	template <typename...>
+	struct is_val_ctor_with_flags : std::false_type
+	{};
+
+	template <typename T, typename U>
+	struct is_val_ctor_with_flags<T, U> : std::bool_constant<			  //
+											  (is_node<T> && is_value<T>) //
+											  &&(std::is_same_v<remove_cvref<U>, value_flags>)>
+	{};
 }
 TOML_IMPL_NAMESPACE_END;
 
@@ -4759,7 +4769,7 @@ TOML_NAMESPACE_START
 				std::string_view,
 				std::conditional_t<impl::is_one_of<value_type, double, int64_t, bool>, value_type, const value_type&>>);
 
-		template <typename... Args>
+		TOML_HIDDEN_CONSTRAINT(!impl::is_val_ctor_with_flags<Args...>::value, typename... Args)
 		TOML_NODISCARD_CTOR
 		explicit value(Args&&... args) noexcept(noexcept(value_type(
 			impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))))
@@ -4796,7 +4806,7 @@ TOML_NAMESPACE_START
 		value(value&& other) noexcept //
 			: node(std::move(other)),
 			  val_{ std::move(other.val_) },
-			  flags_{ other.flags_ }
+			  flags_{ std::exchange(other.flags_, value_flags{}) }
 		{
 #if TOML_LIFETIME_HOOKS
 			TOML_VALUE_CREATED;
@@ -4812,6 +4822,7 @@ TOML_NAMESPACE_START
 #if TOML_LIFETIME_HOOKS
 			TOML_VALUE_CREATED;
 #endif
+			other.flags_ = {};
 		}
 
 		value& operator=(const value& rhs) noexcept
@@ -4828,7 +4839,7 @@ TOML_NAMESPACE_START
 			{
 				node::operator=(std::move(rhs));
 				val_   = std::move(rhs.val_);
-				flags_ = rhs.flags_;
+				flags_ = std::exchange(rhs.flags_, value_flags{});
 			}
 			return *this;
 		}
@@ -5316,6 +5327,8 @@ TOML_NAMESPACE_START
 
 	template <typename T>
 	value(T) -> value<impl::native_type_of<impl::remove_cvref<T>>>;
+	template <typename T>
+	value(T, value_flags) -> value<impl::native_type_of<impl::remove_cvref<T>>>;
 
 	template <typename T>
 	TOML_NODISCARD
@@ -5649,7 +5662,7 @@ TOML_IMPL_NAMESPACE_START
 			// copy/move ctor
 			if constexpr (std::is_same_v<remove_cvref<T>, value_type>)
 			{
-				out = new value_type{ static_cast<T&&>(val) };
+				out = new value_type{ static_cast<T&&>(val), flags };
 			}
 
 			// creating from raw value
@@ -7967,7 +7980,7 @@ TOML_NAMESPACE_START
 			return contains(impl::narrow(key));
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 	  private:
 
@@ -8266,7 +8279,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ get(key) };
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 	  private:
 
@@ -8674,7 +8687,7 @@ TOML_IMPL_NAMESPACE_START
 			const auto type = state_table[byte];
 
 			codepoint = static_cast<char32_t>(has_code_point() ? (uint_least32_t{ 255u } >> type) & byte
-															   : (byte & uint_least32_t{ 63u })
+															   : (byte& uint_least32_t{ 63u })
 																	 | (static_cast<uint_least32_t>(codepoint) << 6));
 
 			state = state_table[state + uint_least32_t{ 256u } + type];
@@ -9160,7 +9173,7 @@ TOML_NAMESPACE_START
 			return err_ ? node_view<const node>{} : table()[key];
 		}
 
-#endif // TOML_ENABLE_WINDOWS_COMPAT
+#endif	// TOML_ENABLE_WINDOWS_COMPAT
 
 #if TOML_ENABLE_FORMATTERS
 
@@ -9288,7 +9301,7 @@ TOML_NAMESPACE_START
 			return parse(std::u8string_view{ str, len });
 		}
 
-#endif // TOML_HAS_CHAR8
+#endif							// TOML_HAS_CHAR8
 
 		TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 	}
@@ -12595,11 +12608,11 @@ TOML_ANON_NAMESPACE_START
 	template <typename Char>
 	utf8_reader(std::basic_string_view<Char>, std::string_view) -> utf8_reader<std::basic_string_view<Char>>;
 	template <typename Char>
-	utf8_reader(std::basic_string_view<Char>, std::string &&) -> utf8_reader<std::basic_string_view<Char>>;
+	utf8_reader(std::basic_string_view<Char>, std::string&&) -> utf8_reader<std::basic_string_view<Char>>;
 	template <typename Char>
 	utf8_reader(std::basic_istream<Char>&, std::string_view) -> utf8_reader<std::basic_istream<Char>>;
 	template <typename Char>
-	utf8_reader(std::basic_istream<Char>&, std::string &&) -> utf8_reader<std::basic_istream<Char>>;
+	utf8_reader(std::basic_istream<Char>&, std::string&&) -> utf8_reader<std::basic_istream<Char>>;
 
 #if TOML_EXCEPTIONS
 #define utf8_buffered_reader_error_check(...) static_assert(true)
@@ -14240,7 +14253,7 @@ TOML_IMPL_NAMESPACE_START
 
 			return (fragments[0].value + fragments[1].value) * pow(2.0, fragments[2].value * exponent_sign) * sign;
 
-#else // !TOML_LANG_UNRELEASED
+#else  // !TOML_LANG_UNRELEASED
 
 			set_error_and_return_default("hexadecimal floating-point values are not supported "
 										 "in TOML 1.0.0 and earlier"sv);
@@ -16018,7 +16031,7 @@ TOML_NAMESPACE_START
 		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
 	}
 
-#endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
+#endif						// TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 }

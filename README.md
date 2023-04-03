@@ -177,11 +177,7 @@ FetchContent_MakeAvailable(tomlplusplus)
 
 ```plaintext
 git submodule add --depth 1 https://github.com/marzer/tomlplusplus.git tomlplusplus
-git config -f .gitmodules submodule.tomlplusplus.shallow true
 ```
-
-> ⚠&#xFE0F; The toml++ repository has some submodules of its own, but **they are only used for testing**!
-> You should **not** use the `--recursive` option for regular library consumption.
 
 ### Other environments and package managers
 
