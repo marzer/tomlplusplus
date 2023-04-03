@@ -28,6 +28,20 @@ function toggle_theme()
 		set_theme('light');
 }
 
+function install_mcss_search_shim()
+{
+	let showSearch_impl = window.showSearch;
+	window.showSearch = function()
+	{
+		if (window.location.hash == '#search')
+		{
+			document.getElementById('search-input').focus();
+			return false;
+		}
+		return showSearch_impl.apply(null);
+	};
+}
+
 /*
 $(function()
 {
