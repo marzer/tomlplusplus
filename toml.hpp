@@ -4636,7 +4636,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		template <typename T>
 		TOML_NODISCARD
-		static std::string make(T&& arg) noexcept
+		static std::string make(T&& arg)
 		{
 			using arg_type = std::decay_t<T>;
 #if TOML_HAS_CHAR8
@@ -5639,7 +5639,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_impl_specialized(T && val, value_flags flags)
+	auto* make_node_impl_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
 		using unwrapped_type = unwrap_node<remove_cvref<T>>;
 		static_assert(!std::is_same_v<unwrapped_type, node>);

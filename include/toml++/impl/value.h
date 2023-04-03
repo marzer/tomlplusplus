@@ -108,7 +108,7 @@ TOML_IMPL_NAMESPACE_START
 	{
 		template <typename T>
 		TOML_NODISCARD
-		static std::string make(T&& arg) noexcept
+		static std::string make(T&& arg)
 		{
 			using arg_type = std::decay_t<T>;
 #if TOML_HAS_CHAR8

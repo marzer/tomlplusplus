@@ -13,7 +13,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	TOML_NODISCARD
 	TOML_ATTR(returns_nonnull)
-	auto* make_node_impl_specialized(T && val, value_flags flags)
+	auto* make_node_impl_specialized(T && val, [[maybe_unused]] value_flags flags)
 	{
 		using unwrapped_type = unwrap_node<remove_cvref<T>>;
 		static_assert(!std::is_same_v<unwrapped_type, node>);
