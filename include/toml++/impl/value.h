@@ -195,13 +195,11 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	template <typename...>
-	struct is_val_ctor_with_flags : std::false_type
+	struct value_variadic_ctor_allowed : std::true_type
 	{};
 
-	template <typename T, typename U>
-	struct is_val_ctor_with_flags<T, U> : std::bool_constant<			  //
-											  (is_node<T> && is_value<T>) //
-											  &&(std::is_same_v<remove_cvref<U>, value_flags>)>
+	template <typename T, typename... Args>
+	struct value_variadic_ctor_allowed<value<T>, value<T>, Args...> : std::false_type
 	{};
 }
 TOML_IMPL_NAMESPACE_END;
@@ -264,7 +262,9 @@ TOML_NAMESPACE_START
 		///
 		/// \tparam	Args	Constructor argument types.
 		/// \param 	args	Arguments to forward to the internal value's constructor.
-		TOML_HIDDEN_CONSTRAINT(!impl::is_val_ctor_with_flags<Args...>::value, typename... Args)
+		TOML_HIDDEN_CONSTRAINT(
+			(impl::value_variadic_ctor_allowed<value<ValueType>, impl::remove_cvref<Args>...>::value),
+			typename... Args)
 		TOML_NODISCARD_CTOR
 		explicit value(Args&&... args) noexcept(noexcept(value_type(
 			impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))))
