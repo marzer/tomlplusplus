@@ -28,6 +28,7 @@ template:
 -   fixed `value_flags` not being preserved correctly when inserting into tables and arrays (#108) (@LebJe)
 -   fixed `toml::value::flags()` not being cleared when `std::move`-ing a value
 -   fixed error in README (#195) (@andrewkcorcoran)
+-   fixed compiler error when using NVCC (#198) (@thompsonnoahe)
 
 <br><br>
 

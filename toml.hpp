@@ -114,6 +114,11 @@
 #else
 #define TOML_INTELLISENSE 0
 #endif
+#if defined(__CUDACC__) || defined(__CUDA_ARCH__) || defined(__CUDA_LIBDEVICE__)
+#define TOML_CUDA 1
+#else
+#define TOML_CUDA 0
+#endif
 
 // special handling for apple clang; see:
 // - https://github.com/marzer/tomlplusplus/issues/189
@@ -300,9 +305,14 @@
 // TOML_NEVER_INLINE
 #ifdef _MSC_VER
 #define TOML_NEVER_INLINE TOML_DECLSPEC(noinline)
-#elif TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__noinline__)
-#define TOML_NEVER_INLINE TOML_ATTR(__noinline__)
+#elif TOML_CUDA // https://gitlab.gnome.org/GNOME/glib/-/issues/2555
+TOML_ATTR(noinline)
 #else
+#if TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__noinline__)
+#define TOML_NEVER_INLINE TOML_ATTR(__noinline__)
+#endif
+#endif
+#ifndef TOML_NEVER_INLINE
 #define TOML_NEVER_INLINE
 #endif
 
