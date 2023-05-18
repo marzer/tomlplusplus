@@ -9,7 +9,14 @@ assignees: marzer
 
 <!--
     Replace the HTML comments below with the requested information.
-    Please don't delete this template and roll your own!
+
+    Please be as thorough as possible, and don't delete this template and roll your own.
+    I'm a human being with a busy life and concerns of my own - if you force me to jump through many
+    information-gathering hoops without first making an effort yourself, there's a high chance I'll
+    summarily close your issue as 'not a bug'.
+
+    Also please *don't* paste screenshots of logs, compiler messages, et cetera. Paste their actual text.
+    I can't copy/paste/search text from an image.
 
     Thanks for contributing!
 -->
@@ -23,9 +30,8 @@ assignees: marzer
     Otherwise you can find it by opening toml++/impl/version.h; it'll be represented by three defines -
     TOML_LIB_MAJOR, TOML_LIB_MINOR and TOML_LIB_PATCH.
     
-    If you're not using any particular release and are instead just living large at HEAD of master, the commit hash
-    would be super helpful too, though it's not critical.
-    
+    If you're not using any particular release and have just cloned the repository directly,
+    please also include the the commit hash.
 -->
 
 
@@ -68,6 +74,10 @@ assignees: marzer
 ## Describe the bug
 <!--
     A clear and concise description of the bug goes here.
+
+    Please include compiler error messages as appropriate.
+
+    *DON'T PASTE SCREENSHOTS*
 -->
 
 
@@ -83,4 +93,6 @@ assignees: marzer
 ## Additional information
 <!--
     Any post-scripts, addendums, or additional pieces of context, as necessary.
+
+    *DON'T PASTE SCREENSHOTS*
 -->

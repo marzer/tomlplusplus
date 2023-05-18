@@ -86,15 +86,23 @@
 			<DiagnosticsFormat>Caret</DiagnosticsFormat>
 			<ProgramDataBaseFileName>$(OutDir)$(TargetName).pdb</ProgramDataBaseFileName>
 			<EnableEnhancedInstructionSet>$(TomlInstructionSet_)</EnableEnhancedInstructionSet>
-			<AdditionalOptions>
-				%(AdditionalOptions) /utf-8 /volatile:iso /Zc:__cplusplus /bigobj /Zc:inline /Zc:throwingNew
-			</AdditionalOptions>
+			<!-- conformance flags -->
+			<AdditionalOptions>%(AdditionalOptions) /utf-8</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /volatile:iso</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /Zc:__cplusplus</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /Zc:inline</AdditionalOptions>
+			<AdditionalOptions>%(AdditionalOptions) /Zc:throwingNew</AdditionalOptions>
+			<!-- defines -->
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_WINSOCK_DEPRECATED_NO_WARNINGS</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_SCL_SECURE_NO_WARNINGS</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_MSC_TOOLSET_VER=$(PlatformToolsetVersion)</PreprocessorDefinitions>
 			<PreprocessorDefinitions>%(PreprocessorDefinitions);_ITERATOR_DEBUG_LEVEL=0</PreprocessorDefinitions>
 			<PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+			<!-- modules -->
+			<EnableModules>false</EnableModules>
+			<BuildStlModules>false</BuildStlModules>
 		</ClCompile>
 		<Link>
 			<TreatLinkerWarningAsErrors>true</TreatLinkerWarningAsErrors>
