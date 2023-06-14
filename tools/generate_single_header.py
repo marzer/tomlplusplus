@@ -210,6 +210,7 @@ def main():
 				r'TOML_CONCAT',
 				r'TOML_CONCAT_1',
 				r'TOML_CONFIG_HEADER',
+				r'TOML_CUDA',
 				r'TOML_ENABLE_FORMATTERS',
 				r'TOML_ENABLE_PARSER',
 				r'TOML_ENABLE_SIMD',

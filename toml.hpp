@@ -73,8 +73,7 @@
 #define TOML_MAKE_VERSION(major, minor, patch) (((major)*10000) + ((minor)*100) + ((patch)))
 
 #ifdef __clang__
-#define TOML_CLANG		   __clang_major__
-#define TOML_CLANG_VERSION TOML_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#define TOML_CLANG __clang_major__
 #else
 #define TOML_CLANG 0
 #endif
@@ -126,7 +125,12 @@
 // - https://stackoverflow.com/questions/19387043/how-can-i-reliably-detect-the-version-of-clang-at-preprocessing-time
 #if TOML_CLANG && defined(__apple_build_version__)
 #undef TOML_CLANG
-#if TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 0, 0)
+#define TOML_CLANG_VERSION TOML_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
+#if TOML_CLANG_VERSION >= TOML_MAKE_VERSION(15, 0, 0)
+#define TOML_CLANG 16
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 3, 0)
+#define TOML_CLANG 15
+#elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(14, 0, 0)
 #define TOML_CLANG 14
 #elif TOML_CLANG_VERSION >= TOML_MAKE_VERSION(13, 1, 6)
 #define TOML_CLANG 13
@@ -145,6 +149,7 @@
 #else
 #define TOML_CLANG 6 // not strictly correct but doesn't matter below this
 #endif
+#undef TOML_CLANG_VERSION
 #endif
 
 // IA64
@@ -306,7 +311,7 @@
 #ifdef _MSC_VER
 #define TOML_NEVER_INLINE TOML_DECLSPEC(noinline)
 #elif TOML_CUDA // https://gitlab.gnome.org/GNOME/glib/-/issues/2555
-TOML_ATTR(noinline)
+#define TOML_NEVER_INLINE TOML_ATTR(noinline)
 #else
 #if TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__noinline__)
 #define TOML_NEVER_INLINE TOML_ATTR(__noinline__)
@@ -364,11 +369,15 @@ TOML_ATTR(noinline)
 
 // TOML_ASSUME
 #ifdef _MSC_VER
-#define TOML_ASSUME(...) __assume(__VA_ARGS__)
+#define TOML_ASSUME(expr) __assume(expr)
 #elif TOML_ICC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_assume)
-#define TOML_ASSUME(...) __builtin_assume(__VA_ARGS__)
+#define TOML_ASSUME(expr) __builtin_assume(expr)
+#elif TOML_HAS_CPP_ATTR(assume) >= 202207
+#define TOML_ASSUME(expr) [[assume(expr)]]
+#elif TOML_HAS_ATTR(__assume__)
+#define TOML_ASSUME(expr) __attribute__((__assume__(expr)))
 #else
-#define TOML_ASSUME(...) static_assert(true)
+#define TOML_ASSUME(expr) static_cast<void>(0)
 #endif
 
 // TOML_UNREACHABLE
@@ -377,7 +386,7 @@ TOML_ATTR(noinline)
 #elif TOML_ICC || TOML_CLANG || TOML_GCC || TOML_HAS_BUILTIN(__builtin_unreachable)
 #define TOML_UNREACHABLE __builtin_unreachable()
 #else
-#define TOML_UNREACHABLE static_assert(true)
+#define TOML_UNREACHABLE static_cast<void>(0)
 #endif
 
 // TOML_LIKELY
