@@ -588,10 +588,8 @@ it is embedded in the preamble at the top of the header.
 \section mainpage-contact Contacting the author
 For bug reports and feature requests please use the \github{marzer/tomlplusplus/issues, Github Issues}
 system. For anything else you're welcome to reach out via other means. In order of likely response speed:
-- Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 - Twitter: [marzer8789](https://twitter.com/marzer8789)
+- Gitter: [marzer/tomlplusplus](https://gitter.im/marzer/tomlplusplus) ("Discord for repos")
 - Email: [mark.gillard@outlook.com.au](mailto:mark.gillard@outlook.com.au)
-- Facebook: [marzer](https://www.facebook.com/marzer)
-- LinkedIn: [marzer](https://www.linkedin.com/in/marzer/)
 
 */

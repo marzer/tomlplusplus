@@ -9,6 +9,8 @@ description     = 'TOML for C++'
 cpp             = 17
 github          = 'marzer/tomlplusplus'
 license         = [ 'MIT', 'https://github.com/marzer/tomlplusplus/blob/master/LICENSE' ]
+twitter         = 'marzer8789'
+sponsor         = 'https://github.com/sponsors/marzer'
 show_includes   = false
 changelog       = true
 logo            = 'images/logo.svg'
@@ -19,7 +21,6 @@ extra_files     = [
     'images/badge-awesome.svg',
     'images/badge-TOML.svg',
     'images/badge-gitter.svg',
-    'images/badge-sponsor.svg',
 ]
 
 
@@ -66,19 +67,11 @@ macros          = [ 'TOML_[A-Z0-9_]+?', 'print_value' ]
     'badge-TOML.svg',
     'https://toml.io/en/v1.0.0'
 ]
-'2. CI'     = [
-    'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml/badge.svg?branch=master',
-    'https://github.com/marzer/tomlplusplus/actions/workflows/ci.yaml'
-]
-'3. Mentioned in Awesome C++' = [
+'2. Mentioned in Awesome C++' = [
     'badge-awesome.svg',
     'https://github.com/fffaraz/awesome-cpp'
 ]
-'4. Sponsor'        = [
-    'badge-sponsor.svg',
-    'https://github.com/sponsors/marzer'
- ]
-'5. Gitter'        = [
+'3. Gitter'        = [
     'badge-gitter.svg',
     'https://gitter.im/marzer/tomlplusplus'
  ]
