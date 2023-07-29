@@ -2645,8 +2645,10 @@ body > header,
 body > header * { white-space: nowrap; }
 a { text-decoration: none !important; }
 a:hover { text-decoration: underline !important; }
-article div > section { margin-top: 2rem; }
-article div > section > section { margin-bottom: 2.25rem; }
+article div > section { margin-top: 2.5rem; }
+article div > section:first-of-type { margin-top: initial; }
+article div > section > section { margin-top: 2.25rem; }
+article div > section > section:first-of-type { margin-top: initial; }
 a.poxy-external { font-weight: normal; }
 pre.m-code a,
 pre.m-console a { font-weight: inherit !important; color: inherit !important; }
@@ -2810,8 +2812,10 @@ margin-top: initial;
 .m-doc-template-params.m-doc-template-long { display: block; padding-left: 1rem; }
 .m-doc-template-params.m-doc-template-long .m-doc-template-param::before { content: ""; display: block; }
 section.m-doc-details div .m-table.m-fullwidth.m-flat tbody td:first-of-type wbr { display: none; }
-.poxy-about-the-author .poxy-icon img,
-.poxy-about-the-author .poxy-icon svg { max-width: 1.5rem; max-height: 1.5rem; margin-right: 0.5rem; }
+.poxy-about-the-author { margin-top: 4rem; }
+.poxy-about-the-author .socials { display: block; padding-top: 0.5rem; }
+.poxy-about-the-author img.poxy-icon,
+.poxy-about-the-author svg.poxy-icon { max-width: 1.5rem; max-height: 1.5rem; margin-right: 0.5rem; }
 header nav #m-navbar-collapse li a.sponsor:hover { border-color: var(--sponsor-color) !important; }
 header nav a.sponsor:hover,
 footer nav a.sponsor:hover,
