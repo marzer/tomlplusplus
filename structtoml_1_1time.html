@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.13.1" name="generator"/>
+  <meta content="Poxy v0.13.3" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -83,7 +83,7 @@
             </dt>
             <dd>Default constructor. Does not initialize the members.</dd>
             <dt id="acaec3dc6784706c57cc712ab403123e6">
-              <div class="m-doc-template">template&lt;<span class="m-doc-template-params m-doc-template-long"><span class="m-doc-template-param">typename H</span>, <span class="m-doc-template-param">typename M</span>, <span class="m-doc-template-param">typename S = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a></span>, <span class="m-doc-template-param">typename NS = <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a></span></span>&gt;</div>
+              <div class="m-doc-template">template&lt;<span class="m-doc-template-params m-doc-template-long"><span class="m-doc-template-param">typename H</span>, <span class="m-doc-template-param">typename M</span>, <span class="m-doc-template-param">typename S = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a></span>, <span class="m-doc-template-param">typename NS = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a></span></span>&gt;</div>
               <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#acaec3dc6784706c57cc712ab403123e6">time</a>(</span><span class="m-doc-wrap">H h,
               M m,
               S s = S{},
@@ -95,16 +95,16 @@
         <section id="pub-attribs">
           <h2><a href="#pub-attribs">Public variables</a></h2>
           <dl class="m-doc">
-            <dt id="a18f32a58846d333f9e866b725b7b7ae4"> <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a18f32a58846d333f9e866b725b7b7ae4">hour</a>
+            <dt id="a18f32a58846d333f9e866b725b7b7ae4"> <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a18f32a58846d333f9e866b725b7b7ae4">hour</a>
             </dt>
             <dd>The hour component, from 0 - 23.</dd>
-            <dt id="a02de4fe041dfa9535eb4df60d86f7fb4"> <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a02de4fe041dfa9535eb4df60d86f7fb4">minute</a>
+            <dt id="a02de4fe041dfa9535eb4df60d86f7fb4"> <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a02de4fe041dfa9535eb4df60d86f7fb4">minute</a>
             </dt>
             <dd>The minute component, from 0 - 59.</dd>
-            <dt id="a8ae0ab849a761543207ca86a2e1d0fdf"> <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a8ae0ab849a761543207ca86a2e1d0fdf">second</a>
+            <dt id="a8ae0ab849a761543207ca86a2e1d0fdf"> <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint8_t</a> <a class="m-doc-self" href="#a8ae0ab849a761543207ca86a2e1d0fdf">second</a>
             </dt>
             <dd>The second component, from 0 - 59.</dd>
-            <dt id="a3e9c60650ccd21f1e47132b777547185"> <a class="m-doc poxy-injected poxy-external" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a> <a class="m-doc-self" href="#a3e9c60650ccd21f1e47132b777547185">nanosecond</a>
+            <dt id="a3e9c60650ccd21f1e47132b777547185"> <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a> <a class="m-doc-self" href="#a3e9c60650ccd21f1e47132b777547185">nanosecond</a>
             </dt>
             <dd>The fractional nanoseconds component, from 0 - 999999999.</dd>
           </dl>
@@ -123,8 +123,8 @@
             </dt>
             <dd>Less-than operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs) -&gt; <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</dd>
             <dt id="a459d4906732bd6c6129de62f1c601a60">
@@ -153,7 +153,7 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="aad81b91942de3b3f2d54656c8a686ee7"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aad81b91942de3b3f2d54656c8a686ee7">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
               const <a class="m-doc" href="structtoml_1_1time.html">time</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints a time out to a stream as <code>HH:MM:SS.FFFFFF</code> (per RFC 3339).</p>

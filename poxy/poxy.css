@@ -2716,12 +2716,15 @@ h1 .m-doc-include *,
 h3 .m-doc-include * { opacity: 1 !important; }
 h1 .m-doc-include .cp,
 h3 .m-doc-include .cp { color: var(--dim-color); }
-.godbolt { font-family: "Source Sans Pro", sans-serif; }
-p.godbolt { text-align: center; padding: 0rem; text-indent: 0rem; }
-a.godbolt { padding: 0.5rem; display: inline-block; }
-pre > p.godbolt { float: right; }
+pre .poxy-godbolt,
+code .poxy-godbolt { font-family: "Source Sans Pro", sans-serif; }
+pre p.poxy-godbolt,
+code p.poxy-godbolt { text-align: center; padding: 0rem; text-indent: 0rem; float: right; }
+pre p.poxy-godbolt a.poxy-godbolt,
+code p.poxy-godbolt a.poxy-godbolt { padding: 0.5rem; display: inline-block; }
 @media screen and (max-width: 768px) {
-.godbolt { display: none; }
+pre p.poxy-godbolt,
+code p.poxy-godbolt { display: none; }
 }
 h2:last-child,
 h3:last-child,
@@ -2729,7 +2732,7 @@ h4:last-child,
 h5:last-child,
 h6:last-child { margin-bottom: 0rem; }
 .m-doc-details table img.m-image { margin-left: inherit; }
-@media screen and (min-width: 1300px) and (min-height: 775px) {
+@media screen and (min-width: 1300px) {
 :root { --wide-page-left-offset: -160px; }
 #poxy-toc {
 position: fixed;
@@ -2739,6 +2742,8 @@ min-width: 200px;
 z-index: 5;
 margin: 0px 20px 0px 0px !important;
 background-color: var(--background-color);
+overflow-y: auto;
+max-height: calc(100% - 7rem);
 }
 header nav > .m-container,
 footer nav > .m-container { width: 100%; }
@@ -2813,11 +2818,12 @@ margin-top: initial;
 .m-doc-template-params.m-doc-template-long .m-doc-template-param::before { content: ""; display: block; }
 section.m-doc-details div .m-table.m-fullwidth.m-flat tbody td:first-of-type wbr { display: none; }
 .poxy-about-the-author { margin-top: 4rem; }
-.poxy-about-the-author .socials { display: block; padding-top: 0.5rem; }
+.poxy-about-the-author .poxy-socials { display: block; padding-top: 0.5rem; }
 .poxy-about-the-author img.poxy-icon,
 .poxy-about-the-author svg.poxy-icon { max-width: 1.5rem; max-height: 1.5rem; margin-right: 0.5rem; }
 header nav #m-navbar-collapse li a.sponsor:hover { border-color: var(--sponsor-color) !important; }
 header nav a.sponsor:hover,
 footer nav a.sponsor:hover,
 a.poxy-icon.sponsor:hover { color: var(--sponsor-color) !important; }
+main article a.poxy-named-requirement { font-style: italic; }
 
