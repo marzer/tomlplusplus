@@ -2816,6 +2816,8 @@ margin-top: initial;
 .m-info:not(.m-note, .m-button) a:active { color: var(--info-link-active-color); }
 .m-doc-template-params.m-doc-template-long { display: block; padding-left: 1rem; }
 .m-doc-template-params.m-doc-template-long .m-doc-template-param::before { content: ""; display: block; }
+.m-doc-details .m-doc-template .m-doc-template-parent,
+.m-doc-details .m-doc-template .m-doc-template-parent + br { display: none; }
 section.m-doc-details div .m-table.m-fullwidth.m-flat tbody td:first-of-type wbr { display: none; }
 .poxy-about-the-author { margin-top: 4rem; }
 .poxy-about-the-author .poxy-socials { display: block; padding-top: 0.5rem; }
