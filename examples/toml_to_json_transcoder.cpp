@@ -5,8 +5,8 @@
 
 // This example demonstrates how to use the toml::json_formatter to re-serialize TOML data as JSON.
 
-#include "examples.h"
-#include <toml++/toml.h>
+#include "examples.hpp"
+#include <toml++/toml.hpp>
 
 using namespace std::string_view_literals;
 

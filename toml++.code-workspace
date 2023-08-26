@@ -17,6 +17,7 @@
 			"version": "cpp",
 			"xstring": "cpp"
 		},
-		"explorer.sortOrder": "type"
+		"explorer.sortOrder": "type",
+		"C_Cpp.default.compileCommands": "builddir\\compile_commands.json"
 	}
 }

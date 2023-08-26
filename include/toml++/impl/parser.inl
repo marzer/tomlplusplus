@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 //# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
@@ -12,15 +12,15 @@
 //# }}
 #if TOML_ENABLE_PARSER
 
-#include "parser.h"
-#include "std_optional.h"
-#include "source_region.h"
-#include "parse_error.h"
-#include "date_time.h"
-#include "value.h"
-#include "array.h"
-#include "table.h"
-#include "unicode.h"
+#include "parser.hpp"
+#include "std_optional.hpp"
+#include "source_region.hpp"
+#include "parse_error.hpp"
+#include "date_time.hpp"
+#include "value.hpp"
+#include "array.hpp"
+#include "table.hpp"
+#include "unicode.hpp"
 TOML_DISABLE_WARNINGS;
 #include <istream>
 #include <fstream>
@@ -34,7 +34,7 @@ TOML_DISABLE_WARNINGS;
 #include <iomanip>
 #endif
 TOML_ENABLE_WARNINGS;
-#include "header_start.h"
+#include "header_start.hpp"
 
 //#---------------------------------------------------------------------------------------------------------------------
 //# UTF8 STREAMS
@@ -3913,5 +3913,5 @@ TOML_NAMESPACE_START
 TOML_NAMESPACE_END;
 
 #undef TOML_OVERALIGNED
-#include "header_end.h"
+#include "header_end.hpp"
 #endif // TOML_ENABLE_PARSER

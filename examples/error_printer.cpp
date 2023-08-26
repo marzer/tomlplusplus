@@ -6,8 +6,8 @@
 // This example shows the error messages the library produces by forcing a set of specific parsing
 // failures and printing their results.
 
-#include "examples.h"
-#include <toml++/toml.h>
+#include "examples.hpp"
+#include <toml++/toml.hpp>
 
 using namespace std::string_view_literals;
 

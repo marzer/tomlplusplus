@@ -5,15 +5,15 @@
 #pragma once
 
 //# {{
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
 
-#include "at_path.h"
-#include "array.h"
-#include "table.h"
+#include "at_path.hpp"
+#include "array.hpp"
+#include "table.hpp"
 TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV
 #include <charconv>
@@ -21,7 +21,7 @@ TOML_DISABLE_WARNINGS;
 #include <sstream>
 #endif
 TOML_ENABLE_WARNINGS;
-#include "header_start.h"
+#include "header_start.hpp"
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -287,4 +287,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"

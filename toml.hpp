@@ -41,12 +41,13 @@
 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 //----------------------------------------------------------------------------------------------------------------------
-#ifndef TOMLPLUSPLUS_H
-#define TOMLPLUSPLUS_H
+#ifndef TOMLPLUSPLUS_HPP
+#define TOMLPLUSPLUS_HPP
 
 #define INCLUDE_TOMLPLUSPLUS_H // old guard name used pre-v3
+#define TOMLPLUSPLUS_H		   // guard name used in the legacy toml.h
 
-//********  impl/preprocessor.h  ***************************************************************************************
+//********  impl/preprocessor.hpp  *************************************************************************************
 
 #ifndef __cplusplus
 #error toml++ is a C++ library.
@@ -996,7 +997,7 @@ TOML_ENABLE_WARNINGS;
 
 // clang-format off
 
-//********  impl/version.h  ********************************************************************************************
+//********  impl/version.hpp  ******************************************************************************************
 
 #define TOML_LIB_MAJOR 3
 #define TOML_LIB_MINOR 3
@@ -1006,7 +1007,7 @@ TOML_ENABLE_WARNINGS;
 #define TOML_LANG_MINOR 0
 #define TOML_LANG_PATCH 0
 
-//********  impl/preprocessor.h  ***************************************************************************************
+//********  impl/preprocessor.hpp  *************************************************************************************
 
 #define	TOML_LIB_SINGLE_HEADER 1
 
@@ -1143,7 +1144,7 @@ TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #endif
 #endif
 
-//********  impl/std_new.h  ********************************************************************************************
+//********  impl/std_new.hpp  ******************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <new>
@@ -1157,7 +1158,7 @@ TOML_ENABLE_WARNINGS;
 #define TOML_LAUNDER(x) x
 #endif
 
-//********  impl/std_string.h  *****************************************************************************************
+//********  impl/std_string.hpp  ***************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <string_view>
@@ -1202,7 +1203,7 @@ TOML_IMPL_NAMESPACE_END;
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
-//********  impl/std_optional.h  ***************************************************************************************
+//********  impl/std_optional.hpp  *************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #if !TOML_HAS_CUSTOM_OPTIONAL_TYPE
@@ -1226,7 +1227,7 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-//********  impl/forward_declarations.h  *******************************************************************************
+//********  impl/forward_declarations.hpp  *****************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <cstdint>
@@ -1339,7 +1340,7 @@ TOML_IMPL_NAMESPACE_START
 	class parser;
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
-							// clang-format off
+	// clang-format off
 
 	inline constexpr std::string_view control_char_escapes[] =
 	{
@@ -1733,8 +1734,8 @@ TOML_IMPL_NAMESPACE_START
 																 && digits <= 53	// DBL_MANT_DIG
 																 && digits10 <= 15; // DBL_DIG
 
-		static constexpr bool can_represent_native = digits >= 53					// DBL_MANT_DIG
-												  && digits10 >= 15;				// DBL_DIG
+		static constexpr bool can_represent_native = digits >= 53	 // DBL_MANT_DIG
+												  && digits10 >= 15; // DBL_DIG
 
 		static constexpr bool can_partially_represent_native = digits > 0 && digits10 > 0;
 	};
@@ -2156,7 +2157,7 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/print_to_stream.h  ************************************************************************************
+//********  impl/print_to_stream.hpp  **********************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -2296,7 +2297,7 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/source_region.h  **************************************************************************************
+//********  impl/source_region.hpp  ************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -2420,7 +2421,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/date_time.h  ******************************************************************************************
+//********  impl/date_time.hpp  ****************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -2764,7 +2765,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/at_path.h  ********************************************************************************************
+//********  impl/at_path.hpp  ******************************************************************************************
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -2803,14 +2804,14 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-//********  impl/std_vector.h  *****************************************************************************************
+//********  impl/std_vector.hpp  ***************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <vector>
 #include <iterator>
 TOML_ENABLE_WARNINGS;
 
-//********  impl/path.h  ***********************************************************************************************
+//********  impl/path.hpp  *********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -3403,13 +3404,13 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/std_utility.h  ****************************************************************************************
+//********  impl/std_utility.hpp  **************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <utility>
 TOML_ENABLE_WARNINGS;
 
-//********  impl/node.h  ***********************************************************************************************
+//********  impl/node.hpp  *********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -4024,13 +4025,13 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/std_initializer_list.h  *******************************************************************************
+//********  impl/std_initializer_list.hpp  *****************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <initializer_list>
 TOML_ENABLE_WARNINGS;
 
-//********  impl/node_view.h  ******************************************************************************************
+//********  impl/node_view.hpp  ****************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -4547,7 +4548,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/value.h  **********************************************************************************************
+//********  impl/value.hpp  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -5640,7 +5641,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/make_node.h  ******************************************************************************************
+//********  impl/make_node.hpp  ****************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -5820,7 +5821,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/array.h  **********************************************************************************************
+//********  impl/array.hpp  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -6915,7 +6916,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/key.h  ************************************************************************************************
+//********  impl/key.hpp  **********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -7178,14 +7179,14 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/std_map.h  ********************************************************************************************
+//********  impl/std_map.hpp  ******************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #include <map>
 #include <iterator>
 TOML_ENABLE_WARNINGS;
 
-//********  impl/table.h  **********************************************************************************************
+//********  impl/table.hpp  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -8342,7 +8343,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/unicode_autogenerated.h  ******************************************************************************
+//********  impl/unicode_autogenerated.hpp  ****************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -8534,7 +8535,7 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/unicode.h  ********************************************************************************************
+//********  impl/unicode.hpp  ******************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -8740,11 +8741,11 @@ TOML_IMPL_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/parse_error.h  ****************************************************************************************
+//********  impl/parse_error.hpp  **************************************************************************************
 
 #if TOML_ENABLE_PARSER
 
-//********  impl/std_except.h  *****************************************************************************************
+//********  impl/std_except.hpp  ***************************************************************************************
 
 TOML_DISABLE_WARNINGS;
 #if TOML_EXCEPTIONS
@@ -8752,7 +8753,7 @@ TOML_DISABLE_WARNINGS;
 #endif
 TOML_ENABLE_WARNINGS;
 
-//********  impl/parse_error.h  ****************************************************************************************
+//********  impl/parse_error.hpp  **************************************************************************************
 
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
@@ -8868,7 +8869,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER
 
-//********  impl/parse_result.h  ***************************************************************************************
+//********  impl/parse_result.hpp  *************************************************************************************
 
 #if TOML_DOXYGEN || (TOML_ENABLE_PARSER && !TOML_EXCEPTIONS)
 
@@ -9219,7 +9220,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER && !TOML_EXCEPTIONS
 
-//********  impl/parser.h  *********************************************************************************************
+//********  impl/parser.hpp  *******************************************************************************************
 
 #if TOML_ENABLE_PARSER
 
@@ -9338,7 +9339,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_PARSER
 
-//********  impl/formatter.h  ******************************************************************************************
+//********  impl/formatter.hpp  ****************************************************************************************
 
 #if TOML_ENABLE_FORMATTERS
 
@@ -9538,7 +9539,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
 
-//********  impl/toml_formatter.h  *************************************************************************************
+//********  impl/toml_formatter.hpp  ***********************************************************************************
 
 #if TOML_ENABLE_FORMATTERS
 
@@ -9643,7 +9644,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
 
-//********  impl/json_formatter.h  *************************************************************************************
+//********  impl/json_formatter.hpp  ***********************************************************************************
 
 #if TOML_ENABLE_FORMATTERS
 
@@ -9733,7 +9734,7 @@ TOML_POP_WARNINGS;
 
 #endif // TOML_ENABLE_FORMATTERS
 
-//********  impl/yaml_formatter.h  *************************************************************************************
+//********  impl/yaml_formatter.hpp  ***********************************************************************************
 
 #if TOML_ENABLE_FORMATTERS
 
@@ -12071,7 +12072,7 @@ TOML_NAMESPACE_END;
 #endif
 TOML_POP_WARNINGS;
 
-//********  impl/simd.h  ***********************************************************************************************
+//********  impl/simd.hpp  *********************************************************************************************
 
 #if TOML_ENABLE_SIMD
 
@@ -17430,4 +17431,4 @@ TOML_POP_WARNINGS;
 #undef TOML_WINDOWS
 #endif
 
-#endif // TOMLPLUSPLUS_H
+#endif // TOMLPLUSPLUS_HPP

@@ -3,7 +3,7 @@
 //# See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tt.h"
+#include "tt.hpp"
 
 using nlohmann::json;
 using namespace std::string_view_literals;

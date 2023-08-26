@@ -5,8 +5,8 @@
 
 // This example demonstrates how to parse TOML from a file or stdin and re-serialize it (print it out) to stdout.
 
-#include "examples.h"
-#include <toml++/toml.h>
+#include "examples.hpp"
+#include <toml++/toml.hpp>
 
 using namespace std::string_view_literals;
 

@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "tests.hpp"
 
 TOML_DISABLE_WARNINGS;
 #include <algorithm>

@@ -5,22 +5,22 @@
 #pragma once
 
 //# {{
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
 
-#include "path.h"
-#include "at_path.h"
-#include "print_to_stream.h"
+#include "path.hpp"
+#include "at_path.hpp"
+#include "print_to_stream.hpp"
 TOML_DISABLE_WARNINGS;
 #if TOML_INT_CHARCONV
 #include <charconv>
 #endif
 #include <sstream>
 TOML_ENABLE_WARNINGS;
-#include "header_start.h"
+#include "header_start.hpp"
 
 //#=====================================================================================================================
 //# toml::path_component
@@ -520,4 +520,4 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"

@@ -113,11 +113,11 @@
 		<Natvis Include="..\..\toml++.natvis" />
 	</ItemGroup>
 	<ItemGroup>
-		<ClInclude Include="..\leakproof.h" />
-		<ClInclude Include="..\lib_catch2.h" />
-		<ClInclude Include="..\lib_tloptional.h" />
-		<ClInclude Include="..\settings.h" />
-		<ClInclude Include="..\tests.h" />
+		<ClInclude Include="..\leakproof.hpp" />
+		<ClInclude Include="..\lib_catch2.hpp" />
+		<ClInclude Include="..\lib_tloptional.hpp" />
+		<ClInclude Include="..\settings.hpp" />
+		<ClInclude Include="..\tests.hpp" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="..\cpp.hint" />

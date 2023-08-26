@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 //# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
@@ -12,11 +12,11 @@
 //# }}
 #if TOML_ENABLE_FORMATTERS
 
-#include "yaml_formatter.h"
-#include "print_to_stream.h"
-#include "table.h"
-#include "array.h"
-#include "header_start.h"
+#include "yaml_formatter.hpp"
+#include "print_to_stream.hpp"
+#include "table.hpp"
+#include "array.hpp"
+#include "header_start.hpp"
 
 TOML_NAMESPACE_START
 {
@@ -161,5 +161,5 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"
 #endif // TOML_ENABLE_FORMATTERS

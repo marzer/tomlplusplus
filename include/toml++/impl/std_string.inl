@@ -5,14 +5,14 @@
 #pragma once
 
 //# {{
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
 
 #if TOML_WINDOWS
-#include "std_string.h"
+#include "std_string.hpp"
 #ifndef _WINDOWS_
 #if TOML_INCLUDE_WINDOWS_H
 #include <Windows.h>
@@ -36,7 +36,7 @@ extern "C" __declspec(dllimport) int __stdcall MultiByteToWideChar(unsigned int 
 
 #endif // TOML_INCLUDE_WINDOWS_H
 #endif // _WINDOWS_
-#include "header_start.h"
+#include "header_start.hpp"
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -95,5 +95,5 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"
 #endif // TOML_WINDOWS

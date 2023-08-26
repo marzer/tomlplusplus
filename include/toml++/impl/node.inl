@@ -5,19 +5,19 @@
 #pragma once
 
 //# {{
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
 
-#include "node.h"
-#include "node_view.h"
-#include "at_path.h"
-#include "table.h"
-#include "array.h"
-#include "value.h"
-#include "header_start.h"
+#include "node.hpp"
+#include "node_view.hpp"
+#include "at_path.hpp"
+#include "table.hpp"
+#include "array.hpp"
+#include "value.hpp"
+#include "header_start.hpp"
 
 TOML_NAMESPACE_START
 {
@@ -138,4 +138,4 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"

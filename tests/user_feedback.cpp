@@ -3,7 +3,7 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tests.h"
+#include "tests.hpp"
 
 // this file is about testing user misc. repros submitted via github issues, et cetera.
 

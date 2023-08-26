@@ -3,7 +3,7 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "settings.h"
+#include "settings.hpp"
 #if !TOML_HEADER_ONLY && !TOML_SHARED_LIB
 #define TOML_IMPLEMENTATION
 #endif
@@ -11,7 +11,7 @@
 #if USE_SINGLE_HEADER
 #include "../toml.hpp"
 #else
-#include "../include/toml++/toml.h"
+#include "../include/toml++/toml.hpp"
 #endif
 
 namespace toml

@@ -5,19 +5,19 @@
 #pragma once
 
 //# {{
-#include "preprocessor.h"
+#include "preprocessor.hpp"
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
 #endif
 //# }}
 
-#include "print_to_stream.h"
-#include "source_region.h"
-#include "date_time.h"
-#include "toml_formatter.h"
-#include "value.h"
-#include "array.h"
-#include "table.h"
+#include "print_to_stream.hpp"
+#include "source_region.hpp"
+#include "date_time.hpp"
+#include "toml_formatter.hpp"
+#include "value.hpp"
+#include "array.hpp"
+#include "table.hpp"
 TOML_DISABLE_WARNINGS;
 #include <ostream>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
@@ -30,7 +30,7 @@ TOML_DISABLE_WARNINGS;
 #include <iomanip>
 #endif
 TOML_ENABLE_WARNINGS;
-#include "header_start.h"
+#include "header_start.hpp"
 
 TOML_ANON_NAMESPACE_START
 {
@@ -487,4 +487,4 @@ TOML_IMPL_NAMESPACE_START
 }
 TOML_IMPL_NAMESPACE_END;
 
-#include "header_end.h"
+#include "header_end.hpp"

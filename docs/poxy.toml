@@ -35,8 +35,8 @@ undocumented    = true
 [sources]
 paths           = [ 'pages' ]
 recursive_paths = [ '../include' ]
-patterns        = [ '*.h', '*.dox' ]
-strip_paths     = [ '../include' ]
+patterns        = [ '*.h', '*.hpp', '*.dox', '*.md' ]
+strip_paths     = [ '../include', 'pages' ]
 
 
 

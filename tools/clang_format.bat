@@ -33,6 +33,7 @@ EXIT /B 0
 			ECHO Formatting files in "%%~i"
 			clang-format --style=file -i "%%~i\*.cpp" >nul 2>&1
 			clang-format --style=file -i "%%~i\*.h" >nul 2>&1
+			clang-format --style=file -i "%%~i\*.hpp" >nul 2>&1
 			clang-format --style=file -i "%%~i\*.inl" >nul 2>&1
 		)
 	)

@@ -56,7 +56,7 @@ class Preprocessor:
 		if incl_normalized.startswith(self.__entry_root):
 			incl_normalized = incl_normalized[len(self.__entry_root):].strip('/')
 
-		if len(self.__include_stack) > 1 and incl_normalized not in (r'impl/header_start.h', r'impl/header_end.h'):
+		if len(self.__include_stack) > 1 and incl_normalized not in (r'impl/header_start.hpp', r'impl/header_end.hpp'):
 			header = utils.make_divider(incl_normalized, 10, pattern = r'*')
 			footer = ''
 			if len(self.__include_stack) > 2:
@@ -88,7 +88,7 @@ def main():
 	include_dir = Path(root_dir, 'include', 'toml++')
 
 	# preprocess header(s)
-	toml_h = str(Preprocessor(Path(include_dir, 'toml.h')))
+	toml_h = str(Preprocessor(Path(include_dir, 'toml.hpp')))
 
 	# strip various things:
 	if 1:
@@ -133,14 +133,14 @@ def main():
 	)
 
 	# read version number
-	version_h = utils.read_all_text_from_file(Path(include_dir, 'impl/version.h'), logger=True)
+	version_h = utils.read_all_text_from_file(Path(include_dir, 'impl/version.hpp'), logger=True)
 	match = re.search(
 			r'#\s*define\s+TOML_LIB_MAJOR\s+([0-9]+)[^0-9].*'
 			+ r'#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)[^0-9].*'
 			+ r'#\s*define\s+TOML_LIB_PATCH\s+([0-9]+)[^0-9]',
 			version_h, re.I | re.S)
 	if match is None:
-		raise Exception("could not find TOML_LIB_MAJOR, TOML_LIB_MINOR or TOML_LIB_PATCH impl/version.h")
+		raise Exception("could not find TOML_LIB_MAJOR, TOML_LIB_MINOR or TOML_LIB_PATCH impl/version.hpp")
 	version = rf'{int(match[1])}.{int(match[2])}.{int(match[3])}'
 	print(rf'Library version: {version}')
 
@@ -238,6 +238,7 @@ def main():
 				r'TOML_SMALL_INT_TYPE',
 				r'TOML_UNDEF_MACROS',
 				r'TOMLPLUSPLUS_H',
+				r'TOMLPLUSPLUS_HPP',
 				r'TOML_SHARED_LIB'
 			)
 			set_defines = []

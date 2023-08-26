@@ -3,7 +3,7 @@
 // See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 // SPDX-License-Identifier: MIT
 
-#include "tests.h"
+#include "tests.hpp"
 TOML_DISABLE_SPAM_WARNINGS;
 
 TEST_CASE("parsing - TOML spec example")

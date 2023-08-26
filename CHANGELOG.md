@@ -30,6 +30,14 @@ template:
 -   fixed error in README (#195) (@andrewkcorcoran)
 -   fixed compiler error when using NVCC (#198) (@thompsonnoahe)
 
+#### Changes:
+
+-   renamed header files to have `.hpp` extension (`toml.h` is still present for backwards-compatibility)
+
+#### Build system:
+
+-   fixed meson builds with `-Ddefault_library=static` having hidden symbols on GNU compilers (#201) (@vlad0x00)
+
 <br><br>
 
 ## v3.3.0

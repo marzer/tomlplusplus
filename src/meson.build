@@ -30,7 +30,7 @@ tomlplusplus_lib = library(
 	meson.project_name(),
 	files('toml.cpp'),
 	cpp_args: lib_internal_args,
-	gnu_symbol_visibility: 'hidden',
+	gnu_symbol_visibility: get_option('default_library') == 'static' ? '' : 'hidden',
 	include_directories: include_dir,
 	install: not is_subproject,
 	version: meson.project_version(),

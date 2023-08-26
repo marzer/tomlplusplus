@@ -5,8 +5,8 @@
 
 // This example demonstrates a method of merging one TOML data tree into another.
 
-#include "examples.h"
-#include <toml++/toml.h>
+#include "examples.hpp"
+#include <toml++/toml.hpp>
 
 using namespace std::string_view_literals;
 

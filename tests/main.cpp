@@ -10,7 +10,7 @@
 #endif
 
 #define CATCH_CONFIG_RUNNER
-#include "lib_catch2.h"
+#include "lib_catch2.hpp"
 #include <clocale>
 
 #if LEAK_TESTS
@@ -18,7 +18,7 @@
 #include <iostream>
 #include <iomanip>
 #include <atomic>
-#include "leakproof.h"
+#include "leakproof.hpp"
 using namespace std::string_view_literals;
 
 namespace leakproof
