@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.13.4" name="generator"/>
+  <meta content="Poxy v0.13.7" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -81,7 +81,7 @@
           </ul>
         </nav>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p><strong>This type only exists when exceptions are disabled.</strong> Otherwise <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is just an alias for <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#if </span><span class="fm">TOML_EXCEPTIONS</span>
-    <span class="k">using</span> <span class="n">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
+    <span class="k">using</span> <span class="nc">parse_result</span> <span class="o">=</span> <span class="n">table</span><span class="p">;</span>
 <span class="cp">#else</span>
     <span class="k">class</span> <span class="nc">parse_result</span> <span class="p">{</span> <span class="c1">// ...</span>
 <span class="cp">#endif</span></pre></aside><p>A <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a> is effectively a discriminated union containing either a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> or a <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>. Most member functions assume a particular one of these two states, and calling them when in the wrong state will cause errors (e.g. attempting to access the error object when parsing was successful).</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">parse_result</span> <span class="n">result</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse_file</span><span class="p">(</span><span class="s">"config.toml"</span><span class="p">);</span>
@@ -300,84 +300,84 @@
           <h2>Function documentation</h2>
           <section class="m-doc-details" id="a3f641e942f1518dffad6fcc7dc13893d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a19243ec6febf1bb834ea9e366405e317">table_<wbr/>iterator</a> <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a3f641e942f1518dffad6fcc7dc13893d">begin</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Always returns the same value as <a class="m-doc" href="#a336d398e329f08195d714ff02fdffca6">end()</a> if parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a910f13933a0547a2920404287829781f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a910f13933a0547a2920404287829781f">begin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Always returns the same value as <a class="m-doc" href="#a336d398e329f08195d714ff02fdffca6">end()</a> if parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="af58212d8a367e5c1d38eb5d58708754b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#a4bccd753f54404e0097457514177fcbb">const_<wbr/>table_<wbr/>iterator</a> <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af58212d8a367e5c1d38eb5d58708754b">cbegin</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns an iterator to the first key-value pair in the wrapped table.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>Always returns the same value as <a class="m-doc" href="#afa4f821ad60ceb06327cec6b42b05071">cend()</a> if parsing failed.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a09972ac3195147c36fcb40386c863a35"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a09972ac3195147c36fcb40386c863a35">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a09972ac3195147c36fcb40386c863a35">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">toml::<wbr/>node::<wbr/>at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a1296ae08b7d147c6b83f1ba07fc4186f"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1296ae08b7d147c6b83f1ba07fc4186f">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1296ae08b7d147c6b83f1ba07fc4186f">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> path) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">toml::<wbr/>node::<wbr/>at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="aebf8e6383263bf51e1145949250ca779"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aebf8e6383263bf51e1145949250ca779">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#aebf8e6383263bf51e1145949250ca779">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#aef68f74119416a0a6d0a62f0f7d8d4ea">toml::<wbr/>node::<wbr/>at_path(const toml::<wbr/>path&amp;)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a57deb2b5e41a3fd89af32f6a8092a4c1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a57deb2b5e41a3fd89af32f6a8092a4c1">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a57deb2b5e41a3fd89af32f6a8092a4c1">at_path</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#aef68f74119416a0a6d0a62f0f7d8d4ea">toml::<wbr/>node::<wbr/>at_path(const toml::<wbr/>path&amp;)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a1d945519896bd0095b4ed6cbb9215774"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d945519896bd0095b4ed6cbb9215774">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d945519896bd0095b4ed6cbb9215774">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path)</span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">toml::<wbr/>node::<wbr/>at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a9f9d6bd799058036b11d8de03b43bb57"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f9d6bd799058036b11d8de03b43bb57">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) const</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9f9d6bd799058036b11d8de03b43bb57">at_path</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> path) const</span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a20a0cfac8f31649544db5d9eead609f9">toml::<wbr/>node::<wbr/>at_path(std::<wbr/>string_view)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a29af8ed25f2bb21266b9dd2004c38f2c"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a29af8ed25f2bb21266b9dd2004c38f2c">operator[]</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a29af8ed25f2bb21266b9dd2004c38f2c">operator[]</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a8c3214e47f056a3a9bcdb66edd7fa97f">toml::<wbr/>node::<wbr/>operator[](const toml::<wbr/>path&amp;)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a84997148a9f0113e39233da93844c6d1"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a84997148a9f0113e39233da93844c6d1">operator[]</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a84997148a9f0113e39233da93844c6d1">operator[]</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path.html">toml::<wbr/>path</a>&amp; path) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a const view of the subnode matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="classtoml_1_1node.html#a8c3214e47f056a3a9bcdb66edd7fa97f">toml::<wbr/>node::<wbr/>operator[](const toml::<wbr/>path&amp;)</a></p></aside>
           </div></section>
           <section class="m-doc-details" id="a8825eaef011c7dbb5c1d1e46584e90bc"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8825eaef011c7dbb5c1d1e46584e90bc">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8825eaef011c7dbb5c1d1e46584e90bc">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair in the wrapped table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -401,7 +401,7 @@
           </div></section>
           <section class="m-doc-details" id="a1d91207197c22f396acba5d46995d8ab"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d91207197c22f396acba5d46995d8ab">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1d91207197c22f396acba5d46995d8ab">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair in the wrapped table (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -425,7 +425,7 @@
           </div></section>
           <section class="m-doc-details" id="a67f55af8782d160d14026af394b2954b"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a67f55af8782d160d14026af394b2954b">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;<a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a67f55af8782d160d14026af394b2954b">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key)</span></span>
             </h3>
             <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair in the wrapped table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -449,7 +449,7 @@
           </div></section>
           <section class="m-doc-details" id="a025653d2720d17884461814ae3473367"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-wrap-bumper-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a025653d2720d17884461814ae3473367">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) const</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a>&lt;const <a class="m-doc" href="classtoml_1_1node.html">node</a>&gt; <span class="m-doc-details-prefix">toml::<wbr/>parse_result::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a025653d2720d17884461814ae3473367">operator[]</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) const</span></span>
             </h3>
             <p>Gets a <a class="m-doc" href="classtoml_1_1node__view.html">node_<wbr/>view</a> for the selected key-value pair in the wrapped table (const overload).</p>
             <table class="m-table m-fullwidth m-flat">

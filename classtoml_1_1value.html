@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.13.4" name="generator"/>
+  <meta content="Poxy v0.13.7" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -616,7 +616,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              using toml::<wbr/>value&lt;ValueType&gt;::<wbr/><a class="m-doc-self" href="#ac1316850f0671bab2505d126570e3660">value_arg</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
+              using <span class="m-doc-details-prefix">toml::value::</span><a class="m-doc-self" href="#ac1316850f0671bab2505d126570e3660">value_arg</a> = <code class="m-note m-dim poxy-impl">/* ... */</code>
             </h3>
             <p>A type alias for 'value arguments'.</p>
 <p>This differs according to the value's type argument:</p><ul><li>ints, floats, booleans: <code>value_type</code></li><li>strings: <code>string_view</code></li><li>everything else: <code>const value_type&amp;</code></li></ul>
@@ -629,7 +629,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper"> <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab7aa8ba30bd6ead7db1e9cadbff39e22">value</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper"> <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab7aa8ba30bd6ead7db1e9cadbff39e22">value</a>(</span><span class="m-doc-wrap">Args &amp;&amp; ... args) <span class="m-label m-info">explicit</span>  <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Constructs a toml value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -651,7 +651,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a872e565adfbcd201f2ab1e3103699758">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a872e565adfbcd201f2ab1e3103699758">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inequality operator.</p>
@@ -684,7 +684,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7fdc4f87f9ec3efb896cc3e09694328b">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7fdc4f87f9ec3efb896cc3e09694328b">operator&lt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Less-than operator.</p>
@@ -719,7 +719,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac6af15f59d537d95d1afe887b12b697e">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac6af15f59d537d95d1afe887b12b697e">operator&lt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Less-than-or-equal-to operator.</p>
@@ -754,7 +754,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2fa446100047d052d0cca2c1f3f60085">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a2fa446100047d052d0cca2c1f3f60085">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Equality operator.</p>
@@ -787,7 +787,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab95d07a7f48e44baefbacbf5f6072837">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab95d07a7f48e44baefbacbf5f6072837">operator&gt;</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Greater-than operator.</p>
@@ -822,7 +822,7 @@
                 <br/>
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0ebdea821d98546de4b686f450506637">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0ebdea821d98546de4b686f450506637">operator&gt;=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; lhs,
               const <a class="m-doc" href="classtoml_1_1value.html">value</a>&lt;T&gt;&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Greater-than-or-equal-to operator.</p>
@@ -855,7 +855,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4311828058d75bfaa2c01c3395d09385">flags</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> new_flags) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1value.html">value</a>&amp; <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a4311828058d75bfaa2c01c3395d09385">flags</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#a73eba6a34e7c7c4a4d311100800e1bb5">value_<wbr/>flags</a> new_flags) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Sets the metadata flags associated with this value.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -872,7 +872,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a66f31db0fe4aa1a65fff1ce3bb8be1eb">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a66f31db0fe4aa1a65fff1ce3bb8be1eb">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Checks if the node contains values/elements of only one type.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -906,7 +906,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5097925569d4e2f581907dc692aefe02">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a5097925569d4e2f581907dc692aefe02">is_homogeneous</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> ntype,
               <a class="m-doc" href="classtoml_1_1node.html">node</a>*&amp; first_nonmatch) <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Checks if a node contains values/elements of only one type.</p>
@@ -947,7 +947,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a69ed0d45e2de5929fea3375cd68960eb">type</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a69ed0d45e2de5929fea3375cd68960eb">type</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-warning">final</span> <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns the value's node type identifier.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -964,7 +964,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>* <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a79983137e697848cb82a95b265b03d4d">operator-&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>* <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a79983137e697848cb82a95b265b03d4d">operator-&gt;</a>(</span><span class="m-doc-wrap">) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the underlying value.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This operator is only available when <a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a> is a class/struct.</p></aside>
@@ -974,7 +974,7 @@
               <div class="m-doc-template">
                 <span class="m-doc-template-parent">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename ValueType</span></span>&gt;</span>
               </div>
-              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>* <span class="m-doc-wrap-bumper-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a23ab1c59bf4ec4bc19b6fa3fcf399171">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">const <a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a>* <span class="m-doc-details-prefix">toml::value::</span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a23ab1c59bf4ec4bc19b6fa3fcf399171">operator-&gt;</a>(</span><span class="m-doc-wrap">) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Returns a pointer to the underlying value (const overload).</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This operator is only available when <a class="m-doc" href="#ad87b8c7ec465c424b861aba2d4cd5526">value_<wbr/>type</a> is a class/struct.</p></aside>
