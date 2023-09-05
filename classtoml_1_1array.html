@@ -328,22 +328,22 @@
             <dd>Returns an iterator to one-past-the-last element.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a1154a3d27b1af41ffaa498c8d6070b88">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab2e1a5b5afb21b14461298f5494a8c35">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each element in the array.</dd>
-            <dt id="aa7d6dd4f662a93b97d1e750a57df7efc">
+            <dt id="a1e04521b2c24b0b01c3c59f3d20b8839">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aa7d6dd4f662a93b97d1e750a57df7efc">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a1e04521b2c24b0b01c3c59f3d20b8839">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each element in the array (rvalue overload).</dd>
-            <dt id="a335c0d9bac1ca2b03a961dbe4dabc386">
+            <dt id="a7e8ed1b3d210f5d00480e27a3855994f">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a335c0d9bac1ca2b03a961dbe4dabc386">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7e8ed1b3d210f5d00480e27a3855994f">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each element in the array (const lvalue overload).</dd>
-            <dt id="a944a1130f3dd2b7aa13c38bd600295b5">
+            <dt id="ab2b37b3f36abadf0962411a609d7ac8f">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a944a1130f3dd2b7aa13c38bd600295b5">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab2b37b3f36abadf0962411a609d7ac8f">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; const <a class="m-doc" href="classtoml_1_1array.html">array</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each element in the array (const rvalue overload).</dd>
           </dl>
@@ -1362,12 +1362,12 @@
 <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">[ 1, 2, 3 ]</span>
 <span class="go">[ 1, 'two', 3 ]</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code><a class="m-doc" href="#adaf908b0cc3e8bcb1ee9ec9ec706d223">end()</a></code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no replacement can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="a1154a3d27b1af41ffaa498c8d6070b88"><div>
+          <section class="m-doc-details" id="ab2e1a5b5afb21b14461298f5494a8c35"><div>
             <h3>
               <div class="m-doc-template">
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>array::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a1154a3d27b1af41ffaa498c8d6070b88">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1array.html">array</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>array::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab2e1a5b5afb21b14461298f5494a8c35">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Invokes a visitor on each element in the array.</p>
             <table class="m-table m-fullwidth m-flat">

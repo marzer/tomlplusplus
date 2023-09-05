@@ -813,29 +813,29 @@
       <type>array &amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a1154a3d27b1af41ffaa498c8d6070b88</anchor>
-      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp; &gt;)</arglist>
+      <anchor>ab2e1a5b5afb21b14461298f5494a8c35</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>array &amp;&amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>aa7d6dd4f662a93b97d1e750a57df7efc</anchor>
-      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp;&amp; &gt;)</arglist>
+      <anchor>a1e04521b2c24b0b01c3c59f3d20b8839</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, array &amp;&amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>const array &amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a335c0d9bac1ca2b03a961dbe4dabc386</anchor>
-      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp; &gt;)</arglist>
+      <anchor>a7e8ed1b3d210f5d00480e27a3855994f</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>const array &amp;&amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a944a1130f3dd2b7aa13c38bd600295b5</anchor>
-      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp;&amp; &gt;)</arglist>
+      <anchor>ab2b37b3f36abadf0962411a609d7ac8f</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const array &amp;&amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>node_type</type>
@@ -6206,29 +6206,29 @@
       <type>table &amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ac22ee86d5b83fd73a8013d39be1cc698</anchor>
-      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp; &gt;)</arglist>
+      <anchor>a67fd24ac51d4ba8f5e1df54c5a5d30aa</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>table &amp;&amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aca50cb292d1029b5df558847a0fec7c5</anchor>
-      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp;&amp; &gt;)</arglist>
+      <anchor>ae55e8d274a9e9fb79e167d8d1afcaf96</anchor>
+      <arglist>(Func &amp;&amp;visitor) &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, table &amp;&amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>const table &amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a58267a6238a414e7b6db9f59218e790f</anchor>
-      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp; &gt;)</arglist>
+      <anchor>ac27c78af74855b9a75b38b177a7e7181</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>const table &amp;&amp;</type>
       <name>for_each</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ab89cdd042f443f05a07e032494b650c2</anchor>
-      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp;&amp; &gt;)</arglist>
+      <anchor>a7e86095758aa39070138c2b0c7bd0a61</anchor>
+      <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(for_each_is_nothrow&lt; Func &amp;&amp;, const table &amp;&amp; &gt;::value)</arglist>
     </member>
     <member kind="function">
       <type>node_type</type>

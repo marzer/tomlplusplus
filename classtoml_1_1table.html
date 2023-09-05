@@ -279,22 +279,22 @@
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ac22ee86d5b83fd73a8013d39be1cc698">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a67fd24ac51d4ba8f5e1df54c5a5d30aa">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table.</dd>
-            <dt id="aca50cb292d1029b5df558847a0fec7c5">
+            <dt id="ae55e8d274a9e9fb79e167d8d1afcaf96">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#aca50cb292d1029b5df558847a0fec7c5">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae55e8d274a9e9fb79e167d8d1afcaf96">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; -&gt; <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (rvalue overload).</dd>
-            <dt id="a58267a6238a414e7b6db9f59218e790f">
+            <dt id="ac27c78af74855b9a75b38b177a7e7181">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a58267a6238a414e7b6db9f59218e790f">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac27c78af74855b9a75b38b177a7e7181">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (const lvalue overload).</dd>
-            <dt id="ab89cdd042f443f05a07e032494b650c2">
+            <dt id="a7e86095758aa39070138c2b0c7bd0a61">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab89cdd042f443f05a07e032494b650c2">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a7e86095758aa39070138c2b0c7bd0a61">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; -&gt; const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (const rvalue overload).</dd>
           </dl>
@@ -1353,12 +1353,12 @@
 <span class="go">c = 3</span>
 <span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion or assignment can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ac22ee86d5b83fd73a8013d39be1cc698"><div>
+          <section class="m-doc-details" id="a67fd24ac51d4ba8f5e1df54c5a5d30aa"><div>
             <h3>
               <div class="m-doc-template">
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ac22ee86d5b83fd73a8013d39be1cc698">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a67fd24ac51d4ba8f5e1df54c5a5d30aa">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Invokes a visitor on each key-value pair in the table.</p>
             <table class="m-table m-fullwidth m-flat">
