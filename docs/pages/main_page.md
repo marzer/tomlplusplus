@@ -15,7 +15,7 @@
 - C++17 (plus some C++20 features where available, e.g. experimental support for char8_t strings)
 - Doesn't require RTTI
 - Works with or without exceptions
-- Tested on Clang (6+), GCC (7+) and MSVC (VS2019)
+- Tested on Clang (8+), GCC (8+) and MSVC (VS2019)
 - Tested on x64, x86 and ARM
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->

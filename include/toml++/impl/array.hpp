@@ -11,6 +11,26 @@
 #include "make_node.hpp"
 #include "header_start.hpp"
 
+#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+#if TOML_GCC && TOML_GCC <= 7
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN 1
+#else
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN 0
+#endif
+#endif
+
+#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN && !defined(TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED)
+#define TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE                                                                  \
+	"If you're seeing this error it's because you're using one of toml++'s for_each() functions on a compiler with "   \
+	"known bugs in that area (e.g. GCC 7). On these compilers returning a bool (or bool-convertible) value from the "  \
+	"for_each() callable causes spurious compilation failures, while returning nothing (void) works fine. "            \
+	"If you believe this message is incorrect for your compiler, you can try your luck by #defining "                  \
+	"TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN as 0 and recompiling - if it works, great! Let me know at "                 \
+	"https://github.com/marzer/tomlplusplus/issues. Alternatively, if you don't have any need for early-exiting from " \
+	"for_each(), you can suppress this error by #defining TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED "         \
+	"and moving on with your life."
+#endif
+
 /// \cond
 TOML_IMPL_NAMESPACE_START
 {
@@ -834,51 +854,56 @@ TOML_NAMESPACE_START
 		using for_each_elem_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Array>;
 
 		template <typename Func, typename Array, typename T>
-		static constexpr bool can_for_each = std::is_invocable_v<Func, for_each_elem_ref<T, Array>, size_t> //
-										  || std::is_invocable_v<Func, size_t, for_each_elem_ref<T, Array>> //
-										  || std::is_invocable_v<Func, for_each_elem_ref<T, Array>>;
+		using can_for_each = std::disjunction<std::is_invocable<Func, for_each_elem_ref<T, Array>, size_t>,
+											  std::is_invocable<Func, size_t, for_each_elem_ref<T, Array>>,
+											  std::is_invocable<Func, for_each_elem_ref<T, Array>>>;
 
 		template <typename Func, typename Array, typename T>
-		static constexpr bool can_for_each_nothrow =
-			std::is_nothrow_invocable_v<Func, for_each_elem_ref<T, Array>, size_t>	  //
-			|| std::is_nothrow_invocable_v<Func, size_t, for_each_elem_ref<T, Array>> //
-			|| std::is_nothrow_invocable_v<Func, for_each_elem_ref<T, Array>>;
+		using can_for_each_nothrow = std::conditional_t<
+			// first form
+			std::is_invocable_v<Func, for_each_elem_ref<T, Array>, size_t>,
+			std::is_nothrow_invocable<Func, for_each_elem_ref<T, Array>, size_t>,
+			std::conditional_t<
+				// second form
+				std::is_invocable_v<Func, size_t, for_each_elem_ref<T, Array>>,
+				std::is_nothrow_invocable<Func, size_t, for_each_elem_ref<T, Array>>,
+				std::conditional_t<
+					// third form
+					std::is_invocable_v<Func, for_each_elem_ref<T, Array>>,
+					std::is_nothrow_invocable<Func, for_each_elem_ref<T, Array>>,
+					std::false_type>>>;
 
 		template <typename Func, typename Array>
-		static constexpr bool can_for_each_any = can_for_each<Func, Array, table>		//
-											  || can_for_each<Func, Array, array>		//
-											  || can_for_each<Func, Array, std::string> //
-											  || can_for_each<Func, Array, int64_t>		//
-											  || can_for_each<Func, Array, double>		//
-											  || can_for_each<Func, Array, bool>		//
-											  || can_for_each<Func, Array, date>		//
-											  || can_for_each<Func, Array, time>		//
-											  || can_for_each<Func, Array, date_time>;
+		using can_for_each_any = std::disjunction<can_for_each<Func, Array, table>,
+												  can_for_each<Func, Array, array>,
+												  can_for_each<Func, Array, std::string>,
+												  can_for_each<Func, Array, int64_t>,
+												  can_for_each<Func, Array, double>,
+												  can_for_each<Func, Array, bool>,
+												  can_for_each<Func, Array, date>,
+												  can_for_each<Func, Array, time>,
+												  can_for_each<Func, Array, date_time>>;
 
 		template <typename Func, typename Array, typename T>
-		static constexpr bool for_each_is_nothrow_one = !can_for_each<Func, Array, T> //
-													 || can_for_each_nothrow<Func, Array, T>;
-
-		// clang-format off
-
+		using for_each_is_nothrow_one = std::disjunction<std::negation<can_for_each<Func, Array, T>>, //
+														 can_for_each_nothrow<Func, Array, T>>;
 
 		template <typename Func, typename Array>
-		static constexpr bool for_each_is_nothrow = for_each_is_nothrow_one<Func, Array, table>		  //
-												 && for_each_is_nothrow_one<Func, Array, array>		  //
-												 && for_each_is_nothrow_one<Func, Array, std::string> //
-												 && for_each_is_nothrow_one<Func, Array, int64_t>	  //
-												 && for_each_is_nothrow_one<Func, Array, double>	  //
-												 && for_each_is_nothrow_one<Func, Array, bool>		  //
-												 && for_each_is_nothrow_one<Func, Array, date>		  //
-												 && for_each_is_nothrow_one<Func, Array, time>		  //
-												 && for_each_is_nothrow_one<Func, Array, date_time>;
-
-		// clang-format on
+		using for_each_is_nothrow = std::conjunction<for_each_is_nothrow_one<Func, Array, table>,
+													 for_each_is_nothrow_one<Func, Array, array>,
+													 for_each_is_nothrow_one<Func, Array, std::string>,
+													 for_each_is_nothrow_one<Func, Array, int64_t>,
+													 for_each_is_nothrow_one<Func, Array, double>,
+													 for_each_is_nothrow_one<Func, Array, bool>,
+													 for_each_is_nothrow_one<Func, Array, date>,
+													 for_each_is_nothrow_one<Func, Array, time>,
+													 for_each_is_nothrow_one<Func, Array, date_time>>;
 
 		template <typename Func, typename Array>
-		static void do_for_each(Func&& visitor, Array&& arr) noexcept(for_each_is_nothrow<Func&&, Array&&>)
+		static void do_for_each(Func&& visitor, Array&& arr) //
+			noexcept(for_each_is_nothrow<Func&&, Array&&>::value)
 		{
-			static_assert(can_for_each_any<Func&&, Array&&>,
+			static_assert(can_for_each_any<Func&&, Array&&>::value,
 						  "TOML array for_each visitors must be invocable for at least one of the toml::node "
 						  "specializations:" TOML_SA_NODE_TYPE_LIST);
 
@@ -887,13 +912,46 @@ TOML_NAMESPACE_START
 				using node_ref = impl::copy_cvref<toml::node, Array&&>;
 				static_assert(std::is_reference_v<node_ref>);
 
+#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
+#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED
+				static_assert(impl::always_false<Func, Array, node_ref>, //
+							  TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE);
+#endif
+
+				static_cast<node_ref>(static_cast<Array&&>(arr)[i])
+					.visit(
+						[&]([[maybe_unused]] auto&& elem) //
+						noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>::value)
+						{
+							using elem_ref = for_each_elem_ref<decltype(elem), Array&&>;
+							static_assert(std::is_reference_v<elem_ref>);
+
+							// func(elem, i)
+							if constexpr (std::is_invocable_v<Func&&, elem_ref, size_t>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem), i);
+							}
+
+							// func(i, elem)
+							else if constexpr (std::is_invocable_v<Func&&, size_t, elem_ref>)
+							{
+								static_cast<Func&&>(visitor)(i, static_cast<elem_ref>(elem));
+							}
+
+							// func(elem)
+							else if constexpr (std::is_invocable_v<Func&&, elem_ref>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<elem_ref>(elem));
+							}
+						});
+
+#else
 				const auto keep_going =
 					static_cast<node_ref>(static_cast<Array&&>(arr)[i])
 						.visit(
-							[&](auto&& elem)
-#if !TOML_MSVC // MSVC thinks this is invalid syntax O_o
-								noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>)
-#endif
+							[&]([[maybe_unused]] auto&& elem) //
+							noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>::value)
 							{
 								using elem_ref = for_each_elem_ref<decltype(elem), Array&&>;
 								static_assert(std::is_reference_v<elem_ref>);
@@ -959,6 +1017,7 @@ TOML_NAMESPACE_START
 
 				if (!keep_going)
 					return;
+#endif
 			}
 		}
 
@@ -1026,7 +1085,8 @@ TOML_NAMESPACE_START
 		///
 		/// \see node::visit()
 		template <typename Func>
-		array& for_each(Func&& visitor) & noexcept(for_each_is_nothrow<Func&&, array&>)
+		array& for_each(Func&& visitor) & //
+			noexcept(for_each_is_nothrow<Func&&, array&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), *this);
 			return *this;
@@ -1034,7 +1094,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each element in the array (rvalue overload).
 		template <typename Func>
-		array&& for_each(Func&& visitor) && noexcept(for_each_is_nothrow<Func&&, array&&>)
+		array&& for_each(Func&& visitor) && //
+			noexcept(for_each_is_nothrow<Func&&, array&&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), static_cast<array&&>(*this));
 			return static_cast<array&&>(*this);
@@ -1042,7 +1103,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each element in the array (const lvalue overload).
 		template <typename Func>
-		const array& for_each(Func&& visitor) const& noexcept(for_each_is_nothrow<Func&&, const array&>)
+		const array& for_each(Func&& visitor) const& //
+			noexcept(for_each_is_nothrow<Func&&, const array&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), *this);
 			return *this;
@@ -1050,7 +1112,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each element in the array (const rvalue overload).
 		template <typename Func>
-		const array&& for_each(Func&& visitor) const&& noexcept(for_each_is_nothrow<Func&&, const array&&>)
+		const array&& for_each(Func&& visitor) const&& //
+			noexcept(for_each_is_nothrow<Func&&, const array&&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), static_cast<const array&&>(*this));
 			return static_cast<const array&&>(*this);

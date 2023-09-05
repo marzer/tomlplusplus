@@ -29,6 +29,8 @@ template:
 -   fixed `toml::value::flags()` not being cleared when `std::move`-ing a value
 -   fixed error in README (#195) (@andrewkcorcoran)
 -   fixed compiler error when using NVCC (#198) (@thompsonnoahe)
+-   fixed `noexcept(...)` sometimes being incorrectly derived on `for_each()`
+-   fixed `for_each()` compilation error on GCC &lt;= 7 (#197) (@sagi-ottopia)
 
 #### Changes:
 

@@ -652,6 +652,8 @@ TEST_CASE("tables - for_each")
 		CHECK(bools == 1);
 	}
 
+#if !TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
 	SECTION("early-exit (key, val)")
 	{
 		int count = 0;
@@ -665,4 +667,6 @@ TEST_CASE("tables - for_each")
 		tbl.for_each([&](const auto& /*v*/) noexcept -> bool { return ++count < 3; });
 		CHECK(count == 3);
 	}
+
+#endif
 }

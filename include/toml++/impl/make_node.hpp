@@ -49,14 +49,14 @@ TOML_IMPL_NAMESPACE_START
 				if constexpr (!is_losslessly_convertible_to_native<unwrapped_type>)
 				{
 					if constexpr (std::is_same_v<native_type, int64_t>)
-						static_assert(dependent_false<T>,
+						static_assert(always_false<T>,
 									  "Integral value initializers must be losslessly convertible to int64_t");
 					else if constexpr (std::is_same_v<native_type, double>)
-						static_assert(dependent_false<T>,
+						static_assert(always_false<T>,
 									  "Floating-point value initializers must be losslessly convertible to double");
 					else
 						static_assert(
-							dependent_false<T>,
+							always_false<T>,
 							"Value initializers must be losslessly convertible to one of the TOML value types");
 				}
 
@@ -65,7 +65,7 @@ TOML_IMPL_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 					out = new value_type{ narrow(static_cast<T&&>(val)) };
 #else
-					static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+					static_assert(always_false<T>, "Evaluated unreachable branch!");
 #endif
 				}
 				else

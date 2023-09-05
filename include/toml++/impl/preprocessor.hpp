@@ -11,82 +11,86 @@
 #ifndef __cplusplus
 #error toml++ is a C++ library.
 #endif
+
+#ifndef TOML_CPP
 #ifdef _MSVC_LANG
+#if _MSVC_LANG > __cplusplus
 #define TOML_CPP _MSVC_LANG
-#else
+#endif
+#endif
+#ifndef TOML_CPP
 #define TOML_CPP __cplusplus
 #endif
-#if TOML_CPP >= 202002L
+#if TOML_CPP >= 202900L
+#undef TOML_CPP
+#define TOML_CPP 29
+#elif TOML_CPP >= 202600L
+#undef TOML_CPP
+#define TOML_CPP 26
+#elif TOML_CPP >= 202302L
+#undef TOML_CPP
+#define TOML_CPP 23
+#elif TOML_CPP >= 202002L
 #undef TOML_CPP
 #define TOML_CPP 20
 #elif TOML_CPP >= 201703L
 #undef TOML_CPP
 #define TOML_CPP 17
+#elif TOML_CPP >= 201402L
+#undef TOML_CPP
+#define TOML_CPP 14
+#elif TOML_CPP >= 201103L
+#undef TOML_CPP
+#define TOML_CPP 11
 #else
-#if TOML_CPP < 201103L
+#undef TOML_CPP
+#define TOML_CPP 0
+#endif
+#endif
+
+#if !TOML_CPP
 #error toml++ requires C++17 or higher. For a pre-C++11 TOML library see https://github.com/ToruNiina/Boost.toml
-#elif TOML_CPP < 201703L
+#elif TOML_CPP < 17
 #error toml++ requires C++17 or higher. For a C++11 TOML library see https://github.com/ToruNiina/toml11
 #endif
-#endif
 
 //#=====================================================================================================================
-//# COMPILER / OS
+//# COMPILER
 //#=====================================================================================================================
 
+#ifndef TOML_MAKE_VERSION
 #define TOML_MAKE_VERSION(major, minor, patch) (((major)*10000) + ((minor)*100) + ((patch)))
+#endif
 
-#ifdef __clang__
-#define TOML_CLANG __clang_major__
-#else
-#define TOML_CLANG 0
-#endif
-#ifdef __INTEL_COMPILER
-#define TOML_ICC __INTEL_COMPILER
-#ifdef __ICL
-#define TOML_ICC_CL TOML_ICC
-#else
-#define TOML_ICC_CL 0
-#endif
-#else
-#define TOML_ICC	0
-#define TOML_ICC_CL 0
-#endif
-#if defined(_MSC_VER) && !TOML_CLANG && !TOML_ICC
-#define TOML_MSVC _MSC_VER
-#else
-#define TOML_MSVC 0
-#endif
-#if defined(__GNUC__) && !TOML_CLANG && !TOML_ICC
-#define TOML_GCC __GNUC__
-#else
-#define TOML_GCC 0
-#endif
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(__CYGWIN__)
-#define TOML_WINDOWS 1
-#else
-#define TOML_WINDOWS 0
-#endif
-#if defined(DOXYGEN) || defined(__DOXYGEN__) || defined(__POXY__) || defined(__poxy__)
-#define TOML_DOXYGEN 1
-#else
-#define TOML_DOXYGEN 0
-#endif
+#ifndef TOML_INTELLISENSE
 #ifdef __INTELLISENSE__
 #define TOML_INTELLISENSE 1
 #else
 #define TOML_INTELLISENSE 0
 #endif
-#if defined(__CUDACC__) || defined(__CUDA_ARCH__) || defined(__CUDA_LIBDEVICE__)
-#define TOML_CUDA 1
+#endif
+
+#ifndef TOML_DOXYGEN
+#if defined(DOXYGEN) || defined(__DOXYGEN) || defined(__DOXYGEN__) || defined(__doxygen__) || defined(__POXY__)        \
+	|| defined(__poxy__)
+#define TOML_DOXYGEN 1
 #else
-#define TOML_CUDA 0
+#define TOML_DOXYGEN 0
+#endif
+#endif
+
+#ifndef TOML_CLANG
+#ifdef __clang__
+#define TOML_CLANG __clang_major__
+#else
+#define TOML_CLANG 0
 #endif
 
 // special handling for apple clang; see:
 // - https://github.com/marzer/tomlplusplus/issues/189
 // - https://en.wikipedia.org/wiki/Xcode
-// - https://stackoverflow.com/questions/19387043/how-can-i-reliably-detect-the-version-of-clang-at-preprocessing-time
+// -
+// https://stackoverflow.com/questions/19387043/how-can-i-reliably-detect-the-version-of-clang-at-preprocessing-time
 #if TOML_CLANG && defined(__apple_build_version__)
 #undef TOML_CLANG
 #define TOML_CLANG_VERSION TOML_MAKE_VERSION(__clang_major__, __clang_minor__, __clang_patchlevel__)
@@ -115,46 +119,144 @@
 #endif
 #undef TOML_CLANG_VERSION
 #endif
+#endif
+
+#ifndef TOML_ICC
+#ifdef __INTEL_COMPILER
+#define TOML_ICC __INTEL_COMPILER
+#ifdef __ICL
+#define TOML_ICC_CL TOML_ICC
+#else
+#define TOML_ICC_CL 0
+#endif
+#else
+#define TOML_ICC	0
+#define TOML_ICC_CL 0
+#endif
+#endif
+
+#ifndef TOML_MSVC_LIKE
+#ifdef _MSC_VER
+#define TOML_MSVC_LIKE _MSC_VER
+#else
+#define TOML_MSVC_LIKE 0
+#endif
+#endif
+
+#ifndef TOML_MSVC
+#if TOML_MSVC_LIKE && !TOML_CLANG && !TOML_ICC
+#define TOML_MSVC TOML_MSVC_LIKE
+#else
+#define TOML_MSVC 0
+#endif
+#endif
+
+#ifndef TOML_GCC_LIKE
+#ifdef __GNUC__
+#define TOML_GCC_LIKE __GNUC__
+#else
+#define TOML_GCC_LIKE 0
+#endif
+#endif
+
+#ifndef TOML_GCC
+#if TOML_GCC_LIKE && !TOML_CLANG && !TOML_ICC
+#define TOML_GCC TOML_GCC_LIKE
+#else
+#define TOML_GCC 0
+#endif
+#endif
+
+#ifndef TOML_CUDA
+#if defined(__CUDACC__) || defined(__CUDA_ARCH__) || defined(__CUDA_LIBDEVICE__)
+#define TOML_CUDA 1
+#else
+#define TOML_CUDA 0
+#endif
+#endif
 
 //#=====================================================================================================================
 //# ARCHITECTURE
 //#=====================================================================================================================
 
-// IA64
+#ifndef TOML_ARCH_ITANIUM
 #if defined(__ia64__) || defined(__ia64) || defined(_IA64) || defined(__IA64__) || defined(_M_IA64)
 #define TOML_ARCH_ITANIUM 1
+#define TOML_ARCH_BITNESS 64
 #else
 #define TOML_ARCH_ITANIUM 0
 #endif
+#endif
 
-// AMD64
+#ifndef TOML_ARCH_AMD64
 #if defined(__amd64__) || defined(__amd64) || defined(__x86_64__) || defined(__x86_64) || defined(_M_AMD64)
-#define TOML_ARCH_AMD64 1
+#define TOML_ARCH_AMD64	  1
+#define TOML_ARCH_BITNESS 64
 #else
 #define TOML_ARCH_AMD64 0
 #endif
+#endif
 
-// 32-bit x86
+#ifndef TOML_ARCH_X86
 #if defined(__i386__) || defined(_M_IX86)
-#define TOML_ARCH_X86 1
+#define TOML_ARCH_X86	  1
+#define TOML_ARCH_BITNESS 32
 #else
 #define TOML_ARCH_X86 0
 #endif
+#endif
 
-// ARM
+#ifndef TOML_ARCH_ARM
 #if defined(__aarch64__) || defined(__ARM_ARCH_ISA_A64) || defined(_M_ARM64) || defined(__ARM_64BIT_STATE)             \
 	|| defined(_M_ARM64EC)
-#define TOML_ARCH_ARM32 0
-#define TOML_ARCH_ARM64 1
-#define TOML_ARCH_ARM	1
+#define TOML_ARCH_ARM32	  0
+#define TOML_ARCH_ARM64	  1
+#define TOML_ARCH_ARM	  1
+#define TOML_ARCH_BITNESS 64
 #elif defined(__arm__) || defined(_M_ARM) || defined(__ARM_32BIT_STATE)
-#define TOML_ARCH_ARM32 1
-#define TOML_ARCH_ARM64 0
-#define TOML_ARCH_ARM	1
+#define TOML_ARCH_ARM32	  1
+#define TOML_ARCH_ARM64	  0
+#define TOML_ARCH_ARM	  1
+#define TOML_ARCH_BITNESS 32
 #else
 #define TOML_ARCH_ARM32 0
 #define TOML_ARCH_ARM64 0
 #define TOML_ARCH_ARM	0
+#endif
+#endif
+
+#ifndef TOML_ARCH_BITNESS
+#define TOML_ARCH_BITNESS 0
+#endif
+
+#ifndef TOML_ARCH_X64
+#if TOML_ARCH_BITNESS == 64
+#define TOML_ARCH_X64 1
+#else
+#define TOML_ARCH_X64 0
+#endif
+#endif
+
+//#=====================================================================================================================
+//# OS
+//#=====================================================================================================================
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) || defined(__CYGWIN__)
+#define TOML_WINDOWS 1
+#else
+#define TOML_WINDOWS 0
+#endif
+
+#ifdef __unix__
+#define TOML_UNIX 1
+#else
+#define TOML_UNIX 0
+#endif
+
+#ifdef __linux__
+#define TOML_LINUX 1
+#else
+#define TOML_LINUX 0
 #endif
 
 //#=====================================================================================================================
@@ -162,65 +264,84 @@
 //#=====================================================================================================================
 
 // TOML_HAS_INCLUDE
+#ifndef TOML_HAS_INCLUDE
 #ifdef __has_include
-#define TOML_HAS_INCLUDE(header) __has_include(header)
+#define TOML_HAS_INCLUDE(header)		__has_include(header)
 #else
 #define TOML_HAS_INCLUDE(header) 0
 #endif
+#endif
 
+// TOML_HAS_BUILTIN
+#ifndef TOML_HAS_BUILTIN
 #ifdef __has_builtin
 #define TOML_HAS_BUILTIN(name) __has_builtin(name)
 #else
 #define TOML_HAS_BUILTIN(name) 0
 #endif
+#endif
 
 // TOML_HAS_FEATURE
+#ifndef TOML_HAS_FEATURE
 #ifdef __has_feature
 #define TOML_HAS_FEATURE(name) __has_feature(name)
 #else
 #define TOML_HAS_FEATURE(name) 0
 #endif
+#endif
 
 // TOML_HAS_ATTR
+#ifndef TOML_HAS_ATTR
 #ifdef __has_attribute
 #define TOML_HAS_ATTR(attr) __has_attribute(attr)
 #else
 #define TOML_HAS_ATTR(attr) 0
 #endif
+#endif
 
 // TOML_HAS_CPP_ATTR
+#ifndef TOML_HAS_CPP_ATTR
 #ifdef __has_cpp_attribute
 #define TOML_HAS_CPP_ATTR(attr) __has_cpp_attribute(attr)
 #else
 #define TOML_HAS_CPP_ATTR(attr) 0
 #endif
+#endif
+
+// TOML_ATTR (gnu attributes)
+#ifndef TOML_ATTR
+#if TOML_CLANG || TOML_GCC_LIKE
+#define TOML_ATTR(...) __attribute__((__VA_ARGS__))
+#else
+#define TOML_ATTR(...)
+#endif
+#endif
+
+// TOML_DECLSPEC (msvc attributes)
+#ifndef TOML_DECLSPEC
+#if TOML_MSVC_LIKE
+#define TOML_DECLSPEC(...) __declspec(__VA_ARGS__)
+#else
+#define TOML_DECLSPEC(...)
+#endif
+#endif
 
 // TOML_COMPILER_HAS_EXCEPTIONS
+#ifndef TOML_COMPILER_HAS_EXCEPTIONS
 #if defined(__EXCEPTIONS) || defined(_CPPUNWIND) || defined(__cpp_exceptions)
 #define TOML_COMPILER_HAS_EXCEPTIONS 1
 #else
 #define TOML_COMPILER_HAS_EXCEPTIONS 0
 #endif
+#endif
 
 // TOML_COMPILER_HAS_RTTI
+#ifndef TOML_COMPILER_HAS_RTTI
 #if defined(_CPPRTTI) || defined(__GXX_RTTI) || TOML_HAS_FEATURE(cxx_rtti)
 #define TOML_COMPILER_HAS_RTTI 1
 #else
 #define TOML_COMPILER_HAS_RTTI 0
 #endif
-
-// TOML_ATTR (gnu attributes)
-#if TOML_CLANG || TOML_GCC || defined(__GNUC__)
-#define TOML_ATTR(...) __attribute__((__VA_ARGS__))
-#else
-#define TOML_ATTR(...)
-#endif
-
-// TOML_DECLSPEC (msvc attributes)
-#ifdef _MSC_VER
-#define TOML_DECLSPEC(...) __declspec(__VA_ARGS__)
-#else
-#define TOML_DECLSPEC(...)
 #endif
 
 // TOML_CONCAT
@@ -236,6 +357,11 @@
 #define TOML_PRAGMA_CLANG(decl) _Pragma(TOML_MAKE_STRING(clang decl))
 #else
 #define TOML_PRAGMA_CLANG(decl)
+#endif
+#if TOML_CLANG >= 8
+#define TOML_PRAGMA_CLANG_GE_8(decl) TOML_PRAGMA_CLANG(decl)
+#else
+#define TOML_PRAGMA_CLANG_GE_8(decl)
 #endif
 #if TOML_CLANG >= 9
 #define TOML_PRAGMA_CLANG_GE_9(decl) TOML_PRAGMA_CLANG(decl)
@@ -321,23 +447,51 @@
 #endif
 
 // pure + const
-// clang-format off
+#ifndef TOML_PURE
 #ifdef NDEBUG
-	#define TOML_PURE					TOML_DECLSPEC(noalias)	TOML_ATTR(__pure__)
-	#define TOML_CONST					TOML_DECLSPEC(noalias)	TOML_ATTR(__const__)
-	#define TOML_PURE_GETTER			TOML_NODISCARD						TOML_PURE
-	#define TOML_CONST_GETTER			TOML_NODISCARD						TOML_CONST
-	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_PURE
-	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE	TOML_CONST
+#define TOML_PURE                                                                                                      \
+	TOML_DECLSPEC(noalias)                                                                                             \
+	TOML_ATTR(pure)
 #else
-	#define TOML_PURE
-	#define TOML_CONST
-	#define TOML_PURE_GETTER			TOML_NODISCARD	
-	#define TOML_CONST_GETTER			TOML_NODISCARD	
-	#define TOML_PURE_INLINE_GETTER		TOML_NODISCARD	TOML_ALWAYS_INLINE
-	#define TOML_CONST_INLINE_GETTER	TOML_NODISCARD	TOML_ALWAYS_INLINE
+#define TOML_PURE
 #endif
-// clang-format on
+#endif
+#ifndef TOML_CONST
+#ifdef NDEBUG
+#define TOML_CONST                                                                                                     \
+	TOML_DECLSPEC(noalias)                                                                                             \
+	TOML_ATTR(const)
+#else
+#define TOML_CONST
+#endif
+#endif
+#ifndef TOML_INLINE_GETTER
+#define TOML_INLINE_GETTER                                                                                             \
+	TOML_NODISCARD                                                                                                     \
+	TOML_ALWAYS_INLINE
+#endif
+#ifndef TOML_PURE_GETTER
+#define TOML_PURE_GETTER                                                                                               \
+	TOML_NODISCARD                                                                                                     \
+	TOML_PURE
+#endif
+#ifndef TOML_PURE_INLINE_GETTER
+#define TOML_PURE_INLINE_GETTER                                                                                        \
+	TOML_NODISCARD                                                                                                     \
+	TOML_ALWAYS_INLINE                                                                                                 \
+	TOML_PURE
+#endif
+#ifndef TOML_CONST_GETTER
+#define TOML_CONST_GETTER                                                                                              \
+	TOML_NODISCARD                                                                                                     \
+	TOML_CONST
+#endif
+#ifndef TOML_CONST_INLINE_GETTER
+#define TOML_CONST_INLINE_GETTER                                                                                       \
+	TOML_NODISCARD                                                                                                     \
+	TOML_ALWAYS_INLINE                                                                                                 \
+	TOML_CONST
+#endif
 
 // TOML_ASSUME
 #ifdef _MSC_VER
@@ -495,6 +649,7 @@
 	static_assert(true)
 
 #define TOML_DISABLE_ARITHMETIC_WARNINGS                                                                               \
+	TOML_PRAGMA_CLANG_GE_10(diagnostic ignored "-Wimplicit-int-float-conversion")                                      \
 	TOML_PRAGMA_CLANG(diagnostic ignored "-Wfloat-equal")                                                              \
 	TOML_PRAGMA_CLANG(diagnostic ignored "-Wdouble-promotion")                                                         \
 	TOML_PRAGMA_CLANG(diagnostic ignored "-Wchar-subscripts")                                                          \
@@ -502,6 +657,7 @@
 	static_assert(true)
 
 #define TOML_DISABLE_SPAM_WARNINGS                                                                                     \
+	TOML_PRAGMA_CLANG_GE_8(diagnostic ignored "-Wdefaulted-function-deleted")                                          \
 	TOML_PRAGMA_CLANG_GE_9(diagnostic ignored "-Wctad-maybe-unsupported")                                              \
 	TOML_PRAGMA_CLANG_GE_10(diagnostic ignored "-Wzero-as-null-pointer-constant")                                      \
 	TOML_PRAGMA_CLANG_GE_11(diagnostic ignored "-Wsuggest-destructor-override")                                        \

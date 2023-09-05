@@ -465,8 +465,8 @@ TOML_IMPL_NAMESPACE_START
 	using copy_cvref =
 		copy_ref<copy_ref<copy_cv<std::remove_reference_t<Dest>, std::remove_reference_t<Src>>, Dest>, Src>;
 
-	template <typename T>
-	inline constexpr bool dependent_false = false;
+	template <typename...>
+	inline constexpr bool always_false = false;
 
 	template <typename T, typename... U>
 	inline constexpr bool first_is_same = false;

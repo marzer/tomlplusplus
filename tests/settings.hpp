@@ -16,7 +16,7 @@
 #define USE_SINGLE_HEADER 0
 #endif
 #if defined(LEAK_TESTS) && LEAK_TESTS
-#define TOML_CONFIG_HEADER "leakproof.h"
+#define TOML_CONFIG_HEADER "leakproof.hpp"
 #else
 #undef LEAK_TESTS
 #define LEAK_TESTS 0

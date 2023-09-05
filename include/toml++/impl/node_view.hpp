@@ -501,7 +501,7 @@ TOML_NAMESPACE_START
 
 #else
 
-				static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<T>, "Evaluated unreachable branch!");
 
 #endif
 			}
@@ -656,7 +656,7 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 				return lhs == impl::narrow(rhs);
 #else
-				static_assert(impl::dependent_false<T>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<T>, "Evaluated unreachable branch!");
 #endif
 			}
 			else

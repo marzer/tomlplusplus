@@ -1011,7 +1011,7 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 				return widen(str);
 #else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				static_assert(always_false<T>, "Evaluated unreachable branch!");
 #endif
 			}
 
@@ -1023,7 +1023,7 @@ TOML_NAMESPACE_START
 			else if constexpr (std::is_same_v<T, const char8_t*>)
 				return reinterpret_cast<const char8_t*>(str.c_str());
 			else
-				static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+				static_assert(always_false<T>, "Evaluated unreachable branch!");
 
 #endif
 		}
@@ -1191,7 +1191,7 @@ TOML_NAMESPACE_START
 
 #else
 
-			static_assert(dependent_false<T>, "Evaluated unreachable branch!");
+			static_assert(always_false<T>, "Evaluated unreachable branch!");
 
 #endif
 		}

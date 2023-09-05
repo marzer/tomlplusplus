@@ -194,6 +194,8 @@ TEST_CASE("array::for_each")
 		CHECK(arr2 == toml::array{ 0, 1, 2, 6 });
 	}
 
+#if !TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
 	// check that early-stopping works
 	{
 		toml::array arr2;
@@ -210,6 +212,8 @@ TEST_CASE("array::for_each")
 			});
 		CHECK(arr2 == toml::array{ 0, 1, 2, 3.0 });
 	}
+
+#endif
 }
 
 TEST_CASE("table::for_each")
@@ -356,6 +360,8 @@ TEST_CASE("table::for_each")
 						{ "six", 6 } });
 	}
 
+#if !TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
 	// check that early-stopping works
 	{
 		toml::table tbl2;
@@ -369,4 +375,6 @@ TEST_CASE("table::for_each")
 			});
 		CHECK(tbl2.size() == 3u);
 	}
+
+#endif
 }

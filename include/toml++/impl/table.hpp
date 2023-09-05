@@ -841,49 +841,51 @@ TOML_NAMESPACE_START
 		using for_each_value_ref = impl::copy_cvref<impl::wrap_node<impl::remove_cvref<impl::unwrap_node<T>>>, Table>;
 
 		template <typename Func, typename Table, typename T>
-		static constexpr bool can_for_each = std::is_invocable_v<Func, const key&, for_each_value_ref<T, Table>> //
-										  || std::is_invocable_v<Func, for_each_value_ref<T, Table>>;
+		using can_for_each = std::disjunction<std::is_invocable<Func, const key&, for_each_value_ref<T, Table>>, //
+											  std::is_invocable<Func, for_each_value_ref<T, Table>>>;
 
 		template <typename Func, typename Table, typename T>
-		static constexpr bool can_for_each_nothrow =
-			std::is_nothrow_invocable_v<Func, const key&, for_each_value_ref<T, Table>> //
-			|| std::is_nothrow_invocable_v<Func, for_each_value_ref<T, Table>>;
+		using can_for_each_nothrow = std::conditional_t<
+			// first form
+			std::is_invocable_v<Func, const key&, for_each_value_ref<T, Table>>,
+			std::is_nothrow_invocable<Func, const key&, for_each_value_ref<T, Table>>,
+			std::conditional_t<
+				// second form
+				std::is_invocable_v<Func, for_each_value_ref<T, Table>>,
+				std::is_nothrow_invocable<Func, for_each_value_ref<T, Table>>,
+				std::false_type>>;
 
 		template <typename Func, typename Table>
-		static constexpr bool can_for_each_any = can_for_each<Func, Table, table>		//
-											  || can_for_each<Func, Table, array>		//
-											  || can_for_each<Func, Table, std::string> //
-											  || can_for_each<Func, Table, int64_t>		//
-											  || can_for_each<Func, Table, double>		//
-											  || can_for_each<Func, Table, bool>		//
-											  || can_for_each<Func, Table, date>		//
-											  || can_for_each<Func, Table, time>		//
-											  || can_for_each<Func, Table, date_time>;
+		using can_for_each_any = std::disjunction<can_for_each<Func, Table, table>,
+												  can_for_each<Func, Table, array>,
+												  can_for_each<Func, Table, std::string>,
+												  can_for_each<Func, Table, int64_t>,
+												  can_for_each<Func, Table, double>,
+												  can_for_each<Func, Table, bool>,
+												  can_for_each<Func, Table, date>,
+												  can_for_each<Func, Table, time>,
+												  can_for_each<Func, Table, date_time>>;
 
 		template <typename Func, typename Table, typename T>
-		static constexpr bool for_each_is_nothrow_one = !can_for_each<Func, Table, T> //
-													 || can_for_each_nothrow<Func, Table, T>;
-
-		// clang-format off
-
-
-		  template <typename Func, typename Table>
-		  static constexpr bool for_each_is_nothrow = for_each_is_nothrow_one<Func, Table, table>		//
-												   && for_each_is_nothrow_one<Func, Table, array>		//
-												   && for_each_is_nothrow_one<Func, Table, std::string> //
-												   && for_each_is_nothrow_one<Func, Table, int64_t>		//
-												   && for_each_is_nothrow_one<Func, Table, double>		//
-												   && for_each_is_nothrow_one<Func, Table, bool>		//
-												   && for_each_is_nothrow_one<Func, Table, date>		//
-												   && for_each_is_nothrow_one<Func, Table, time>		//
-												   && for_each_is_nothrow_one<Func, Table, date_time>;
-
-		// clang-format on
+		using for_each_is_nothrow_one = std::disjunction<std::negation<can_for_each<Func, Table, T>>, //
+														 can_for_each_nothrow<Func, Table, T>>;
 
 		template <typename Func, typename Table>
-		static void do_for_each(Func&& visitor, Table&& tbl) noexcept(for_each_is_nothrow<Func&&, Table&&>)
+		using for_each_is_nothrow = std::conjunction<for_each_is_nothrow_one<Func, Table, table>,
+													 for_each_is_nothrow_one<Func, Table, array>,
+													 for_each_is_nothrow_one<Func, Table, std::string>,
+													 for_each_is_nothrow_one<Func, Table, int64_t>,
+													 for_each_is_nothrow_one<Func, Table, double>,
+													 for_each_is_nothrow_one<Func, Table, bool>,
+													 for_each_is_nothrow_one<Func, Table, date>,
+													 for_each_is_nothrow_one<Func, Table, time>,
+													 for_each_is_nothrow_one<Func, Table, date_time>>;
+
+		template <typename Func, typename Table>
+		static void do_for_each(Func&& visitor, Table&& tbl) //
+			noexcept(for_each_is_nothrow<Func&&, Table&&>::value)
 		{
-			static_assert(can_for_each_any<Func&&, Table&&>,
+			static_assert(can_for_each_any<Func&&, Table&&>::value,
 						  "TOML table for_each visitors must be invocable for at least one of the toml::node "
 						  "specializations:" TOML_SA_NODE_TYPE_LIST);
 
@@ -894,13 +896,41 @@ TOML_NAMESPACE_START
 				using node_ref = impl::copy_cvref<toml::node, Table&&>;
 				static_assert(std::is_reference_v<node_ref>);
 
+#if TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN
+
+#ifndef TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_ACKNOWLEDGED
+				static_assert(impl::always_false<Func, Table, kvp_type, node_ref>, //
+							  TOML_RETURN_BOOL_FROM_FOR_EACH_BROKEN_MESSAGE);
+#endif
+
+				static_cast<node_ref>(*kvp.second)
+					.visit(
+						[&]([[maybe_unused]] auto&& v) //
+						noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
+						{
+							using value_ref = for_each_value_ref<decltype(v), Table&&>;
+							static_assert(std::is_reference_v<value_ref>);
+
+							// func(key, val)
+							if constexpr (std::is_invocable_v<Func&&, const key&, value_ref>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<const key&>(kvp.first),
+															 static_cast<value_ref>(v));
+							}
+
+							// func(val)
+							else if constexpr (std::is_invocable_v<Func&&, value_ref>)
+							{
+								static_cast<Func&&>(visitor)(static_cast<value_ref>(v));
+							}
+						});
+
+#else
 				const auto keep_going =
 					static_cast<node_ref>(*kvp.second)
 						.visit(
-							[&](auto&& v)
-#if !TOML_MSVC // MSVC thinks this is invalid syntax O_o
-								noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>)
-#endif
+							[&]([[maybe_unused]] auto&& v) //
+							noexcept(for_each_is_nothrow_one<Func&&, Table&&, decltype(v)>::value)
 							{
 								using value_ref = for_each_value_ref<decltype(v), Table&&>;
 								static_assert(std::is_reference_v<value_ref>);
@@ -949,6 +979,7 @@ TOML_NAMESPACE_START
 
 				if (!keep_going)
 					return;
+#endif
 			}
 		}
 
@@ -1037,7 +1068,8 @@ TOML_NAMESPACE_START
 		///
 		/// \see node::visit()
 		template <typename Func>
-		table& for_each(Func&& visitor) & noexcept(for_each_is_nothrow<Func&&, table&>)
+		table& for_each(Func&& visitor) & //
+			noexcept(for_each_is_nothrow<Func&&, table&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), *this);
 			return *this;
@@ -1045,7 +1077,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each key-value pair in the table (rvalue overload).
 		template <typename Func>
-		table&& for_each(Func&& visitor) && noexcept(for_each_is_nothrow<Func&&, table&&>)
+		table&& for_each(Func&& visitor) && //
+			noexcept(for_each_is_nothrow<Func&&, table&&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), static_cast<table&&>(*this));
 			return static_cast<table&&>(*this);
@@ -1053,7 +1086,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each key-value pair in the table (const lvalue overload).
 		template <typename Func>
-		const table& for_each(Func&& visitor) const& noexcept(for_each_is_nothrow<Func&&, const table&>)
+		const table& for_each(Func&& visitor) const& //
+			noexcept(for_each_is_nothrow<Func&&, const table&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), *this);
 			return *this;
@@ -1061,7 +1095,8 @@ TOML_NAMESPACE_START
 
 		/// \brief	Invokes a visitor on each key-value pair in the table (const rvalue overload).
 		template <typename Func>
-		const table&& for_each(Func&& visitor) const&& noexcept(for_each_is_nothrow<Func&&, const table&&>)
+		const table&& for_each(Func&& visitor) const&& //
+			noexcept(for_each_is_nothrow<Func&&, const table&&>::value)
 		{
 			do_for_each(static_cast<Func&&>(visitor), static_cast<const table&&>(*this));
 			return static_cast<const table&&>(*this);
@@ -1216,7 +1251,7 @@ TOML_NAMESPACE_START
 			return contains(impl::narrow(key));
 		}
 
-#endif	// TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
@@ -1448,7 +1483,7 @@ TOML_NAMESPACE_START
 												impl::narrow(static_cast<KeyType&&>(key)),
 												static_cast<ValueArgs&&>(args)...);
 #else
-				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
@@ -1567,7 +1602,7 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 				return insert(impl::narrow(static_cast<KeyType&&>(key)), static_cast<ValueType&&>(val), flags);
 #else
-				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
@@ -1714,7 +1749,7 @@ TOML_NAMESPACE_START
 										static_cast<ValueType&&>(val),
 										flags);
 #else
-				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
@@ -1793,7 +1828,7 @@ TOML_NAMESPACE_START
 				return emplace<value_type>(impl::narrow(static_cast<KeyType&&>(key)),
 										   static_cast<ValueArgs&&>(args)...);
 #else
-				static_assert(impl::dependent_false<KeyType>, "Evaluated unreachable branch!");
+				static_assert(impl::always_false<KeyType>, "Evaluated unreachable branch!");
 #endif
 			}
 			else
@@ -1900,7 +1935,7 @@ TOML_NAMESPACE_START
 			return node_view<const node>{ get(key) };
 		}
 
-#endif	// TOML_ENABLE_WINDOWS_COMPAT
+#endif // TOML_ENABLE_WINDOWS_COMPAT
 
 		/// @}
 
