@@ -35,12 +35,15 @@ TOML_ENABLE_WARNINGS;
 	"Thanks!"
 
 static_assert(CHAR_BIT == 8, TOML_ENV_MESSAGE);
+#ifdef FLT_RADIX
 static_assert(FLT_RADIX == 2, TOML_ENV_MESSAGE);
+#endif
 static_assert('A' == 65, TOML_ENV_MESSAGE);
 static_assert(sizeof(double) == 8, TOML_ENV_MESSAGE);
 static_assert(std::numeric_limits<double>::is_iec559, TOML_ENV_MESSAGE);
 static_assert(std::numeric_limits<double>::digits == 53, TOML_ENV_MESSAGE);
 static_assert(std::numeric_limits<double>::digits10 == 15, TOML_ENV_MESSAGE);
+static_assert(std::numeric_limits<double>::radix == 2, TOML_ENV_MESSAGE);
 
 #undef TOML_ENV_MESSAGE
 #endif // !TOML_DISABLE_ENVIRONMENT_CHECKS
