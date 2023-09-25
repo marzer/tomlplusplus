@@ -59,7 +59,7 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_LIST_END																						\
 																											\
 	TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"		\
-	TOML_SA_LIST_BEG "any other integer type"																\
+	TOML_SA_LIST_BEG "any other integral type"																\
 	TOML_SA_LIST_SEP "any floating-point type"																\
 	TOML_SA_LIST_END																						\
 																											\
@@ -1221,7 +1221,7 @@ TOML_NAMESPACE_START
 				TOML_SA_LIST_END
 
 				TOML_SA_LIST_NXT "A non-view type capable of (reasonably) representing a native TOML value type"
-				TOML_SA_LIST_BEG "any other integer type"
+				TOML_SA_LIST_BEG "any other integral type"
 				TOML_SA_LIST_SEP "any floating-point type"
 				TOML_SA_LIST_END
 

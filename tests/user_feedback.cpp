@@ -393,4 +393,23 @@ b = []
 			y = 2
 		)"sv);
 	}
+
+	SECTION("tomlplusplus/issues/207") // https://github.com/marzer/tomlplusplus/issues/207
+	{
+		enum class an_enum
+		{
+			zero,
+			one,
+			two,
+			three
+		};
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   "val = 2\n",
+							   [](auto&& tbl)
+							   {
+								   const auto val = tbl["val"].template value_or<an_enum>(an_enum::zero);
+								   CHECK(val == an_enum::two);
+							   });
+	}
 }

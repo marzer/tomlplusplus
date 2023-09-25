@@ -476,10 +476,22 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T, typename... U>
 	inline constexpr bool first_is_same<T, T, U...> = true;
 
+	template <typename T, bool = std::is_enum_v<T>>
+	struct underlying_type_
+	{
+		using type = std::underlying_type_t<T>;
+	};
+	template <typename T>
+	struct underlying_type_<T, false>
+	{
+		using type = T;
+	};
+	template <typename T>
+	using underlying_type = typename underlying_type_<T>::type;
+
 	// general value traits
 	// (as they relate to their equivalent native TOML type)
-	template <typename T>
-	struct value_traits
+	struct default_value_traits
 	{
 		using native_type										  = void;
 		static constexpr bool is_native							  = false;
@@ -489,6 +501,27 @@ TOML_IMPL_NAMESPACE_START
 		static constexpr auto type								  = node_type::none;
 	};
 
+	template <typename T>
+	struct value_traits;
+
+	template <typename T, bool = std::is_enum_v<T>>
+	struct value_traits_base_selector
+	{
+		static_assert(!is_cvref<T>);
+
+		using type = default_value_traits;
+	};
+	template <typename T>
+	struct value_traits_base_selector<T, true>
+	{
+		static_assert(!is_cvref<T>);
+
+		using type = value_traits<underlying_type<T>>;
+	};
+
+	template <typename T>
+	struct value_traits : value_traits_base_selector<T>::type
+	{};
 	template <typename T>
 	struct value_traits<const T> : value_traits<T>
 	{};
@@ -509,32 +542,35 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct integer_limits
 	{
-		static constexpr auto min = (std::numeric_limits<T>::min)();
-		static constexpr auto max = (std::numeric_limits<T>::max)();
+		static constexpr T min = T{ (std::numeric_limits<underlying_type<T>>::min)() };
+		static constexpr T max = T{ (std::numeric_limits<underlying_type<T>>::max)() };
 	};
 	template <typename T>
 	struct integer_traits_base : integer_limits<T>
 	{
 		using native_type				= int64_t;
-		static constexpr bool is_native = std::is_same_v<T, native_type>;
-		static constexpr bool is_signed = static_cast<T>(-1) < T{}; // for impls not specializing std::is_signed<T>
+		static constexpr bool is_native = std::is_same_v<underlying_type<T>, native_type>;
+		static constexpr bool is_signed = static_cast<underlying_type<T>>(-1) < underlying_type<T>{};
 		static constexpr auto type		= node_type::integer;
 		static constexpr bool can_partially_represent_native = true;
 	};
 	template <typename T>
 	struct unsigned_integer_traits : integer_traits_base<T>
 	{
-		static constexpr bool is_losslessly_convertible_to_native = integer_limits<T>::max <= 9223372036854775807ULL;
-		static constexpr bool can_represent_native				  = false;
+		static constexpr bool is_losslessly_convertible_to_native =
+			integer_limits<underlying_type<T>>::max <= 9223372036854775807ULL;
+		static constexpr bool can_represent_native = false;
 	};
 	template <typename T>
 	struct signed_integer_traits : integer_traits_base<T>
 	{
 		using native_type = int64_t;
 		static constexpr bool is_losslessly_convertible_to_native =
-			integer_limits<T>::min >= (-9223372036854775807LL - 1LL) && integer_limits<T>::max <= 9223372036854775807LL;
+			integer_limits<underlying_type<T>>::min >= (-9223372036854775807LL - 1LL)
+			&& integer_limits<underlying_type<T>>::max <= 9223372036854775807LL;
 		static constexpr bool can_represent_native =
-			integer_limits<T>::min <= (-9223372036854775807LL - 1LL) && integer_limits<T>::max >= 9223372036854775807LL;
+			integer_limits<underlying_type<T>>::min <= (-9223372036854775807LL - 1LL)
+			&& integer_limits<underlying_type<T>>::max >= 9223372036854775807LL;
 	};
 	template <typename T, bool S = integer_traits_base<T>::is_signed>
 	struct integer_traits : signed_integer_traits<T>

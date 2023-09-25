@@ -33,6 +33,10 @@ template:
 -   fixed `for_each()` compilation error on GCC &lt;= 7 (#197) (@sagi-ottopia, @damirbarr)
 -   fixed `FLT_RADIX` check getting broken by Intel MKL headers (#202) (@iago-lito)
 
+#### Additions
+
+-   improved support for using enums with `value_or()`
+
 #### Changes:
 
 -   renamed header files to have `.hpp` extension (`toml.h` is still present for backwards-compatibility)
