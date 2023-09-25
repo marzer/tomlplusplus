@@ -23,6 +23,12 @@
 #include "unicode.hpp"
 TOML_DISABLE_WARNINGS;
 #include <istream>
+
+#if defined(__ANDROID_API__) && __ANDROID_API__ < 24
+    // Cf. https://android.googlesource.com/platform/bionic/+/master/docs/32-bit-abi.md#32_bit-and
+    #define ftello ftell
+    #define fseeko fseek
+#endif
 #include <fstream>
 #if TOML_INT_CHARCONV || TOML_FLOAT_CHARCONV
 #include <charconv>
