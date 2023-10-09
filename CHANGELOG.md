@@ -32,6 +32,7 @@ template:
 -   fixed `noexcept(...)` sometimes being incorrectly derived on `for_each()`
 -   fixed `for_each()` compilation error on GCC &lt;= 7 (#197) (@sagi-ottopia, @damirbarr)
 -   fixed `FLT_RADIX` check getting broken by Intel MKL headers (#202) (@iago-lito)
+-   fixed keys containing `\t` incorrectly formatting as bare keys (@jasmine-zhu, @arp242)
 
 #### Additions
 

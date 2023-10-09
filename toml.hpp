@@ -16561,6 +16561,10 @@ TOML_IMPL_NAMESPACE_START
 				bad_unicode();
 		}
 
+		// strings with line breaks and tabs can't be bare
+		if (!!(traits & (formatted_string_traits::line_breaks | formatted_string_traits::tabs)))
+			traits |= formatted_string_traits::non_bare;
+
 		// if the string meets the requirements of being 'bare' we can emit a bare string
 		// (bare strings are composed of letters and numbers; no whitespace, control chars, quotes, etc)
 		if (!(traits & formatted_string_traits::non_bare)

@@ -412,4 +412,22 @@ b = []
 								   CHECK(val == an_enum::two);
 							   });
 	}
+
+	SECTION("tomlplusplus/issues/176") // https://github.com/marzer/tomlplusplus/issues/176
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   R"(
+								"a"    = "x\ty"
+								"a\tb" = "x\ty"
+								)",
+							   [](auto&& tbl)
+							   {
+								   CHECK(tbl["a"]);
+								   CHECK(tbl["a\tb"]);
+
+								   std::stringstream ss;
+								   ss << tbl;
+								   CHECK(ss.str() == "a = 'x\ty'\n'a\tb' = 'x\ty'"sv);
+							   });
+	}
 }

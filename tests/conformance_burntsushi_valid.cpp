@@ -67,11 +67,15 @@ Job: XXXX""",
 	static constexpr auto bool_bool = R"(t = true
 f = false)"sv;
 
-	static constexpr auto comment_at_eof	 = R"(# This is a full-line comment
+	static constexpr auto comment_after_literal_no_ws = R"(inf=inf#infinity
+nan=nan#not a number
+true=true#true
+false=false#false)"sv;
+	static constexpr auto comment_at_eof			  = R"(# This is a full-line comment
 key = "value" # This is a comment at the end of a line)"sv;
-	static constexpr auto comment_at_eof2	 = R"(# This is a full-line comment
+	static constexpr auto comment_at_eof2			  = R"(# This is a full-line comment
 key = "value" # This is a comment at the end of a line)"sv;
-	static constexpr auto comment_everywhere = R"(# Top comment.
+	static constexpr auto comment_everywhere		  = R"(# Top comment.
   # Top comment.
 # Top comment.
 
@@ -99,8 +103,8 @@ more = [ # Comment
 # Make sure the space between the datetime and "#" isn't lexed.
 dt = 1979-05-27T07:32:12-07:00  # c
 d = 1979-05-27 # Comment)"sv;
-	static constexpr auto comment_noeol		 = R"(# single comment without any eol characters)"sv;
-	static constexpr auto comment_tricky	 = R"([section]#attached comment
+	static constexpr auto comment_noeol				  = R"(# single comment without any eol characters)"sv;
+	static constexpr auto comment_tricky			  = R"([section]#attached comment
 #[notsection]
 one = "11"#cmt
 two = "22#"
@@ -1491,6 +1495,22 @@ Job: XXXX)"sv,
 							   });
 	}
 
+	SECTION("comment-after-literal-no-ws")
+	{
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   comment_after_literal_no_ws,
+							   [](toml::table&& tbl) // comment-after-literal-no-ws
+							   {
+								   const auto expected = toml::table{
+									   { R"(false)"sv, false },
+									   { R"(inf)"sv, std::numeric_limits<double>::infinity() },
+									   { R"(nan)"sv, std::numeric_limits<double>::quiet_NaN() },
+									   { R"(true)"sv, true },
+								   };
+								   REQUIRE(tbl == expected);
+							   });
+	}
+
 	SECTION("comment-at-eof")
 	{
 		parsing_should_succeed(FILE_LINE_ARGS,
@@ -1528,8 +1548,8 @@ Job: XXXX)"sv,
 					{ R"(group)"sv,
 					  toml::table{
 						  { R"(answer)"sv, 42 },
-						  { R"(dt)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 12 }, { -7, 0 } } },
 						  { R"(d)"sv, toml::date{ 1979, 5, 27 } },
+						  { R"(dt)"sv, toml::date_time{ { 1979, 5, 27 }, { 7, 32, 12 }, { -7, 0 } } },
 						  { R"(more)"sv,
 							toml::array{
 								42,
@@ -1857,13 +1877,13 @@ Job: XXXX)"sv,
 							   [](toml::table&& tbl) // float-zero
 							   {
 								   const auto expected = toml::table{
-									   { R"(zero)"sv, 0.0 },
-									   { R"(signed-pos)"sv, 0.0 },
-									   { R"(signed-neg)"sv, 0.0 },
 									   { R"(exponent)"sv, 0.0 },
-									   { R"(exponent-two-0)"sv, 0.0 },
+									   { R"(exponent-signed-neg)"sv, -0.0 },
 									   { R"(exponent-signed-pos)"sv, 0.0 },
-									   { R"(exponent-signed-neg)"sv, 0.0 },
+									   { R"(exponent-two-0)"sv, 0.0 },
+									   { R"(signed-neg)"sv, -0.0 },
+									   { R"(signed-pos)"sv, 0.0 },
+									   { R"(zero)"sv, 0.0 },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -2517,16 +2537,16 @@ another line)"sv },
 										 toml::table{
 											 { R"(x)"sv, R"(empty.x)"sv },
 										 } },
-									   { R"(x)"sv,
-										 toml::table{
-											 { ""sv, R"(x.empty)"sv },
-										 } },
 									   { R"(a)"sv,
 										 toml::table{
 											 { ""sv,
 											   toml::table{
 												   { ""sv, R"(empty.empty)"sv },
 											   } },
+										 } },
+									   { R"(x)"sv,
+										 toml::table{
+											 { ""sv, R"(x.empty)"sv },
 										 } },
 								   };
 								   REQUIRE(tbl == expected);
@@ -4093,9 +4113,9 @@ has ' a quote character
 and more than
 one newline
 in it.)"sv },
-									   { R"(oneline)"sv, R"(This string has a ' quote character.)"sv },
 									   { R"(multiline_with_tab)"sv, R"(First line
 	 Followed by a tab)"sv },
+									   { R"(oneline)"sv, R"(This string has a ' quote character.)"sv },
 								   };
 								   REQUIRE(tbl == expected);
 							   });
@@ -4463,11 +4483,11 @@ in it.)"sv },
 								   const auto expected = toml::table{
 									   { ""sv,
 										 toml::table{
-											 { R"(x)"sv, 1 },
 											 { R"(a)"sv,
 											   toml::table{
 												   { R"(x)"sv, 2 },
 											   } },
+											 { R"(x)"sv, 1 },
 										 } },
 									   { R"(a)"sv,
 										 toml::table{
@@ -4501,10 +4521,10 @@ in it.)"sv },
 							   [](toml::table&& tbl) // table-keyword
 							   {
 								   const auto expected = toml::table{
-									   { R"(true)"sv, toml::table{} },
 									   { R"(false)"sv, toml::table{} },
 									   { R"(inf)"sv, toml::table{} },
 									   { R"(nan)"sv, toml::table{} },
+									   { R"(true)"sv, toml::table{} },
 								   };
 								   REQUIRE(tbl == expected);
 							   });

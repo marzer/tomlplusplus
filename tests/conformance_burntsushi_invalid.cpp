@@ -105,6 +105,8 @@ d = 2006-01-01T00:60:00-00:00)"sv;
 d = 2006-13-01T00:00:00-00:00)"sv;
 	static constexpr auto datetime_month_under = R"(# date-month      = 2DIGIT  ; 01-12
 d = 2007-00-01T00:00:00-00:00)"sv;
+	static constexpr auto datetime_no_leads_month	   = R"(# Month "7" instead of "07"; the leading zero is required.
+no-leads = 1987-7-05T17:45:00Z)"sv;
 	static constexpr auto datetime_no_leads_with_milli = R"(# Day "5" instead of "05"; the leading zero is required.
 with-milli = 1987-07-5T17:45:00.12Z)"sv;
 	static constexpr auto datetime_no_leads			   = R"(# Month "7" instead of "07"; the leading zero is required.
@@ -115,12 +117,8 @@ no-t = 1987-07-0517:45:00Z)"sv;
 		R"(# time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
 #                           ; rules
 d = 2006-01-01T00:00:61-00:00)"sv;
-	static constexpr auto datetime_time_no_leads_2 = R"(# Leading 0 is always required.
-d = 01:32:0)"sv;
-	static constexpr auto datetime_time_no_leads   = R"(# Leading 0 is always required.
-d = 1:32:00)"sv;
-	static constexpr auto datetime_trailing_t	   = R"(# Date cannot end with trailing T
-d = 2006-01-30T)"sv;
+	static constexpr auto datetime_time_no_leads = R"(# Leading 0 is always required.
+d = 2023-10-01T1:32:00Z)"sv;
 
 #if !TOML_LANG_UNRELEASED
 
@@ -178,7 +176,7 @@ no-secs = 1987-07-05T17:45Z)"sv;
 	static constexpr auto float_exp_leading_us		= R"(exp-leading-us = 1e_23)"sv;
 	static constexpr auto float_exp_point_1			= R"(exp-point-1 = 1e2.3)"sv;
 	static constexpr auto float_exp_point_2			= R"(exp-point-2 = 1.e2)"sv;
-	static constexpr auto float_exp_trailing_us		= R"(exp-trailing-us = 1e_23_)"sv;
+	static constexpr auto float_exp_trailing_us		= R"(exp-trailing-us = 1e23_)"sv;
 	static constexpr auto float_inf_capital			= R"(v = Inf)"sv;
 	static constexpr auto float_inf_incomplete_1	= R"(inf-incomplete-1 = in)"sv;
 	static constexpr auto float_inf_incomplete_2	= R"(inf-incomplete-2 = +in)"sv;
@@ -199,10 +197,8 @@ no-secs = 1987-07-05T17:45Z)"sv;
 	static constexpr auto float_trailing_point_min	= R"(trailing-point-min = -1.)"sv;
 	static constexpr auto float_trailing_point_plus = R"(trailing-point-plus = +1.)"sv;
 	static constexpr auto float_trailing_point		= R"(trailing-point = 1.)"sv;
-	static constexpr auto float_trailing_us_exp		= R"(# trailing underscore in integer part is not allowed
-trailing-us-exp = 1_e2
-# trailing underscore in float part is not allowed
-trailing-us-exp2 = 1.2_e2)"sv;
+	static constexpr auto float_trailing_us_exp_1	= R"(trailing-us-exp-1 = 1_e2)"sv;
+	static constexpr auto float_trailing_us_exp_2	= R"(trailing-us-exp-2 = 1.2_e2)"sv;
 	static constexpr auto float_trailing_us			= R"(trailing-us = 1.2_)"sv;
 	static constexpr auto float_us_after_point		= R"(us-after-point = 1._2)"sv;
 	static constexpr auto float_us_before_point		= R"(us-before-point = 1_.2)"sv;
@@ -326,6 +322,68 @@ key""" = 1)"sv;
 	static constexpr auto key_special_character = R"(μ = "greek small letter mu")"sv;
 
 #endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
+	static constexpr auto local_date_mday_over	= R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-32)"sv;
+	static constexpr auto local_date_mday_under = R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-00)"sv;
+	static constexpr auto local_date_month_over = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2006-13-01)"sv;
+	static constexpr auto local_date_month_under		 = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2007-00-01)"sv;
+	static constexpr auto local_date_no_leads_with_milli = R"(# Day "5" instead of "05"; the leading zero is required.
+with-milli = 1987-07-5)"sv;
+	static constexpr auto local_date_no_leads	   = R"(# Month "7" instead of "07"; the leading zero is required.
+no-leads = 1987-7-05)"sv;
+	static constexpr auto local_date_trailing_t	   = R"(# Date cannot end with trailing T
+d = 2006-01-30T)"sv;
+	static constexpr auto local_datetime_hour_over = R"(# time-hour       = 2DIGIT  ; 00-23
+d = 2006-01-01T24:00:00)"sv;
+	static constexpr auto local_datetime_mday_over =
+		R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-32T00:00:00)"sv;
+	static constexpr auto local_datetime_mday_under =
+		R"(# date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on
+#                           ; month/year
+d = 2006-01-00T00:00:00)"sv;
+	static constexpr auto local_datetime_minute_over = R"(# time-minute     = 2DIGIT  ; 00-59
+d = 2006-01-01T00:60:00)"sv;
+	static constexpr auto local_datetime_month_over	 = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2006-13-01T00:00:00)"sv;
+	static constexpr auto local_datetime_month_under = R"(# date-month      = 2DIGIT  ; 01-12
+d = 2007-00-01T00:00:00)"sv;
+	static constexpr auto local_datetime_no_leads_with_milli =
+		R"(# Day "5" instead of "05"; the leading zero is required.
+with-milli = 1987-07-5T17:45:00.12)"sv;
+	static constexpr auto local_datetime_no_leads = R"(# Month "7" instead of "07"; the leading zero is required.
+no-leads = 1987-7-05T17:45:00)"sv;
+	static constexpr auto local_datetime_no_secs  = R"(# No seconds in time.
+no-secs = 1987-07-05T17:45)"sv;
+	static constexpr auto local_datetime_no_t	  = R"(# No "t" or "T" between the date and time.
+no-t = 1987-07-0517:45:00)"sv;
+	static constexpr auto local_datetime_second_over =
+		R"(# time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
+#                           ; rules
+d = 2006-01-01T00:00:61)"sv;
+	static constexpr auto local_datetime_time_no_leads = R"(# Leading 0 is always required.
+d = 2023-10-01T1:32:00Z)"sv;
+	static constexpr auto local_time_hour_over		   = R"(# time-hour       = 2DIGIT  ; 00-23
+d = 24:00:00)"sv;
+	static constexpr auto local_time_minute_over	   = R"(# time-minute     = 2DIGIT  ; 00-59
+d = 00:60:00)"sv;
+	static constexpr auto local_time_no_secs		   = R"(# No seconds in time.
+no-secs = 17:45)"sv;
+	static constexpr auto local_time_second_over =
+		R"(# time-second     = 2DIGIT  ; 00-58, 00-59, 00-60 based on leap second
+#                           ; rules
+d = 00:00:61)"sv;
+	static constexpr auto local_time_time_no_leads_2 = R"(# Leading 0 is always required.
+d = 01:32:0)"sv;
+	static constexpr auto local_time_time_no_leads	 = R"(# Leading 0 is always required.
+d = 1:32:00)"sv;
 
 	static constexpr auto spec_inline_table_2_0 = R"([product]
 type = { name = "Nail" }
@@ -507,16 +565,16 @@ zyx = 42)"sv;
 zyx = 42)"sv;
 	static constexpr auto table_quoted_no_close				= R"(["where will it end]
 name = value)"sv;
-	static constexpr auto table_redefine					= R"(# Define b as int, and try to use it as a table: error
+	static constexpr auto table_redefine		 = R"(# Define b as int, and try to use it as a table: error
 [a]
 b = 1
 
 [a.b]
 c = 2)"sv;
-	static constexpr auto table_rrbrace						= R"([[table] ])"sv;
-	static constexpr auto table_text_after_table			= R"([error] this shouldn't be here)"sv;
-	static constexpr auto table_whitespace					= R"([invalid key])"sv;
-	static constexpr auto table_with_pound					= R"([key#group]
+	static constexpr auto table_rrbrace			 = R"([[table] ])"sv;
+	static constexpr auto table_text_after_table = R"([error] this shouldn't be here)"sv;
+	static constexpr auto table_whitespace		 = R"([invalid key])"sv;
+	static constexpr auto table_with_pound		 = R"([key#group]
 answer = 42)"sv;
 }
 
@@ -802,6 +860,11 @@ TEST_CASE("conformance - burntsushi/invalid")
 		parsing_should_fail(FILE_LINE_ARGS, datetime_month_under); // datetime-month-under
 	}
 
+	SECTION("datetime-no-leads-month")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_month); // datetime-no-leads-month
+	}
+
 	SECTION("datetime-no-leads-with-milli")
 	{
 		parsing_should_fail(FILE_LINE_ARGS, datetime_no_leads_with_milli); // datetime-no-leads-with-milli
@@ -822,19 +885,9 @@ TEST_CASE("conformance - burntsushi/invalid")
 		parsing_should_fail(FILE_LINE_ARGS, datetime_second_over); // datetime-second-over
 	}
 
-	SECTION("datetime-time-no-leads-2")
-	{
-		parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads_2); // datetime-time-no-leads-2
-	}
-
 	SECTION("datetime-time-no-leads")
 	{
 		parsing_should_fail(FILE_LINE_ARGS, datetime_time_no_leads); // datetime-time-no-leads
-	}
-
-	SECTION("datetime-trailing-t")
-	{
-		parsing_should_fail(FILE_LINE_ARGS, datetime_trailing_t); // datetime-trailing-t
 	}
 
 #if !TOML_LANG_UNRELEASED
@@ -1047,9 +1100,14 @@ TEST_CASE("conformance - burntsushi/invalid")
 		parsing_should_fail(FILE_LINE_ARGS, float_trailing_point); // float-trailing-point
 	}
 
-	SECTION("float-trailing-us-exp")
+	SECTION("float-trailing-us-exp-1")
 	{
-		parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp); // float-trailing-us-exp
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp_1); // float-trailing-us-exp-1
+	}
+
+	SECTION("float-trailing-us-exp-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, float_trailing_us_exp_2); // float-trailing-us-exp-2
 	}
 
 	SECTION("float-trailing-us")
@@ -1469,6 +1527,131 @@ TEST_CASE("conformance - burntsushi/invalid")
 	}
 
 #endif // !TOML_LANG_UNRELEASED && UNICODE_LITERALS_OK
+
+	SECTION("local-date-mday-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_mday_over); // local-date-mday-over
+	}
+
+	SECTION("local-date-mday-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_mday_under); // local-date-mday-under
+	}
+
+	SECTION("local-date-month-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_month_over); // local-date-month-over
+	}
+
+	SECTION("local-date-month-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_month_under); // local-date-month-under
+	}
+
+	SECTION("local-date-no-leads-with-milli")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_no_leads_with_milli); // local-date-no-leads-with-milli
+	}
+
+	SECTION("local-date-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_no_leads); // local-date-no-leads
+	}
+
+	SECTION("local-date-trailing-t")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_date_trailing_t); // local-date-trailing-t
+	}
+
+	SECTION("local-datetime-hour-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_hour_over); // local-datetime-hour-over
+	}
+
+	SECTION("local-datetime-mday-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_mday_over); // local-datetime-mday-over
+	}
+
+	SECTION("local-datetime-mday-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_mday_under); // local-datetime-mday-under
+	}
+
+	SECTION("local-datetime-minute-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_minute_over); // local-datetime-minute-over
+	}
+
+	SECTION("local-datetime-month-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_month_over); // local-datetime-month-over
+	}
+
+	SECTION("local-datetime-month-under")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_month_under); // local-datetime-month-under
+	}
+
+	SECTION("local-datetime-no-leads-with-milli")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_leads_with_milli); // local-datetime-no-leads-with-milli
+	}
+
+	SECTION("local-datetime-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_leads); // local-datetime-no-leads
+	}
+
+	SECTION("local-datetime-no-secs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_secs); // local-datetime-no-secs
+	}
+
+	SECTION("local-datetime-no-t")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_no_t); // local-datetime-no-t
+	}
+
+	SECTION("local-datetime-second-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_second_over); // local-datetime-second-over
+	}
+
+	SECTION("local-datetime-time-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_datetime_time_no_leads); // local-datetime-time-no-leads
+	}
+
+	SECTION("local-time-hour-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_hour_over); // local-time-hour-over
+	}
+
+	SECTION("local-time-minute-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_minute_over); // local-time-minute-over
+	}
+
+	SECTION("local-time-no-secs")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_no_secs); // local-time-no-secs
+	}
+
+	SECTION("local-time-second-over")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_second_over); // local-time-second-over
+	}
+
+	SECTION("local-time-time-no-leads-2")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_time_no_leads_2); // local-time-time-no-leads-2
+	}
+
+	SECTION("local-time-time-no-leads")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, local_time_time_no_leads); // local-time-time-no-leads
+	}
 
 	SECTION("spec-inline-table-2-0")
 	{
