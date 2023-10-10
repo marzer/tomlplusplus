@@ -130,7 +130,7 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const key& k)
 	{
-		print_string(k.str(), false, true);
+		print_string(k.str(), false, true, false);
 	}
 
 	TOML_EXTERNAL_LINKAGE

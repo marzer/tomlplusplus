@@ -415,19 +415,33 @@ b = []
 
 	SECTION("tomlplusplus/issues/176") // https://github.com/marzer/tomlplusplus/issues/176
 	{
-		parsing_should_succeed(FILE_LINE_ARGS,
-							   R"(
+		parsing_should_succeed(FILE_LINE_ARGS, "  a      = \"x\\ty\""sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\"a\"    = \"x\\ty\""sv);
+		parsing_should_succeed(FILE_LINE_ARGS, "\"a\tb\" = \"x\\ty\""sv);
+		parsing_should_fail(FILE_LINE_ARGS, "\"a\nb\" = \"x\\ty\""sv); // literal newline in single-line key
+
+		static constexpr auto input = R"(
 								"a"    = "x\ty"
 								"a\tb" = "x\ty"
-								)",
-							   [](auto&& tbl)
+								"a\nb" = "x\ty"
+								)"sv;
+
+		static constexpr auto output = "a = 'x\ty'\n"
+									   "\"a\\tb\" = 'x\ty'\n" // tab and newlines in keys should be emitted
+									   "\"a\\nb\" = 'x\ty'"	  // as escapes, not literals
+									   ""sv;
+
+		parsing_should_succeed(FILE_LINE_ARGS,
+							   input,
+							   [&](auto&& tbl)
 							   {
 								   CHECK(tbl["a"]);
 								   CHECK(tbl["a\tb"]);
+								   CHECK(tbl["a\nb"]);
 
 								   std::stringstream ss;
 								   ss << tbl;
-								   CHECK(ss.str() == "a = 'x\ty'\n'a\tb' = 'x\ty'"sv);
+								   CHECK(ss.str() == output);
 							   });
 	}
 }

@@ -149,7 +149,10 @@ TOML_IMPL_NAMESPACE_START
 		void print_unformatted(std::string_view);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
-		void print_string(std::string_view str, bool allow_multi_line = true, bool allow_bare = false);
+		void print_string(std::string_view str,
+						  bool allow_multi_line			= true,
+						  bool allow_bare				= false,
+						  bool allow_literal_whitespace = true);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const value<std::string>&);

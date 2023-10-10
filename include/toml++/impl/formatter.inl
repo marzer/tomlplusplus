@@ -113,7 +113,10 @@ TOML_IMPL_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void formatter::print_string(std::string_view str, bool allow_multi_line, bool allow_bare)
+	void formatter::print_string(std::string_view str,
+								 bool allow_multi_line,
+								 bool allow_bare,
+								 bool allow_literal_whitespace)
 	{
 		if (str.empty())
 		{
@@ -206,8 +209,10 @@ TOML_IMPL_NAMESPACE_START
 				bad_unicode();
 		}
 
-		// strings with line breaks and tabs can't be bare
-		if (!!(traits & (formatted_string_traits::line_breaks | formatted_string_traits::tabs)))
+		// strings with line breaks, tabs, and single-quotes can't be bare
+		if (!!(traits
+			   & (formatted_string_traits::line_breaks | formatted_string_traits::tabs
+				  | formatted_string_traits::single_quotes)))
 			traits |= formatted_string_traits::non_bare;
 
 		// if the string meets the requirements of being 'bare' we can emit a bare string
@@ -218,17 +223,20 @@ TOML_IMPL_NAMESPACE_START
 			print_unformatted(str);
 			return;
 		}
+		const auto real_tabs_allowed = allow_literal_whitespace && real_tabs_in_strings_allowed();
 
 		// determine if this should be a multi-line string (triple-quotes)
-		const auto multi_line = allow_multi_line			 //
+		const auto multi_line = allow_literal_whitespace	 //
+							 && allow_multi_line			 //
 							 && multi_line_strings_allowed() //
 							 && !!(traits & formatted_string_traits::line_breaks);
 
 		// determine if this should be a literal string (single-quotes with no escaping)
-		const auto literal = literal_strings_allowed()													   //
-						  && !(traits & formatted_string_traits::control_chars)							   //
-						  && (!(traits & formatted_string_traits::single_quotes) || multi_line)			   //
-						  && (!(traits & formatted_string_traits::tabs) || real_tabs_in_strings_allowed()) //
+		const auto literal = literal_strings_allowed()											//
+						  && !(traits & formatted_string_traits::control_chars)					//
+						  && (!(traits & formatted_string_traits::single_quotes) || multi_line) //
+						  && (!(traits & formatted_string_traits::tabs) || real_tabs_allowed)	//
+						  && (!(traits & formatted_string_traits::line_breaks) || multi_line)	//
 						  && (!(traits & formatted_string_traits::non_ascii) || unicode_allowed);
 
 		// literal strings (single quotes, no escape codes)
@@ -243,8 +251,6 @@ TOML_IMPL_NAMESPACE_START
 
 		// anything from here down is a non-literal string, so requires iteration and escaping.
 		print_unformatted(multi_line ? R"(""")"sv : R"(")"sv);
-
-		const auto real_tabs_allowed = real_tabs_in_strings_allowed();
 
 		// ascii fast path
 		if (!(traits & formatted_string_traits::non_ascii))
