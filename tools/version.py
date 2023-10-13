@@ -31,7 +31,7 @@ if __name__ == '__main__':
 	args.add_argument(r'version', type=str)
 	args = args.parse_args()
 
-	version = re.fullmatch(r'\s*([0-9]+)\s*[.,;]\s*([0-9]+)\s*[.,;]\s*([0-9]+)\s*', args.version)
+	version = re.fullmatch(r'\s*[vV]?\s*([0-9]+)\s*[.,;]+\s*([0-9]+)\s*[.,;]+\s*([0-9]+)\s*', args.version)
 	if not version:
 		print(rf"Couldn't parse version triplet from '{args.version}'", file=sys.stderr)
 		sys.exit(1)
@@ -51,15 +51,15 @@ if __name__ == '__main__':
 	text = re.sub(r'''(\s|^)VERSION\s+[0-9](?:[.][0-9]){2}''', rf"\1VERSION {version_str}", text, count=1, flags=re.I)
 	write_text_file(path, text)
 
-	path = root / r'include/toml++/impl/version.h'
-	text = read_text_file(path)
-	text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_MAJOR)\s+[0-9]+''', rf"\1 {version[0]}", text)
-	text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_MINOR)\s+[0-9]+''', rf"\1 {version[1]}", text)
-	text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_PATCH)\s+[0-9]+''', rf"\1 {version[2]}", text)
-	write_text_file(path, text)
+	for path in (root / r'include/toml++/impl/version.hpp', root / r'toml.hpp'):
+		text = read_text_file(path)
+		text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_MAJOR)\s+[0-9]+''', rf"\1 {version[0]}", text)
+		text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_MINOR)\s+[0-9]+''', rf"\1 {version[1]}", text)
+		text = re.sub(r'''(\s*#\s*define\s+TOML_LIB_PATCH)\s+[0-9]+''', rf"\1 {version[2]}", text)
+		write_text_file(path, text)
 
 	noop_sub = r'#$%^nbsp^%$#'
-	for file in (r'README.md', r'docs/pages/main_page.dox'):
+	for file in (r'README.md', r'docs/pages/main_page.md'):
 		path = root / file
 		text = read_text_file(path)
 		text = re.sub(r'''(toml(?:plusplus|\+\+|pp)\s*[/:^]\s*)[0-9](?:[.][0-9]){2}''', rf"\1{noop_sub}{version_str}", text, flags=re.I)

@@ -47,6 +47,6 @@ ninja && toml-test ./toml-test/tt_decoder && toml-test ./toml-test/tt_encoder --
 > ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to meson if you wish to use the system-installed version
 > of nlohmann/json rather than the vendored one.
 
-[toml-test]: https://github.com/BurntSushi/toml-test
-[contributing]: ../CONTRIBUTING.md
+[toml-test]: https://github.com/toml-lang/toml-test
+[contributing]: ./../CONTRIBUTING.md
 [meson]: https://mesonbuild.com/

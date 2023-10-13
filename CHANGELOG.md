@@ -21,7 +21,7 @@ template:
 
 -->
 
-## Unreleased
+## v3.4.0
 
 #### Fixes
 
@@ -37,7 +37,7 @@ template:
 
 #### Additions
 
--   improved support for using enums with `value_or()`
+-   added support for using enums with `value_or()`
 
 #### Changes:
 
