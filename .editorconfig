@@ -10,7 +10,7 @@ trim_trailing_whitespace = true
 charset = utf-8
 max_line_length = 120
 
-[*.{gitattributes,yaml,yml,vcxproj,vcxproj.filters,sln,rc,clang-format,toml,py,cmake}]
+[*.{gitattributes,yaml,yml,vcxproj,vcxproj.filters,sln,rc,clang-format,toml,py,cmake,md,markdown}]
 indent_style = space
 
 [{Doxyfile,Doxyfile-mcss,CMakeLists.txt}]

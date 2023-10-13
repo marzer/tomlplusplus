@@ -40,20 +40,19 @@ Call toml::parse_file() and work with the toml::table you get back, or handle an
 
 int main(int argc, char\*\* argv)
 {
-toml::table tbl;
-try
-{
-tbl = toml::parse_file(argv[1]);
-std::cout << tbl << "\n";
-}
-catch (const toml::parse_error& err)
-{
-std::cerr << "Parsing failed:\n" << err << "\n";
-return 1;
-}
+    toml::table tbl;
+    try
+    {
+        tbl = toml::parse_file(argv[1]);
+        std::cout << tbl << "\n";
+    }
+    catch (const toml::parse_error& err)
+    {
+        std::cerr << "Parsing failed:\n" << err << "\n";
+        return 1;
+    }
 
     return 0;
-
 }
 
 @endcpp
@@ -80,34 +79,33 @@ using namespace std::string_view_literals;
 
 int main()
 {
-static constexpr std::string_view some_toml = R"(
-[library]
-name = "toml++"
-authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
-cpp = 17
-)"sv;
+    static constexpr std::string_view some_toml = R"(
+        [library]
+        name = "toml++"
+        authors = ["Mark Gillard <mark.gillard@outlook.com.au>"]
+        cpp = 17
+    )"sv;
 
     try
     {
+        // parse directly from a string view:
+        {
+        toml::table tbl = toml::parse(some_toml);
+        std::cout << tbl << "\n";
+        }
 
-// parse directly from a string view:
-{
-toml::table tbl = toml::parse(some_toml);
-std::cout << tbl << "\n";
-}
-
-// parse from a string stream:
-{
-std::stringstream ss{ std::string{ some_toml } };
-toml::table tbl = toml::parse(ss);
-std::cout << tbl << "\n";
-}
-}
-catch (const toml::parse_error& err)
-{
-std::cerr << "Parsing failed:\n" << err << "\n";
-return 1;
-}
+        // parse from a string stream:
+        {
+        std::stringstream ss{ std::string{ some_toml } };
+        toml::table tbl = toml::parse(ss);
+        std::cout << tbl << "\n";
+        }
+    }
+    catch (const toml::parse_error& err)
+    {
+        std::cerr << "Parsing failed:\n" << err << "\n";
+        return 1;
+    }
 
     return 0;
 
@@ -148,16 +146,16 @@ the parsing functions return a toml::parse_result instead of a toml::table:
 
 int main()
 {
-toml::parse_result result = toml::parse_file("configuration.toml");
-if (!result)
-{
-std::cerr << "Parsing failed:\n" << result.error() << "\n";
-return 1;
-}
+    toml::parse_result result = toml::parse_file("configuration.toml");
+
+    if (!result)
+    {
+        std::cerr << "Parsing failed:\n" << result.error() << "\n";
+        return 1;
+    }
 
     do_stuff_with_your_config(std::move(result).table()); // 'steal' the table from the result
     return 0;
-
 }
 @endcpp
 
@@ -179,15 +177,15 @@ and description() members:
 toml::table tbl;
 try
 {
-tbl = toml::parse_file("configuration.toml");
+    tbl = toml::parse_file("configuration.toml");
 }
 catch (const toml::parse_error& err)
 {
-std::cerr
-<< "Error parsing file '" << \*err.source().path
-<< "':\n" << err.description()
-<< "\n (" << err.source().begin << ")\n";
-return 1;
+    std::cerr
+        << "Error parsing file '" << \*err.source().path
+        << "':\n" << err.description()
+        << "\n (" << err.source().begin << ")\n";
+    return 1;
 }
 @endcpp
 
@@ -214,18 +212,17 @@ using namespace std::string_view_literals;
 
 int main()
 {
-static constexpr auto source = R"(
-str = "hello world"
+    static constexpr auto source = R"(
+        str = "hello world"
 
-numbers = [ 1, 2, 3, "four", 5.0 ]
-vegetables = [ "tomato", "onion", "mushroom", "lettuce" ]
-minerals = [ "quartz", "iron", "copper", "diamond" ]
+        numbers = [ 1, 2, 3, "four", 5.0 ]
+        vegetables = [ "tomato", "onion", "mushroom", "lettuce" ]
+        minerals = [ "quartz", "iron", "copper", "diamond" ]
 
-[animals]
-cats = [ "tiger", "lion", "puma" ]
-birds = [ "macaw", "pigeon", "canary" ]
-fish = [ "salmon", "trout", "carp" ]
-
+        [animals]
+        cats = [ "tiger", "lion", "puma" ]
+        birds = [ "macaw", "pigeon", "canary" ]
+        fish = [ "salmon", "trout", "carp" ]
     )"sv;
     toml::table tbl = toml::parse(source);
 
@@ -249,20 +246,20 @@ fish = [ "salmon", "trout", "carp" ]
     // get the underlying array object to do some more advanced stuff
     if (toml::array* arr = numbers.as_array())
     {
-    	// visitation with for_each() helps deal with heterogeneous data
-    	arr->for_each([](auto&& el)
-    	{
-    		if constexpr (toml::is_number<decltype(el)>)
-    			(*el)++;
-    		else if constexpr (toml::is_string<decltype(el)>)
-    			el = "five"sv;
-    	});
+        // visitation with for_each() helps deal with heterogeneous data
+        arr->for_each([](auto&& el)
+        {
+            if constexpr (toml::is_number<decltype(el)>)
+                (*el)++;
+            else if constexpr (toml::is_string<decltype(el)>)
+                el = "five"sv;
+        });
 
-// arrays are very similar to std::vector
-arr->push_back(7);
-arr->emplace_back<toml::array>(8, 9);
-std::cout << "numbers: " << numbers << "\n";
-}
+        // arrays are very similar to std::vector
+        arr->push_back(7);
+        arr->emplace_back<toml::array>(8, 9);
+        std::cout << "numbers: " << numbers << "\n";
+    }
 
     // node-views can be chained to quickly query deeper
     std::cout << "cats: " << tbl["animals"]["cats"] << "\n";
@@ -318,18 +315,18 @@ but via a toml::json_formatter and toml::yaml_formatter.
 
 int main()
 {
-auto tbl = toml::table{
-{ "lib", "toml++" },
-{ "cpp", toml::array{ 17, 20, "and beyond" } },
-{ "toml", toml::array{ "1.0.0", "and beyond" } },
-{ "repo", "https://github.com/marzer/tomlplusplus/" },
-{ "author", toml::table{
-{ "name", "Mark Gillard" },
-{ "github", "https://github.com/marzer" },
-{ "twitter", "https://twitter.com/marzer8789" }
-}
-},
-};
+    auto tbl = toml::table{
+        { "lib", "toml++" },
+        { "cpp", toml::array{ 17, 20, "and beyond" } },
+        { "toml", toml::array{ "1.0.0", "and beyond" } },
+        { "repo", "https://github.com/marzer/tomlplusplus/" },
+        { "author", toml::table{
+                { "name", "Mark Gillard" },
+                { "github", "https://github.com/marzer" },
+                { "twitter", "https://twitter.com/marzer8789" }
+            }
+        },
+    };
 
     // serializing as TOML
     std::cout << "###### TOML ######" << "\n\n";
@@ -365,22 +362,22 @@ twitter = 'https://twitter.com/marzer8789'
 ###### JSON
 
 {
-"author" : {
-"github" : "https://github.com/marzer",
-"name" : "Mark Gillard",
-"twitter" : "https://twitter.com/marzer8789"
-},
-"cpp" : [
-17,
-20,
-"and beyond"
-],
-"lib" : "toml++",
-"repo" : "https://github.com/marzer/tomlplusplus/",
-"toml" : [
-"1.0.0",
-"and beyond"
-]
+    "author" : {
+        "github" : "https://github.com/marzer",
+        "name" : "Mark Gillard",
+        "twitter" : "https://twitter.com/marzer8789"
+    },
+    "cpp" : [
+        17,
+        20,
+        "and beyond"
+    ],
+    "lib" : "toml++",
+    "repo" : "https://github.com/marzer/tomlplusplus/",
+    "toml" : [
+        "1.0.0",
+        "and beyond"
+    ]
 }
 
 ###### YAML
@@ -390,16 +387,15 @@ github: 'https://github.com/marzer'
 name: 'Mark Gillard'
 twitter: 'https://twitter.com/marzer8789'
 cpp:
-
 -   17
 -   20
 -   'and beyond'
-    lib: 'toml++'
-    repo: 'https://github.com/marzer/tomlplusplus/'
-    toml:
+lib: 'toml++'
+repo: 'https://github.com/marzer/tomlplusplus/'
+toml:
 -   '1.0.0'
 -   'and beyond'
-    @endout
+@endout
 
 @see
 
@@ -479,7 +475,7 @@ Add `tomlplusplus/3.4.0` to your conanfile.
 Add `tomlpp` to your `package.json5`, e.g.:
 @json
 depends: [
-'tomlpp^3.4.0',
+    'tomlpp^3.4.0',
 ]
 @endjson
 
@@ -510,7 +506,7 @@ You can also add it as a subproject directly.
 
 @json
 {
-"marzer/tomlplusplus": { }
+    "marzer/tomlplusplus": { }
 }
 @endjson
 
@@ -529,9 +525,9 @@ vcpkg install tomlplusplus
 @cmake
 include(FetchContent)
 FetchContent_Declare(
-tomlplusplus
-GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
-GIT_TAG v3.4.0
+    tomlplusplus
+    GIT_REPOSITORY https://github.com/marzer/tomlplusplus.git
+    GIT_TAG v3.4.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
 @endcmake
