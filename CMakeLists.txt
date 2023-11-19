@@ -30,11 +30,15 @@ target_include_directories(
 
 target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
 
-# ---- Install rules and examples ----
+# ---- Install rules, examples, and fuzzing ----
 if(PROJECT_IS_TOP_LEVEL)
   include(cmake/install-rules.cmake)
   option(BUILD_EXAMPLES "Build examples tree." OFF)
+  option(BUILD_FUZZER "Build fuzzer." OFF)
   if(BUILD_EXAMPLES)
     add_subdirectory(examples)
+  endif()
+  if(BUILD_FUZZER AND DEFINED ENV{LIB_FUZZING_ENGINE})
+    add_subdirectory(fuzzing)
   endif()
 endif()
