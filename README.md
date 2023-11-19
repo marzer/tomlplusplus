@@ -302,7 +302,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 -   **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 -   **[@a-is](https://github.com/a-is)** - Fixed a bug
-
+  -**[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
 <br>
 
 ## Contact
