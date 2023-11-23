@@ -9,7 +9,7 @@ enum class SerializationTest
     JSON,
     YAML,
     TOML,
-    kMaxValue = YAML
+    kMaxValue = TOML
 };
 
 extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t* data, const std::size_t size)
