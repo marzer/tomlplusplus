@@ -2638,7 +2638,7 @@ color: var(--color);
 html { height: 100%; scroll-padding-top: 4em; }
 body { min-height: 100%; }
 body { display: flex; flex-direction: column; }
-body > header { position: sticky; top: 0; left: 0; right: 0; z-index: 5; }
+body > header { position: sticky; top: 0; left: 0; right: 0; z-index: 6; }
 body > main { flex: 1 0 auto; }
 body > footer { flex-shrink: 0; }
 body > header,
