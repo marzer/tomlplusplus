@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+  <meta charset="utf-8"/>
+  <title>toml++ TOML for C++</title>
+  <link href="favicon.ico" rel="icon" type="image/vnd.microsoft.icon"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <meta content="#22272e" name="theme-color"/>
+  <link href="../poxy/poxy.css" referrerpolicy="no-referrer" rel="stylesheet"/>
+  <script src="../poxy/poxy.js"></script>
+  <script>initialize_theme("dark");</script>
+  <meta content="toml++" name="twitter:title"/>
+  <meta content="toml++" property="og:title"/>
+  <meta content="toml++" itemprop="name"/>
+  <meta content="Mark Gillard" name="author"/>
+  <meta content="Mark Gillard" property="article:author"/>
+  <meta content="TOML for C++" name="description"/>
+  <meta content="TOML for C++" name="twitter:description"/>
+  <meta content="TOML for C++" property="og:description"/>
+  <meta content="TOML for C++" itemprop="description"/>
+  <meta content="telephone=no" name="format-detection"/>
+  <meta content="Poxy v0.16.0" name="generator"/>
+  <meta content="strict-origin-when-cross-origin" name="referrer"/>
+  <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
+</head>
+<body class="poxy-has-toc poxy-has-main-banner poxy-has-badges">
+<header><nav id="navigation">
+  <div class="m-container">
+    <div class="m-row">
+      <a class="m-col-t-8 m-col-m-none m-left-m" href="index.html" id="m-navbar-brand"><img alt="" src="logo.png"/>toml++ <span class="m-thin">TOML for C++</span></a>
+      <div class="m-col-t-4 m-hide-m m-text-right m-nopadr">
+        <a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+          <path d="m6 0c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 1.49 0 2.85-0.541 3.89-1.44-0.0164 0.338 0.147 0.759 0.5 1.15l3.22 3.79c0.552 0.614 1.45 0.665 2 0.115 0.55-0.55 0.499-1.45-0.115-2l-3.79-3.22c-0.392-0.353-0.812-0.515-1.15-0.5 0.895-1.05 1.44-2.41 1.44-3.89 0-3.31-2.69-6-6-6zm0 1.56a4.44 4.44 0 0 1 4.44 4.44 4.44 4.44 0 0 1-4.44 4.44 4.44 4.44 0 0 1-4.44-4.44 4.44 4.44 0 0 1 4.44-4.44z" id="m-doc-search-icon-path"></path>
+        </svg></a>
+        <a href="#navigation" id="m-navbar-show" title="Show navigation"></a>
+        <a href="#" id="m-navbar-hide" title="Hide navigation"></a>
+      </div>
+      <div class="m-col-t-12 m-show-m m-col-m-none m-right-m" id="m-navbar-collapse">
+        <div class="m-row">
+          <ol class="m-col-t-6 m-col-m-none">
+            <li><a href="namespaces.html">Namespaces</a></li>
+            <li><a href="annotated.html">Classes</a></li>
+            <li class="poxy-navbar-version-selector"><a href="index.html">Version: v3.0.0</a><ol><li><a href="../index.html">HEAD</a></li><li><a href="../v3.4.0/index.html">v3.4.0</a></li><li><a href="../v3.3.0/index.html">v3.3.0</a></li><li><a href="../v3.2.0/index.html">v3.2.0</a></li><li><a href="../v3.1.0/index.html">v3.1.0</a></li><li><a href="../v3.0.1/index.html">v3.0.1</a></li><li><a href="index.html">v3.0.0</a></li><li><a href="../v2.5.0/index.html">v2.5.0</a></li><li><a href="../v2.4.0/index.html">v2.4.0</a></li></ol></li>
+          </ol>
+          <ol class="m-col-t-6 m-col-m-none" start="4">
+            <li><a class="poxy-icon repo github poxy-external" href="https://github.com/marzer/tomlplusplus" target="_blank" title="View on GitHub"><svg id="poxy-icon-repo" version="1.1" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg"><path d="M25,1.23a24.37,24.37,0,0,0-7.7,47.5C18.51,49,19,48.2,19,47.56s0-2.12,0-4.15c-6.78,1.47-8.21-3.27-8.21-3.27C9.61,37.33,8,36.58,8,36.58c-2.21-1.51.17-1.48.17-1.48a5.12,5.12,0,0,1,3.73,2.51c2.17,3.72,5.7,2.65,7.09,2a5.25,5.25,0,0,1,1.55-3.26c-5.41-.61-11.1-2.7-11.1-12A9.41,9.41,0,0,1,12,17.79a8.75,8.75,0,0,1,.24-6.45s2-.66,6.7,2.49a23.1,23.1,0,0,1,12.2,0c4.66-3.15,6.7-2.49,6.7-2.49A8.75,8.75,0,0,1,38,17.79a9.41,9.41,0,0,1,2.51,6.54c0,9.36-5.7,11.42-11.13,12a5.83,5.83,0,0,1,1.65,4.51c0,3.26,0,5.89,0,6.69,0,.65.44,1.41,1.68,1.17A24.38,24.38,0,0,0,25,1.23Z" fill="currentColor"></path></svg></a></li>
+            <li><a class="poxy-icon theme" href="javascript:void(null);" id="poxy-theme-switch" onclick="toggle_theme(); return false;" role="button" title="Toggle dark and light themes"><svg id="poxy-theme-switch-img" version="1.1" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><circle cx="185.6708" cy="183.8122" fill="currentColor" r="65.625"></circle><path d="M185.6708,87.5622a13.1256,13.1256,0,0,0,13.125-13.125V52.5622a13.125,13.125,0,1,0-26.25,0v21.875A13.1257,13.1257,0,0,0,185.6708,87.5622Z" fill="currentColor"></path><path d="M99.051,115.7519a13.1236,13.1236,0,1,0,18.56-18.56L102.1442,81.726a13.1236,13.1236,0,0,0-18.5595,18.56Z" fill="currentColor"></path><path d="M89.4208,183.8122a13.1257,13.1257,0,0,0-13.125-13.125H54.4208a13.125,13.125,0,0,0,0,26.25h21.875A13.1256,13.1256,0,0,0,89.4208,183.8122Z" fill="currentColor"></path><path d="M99.051,251.8725,83.5847,267.3431a13.1236,13.1236,0,1,0,18.56,18.56l15.4663-15.4706a13.1236,13.1236,0,1,0-18.5595-18.56Z" fill="currentColor"></path><path d="M185.6708,280.0622a13.1258,13.1258,0,0,0-13.125,13.125v21.875a13.125,13.125,0,0,0,26.25,0v-21.875A13.1257,13.1257,0,0,0,185.6708,280.0622Z" fill="currentColor"></path><path d="M272.2907,251.8725a13.1236,13.1236,0,1,0-18.56,18.56l15.4663,15.4706a13.1236,13.1236,0,1,0,18.56-18.56Z" fill="currentColor"></path><path d="M330.0458,183.8122a13.1257,13.1257,0,0,0-13.125-13.125h-21.875a13.125,13.125,0,0,0,0,26.25h21.875A13.1256,13.1256,0,0,0,330.0458,183.8122Z" fill="currentColor"></path><path d="M263.0109,119.5971a13.0824,13.0824,0,0,0,9.28-3.8452l15.4663-15.4663a13.1236,13.1236,0,1,0-18.56-18.56L253.7312,97.1923a13.125,13.125,0,0,0,9.28,22.4048Z" fill="currentColor"></path><path d="M456.9379,401.6714a63.97,63.97,0,0,1-14.9963,7.2055c-19.6448,6.5283-41.8787,2.9566-58.1439-9.8523a68.9311,68.9311,0,0,1-10.835-10.8339c-12.8088-16.2663-16.3806-38.5-9.8523-58.1471a63.8444,63.8444,0,0,1,7.2077-14.9931,8.8036,8.8036,0,0,0-10.1172-13.3034,87.5188,87.5188,0,1,0,110.0372,110.04A8.8,8.8,0,0,0,456.9379,401.6714Z" fill="currentColor"></path></svg></a></li>
+            <li class="m-show-m"><a class="m-doc-search-icon" href="#search" onclick="return showSearch()" title="Search"><svg style="height: 0.9rem;" viewBox="0 0 16 16">
+              <use href="#m-doc-search-icon-path"></use>
+            </svg></a></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav></header>
+<main><article>
+  <div class="m-container m-container-inflatable">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        <img alt="Image" class="m-image" id="poxy-main-banner" src="banner_small.png" style="width: 1280px;"/><div id="poxy-badges"><span><a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank"><svg class="poxy-injected-svg" height="20" id="poxy-injected-svg-0" version="1.1" width="78" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g shape-rendering="crispEdges"><path d="M0 0h47v20H0z" fill="#555"></path><path d="M47 0h31v20H47z" fill="purple"></path></g><g fill="#fff" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110" text-anchor="middle"><text textLength="370" transform="scale(.1)" x="245" y="140">license</text><text textLength="210" transform="scale(.1)" x="615" y="140">MIT</text></g></svg></a><a class="poxy-external" href="https://github.com/marzer/tomlplusplus/releases" target="_blank"><img alt="Releases" src="https://img.shields.io/github/v/release/marzer/tomlplusplus?style=flat-square"/></a></span><span><a class="poxy-cppreference poxy-external" href="https://en.cppreference.com/w/cpp/compiler_support" target="_blank"><svg class="poxy-injected-svg" height="20" id="poxy-injected-svg-1" version="1.1" width="125" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g shape-rendering="crispEdges"><path d="M0 0h76v20H0z" fill="#555"></path><path d="M76 0h49v20H76z" fill="#007ec6"></path></g><g fill="#fff" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110" text-anchor="middle"><image height="14" width="14" x="5" xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSJ3aGl0ZXNtb2tlIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QysrIGljb248L3RpdGxlPjxwYXRoIGQ9Ik0yMi4zOTMgNmMtLjE2Ny0uMjktLjM5OC0uNTQzLS42NTItLjY5TDEyLjkyNS4yMmMtLjUwOC0uMjkzLTEuMzM5LS4yOTMtMS44NDcgMEwyLjI2IDUuMzFjLS41MDguMjkzLS45MjMgMS4wMTMtLjkyMyAxLjZ2MTAuMThjMCAuMjk0LjEwNC42Mi4yNzEuOTEuMTY3LjI5LjM5OC41NDMuNjUyLjY4OWw4LjgxNiA1LjA5MWMuNTA4LjI5MyAxLjMzOS4yOTMgMS44NDcgMGw4LjgxNi01LjA5MWMuMjU0LS4xNDYuNDg1LS4zOTkuNjUyLS42ODlzLjI3MS0uNjE2LjI3MS0uOTFWNi45MWMuMDAyLS4yOTQtLjEwMi0uNjItLjI2OS0uOTF6TTEyIDE5LjEwOWMtMy45MiAwLTcuMTA5LTMuMTg5LTcuMTA5LTcuMTA5UzguMDggNC44OTEgMTIgNC44OTFhNy4xMzMgNy4xMzMgMCAwIDEgNi4xNTYgMy41NTJsLTMuMDc2IDEuNzgxQTMuNTY3IDMuNTY3IDAgMCAwIDEyIDguNDQ1Yy0xLjk2IDAtMy41NTQgMS41OTUtMy41NTQgMy41NTVTMTAuMDQgMTUuNTU1IDEyIDE1LjU1NWEzLjU3IDMuNTcgMCAwIDAgMy4wOC0xLjc3OGwzLjA3NyAxLjc4QTcuMTM1IDcuMTM1IDAgMCAxIDEyIDE5LjEwOXptNy4xMDktNi43MTRoLS43OXYuNzloLS43OXYtLjc5aC0uNzl2LS43OWguNzl2LS43OWguNzl2Ljc5aC43OXYuNzl6bTIuOTYyIDBoLS43OXYuNzloLS43OXYtLjc5aC0uNzg5di0uNzloLjc4OXYtLjc5aC43OXYuNzloLjc5di43OXoiLz48L3N2Zz4=" y="3"/><text textLength="490" transform="scale(.1)" x="475" y="140">standard</text><text textLength="390" transform="scale(.1)" x="995" y="140">C++17</text></g></svg></a><a class="poxy-cppreference poxy-external" href="https://en.cppreference.com/w/cpp/compiler_support" target="_blank"><svg class="poxy-injected-svg" height="20" id="poxy-injected-svg-2" version="1.1" width="125" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><g shape-rendering="crispEdges"><path d="M0 0h76v20H0z" fill="#555"></path><path d="M76 0h49v20H76z" fill="#007ec6"></path></g><g fill="#fff" font-family="DejaVu Sans,Verdana,Geneva,sans-serif" font-size="110" text-anchor="middle"><image height="14" width="14" x="5" xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSJ3aGl0ZXNtb2tlIiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+QysrIGljb248L3RpdGxlPjxwYXRoIGQ9Ik0yMi4zOTMgNmMtLjE2Ny0uMjktLjM5OC0uNTQzLS42NTItLjY5TDEyLjkyNS4yMmMtLjUwOC0uMjkzLTEuMzM5LS4yOTMtMS44NDcgMEwyLjI2IDUuMzFjLS41MDguMjkzLS45MjMgMS4wMTMtLjkyMyAxLjZ2MTAuMThjMCAuMjk0LjEwNC42Mi4yNzEuOTEuMTY3LjI5LjM5OC41NDMuNjUyLjY4OWw4LjgxNiA1LjA5MWMuNTA4LjI5MyAxLjMzOS4yOTMgMS44NDcgMGw4LjgxNi01LjA5MWMuMjU0LS4xNDYuNDg1LS4zOTkuNjUyLS42ODlzLjI3MS0uNjE2LjI3MS0uOTFWNi45MWMuMDAyLS4yOTQtLjEwMi0uNjItLjI2OS0uOTF6TTEyIDE5LjEwOWMtMy45MiAwLTcuMTA5LTMuMTg5LTcuMTA5LTcuMTA5UzguMDggNC44OTEgMTIgNC44OTFhNy4xMzMgNy4xMzMgMCAwIDEgNi4xNTYgMy41NTJsLTMuMDc2IDEuNzgxQTMuNTY3IDMuNTY3IDAgMCAwIDEyIDguNDQ1Yy0xLjk2IDAtMy41NTQgMS41OTUtMy41NTQgMy41NTVTMTAuMDQgMTUuNTU1IDEyIDE1LjU1NWEzLjU3IDMuNTcgMCAwIDAgMy4wOC0xLjc3OGwzLjA3NyAxLjc4QTcuMTM1IDcuMTM1IDAgMCAxIDEyIDE5LjEwOXptNy4xMDktNi43MTRoLS43OXYuNzloLS43OXYtLjc5aC0uNzl2LS43OWguNzl2LS43OWguNzl2Ljc5aC43OXYuNzl6bTIuOTYyIDBoLS43OXYuNzloLS43OXYtLjc5aC0uNzg5di0uNzloLjc4OXYtLjc5aC43OXYuNzloLjc5di43OXoiLz48L3N2Zz4=" y="3"/><text textLength="490" transform="scale(.1)" x="475" y="140">standard</text><text textLength="390" transform="scale(.1)" x="995" y="140">C++20</text></g></svg></a></span><span><a class="poxy-external" href="https://toml.io/en/v1.0.0" target="_blank"><svg aria-label="TOML: v1.0.0" class="poxy-injected-svg" height="20" id="poxy-injected-svg-3" role="img" version="1.1" width="86" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>TOML: v1.0.0</title><g shape-rendering="crispEdges"><rect fill="#555" height="20" width="41"></rect><rect fill="#007ec6" height="20" width="45" x="41"></rect></g><g fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110" text-anchor="middle" text-rendering="geometricPrecision"><text fill="#fff" textLength="310" transform="scale(.1)" x="215" y="140">TOML</text><text fill="#fff" textLength="350" transform="scale(.1)" x="625" y="140">v1.0.0</text></g></svg></a><a class="poxy-external" href="https://circleci.com/gh/marzer/tomlplusplus" target="_blank"><img alt="3. CircleCI" src="https://img.shields.io/circleci/build/github/marzer/tomlplusplus?label=circle%20ci&amp;logo=circleci&amp;logoColor=white&amp;style=flat-square"/></a></span><span><a class="poxy-external" href="https://github.com/fffaraz/awesome-cpp" target="_blank"><svg class="poxy-injected-svg" height="20" id="poxy-injected-svg-4" version="1.1" viewBox="0 0 110 20" width="110" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><title>Mentioned in an Awesome list</title><defs><path d="M53.57 3.52h-4.446V7h.648V4.3c0-.072.06-.132.132-.132h1.38c.072 0 .132.06.132.132V7h.648V4.3c0-.072.06-.132.132-.132h1.374c.078 0 .138.06.138.132V7h.642V4.3a.778.778 0 0 0-.78-.78zm4.704 0c.432 0 .78.348.78.78v1.284h-2.892v.636c0 .072.06.132.132.132h2.76V7h-2.76a.778.778 0 0 1-.78-.78V4.3c0-.432.348-.78.78-.78h1.98zm-2.112 1.416h2.244V4.3a.133.133 0 0 0-.132-.132h-1.98a.133.133 0 0 0-.132.132v.636zm6.822-1.416h-2.76V7h.648V4.3c0-.072.06-.132.132-.132h1.98c.072 0 .132.06.132.132V7h.648V4.3a.778.778 0 0 0-.78-.78zm4.026.648V3.52h-1.428V2.38h-.648v3.84c0 .432.348.78.78.78h1.296v-.648h-1.296a.133.133 0 0 1-.132-.132V4.168h1.428zM67.928 7h.648V3.52h-.648V7zm0-4.62v.648h.648V2.38h-.648zm2.562 1.14h1.98c.432 0 .78.348.78.78v1.92c0 .432-.348.78-.78.78h-1.98a.778.778 0 0 1-.78-.78V4.3c0-.432.348-.78.78-.78zm1.98.648h-1.98a.133.133 0 0 0-.132.132v1.92c0 .072.06.132.132.132h1.98c.072 0 .132-.06.132-.132V4.3a.133.133 0 0 0-.132-.132zm4.62-.648h-2.76V7h.648V4.3c0-.072.06-.132.132-.132h1.98c.072 0 .132.06.132.132V7h.648V4.3a.778.778 0 0 0-.78-.78zm4.698 0c.432 0 .78.348.78.78v1.284h-2.892v.636c0 .072.06.132.132.132h2.76V7h-2.76a.778.778 0 0 1-.78-.78V4.3c0-.432.348-.78.78-.78h1.98zm-2.112 1.416h2.244V4.3a.133.133 0 0 0-.132-.132h-1.98a.133.133 0 0 0-.132.132v.636zm6.768-2.556h.648V7h-2.76a.778.778 0 0 1-.78-.78V4.3c0-.432.348-.78.78-.78h2.112V2.38zm-2.112 3.972h1.98c.072 0 .132-.06.132-.132V4.3a.133.133 0 0 0-.132-.132h-1.98a.133.133 0 0 0-.132.132v1.92c0 .072.06.132.132.132zM90.548 7h.648V3.52h-.648V7zm0-4.62v.648h.648V2.38h-.648zm4.56 1.14h-2.76V7h.648V4.3c0-.072.06-.132.132-.132h1.98c.072 0 .132.06.132.132V7h.648V4.3a.778.778 0 0 0-.78-.78z" id="poxy-injected-svg-4-a"></path></defs><g fill="none" fill-rule="evenodd"><g fill-rule="nonzero"><path d="M0 0h34v20H0z" fill="#CCA6C4"></path><path d="M34 0h77v20H34z" fill="#494368"></path></g><g fill-rule="nonzero"><path d="M46.97 9.92c.42 0 .75.13 1.05.4.28.27.43.59.43.98v4.79h-5.24c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-2.27h5.5v-1.15c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-5.24V9.92h5.23zm.26 5.02v-1.36h-4.26v1.13c0 .07.03.12.08.16.05.04.11.07.17.07h4.01zm11.86-5.02h1.3l-2.49 6.17h-1l-2.22-4.59-2.1 4.59-.03-.01.01.01h-1l-2.6-6.17h1.3l1.79 4.09 1.91-4.09h1.4l2.02 4.09 1.71-4.09zm6.95 0c.42 0 .77.13 1.05.4s.43.59.43.98v2.27h-5.5v1.13c0 .07.03.12.08.16.05.04.11.07.17.07h5.24v1.14h-5.24c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-3.4c0-.38.15-.71.43-.98s.63-.4 1.05-.4h3.77v.01zm-4.01 2.5h4.26v-1.13c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-3.77a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v1.13h.01zm13.35-1.13v.23h-1.22v-.23c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-3.77a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v.9c0 .07.03.12.08.16.05.04.11.07.17.07h3.77c.42 0 .75.13 1.05.4.28.27.43.59.43.98v.89c0 .38-.15.71-.43.98s-.63.4-1.05.4h-3.77c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-.23h1.24v.23c0 .07.03.12.08.16.05.04.11.07.17.07h3.77c.07 0 .12-.03.17-.07.05-.04.08-.11.08-.16v-.89c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-3.77c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-.9c0-.38.15-.71.43-.98s.63-.4 1.05-.4h3.77c.42 0 .75.13 1.05.4.27.28.41.61.41.98zm2.6-1.37h3.77c.42 0 .77.13 1.05.4s.43.59.43.98v3.4c0 .38-.15.71-.43.98s-.63.4-1.05.4h-3.77c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-3.41c0-.38.15-.71.43-.98.3-.26.65-.39 1.05-.39zm3.77 1.14h-3.77a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v3.4c0 .07.03.12.08.16.05.04.11.07.17.07h3.77c.07 0 .12-.03.17-.07.05-.04.08-.11.08-.16v-3.4c0-.07-.03-.12-.08-.16a.241.241 0 0 0-.17-.07zm11.12-1.14c.42 0 .75.13 1.05.4.28.27.43.59.43.98v4.79h-1.22v-4.8c0-.07-.03-.12-.08-.16a.294.294 0 0 0-.19-.07h-2.61a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v4.79h-1.24v-4.79c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-2.62a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v4.79H84.4V9.92h8.47zm7.92 0c.42 0 .77.13 1.05.4s.43.59.43.98v2.27h-5.5v1.13c0 .07.03.12.08.16.05.04.11.07.17.07h5.24v1.14h-5.24c-.42 0-.77-.13-1.05-.4a1.31 1.31 0 0 1-.43-.98v-3.4c0-.38.15-.71.43-.98s.63-.4 1.05-.4h3.77v.01zm-4.02 2.5h4.26v-1.13c0-.07-.03-.12-.08-.16a.284.284 0 0 0-.17-.07h-3.77a.26.26 0 0 0-.17.07c-.05.04-.08.11-.08.16v1.13h.01z" fill="#FFF"></path></g><use fill="#FFF" fill-opacity=".9" xlink:href="#poxy-injected-svg-4-a"></use><g fill-rule="nonzero"><path d="M26.57 9.76l-4.91-4.5-.69.75 4.09 3.75H8.94l4.09-3.75-.69-.75-4.91 4.5v2.97c0 1.34 1.29 2.43 2.88 2.43h3.03c1.59 0 2.88-1.09 2.88-2.43v-1.95h1.57v1.95c0 1.34 1.29 2.43 2.88 2.43h3.03c1.59 0 2.88-1.09 2.88-2.43l-.01-2.97z" fill="#DDA4CA"></path><path d="M26.57 9.34l-4.91-4.5-.69.75 4.09 3.75H8.94l4.09-3.75-.69-.75-4.91 4.5v2.97c0 1.34 1.29 2.43 2.88 2.43h3.03c1.59 0 2.88-1.09 2.88-2.43v-1.95h1.57v1.95c0 1.34 1.29 2.43 2.88 2.43h3.03c1.59 0 2.88-1.09 2.88-2.43l-.01-2.97z" fill="#261120"></path></g></g></svg></a></span></div>
+        <nav class="m-block m-default poxy-toc" id="poxy-toc">
+          <h3>Contents</h3>
+          <ul>
+            <li><a href="#mainpage-features">Features</a></li>
+            <li><a href="#mainpage-api-documentation">API documentation</a></li>
+            <li>
+              <a href="#mainpage-example">Basic examples</a>
+              <ul>
+                <li><a href="#mainpage-example-parsing-files">Parsing files</a></li>
+                <li><a href="#mainpage-example-parsing-strings">Parsing strings and iostreams</a></li>
+                <li><a href="#mainpage-example-parsing-without-exceptions">Handling errors without exceptions</a></li>
+                <li><a href="#mainpage-example-custom-error-formatting">Custom error formatting</a></li>
+                <li><a href="#mainpage-example-manipulations">Working with TOML data</a></li>
+                <li><a href="#mainpage-example-serialization">Serializing as TOML, JSON and YAML</a></li>
+                <li><a href="#mainpage-example-speed-up-compilation">Speeding up compilation</a></li>
+              </ul>
+            </li>
+            <li>
+              <a href="#mainpage-adding-lib">Adding toml++ to your project</a>
+              <ul>
+                <li><a href="#mainpage-adding-lib-old-school">"The old fashioned way"</a></li>
+                <li><a href="#mainpage-adding-lib-conan">Conan</a></li>
+                <li><a href="#mainpage-adding-lib-dds">DDS</a></li>
+                <li><a href="#mainpage-adding-lib-meson">Meson</a></li>
+                <li><a href="#mainpage-adding-lib-vcpkg">Vcpkg</a></li>
+                <li><a href="#mainpage-adding-lib-cmake-fetch-content">CMake FetchContent</a></li>
+                <li><a href="#mainpage-adding-lib-other">Other environments and package managers</a></li>
+                <li><a href="#mainpage-adding-lib-python">Special mention: Python</a></li>
+              </ul>
+            </li>
+            <li><a href="#mainpage-configuration">Library configuration options</a></li>
+            <li><a href="#mainpage-contributing">Contributing</a></li>
+            <li><a href="#mainpage-license">License</a></li>
+            <li><a href="#mainpage-contact">Contacting the author</a></li>
+          </ul>
+        </nav>
+<section id="mainpage-features"><h2><a href="#mainpage-features">Features</a></h2><ul><li>Supports the latest <a class="poxy-external" href="https://toml.io/" target="_blank">TOML</a> release (<a class="poxy-external" href="https://toml.io/en/v1.0.0" target="_blank">v1.0.0</a>), plus optional support for some unreleased TOML features</li><li>Supports serializing to JSON and YAML</li><li>Proper UTF-8 handling (incl. BOM)</li><li>C++17 (plus some C++20 features where available, e.g. experimental support for <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/language/types#Character_types" target="_blank">char8_t</a> strings)</li><li>Header-only (optional!)</li><li>Doesn't require RTTI</li><li>Works with or without exceptions</li><li>Tested on Clang (6+), GCC (7+) and MSVC (VS2019)</li><li>Tested on x64, x86 and ARM</li></ul></section><section id="mainpage-api-documentation"><h2><a href="#mainpage-api-documentation">API documentation</a></h2><p>You're looking at it! Browse the docs using the links at the top of the page. You can search from anywhere by pressing the TAB key.</p></section><section id="mainpage-example"><h2><a href="#mainpage-example">Basic examples</a></h2><section id="mainpage-example-parsing-files"><h3><a href="#mainpage-example-parsing-files">Parsing files</a></h3><p>Call <a class="m-doc" href="namespacetoml.html#a8dbc58dad43c3b66f4476a7131f5741a">toml::<wbr/>parse_file()</a> and work with the <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> you get back, or handle any <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> that gets thrown:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
+
+<span class="k">int</span> <span class="nf">main</span><span class="p">(</span><span class="k">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">char</span><span class="o">**</span> <span class="n">argv</span><span class="p">)</span>
+<span class="p">{</span>
+   <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span> <span class="n">tbl</span><span class="p">;</span>
+   <span class="k">try</span>
+   <span class="p">{</span>
+       <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse_file</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+           <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="p">}</span>
+   <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="nn">std</span><span class="o">::</span><span class="nc">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="namespacetoml.html#a8dbc58dad43c3b66f4476a7131f5741a">toml::<wbr/>parse_file()</a></li><li><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></li><li><a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a></li></ul></aside></section><section id="mainpage-example-parsing-strings"><h3><a href="#mainpage-example-parsing-strings">Parsing strings and iostreams</a></h3><p>Call <a class="m-doc" href="namespacetoml.html#ada8654fb4ceef15c20fc1d5e0cc734dd">toml::<wbr/>parse()</a> and work with the <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a> you get back, or handle any <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a> that gets thrown:</p><pre class="m-code"><p class="m-note m-success poxy-godbolt"><a class="poxy-external poxy-godbolt" href="https://godbolt.org/z/NsR-xf" target="_blank">Try this code on Compiler Explorer</a></p><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span> <span class="cpf">&lt;sstream&gt;</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="nn">std</span><span class="o">::</span><span class="nn">string_view_literals</span><span class="p">;</span>
+
+<span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="nn">std</span><span class="o">::</span><span class="nc">string_view</span> <span class="n">some_toml</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<span class="s">       [library]</span>
+<span class="s">       name = "toml++"</span>
+<span class="s">       authors = ["Mark Gillard &lt;mark.gillard@outlook.com.au&gt;"]</span>
+<span class="s">       cpp = 17</span>
+<span class="s">   </span><span class="dl">)</span><span class="s">"sv</span><span class="p">;</span>
+
+   <span class="k">try</span>
+   <span class="p">{</span>
+       <span class="c1">// parse directly from a string view:</span>
+       <span class="p">{</span>
+           <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse</span><span class="p">(</span><span class="n">some_toml</span><span class="p">);</span>
+           <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="p">}</span>
+
+       <span class="c1">// parse from a string stream:</span>
+       <span class="p">{</span>
+           <span class="nn">std</span><span class="o">::</span><span class="nc">stringstream</span> <span class="n">ss</span><span class="p">{</span> <span class="nn">std</span><span class="o">::</span><span class="nc">string</span><span class="p">{</span> <span class="n">some_toml</span> <span class="p">}</span> <span class="p">};</span>
+           <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse</span><span class="p">(</span><span class="n">ss</span><span class="p">);</span>
+           <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="p">}</span>
+   <span class="p">}</span>
+   <span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="nn">std</span><span class="o">::</span><span class="nc">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-console"><span class="go">[library]</span>
+<span class="go">authors = [ 'Mark Gillard &lt;mark.gillard@outlook.com.au&gt;' ]</span>
+<span class="go">cpp = 17</span>
+<span class="go">name = 'toml++'</span>
+
+<span class="go">[library]</span>
+<span class="go">authors = [ 'Mark Gillard &lt;mark.gillard@outlook.com.au&gt;' ]</span>
+<span class="go">cpp = 17</span>
+<span class="go">name = 'toml++'</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="namespacetoml.html#a8dbc58dad43c3b66f4476a7131f5741a">toml::<wbr/>parse_file()</a></li><li><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></li><li><a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a></li></ul></aside></section><section id="mainpage-example-parsing-without-exceptions"><h3><a href="#mainpage-example-parsing-without-exceptions">Handling errors without exceptions</a></h3><p>Can't (or won't) use exceptions? That's fine too. You can disable exceptions in your compiler flags and/or explicitly disable the library's use of them by setting the option <a class="m-doc" href="group__configuration.html#ga93097ecd88ca4bca393f60a78bda643b">TOML_<wbr/>EXCEPTIONS</a> to <code>0</code>. In either case, the parsing functions return a <a class="m-doc" href="classtoml_1_1parse__result.html">toml::<wbr/>parse_result</a> instead of a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>:</p><pre class="m-code"><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+
+<span class="cp">#define </span><span class="fm">TOML_EXCEPTIONS</span><span class="cp"> 0 </span><span class="c1">// only necessary if you've left them enabled in your compiler</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
+
+<span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+   <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1parse__result.html">parse_result</a></span> <span class="n">result</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse_file</span><span class="p">(</span><span class="s">"configuration.toml"</span><span class="p">);</span>
+   <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">result</span><span class="p">)</span>
+   <span class="p">{</span>
+       <span class="nn">std</span><span class="o">::</span><span class="nc">cerr</span> <span class="o">&lt;&lt;</span> <span class="s">"Parsing failed:</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">result</span><span class="p">.</span><span class="nf">error</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+       <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="nf">do_stuff_with_your_config</span><span class="p">(</span><span class="nn">std</span><span class="o">::</span><span class="nf">move</span><span class="p">(</span><span class="n">result</span><span class="p">).</span><span class="nf">table</span><span class="p">());</span> <span class="c1">// 'steal' the table from the result</span>
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre></section><section id="mainpage-example-custom-error-formatting"><h3><a href="#mainpage-example-custom-error-formatting">Custom error formatting</a></h3><p>The examples above use an overloaded <code>operator&lt;&lt;</code> with ostreams to print basic error messages, and look like this:</p><pre class="m-console"><span class="go">Error while parsing key: expected bare key starting character or string delimiter, saw '?'</span>
+<span class="go">    (error occurred at line 2, column 5)</span></pre><p>In order to keep the library as small as possible I haven't bent over backwards to support things like custom colouring of the text in TTY environments, et cetera. That being said, the library provides the requisite information for you to build these yourself if necessary via <a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a>'s source() and description() members:</p><pre class="m-code"><span class="nn">toml</span><span class="o">::</span><span class="nc">table</span> <span class="n">tbl</span><span class="p">;</span>
+<span class="k">try</span>
+<span class="p">{</span>
+   <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse_file</span><span class="p">(</span><span class="s">"configuration.toml"</span><span class="p">);</span>
+<span class="p">}</span>
+<span class="k">catch</span> <span class="p">(</span><span class="k">const</span> <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1parse__error.html">parse_error</a></span><span class="o">&amp;</span> <span class="n">err</span><span class="p">)</span>
+<span class="p">{</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cerr</span>
+       <span class="o">&lt;&lt;</span> <span class="s">"Error parsing file '"</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">err</span><span class="p">.</span><span class="nf">source</span><span class="p">().</span><span class="n">path</span>
+       <span class="o">&lt;&lt;</span> <span class="s">"':</span><span class="se">\n</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="nf">description</span><span class="p">()</span>
+       <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">  ("</span> <span class="o">&lt;&lt;</span> <span class="n">err</span><span class="p">.</span><span class="nf">source</span><span class="p">().</span><span class="n">begin</span> <span class="o">&lt;&lt;</span> <span class="s">")</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1parse__error.html">toml::<wbr/>parse_error</a></li><li><a class="m-doc" href="structtoml_1_1source__region.html">toml::<wbr/>source_region</a></li><li><a class="m-doc" href="structtoml_1_1source__position.html">toml::<wbr/>source_position</a></li></ul></aside></section><section id="mainpage-example-manipulations"><h3><a href="#mainpage-example-manipulations">Working with TOML data</a></h3><p>A TOML document is a tree of values, arrays and tables, represented as the <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a>, <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a> and <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>, respectively. All three inherit from <a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a>, and can be easily accessed via the <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</p><pre class="m-code"><p class="m-note m-success poxy-godbolt"><a class="poxy-external poxy-godbolt" href="https://godbolt.org/z/7z6GGW" target="_blank">Try this code on Compiler Explorer</a></p><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
+<span class="k">using</span> <span class="k">namespace</span> <span class="nn">std</span><span class="o">::</span><span class="nn">string_view_literals</span><span class="p">;</span>
+
+<span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+   <span class="k">static</span> <span class="k">constexpr</span> <span class="k">auto</span> <span class="n">source</span> <span class="o">=</span> <span class="sa">R</span><span class="s">"</span><span class="dl">(</span>
+<span class="s">       str = "hello world"</span>
+
+<span class="s">       numbers = [ 1, 2, 3, "four", 5.0 ]</span>
+<span class="s">       vegetables = [ "tomato", "onion", "mushroom", "lettuce" ]</span>
+<span class="s">       minerals = [ "quartz", "iron", "copper", "diamond" ]</span>
+
+<span class="s">       [animals]</span>
+<span class="s">       cats = [ "tiger", "lion", "puma" ]</span>
+<span class="s">       birds = [ "macaw", "pigeon", "canary" ]</span>
+<span class="s">       fish = [ "salmon", "trout", "carp" ]</span>
+
+<span class="s">   </span><span class="dl">)</span><span class="s">"sv</span><span class="p">;</span>
+   <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span> <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">parse</span><span class="p">(</span><span class="n">source</span><span class="p">);</span>
+
+   <span class="c1">// different ways of directly querying data</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">optional</span><span class="o">&lt;</span><span class="nn">std</span><span class="o">::</span><span class="nc">string_view</span><span class="o">&gt;</span> <span class="n">str1</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="n">value</span><span class="o">&lt;</span><span class="nn">std</span><span class="o">::</span><span class="nc">string_view</span><span class="o">&gt;</span><span class="p">();</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">optional</span><span class="o">&lt;</span><span class="nn">std</span><span class="o">::</span><span class="nc">string</span><span class="o">&gt;</span>      <span class="n">str2</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="n">value</span><span class="o">&lt;</span><span class="nn">std</span><span class="o">::</span><span class="nc">string</span><span class="o">&gt;</span><span class="p">();</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">string_view</span>                <span class="n">str3</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="nf">value_or</span><span class="p">(</span><span class="s">""sv</span><span class="p">);</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">string</span><span class="o">&amp;</span>                    <span class="n">str4</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"str"</span><span class="p">].</span><span class="n">ref</span><span class="o">&lt;</span><span class="nn">std</span><span class="o">::</span><span class="nc">string</span><span class="o">&gt;</span><span class="p">();</span> <span class="c1">// ~~dangerous~~</span>
+
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str1</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="o">*</span><span class="n">str2</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str3</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">str4</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// get a <a class="m-doc poxy-injected" href="classtoml_1_1node__view.html">toml::node_view</a> of the element 'numbers' using operator[]</span>
+   <span class="k">auto</span> <span class="n">numbers</span> <span class="o">=</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"numbers"</span><span class="p">];</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"table has 'numbers': "</span> <span class="o">&lt;&lt;</span> <span class="o">!!</span><span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers is an: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span><span class="p">.</span><span class="nf">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// get the underlying array object to do some more advanced stuff</span>
+   <span class="k">if</span> <span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="o">*</span> <span class="n">arr</span> <span class="o">=</span> <span class="n">numbers</span><span class="p">.</span><span class="nf">as_array</span><span class="p">())</span>
+   <span class="p">{</span>
+       <span class="k">for</span> <span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="nc">node</span><span class="o">&amp;</span> <span class="n">elem</span> <span class="o">:</span> <span class="o">*</span><span class="n">arr</span><span class="p">)</span>
+       <span class="p">{</span>
+           <span class="c1">// visitation helps deal with the polymorphic nature of TOML data</span>
+           <span class="n">elem</span><span class="p">.</span><span class="nf">visit</span><span class="p">([](</span><span class="k">auto</span><span class="o">&amp;&amp;</span> <span class="n">el</span><span class="p">)</span> <span class="k">noexcept</span>
+           <span class="p">{</span>
+               <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="n">is_number</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+                   <span class="p">(</span><span class="o">*</span><span class="n">el</span><span class="p">)</span><span class="o">++</span><span class="p">;</span>
+               <span class="k">else</span> <span class="k">if</span> <span class="k">constexpr</span> <span class="p">(</span><span class="nn">toml</span><span class="o">::</span><span class="n">is_string</span><span class="o">&lt;</span><span class="k">decltype</span><span class="p">(</span><span class="n">el</span><span class="p">)</span><span class="o">&gt;</span><span class="p">)</span>
+                   <span class="n">el</span> <span class="o">=</span> <span class="s">"five"sv</span><span class="p">;</span>
+           <span class="p">});</span>
+       <span class="p">}</span>
+
+       <span class="c1">// arrays are very similar to <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/container/vector" target="_blank">std::vector</a></span>
+       <span class="n">arr</span><span class="o">-&gt;</span><span class="nf">push_back</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+       <span class="n">arr</span><span class="o">-&gt;</span><span class="n">emplace_back</span><span class="o">&lt;</span><span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">);</span>
+       <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"numbers: "</span> <span class="o">&lt;&lt;</span> <span class="n">numbers</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="p">}</span>
+
+   <span class="c1">// node-views can be chained to quickly query deeper</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"cats"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"fish[1]: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"fish"</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// can also be retrieved via absolute path</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"cats: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="nf">at_path</span><span class="p">(</span><span class="s">"animals.cats"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"fish[1]: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">.</span><span class="nf">at_path</span><span class="p">(</span><span class="s">"animals.fish[1]"</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// ...even if the element doesn't exist</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"dinosaurs: "</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span><span class="p">[</span><span class="s">"animals"</span><span class="p">][</span><span class="s">"dinosaurs"</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span> <span class="c1">//no dinosaurs :(</span>
+
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-console"><span class="go">hello world</span>
+<span class="go">hello world</span>
+<span class="go">hello world</span>
+<span class="go">hello world</span>
+<span class="go">table has 'numbers': 1</span>
+<span class="go">numbers is an: array</span>
+<span class="go">numbers: [ 1, 2, 3, 'four', 5.0 ]</span>
+<span class="go">numbers: [ 2, 3, 4, 'five', 6.0, 7, [ 8, 9 ] ]</span>
+<span class="go">cats: [ 'tiger', 'lion', 'puma' ]</span>
+<span class="go">fish[1]: 'trout'</span>
+<span class="go">cats: [ 'tiger', 'lion', 'puma' ]</span>
+<span class="go">fish[1]: 'trout'</span>
+<span class="go">dinosaurs:</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1node.html">toml::<wbr/>node</a></li><li><a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a></li><li><a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value</a></li><li><a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a></li><li><a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a></li></ul></aside></section><section id="mainpage-example-serialization"><h3><a href="#mainpage-example-serialization">Serializing as TOML, JSON and YAML</a></h3><p>All toml++ data types have overloaded <code>operator&lt;&lt;</code> for ostreams, so 'serializing' a set of TOML data to actual TOML is done just by printing it to an ostream. Converting it to JSON and YAML is done in much the same way, but via a <a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a> and <a class="m-doc" href="classtoml_1_1yaml__formatter.html">toml::<wbr/>yaml_formatter</a>.</p><pre class="m-code"><p class="m-note m-success poxy-godbolt"><a class="poxy-external poxy-godbolt" href="https://godbolt.org/z/srdfoWMq6" target="_blank">Try this code on Compiler Explorer</a></p><span class="cp">#include</span> <span class="cpf">&lt;iostream&gt;</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml++/toml.h&gt;</span>
+
+<span class="k">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+   <span class="k">auto</span> <span class="n">tbl</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span><span class="p">{</span>
+       <span class="p">{</span> <span class="s">"lib"</span><span class="p">,</span> <span class="s">"toml++"</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">"cpp"</span><span class="p">,</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="s">"and beyond"</span> <span class="p">}</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">"toml"</span><span class="p">,</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="s">"1.0.0"</span><span class="p">,</span> <span class="s">"and beyond"</span> <span class="p">}</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">"repo"</span><span class="p">,</span> <span class="s">"https://github.com/marzer/tomlplusplus/"</span> <span class="p">},</span>
+       <span class="p">{</span> <span class="s">"author"</span><span class="p">,</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">table</span><span class="p">{</span>
+               <span class="p">{</span> <span class="s">"name"</span><span class="p">,</span> <span class="s">"Mark Gillard"</span> <span class="p">},</span>
+               <span class="p">{</span> <span class="s">"github"</span><span class="p">,</span> <span class="s">"https://github.com/marzer"</span> <span class="p">},</span>
+               <span class="p">{</span> <span class="s">"twitter"</span><span class="p">,</span> <span class="s">"https://twitter.com/marzer8789"</span> <span class="p">}</span>
+           <span class="p">}</span>
+       <span class="p">},</span>
+   <span class="p">};</span>
+
+   <span class="c1">// serializing as TOML</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### TOML ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="n">tbl</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// serializing as JSON using <a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">toml::json_formatter</a>:</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### JSON ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1json__formatter.html">json_formatter</a></span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="c1">// serializing as YAML using <a class="m-doc poxy-injected" href="classtoml_1_1yaml__formatter.html">toml::yaml_formatter</a>:</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"###### YAML ######"</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+   <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="nn">toml</span><span class="o">::</span><span class="nc"><a class="m-doc poxy-injected" href="classtoml_1_1yaml__formatter.html">yaml_formatter</a></span><span class="p">{</span> <span class="n">tbl</span> <span class="p">}</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n\n</span><span class="s">"</span><span class="p">;</span>
+
+   <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span></pre><pre class="m-console"><span class="gp">#</span><span class="c1">##### TOML ######</span>
+
+<span class="go">cpp = [ 17, 20, 'and beyond' ]</span>
+<span class="go">lib = 'toml++'</span>
+<span class="go">repo = 'https://github.com/marzer/tomlplusplus/'</span>
+<span class="go">toml = [ '1.0.0', 'and beyond' ]</span>
+
+<span class="go">[author]</span>
+<span class="go">github = 'https://github.com/marzer'</span>
+<span class="go">name = 'Mark Gillard'</span>
+<span class="go">twitter = 'https://twitter.com/marzer8789'</span>
+
+<span class="gp">#</span><span class="c1">##### JSON ######</span>
+
+<span class="go">{</span>
+<span class="go">    "author" : {</span>
+<span class="go">        "github" : "https://github.com/marzer",</span>
+<span class="go">        "name" : "Mark Gillard",</span>
+<span class="go">        "twitter" : "https://twitter.com/marzer8789"</span>
+<span class="go">    },</span>
+<span class="go">    "cpp" : [</span>
+<span class="go">        17,</span>
+<span class="go">        20,</span>
+<span class="go">        "and beyond"</span>
+<span class="go">    ],</span>
+<span class="go">    "lib" : "toml++",</span>
+<span class="go">    "repo" : "https://github.com/marzer/tomlplusplus/",</span>
+<span class="go">    "toml" : [</span>
+<span class="go">        "1.0.0",</span>
+<span class="go">        "and beyond"</span>
+<span class="go">    ]</span>
+<span class="go">}</span>
+
+<span class="gp">#</span><span class="c1">##### YAML ######</span>
+
+<span class="go">author:</span>
+<span class="go">  github: 'https://github.com/marzer'</span>
+<span class="go">  name: 'Mark Gillard'</span>
+<span class="go">  twitter: 'https://twitter.com/marzer8789'</span>
+<span class="go">cpp:</span>
+<span class="go">  - 17</span>
+<span class="go">  - 20</span>
+<span class="go">  - 'and beyond'</span>
+<span class="go">lib: toml++</span>
+<span class="go">repo: 'https://github.com/marzer/tomlplusplus/'</span>
+<span class="go">toml:</span>
+<span class="go">  - '1.0.0'</span>
+<span class="go">  - 'and beyond'</span></pre><aside class="m-note m-default"><h4>See also</h4><ul><li><a class="m-doc" href="classtoml_1_1toml__formatter.html">toml::<wbr/>toml_formatter</a></li><li><a class="m-doc" href="classtoml_1_1json__formatter.html">toml::<wbr/>json_formatter</a></li><li><a class="m-doc" href="classtoml_1_1yaml__formatter.html">toml::<wbr/>yaml_formatter</a></li></ul></aside></section><section id="mainpage-example-speed-up-compilation"><h3><a href="#mainpage-example-speed-up-compilation">Speeding up compilation</a></h3><p>Because toml++ is a header-only library of nontrivial size you might find that compilation times noticeably increase after you add it to your project, especially if you add the library's header somewhere that's visible from a large number of translation units. You can counter this by disabling header-only mode and explicitly controlling where the library's implementation is compiled.</p><p><strong>Step 1: Set <a class="m-doc" href="group__configuration.html#ga8219bfd7e75587516385b6022b28abc2">TOML_<wbr/>HEADER_<wbr/>ONLY</a> to <code>0</code> before including toml++</strong></p><p>This must be the same everywhere, so either set it as a global <code>#define</code> in your build system, or do it manually before including toml++ in some global header that's used everywhere in your project:</p><pre class="m-code"><span class="c1">// global_header_that_includes_toml++.h</span>
+
+<span class="cp">#define </span><span class="fm">TOML_HEADER_ONLY</span><span class="cp"> 0</span>
+<span class="cp">#include</span> <span class="cpf">&lt;toml.hpp&gt;</span></pre><p><strong>Step 2: Define <a class="m-doc" href="group__configuration.html#ga27ee69835a1ddff9dbaf3015b4b08a11">TOML_<wbr/>IMPLEMENTATION</a> before including toml++ in one specific translation unit</strong></p><pre class="m-code"><span class="c1">// some_code_file.cpp</span>
+
+<span class="cp">#define </span><span class="fm">TOML_IMPLEMENTATION</span>
+<span class="cp">#include</span> <span class="cpf">"global_header_that_includes_toml++.h"</span></pre><p><strong>Bonus Step: Disable any library features you don't need</strong></p><p>Some library features can be disabled wholesale so you can avoid paying their the compilation cost if you don't need them. For example, if all you need to do is serialize some code-generated TOML and don't actually need the parser at all you, can set <a class="m-doc" href="group__configuration.html#ga121912d75d4624de6ab6854e41d8a852">TOML_<wbr/>ENABLE_<wbr/>PARSER</a> to <code>0</code> to disable the parser altogether. This can yield fairly significant compilation speedups since the parser accounts for a good chunk of the library's code.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="group__configuration.html">Library Configuration</a></p></aside></section></section><section id="mainpage-adding-lib"><h2><a href="#mainpage-adding-lib">Adding toml++ to your project</a></h2><p class="m-note m-default">The library comes in two flavours, 🍦️ Single-header and 🍨️ Regular. The API is the same for both.</p><section id="mainpage-adding-lib-old-school"><h3><a href="#mainpage-adding-lib-old-school">"The old fashioned way"</a></h3><p>Clone <a class="poxy-external" href="https://github.com/marzer/tomlplusplus" target="_blank">the repository</a> from GitHub, and then:</p><h4>🍦️ Single-header flavour</h4><ol><li>Drop <code>toml.hpp</code> wherever you like in your source tree</li><li>There is no step two</li></ol><h4>🍨️ Regular flavour</h4><ol><li>Add <code>tomlplusplus/include</code> to your include paths</li><li><code>#include &lt;toml++/toml.h&gt;</code></li></ol></section><section id="mainpage-adding-lib-conan"><h3><a href="#mainpage-adding-lib-conan">Conan</a></h3><p>Add <code>tomlplusplus/3.0.0</code> to your conanfile.</p></section><section id="mainpage-adding-lib-dds"><h3><a href="#mainpage-adding-lib-dds">DDS</a></h3><p>Add <code>tomlpp</code> to your <code>package.json5</code>, e.g.:</p><pre class="m-code">depends: <span class="o">[</span>
+       <span class="s1">'tomlpp^3.0.0'</span>,
+<span class="o">]</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="poxy-external" href="https://dds.pizza/" target="_blank">What is DDS?</a></p></aside></section><section id="mainpage-adding-lib-meson"><h3><a href="#mainpage-adding-lib-meson">Meson</a></h3><pre class="m-code">meson wrap install tomlplusplus</pre><p>You can install the wrap with:  After that, you can use it like a regular dependency: ‘tomlplusplus_dep = dependency('tomlplusplus’)`. You can also add it as a subproject directly.</p></section><section id="mainpage-adding-lib-vcpkg"><h3><a href="#mainpage-adding-lib-vcpkg">Vcpkg</a></h3><pre class="m-code">vcpkg install tomlplusplus</pre></section><section id="mainpage-adding-lib-cmake-fetch-content"><h3><a href="#mainpage-adding-lib-cmake-fetch-content">CMake FetchContent</a></h3><pre class="m-code"><span class="nb">include</span><span class="p">(</span><span class="s">FetchContent</span><span class="p">)</span>
+<span class="nb">FetchContent_Declare</span><span class="p">(</span>
+    <span class="s">tomlplusplus</span>
+    <span class="s">GIT_REPOSITORY</span> <span class="s">https://github.com/marzer/tomlplusplus.git</span>
+    <span class="s">GIT_TAG</span>        <span class="s">v3.0.0</span>
+<span class="p">)</span>
+<span class="nb">FetchContent_MakeAvailable</span><span class="p">(</span><span class="s">tomlplusplus</span><span class="p">)</span></pre><aside class="m-note m-default"><h4>See also</h4><p><a class="poxy-external" href="https://cmake.org/cmake/help/latest/module/FetchContent.html" target="_blank">What is FetchContent?</a></p></aside></section><section id="mainpage-adding-lib-other"><h3><a href="#mainpage-adding-lib-other">Other environments and package managers</a></h3><p>toml++ is a fairly new project and I'm not up-to-speed with all of the available packaging and integration options in the C++ ecosystem. I'm also a cmake novice, for better or worse. If there's an integration option missing be assured that I fully support it being added, and welcome pull requests!</p></section><section id="mainpage-adding-lib-python"><h3><a href="#mainpage-adding-lib-python">Special mention: Python</a></h3><p>There exists a python wrapper library built around toml++ called <a class="poxy-external" href="https://github.com/bobfang1992/pytomlpp" target="_blank">pytomlpp</a> which is, at the time of writing, the only natively-compiled TOML library available for python, and thus much faster than many of the alternatives:</p><pre class="m-console"><span class="go">Parsing data.toml 5000 times:</span>
+<span class="go">  pytomlpp:   0.694 s</span>
+<span class="go">     rtoml:   0.871 s ( 1.25x)</span>
+<span class="go">     tomli:   2.625 s ( 3.78x)</span>
+<span class="go">      toml:   5.642 s ( 8.12x)</span>
+<span class="go">     qtoml:   7.760 s (11.17x)</span>
+<span class="go">   tomlkit:  32.708 s (47.09x)</span></pre><p>Install it using <code>pip</code>:</p><pre class="m-code">pip install pytomlpp</pre><p>Note that I'm not the owner of that project so if you wish to report a bug relating to the python implementation, please do so at their repository, not on the main toml++ one.</p></section></section><section id="mainpage-configuration"><h2><a href="#mainpage-configuration">Library configuration options</a></h2><p>The library exposes a number of configuration options in the form of compiler <code>#defines</code>. Things like changing the <code>optional&lt;T&gt;</code> type, disabling header-only mode, et cetera. The full list of configurables can be found on the <a class="m-doc" href="group__configuration.html">Library Configuration</a> page.</p><aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="group__configuration.html">Library Configuration</a></p></aside></section><section id="mainpage-contributing"><h2><a href="#mainpage-contributing">Contributing</a></h2><p>Contributions are very welcome! Either by <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">reporting issues</a> or submitting pull requests. If you wish to submit a pull request, please see <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md" target="_blank">CONTRIBUTING</a> for all the details you need to get going.</p></section><section id="mainpage-license"><h2><a href="#mainpage-license">License</a></h2><p>toml++ is licensed under the terms of the MIT license - see <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">LICENSE</a>.</p><p class="m-note m-default">If you're using the single-header version of the library you don't need to explicitly distribute the license file; it is embedded in the preamble at the top of the header.</p></section><section id="mainpage-contact"><h2><a href="#mainpage-contact">Contacting the author</a></h2><p>For bug reports and feature requests please use the <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Github Issues</a> system. For anything else you're welcome to reach out via other means. In order of likely response speed:</p><ul><li>Twitter: <a class="poxy-external" href="https://twitter.com/marzer8789" target="_blank">marzer8789</a></li><li>Email: <a class="poxy-external" href="mailto:mark.gillard@outlook.com.au" target="_blank">mark.gillard@outlook.com.au</a></li><li>Facebook: <a class="poxy-external" href="https://www.facebook.com/marzer" target="_blank">marzer</a></li><li>LinkedIn: <a class="poxy-external" href="https://www.linkedin.com/in/marzer/" target="_blank">marzer</a></li></ul></section>
+      </div>
+    </div>
+  </div>
+</article></main>
+<div class="m-doc-search" id="search">
+  <a href="#!" onclick="return hideSearch()"></a>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-m-8 m-push-m-2">
+        <div class="m-doc-search-header m-text m-small">
+          <div><span class="m-label m-default">Tab</span> / <span class="m-label m-default">T</span> to search, <span class="m-label m-default">Esc</span> to close</div>
+          <div id="search-symbolcount">…</div>
+        </div>
+        <div class="m-doc-search-content">
+          <form>
+            <input autocomplete="off" autofocus="autofocus" disabled="disabled" id="search-input" name="q" placeholder="Loading …" spellcheck="false" type="search"/>
+          </form>
+          <noscript class="m-text m-danger m-text-center">Unlike everything else in the docs, the search functionality <em>requires</em> JavaScript.</noscript>
+          <div class="m-text m-dim m-text-center" id="search-help">
+            <p class="m-noindent">Search for symbols, directories, files, pages or
+            modules. You can omit any prefix from the symbol or file path; adding a
+            <code>:</code> or <code>/</code> suffix lists all members of given symbol or
+            directory.</p>
+            <p class="m-noindent">Use <span class="m-label m-dim">↓</span>
+            / <span class="m-label m-dim">↑</span> to navigate through the list,
+            <span class="m-label m-dim">Enter</span> to go.
+            <span class="m-label m-dim">Tab</span> autocompletes common prefix, you can
+            copy a link to the result using <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">L</span> while <span class="m-label m-dim">⌘</span>
+            <span class="m-label m-dim">M</span> produces a Markdown link.</p>
+          </div>
+          <div class="m-text m-warning m-text-center" id="search-notfound">Sorry, nothing was found.</div>
+          <ul id="search-results"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="search-v2.js"></script><script>install_mcss_search_shim();</script>
+<script async="async" src="searchdata-v2.js"></script>
+<footer><nav>
+  <div class="m-container">
+    <div class="m-row">
+      <div class="m-col-l-10 m-push-l-1">
+        
+<a class="poxy-external" href="https://github.com/marzer/tomlplusplus" target="_blank">GitHub</a>
+• <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues" target="_blank">Report an issue</a>
+• <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/blob/master/LICENSE" target="_blank">License</a>
+• <a download="" href="toml++.tagfile.xml" target="_blank" type="text/xml">Doxygen tagfile</a>
+<br/><br/>
+Site generated using <a class="poxy-external" href="https://github.com/marzer/poxy/" target="_blank">Poxy</a>
+
+      </div>
+    </div>
+  </div>
+</nav></footer>
+
+
+</body></html>
