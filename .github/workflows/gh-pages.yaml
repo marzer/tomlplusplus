@@ -22,7 +22,9 @@ jobs:
                 shell: bash
 
         steps:
-            - uses: actions/checkout@v3
+            - uses: actions/checkout@v4
+              with:
+                  fetch-depth: 0
 
             - name: Install dependencies
               run: |
@@ -32,8 +34,12 @@ jobs:
 
             - name: Generate docs
               run: |
+                  git fetch origin master:refs/remotes/origin/master --tags --force
+                  git remote set-head origin -a
+                  git checkout master
+                  git pull --force
                   cd docs
-                  poxy --verbose
+                  poxy --verbose --git-tags
 
             - name: Deploy
               uses: peaceiris/actions-gh-pages@v3
