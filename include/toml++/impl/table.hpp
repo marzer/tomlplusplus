@@ -605,10 +605,10 @@ TOML_NAMESPACE_START
 		///		{ "a", 42, },
 		///		{ "b", "is the meaning of life, apparently." }
 		///	};
-		///	std::cout << R"(node ["a"] exists: )"sv << !!arr.get("a") << "\n";
-		///	std::cout << R"(node ["b"] exists: )"sv << !!arr.get("b") << "\n";
-		///	std::cout << R"(node ["c"] exists: )"sv << !!arr.get("c") << "\n";
-		/// if (auto val = arr.get("a"))
+		///	std::cout << R"(node ["a"] exists: )"sv << !!tbl.get("a") << "\n";
+		///	std::cout << R"(node ["b"] exists: )"sv << !!tbl.get("b") << "\n";
+		///	std::cout << R"(node ["c"] exists: )"sv << !!tbl.get("c") << "\n";
+		/// if (auto val = tbl.get("a"))
 		///		std::cout << R"(node ["a"] was an )"sv << val->type() << "\n";
 		/// \ecpp
 		///
