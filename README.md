@@ -51,7 +51,7 @@ cpp = 17
 Reading it in C++ is easy with toml++:
 
 ```cpp
-#include <toml.hpp>
+#include <toml++/toml.hpp>
 
 auto config = toml::parse_file( "configuration.toml" );
 
@@ -169,6 +169,7 @@ FetchContent_Declare(
     GIT_TAG        v3.4.0
 )
 FetchContent_MakeAvailable(tomlplusplus)
+# Example add library: target_link_libraries(MyApp tomlplusplus::tomlplusplus)
 ```
 
 > ℹ&#xFE0F; _[What is FetchContent?](https://cmake.org/cmake/help/latest/module/FetchContent.html)_
