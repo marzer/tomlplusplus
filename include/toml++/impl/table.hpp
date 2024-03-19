@@ -1527,6 +1527,8 @@ TOML_NAMESPACE_START
 				}
 				return iterator{ ipos };
 			}
+
+			TOML_UNREACHABLE;
 		}
 
 		/// \brief	Inserts a new value at a specific key if one did not already exist.

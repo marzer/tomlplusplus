@@ -9,6 +9,13 @@
 #include "source_region.hpp"
 #include "header_start.hpp"
 
+// workaround for this: https://github.com/marzer/tomlplusplus/issues/220
+#if TOML_NVCC
+#define TOML_NVCC_WORKAROUND { return {}; }
+#else
+#define TOML_NVCC_WORKAROUND = 0
+#endif
+
 TOML_NAMESPACE_START
 {
 	/// \brief	A TOML node.
@@ -246,11 +253,11 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns the node's type identifier.
 		TOML_PURE_GETTER
-		virtual node_type type() const noexcept = 0;
+		virtual node_type type() const noexcept TOML_NVCC_WORKAROUND;
 
 		/// \brief	Returns true if this node is a table.
 		TOML_PURE_GETTER
-		virtual bool is_table() const noexcept = 0;
+		virtual bool is_table() const noexcept TOML_NVCC_WORKAROUND;
 
 		/// \brief	Returns true if this node is an array.
 		TOML_PURE_GETTER
@@ -258,7 +265,7 @@ TOML_NAMESPACE_START
 
 		/// \brief	Returns true if this node is an array containing only tables.
 		TOML_PURE_GETTER
-		virtual bool is_array_of_tables() const noexcept = 0;
+		virtual bool is_array_of_tables() const noexcept TOML_NVCC_WORKAROUND;
 
 		/// \brief	Returns true if this node is a value.
 		TOML_PURE_GETTER
@@ -327,6 +334,8 @@ TOML_NAMESPACE_START
 				return is_time();
 			else if constexpr (std::is_same_v<type, date_time>)
 				return is_date_time();
+
+			TOML_UNREACHABLE;
 		}
 
 		/// @}
@@ -452,6 +461,8 @@ TOML_NAMESPACE_START
 				return as_time();
 			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
 				return as_date_time();
+
+			TOML_UNREACHABLE;
 		}
 
 		/// \brief	Gets a pointer to the node as a more specific node type (const overload).
@@ -481,6 +492,8 @@ TOML_NAMESPACE_START
 				return as_time();
 			else if constexpr (std::is_same_v<unwrapped_type, date_time>)
 				return as_date_time();
+
+			TOML_UNREACHABLE;
 		}
 
 		/// @}
@@ -1112,4 +1125,5 @@ TOML_IMPL_NAMESPACE_START
 TOML_IMPL_NAMESPACE_END;
 /// \endcond
 
+#undef TOML_NVCC_WORKAROUND
 #include "header_end.hpp"

@@ -175,6 +175,14 @@
 #endif
 #endif
 
+#ifndef TOML_NVCC
+#ifdef __NVCOMPILER_MAJOR__
+#define TOML_NVCC __NVCOMPILER_MAJOR__
+#else
+#define TOML_NVCC 0
+#endif
+#endif
+
 //#=====================================================================================================================
 //# ARCHITECTURE
 //#=====================================================================================================================
@@ -395,6 +403,7 @@
 #endif
 
 // TOML_ALWAYS_INLINE
+#ifndef TOML_ALWAYS_INLINE
 #ifdef _MSC_VER
 #define TOML_ALWAYS_INLINE __forceinline
 #elif TOML_GCC || TOML_CLANG || TOML_HAS_ATTR(__always_inline__)
@@ -404,8 +413,10 @@
 #else
 #define TOML_ALWAYS_INLINE inline
 #endif
+#endif
 
 // TOML_NEVER_INLINE
+#ifndef TOML_NEVER_INLINE
 #ifdef _MSC_VER
 #define TOML_NEVER_INLINE TOML_DECLSPEC(noinline)
 #elif TOML_CUDA // https://gitlab.gnome.org/GNOME/glib/-/issues/2555
@@ -418,19 +429,27 @@
 #ifndef TOML_NEVER_INLINE
 #define TOML_NEVER_INLINE
 #endif
+#endif
 
 // MSVC attributes
+#ifndef TOML_ABSTRACT_INTERFACE
 #define TOML_ABSTRACT_INTERFACE TOML_DECLSPEC(novtable)
+#endif
+#ifndef TOML_EMPTY_BASES
 #define TOML_EMPTY_BASES		TOML_DECLSPEC(empty_bases)
+#endif
 
 // TOML_TRIVIAL_ABI
+#ifndef TOML_TRIVIAL_ABI
 #if TOML_CLANG || TOML_HAS_ATTR(__trivial_abi__)
 #define TOML_TRIVIAL_ABI TOML_ATTR(__trivial_abi__)
 #else
 #define TOML_TRIVIAL_ABI
 #endif
+#endif
 
 // TOML_NODISCARD
+#ifndef TOML_NODISCARD
 #if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201603
 #define TOML_NODISCARD [[nodiscard]]
 #elif TOML_CLANG || TOML_GCC || TOML_HAS_ATTR(__warn_unused_result__)
@@ -438,12 +457,15 @@
 #else
 #define TOML_NODISCARD
 #endif
+#endif
 
 // TOML_NODISCARD_CTOR
+#ifndef TOML_NODISCARD_CTOR
 #if TOML_CPP >= 17 && TOML_HAS_CPP_ATTR(nodiscard) >= 201907
 #define TOML_NODISCARD_CTOR [[nodiscard]]
 #else
 #define TOML_NODISCARD_CTOR
+#endif
 #endif
 
 // pure + const
@@ -494,6 +516,7 @@
 #endif
 
 // TOML_ASSUME
+#ifndef TOML_ASSUME
 #ifdef _MSC_VER
 #define TOML_ASSUME(expr) __assume(expr)
 #elif TOML_ICC || TOML_CLANG || TOML_HAS_BUILTIN(__builtin_assume)
@@ -505,14 +528,17 @@
 #else
 #define TOML_ASSUME(expr) static_cast<void>(0)
 #endif
+#endif
 
 // TOML_UNREACHABLE
+#ifndef TOML_UNREACHABLE
 #ifdef _MSC_VER
 #define TOML_UNREACHABLE __assume(0)
 #elif TOML_ICC || TOML_CLANG || TOML_GCC || TOML_HAS_BUILTIN(__builtin_unreachable)
 #define TOML_UNREACHABLE __builtin_unreachable()
 #else
 #define TOML_UNREACHABLE static_cast<void>(0)
+#endif
 #endif
 
 // TOML_LIKELY

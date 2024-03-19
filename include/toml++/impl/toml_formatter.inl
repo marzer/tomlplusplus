@@ -92,7 +92,6 @@ TOML_ANON_NAMESPACE_START
 					val *= -1.0;
 				}
 				return weight + static_cast<size_t>(log10(val)) + 1u;
-				break;
 			}
 
 			case node_type::boolean: return 5u;

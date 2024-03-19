@@ -21,7 +21,11 @@ template:
 
 -->
 
+## Unreleased
+
 ## v3.4.0
+
+-   fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)
 
 #### Fixes
 
