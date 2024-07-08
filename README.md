@@ -21,7 +21,7 @@
 
 -   Header-only (optional!)
 -   Supports the latest [TOML] release ([v1.0.0]), plus optional support for some unreleased TOML features
--   Passes all tests in the [toml-test](https://github.com/BurntSushi/toml-test) suite
+-   Passes all tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 -   Supports serializing to JSON and YAML
 -   Proper UTF-8 handling (incl. BOM)
 -   C++17 (plus some C++20 features where available, e.g. experimental support for [char8_t] strings)
