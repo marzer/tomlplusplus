@@ -418,11 +418,11 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
@@ -1555,8 +1555,8 @@ TOML_NAMESPACE_START
 		{
 			using raw_elem_type = impl::remove_cvref<ElemType>;
 			using elem_type		= std::conditional_t<std::is_void_v<raw_elem_type>, //
-												 impl::emplaced_type_of<Args&&...>,
-												 raw_elem_type>;
+													 impl::emplaced_type_of<Args&&...>,
+													 raw_elem_type>;
 
 			using type = impl::remove_cvref<impl::unwrap_node<elem_type>>;
 			static_assert(impl::is_native<type> || impl::is_one_of<type, table, array>,
@@ -1660,8 +1660,8 @@ TOML_NAMESPACE_START
 		{
 			using raw_elem_type = impl::remove_cvref<ElemType>;
 			using elem_type		= std::conditional_t<std::is_void_v<raw_elem_type>, //
-												 impl::emplaced_type_of<Args&&...>,
-												 raw_elem_type>;
+													 impl::emplaced_type_of<Args&&...>,
+													 raw_elem_type>;
 
 			static constexpr auto moving_node_ptr = std::is_same_v<elem_type, impl::node_ptr> //
 												 && sizeof...(Args) == 1u					  //

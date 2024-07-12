@@ -126,7 +126,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_PURE_GETTER
+	TOML_NODISCARD
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, node * &first_nonmatch) noexcept
 	{
@@ -149,7 +149,7 @@ TOML_NAMESPACE_START
 		return true;
 	}
 
-	TOML_PURE_GETTER
+	TOML_NODISCARD
 	TOML_EXTERNAL_LINKAGE
 	bool table::is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept
 	{
