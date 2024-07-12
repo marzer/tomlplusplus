@@ -26,6 +26,7 @@ template:
 #### Fixes
 
 -   fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds (#231) (@Forbinn)
+-   fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
 
 ## v3.4.0
 

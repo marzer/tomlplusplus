@@ -2243,7 +2243,7 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default("'"sv,
 											 traits::full_prefix,
 											 std::string_view{ digits, length },
-											 "' is not representable in 64 bits"sv);
+											 "' is not representable as a signed 64-bit integer"sv);
 
 			// do the thing
 			{
@@ -2267,7 +2267,7 @@ TOML_IMPL_NAMESPACE_START
 					set_error_and_return_default("'"sv,
 												 traits::full_prefix,
 												 std::string_view{ digits, length },
-												 "' is not representable in 64 bits"sv);
+												 "' is not representable as a signed 64-bit integer"sv);
 
 				if constexpr (traits::is_signed)
 				{
@@ -3766,16 +3766,10 @@ TOML_ANON_NAMESPACE_START
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
-	throw parse_error{ msg, source_position{}, std::make_shared<const std::string>(std::move(path)) }
+	throw parse_error(msg, source_position{}, std::make_shared<const std::string>(std::move(path)))
 #else
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
-	return parse_result                                                                                                \
-	{                                                                                                                  \
-		parse_error                                                                                                    \
-		{                                                                                                              \
-			msg, source_position{}, std::make_shared<const std::string>(std::move(path))                               \
-		}                                                                                                              \
-	}
+	return parse_result(parse_error(msg, source_position{}, std::make_shared<const std::string>(std::move(path))))
 #endif
 
 		std::string file_path_str(file_path);
