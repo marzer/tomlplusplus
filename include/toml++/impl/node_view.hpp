@@ -290,7 +290,7 @@ TOML_NAMESPACE_START
 		///
 		/// \remarks	Always returns `false` if the view does not reference a node, or if the viewed node is
 		/// 			an empty table or array.
-		TOML_NODISCARD
+		TOML_PURE_GETTER
 		bool is_homogeneous(node_type ntype) const noexcept
 		{
 			return node_ ? node_->is_homogeneous(ntype) : false;

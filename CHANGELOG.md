@@ -23,6 +23,10 @@ template:
 
 ## Unreleased
 
+#### Fixes
+
+-   fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds (#231) (@Forbinn)
+
 ## v3.4.0
 
 -   fixed "unresolved symbol" error with nvc++ (#220) (@Tomcat-42)

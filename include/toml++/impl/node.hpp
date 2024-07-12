@@ -11,7 +11,10 @@
 
 // workaround for this: https://github.com/marzer/tomlplusplus/issues/220
 #if TOML_NVCC
-#define TOML_NVCC_WORKAROUND { return {}; }
+#define TOML_NVCC_WORKAROUND                                                                                           \
+	{                                                                                                                  \
+		return {};                                                                                                     \
+	}
 #else
 #define TOML_NVCC_WORKAROUND = 0
 #endif
@@ -177,11 +180,11 @@ TOML_NAMESPACE_START
 		/// \returns	True if the node was homogeneous.
 		///
 		/// \remarks	Always returns `false` for empty tables and arrays.
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		virtual bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept = 0;
 
 		/// \brief	Checks if a node contains values/elements of only one type (const overload).
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		virtual bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept = 0;
 
 		/// \brief	Checks if the node contains values/elements of only one type.

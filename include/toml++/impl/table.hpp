@@ -298,11 +298,11 @@ TOML_NAMESPACE_START
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype) const noexcept final;
 
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, node*& first_nonmatch) noexcept final;
 
-		TOML_PURE_GETTER
+		TOML_NODISCARD
 		TOML_EXPORTED_MEMBER_FUNCTION
 		bool is_homogeneous(node_type ntype, const node*& first_nonmatch) const noexcept final;
 
