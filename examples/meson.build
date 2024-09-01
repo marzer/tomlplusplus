@@ -24,7 +24,8 @@ foreach example : examples
 			[ example + '.cpp' ],
 			cpp_args: example_args,
 			dependencies: tomlplusplus_dep,
-			override_options: global_overrides
+			override_options: global_overrides,
+			install: not is_subproject
 		)
 	]]
 endforeach
