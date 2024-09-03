@@ -53,9 +53,10 @@ Reading it in C++ is easy with toml++:
 ```cpp
 #include <toml++/toml.hpp>
 
+using namespace std::literals;
+
 auto config = toml::parse_file( "configuration.toml" );
 
-using namespace std::literals;
 // get key-value pairs
 std::string_view library_name = config["library"]["name"].value_or(""sv);
 std::string_view library_author = config["library"]["authors"][0].value_or(""sv);
