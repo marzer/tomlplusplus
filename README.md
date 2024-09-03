@@ -53,6 +53,8 @@ Reading it in C++ is easy with toml++:
 ```cpp
 #include <toml++/toml.hpp>
 
+using namespace std::literals;
+
 auto config = toml::parse_file( "configuration.toml" );
 
 // get key-value pairs
