@@ -11,6 +11,7 @@ install(
     DIRECTORY "${PROJECT_SOURCE_DIR}/include/"
     DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
     COMPONENT tomlplusplus_Development
+    FILES_MATCHING REGEX "^.*[.](h|hpp|inl)$"
 )
 
 install(
