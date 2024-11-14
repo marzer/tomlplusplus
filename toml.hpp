@@ -1091,6 +1091,10 @@
 // 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
+#ifndef TOML_MAX_DOTTED_KEYS_DEPTH
+#define TOML_MAX_DOTTED_KEYS_DEPTH 1024
+#endif
+
 #ifdef TOML_CHAR_8_STRINGS
 #if TOML_CHAR_8_STRINGS
 #error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
@@ -13554,7 +13558,8 @@ TOML_IMPL_NAMESPACE_START
 	class parser
 	{
 	  private:
-		static constexpr size_t max_nested_values = TOML_MAX_NESTED_VALUES;
+		static constexpr size_t max_nested_values	  = TOML_MAX_NESTED_VALUES;
+		static constexpr size_t max_dotted_keys_depth = TOML_MAX_DOTTED_KEYS_DEPTH;
 
 		utf8_buffered_reader reader;
 		table root;
@@ -15574,6 +15579,11 @@ TOML_IMPL_NAMESPACE_START
 
 				// store segment
 				key_buffer.push_back(key_segment, key_begin, key_end);
+
+				if TOML_UNLIKELY(key_buffer.size() > max_dotted_keys_depth)
+					set_error_and_return_default("exceeded maximum dotted keys depth of "sv,
+												 max_dotted_keys_depth,
+												 " (TOML_MAX_DOTTED_KEYS_DEPTH)"sv);
 
 				// eof or no more key to come
 				if (is_eof() || *cp != U'.')

@@ -1182,6 +1182,10 @@
 // 256 is crazy high! if you're hitting this limit with real input, TOML is probably the wrong tool for the job...
 #endif
 
+#ifndef TOML_MAX_DOTTED_KEYS_DEPTH
+#define TOML_MAX_DOTTED_KEYS_DEPTH 1024
+#endif
+
 #ifdef TOML_CHAR_8_STRINGS
 #if TOML_CHAR_8_STRINGS
 #error TOML_CHAR_8_STRINGS was removed in toml++ 2.0.0; all value setters and getters now work with char8_t strings implicitly.
