@@ -5926,10 +5926,10 @@
       <arglist></arglist>
     </member>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>value_arg</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ac1316850f0671bab2505d126570e3660</anchor>
+      <anchor>ae2ff26c3e1a69d18a35bfbf8b191ed70</anchor>
       <arglist></arglist>
     </member>
     <member kind="function">
@@ -7276,17 +7276,17 @@
     <class kind="class">toml::value</class>
     <class kind="class">toml::yaml_formatter</class>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ac7e383cde1b8d61dba45292b2b0fcb69</anchor>
+      <anchor>a29f7024613d87f4c439bcfe069a4a3e6</anchor>
       <arglist></arglist>
     </member>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aeba9fe3a193c8b641a1fb3a2096d7c13</anchor>
+      <anchor>af895b4da4a93355537c7fce73b8a38ab</anchor>
       <arglist></arglist>
     </member>
     <member kind="typedef">
@@ -7297,10 +7297,10 @@
       <arglist></arglist>
     </member>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>inserted_type_of</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aef1f0bbcdd3686e268f4b81d9da701be</anchor>
+      <anchor>a98d783a1c89ce747982c2d24a5329882</anchor>
       <arglist></arglist>
     </member>
     <member kind="typedef">
@@ -7325,17 +7325,17 @@
       <arglist></arglist>
     </member>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a19243ec6febf1bb834ea9e366405e317</anchor>
+      <anchor>aaed1da38e7ed361e105fae086cf7b0c1</anchor>
       <arglist></arglist>
     </member>
     <member kind="typedef">
-      <type>POXY_IMPLEMENTATION_DETAIL_IMPL</type>
+      <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a4bccd753f54404e0097457514177fcbb</anchor>
+      <anchor>aebe170823fa068b873aa4c775d597993</anchor>
       <arglist></arglist>
     </member>
     <member kind="enumeration">
