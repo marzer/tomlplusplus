@@ -31,10 +31,10 @@ target_include_directories(
 target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
 
 # ---- Install rules, examples, and fuzzing ----
-option(TOMLPLUSPLUS_CPP_INSTALL "Enable generation of tomlplusplus install targets" ${PROJECT_IS_TOP_LEVEL})
-if (TOMLPLUSPLUS_CPP_INSTALL)
+if (tomlplusplus_CPP_INSTALL)
   include(cmake/install-rules.cmake)
 endif()
+
 if(PROJECT_IS_TOP_LEVEL)
   option(BUILD_EXAMPLES "Build examples tree." OFF)
   option(BUILD_FUZZER "Build fuzzer." OFF)
