@@ -31,7 +31,7 @@ target_include_directories(
 target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
 
 # ---- Install rules, examples, and fuzzing ----
-if (tomlplusplus_CPP_INSTALL)
+if (tomlplusplus_INSTALL)
   include(cmake/install-rules.cmake)
 endif()
 
