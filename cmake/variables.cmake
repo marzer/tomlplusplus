@@ -5,6 +5,7 @@
 # This is to provide a user experience similar to find_package when
 # add_subdirectory or FetchContent is used to consume this project
 set(tomlplusplus_warning_guard "")
+option(tomlplusplus_INSTALL "Enable generation of tomlplusplus install targets" ${PROJECT_IS_TOP_LEVEL})
 if(NOT PROJECT_IS_TOP_LEVEL)
   option(
       tomlplusplus_INCLUDES_WITH_SYSTEM
