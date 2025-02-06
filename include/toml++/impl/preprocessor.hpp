@@ -1241,6 +1241,17 @@ TOML_ENABLE_WARNINGS;
 /// \detail Defaults to `0`.
 //# }}
 
+#ifndef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 0
+#endif
+//# {{
+/// \def TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+/// \brief Disable using noexcept(<condition>) in lambda definitions within the toml++ library implementation.
+/// \detail This macro offers a workaround to a bug in the old "legacy lambda processor" of Visual C++, which
+/// caused compile errors like "error C2057: expected constant expression", when it encountered such lambda's.
+/// These compile errors were reported by Kevin Dick, Jan 19, 2024, at https://github.com/marzer/tomlplusplus/issues/219
+//# }}
+
 /// @}
 //#====================================================================================================================
 //# CHARCONV SUPPORT
