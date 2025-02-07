@@ -419,6 +419,11 @@ TOML_IMPL_NAMESPACE_START
 	void TOML_CALLCONV print_to_stream(std::ostream & stream, const source_region& val)
 	{
 		print_to_stream(stream, val.begin);
+		if (val.begin != val.end)
+		{
+			print_to_stream(stream, " to "sv);
+			print_to_stream(stream, val.end);
+		}
 		if (val.path)
 		{
 			print_to_stream(stream, " of '"sv);
