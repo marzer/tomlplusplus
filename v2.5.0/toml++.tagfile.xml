@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
-<tagfile doxygen_version="1.9.1">
+<tagfile doxygen_version="1.9.8">
   <compound kind="class">
     <name>toml::array</name>
     <filename>classtoml_1_1array.html</filename>
@@ -43,14 +43,14 @@
       <type>array &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>af9bf16bc9e21887dc1447651f6fbaba7</anchor>
+      <anchor>a346bc4e67282142c2a84a98438933232</anchor>
       <arglist>(const array &amp;) noexcept</arglist>
     </member>
     <member kind="function">
       <type>array &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a7e5e45777e08941abb2069a5991e1f31</anchor>
+      <anchor>a94ca021b96ffca7cc01ebd2b37ce23aa</anchor>
       <arglist>(array &amp;&amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
@@ -99,7 +99,7 @@
       <type>array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a92874b0f5a195ffc699dde0a5a25f118</anchor>
+      <anchor>ad07ec49836d8f9ed75a6f7f020d1558e</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
@@ -134,42 +134,42 @@
       <type>node &amp;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a853bad0297ca4dcee57c97da2fe318e7</anchor>
+      <anchor>a1e471e2bed5daf80b6695c009052bb4e</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae9f72a1b877f2ac66327a152d55aa9c6</anchor>
+      <anchor>a908e56552c2cfaabc9b73d220792e214</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node &amp;</type>
       <name>front</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a9c78848129a2a703c154e7cbe1a973d3</anchor>
+      <anchor>a1af85a8c7a82f1c0b48148b7fac8e536</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>front</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a5ba3af18c63546da6f9d2ac3b5b77f64</anchor>
+      <anchor>a8984273ac50a8dba20529ec0cb74a072</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node &amp;</type>
       <name>back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a4c58dea5e8795e4b9f8df4f1e1473204</anchor>
+      <anchor>a8a7f389cd399544b6b80277afd50d5d6</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ac7652c1ab60af2ca1c7d52f0658639b4</anchor>
+      <anchor>a0afe372457485cdc90ecee8fc11c2ca6</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -351,42 +351,42 @@
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a10664e00054ea4021fec5144b69b8792</anchor>
+      <anchor>a442d80f39922d05c46b4a7d9a5455585</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a44db509dce6b7b77e563c822a5936abe</anchor>
+      <anchor>a0fb727f90506419f2e950b5d0e5160a9</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ElemType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a5c2f4624498cba9e1e467b0eb2e9046e</anchor>
+      <anchor>a7ab30b16bb727e0595d0bd4adfcd9455</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ElemType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae47ca1cc4c61e94fed30aea72ca8d268</anchor>
+      <anchor>a17dc014c1c5e64dd9d4f118ddc066ed8</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>array &amp;</type>
       <name>flatten</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>aa2a21958705629bde15aafae9598a2ec</anchor>
+      <anchor>a3a550518aab77d3d49a0f238a4154e80</anchor>
       <arglist>() &amp;</arglist>
     </member>
     <member kind="function">
       <type>array &amp;&amp;</type>
       <name>flatten</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ad307bea17e7640c57715d67ab8a777d4</anchor>
+      <anchor>a5ea2067eb6014aac937cad430810020b</anchor>
       <arglist>() &amp;&amp;</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -456,84 +456,84 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -547,28 +547,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -610,7 +610,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a8574290131ff09ae36a4535e2ac25261</anchor>
+      <anchor>ab3ae8dbb9db73552414b60c65026b12c</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;, const array &amp;)</arglist>
     </member>
     <member kind="function">
@@ -645,7 +645,7 @@
       <type>array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a92874b0f5a195ffc699dde0a5a25f118</anchor>
+      <anchor>ad07ec49836d8f9ed75a6f7f020d1558e</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
@@ -680,42 +680,42 @@
       <type>node &amp;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a853bad0297ca4dcee57c97da2fe318e7</anchor>
+      <anchor>a1e471e2bed5daf80b6695c009052bb4e</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae9f72a1b877f2ac66327a152d55aa9c6</anchor>
+      <anchor>a908e56552c2cfaabc9b73d220792e214</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node &amp;</type>
       <name>front</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a9c78848129a2a703c154e7cbe1a973d3</anchor>
+      <anchor>a1af85a8c7a82f1c0b48148b7fac8e536</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>front</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a5ba3af18c63546da6f9d2ac3b5b77f64</anchor>
+      <anchor>a8984273ac50a8dba20529ec0cb74a072</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node &amp;</type>
       <name>back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a4c58dea5e8795e4b9f8df4f1e1473204</anchor>
+      <anchor>a8a7f389cd399544b6b80277afd50d5d6</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node &amp;</type>
       <name>back</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ac7652c1ab60af2ca1c7d52f0658639b4</anchor>
+      <anchor>a0afe372457485cdc90ecee8fc11c2ca6</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -897,42 +897,42 @@
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a10664e00054ea4021fec5144b69b8792</anchor>
+      <anchor>a442d80f39922d05c46b4a7d9a5455585</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a44db509dce6b7b77e563c822a5936abe</anchor>
+      <anchor>a0fb727f90506419f2e950b5d0e5160a9</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ElemType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>a5c2f4624498cba9e1e467b0eb2e9046e</anchor>
+      <anchor>a7ab30b16bb727e0595d0bd4adfcd9455</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ElemType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ae47ca1cc4c61e94fed30aea72ca8d268</anchor>
+      <anchor>a17dc014c1c5e64dd9d4f118ddc066ed8</anchor>
       <arglist>(size_t index) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>array &amp;</type>
       <name>flatten</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>aa2a21958705629bde15aafae9598a2ec</anchor>
+      <anchor>a3a550518aab77d3d49a0f238a4154e80</anchor>
       <arglist>() &amp;</arglist>
     </member>
     <member kind="function">
       <type>array &amp;&amp;</type>
       <name>flatten</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
-      <anchor>ad307bea17e7640c57715d67ab8a777d4</anchor>
+      <anchor>a5ea2067eb6014aac937cad430810020b</anchor>
       <arglist>() &amp;&amp;</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -1002,84 +1002,84 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -1093,28 +1093,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -1206,45 +1206,45 @@
       <arglist></arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator==</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>a07ff3f69b41d69e780aac60d11e8a2a8</anchor>
+      <anchor>a3a794ae693cf3ceaba89f16d475ad405</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator!=</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>af2ad5cc7af0b184e6fab182f32df8a1c</anchor>
+      <anchor>aa1ee22aee5f765119561132d6dd80a64</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>af143f183b354544eb5f63a1887e65daa</anchor>
+      <anchor>a0b4bdfb28c0842803561bd8a9c66a96c</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;=</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>af353d0dbb3eda43ee136ac12b4b94fdd</anchor>
+      <anchor>aafb7eb93d6ef87480122e9444259cd15</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>a399f4b20d6b9f84a9c093026de0965c2</anchor>
+      <anchor>a9fc14c7e8c09cbd9d0e2eb3d3b032037</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;=</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
-      <anchor>aac65e3db8d117aad6dc469d4e5ec77bb</anchor>
+      <anchor>a1ca081446c246a31ca6ff9dd2b036cb9</anchor>
       <arglist>(date lhs, date rhs) noexcept</arglist>
     </member>
   </compound>
@@ -1301,52 +1301,52 @@
       <arglist></arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator==</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a885cbe902aeadacb0953230ade9d8b9a</anchor>
+      <anchor>a50f2aed78abbdc7ce50e6069650b6afc</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator!=</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a9ae0e032ffe90928c47b40bd8155dea3</anchor>
+      <anchor>a2ca3befabda501eb114245b621a4e921</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a4f67803fdc02fb5549ba213a9273a63b</anchor>
+      <anchor>ae7d7c40a726de7f5f89452925b36bd41</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;=</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a7b2f0261ae38ef6dbb6de0fb35fbbf3b</anchor>
+      <anchor>adb2c7b8d3d8db11ffbd96baa2ba9d322</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a1bceb05028f33a829d61ffc768eab78a</anchor>
+      <anchor>a76a29c49cd16e9103b174dbde3a3e59c</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;=</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
-      <anchor>a361fb1904f477e0a1f7acaa3cdd14abf</anchor>
+      <anchor>aca7c2496685d72177b1c89648e9c25aa</anchor>
       <arglist>(const date_time &amp;lhs, const date_time &amp;rhs) noexcept</arglist>
     </member>
   </compound>
   <compound kind="class">
     <name>toml::default_formatter</name>
     <filename>classtoml_1_1default__formatter.html</filename>
-    <templarg></templarg>
+    <templarg>typename Char</templarg>
     <member kind="function">
       <type></type>
       <name>default_formatter</name>
@@ -1372,26 +1372,26 @@
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
-      <anchor>a516a015d387a195a4abb0f6262f88698</anchor>
+      <anchor>ac781b0ac6c466985e5517d0821558dc2</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;)</arglist>
     </member>
     <member kind="friend">
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
-      <anchor>a09799f1ec6ad5804b5001fb37053e377</anchor>
+      <anchor>aaa687b3a683c4843abfe476391ebd75d</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;&amp;)</arglist>
     </member>
   </compound>
   <compound kind="struct">
     <name>toml::inserter</name>
     <filename>structtoml_1_1inserter.html</filename>
-    <templarg></templarg>
+    <templarg>typename T</templarg>
   </compound>
   <compound kind="class">
     <name>toml::json_formatter</name>
     <filename>classtoml_1_1json__formatter.html</filename>
-    <templarg></templarg>
+    <templarg>typename Char</templarg>
     <member kind="function">
       <type></type>
       <name>json_formatter</name>
@@ -1417,14 +1417,14 @@
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
-      <anchor>ababd7a7f97d0673d75407a612bfc887d</anchor>
+      <anchor>a2ede04ece10d1a0acb89c0ee47672f12</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;)</arglist>
     </member>
     <member kind="friend">
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
-      <anchor>a7a4c90e29dbda20e5fbcfbe5e7121f62</anchor>
+      <anchor>a62b6bdaeb881e5aab4a723ce86e3cd6e</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;&amp;)</arglist>
     </member>
   </compound>
@@ -1561,91 +1561,91 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -1659,28 +1659,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -1848,91 +1848,91 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -1946,28 +1946,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -2009,7 +2009,7 @@
   <compound kind="class">
     <name>toml::node_view</name>
     <filename>classtoml_1_1node__view.html</filename>
-    <templarg></templarg>
+    <templarg>typename ViewedType</templarg>
     <member kind="function">
       <type></type>
       <name>node_view</name>
@@ -2042,7 +2042,7 @@
       <type>viewed_type *</type>
       <name>node</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>afb42ba6fdddfb407bd37b697a407246d</anchor>
+      <anchor>ae141e775e958e23c730a6d78397dc820</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -2238,14 +2238,14 @@
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>af7d31ebd85f054b1626af2d105ef681e</anchor>
+      <anchor>ae88034384f351de87c9acae5ebff945f</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>a41ed0d2afddf279ad774af738723ed3a</anchor>
+      <anchor>a8f0258f604d8db57e3b92771e76d1003</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -2294,7 +2294,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>a34a8c7bfbe5ff1c3acabdee184109076</anchor>
+      <anchor>a76875814579f52ad2954aab7a75e9be7</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;, const node_view&lt; T &gt; &amp;)</arglist>
     </member>
     <member kind="friend">
@@ -2574,14 +2574,14 @@
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>af7d31ebd85f054b1626af2d105ef681e</anchor>
+      <anchor>ae88034384f351de87c9acae5ebff945f</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>a41ed0d2afddf279ad774af738723ed3a</anchor>
+      <anchor>a8f0258f604d8db57e3b92771e76d1003</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -2641,7 +2641,7 @@
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1parse__error.html</anchorfile>
-      <anchor>a8168b4941305654cf4ba8fc96efd0514</anchor>
+      <anchor>acaa5f85a7cc3f4c3c0596ed1dc4eae36</anchor>
       <arglist>() const noexcept</arglist>
     </member>
   </compound>
@@ -2687,42 +2687,42 @@
       <type>toml::table &amp;</type>
       <name>table</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a47d2ead20ae9d1681210c63319a6a162</anchor>
+      <anchor>acb584071a535b94531a5f282ca4289b9</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>toml::table &amp;&amp;</type>
       <name>table</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a77b470b66dd401a0a929006dd788b882</anchor>
+      <anchor>a456fd2dda64ba2e58fc7988539ad91fe</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const toml::table &amp;</type>
       <name>table</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a993f5d59c4b10f87138f8abb8a16d51d</anchor>
+      <anchor>a2d6cc574acb39511d2a9cc70bda54ef2</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>parse_error &amp;</type>
       <name>error</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>aefbb9aafdf00fa1ac979962d22e12e68</anchor>
+      <anchor>a6081fd130634af79731868563f2dd68a</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>parse_error &amp;&amp;</type>
       <name>error</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>ab07914228f9f7436628c99df454f177d</anchor>
+      <anchor>a9512ddb380d1beea922f97e77c7afb9b</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const parse_error &amp;</type>
       <name>error</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a9a5929b01df9a7f7f986b8431cefd2b8</anchor>
+      <anchor>a1affe5137dc6583fa0aa045c6210f1b2</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
@@ -2778,7 +2778,7 @@
       <type>parse_result &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>aa4c2c770a8d214f9d508582233ff1d84</anchor>
+      <anchor>aa0e17c1bc41e0904289d9d9ad63e4e92</anchor>
       <arglist>(parse_result &amp;&amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
@@ -2792,28 +2792,28 @@
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>aaa83205a294dedd8857844d0b6378560</anchor>
+      <anchor>aba7dd08a1f61ac006f5eac73dcb4fd3b</anchor>
       <arglist>(string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a3b88dad377d33e1fdda317177025fba5</anchor>
+      <anchor>aecf46fe9f5fe8132e7641e413c90c8ff</anchor>
       <arglist>(string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>ade8c625d35dcc5b4fdec97d9f5a7f96f</anchor>
+      <anchor>abb088b68b5fa59ddbea9b00a73d26b84</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a58a3ee971220497ef922fc2ab5c7a9c0</anchor>
+      <anchor>ab50750d3c9ee2bb8bf3eb54d0e3d967c</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function">
@@ -2862,7 +2862,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
-      <anchor>a8b92c641ed22f79764606df797f3278e</anchor>
+      <anchor>a03e9bc361e2fa552b5925ebcbf7ed67c</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;os, const parse_result &amp;result)</arglist>
     </member>
   </compound>
@@ -2891,31 +2891,31 @@
       <arglist></arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator==</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
-      <anchor>a2661adb822c0291c5328d9d00e4b9a8f</anchor>
+      <anchor>ad4600cc2d6ede282c93a8bdc5bb7a2fe</anchor>
       <arglist>(const source_position &amp;lhs, const source_position &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator!=</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
-      <anchor>a90fec8fa1014a1358a362f9171cdb073</anchor>
+      <anchor>a8c3d253eb50b2b908cf1a7514a1d1dcb</anchor>
       <arglist>(const source_position &amp;lhs, const source_position &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
-      <anchor>a771714902fb113445597a1fd2a24e8cd</anchor>
+      <anchor>a1c7ae741097e2fba03cceb36b7aed973</anchor>
       <arglist>(const source_position &amp;lhs, const source_position &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;=</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
-      <anchor>abb7d47c85374301ec48e7c5f3ee1c71a</anchor>
+      <anchor>a1f5525a304df6157cd0f41378c0773e2</anchor>
       <arglist>(const source_position &amp;lhs, const source_position &amp;rhs) noexcept</arglist>
     </member>
   </compound>
@@ -2926,7 +2926,7 @@
       <type>optional&lt; std::wstring &gt;</type>
       <name>wide_path</name>
       <anchorfile>structtoml_1_1source__region.html</anchorfile>
-      <anchor>ae4aaf4e5c7a8b178b4ba46e7f9d050bd</anchor>
+      <anchor>a1e6f22ef6123847d094dad73245def20</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="variable">
@@ -2994,14 +2994,14 @@
       <type>table &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a54571ed4637b4164cb559135807d00c0</anchor>
+      <anchor>a76a45e124a0c020b996c649ebd54b1e4</anchor>
       <arglist>(const table &amp;) noexcept</arglist>
     </member>
     <member kind="function">
       <type>table &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a5c5fd0e11db828ab264eccc96dfdd619</anchor>
+      <anchor>ab39996f51aad45970e8bcb34883710df</anchor>
       <arglist>(table &amp;&amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
@@ -3071,7 +3071,7 @@
       <type>table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aafd874c7b06b7f0f535e713b2640fe96</anchor>
+      <anchor>a58ce18a24d23f3445a279999889ea851</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
@@ -3092,28 +3092,28 @@
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a6d8386049f630c8551597a2180479c7c</anchor>
+      <anchor>a8e587921807c280c2e03587b3363351b</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a9b13a19ddfcd2f76685f57587d28701c</anchor>
+      <anchor>ae7e850b38aaa5bb11e45ebe1e7dc6b81</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a06fd3d9032b031b0363818939cd5cf38</anchor>
+      <anchor>ad439e8655826fa647a9f66b6a5d18d9a</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a404ae83ed52c7b8ce294d3d4925c8a16</anchor>
+      <anchor>a5343716f2ab1d618902254134f45e6eb</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function">
@@ -3183,7 +3183,7 @@
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>insert</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aa757797646986f2f2cce0fa84221963e</anchor>
+      <anchor>ad5e147a44328915e76753929414c4a67</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueType &amp;&amp;val) noexcept</arglist>
     </member>
     <member kind="function">
@@ -3197,14 +3197,14 @@
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>insert_or_assign</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>acb97b09eb0b36ea708178678f15d0614</anchor>
+      <anchor>aaf8324b8246cd7a7a348e594186d74ec</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueType &amp;&amp;val) noexcept</arglist>
     </member>
     <member kind="function">
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>emplace</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a04815da57fe75169ceb1c20946faac6b</anchor>
+      <anchor>a57d4091d8b1c4bccb1c82802045f3194</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueArgs &amp;&amp;... args) noexcept</arglist>
     </member>
     <member kind="function">
@@ -3288,56 +3288,56 @@
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ae6811ea7c692ac71880693e225c66aed</anchor>
+      <anchor>afb43a06fdd11582f15761b120aa47fb4</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a43afae4f760f715c69b0b8aa0a7ef071</anchor>
+      <anchor>a1deab1c0a2bac487aab72d3c8600731a</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aa67b393855cbd706ce89d5a09f062002</anchor>
+      <anchor>a90454d1b6be960adabe3fa4dc8dec44f</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a615c9124ee853eb6a7544c0ab3b9911f</anchor>
+      <anchor>a47801f9524b9ba8e502113a6fd540b3f</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a933f4a709d7bb5f51a756e571f6166f9</anchor>
+      <anchor>a6967f45b0977d17e4dfa34c3c20d1d19</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a180f46103dda744bf75eeadb32659b7c</anchor>
+      <anchor>a70bcc34981131e2f03374823bf1c7043</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ade6422b39babbf9b3e4b87cd985f0d14</anchor>
+      <anchor>a733b15024ce4a3e35e2460d87f3dc78b</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ad734dfa38c76cf282235befd30354c90</anchor>
+      <anchor>a866e5ade66cb03283582a33eb5702d62</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -3414,84 +3414,84 @@
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -3505,28 +3505,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -3582,7 +3582,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ab34ff6b624f5f39fa8002f3d6e539eca</anchor>
+      <anchor>aec70646a7bf0230a5c478cace6b38ad7</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;, const table &amp;)</arglist>
     </member>
     <member kind="friend">
@@ -3603,7 +3603,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ab34ff6b624f5f39fa8002f3d6e539eca</anchor>
+      <anchor>aec70646a7bf0230a5c478cace6b38ad7</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;, const table &amp;)</arglist>
     </member>
     <member kind="function">
@@ -3659,7 +3659,7 @@
       <type>table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aafd874c7b06b7f0f535e713b2640fe96</anchor>
+      <anchor>a58ce18a24d23f3445a279999889ea851</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
@@ -3680,28 +3680,28 @@
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a6d8386049f630c8551597a2180479c7c</anchor>
+      <anchor>a8e587921807c280c2e03587b3363351b</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a9b13a19ddfcd2f76685f57587d28701c</anchor>
+      <anchor>ae7e850b38aaa5bb11e45ebe1e7dc6b81</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a06fd3d9032b031b0363818939cd5cf38</anchor>
+      <anchor>ad439e8655826fa647a9f66b6a5d18d9a</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>node_view&lt; const node &gt;</type>
       <name>operator[]</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a404ae83ed52c7b8ce294d3d4925c8a16</anchor>
+      <anchor>a5343716f2ab1d618902254134f45e6eb</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function">
@@ -3771,7 +3771,7 @@
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>insert</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aa757797646986f2f2cce0fa84221963e</anchor>
+      <anchor>ad5e147a44328915e76753929414c4a67</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueType &amp;&amp;val) noexcept</arglist>
     </member>
     <member kind="function">
@@ -3785,14 +3785,14 @@
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>insert_or_assign</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>acb97b09eb0b36ea708178678f15d0614</anchor>
+      <anchor>aaf8324b8246cd7a7a348e594186d74ec</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueType &amp;&amp;val) noexcept</arglist>
     </member>
     <member kind="function">
       <type>std::pair&lt; iterator, bool &gt;</type>
       <name>emplace</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a04815da57fe75169ceb1c20946faac6b</anchor>
+      <anchor>a57d4091d8b1c4bccb1c82802045f3194</anchor>
       <arglist>(KeyType &amp;&amp;key, ValueArgs &amp;&amp;... args) noexcept</arglist>
     </member>
     <member kind="function">
@@ -3876,56 +3876,56 @@
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ae6811ea7c692ac71880693e225c66aed</anchor>
+      <anchor>afb43a06fdd11582f15761b120aa47fb4</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a43afae4f760f715c69b0b8aa0a7ef071</anchor>
+      <anchor>a1deab1c0a2bac487aab72d3c8600731a</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>aa67b393855cbd706ce89d5a09f062002</anchor>
+      <anchor>a90454d1b6be960adabe3fa4dc8dec44f</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const node *</type>
       <name>get</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a615c9124ee853eb6a7544c0ab3b9911f</anchor>
+      <anchor>a47801f9524b9ba8e502113a6fd540b3f</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a933f4a709d7bb5f51a756e571f6166f9</anchor>
+      <anchor>a6967f45b0977d17e4dfa34c3c20d1d19</anchor>
       <arglist>(std::string_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>a180f46103dda744bf75eeadb32659b7c</anchor>
+      <anchor>a70bcc34981131e2f03374823bf1c7043</anchor>
       <arglist>(std::string_view key) const noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ade6422b39babbf9b3e4b87cd985f0d14</anchor>
+      <anchor>a733b15024ce4a3e35e2460d87f3dc78b</anchor>
       <arglist>(std::wstring_view key) noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; ValueType &gt; *</type>
       <name>get_as</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
-      <anchor>ad734dfa38c76cf282235befd30354c90</anchor>
+      <anchor>a866e5ade66cb03283582a33eb5702d62</anchor>
       <arglist>(std::wstring_view key) const noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -4002,84 +4002,84 @@
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ab8f42ecf095260b1d97363949a98267b</anchor>
+      <anchor>afd557819b681190f5ac650e8873b1ad3</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac507d02b3b744e0624c504614e91c9e5</anchor>
+      <anchor>a8142827acffea56f356cb92837dd12ce</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a480ae95e180992d152ad80e3b52a330a</anchor>
+      <anchor>aac76ea22db12c717b7d80018145d2a1c</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a40031abf671512f9fdcd31666ce481fd</anchor>
+      <anchor>a401d73bc91fb93972d0baaf4d0a19306</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a35ec7bd4efab69906d7874df736cdaaf</anchor>
+      <anchor>aaa678cb2441762c36d442e4ebcb0bfbe</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aeb23a8054899c4b0d57e10c4a3dcadf0</anchor>
+      <anchor>a22c6d779608a4a75926fd8f12d1a41d0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual toml::value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a68cc63dfd8e435b00c7c99da298d6733</anchor>
+      <anchor>aca510d5fc052b421cbecbd835a4ec192</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -4093,28 +4093,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -4185,45 +4185,45 @@
       <arglist></arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator==</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>aa88d156f8ea405513e00702b3c88de2f</anchor>
+      <anchor>a7ffc48378c7a8c1651afe4c7cca9c054</anchor>
       <arglist>(const time &amp;lhs, const time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator!=</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>a76766a077e105960758caa4a9cbfd25b</anchor>
+      <anchor>a779eb04b76147675a373fb702f54de75</anchor>
       <arglist>(const time &amp;lhs, const time &amp;rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>a6e53cc30a5701a18713e853d8abd4b20</anchor>
+      <anchor>a93c06782ccf78fc6ebfe571e0ab83b93</anchor>
       <arglist>(time lhs, time rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;=</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>a108b128e5d6a831b110909e4f18c1cbb</anchor>
+      <anchor>a3d4ceae518810ff6c8294c0f8aefd0fb</anchor>
       <arglist>(time lhs, time rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>aaba3d9a66b122ab5a10a359d95d0171c</anchor>
+      <anchor>a33636ce7adba4160c47e8f4b49e0452b</anchor>
       <arglist>(time lhs, time rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;=</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
-      <anchor>a59c7d66cd934fe5af4f85e2fdd1a3892</anchor>
+      <anchor>a1445466782b076604a7945c5eac9cbb1</anchor>
       <arglist>(time lhs, time rhs) noexcept</arglist>
     </member>
   </compound>
@@ -4252,52 +4252,52 @@
       <arglist></arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator==</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>ad9423ee067d0a4c0ba39deb2679a07f6</anchor>
+      <anchor>a724fcd380742ef6fd2581e4d94bdecbb</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator!=</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>a77e5bb056ffcd6a91b1740333f23b806</anchor>
+      <anchor>a337d8610dcca51598cb54bca6831c0a8</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>afe1582662b6922546524d14c1588cf9d</anchor>
+      <anchor>ad5180d14b229562acb94ad8e5f9a3828</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&lt;=</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>a4a0886d9ad65963a4e812576ba0c6928</anchor>
+      <anchor>a63c4153f870f374e6363d177d75db7c8</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>aa5270a5c11af2a9344d2c20911643429</anchor>
+      <anchor>a343c943c3fc47e279a2cf9978bacbc53</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
     <member kind="friend">
-      <type>constexpr friend bool</type>
+      <type>friend constexpr bool</type>
       <name>operator&gt;=</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
-      <anchor>a0146123daf63c677b2559aaf9bda1338</anchor>
+      <anchor>aba474cd6d6ddb2d2bb8f143889a8440d</anchor>
       <arglist>(time_offset lhs, time_offset rhs) noexcept</arglist>
     </member>
   </compound>
   <compound kind="class">
     <name>toml::value</name>
     <filename>classtoml_1_1value.html</filename>
-    <templarg></templarg>
+    <templarg>typename ValueType</templarg>
     <base>toml::node</base>
     <member kind="typedef">
       <type>ValueType</type>
@@ -4338,21 +4338,21 @@
       <type>value &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a339731a8213b5e0993b5547067fde1f7</anchor>
+      <anchor>a42a52a860570643cd76a7e03604ad55b</anchor>
       <arglist>(const value &amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
       <type>value &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a958da7aae3ff90094e348ebceaa4aa5d</anchor>
+      <anchor>a635bbc71edd6303beced451126ecc39d</anchor>
       <arglist>(value &amp;&amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
       <type>value &amp;</type>
       <name>operator=</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a08950deffd1a5568154d58d27517c973</anchor>
+      <anchor>adc6a6c311465f87e5a04bb04cae9c5ad</anchor>
       <arglist>(value_arg rhs) noexcept</arglist>
     </member>
     <member kind="function">
@@ -4464,91 +4464,91 @@
       <type>value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9</anchor>
+      <anchor>afb4fe37480ab6f623a5cf29948d0bdf3</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>af4ff7751b5220c599d5dcee7fc44a595</anchor>
+      <anchor>a9b82c9108cee285b9f31d5aafc387977</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a1a50e6ae4b77e2399e979e0e32e2c122</anchor>
+      <anchor>af81722395384aa52df8248dcf1167852</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a388205107db2b06f7f2954942cca8063</anchor>
+      <anchor>a6b453008313ad126aad67ff831eab40c</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad66d88e92f607a426a28ca3d933f641d</anchor>
+      <anchor>aeda8905313edb12c85c4ccade2acc423</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad0f53f0e903d09aecdbd62b956113457</anchor>
+      <anchor>adbdca19a6feb1358493af6860d722586</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a693ae6fa8490000bad7c4b947a71f352</anchor>
+      <anchor>a0eb12dc4024f4359a7844b2410b8136b</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>af607a8347e5918b35fcfb11e8f7d4398</anchor>
+      <anchor>aeb879401a651ddbf721bfe6d94b3fd8d</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;&amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a0b4ea781b83a3c164df24129d0e73341</anchor>
+      <anchor>aefc6bd93a20e1683922c6499913cc0cf</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const value_type &amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a3a0ec9ea9604d68ba9a9a4692868f8d8</anchor>
+      <anchor>a5b47583e493e738d22a0fdeb14a3c091</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a054c1fb796a4e560d4afb27019bb1aef</anchor>
+      <anchor>a6b50e3a6fc1335b779cfe75e88014193</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;&amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a64ad94a1086eedde1a94f12f020498d2</anchor>
+      <anchor>a38c830d85b1129dbf887fcd2792739d2</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const value_type &amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a15e56286d17f11a4d567eaddb36368f8</anchor>
+      <anchor>afeef59a0cb492374ea25b1f99c1ca8bb</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
@@ -4583,7 +4583,7 @@
       <type>value &amp;</type>
       <name>flags</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a4311828058d75bfaa2c01c3395d09385</anchor>
+      <anchor>a33344888484746d4106968973bcf088f</anchor>
       <arglist>(value_flags new_flags) noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -4604,42 +4604,42 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -4653,28 +4653,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -4716,7 +4716,7 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a3559f8309f337e65ee1baba5f2130f48</anchor>
+      <anchor>a0e86276c8de93a96610a4131b4cef131</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const value&lt; T &gt; &amp;rhs)</arglist>
     </member>
     <member kind="friend">
@@ -5038,91 +5038,91 @@
       <type>value&lt; std::string &gt; *</type>
       <name>as_string</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad1a3c4dd6ffe9bbc53e1e0210a1dfcb9</anchor>
+      <anchor>afb4fe37480ab6f623a5cf29948d0bdf3</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; int64_t &gt; *</type>
       <name>as_integer</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>af4ff7751b5220c599d5dcee7fc44a595</anchor>
+      <anchor>a9b82c9108cee285b9f31d5aafc387977</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; double &gt; *</type>
       <name>as_floating_point</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a1a50e6ae4b77e2399e979e0e32e2c122</anchor>
+      <anchor>af81722395384aa52df8248dcf1167852</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; bool &gt; *</type>
       <name>as_boolean</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a388205107db2b06f7f2954942cca8063</anchor>
+      <anchor>a6b453008313ad126aad67ff831eab40c</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; date &gt; *</type>
       <name>as_date</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad66d88e92f607a426a28ca3d933f641d</anchor>
+      <anchor>aeda8905313edb12c85c4ccade2acc423</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; time &gt; *</type>
       <name>as_time</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad0f53f0e903d09aecdbd62b956113457</anchor>
+      <anchor>adbdca19a6feb1358493af6860d722586</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value&lt; date_time &gt; *</type>
       <name>as_date_time</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a693ae6fa8490000bad7c4b947a71f352</anchor>
+      <anchor>a0eb12dc4024f4359a7844b2410b8136b</anchor>
       <arglist>() noexcept override</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>af607a8347e5918b35fcfb11e8f7d4398</anchor>
+      <anchor>aeb879401a651ddbf721bfe6d94b3fd8d</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;&amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a0b4ea781b83a3c164df24129d0e73341</anchor>
+      <anchor>aefc6bd93a20e1683922c6499913cc0cf</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const value_type &amp;</type>
       <name>get</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a3a0ec9ea9604d68ba9a9a4692868f8d8</anchor>
+      <anchor>a5b47583e493e738d22a0fdeb14a3c091</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a054c1fb796a4e560d4afb27019bb1aef</anchor>
+      <anchor>a6b50e3a6fc1335b779cfe75e88014193</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>value_type &amp;&amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a64ad94a1086eedde1a94f12f020498d2</anchor>
+      <anchor>a38c830d85b1129dbf887fcd2792739d2</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const value_type &amp;</type>
       <name>operator*</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a15e56286d17f11a4d567eaddb36368f8</anchor>
+      <anchor>afeef59a0cb492374ea25b1f99c1ca8bb</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
@@ -5157,7 +5157,7 @@
       <type>value &amp;</type>
       <name>flags</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>a4311828058d75bfaa2c01c3395d09385</anchor>
+      <anchor>a33344888484746d4106968973bcf088f</anchor>
       <arglist>(value_flags new_flags) noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
@@ -5178,42 +5178,42 @@
       <type>virtual table *</type>
       <name>as_table</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa696716239e7434145103173e880fb80</anchor>
+      <anchor>aa0372da0b9598b4a2ef65df6d51c44a9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function" virtualness="virtual">
       <type>virtual array *</type>
       <name>as_array</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>adac204f1c1e3ae99beaa79bb1624cc95</anchor>
+      <anchor>a06e952636323261700c56313265c1e21</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa818a12fc0212e5e416b38fcf103f899</anchor>
+      <anchor>a42b952e50ab41b39c1c5340c010d07f0</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::wrap_node&lt; T &gt; *</type>
       <name>as</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a21d7481eabdf0eaedb91ddeefa950cc1</anchor>
+      <anchor>a4013d8bf01b87e77643bef7cdf818a5a</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value_exact</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>ac1417bb4313b2624e3ea270a487f153b</anchor>
+      <anchor>a6bad622231925c6855422563c48f1b3c</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
       <type>optional&lt; T &gt;</type>
       <name>value</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a48098db842e6a202902e6c85326f71b4</anchor>
+      <anchor>ab144c1ae90338b6b03f6af0574c87993</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -5227,28 +5227,28 @@
       <type>impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a0f2b674e80b882b329513e7ec9aed842</anchor>
+      <anchor>ae7b18b46c469f697f9fd4f74c22969b3</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>impl::unwrap_node&lt; T &gt; &amp;&amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a292bce25bfe779dc51403e88f0cc4bcc</anchor>
+      <anchor>ad8cb8653f22acb18989323655c6f01d9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const impl::unwrap_node&lt; T &gt; &amp;</type>
       <name>ref</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>a378e94ebc00235eb4d1da68f81edd77f</anchor>
+      <anchor>ae83a0f46115bb6f0af9740960d7124c6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
       <type>const source_region &amp;</type>
       <name>source</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
-      <anchor>aa378fa343dab7d7bdb4073570dba5fdc</anchor>
+      <anchor>a4a30e611eeddce99e5c48fd80e79b134</anchor>
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
@@ -5292,20 +5292,20 @@
     <filename>namespacetoml.html</filename>
     <namespace>toml::literals</namespace>
     <class kind="class">toml::array</class>
-    <class kind="struct">toml::inserter</class>
-    <class kind="struct">toml::source_position</class>
-    <class kind="struct">toml::source_region</class>
     <class kind="struct">toml::date</class>
-    <class kind="struct">toml::time</class>
-    <class kind="struct">toml::time_offset</class>
     <class kind="struct">toml::date_time</class>
     <class kind="class">toml::default_formatter</class>
+    <class kind="struct">toml::inserter</class>
     <class kind="class">toml::json_formatter</class>
     <class kind="class">toml::node</class>
     <class kind="class">toml::node_view</class>
     <class kind="class">toml::parse_error</class>
     <class kind="class">toml::parse_result</class>
+    <class kind="struct">toml::source_position</class>
+    <class kind="struct">toml::source_region</class>
     <class kind="class">toml::table</class>
+    <class kind="struct">toml::time</class>
+    <class kind="struct">toml::time_offset</class>
     <class kind="class">toml::value</class>
     <member kind="typedef">
       <type>impl::array_iterator&lt; false &gt;</type>
@@ -5407,77 +5407,77 @@
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aba6195d5e83ab18f30c9a211384e2c1a</anchor>
+      <anchor>a8a37f07ea9c0a841be1352143b3cbc52</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, node_type rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ad6baa4a70ba588d799c8b5d47368daab</anchor>
+      <anchor>aa1a9e34f231b99fc37d9e3cf667db19d</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const date &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>adbd4fa5a540b9013568db5ca31509611</anchor>
+      <anchor>af93b14289837846e606444f92e6b717e</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const time &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ae806dceb4c37542aef0b1603ecb24f93</anchor>
+      <anchor>a3281246d26a13e1c289d69a3d3b1f998</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const time_offset &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a47918bf17e54f33e998e32b837d295ae</anchor>
+      <anchor>ac7d954fd727e85c0d03db40ffe9be979</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const date_time &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a76e6f635590c5477371cfdbd9995e93c</anchor>
+      <anchor>a9bc611462f898e4359e56a122402e640</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, default_formatter&lt; U &gt; &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a7751ef32d579a26d6d718bd20727c366</anchor>
+      <anchor>a478c21b37bc6a2e7c1b24e2efd74b5f5</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, default_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a71f00c85c2e052bc37e68901e528adf8</anchor>
+      <anchor>aea9149d23ae75227367efb32cd56a8fb</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a5950cf269cd3a637e75a0c5d862bb59e</anchor>
+      <anchor>a73e1e92e301f8319cf0adb9baafd1320</anchor>
       <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>af05142410823b801c5337566ec4167e9</anchor>
+      <anchor>a78af94e0719e4aa7f1926bf05093bb72</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;os, const node_view&lt; T &gt; &amp;nv)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aa96d938e7e76fa6753e2c3b319af0ab6</anchor>
+      <anchor>ab680ac5cb5766a4705bd64644bf7d1dd</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const parse_error &amp;rhs)</arglist>
     </member>
     <member kind="function">
@@ -5568,14 +5568,14 @@
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a97327637eb536dde43a66ea3469bce9e</anchor>
+      <anchor>adddd50b4d22a4b88a3ba1e25d7edfc52</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const source_position &amp;rhs)</arglist>
     </member>
     <member kind="function">
       <type>std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a86595b9c9187cb2c09cbffebe3752f0f</anchor>
+      <anchor>a0cf973b6c2b1c3f64cf7b3c3d72e2b16</anchor>
       <arglist>(std::basic_ostream&lt; Char &gt; &amp;lhs, const source_region &amp;rhs)</arglist>
     </member>
     <member kind="variable">
