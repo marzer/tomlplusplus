@@ -444,4 +444,11 @@ b = []
 								   CHECK(ss.str() == output);
 							   });
 	}
+
+	SECTION("tomlplusplus/pull/244") // https://github.com/marzer/tomlplusplus/pull/244
+	{
+		std::ostringstream oss;
+		oss << toml::source_region{ { 1, 2 }, { 3, 4 }, nullptr };
+		CHECK(oss.str() == "line 1, column 2 to line 3, column 4");
+	}
 }
