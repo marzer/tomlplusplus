@@ -57,14 +57,14 @@ jobs:
             - name: Install base dependencies
               run: |
                   sudo apt -y update
-                  sudo apt -y install --no-install-recommends git python3 python3-pip ninja-build libstdc++-${{ env.gcc_version }}-dev locales-all
+                  sudo apt -y install --no-install-recommends git ninja-build libstdc++-${{ env.gcc_version }}-dev locales-all
 
             - uses: actions/checkout@v3
 
             - name: Install python dependencies
               run: |
-                  sudo -H pip3 install --no-cache-dir --upgrade meson
-                  sudo -H pip3 install --no-cache-dir --upgrade -r tools/requirements.txt
+                  pip3 install --user --no-cache-dir --upgrade meson
+                  pip3 install --user --no-cache-dir --upgrade -r tools/requirements.txt
 
             - name: Check toml.hpp
               run: |
