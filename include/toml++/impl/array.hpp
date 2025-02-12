@@ -951,7 +951,10 @@ TOML_NAMESPACE_START
 					static_cast<node_ref>(static_cast<Array&&>(arr)[i])
 						.visit(
 							[&]([[maybe_unused]] auto&& elem) //
+// Define this macro as a workaround to compile errors caused by a bug in MSVC's "legacy lambda processor".
+#if !TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
 							noexcept(for_each_is_nothrow_one<Func&&, Array&&, decltype(elem)>::value)
+#endif
 							{
 								using elem_ref = for_each_elem_ref<decltype(elem), Array&&>;
 								static_assert(std::is_reference_v<elem_ref>);
