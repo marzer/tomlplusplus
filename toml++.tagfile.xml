@@ -9138,6 +9138,13 @@
       <anchor>ga56ab81041897681ac38ceba52a380b97</anchor>
       <arglist></arglist>
     </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>ga5c13a4a38e4b663c78ab84b7c99845f4</anchor>
+      <arglist></arglist>
+    </member>
   </compound>
   <compound kind="page">
     <name>poxy_changelog</name>
