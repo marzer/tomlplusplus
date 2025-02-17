@@ -112,6 +112,9 @@ jobs:
                 type:
                     - "debug"
                     - "release"
+                permissive:
+                    - false
+                    - true
 
         runs-on: windows-2022
 
@@ -130,7 +133,7 @@ jobs:
             - uses: ilammy/msvc-dev-cmd@v1
 
             - name: Configure Meson
-              run: meson setup build --vsenv --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false
+              run: meson setup build --vsenv --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false -Dpermissive=${{ matrix.permissive }}
 
             - name: Build
               run: meson compile -C build

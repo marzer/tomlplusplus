@@ -4,6 +4,7 @@ option('build_examples',		type: 'boolean', value: false,	description: 'Build the
 option('build_tests',			type: 'boolean', value: false,	description: 'Build tests (default: false) (implied by devel)')
 option('build_tt',				type: 'boolean', value: false,	description: 'Enable to build the toml-test encoder and decoder. (default: false) (implied by devel) (disabled by unreleased_features)')
 option('pedantic',				type: 'boolean', value: false,	description: 'Enable as many compiler warnings as possible (default: false) (implied by devel)')
+option('permissive',			type: 'boolean', value: false,	description: 'Add compiler option /permissive (default: false, which implies /permissive-) (only relevant for MSVC)')
 option('time_trace',			type: 'boolean', value: false,	description: 'Enable the -ftime-trace option (Clang only)')
 option('unreleased_features',	type: 'boolean', value: false,	description: 'Enable TOML_UNRELEASED_FEATURES=1 (default: false) (only relevant when compiling the library)')
 
