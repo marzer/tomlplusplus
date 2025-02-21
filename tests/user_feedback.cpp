@@ -451,4 +451,36 @@ b = []
 		oss << toml::source_region{ { 1, 2 }, { 3, 4 }, nullptr };
 		CHECK(oss.str() == "line 1, column 2 to line 3, column 4");
 	}
+
+	SECTION("tomlplusplus/issues/254") // https://github.com/marzer/tomlplusplus/issues/254
+	{
+		for (const toml::source_index line_num: { 0u, 1u, 2u })
+		{
+			CHECK(toml::get_line(""sv, line_num) == std::string_view{});
+		}
+
+		for (const auto input : {
+				 "# \r (embedded carriage return)"sv,
+				 "# \r (embedded carriage return)\n"sv,
+				 "# \r (embedded carriage return)\r\n"sv,
+			 })
+		{
+			CHECK(toml::get_line(input, 0) == std::string_view{});
+			CHECK(toml::get_line(input, 1) == "# \r (embedded carriage return)"sv);
+			CHECK(toml::get_line(input, 2) == std::string_view{});
+		}
+
+		for (const auto input : {
+				 "alpha = 1\nbeta = 2\n # last line # "sv,
+				 "alpha = 1\nbeta = 2\n # last line # \n"sv,
+				 "alpha = 1\r\nbeta = 2\r\n # last line # \r\n"sv,
+			 })
+		{
+			CHECK(toml::get_line(input, 0) == std::string_view{});
+			CHECK(toml::get_line(input, 1) == "alpha = 1"sv);
+			CHECK(toml::get_line(input, 2) == "beta = 2"sv);
+			CHECK(toml::get_line(input, 3) == " # last line # "sv);
+			CHECK(toml::get_line(input, 4) == std::string_view{});
+		}
+	}
 }
