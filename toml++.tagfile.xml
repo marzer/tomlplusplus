@@ -8849,6 +8849,13 @@
       <anchor>a3655200a65b1974b8bd13c1a4b5e45c1</anchor>
       <arglist>(const node &amp;root, const toml::path &amp;path) noexcept</arglist>
     </member>
+    <member kind="function">
+      <type>std::string_view</type>
+      <name>get_line</name>
+      <anchorfile>namespacetoml.html</anchorfile>
+      <anchor>a9a482a16198f8ad49bde728367ac87f5</anchor>
+      <arglist>(std::string_view doc, source_index line_num) noexcept</arglist>
+    </member>
     <member kind="variable">
       <type>constexpr value_flags</type>
       <name>preserve_source_value_flags</name>

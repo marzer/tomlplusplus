@@ -299,6 +299,11 @@
             </dt>
             <dd>Returns a const view of the node matching a fully-qualified "TOML path".</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a9a482a16198f8ad49bde728367ac87f5">get_line</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <a class="m-doc" href="#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> line_num) →  <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> <span class="m-label m-flat m-success">noexcept</span></span>
+            </dt>
+            <dd>Returns the line at the specified line number, from the specified document.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml_1_1literals.html#a401530e560c2dc540729af01e10b2a74">operator""_toml</a>(</span><span class="m-doc-wrap">const char* str,
               <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> len) →  <a class="m-doc" href="classtoml_1_1parse__result.html">parse_<wbr/>result</a></span>
             </dt>
@@ -828,6 +833,38 @@
             </h3>
             <p>Returns a const view of the node matching a fully-qualified "TOML path".</p>
 <aside class="m-note m-default"><h4>See also</h4><p><a class="m-doc" href="#a402a1973caa5c848ca494cac31d1085d">toml::<wbr/>at_path(node&amp;, const toml::<wbr/>path&amp; path)</a></p></aside>
+          </div></section>
+          <section class="m-doc-details" id="a9a482a16198f8ad49bde728367ac87f5"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> <span class="m-doc-details-prefix">toml::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a9a482a16198f8ad49bde728367ac87f5">get_line</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> doc,
+              <a class="m-doc" href="#afb852fa22a8b3ea9d200d645b9d5c308">source_<wbr/>index</a> line_num) <span class="m-label m-success">noexcept</span></span></span>
+            </h3>
+            <p>Returns the line at the specified line number, from the specified document.</p>
+            <table class="m-table m-fullwidth m-flat">
+              <thead>
+                <tr><th colspan="2">Parameters</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style="width: 1%">doc</td>
+                  <td>The document.</td>
+                </tr>
+                <tr>
+                  <td>line_num</td>
+                  <td>The line number (1-based).</td>
+                </tr>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <th>Returns</th>
+                  <td>The specified line, excluding any possible trailing carriage return or line feed character.</td>
+                </tr>
+              </tfoot>
+            </table>
+<pre class="m-code"><span class="k">auto</span> <span class="n">doc</span> <span class="o">=</span> <span class="s">"alpha = 1</span><span class="se">\n</span><span class="s">beta = 2"sv</span><span class="p">;</span>
+<span class="k">auto</span> <span class="n">second_line</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nf">get_line</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+<span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"The second line says </span><span class="se">\"</span><span class="s">"</span> <span class="o">&lt;&lt;</span> <span class="n">second_line</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\"\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">The second line says "beta = 2"</span></pre><aside class="m-note m-default"><h4>Remark</h4><p>Returns an empty string_view when there is no line at the specified line number, in the specified document.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8a37f07ea9c0a841be1352143b3cbc52"><div>
             <h3>
