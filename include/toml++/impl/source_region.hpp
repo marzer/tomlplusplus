@@ -217,6 +217,78 @@ TOML_NAMESPACE_START
 			return lhs;
 		}
 	};
+
+	/// \brief	Returns the line at the specified line number, from the specified document.
+	///
+	/// \detail \cpp
+	/// auto doc = "alpha = 1\nbeta = 2"sv;
+	/// auto second_line = toml::get_line(doc, 2);
+	///
+	/// std::cout << "The second line says \"" << second_line << "\"\n";
+	/// \ecpp
+	///
+	/// \out
+	/// The second line says "beta = 2"
+	/// \eout
+	///
+	/// \param 	doc	The document.
+	/// \param 	line_num	The line number (1-based).
+	///
+	/// \returns	The specified line, excluding any possible trailing carriage return or line feed character.
+	/// \remarks Returns an empty string_view when there is no line at the specified line number, in the specified document.
+	TOML_NODISCARD
+	inline std::string_view get_line(std::string_view doc, source_index line_num) noexcept
+	{
+		if (line_num == 0)
+		{
+			// Invalid line number. Should be greater than zero.
+			return {};
+		}
+
+		// The position of the first character of the specified line.
+		const auto begin_of_line = [doc, line_num]() -> std::size_t
+		{
+			if (line_num == 1)
+			{
+				return 0;
+			}
+
+			const auto num_chars_of_doc = doc.size();
+			std::size_t current_line_num{ 1 };
+
+			for (std::size_t i{}; i < num_chars_of_doc; ++i)
+			{
+				if (doc[i] == '\n')
+				{
+					++current_line_num;
+
+					if (current_line_num == line_num)
+					{
+						return i + 1;
+					}
+				}
+			}
+			return std::string_view::npos;
+		}();
+
+		if (begin_of_line >= doc.size())
+		{
+			return {};
+		}
+
+		if (const auto end_of_line = doc.find('\n', begin_of_line); end_of_line != std::string_view::npos)
+		{
+			const auto num_chars_of_line = end_of_line - begin_of_line;
+
+			// Trim an optional trailing carriage return.
+			return doc.substr(begin_of_line,
+							  ((num_chars_of_line > 0) && (doc[end_of_line - 1] == '\r')) ? num_chars_of_line - 1
+																						  : num_chars_of_line);
+		}
+
+		// Return the last line. Apparently this doc has no trailing line break character at the end.
+		return doc.substr(begin_of_line);
+	}
 }
 TOML_NAMESPACE_END;
 
