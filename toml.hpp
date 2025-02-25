@@ -2636,7 +2636,7 @@ TOML_NAMESPACE_START
 	};
 
 	TOML_NODISCARD
-	inline std::string_view get_line(std::string_view doc, source_index line_num) noexcept
+	constexpr std::string_view get_line(std::string_view doc, source_index line_num) noexcept
 	{
 		if (line_num == 0)
 		{

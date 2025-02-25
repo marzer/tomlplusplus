@@ -237,7 +237,7 @@ TOML_NAMESPACE_START
 	/// \returns	The specified line, excluding any possible trailing carriage return or line feed character.
 	/// \remarks Returns an empty string_view when there is no line at the specified line number, in the specified document.
 	TOML_NODISCARD
-	inline std::string_view get_line(std::string_view doc, source_index line_num) noexcept
+	constexpr std::string_view get_line(std::string_view doc, source_index line_num) noexcept
 	{
 		if (line_num == 0)
 		{
