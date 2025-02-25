@@ -75,7 +75,7 @@ global_args = cpp.get_supported_arguments(
 	'/Gy', # function-level linking
 	'/GF', # string pooling
 	'/openmp-',
-	'/permissive-',
+	'/permissive',
 	'/utf-8',
 	'/volatile:iso',
 	'/Zc:__cplusplus',
