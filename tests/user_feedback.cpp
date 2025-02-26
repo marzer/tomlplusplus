@@ -455,12 +455,16 @@ b = []
 	SECTION("tomlplusplus/issues/254") // https://github.com/marzer/tomlplusplus/issues/254
 	{
 		// Check constexpr support.
-		static_assert(toml::get_line(""sv, 1) == std::string_view{});
+		static_assert(toml::get_line(""sv, 1).data() == nullptr);
 		static_assert(toml::get_line("alpha = 1\nbeta = 2\n # last line # "sv, 1) == "alpha = 1"sv);
+
+		constexpr auto expected_empty_line = toml::get_line("# line one\n\n# line three"sv, 2);
+		static_assert(expected_empty_line.empty());
+		static_assert(expected_empty_line.data() != nullptr);
 
 		for (const toml::source_index line_num : { 0u, 1u, 2u })
 		{
-			CHECK(toml::get_line(""sv, line_num) == std::string_view{});
+			CHECK(toml::get_line(""sv, line_num).data() == nullptr);
 		}
 
 		for (const auto input : {
@@ -469,9 +473,9 @@ b = []
 				 "# \r (embedded carriage return)\r\n"sv,
 			 })
 		{
-			CHECK(toml::get_line(input, 0) == std::string_view{});
+			CHECK(toml::get_line(input, 0).data() == nullptr);
 			CHECK(toml::get_line(input, 1) == "# \r (embedded carriage return)"sv);
-			CHECK(toml::get_line(input, 2) == std::string_view{});
+			CHECK(toml::get_line(input, 2).data() == nullptr);
 		}
 
 		for (const auto input : {
@@ -480,11 +484,11 @@ b = []
 				 "alpha = 1\r\nbeta = 2\r\n # last line # \r\n"sv,
 			 })
 		{
-			CHECK(toml::get_line(input, 0) == std::string_view{});
+			CHECK(toml::get_line(input, 0).data() == nullptr);
 			CHECK(toml::get_line(input, 1) == "alpha = 1"sv);
 			CHECK(toml::get_line(input, 2) == "beta = 2"sv);
 			CHECK(toml::get_line(input, 3) == " # last line # "sv);
-			CHECK(toml::get_line(input, 4) == std::string_view{});
+			CHECK(toml::get_line(input, 4).data() == nullptr);
 		}
 	}
 }
