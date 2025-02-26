@@ -290,7 +290,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@levicki](https://github.com/levicki)** - Helped design some new features
 -   **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 -   **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
--   **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022
+-   **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022, added `get_line`
 -   **[@ned14](https://github.com/ned14)** - Reported a bunch of bugs and helped design some new features
 -   **[@okureta](https://github.com/okureta)** - Reported a bug
 -   **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
