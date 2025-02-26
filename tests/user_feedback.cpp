@@ -454,7 +454,11 @@ b = []
 
 	SECTION("tomlplusplus/issues/254") // https://github.com/marzer/tomlplusplus/issues/254
 	{
-		for (const toml::source_index line_num: { 0u, 1u, 2u })
+		// Check constexpr support.
+		static_assert(toml::get_line(""sv, 1) == std::string_view{});
+		static_assert(toml::get_line("alpha = 1\nbeta = 2\n # last line # "sv, 1) == "alpha = 1"sv);
+
+		for (const toml::source_index line_num : { 0u, 1u, 2u })
 		{
 			CHECK(toml::get_line(""sv, line_num) == std::string_view{});
 		}
