@@ -8850,10 +8850,10 @@
       <arglist>(const node &amp;root, const toml::path &amp;path) noexcept</arglist>
     </member>
     <member kind="function">
-      <type>constexpr std::string_view</type>
+      <type>constexpr optional&lt; std::string_view &gt;</type>
       <name>get_line</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a42911a91735d4abdb21f631a717533b8</anchor>
+      <anchor>a7a137fbfb3f257680292c20bce18a55d</anchor>
       <arglist>(std::string_view doc, source_index line_num) noexcept</arglist>
     </member>
     <member kind="variable">
