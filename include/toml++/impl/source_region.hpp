@@ -224,7 +224,7 @@ TOML_NAMESPACE_START
 	/// auto doc = "alpha = 1\nbeta = 2"sv;
 	/// auto second_line = toml::get_line(doc, 2);
 	///
-	/// std::cout << "The second line says \"" << second_line << "\"\n";
+	/// std::cout << "The second line says \"" << second_line.value() << "\"\n";
 	/// \ecpp
 	///
 	/// \out
@@ -235,9 +235,10 @@ TOML_NAMESPACE_START
 	/// \param 	line_num	The line number (1-based).
 	///
 	/// \returns	The specified line, excluding any possible trailing carriage return or line feed character.
-	/// \remarks Returns an empty string_view when there is no line at the specified line number, in the specified document.
+	/// \remarks	Returns an empty `optional` when the specified line number is out of range, i.e., when
+	///				the line number is zero or greater than the total number of lines of the specified document.
 	TOML_NODISCARD
-	constexpr std::string_view get_line(std::string_view doc, source_index line_num) noexcept
+	constexpr optional<std::string_view> get_line(std::string_view doc, source_index line_num) noexcept
 	{
 		if (line_num == 0)
 		{
