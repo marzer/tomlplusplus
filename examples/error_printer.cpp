@@ -104,6 +104,39 @@ namespace
 
 	inline constexpr auto divider =
 		"################################################################################"sv;
+
+	void print_string(std::string_view str)
+	{
+		for (char c : str)
+		{
+			if (c >= 0 && static_cast<std::size_t>(c) < std::size(toml::impl::control_char_escapes))
+			{
+				std::cout << toml::impl::control_char_escapes[static_cast<std::size_t>(c)];
+			}
+			else
+			{
+				if (c == '\\')
+				{
+					std::cout << '\\';
+				}
+				std::cout << c;
+			}
+		}
+	}
+
+	void print_parse_error(std::string_view doc, const toml::parse_error& err)
+	{
+		std::cout << err;
+
+		auto line_num = err.source().begin.line;
+
+		if (auto line = toml::get_line(doc, line_num))
+		{
+			std::cout << "\nLine "sv << line_num << ": "sv;
+			print_string(*line);
+		}
+		std::cout << "\n\n"sv;
+	}
 }
 
 int main()
@@ -118,11 +151,11 @@ int main()
 		}
 		catch (const toml::parse_error& err)
 		{
-			std::cout << err << "\n\n"sv;
+			print_parse_error(str, err);
 		}
 #else
 		if (auto result = toml::parse(str); !result)
-			std::cout << result.error() << "\n\n"sv;
+			print_parse_error(str, result.error());
 #endif
 	};
 
