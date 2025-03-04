@@ -17,6 +17,7 @@ namespace
 		"########## comments and whitespace"sv,
 		"# bar\rkek"sv,
 		"# bar\bkek"sv,
+		"# DEL character: '\x7f'"sv,
 		"# \xf1\x63"sv,
 		"# val1 = 1\fval2 = 2"sv,
 		"foo = 1\n\u2000\nbar = 2"sv,
@@ -115,11 +116,19 @@ namespace
 			}
 			else
 			{
-				if (c == '\\')
+				if (c == '\x7F')
 				{
-					std::cout << '\\';
+					// DEL character.
+					std::cout << "\\u007F"sv;
 				}
-				std::cout << c;
+				else
+				{
+					if (c == '\\')
+					{
+						std::cout << '\\';
+					}
+					std::cout << c;
+				}
 			}
 		}
 	}
