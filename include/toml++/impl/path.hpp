@@ -790,7 +790,7 @@ TOML_NAMESPACE_START
 		/// \returns	A #toml::path generated from the string literal.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		path operator"" _tpath(const char* str, size_t len)
+		path operator""_tpath(const char* str, size_t len)
 		{
 			return path(std::string_view{ str, len });
 		}

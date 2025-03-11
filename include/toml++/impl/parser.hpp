@@ -345,7 +345,7 @@ TOML_NAMESPACE_START
 		///				A toml::parse_result.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		parse_result operator"" _toml(const char* str, size_t len)
+		parse_result operator""_toml(const char* str, size_t len)
 		{
 			return parse(std::string_view{ str, len });
 		}
@@ -374,7 +374,7 @@ TOML_NAMESPACE_START
 		///				A toml::parse_result.
 		TOML_NODISCARD
 		TOML_ALWAYS_INLINE
-		parse_result operator"" _toml(const char8_t* str, size_t len)
+		parse_result operator""_toml(const char8_t* str, size_t len)
 		{
 			return parse(std::u8string_view{ str, len });
 		}

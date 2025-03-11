@@ -45,7 +45,7 @@ TOML_ENABLE_WARNINGS;
 TOML_NODISCARD
 TOML_ATTR(const)
 TOML_ALWAYS_INLINE
-constexpr size_t operator"" _sz(unsigned long long n) noexcept
+constexpr size_t operator""_sz(unsigned long long n) noexcept
 {
 	return static_cast<size_t>(n);
 }
