@@ -36,6 +36,7 @@ is_devel = get_option('devel')
 is_debug = get_option('debug')
 is_release = not is_debug
 is_pedantic = get_option('pedantic') or is_devel
+is_permissive = get_option('permissive')
 is_windows = host_machine.system() == 'windows'
 is_x64 = host_machine.cpu_family() == 'x86_64'
 is_subproject = meson.is_subproject()
@@ -75,7 +76,6 @@ global_args = cpp.get_supported_arguments(
 	'/Gy', # function-level linking
 	'/GF', # string pooling
 	'/openmp-',
-	'/permissive-',
 	'/utf-8',
 	'/volatile:iso',
 	'/Zc:__cplusplus',
@@ -87,6 +87,11 @@ if has_exceptions
 	global_args += cpp.get_supported_arguments('/Zc:throwingNew', '-D_HAS_EXCEPTIONS=1')
 else
 	global_args += cpp.get_supported_arguments('-D_HAS_EXCEPTIONS=0')
+endif
+if is_permissive
+	global_args += cpp.get_supported_arguments('/permissive', '-DTOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA=1')
+else
+	global_args += cpp.get_supported_arguments('/permissive-')
 endif
 if is_pedantic
 	global_args += cpp.get_supported_arguments(
