@@ -3784,7 +3784,7 @@ TOML_ANON_NAMESPACE_START
 		std::ifstream file;
 		TOML_OVERALIGNED char file_buffer[sizeof(void*) * 1024u];
 		file.rdbuf()->pubsetbuf(file_buffer, sizeof(file_buffer));
-#if TOML_WINDOWS
+#if TOML_WINDOWS && !(defined(__MINGW32__) || defined(__MINGW64__))
 		file.open(impl::widen(file_path_str).c_str(), std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
 #else
 		file.open(file_path_str, std::ifstream::in | std::ifstream::binary | std::ifstream::ate);
