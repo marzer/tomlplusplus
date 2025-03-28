@@ -110,7 +110,7 @@ You'll find some more code examples in the `examples` directory, and plenty more
 ### 🍨&#xFE0F; Regular flavour
 
 1. Clone the repository
-2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules/` as well
+2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well and enable `TOMLPLUSPLUS_BUILD_MODULES`
 3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 ### Conan
