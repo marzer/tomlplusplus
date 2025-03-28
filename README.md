@@ -309,6 +309,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@a-is](https://github.com/a-is)** - Fixed a bug
 -   **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
 -   **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
+-   **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules
 <br>
 
 ## Contact
