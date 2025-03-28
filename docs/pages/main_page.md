@@ -463,7 +463,7 @@ and [emoji sundae] Regular. The API is the same for both.
 
 <h3>[emoji sundae] Regular flavour</h3>
 1. Clone \github{marzer/tomlplusplus, the repository} from GitHub
-2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules/` as well
+2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well
 3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
