@@ -20,6 +20,7 @@
 ## Library features
 
 -   Header-only (optional!)
+-   Module support
 -   Supports the latest [TOML] release ([v1.0.0]), plus optional support for some unreleased TOML features
 -   Passes all tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 -   Supports serializing to JSON and YAML
