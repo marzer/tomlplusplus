@@ -20,6 +20,7 @@
 ## Library features
 
 -   Header-only (optional!)
+-   Module support
 -   Supports the latest [TOML] release ([v1.0.0]), plus optional support for some unreleased TOML features
 -   Passes all tests in the [toml-test](https://github.com/toml-lang/toml-test) suite
 -   Supports serializing to JSON and YAML
@@ -110,8 +111,8 @@ You'll find some more code examples in the `examples` directory, and plenty more
 ### 🍨&#xFE0F; Regular flavour
 
 1. Clone the repository
-2. Add `tomlplusplus/include` to your include paths
-3. `#include <toml++/toml.hpp>`
+2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well and enable `TOMLPLUSPLUS_BUILD_MODULES`
+3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 ### Conan
 
@@ -281,13 +282,16 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 
 ### With thanks to:
 
+-   **[@a-is](https://github.com/a-is)** - Fixed a bug
 -   **[@beastle9end](https://github.com/beastle9end)** - Made Windows.h include bypass
 -   **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 -   **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
+-   **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
 -   **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
 -   **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 -   **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
 -   **[@levicki](https://github.com/levicki)** - Helped design some new features
+-   **[@mikomikotaishi](https://github.com/mikomikotaishi)** - Added support for C++20 modules
 -   **[@moorereason](https://github.com/moorereason)** - Reported a whole bunch of bugs
 -   **[@mosra](https://github.com/mosra)** - Created the awesome [m.css] used to generate the API docs
 -   **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022, added `get_line`
@@ -304,11 +308,9 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@std-any-emplace](https://github.com/std-any-emplace)** - Reported some bugs
 -   **[@Tachi107](https://github.com/Tachi107)** - Made some tweaks to meson.build, added compile_library build option
 -   **[@traversaro](https://github.com/traversaro)** - Added vcpkg support and reported a bunch of bugs
+-   **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
 -   **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 -   **[@ximion](https://github.com/ximion)** - Added support for installation with meson
--   **[@a-is](https://github.com/a-is)** - Fixed a bug
--   **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
--   **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
 <br>
 
 ## Contact

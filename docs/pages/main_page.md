@@ -7,6 +7,7 @@
 @section mainpage-features Features
 
 -   Header-only (optional!)
+-   Module support
 -   Supports the latest [TOML](https://toml.io/) release ([v1.0.0](https://toml.io/en/v1.0.0)), plus
     optional support for some unreleased TOML features
 -   Passes all tests in the [toml-test](https://github.com/BurntSushi/toml-test) suite
@@ -37,6 +38,8 @@ Call toml::parse_file() and work with the toml::table you get back, or handle an
 @cpp
 #include <iostream>
 #include <toml++/toml.hpp>
+// or alternatively:
+import tomlplusplus; // if C++20 or later
 
 int main(int argc, char\*\* argv)
 {
@@ -460,8 +463,8 @@ and [emoji sundae] Regular. The API is the same for both.
 
 <h3>[emoji sundae] Regular flavour</h3>
 1. Clone \github{marzer/tomlplusplus, the repository} from GitHub
-2. Add `tomlplusplus/include` to your include paths
-3. `#include <toml++/toml.hpp>`
+2. Add `tomlplusplus/include` to your include paths, or for optional module support add `tomlplusplus/modules` as well and enable `TOMLPLUSPLUS_BUILD_MODULES`
+3. `#include <toml++/toml.hpp>` (or `import tomlplusplus;`)
 
 <!-- --------------------------------------------------------------------------------------------------------------- -->
 
