@@ -58,6 +58,7 @@ export namespace toml {
     using toml::table_iterator;
 
     using toml::at_path;
+    using toml::get_line;
     using toml::operator""_toml;
     using toml::operator""_tpath;
     using toml::operator<<;
