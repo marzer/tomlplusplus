@@ -27,13 +27,7 @@ target_include_directories(tomlplusplus_modules
     ${tomlplusplus_SOURCE_DIR}/include
 )
 
-set_target_properties(tomlplusplus_modules PROPERTIES 
-  CXX_STANDARD 23 
-  CXX_STANDARD_REQUIRED ON
-  CXX_EXTENSIONS OFF 
-  CXX_MODULE_DYNDEP OFF
-)
-
+target_compile_features(tomlplusplus_modules PUBLIC cxx_std_20)
 
 if(TOMLPLUSPLUS_ENABLE_INSTALL)
   install(TARGETS tomlplusplus_modules
