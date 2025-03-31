@@ -30,20 +30,9 @@ target_include_directories(
 
 target_compile_features(tomlplusplus_tomlplusplus INTERFACE cxx_std_17)
 
-# ---- Install rules, examples, and fuzzing ----
+# ---- Install rules ----
 if (tomlplusplus_INSTALL)
   include(cmake/install-rules.cmake)
-endif()
-
-if(PROJECT_IS_TOP_LEVEL)
-  option(BUILD_EXAMPLES "Build examples tree." OFF)
-  option(BUILD_FUZZER "Build fuzzer." OFF)
-  if(BUILD_EXAMPLES)
-    add_subdirectory(examples)
-  endif()
-  if(BUILD_FUZZER AND DEFINED ENV{LIB_FUZZING_ENGINE})
-    add_subdirectory(fuzzing)
-  endif()
 endif()
 
 # ---- C++ Modules Support (optional) ----
@@ -58,4 +47,16 @@ if(TOMLPLUSPLUS_BUILD_MODULES)
   endif()
 else()
   message(STATUS "C++ modules support is disabled. Enable with -DTOMLPLUSPLUS_BUILD_MODULES=ON")
+endif()
+
+# ---- Examples and fuzzing ----
+if(PROJECT_IS_TOP_LEVEL)
+  option(BUILD_EXAMPLES "Build examples tree." OFF)
+  option(BUILD_FUZZER "Build fuzzer." OFF)
+  if(BUILD_EXAMPLES)
+    add_subdirectory(examples)
+  endif()
+  if(BUILD_FUZZER AND DEFINED ENV{LIB_FUZZING_ENGINE})
+    add_subdirectory(fuzzing)
+  endif()
 endif()
