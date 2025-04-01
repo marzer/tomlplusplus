@@ -8,6 +8,9 @@
 
 #include "examples.hpp"
 #include <toml++/toml.hpp>
+#include <cctype>  // For iscntrl.
+#include <iomanip> // For setfill, hex, etc.
+#include <optional>
 
 using namespace std::string_view_literals;
 
@@ -110,23 +113,29 @@ namespace
 	{
 		for (char c : str)
 		{
-			if (c >= 0 && static_cast<std::size_t>(c) < std::size(toml::impl::control_char_escapes))
+			if (std::optional<std::string_view> escape_sequence = (c == '\\') ? "\\\\"sv
+																: (c == '\a') ? "\\a"sv
+																: (c == '\b') ? "\\b"sv
+																: (c == '\f') ? "\\f"sv
+																: (c == '\n') ? "\\n"sv
+																: (c == '\r') ? "\\r"sv
+																: (c == '\t') ? "\\t"sv
+																: (c == '\v') ? "\\v"sv
+																			  : std::optional<std::string_view>{})
 			{
-				std::cout << toml::impl::control_char_escapes[static_cast<std::size_t>(c)];
+				std::cout << *escape_sequence;
 			}
 			else
 			{
-				if (c == '\x7F')
+				if (c >= 0 && std::iscntrl(c))
 				{
-					// DEL character.
-					std::cout << "\\u007F"sv;
+					// Print a string, just like `toml::impl::control_char_escapes[c]`.
+					std::ostringstream stream;
+					stream << "\\u00"sv << std::setfill('0') << std::setw(2) << std::hex << std::uppercase << int{ c };
+					std::cout << stream.str();
 				}
 				else
 				{
-					if (c == '\\')
-					{
-						std::cout << '\\';
-					}
 					std::cout << c;
 				}
 			}
