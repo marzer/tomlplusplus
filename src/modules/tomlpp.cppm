@@ -5,6 +5,7 @@
 
 module;
 
+#define TOML_UNDEF_MACROS 0
 #include <toml++/toml.hpp>
 
 export module tomlplusplus;
@@ -19,49 +20,49 @@ export namespace toml {
      * @brief The toml++ namespace toml::literals::
      */
     inline namespace literals {
-        using toml::literals::operator""_toml;
-        using toml::literals::operator""_tpath;
+        using TOML_NAMESPACE::literals::operator""_toml;
+        using TOML_NAMESPACE::literals::operator""_tpath;
     }
 
-    using toml::array;
-    using toml::date;
-    using toml::date_time;
-    using toml::inserter;
-    using toml::json_formatter;
-    using toml::key;
-    using toml::node;
-    using toml::node_view;
-    using toml::parse_error;
-    using toml::parse_result;
-    using toml::path;
-    using toml::path_component;
-    using toml::source_position;
-    using toml::source_region;
-    using toml::table;
-    using toml::time;
-    using toml::time_offset;
-    using toml::toml_formatter;
-    using toml::value;
-    using toml::yaml_formatter;
-    using toml::format_flags;
-    using toml::node_type;
-    using toml::path_component_type;
-    using toml::value_flags;
-    using toml::array_iterator;
-    using toml::const_array_iterator;
-    using toml::const_table_iterator;
-    using toml::default_formatter;
-    using toml::inserted_type_of;
-    using toml::optional;
-    using toml::source_index;
-    using toml::source_path_ptr;
-    using toml::table_iterator;
+    using TOML_NAMESPACE::array;
+    using TOML_NAMESPACE::date;
+    using TOML_NAMESPACE::date_time;
+    using TOML_NAMESPACE::inserter;
+    using TOML_NAMESPACE::json_formatter;
+    using TOML_NAMESPACE::key;
+    using TOML_NAMESPACE::node;
+    using TOML_NAMESPACE::node_view;
+    using TOML_NAMESPACE::parse_error;
+    using TOML_NAMESPACE::parse_result;
+    using TOML_NAMESPACE::path;
+    using TOML_NAMESPACE::path_component;
+    using TOML_NAMESPACE::source_position;
+    using TOML_NAMESPACE::source_region;
+    using TOML_NAMESPACE::table;
+    using TOML_NAMESPACE::time;
+    using TOML_NAMESPACE::time_offset;
+    using TOML_NAMESPACE::toml_formatter;
+    using TOML_NAMESPACE::value;
+    using TOML_NAMESPACE::yaml_formatter;
+    using TOML_NAMESPACE::format_flags;
+    using TOML_NAMESPACE::node_type;
+    using TOML_NAMESPACE::path_component_type;
+    using TOML_NAMESPACE::value_flags;
+    using TOML_NAMESPACE::array_iterator;
+    using TOML_NAMESPACE::const_array_iterator;
+    using TOML_NAMESPACE::const_table_iterator;
+    using TOML_NAMESPACE::default_formatter;
+    using TOML_NAMESPACE::inserted_type_of;
+    using TOML_NAMESPACE::optional;
+    using TOML_NAMESPACE::source_index;
+    using TOML_NAMESPACE::source_path_ptr;
+    using TOML_NAMESPACE::table_iterator;
 
-    using toml::at_path;
-    using toml::get_line;
-    using toml::operator""_toml;
-    using toml::operator""_tpath;
-    using toml::operator<<;
-    using toml::parse;
-    using toml::parse_file;
+    using TOML_NAMESPACE::at_path;
+    using TOML_NAMESPACE::get_line;
+    using TOML_NAMESPACE::operator""_toml;
+    using TOML_NAMESPACE::operator""_tpath;
+    using TOML_NAMESPACE::operator<<;
+    using TOML_NAMESPACE::parse;
+    using TOML_NAMESPACE::parse_file;
 }
