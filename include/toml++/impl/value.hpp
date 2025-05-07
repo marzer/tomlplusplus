@@ -266,8 +266,11 @@ TOML_NAMESPACE_START
 			(impl::value_variadic_ctor_allowed<value<ValueType>, impl::remove_cvref<Args>...>::value),
 			typename... Args)
 		TOML_NODISCARD_CTOR
-		explicit value(Args&&... args) noexcept(noexcept(value_type(
-			impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))))
+		explicit value(Args&&... args)
+#if !TOML_DISABLE_NOEXCEPT_NOEXCEPT
+			noexcept(noexcept(value_type(
+				impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))))
+#endif
 			: val_(impl::native_value_maker<value_type, std::decay_t<Args>...>::make(static_cast<Args&&>(args)...))
 		{
 #if TOML_LIFETIME_HOOKS

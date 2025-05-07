@@ -1252,6 +1252,22 @@ TOML_ENABLE_WARNINGS;
 /// These compile errors were reported by Kevin Dick, Jan 19, 2024, at https://github.com/marzer/tomlplusplus/issues/219
 //# }}
 
+#ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 0
+	#ifdef _MSC_VER
+		#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
+		#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+		#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
+		#endif
+	#endif
+#endif
+//# {{
+/// \def TOML_DISABLE_NOEXCEPT_NOEXCEPT
+/// \brief Disable using noexcept(noexcept(<expression>)) within the toml++ library implementation.
+/// \detail This macro offers a workaround to a bug in Visual C++ (Visual Studio 2022), which caused
+/// compile errors, saying: "error C3878: syntax error: unexpected token ',' following 'simple-type-specifier'"
+//# }}
+
 /// @}
 //#====================================================================================================================
 //# CHARCONV SUPPORT
