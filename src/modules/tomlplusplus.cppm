@@ -65,4 +65,22 @@ export namespace toml {
     using TOML_NAMESPACE::operator<<;
     using TOML_NAMESPACE::parse;
     using TOML_NAMESPACE::parse_file;
+
+    using TOML_NAMESPACE::is_array;
+    using TOML_NAMESPACE::is_boolean;
+    using TOML_NAMESPACE::is_chronological;
+    using TOML_NAMESPACE::is_container;
+    using TOML_NAMESPACE::is_date;
+    using TOML_NAMESPACE::is_date_time;
+    using TOML_NAMESPACE::is_floating_point;
+    using TOML_NAMESPACE::is_integer;
+    using TOML_NAMESPACE::is_key;
+    using TOML_NAMESPACE::is_key_or_convertible;
+    using TOML_NAMESPACE::is_node;
+    using TOML_NAMESPACE::is_node_view;
+    using TOML_NAMESPACE::is_number;
+    using TOML_NAMESPACE::is_string;
+    using TOML_NAMESPACE::is_table;
+    using TOML_NAMESPACE::is_time;
+    using TOML_NAMESPACE::is_value;
 }
