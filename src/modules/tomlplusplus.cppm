@@ -83,4 +83,6 @@ export namespace toml {
     using TOML_NAMESPACE::is_table;
     using TOML_NAMESPACE::is_time;
     using TOML_NAMESPACE::is_value;
+
+	using TOML_NAMESPACE::preserve_source_value_flags;
 }
