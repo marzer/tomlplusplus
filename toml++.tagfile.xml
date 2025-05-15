@@ -9152,6 +9152,13 @@
       <anchor>ga5c13a4a38e4b663c78ab84b7c99845f4</anchor>
       <arglist></arglist>
     </member>
+    <member kind="define">
+      <type>#define</type>
+      <name>TOML_DISABLE_NOEXCEPT_NOEXCEPT</name>
+      <anchorfile>group__configuration.html</anchorfile>
+      <anchor>gac69eea7bc0905d58a6afc199982ed7ad</anchor>
+      <arglist></arglist>
+    </member>
   </compound>
   <compound kind="page">
     <name>poxy_changelog</name>

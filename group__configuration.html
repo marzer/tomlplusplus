@@ -94,6 +94,10 @@
             </dt>
             <dd>Disable using noexcept(&lt;condition&gt;) in lambda definitions within the toml++ library implementation.</dd>
             <dt>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#gac69eea7bc0905d58a6afc199982ed7ad">TOML_DISABLE_NOEXCEPT_NOEXCEPT</a></span>
+            </dt>
+            <dd>Disable using noexcept(noexcept(&lt;expression&gt;)) within the toml++ library implementation.</dd>
+            <dt>
               <span class="m-doc-wrap-bumper">#define <a class="m-doc" href="#ga56ab81041897681ac38ceba52a380b97">TOML_ENABLE_FLOAT16</a></span>
             </dt>
             <dd>Enable support for the built-in <code><a class="m-doc poxy-injected poxy-external" href="https://gcc.gnu.org/onlinedocs/gcc/Half-Precision.html" target="_blank">_Float16</a></code> type.</dd>
@@ -184,6 +188,13 @@
             </h3>
             <p>Disable using noexcept(&lt;condition&gt;) in lambda definitions within the toml++ library implementation.</p>
 <p>This macro offers a workaround to a bug in the old "legacy lambda processor" of Visual C++, which caused compile errors like "error C2057: expected constant expression", when it encountered such lambda's. These compile errors were reported by Kevin Dick, Jan 19, 2024, at <a class="poxy-external" href="https://github.com/marzer/tomlplusplus/issues/219" target="_blank">https:/<wbr/>/<wbr/>github.com/<wbr/>marzer/<wbr/>tomlplusplus/<wbr/>issues/<wbr/>219</a></p>
+          </div></section>
+          <section class="m-doc-details" id="gac69eea7bc0905d58a6afc199982ed7ad"><div>
+            <h3>
+              <span class="m-doc-wrap-bumper">#define <a class="m-doc-self" href="#gac69eea7bc0905d58a6afc199982ed7ad">TOML_DISABLE_NOEXCEPT_NOEXCEPT</a></span>
+            </h3>
+            <p>Disable using noexcept(noexcept(&lt;expression&gt;)) within the toml++ library implementation.</p>
+<p>This macro offers a workaround to a bug in Visual C++ (Visual Studio 2022), which caused compile errors, saying: "error C3878: syntax error: unexpected token ',' following 'simple-type-specifier'"</p>
           </div></section>
           <section class="m-doc-details" id="ga56ab81041897681ac38ceba52a380b97"><div>
             <h3>
