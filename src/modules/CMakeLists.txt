@@ -1,6 +1,11 @@
 file(GLOB_RECURSE TOMLPLUSPLUS_MODULES *.cppm)
 
 add_library(tomlplusplus_modules)
+target_sources(tomlplusplus_modules
+    PUBLIC
+    FILE_SET CXX_MODULES FILES
+    ${TOMLPLUSPLUS_MODULES}
+)
 
 cmake_minimum_required(VERSION 3.28)
 
