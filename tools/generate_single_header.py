@@ -122,6 +122,8 @@ def main():
 			toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
 			# blank lines preceeding closing brackets
 			toml_h = re.sub(r'\n\n([ \t]*[})])', r'\n\1', toml_h)
+			# IWYU pragmas
+			toml_h = re.sub(r'\n// IWYU pragma: [^\n]+\n', '\n', toml_h)
 		# ensure only one trailing newline
 		toml_h = toml_h.strip() + '\n'
 

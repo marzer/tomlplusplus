@@ -31,6 +31,7 @@ TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #endif
 #endif
 
+// IWYU pragma: begin_exports
 #include "impl/std_new.hpp"
 #include "impl/std_string.hpp"
 #include "impl/std_optional.hpp"
@@ -56,6 +57,7 @@ TOML_PRAGMA_CLANG(diagnostic ignored "-Wreserved-identifier")
 #include "impl/toml_formatter.hpp"
 #include "impl/json_formatter.hpp"
 #include "impl/yaml_formatter.hpp"
+// IWYU pragma: end_exports
 
 #if TOML_IMPLEMENTATION
 
