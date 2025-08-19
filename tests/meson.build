@@ -29,6 +29,7 @@ test_sources = files(
 	'parsing_spec_example.cpp',
 	'parsing_strings.cpp',
 	'parsing_tables.cpp',
+	'parsing_trivia.cpp',
 	'path.cpp',
 	'tests.cpp',
 	'user_feedback.cpp',

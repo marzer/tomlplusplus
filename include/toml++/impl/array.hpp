@@ -7,6 +7,8 @@
 #include "std_utility.hpp"
 #include "std_vector.hpp"
 #include "std_initializer_list.hpp"
+#include "preprocessor.hpp"
+#include "trivia_piece.hpp"
 #include "value.hpp"
 #include "make_node.hpp"
 #include "header_start.hpp"
@@ -290,6 +292,7 @@ TOML_NAMESPACE_START
 		using vector_iterator		= typename vector_type::iterator;
 		using const_vector_iterator = typename vector_type::const_iterator;
 		vector_type elems_;
+		optional<std::vector<trivia_piece>> inner_trailing_trivia_;
 
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -403,6 +406,20 @@ TOML_NAMESPACE_START
 		/// \brief	Move-assignment operator.
 		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(array&& rhs) noexcept;
+
+		/// \brief	Gets the inner trailing trivia.
+		TOML_CONST_INLINE_GETTER
+		const optional<std::vector<trivia_piece>> inner_trailing_trivia() const noexcept
+		{
+			return inner_trailing_trivia_;
+		}
+
+		/// \brief	Sets the inner trailing trivia.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_inner_trailing_trivia(optional<std::vector<trivia_piece>> trivia) noexcept
+		{
+			inner_trailing_trivia_ = trivia;
+		}
 
 		/// \name Type checks
 		/// @{

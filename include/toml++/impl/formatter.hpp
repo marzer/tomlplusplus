@@ -130,6 +130,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::terse_key_value_pairs);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool preserve_source_trivia() const noexcept
+		{
+			return !!(config_.flags & format_flags::preserve_source_trivia);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 

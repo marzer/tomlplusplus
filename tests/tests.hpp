@@ -125,7 +125,8 @@ bool parsing_should_succeed(std::string_view test_file,
 							uint32_t test_line,
 							std::string_view toml_str,
 							pss_func&& func				 = {},
-							std::string_view source_path = {});
+							std::string_view source_path = {},
+							bool collect_trivia = false);
 
 bool parsing_should_fail(std::string_view test_file,
 						 uint32_t test_line,

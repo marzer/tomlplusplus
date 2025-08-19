@@ -343,6 +343,9 @@ TOML_NAMESPACE_START // abi namespace
 
 		/// \brief Avoids the use of whitespace around key-value pairs.
 		terse_key_value_pairs = (1ull << 12),
+
+		/// \brief Preserves trivia of nodes that have it (i.e. were passed with collect_trivia enabled).
+		preserve_source_trivia = (1ull << 13)
 	};
 	TOML_MAKE_FLAGS(format_flags);
 

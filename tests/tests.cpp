@@ -9,7 +9,8 @@ bool parsing_should_succeed(std::string_view test_file,
 							uint32_t test_line,
 							std::string_view toml_str,
 							pss_func&& func,
-							std::string_view source_path)
+							std::string_view source_path,
+							bool collect_trivia)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
 			   << "parsing_should_succeed(\""sv << toml_str << "\")"sv)
@@ -36,18 +37,18 @@ bool parsing_should_succeed(std::string_view test_file,
 		{
 			INFO("Parsing string directly"sv)
 			if (func)
-				func(validate_table(toml::parse(toml_str, source_path), source_path));
+				func(validate_table(toml::parse(toml_str, source_path, collect_trivia), source_path));
 			else
-				validate_table(toml::parse(toml_str, source_path), source_path);
+				validate_table(toml::parse(toml_str, source_path, collect_trivia), source_path);
 		}
 		{
 			INFO("Parsing from a string stream"sv)
 			std::stringstream ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			if (func)
-				func(validate_table(toml::parse(ss, source_path), source_path));
+				func(validate_table(toml::parse(ss, source_path, collect_trivia), source_path));
 			else
-				validate_table(toml::parse(ss, source_path), source_path);
+				validate_table(toml::parse(ss, source_path, collect_trivia), source_path);
 		}
 	}
 	catch (const parse_error& err)
@@ -61,7 +62,7 @@ bool parsing_should_succeed(std::string_view test_file,
 
 	{
 		INFO("Parsing string directly"sv)
-		parse_result result = toml::parse(toml_str, source_path);
+		parse_result result = toml::parse(toml_str, source_path, collect_trivia);
 		if (result)
 		{
 			if (func)
@@ -81,7 +82,7 @@ bool parsing_should_succeed(std::string_view test_file,
 		INFO("Parsing from a string stream"sv)
 		std::stringstream ss;
 		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
-		parse_result result = toml::parse(ss, source_path);
+		parse_result result = toml::parse(ss, source_path, collect_trivia);
 		if (result)
 		{
 			if (func)

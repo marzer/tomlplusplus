@@ -5,9 +5,12 @@
 #pragma once
 
 #include "std_utility.hpp"
+#include "std_vector.hpp"
 #include "forward_declarations.hpp"
 #include "source_region.hpp"
 #include "header_start.hpp"
+#include "preprocessor.hpp"
+#include "trivia_piece.hpp"
 
 TOML_NAMESPACE_START
 {
@@ -22,6 +25,8 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
+		std::optional<std::vector<trivia_piece>> leading_trivia_;
+		std::optional<std::vector<trivia_piece>> trailing_trivia_;
 
 		template <typename T>
 		TOML_NODISCARD
@@ -727,6 +732,34 @@ TOML_NAMESPACE_START
 		}
 
 		/// @}
+
+		/// \brief	Returns the leading trivia attached to this node.
+		TOML_PURE_INLINE_GETTER
+		const optional<std::vector<trivia_piece>>& leading_trivia() const noexcept
+		{
+			return leading_trivia_;
+		}
+
+		/// \brief	Returns the trailing trivia attached to this node.
+		TOML_PURE_INLINE_GETTER
+		const optional<std::vector<trivia_piece>>& trailing_trivia() const noexcept
+		{
+			return trailing_trivia_;
+		}
+
+		/// \brief	Sets the leading trivia attached to this node.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_leading_trivia(optional<std::vector<trivia_piece>> leading_trivia) noexcept
+		{
+			leading_trivia_ = leading_trivia;
+		}
+
+		/// \brief	Sets the trailing trivia attached to this node.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_trailing_trivia(optional<std::vector<trivia_piece>> trailing_trivia) noexcept
+		{
+			trailing_trivia_ = trailing_trivia;
+		}
 
 	  private:
 		/// \cond

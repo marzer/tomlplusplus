@@ -30,14 +30,15 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
-	///
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
+ 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
 	/// 			\conditional_return{Without exceptions}
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a string view.
 	///
@@ -54,6 +55,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -61,7 +63,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -73,6 +75,7 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	///
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -80,7 +83,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::string_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::string_view file_path, bool collect_trivia = false);
 
 #if TOML_HAS_CHAR8
 
@@ -99,6 +102,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -106,7 +110,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a char8_t string view.
 	///
@@ -123,6 +127,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -130,7 +135,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -142,6 +147,7 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	///
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -149,7 +155,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path, bool collect_trivia = false);
 
 #endif // TOML_HAS_CHAR8
 
@@ -172,6 +178,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -179,7 +186,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -201,6 +208,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -208,7 +216,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a file.
 	///
@@ -222,6 +230,7 @@ TOML_NAMESPACE_START
 	/// \ecpp
 	///
 	/// \param 	file_path		The TOML document to parse. Must be valid UTF-8.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -229,7 +238,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path, bool collect_trivia = false);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
@@ -252,6 +261,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -259,7 +269,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path, bool collect_trivia = false);
 
 #endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
@@ -281,6 +291,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -288,7 +299,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	/// \brief	Parses a TOML document from a stream.
 	///
@@ -308,6 +319,7 @@ TOML_NAMESPACE_START
 	/// \param 	source_path		The path used to initialize each node's `source().path`.
 	/// 						If you don't have a path (or you have no intention of using paths in diagnostics)
 	/// 						then this parameter can safely be left blank.
+	/// \param 	collect_trivia	Whether to collect trivia such as whitespaces and newlines or not.
 	///
 	/// \returns	\conditional_return{With exceptions}
 	///				A toml::table.
@@ -315,7 +327,7 @@ TOML_NAMESPACE_START
 	///				A toml::parse_result.
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path, bool collect_trivia = false);
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 

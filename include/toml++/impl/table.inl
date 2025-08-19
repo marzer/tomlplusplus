@@ -64,7 +64,11 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) //
 		: node(other),
-		  inline_{ other.inline_ }
+		  inline_{ other.inline_ },
+#if !TOML_ENABLE_ORDERED_TABLES
+			last_inserted_(other.last_inserted_),
+#endif
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_ENABLE_ORDERED_TABLES
 		for (auto&& [k, v] : other.entries_)
@@ -90,8 +94,11 @@ TOML_NAMESPACE_START
 		  map_{ std::move(other.map_) },
 #if TOML_ENABLE_ORDERED_TABLES
 		  entries_{ std::move(other.entries_) },
+#else
+		  last_inserted_(other.last_inserted_),
 #endif
-		  inline_{ other.inline_ }
+		  inline_{ other.inline_ },
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -117,8 +124,10 @@ TOML_NAMESPACE_START
 			{
 				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
 			}
+			last_inserted_ = rhs.last_inserted_;
 #endif
 			inline_ = rhs.inline_;
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}
@@ -131,6 +140,10 @@ TOML_NAMESPACE_START
 			node::operator=(std::move(rhs));
 			map_	= std::move(rhs.map_);
 			inline_ = rhs.inline_;
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
+#if !TOML_ENABLE_ORDERED_TABLES
+			last_inserted_ = rhs.last_inserted_;
+#endif
 		}
 		return *this;
 	}
@@ -394,7 +407,7 @@ TOML_NAMESPACE_START
 		auto prev_size = map_.size();
 		auto ipos = map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
 		if (map_.size() > prev_size)
-			last_inserted_ = iterator{ ipos };
+			last_inserted_ = toml::table_iterator { ipos };
 		return ipos;
 #endif
 	}

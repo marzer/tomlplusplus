@@ -5,6 +5,7 @@
 #pragma once
 
 #include "preprocessor.hpp"
+#include "trivia_piece.hpp"
 #if TOML_ENABLE_FORMATTERS
 
 #include "std_vector.hpp"
@@ -64,6 +65,17 @@ TOML_NAMESPACE_START
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_trivia(const std::vector<trivia_piece>& trivia);
+
+		using impl::formatter::print_value;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_value(const node& node);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_kvp(const key& k, const node& v);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();

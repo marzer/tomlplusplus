@@ -13,6 +13,7 @@
 #include "node_view.hpp"
 #include "key.hpp"
 #include "header_start.hpp"
+#include "preprocessor.hpp"
 #include <iostream>
 
 /// \cond
@@ -244,9 +245,11 @@ TOML_NAMESPACE_START
 		using map_iterator		 = typename map_type::iterator;
 		using const_map_iterator = typename map_type::const_iterator;
 		map_type map_;
+		optional<toml::table_iterator> last_inserted_;
 #endif
 
 		bool inline_ = false;
+		optional<std::vector<trivia_piece>> inner_trailing_trivia_;
 
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -302,6 +305,20 @@ TOML_NAMESPACE_START
 		/// \brief	Move-assignment operator.
 		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(table&& rhs) noexcept;
+
+		/// \brief	Gets the inner trailing trivia.
+		TOML_CONST_INLINE_GETTER
+		const optional<std::vector<trivia_piece>> inner_trailing_trivia() const noexcept
+		{
+			return inner_trailing_trivia_;
+		}
+
+		/// \brief	Sets the inner trailing trivia.
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_inner_trailing_trivia(optional<std::vector<trivia_piece>> trivia) noexcept
+		{
+			inner_trailing_trivia_ = trivia;
+		}
 
 		/// \name Type checks
 		/// @{
@@ -810,6 +827,21 @@ TOML_NAMESPACE_START
 
 		/// \brief A BidirectionalIterator for iterating over const key-value pairs in a toml::table.
 		using const_iterator = toml::const_table_iterator;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		optional<iterator> last_inserted() noexcept
+		{
+			if (size() > 0)
+			{
+#if TOML_ENABLE_ORDERED_TABLES
+				return iterator{ --entries_.end() };
+#else
+				return last_inserted_;
+#endif
+			}
+			else
+				return std::nullopt;
+		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER

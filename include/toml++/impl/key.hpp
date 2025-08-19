@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#include "std_vector.hpp"
+#include "trivia_piece.hpp"
 #include "source_region.hpp"
 #include "std_utility.hpp"
 #include "print_to_stream.hpp"
@@ -33,6 +35,8 @@ TOML_NAMESPACE_START
 	  private:
 		std::string key_;
 		source_region source_;
+		std::optional<std::vector<trivia_piece>> leading_trivia_;
+		std::optional<std::vector<trivia_piece>> trailing_trivia_;
 
 	  public:
 		/// \brief	Default constructor.
@@ -41,44 +45,74 @@ TOML_NAMESPACE_START
 
 		/// \brief	Constructs a key from a string view and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(std::string_view k, source_region&& src = {}) //
+		explicit key(std::string_view k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a string view and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(std::string_view k, const source_region& src) //
+		explicit key(std::string_view k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a string and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(std::string&& k, source_region&& src = {}) noexcept //
+		explicit key(std::string&& k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) noexcept //
 			: key_{ std::move(k) },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a string and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(std::string&& k, const source_region& src) noexcept //
+		explicit key(std::string&& k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) noexcept //
 			: key_{ std::move(k) },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a c-string and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(const char* k, source_region&& src = {}) //
+		explicit key(const char* k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a c-string view and source region.
 		TOML_NODISCARD_CTOR
-		explicit key(const char* k, const source_region& src) //
+		explicit key(const char* k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
@@ -87,18 +121,28 @@ TOML_NAMESPACE_START
 		///
 		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD_CTOR
-		explicit key(std::wstring_view k, source_region&& src = {}) //
+		explicit key(std::wstring_view k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ impl::narrow(k) },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		/// \brief	Constructs a key from a wide string and source region.
 		///
 		/// \availability This constructor is only available when #TOML_ENABLE_WINDOWS_COMPAT is enabled.
 		TOML_NODISCARD_CTOR
-		explicit key(std::wstring_view k, const source_region& src) //
+		explicit key(std::wstring_view k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ impl::narrow(k) },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 #endif
@@ -153,6 +197,23 @@ TOML_NAMESPACE_START
 			return source_;
 		}
 
+		/// @}
+
+		/// \name Metadata
+		/// @{
+
+		/// \brief	Returns the key's leading trivia.
+		optional<std::vector<trivia_piece>> leading_trivia() const noexcept
+		{
+			return leading_trivia_;
+		}
+
+		/// \brief	Returns the key's trailing trivia.
+		optional<std::vector<trivia_piece>> trailing_trivia() const noexcept
+		{
+			return trailing_trivia_;
+		}
+		
 		/// @}
 
 		/// \name Equality and Comparison

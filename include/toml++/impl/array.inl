@@ -65,7 +65,8 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) //
-		: node(other)
+		: node(other),
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 		elems_.reserve(other.elems_.size());
 		for (const auto& elem : other)
@@ -79,7 +80,8 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	array::array(array && other) noexcept //
 		: node(std::move(other)),
-		  elems_(std::move(other.elems_))
+		  elems_(std::move(other.elems_)),
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_LIFETIME_HOOKS
 		TOML_ARRAY_CREATED;
@@ -96,6 +98,7 @@ TOML_NAMESPACE_START
 			elems_.reserve(rhs.elems_.size());
 			for (const auto& elem : rhs)
 				elems_.emplace_back(impl::make_node(elem));
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}
@@ -107,6 +110,7 @@ TOML_NAMESPACE_START
 		{
 			node::operator=(std::move(rhs));
 			elems_ = std::move(rhs.elems_);
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}

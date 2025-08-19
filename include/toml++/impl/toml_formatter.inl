@@ -5,6 +5,8 @@
 #pragma once
 
 #include "preprocessor.hpp"
+#include "formatter.hpp"
+#include "forward_declarations.hpp"
 //# {{
 #if !TOML_IMPLEMENTATION
 #error This is an implementation-only header.
@@ -130,52 +132,128 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const key& k)
 	{
+		if (preserve_source_trivia() && k.leading_trivia().has_value())
+			print_trivia(*k.leading_trivia());
 		print_string(k.str(), false, true, false);
+		if (preserve_source_trivia() && k.trailing_trivia().has_value())
+			print_trivia(*k.trailing_trivia());
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trivia(const std::vector<trivia_piece>& trivia)
+	{
+		for (auto & piece : trivia) {
+			print_unformatted(piece.text);
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_value(const node& node)
+	{
+		const auto type = node.type();
+		TOML_ASSUME(type != node_type::none);
+		switch (type)
+		{
+			case node_type::table: print_inline(*reinterpret_cast<const table*>(&node)); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&node)); break;
+			default:
+				if (preserve_source_trivia() && node.leading_trivia().has_value())
+					print_trivia(node.leading_trivia().value());
+				this->impl::formatter::print_value(node, type);
+				if (preserve_source_trivia() && node.trailing_trivia().has_value())
+					print_trivia(node.trailing_trivia().value());
+		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print_inline(const table& tbl)
 	{
+		if (preserve_source_trivia() && tbl.leading_trivia().has_value())
+			print_trivia(tbl.leading_trivia().value());
+
 		if (tbl.empty())
 		{
-			print_unformatted("{}"sv);
+			print_unformatted("{"sv);
+			if (preserve_source_trivia() && tbl.inner_trailing_trivia().has_value())
+				print_trivia(tbl.inner_trailing_trivia().value());
+			print_unformatted("}"sv);
+			if (preserve_source_trivia() && tbl.trailing_trivia().has_value())
+				print_trivia(tbl.trailing_trivia().value());
 			return;
 		}
 
-		print_unformatted("{ "sv);
+		if (preserve_source_trivia())
+			print_unformatted("{"sv);
+		else
+			print_unformatted("{ "sv);
 
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				print_unformatted(", "sv);
+			{
+				if (preserve_source_trivia())
+					print_unformatted(","sv);
+				else
+					print_unformatted(", "sv);
+			}
 			first = true;
 
-			print(k);
-			if (terse_kvps())
-				print_unformatted("="sv);
-			else
-				print_unformatted(" = "sv);
-
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
-			}
+			print_kvp(k, v);
 		}
 
-		print_unformatted(" }"sv);
+		if (preserve_source_trivia())
+		{
+			if (tbl.inner_trailing_trivia().has_value())
+				print_trivia(tbl.inner_trailing_trivia().value());
+			print_unformatted("}"sv);
+		}
+		else
+			print_unformatted(" }"sv);
+
+		if (preserve_source_trivia() && tbl.trailing_trivia().has_value())
+			print_trivia(tbl.trailing_trivia().value());
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_kvp(const key& k, const node& v)
+	{
+		print(k);
+		if (terse_kvps())
+			print_unformatted("="sv);
+		else if (!preserve_source_trivia())
+			print_unformatted(" = "sv);
+		else
+		{
+			if (!k.trailing_trivia().has_value())
+				print_unformatted(" "sv);
+			print_unformatted("="sv);
+			if (!v.leading_trivia().has_value())
+				print_unformatted(" "sv);
+		}
+
+		print_value(v);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const array& arr)
 	{
+		if (preserve_source_trivia() && arr.leading_trivia().has_value())
+			print_trivia(arr.leading_trivia().value());
+
 		if (arr.empty())
 		{
-			print_unformatted("[]"sv);
+			if (preserve_source_trivia() && arr.inner_trailing_trivia().has_value())
+			{
+				print_unformatted("["sv);
+				print_trivia(arr.inner_trailing_trivia().value());
+				print_unformatted("]"sv);
+			}
+			else
+				print_unformatted("[]"sv);
+
+			if (preserve_source_trivia() && arr.trailing_trivia().has_value())
+				print_trivia(arr.trailing_trivia().value());
 			return;
 		}
 
@@ -194,44 +272,45 @@ TOML_NAMESPACE_START
 			if (indent_array_elements())
 				increase_indent();
 		}
-		else
-			print_unformatted(' ');
 
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
-			{
 				print_unformatted(',');
-				if (!multiline)
+
+			auto& v			= arr[i];
+			if (!preserve_source_trivia() || !v.leading_trivia().has_value())
+			{
+				if (multiline)
+				{
+					print_newline(true);
+					print_indent();
+				}
+				else
 					print_unformatted(' ');
 			}
 
+			print_value(v);
+		}
+
+		if (preserve_source_trivia() && arr.inner_trailing_trivia().has_value())
+			print_trivia(arr.inner_trailing_trivia().value());
+		else
+		{
 			if (multiline)
 			{
+				indent(original_indent);
 				print_newline(true);
 				print_indent();
 			}
-
-			auto& v			= arr[i];
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
-			}
+			else
+				print_unformatted(' ');
 		}
-		if (multiline)
-		{
-			indent(original_indent);
-			print_newline(true);
-			print_indent();
-		}
-		else
-			print_unformatted(' ');
 
 		print_unformatted("]"sv);
+
+		if (preserve_source_trivia() && arr.trailing_trivia().has_value())
+			print_trivia(arr.trailing_trivia().value());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -255,20 +334,11 @@ TOML_NAMESPACE_START
 				continue;
 
 			pending_table_separator_ = true;
-			print_newline();
-			print_indent();
-			print(k);
-			if (terse_kvps())
-				print_unformatted("="sv);
-			else
-				print_unformatted(" = "sv);
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
+			if (!preserve_source_trivia() || !k.leading_trivia().has_value()) {
+				print_newline();
+				print_indent();
 			}
+			print_kvp(k, v);
 		}
 
 		const auto print_key_path = [&]()
@@ -378,6 +448,9 @@ TOML_NAMESPACE_START
 		if (dump_failed_parse_result())
 			return;
 
+		if (preserve_source_trivia() && source().leading_trivia().has_value())
+			print_trivia(source().leading_trivia().value());
+
 		switch (auto source_type = source().type())
 		{
 			case node_type::table:
@@ -397,6 +470,9 @@ TOML_NAMESPACE_START
 
 			default: print_value(source(), source_type);
 		}
+
+		if (preserve_source_trivia() && source().trailing_trivia().has_value())
+			print_trivia(source().trailing_trivia().value());
 	}
 }
 TOML_NAMESPACE_END;

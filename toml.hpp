@@ -1648,6 +1648,7 @@ TOML_NAMESPACE_START // abi namespace
 		indentation = indent_sub_tables | indent_array_elements,
 		relaxed_float_precision = (1ull << 11),
 		terse_key_value_pairs = (1ull << 12),
+		preserve_source_trivia = (1ull << 13)
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -3632,6 +3633,28 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
+//********  impl/trivia_piece.hpp  *************************************************************************************
+
+TOML_NAMESPACE_START
+{
+	enum class TOML_CLOSED_ENUM trivia_type : uint8_t
+	{
+		whitespace,
+		comment,
+		trailing_comma
+	};
+
+	struct trivia_piece
+	{
+		std::string text;
+
+		trivia_type type;
+	};
+}
+TOML_NAMESPACE_END;
+
+//********  impl/node.hpp  *********************************************************************************************
+
 TOML_NAMESPACE_START
 {
 	class TOML_ABSTRACT_INTERFACE TOML_EXPORTED_CLASS node
@@ -3640,6 +3663,8 @@ TOML_NAMESPACE_START
 
 		friend class TOML_PARSER_TYPENAME;
 		source_region source_{};
+		std::optional<std::vector<trivia_piece>> leading_trivia_;
+		std::optional<std::vector<trivia_piece>> trailing_trivia_;
 
 		template <typename T>
 		TOML_NODISCARD
@@ -3994,6 +4019,30 @@ TOML_NAMESPACE_START
 		const source_region& source() const noexcept
 		{
 			return source_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const optional<std::vector<trivia_piece>>& leading_trivia() const noexcept
+		{
+			return leading_trivia_;
+		}
+
+		TOML_PURE_INLINE_GETTER
+		const optional<std::vector<trivia_piece>>& trailing_trivia() const noexcept
+		{
+			return trailing_trivia_;
+		}
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_leading_trivia(optional<std::vector<trivia_piece>> leading_trivia) noexcept
+		{
+			leading_trivia_ = leading_trivia;
+		}
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_trailing_trivia(optional<std::vector<trivia_piece>> trailing_trivia) noexcept
+		{
+			trailing_trivia_ = trailing_trivia;
 		}
 
 	  private:
@@ -6267,6 +6316,7 @@ TOML_NAMESPACE_START
 		using vector_iterator		= typename vector_type::iterator;
 		using const_vector_iterator = typename vector_type::const_iterator;
 		vector_type elems_;
+		optional<std::vector<trivia_piece>> inner_trailing_trivia_;
 
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -6341,6 +6391,18 @@ TOML_NAMESPACE_START
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		array& operator=(array&& rhs) noexcept;
+
+		TOML_CONST_INLINE_GETTER
+		const optional<std::vector<trivia_piece>> inner_trailing_trivia() const noexcept
+		{
+			return inner_trailing_trivia_;
+		}
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_inner_trailing_trivia(optional<std::vector<trivia_piece>> trivia) noexcept
+		{
+			inner_trailing_trivia_ = trivia;
+		}
 
 		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
@@ -7209,6 +7271,8 @@ TOML_NAMESPACE_START
 	  private:
 		std::string key_;
 		source_region source_;
+		std::optional<std::vector<trivia_piece>> leading_trivia_;
+		std::optional<std::vector<trivia_piece>> trailing_trivia_;
 
 	  public:
 
@@ -7216,53 +7280,93 @@ TOML_NAMESPACE_START
 		key() noexcept = default;
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::string_view k, source_region&& src = {}) //
+		explicit key(std::string_view k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::string_view k, const source_region& src) //
+		explicit key(std::string_view k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::string&& k, source_region&& src = {}) noexcept //
+		explicit key(std::string&& k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) noexcept //
 			: key_{ std::move(k) },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::string&& k, const source_region& src) noexcept //
+		explicit key(std::string&& k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) noexcept //
 			: key_{ std::move(k) },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(const char* k, source_region&& src = {}) //
+		explicit key(const char* k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(const char* k, const source_region& src) //
+		explicit key(const char* k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ k },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::wstring_view k, source_region&& src = {}) //
+		explicit key(std::wstring_view k,
+					 source_region&& src					   = {},
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ impl::narrow(k) },
-			  source_{ std::move(src) }
+			  source_{ std::move(src) },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 		TOML_NODISCARD_CTOR
-		explicit key(std::wstring_view k, const source_region& src) //
+		explicit key(std::wstring_view k,
+					 const source_region& src,
+					 optional<std::vector<trivia_piece>> leading_trivia  = optional<std::vector<trivia_piece>>(),
+					 optional<std::vector<trivia_piece>> trailing_trivia = optional<std::vector<trivia_piece>>()) //
 			: key_{ impl::narrow(k) },
-			  source_{ src }
+			  source_{ src },
+			  leading_trivia_(leading_trivia),
+			  trailing_trivia_(trailing_trivia)
 		{}
 
 #endif
@@ -7301,6 +7405,16 @@ TOML_NAMESPACE_START
 		const source_region& source() const noexcept
 		{
 			return source_;
+		}
+
+		optional<std::vector<trivia_piece>> leading_trivia() const noexcept
+		{
+			return leading_trivia_;
+		}
+
+		optional<std::vector<trivia_piece>> trailing_trivia() const noexcept
+		{
+			return trailing_trivia_;
 		}
 
 		TOML_PURE_INLINE_GETTER
@@ -7679,9 +7793,11 @@ TOML_NAMESPACE_START
 		using map_iterator		 = typename map_type::iterator;
 		using const_map_iterator = typename map_type::const_iterator;
 		map_type map_;
+		optional<toml::table_iterator> last_inserted_;
 #endif
 
 		bool inline_ = false;
+		optional<std::vector<trivia_piece>> inner_trailing_trivia_;
 
 		TOML_NODISCARD_CTOR
 		TOML_EXPORTED_MEMBER_FUNCTION
@@ -7715,6 +7831,18 @@ TOML_NAMESPACE_START
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		table& operator=(table&& rhs) noexcept;
+
+		TOML_CONST_INLINE_GETTER
+		const optional<std::vector<trivia_piece>> inner_trailing_trivia() const noexcept
+		{
+			return inner_trailing_trivia_;
+		}
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void set_inner_trailing_trivia(optional<std::vector<trivia_piece>> trivia) noexcept
+		{
+			inner_trailing_trivia_ = trivia;
+		}
 
 		TOML_CONST_INLINE_GETTER
 		node_type type() const noexcept final
@@ -8030,6 +8158,21 @@ TOML_NAMESPACE_START
 		using iterator = toml::table_iterator;
 
 		using const_iterator = toml::const_table_iterator;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		optional<iterator> last_inserted() noexcept
+		{
+			if (size() > 0)
+			{
+#if TOML_ENABLE_ORDERED_TABLES
+				return iterator{ --entries_.end() };
+#else
+				return last_inserted_;
+#endif
+			}
+			else
+				return std::nullopt;
+		}
 
 		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
@@ -9683,29 +9826,29 @@ TOML_NAMESPACE_START
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::string_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::string_view file_path, bool collect_trivia = false);
 
 #if TOML_HAS_CHAR8
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path, bool collect_trivia = false);
 
 #endif // TOML_HAS_CHAR8
 
@@ -9713,15 +9856,15 @@ TOML_NAMESPACE_START
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path);
+	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path, bool collect_trivia = false);
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
 
@@ -9729,17 +9872,17 @@ TOML_NAMESPACE_START
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path);
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path, bool collect_trivia = false);
 
 #endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path = {});
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path = {}, bool collect_trivia = false);
 
 	TOML_NODISCARD
 	TOML_EXPORTED_FREE_FUNCTION
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path);
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path, bool collect_trivia = false);
 
 	TOML_ABI_NAMESPACE_END; // TOML_EXCEPTIONS
 
@@ -9914,6 +10057,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::terse_key_value_pairs);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool preserve_source_trivia() const noexcept
+		{
+			return !!(config_.flags & format_flags::preserve_source_trivia);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
@@ -10023,6 +10172,17 @@ TOML_NAMESPACE_START
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print(const toml::table&);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_trivia(const std::vector<trivia_piece>& trivia);
+
+		using impl::formatter::print_value;
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_value(const node& node);
+
+		TOML_EXPORTED_MEMBER_FUNCTION
+		void print_kvp(const key& k, const node& v);
 
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void print();
@@ -10895,11 +11055,15 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
-		: source_{ std::exchange(other.source_, {}) }
+		: source_{ std::exchange(other.source_, {}) },
+		  leading_trivia_(other.leading_trivia_),
+		  trailing_trivia_(other.trailing_trivia_)
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	node::node(const node& /*other*/) noexcept
+	node::node(const node& other) noexcept
+		: leading_trivia_(other.leading_trivia_),
+		  trailing_trivia_(other.trailing_trivia_)
 	{
 		// does not copy source information - this is not an error
 		//
@@ -10907,13 +11071,15 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node& node::operator=(const node& /*rhs*/) noexcept
+	node& node::operator=(const node& rhs) noexcept
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
+		leading_trivia_ = rhs.leading_trivia_;
+		trailing_trivia_ = rhs.trailing_trivia_;
 		return *this;
 	}
 
@@ -10922,6 +11088,8 @@ TOML_NAMESPACE_START
 	{
 		if (&rhs != this)
 			source_ = std::exchange(rhs.source_, {});
+		leading_trivia_ = rhs.leading_trivia_;
+		trailing_trivia_ = rhs.trailing_trivia_;
 		return *this;
 	}
 
@@ -11872,7 +12040,8 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	array::array(const array& other) //
-		: node(other)
+		: node(other),
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 		elems_.reserve(other.elems_.size());
 		for (const auto& elem : other)
@@ -11886,7 +12055,8 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	array::array(array && other) noexcept //
 		: node(std::move(other)),
-		  elems_(std::move(other.elems_))
+		  elems_(std::move(other.elems_)),
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_LIFETIME_HOOKS
 		TOML_ARRAY_CREATED;
@@ -11903,6 +12073,7 @@ TOML_NAMESPACE_START
 			elems_.reserve(rhs.elems_.size());
 			for (const auto& elem : rhs)
 				elems_.emplace_back(impl::make_node(elem));
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}
@@ -11914,6 +12085,7 @@ TOML_NAMESPACE_START
 		{
 			node::operator=(std::move(rhs));
 			elems_ = std::move(rhs.elems_);
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}
@@ -12257,7 +12429,11 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::table(const table& other) //
 		: node(other),
-		  inline_{ other.inline_ }
+		  inline_{ other.inline_ },
+#if !TOML_ENABLE_ORDERED_TABLES
+			last_inserted_(other.last_inserted_),
+#endif
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_ENABLE_ORDERED_TABLES
 		for (auto&& [k, v] : other.entries_)
@@ -12283,8 +12459,11 @@ TOML_NAMESPACE_START
 		  map_{ std::move(other.map_) },
 #if TOML_ENABLE_ORDERED_TABLES
 		  entries_{ std::move(other.entries_) },
+#else
+		  last_inserted_(other.last_inserted_),
 #endif
-		  inline_{ other.inline_ }
+		  inline_{ other.inline_ },
+		  inner_trailing_trivia_(other.inner_trailing_trivia_)
 	{
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -12310,8 +12489,10 @@ TOML_NAMESPACE_START
 			{
 				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
 			}
+			last_inserted_ = rhs.last_inserted_;
 #endif
 			inline_ = rhs.inline_;
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
 		}
 		return *this;
 	}
@@ -12324,6 +12505,10 @@ TOML_NAMESPACE_START
 			node::operator=(std::move(rhs));
 			map_	= std::move(rhs.map_);
 			inline_ = rhs.inline_;
+			inner_trailing_trivia_ = rhs.inner_trailing_trivia_;
+#if !TOML_ENABLE_ORDERED_TABLES
+			last_inserted_ = rhs.last_inserted_;
+#endif
 		}
 		return *this;
 	}
@@ -12587,7 +12772,7 @@ TOML_NAMESPACE_START
 		auto prev_size = map_.size();
 		auto ipos = map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
 		if (map_.size() > prev_size)
-			last_inserted_ = iterator{ ipos };
+			last_inserted_ = toml::table_iterator { ipos };
 		return ipos;
 #endif
 	}
@@ -13578,6 +13763,8 @@ TOML_ANON_NAMESPACE_START
 		std::vector<std::pair<size_t, size_t>> segments;
 		std::vector<source_position> starts;
 		std::vector<source_position> ends;
+		std::vector<std::vector<trivia_piece>> leading_trivias;
+		std::vector<std::vector<trivia_piece>> trailing_trivias;
 
 		void clear() noexcept
 		{
@@ -13585,14 +13772,25 @@ TOML_ANON_NAMESPACE_START
 			segments.clear();
 			starts.clear();
 			ends.clear();
+			leading_trivias.clear();
+			trailing_trivias.clear();
 		}
 
-		void push_back(std::string_view segment, source_position b, source_position e)
+		void push_back(
+					 std::string_view segment,
+					 source_position b,
+					 source_position e,
+					 std::optional<std::vector<trivia_piece>> leading_trivia,
+					 std::optional<std::vector<trivia_piece>> trailing_trivia)
 		{
 			segments.push_back({ buffer.length(), segment.length() });
 			buffer.append(segment);
 			starts.push_back(b);
 			ends.push_back(e);
+			if (leading_trivia.has_value())
+				leading_trivias.push_back(*leading_trivia);
+			if (trailing_trivia.has_value())
+				trailing_trivias.push_back(*trailing_trivia);
 		}
 
 		TOML_PURE_INLINE_GETTER
@@ -13792,6 +13990,8 @@ TOML_IMPL_NAMESPACE_START
 		std::string string_buffer;
 		std::string recording_buffer; // for diagnostics
 		bool recording = false, recording_whitespace = true;
+		bool collect_trivia = false;
+		std::vector<trivia_piece> trivia_pieces;
 		std::string_view current_scope;
 		size_t nested_values = {};
 #if !TOML_EXCEPTIONS
@@ -13898,15 +14098,23 @@ TOML_IMPL_NAMESPACE_START
 		{
 			return_if_error_or_eof({});
 
+			std::string piece;
 			bool consumed = false;
 			while (!is_eof() && is_horizontal_whitespace(*cp))
 			{
 				if TOML_UNLIKELY(!is_ascii_horizontal_whitespace(*cp))
 					set_error_and_return_default("expected space or tab, saw '"sv, escaped_codepoint{ *cp }, "'"sv);
 
+				if (collect_trivia)
+					piece.append(cp->bytes, cp->count);
+
 				consumed = true;
 				advance_and_return_if_error({});
 			}
+
+			if (collect_trivia && !piece.empty())
+				trivia_pieces.push_back(trivia_piece{piece, trivia_type::whitespace});
+
 			return consumed;
 		}
 
@@ -13918,9 +14126,14 @@ TOML_IMPL_NAMESPACE_START
 				set_error_and_return_default(
 					R"(vertical tabs '\v' and form-feeds '\f' are not legal line breaks in TOML)"sv);
 
+			std::string piece;
+
 			if (*cp == U'\r')
 			{
 				advance_and_return_if_error({}); // skip \r
+
+				if (collect_trivia)
+					piece.append(cp->bytes, cp->count);
 
 				if TOML_UNLIKELY(is_eof())
 					set_error_and_return_default("expected '\\n' after '\\r', saw EOF"sv);
@@ -13932,6 +14145,11 @@ TOML_IMPL_NAMESPACE_START
 			}
 			else if (*cp != U'\n')
 				return false;
+
+			if (collect_trivia) {
+				piece.append(cp->bytes, cp->count);
+				trivia_pieces.push_back(trivia_piece{piece, trivia_type::whitespace});
+			}
 
 			advance_and_return_if_error({}); // skip \n
 			return true;
@@ -13963,12 +14181,23 @@ TOML_IMPL_NAMESPACE_START
 
 			push_parse_scope("comment"sv);
 
+			std::string piece;
+
+			if (collect_trivia)
+				piece.append(cp->bytes, cp->count);
+
 			advance_and_return_if_error({}); // skip the '#'
 
 			while (!is_eof())
 			{
-				if (consume_line_break())
+				if (consume_line_break()) {
+					if (collect_trivia)
+						trivia_pieces.insert(
+							trivia_pieces.end() - 1,
+							trivia_piece{piece, trivia_type::comment}
+						);
 					return true;
+				}
 				return_if_error({});
 
 #if TOML_LANG_AT_LEAST(1, 0, 0)
@@ -13984,8 +14213,14 @@ TOML_IMPL_NAMESPACE_START
 						"unicode surrogates (U+D800 to U+DFFF) are explicitly prohibited in comments"sv);
 #endif
 
+				if (collect_trivia)
+					piece.append(cp->bytes, cp->count);
+
 				advance_and_return_if_error({});
 			}
+
+			if (collect_trivia)
+				trivia_pieces.push_back(trivia_piece{piece, trivia_type::comment});
 
 			return true;
 		}
@@ -15280,6 +15515,13 @@ TOML_IMPL_NAMESPACE_START
 			else if (*cp == U'_')
 				set_error_and_return_default("values may not begin with underscores"sv);
 
+			std::vector<trivia_piece> leading_trivia;
+			if (collect_trivia)
+			{
+				leading_trivia = trivia_pieces;
+				trivia_pieces.clear();
+			}
+
 			const auto begin_pos = cp->position;
 			node_ptr val;
 
@@ -15740,6 +15982,8 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			val->source_ = { begin_pos, current_position(1), reader.source_path() };
+			if (collect_trivia)
+				val->leading_trivia_ = leading_trivia;
 			return val;
 		}
 
@@ -15758,6 +16002,12 @@ TOML_IMPL_NAMESPACE_START
 			{
 				std::string_view key_segment;
 				const auto key_begin = current_position();
+
+				std::vector<trivia_piece> leading_trivia;
+				if (collect_trivia) {
+					leading_trivia = trivia_pieces;
+					trivia_pieces.clear();
+				}
 
 				// bare_key_segment
 				if (is_bare_key_character(*cp))
@@ -15797,7 +16047,16 @@ TOML_IMPL_NAMESPACE_START
 				consume_leading_whitespace();
 
 				// store segment
-				key_buffer.push_back(key_segment, key_begin, key_end);
+				key_buffer.push_back(
+					key_segment,
+					key_begin,
+					key_end,
+					collect_trivia ? std::optional(leading_trivia) : std::optional<std::vector<trivia_piece>>(),
+					collect_trivia ? std::optional(trivia_pieces) : std::optional<std::vector<trivia_piece>>()
+				);
+
+				if (collect_trivia)
+					trivia_pieces.clear();
 
 				// eof or no more key to come
 				if (is_eof() || *cp != U'.')
@@ -15820,7 +16079,9 @@ TOML_IMPL_NAMESPACE_START
 
 			return key{
 				key_buffer[segment_index],
-				source_region{ key_buffer.starts[segment_index], key_buffer.ends[segment_index], root.source().path }
+				source_region{ key_buffer.starts[segment_index], key_buffer.ends[segment_index], root.source().path },
+				collect_trivia ? key_buffer.leading_trivias[segment_index] : optional<std::vector<trivia_piece>>(),
+				collect_trivia ? key_buffer.trailing_trivias[segment_index] : optional<std::vector<trivia_piece>>()
 			};
 		}
 
@@ -15836,6 +16097,9 @@ TOML_IMPL_NAMESPACE_START
 			const source_position header_begin_pos = cp->position;
 			source_position header_end_pos;
 			bool is_arr = false;
+
+			std::vector<trivia_piece> leading_trivia = trivia_pieces;
+			trivia_pieces.clear();
 
 			// parse header
 			{
@@ -16009,6 +16273,7 @@ TOML_IMPL_NAMESPACE_START
 							implicit_tables.erase(implicit_tables.cbegin() + (found - implicit_tables.data()));
 							tbl->source_.begin = header_begin_pos;
 							tbl->source_.end   = header_end_pos;
+							tbl->set_leading_trivia(optional<std::vector<trivia_piece>>{leading_trivia});
 							return tbl;
 						}
 					}
@@ -16052,6 +16317,7 @@ TOML_IMPL_NAMESPACE_START
 
 					table& tbl	= tbl_arr.emplace_back<table>();
 					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					tbl.set_leading_trivia(optional<std::vector<trivia_piece>>{leading_trivia});
 					return &tbl;
 				}
 
@@ -16061,6 +16327,7 @@ TOML_IMPL_NAMESPACE_START
 					it			= parent->emplace_hint<table>(it, std::move(last_key));
 					table& tbl	= it->second.ref_cast<table>();
 					tbl.source_ = { header_begin_pos, header_end_pos, reader.source_path() };
+					tbl.set_leading_trivia(optional<std::vector<trivia_piece>>{leading_trivia});
 					return &tbl;
 				}
 			}
@@ -16227,6 +16494,11 @@ TOML_IMPL_NAMESPACE_START
 			root.source_.end = eof_pos;
 			if (current_table && current_table != &root && current_table->source_.end <= current_table->source_.begin)
 				current_table->source_.end = eof_pos;
+			if (collect_trivia)
+			{
+				current_table->trailing_trivia_ = trivia_pieces;
+				trivia_pieces.clear();
+			}
 		}
 
 		static void update_region_ends(node& nde) noexcept
@@ -16266,9 +16538,14 @@ TOML_IMPL_NAMESPACE_START
 		}
 
 	  public:
-		parser(utf8_reader_interface&& reader_) //
+		parser(utf8_reader_interface&& reader_)
+			: parser(std::move(reader_), false)
+		{}
+
+		parser(utf8_reader_interface&& reader_, bool collect_trivia)
 			: reader{ reader_ }
 		{
+			this->collect_trivia = collect_trivia;
 			root.source_ = { prev_pos, prev_pos, reader.source_path() };
 
 			if (!reader.peek_eof())
@@ -16341,6 +16618,11 @@ TOML_IMPL_NAMESPACE_START
 				if (prev == parse_type::val)
 				{
 					prev = parse_type::comma;
+					if (collect_trivia)
+					{
+						arr.back().set_trailing_trivia(optional<std::vector<trivia_piece>>{ trivia_pieces });
+						trivia_pieces.clear();
+					}
 					advance_and_return_if_error_or_eof({});
 					continue;
 				}
@@ -16371,6 +16653,14 @@ TOML_IMPL_NAMESPACE_START
 					arr.reserve(4u);
 				arr.emplace_back<node_ptr>(std::move(val));
 			}
+		}
+
+		if (collect_trivia)
+		{
+			if (prev == parse_type::comma)
+				trivia_pieces.insert(trivia_pieces.begin(), trivia_piece{",", trivia_type::trailing_comma});
+			arr.set_inner_trailing_trivia(optional<std::vector<trivia_piece>>{ trivia_pieces });
+			trivia_pieces.clear();
 		}
 
 		return_if_error({});
@@ -16421,6 +16711,11 @@ TOML_IMPL_NAMESPACE_START
 				if (prev == parse_type::kvp)
 				{
 					prev = parse_type::comma;
+					if (collect_trivia)
+					{
+						tbl.last_inserted().value()->second.set_trailing_trivia(optional<std::vector<trivia_piece>>{ trivia_pieces });
+						trivia_pieces.clear();
+					}
 					advance_and_return_if_error_or_eof({});
 				}
 				else
@@ -16430,9 +16725,9 @@ TOML_IMPL_NAMESPACE_START
 			// closing '}'
 			else if (*cp == U'}')
 			{
-				if constexpr (!TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
+				if (prev == parse_type::comma)
 				{
-					if (prev == parse_type::comma)
+					if constexpr (!TOML_LANG_UNRELEASED) // toml/issues/516 (newlines/trailing commas in inline tables)
 					{
 						set_error_and_return_default("expected key-value pair, saw closing '}' (dangling comma)"sv);
 						continue;
@@ -16456,6 +16751,14 @@ TOML_IMPL_NAMESPACE_START
 
 			else
 				set_error_and_return_default("expected key or closing '}', saw '"sv, to_sv(*cp), "'"sv);
+		}
+
+		if (collect_trivia)
+		{
+			if (prev == parse_type::comma)
+				trivia_pieces.insert(trivia_pieces.begin(), trivia_piece{ ",", trivia_type::trailing_comma });
+			tbl.set_inner_trailing_trivia(optional<std::vector<trivia_piece>>{ trivia_pieces });
+			trivia_pieces.clear();
 		}
 
 		return_if_error({});
@@ -16493,14 +16796,14 @@ TOML_ANON_NAMESPACE_START
 {
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result do_parse(utf8_reader_interface && reader)
+	parse_result do_parse(utf8_reader_interface && reader, bool collect_trivia)
 	{
-		return impl::parser{ std::move(reader) };
+		return impl::parser{ std::move(reader), collect_trivia };
 	}
 
 	TOML_NODISCARD
 	TOML_INTERNAL_LINKAGE
-	parse_result do_parse_file(std::string_view file_path)
+	parse_result do_parse_file(std::string_view file_path, bool collect_trivia)
 	{
 #if TOML_EXCEPTIONS
 #define TOML_PARSE_FILE_ERROR(msg, path)                                                                               \
@@ -16543,12 +16846,12 @@ TOML_ANON_NAMESPACE_START
 			std::vector<char> file_data;
 			file_data.resize(static_cast<size_t>(file_size));
 			file.read(file_data.data(), static_cast<std::streamsize>(file_size));
-			return parse(std::string_view{ file_data.data(), file_data.size() }, std::move(file_path_str));
+			return parse(std::string_view{ file_data.data(), file_data.size() }, std::move(file_path_str), collect_trivia);
 		}
 
 		// otherwise parse it using the streams
 		else
-			return parse(file, std::move(file_path_str));
+			return parse(file, std::move(file_path_str), collect_trivia);
 
 #undef TOML_PARSE_FILE_ERROR
 	}
@@ -16560,56 +16863,56 @@ TOML_NAMESPACE_START
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::string && source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::string && source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse_file(std::string_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::string_view file_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse_file(file_path);
+		return TOML_ANON_NAMESPACE::do_parse_file(file_path, collect_trivia);
 	}
 
 #if TOML_HAS_CHAR8
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, source_path }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::string && source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, std::move(source_path) }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::u8string_view file_path, bool collect_trivia)
 	{
 		std::string file_path_str;
 		file_path_str.resize(file_path.length());
 		memcpy(file_path_str.data(), file_path.data(), file_path.length());
-		return TOML_ANON_NAMESPACE::do_parse_file(file_path_str);
+		return TOML_ANON_NAMESPACE::do_parse_file(file_path_str, collect_trivia);
 	}
 
 #endif // TOML_HAS_CHAR8
@@ -16617,21 +16920,21 @@ TOML_NAMESPACE_START
 #if TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::string_view doc, std::wstring_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::istream & doc, std::wstring_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) }, collect_trivia);
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path)
+	parse_result TOML_CALLCONV parse_file(std::wstring_view file_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path));
+		return TOML_ANON_NAMESPACE::do_parse_file(impl::narrow(file_path), collect_trivia);
 	}
 
 #endif // TOML_ENABLE_WINDOWS_COMPAT
@@ -16639,9 +16942,9 @@ TOML_NAMESPACE_START
 #if TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
 
 	TOML_EXTERNAL_LINKAGE
-	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path)
+	parse_result TOML_CALLCONV parse(std::u8string_view doc, std::wstring_view source_path, bool collect_trivia)
 	{
-		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) });
+		return TOML_ANON_NAMESPACE::do_parse(TOML_ANON_NAMESPACE::utf8_reader{ doc, impl::narrow(source_path) }, collect_trivia);
 	}
 
 #endif // TOML_HAS_CHAR8 && TOML_ENABLE_WINDOWS_COMPAT
@@ -17313,52 +17616,128 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const key& k)
 	{
+		if (preserve_source_trivia() && k.leading_trivia().has_value())
+			print_trivia(*k.leading_trivia());
 		print_string(k.str(), false, true, false);
+		if (preserve_source_trivia() && k.trailing_trivia().has_value())
+			print_trivia(*k.trailing_trivia());
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_trivia(const std::vector<trivia_piece>& trivia)
+	{
+		for (auto & piece : trivia) {
+			print_unformatted(piece.text);
+		}
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_value(const node& node)
+	{
+		const auto type = node.type();
+		TOML_ASSUME(type != node_type::none);
+		switch (type)
+		{
+			case node_type::table: print_inline(*reinterpret_cast<const table*>(&node)); break;
+			case node_type::array: print(*reinterpret_cast<const array*>(&node)); break;
+			default:
+				if (preserve_source_trivia() && node.leading_trivia().has_value())
+					print_trivia(node.leading_trivia().value());
+				this->impl::formatter::print_value(node, type);
+				if (preserve_source_trivia() && node.trailing_trivia().has_value())
+					print_trivia(node.trailing_trivia().value());
+		}
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print_inline(const table& tbl)
 	{
+		if (preserve_source_trivia() && tbl.leading_trivia().has_value())
+			print_trivia(tbl.leading_trivia().value());
+
 		if (tbl.empty())
 		{
-			print_unformatted("{}"sv);
+			print_unformatted("{"sv);
+			if (preserve_source_trivia() && tbl.inner_trailing_trivia().has_value())
+				print_trivia(tbl.inner_trailing_trivia().value());
+			print_unformatted("}"sv);
+			if (preserve_source_trivia() && tbl.trailing_trivia().has_value())
+				print_trivia(tbl.trailing_trivia().value());
 			return;
 		}
 
-		print_unformatted("{ "sv);
+		if (preserve_source_trivia())
+			print_unformatted("{"sv);
+		else
+			print_unformatted("{ "sv);
 
 		bool first = false;
 		for (auto&& [k, v] : tbl)
 		{
 			if (first)
-				print_unformatted(", "sv);
+			{
+				if (preserve_source_trivia())
+					print_unformatted(","sv);
+				else
+					print_unformatted(", "sv);
+			}
 			first = true;
 
-			print(k);
-			if (terse_kvps())
-				print_unformatted("="sv);
-			else
-				print_unformatted(" = "sv);
-
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
-			}
+			print_kvp(k, v);
 		}
 
-		print_unformatted(" }"sv);
+		if (preserve_source_trivia())
+		{
+			if (tbl.inner_trailing_trivia().has_value())
+				print_trivia(tbl.inner_trailing_trivia().value());
+			print_unformatted("}"sv);
+		}
+		else
+			print_unformatted(" }"sv);
+
+		if (preserve_source_trivia() && tbl.trailing_trivia().has_value())
+			print_trivia(tbl.trailing_trivia().value());
+	}
+
+	TOML_EXTERNAL_LINKAGE
+	void toml_formatter::print_kvp(const key& k, const node& v)
+	{
+		print(k);
+		if (terse_kvps())
+			print_unformatted("="sv);
+		else if (!preserve_source_trivia())
+			print_unformatted(" = "sv);
+		else
+		{
+			if (!k.trailing_trivia().has_value())
+				print_unformatted(" "sv);
+			print_unformatted("="sv);
+			if (!v.leading_trivia().has_value())
+				print_unformatted(" "sv);
+		}
+
+		print_value(v);
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	void toml_formatter::print(const array& arr)
 	{
+		if (preserve_source_trivia() && arr.leading_trivia().has_value())
+			print_trivia(arr.leading_trivia().value());
+
 		if (arr.empty())
 		{
-			print_unformatted("[]"sv);
+			if (preserve_source_trivia() && arr.inner_trailing_trivia().has_value())
+			{
+				print_unformatted("["sv);
+				print_trivia(arr.inner_trailing_trivia().value());
+				print_unformatted("]"sv);
+			}
+			else
+				print_unformatted("[]"sv);
+
+			if (preserve_source_trivia() && arr.trailing_trivia().has_value())
+				print_trivia(arr.trailing_trivia().value());
 			return;
 		}
 
@@ -17377,44 +17756,45 @@ TOML_NAMESPACE_START
 			if (indent_array_elements())
 				increase_indent();
 		}
-		else
-			print_unformatted(' ');
 
 		for (size_t i = 0; i < arr.size(); i++)
 		{
 			if (i > 0u)
-			{
 				print_unformatted(',');
-				if (!multiline)
+
+			auto& v			= arr[i];
+			if (!preserve_source_trivia() || !v.leading_trivia().has_value())
+			{
+				if (multiline)
+				{
+					print_newline(true);
+					print_indent();
+				}
+				else
 					print_unformatted(' ');
 			}
 
+			print_value(v);
+		}
+
+		if (preserve_source_trivia() && arr.inner_trailing_trivia().has_value())
+			print_trivia(arr.inner_trailing_trivia().value());
+		else
+		{
 			if (multiline)
 			{
+				indent(original_indent);
 				print_newline(true);
 				print_indent();
 			}
-
-			auto& v			= arr[i];
-			const auto type = v.type();
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
-			}
+			else
+				print_unformatted(' ');
 		}
-		if (multiline)
-		{
-			indent(original_indent);
-			print_newline(true);
-			print_indent();
-		}
-		else
-			print_unformatted(' ');
 
 		print_unformatted("]"sv);
+
+		if (preserve_source_trivia() && arr.trailing_trivia().has_value())
+			print_trivia(arr.trailing_trivia().value());
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -17438,20 +17818,11 @@ TOML_NAMESPACE_START
 				continue;
 
 			pending_table_separator_ = true;
-			print_newline();
-			print_indent();
-			print(k);
-			if (terse_kvps())
-				print_unformatted("="sv);
-			else
-				print_unformatted(" = "sv);
-			TOML_ASSUME(type != node_type::none);
-			switch (type)
-			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				default: print_value(v, type);
+			if (!preserve_source_trivia() || !k.leading_trivia().has_value()) {
+				print_newline();
+				print_indent();
 			}
+			print_kvp(k, v);
 		}
 
 		const auto print_key_path = [&]()
@@ -17561,6 +17932,9 @@ TOML_NAMESPACE_START
 		if (dump_failed_parse_result())
 			return;
 
+		if (preserve_source_trivia() && source().leading_trivia().has_value())
+			print_trivia(source().leading_trivia().value());
+
 		switch (auto source_type = source().type())
 		{
 			case node_type::table:
@@ -17580,6 +17954,9 @@ TOML_NAMESPACE_START
 
 			default: print_value(source(), source_type);
 		}
+
+		if (preserve_source_trivia() && source().trailing_trivia().has_value())
+			print_trivia(source().trailing_trivia().value());
 	}
 }
 TOML_NAMESPACE_END;

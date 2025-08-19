@@ -29,11 +29,15 @@ TOML_NAMESPACE_START
 
 	TOML_EXTERNAL_LINKAGE
 	node::node(node && other) noexcept //
-		: source_{ std::exchange(other.source_, {}) }
+		: source_{ std::exchange(other.source_, {}) },
+		  leading_trivia_(other.leading_trivia_),
+		  trailing_trivia_(other.trailing_trivia_)
 	{}
 
 	TOML_EXTERNAL_LINKAGE
-	node::node(const node& /*other*/) noexcept
+	node::node(const node& other) noexcept
+		: leading_trivia_(other.leading_trivia_),
+		  trailing_trivia_(other.trailing_trivia_)
 	{
 		// does not copy source information - this is not an error
 		//
@@ -41,13 +45,15 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	node& node::operator=(const node& /*rhs*/) noexcept
+	node& node::operator=(const node& rhs) noexcept
 	{
 		// does not copy source information - this is not an error
 		//
 		// see https://github.com/marzer/tomlplusplus/issues/49#issuecomment-665089577
 
 		source_ = {};
+		leading_trivia_ = rhs.leading_trivia_;
+		trailing_trivia_ = rhs.trailing_trivia_;
 		return *this;
 	}
 
@@ -56,6 +62,8 @@ TOML_NAMESPACE_START
 	{
 		if (&rhs != this)
 			source_ = std::exchange(rhs.source_, {});
+		leading_trivia_ = rhs.leading_trivia_;
+		trailing_trivia_ = rhs.trailing_trivia_;
 		return *this;
 	}
 
