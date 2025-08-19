@@ -6,12 +6,14 @@
 
 #include "forward_declarations.hpp"
 #include "std_map.hpp"
+#include "std_list.hpp"
 #include "std_initializer_list.hpp"
 #include "array.hpp"
 #include "make_node.hpp"
 #include "node_view.hpp"
 #include "key.hpp"
 #include "header_start.hpp"
+#include <iostream>
 
 /// \cond
 TOML_IMPL_NAMESPACE_START
@@ -33,9 +35,16 @@ TOML_IMPL_NAMESPACE_START
 		friend class table_iterator;
 
 		using proxy_type		   = table_proxy_pair<IsConst>;
+
+#if TOML_ENABLE_ORDERED_TABLES
+		using mutable_map_iterator = std::list<std::pair<toml::key, node_ptr>>::iterator;
+		using const_map_iterator = std::list<std::pair<toml::key, node_ptr>>::const_iterator;
+#else
 		using mutable_map_iterator = std::map<toml::key, node_ptr, std::less<>>::iterator;
 		using const_map_iterator   = std::map<toml::key, node_ptr, std::less<>>::const_iterator;
-		using map_iterator		   = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
+#endif
+
+		using map_iterator		 = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
 
 		mutable map_iterator iter_;
 		alignas(proxy_type) mutable unsigned char proxy_[sizeof(proxy_type)];
@@ -221,11 +230,21 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
-		using map_type			 = std::map<toml::key, impl::node_ptr, std::less<>>;
+#if TOML_ENABLE_ORDERED_TABLES
+		using map_pair			 = std::pair<toml::key, impl::node_ptr>;
+		using entries_type			 = std::list<std::pair<toml::key, impl::node_ptr>>;
+		using map_type			 = std::unordered_map<toml::key, entries_type::iterator>;
+		map_type map_;
+		entries_type entries_;
+		using map_iterator		 = typename entries_type::iterator;
+		using const_map_iterator = typename entries_type::const_iterator;
+#else
 		using map_pair			 = std::pair<const toml::key, impl::node_ptr>;
+		using map_type			 = std::map<toml::key, impl::node_ptr, std::less<>>;
 		using map_iterator		 = typename map_type::iterator;
 		using const_map_iterator = typename map_type::const_iterator;
 		map_type map_;
+#endif
 
 		bool inline_ = false;
 
@@ -796,42 +815,66 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return iterator{ entries_.begin() };
+#else
 			return iterator{ map_.begin() };
+#endif
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cbegin() };
+#else
 			return const_iterator{ map_.cbegin() };
+#endif
 		}
 
 		/// \brief	Returns an iterator to the first key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cbegin() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cbegin() };
+#else
 			return const_iterator{ map_.cbegin() };
+#endif
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		iterator end() noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return iterator{ entries_.end() };
+#else
 			return iterator{ map_.end() };
+#endif
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cend() };
+#else
 			return const_iterator{ map_.cend() };
+#endif
 		}
 
 		/// \brief	Returns an iterator to one-past-the-last key-value pair.
 		TOML_PURE_INLINE_GETTER
 		const_iterator cend() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cend() };
+#else
 			return const_iterator{ map_.cend() };
+#endif
 		}
 
 	  private:
@@ -891,7 +934,11 @@ TOML_NAMESPACE_START
 
 			using kvp_type = impl::copy_cv<map_pair, std::remove_reference_t<Table>>;
 
+#if TOML_ENABLE_ORDERED_TABLES
+			for (kvp_type& kvp : tbl.entries_)
+#else
 			for (kvp_type& kvp : tbl.map_)
+#endif
 			{
 				using node_ref = impl::copy_cvref<toml::node, Table&&>;
 				static_assert(std::is_reference_v<node_ref>);
@@ -1129,13 +1176,16 @@ TOML_NAMESPACE_START
 	  private:
 		/// \cond
 
-		TOML_PURE_GETTER
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator get_lower_bound(std::string_view) noexcept;
+#if !TOML_ENABLE_ORDERED_TABLES
+			TOML_PURE_GETTER
+			TOML_EXPORTED_MEMBER_FUNCTION
+			map_iterator get_lower_bound(std::string_view) noexcept;
+#endif
 
 		/// \endcond
 
 	  public:
+#if !TOML_ENABLE_ORDERED_TABLES
 		/// \brief Returns an iterator to the first key-value pair with key that is _not less_ than the given key.
 		///
 		/// \returns	An iterator to the first matching key-value pair, or #end().
@@ -1153,6 +1203,7 @@ TOML_NAMESPACE_START
 		{
 			return const_iterator{ const_cast<table&>(*this).get_lower_bound(key) };
 		}
+#endif // !TOML_ENABLE_ORDERED_TABLES
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -1499,6 +1550,28 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace_hint() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
+#if TOML_ENABLE_ORDERED_TABLES
+				auto toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					if constexpr (moving_node_ptr)
+						entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key,
+							std::move(static_cast<ValueArgs&&>(args)...) });
+					else
+					{
+						entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key,
+							new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } });
+					}
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return iterator{ entry_ipos };
+				}
+				else
+				{
+					return iterator{ ipos->second };
+				}
+#else
 				map_iterator ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
 
 				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
@@ -1526,6 +1599,7 @@ TOML_NAMESPACE_START
 					}
 				}
 				return iterator{ ipos };
+#endif
 			}
 		}
 
@@ -1607,6 +1681,18 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
+#if TOML_ENABLE_ORDERED_TABLES
+				auto toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					auto table_ipos = insert_with_hint(iterator{ ipos->second },
+											toml::key{ static_cast<KeyType&&>(key) },
+											impl::make_node(static_cast<ValueType&&>(val), flags));
+					return { iterator{ table_ipos }, true };
+				}
+				return { iterator { ipos->second }, false };
+#else
 				const auto key_view = std::string_view{ key };
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -1617,6 +1703,7 @@ TOML_NAMESPACE_START
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
+#endif
 			}
 		}
 
@@ -1754,6 +1841,22 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
+#if TOML_ENABLE_ORDERED_TABLES
+				toml::key toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				map_type::iterator ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key, impl::make_node(static_cast<ValueType&&>(val), flags) });
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return { iterator{ entry_ipos }, true };
+				}
+				else
+				{
+					ipos->second->second = impl::make_node(static_cast<ValueType&&>(val), flags);
+					return { iterator{ ipos->second }, false };
+				}
+#else
 				const auto key_view = std::string_view{ key };
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -1768,6 +1871,7 @@ TOML_NAMESPACE_START
 					(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
 					return { iterator{ ipos }, false };
 				}
+#endif
 			}
 		}
 
@@ -1838,6 +1942,22 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
+#if TOML_ENABLE_ORDERED_TABLES
+				toml::key toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					entries_.push_back(
+					  {
+					  	toml_key,
+						  impl::node_ptr{ new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } }
+						});
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return { iterator{ entry_ipos }, true };
+				}
+				return { iterator{ ipos->second }, false };
+#else
 				const auto key_view = std::string_view{ key };
 				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -1849,6 +1969,7 @@ TOML_NAMESPACE_START
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
+#endif
 			}
 		}
 

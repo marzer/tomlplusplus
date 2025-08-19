@@ -39,6 +39,7 @@ is_pedantic = get_option('pedantic') or is_devel
 is_windows = host_machine.system() == 'windows'
 is_x64 = host_machine.cpu_family() == 'x86_64'
 is_subproject = meson.is_subproject()
+enable_ordered_tables = get_option('ordered_tables')
 
 cpp = meson.get_compiler('cpp')
 is_gcc = cpp.get_id() == 'gcc'
@@ -83,6 +84,9 @@ global_args = cpp.get_supported_arguments(
 	'/Zc:externConstexpr',
 	'/Zc:preprocessor'
 )
+if enable_ordered_tables
+	global_args += cpp.get_supported_arguments('-DTOML_ENABLE_ORDERED_TABLES=1')
+endif
 if has_exceptions
 	global_args += cpp.get_supported_arguments('/Zc:throwingNew', '-D_HAS_EXCEPTIONS=1')
 else

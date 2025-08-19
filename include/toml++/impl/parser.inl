@@ -3186,10 +3186,18 @@ TOML_IMPL_NAMESPACE_START
 			for (size_t i = 0, e = key_buffer.size() - 1u; i < e; i++)
 			{
 				const std::string_view segment = key_buffer[i];
+#if TOML_ENABLE_ORDERED_TABLES
+				auto pit					   = parent->find(segment);
+#else
 				auto pit					   = parent->lower_bound(segment);
+#endif
 
 				// parent already existed
+#if TOML_ENABLE_ORDERED_TABLES
+				if (pit != parent->end())
+#else
 				if (pit != parent->end() && pit->first == segment)
+#endif
 				{
 					node& p = pit->second;
 
@@ -3240,13 +3248,21 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			const auto last_segment = key_buffer.back();
+#if TOML_ENABLE_ORDERED_TABLES
+			auto it					= parent->find(last_segment);
+#else
 			auto it					= parent->lower_bound(last_segment);
+#endif
 
 			// if there was already a matching node some sanity checking is necessary;
 			// this is ok if we're making an array and the existing element is already an array (new element)
 			// or if we're making a table and the existing element is an implicitly-created table (promote it),
 			// otherwise this is a redefinition error.
+#if TOML_ENABLE_ORDERED_TABLES
+			if (it != parent->end())
+#else
 			if (it != parent->end() && it->first == last_segment)
+#endif
 			{
 				node& matching_node = it->second;
 				if (auto arr = matching_node.as_array();
@@ -3376,10 +3392,18 @@ TOML_IMPL_NAMESPACE_START
 				for (size_t i = 0; i < key_buffer.size() - 1u; i++)
 				{
 					const std::string_view segment = key_buffer[i];
+#if TOML_ENABLE_ORDERED_TABLES
+					auto pit					   = tbl->find(segment);
+#else
 					auto pit					   = tbl->lower_bound(segment);
+#endif
 
 					// parent already existed
+#if TOML_ENABLE_ORDERED_TABLES
+					if (pit != tbl->end())
+#else
 					if (pit != tbl->end() && pit->first == segment)
+#endif
 					{
 						table* p = pit->second.as_table();
 
@@ -3413,8 +3437,13 @@ TOML_IMPL_NAMESPACE_START
 
 			// ensure this isn't a redefinition
 			const std::string_view last_segment = key_buffer.back();
+#if TOML_ENABLE_ORDERED_TABLES
+			auto it								= tbl->find(last_segment);
+			if (it != tbl->end())
+#else
 			auto it								= tbl->lower_bound(last_segment);
 			if (it != tbl->end() && it->first == last_segment)
+#endif
 			{
 				set_error("cannot redefine existing "sv,
 						  to_sv(it->second.type()),

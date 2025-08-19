@@ -1211,6 +1211,42 @@ TOML_ENABLE_WARNINGS;
 /// \detail Defaults to `0`.
 //# }}
 
+#ifndef TOML_ENABLE_ORDERED_TABLES
+#define TOML_ENABLE_ORDERED_TABLES 0
+#endif
+//# {{
+/// \def TOML_ENABLE_ORDERED_TABLES
+/// \brief Make tables retain insertion order instead of lexicographic order.
+/// \detail Defaults to `0`.
+//# }}
+
+#ifndef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 0
+#endif
+//# {{
+/// \def TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+/// \brief Disable using noexcept(<condition>) in lambda definitions within the toml++ library implementation.
+/// \detail This macro offers a workaround to a bug in the old "legacy lambda processor" of Visual C++, which
+/// caused compile errors like "error C2057: expected constant expression", when it encountered such lambda's.
+/// These compile errors were reported by Kevin Dick, Jan 19, 2024, at https://github.com/marzer/tomlplusplus/issues/219
+//# }}
+
+#ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 0
+	#ifdef _MSC_VER
+		#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
+		#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+		#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
+		#endif
+	#endif
+#endif
+//# {{
+/// \def TOML_DISABLE_NOEXCEPT_NOEXCEPT
+/// \brief Disable using noexcept(noexcept(<expression>)) within the toml++ library implementation.
+/// \detail This macro offers a workaround to a bug in Visual C++ (Visual Studio 2022), which caused
+/// compile errors, saying: "error C3878: syntax error: unexpected token ',' following 'simple-type-specifier'"
+//# }}
+
 /// @}
 //#====================================================================================================================
 //# CHARCONV SUPPORT

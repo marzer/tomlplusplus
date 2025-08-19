@@ -52,7 +52,12 @@ TOML_NAMESPACE_START
 			if (!b->value) // empty node_views
 				continue;
 
+#if TOML_ENABLE_ORDERED_TABLES
+			entries_.push_back({ std::move(b->key), std::move(b->value) });
+			map_.insert_or_assign(std::move(b->key), std::prev(entries_.end()));
+#else
 			map_.insert_or_assign(std::move(b->key), std::move(b->value));
+#endif
 		}
 	}
 
@@ -61,8 +66,18 @@ TOML_NAMESPACE_START
 		: node(other),
 		  inline_{ other.inline_ }
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto&& [k, v] : other.entries_)
+		{
+			entries_.push_back({ k, impl::make_node(*v) });
+			map_.emplace(k, std::prev(entries_.end()));
+		}
+#else
 		for (auto&& [k, v] : other.map_)
+		{
 			map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+		}
+#endif
 
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -73,6 +88,9 @@ TOML_NAMESPACE_START
 	table::table(table && other) noexcept //
 		: node(std::move(other)),
 		  map_{ std::move(other.map_) },
+#if TOML_ENABLE_ORDERED_TABLES
+		  entries_{ std::move(other.entries_) },
+#endif
 		  inline_{ other.inline_ }
 	{
 #if TOML_LIFETIME_HOOKS
@@ -87,8 +105,19 @@ TOML_NAMESPACE_START
 		{
 			node::operator=(rhs);
 			map_.clear();
+#if TOML_ENABLE_ORDERED_TABLES
+			entries_.clear();
+			for (auto&& [k, v] : rhs.entries_)
+			{
+				entries_.push_back({ k, impl::make_node(*v) });
+				map_.emplace(k, std::prev(entries_.end()));
+			}
+#else
 			for (auto&& [k, v] : rhs.map_)
+			{
 				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+			}
+#endif
 			inline_ = rhs.inline_;
 		}
 		return *this;
@@ -113,10 +142,17 @@ TOML_NAMESPACE_START
 		if (map_.empty())
 			return false;
 
+#if TOML_ENABLE_ORDERED_TABLES
+		if (ntype == node_type::none)
+			ntype = entries_.cbegin()->second->type();
+
+		for (auto&& [k, v] : entries_)
+#else
 		if (ntype == node_type::none)
 			ntype = map_.cbegin()->second->type();
 
 		for (auto&& [k, v] : map_)
+#endif
 		{
 			TOML_UNUSED(k);
 			if (v->type() != ntype)
@@ -135,9 +171,19 @@ TOML_NAMESPACE_START
 			first_nonmatch = {};
 			return false;
 		}
+
 		if (ntype == node_type::none)
+#if TOML_ENABLE_ORDERED_TABLES
+			ntype = entries_.cbegin()->second->type();
+#else
 			ntype = map_.cbegin()->second->type();
+#endif
+
+#if TOML_ENABLE_ORDERED_TABLES
+		for (const auto& [k, v] : entries_)
+#else
 		for (const auto& [k, v] : map_)
+#endif
 		{
 			TOML_UNUSED(k);
 			if (v->type() != ntype)
@@ -163,8 +209,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node* table::get(std::string_view key) noexcept
 	{
-		if (auto it = map_.find(key); it != map_.end())
+		if (auto it = map_.find(toml::key{ key }); it != map_.end())
+#if TOML_ENABLE_ORDERED_TABLES
+			return it->second->second.get();
+#else
 			return it->second.get();
+#endif
 		return nullptr;
 	}
 
@@ -192,48 +242,86 @@ TOML_NAMESPACE_START
 		return *n;
 	}
 
+#if !TOML_ENABLE_ORDERED_TABLES
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::get_lower_bound(std::string_view key) noexcept
 	{
 		return map_.lower_bound(key);
 	}
+#endif // !TOML_ENABLE_ORDERED_TABLES
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		auto ipos = map_.find(toml::key{ key });
+		if (ipos == map_.end())
+		{
+			return iterator{ entries_.end() };
+		}
+		return iterator{ ipos->second };
+#else
 		return iterator{ map_.find(key) };
+#endif
 	}
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		return const_iterator{ map_.find(toml::key{ key })->second };
+#else
 		return const_iterator{ map_.find(key) };
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::erase(const_map_iterator pos) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		map_.erase(pos->first);
+		return entries_.erase(pos);
+#else
 		return map_.erase(pos);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::erase(const_map_iterator begin, const_map_iterator end) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto ipos = begin; ipos != end; ipos++) {
+			map_.erase(begin->first);
+		}
+		return entries_.erase(begin, end);
+#else
 		return map_.erase(begin, end);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	size_t table::erase(std::string_view key) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		size_t result = map_.erase(toml::key{ key });
+		auto ipos = map_.find(toml::key{ key });
+		if (ipos != map_.end())
+		{
+			map_.erase(ipos);
+			entries_.erase(ipos->second);
+		}
+		return result;
+#else
 		if (auto it = map_.find(key); it != map_.end())
 		{
 			map_.erase(it);
 			return size_t{ 1 };
 		}
 		return size_t{};
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -244,7 +332,11 @@ TOML_NAMESPACE_START
 
 		for (auto it = map_.begin(); it != map_.end();)
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			if (auto arr = it->second->second->as_array())
+#else
 			if (auto arr = it->second->as_array())
+#endif
 			{
 				if (recursive)
 					arr->prune(true);
@@ -255,7 +347,11 @@ TOML_NAMESPACE_START
 					continue;
 				}
 			}
+#if TOML_ENABLE_ORDERED_TABLES
+			else if (auto tbl = it->second->second->as_table())
+#else
 			else if (auto tbl = it->second->as_table())
+#endif
 			{
 				if (recursive)
 					tbl->prune(true);
@@ -281,7 +377,26 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::insert_with_hint(const_iterator hint, key && k, impl::node_ptr && v)
 	{
-		return map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
+#if TOML_ENABLE_ORDERED_TABLES
+		auto ipos = map_.find(k);
+		if (ipos == map_.end())
+		{
+			entries_.emplace_back(std::pair{ k, std::move(v) });
+			auto entry_ipos = std::prev(entries_.end());
+			map_.emplace(std::move(k), entry_ipos);
+			return entry_ipos;
+		}
+		else
+		{
+			return ipos->second;
+		}
+#else
+		auto prev_size = map_.size();
+		auto ipos = map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
+		if (map_.size() > prev_size)
+			last_inserted_ = iterator{ ipos };
+		return ipos;
+#endif
 	}
 
 	TOML_PURE_GETTER
@@ -293,7 +408,11 @@ TOML_NAMESPACE_START
 		if (lhs.map_.size() != rhs.map_.size())
 			return false;
 
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto l = lhs.entries_.begin(), r = rhs.entries_.begin(), e = lhs.entries_.end(); l != e; l++, r++)
+#else
 		for (auto l = lhs.map_.begin(), r = rhs.map_.begin(), e = lhs.map_.end(); l != e; l++, r++)
+#endif
 		{
 			if (l->first != r->first)
 				return false;

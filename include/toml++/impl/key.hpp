@@ -332,4 +332,10 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+template<> struct std::hash<toml::key> {
+    std::size_t operator()(toml::key const& k) const noexcept {
+        return std::hash<std::string_view>{}(k.str());
+    }
+};
+
 #include "header_end.hpp"

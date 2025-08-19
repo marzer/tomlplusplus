@@ -1103,6 +1103,24 @@ TOML_ENABLE_WARNINGS;
 #define TOML_ENABLE_FLOAT16 0
 #endif
 
+#ifndef TOML_ENABLE_ORDERED_TABLES
+#define TOML_ENABLE_ORDERED_TABLES 0
+#endif
+
+#ifndef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#define TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA 0
+#endif
+
+#ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 0
+	#ifdef _MSC_VER
+		#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
+		#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+		#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
+		#endif
+	#endif
+#endif
+
 #if !defined(TOML_FLOAT_CHARCONV) && (TOML_GCC || TOML_CLANG || (TOML_ICC && !TOML_ICC_CL))
 // not supported by any version of GCC or Clang as of 26/11/2020
 // not supported by any version of ICC on Linux as of 11/01/2021
@@ -7425,6 +7443,12 @@ TOML_NAMESPACE_START
 }
 TOML_NAMESPACE_END;
 
+template<> struct std::hash<toml::key> {
+    std::size_t operator()(toml::key const& k) const noexcept {
+        return std::hash<std::string_view>{}(k.str());
+    }
+};
+
 #ifdef _MSC_VER
 #pragma pop_macro("min")
 #pragma pop_macro("max")
@@ -7441,6 +7465,12 @@ TOML_DISABLE_WARNINGS;
 #include <iterator>
 TOML_ENABLE_WARNINGS;
 
+//********  impl/std_list.hpp  *****************************************************************************************
+
+TOML_DISABLE_WARNINGS;
+#include <list>
+TOML_ENABLE_WARNINGS;
+
 //********  impl/table.hpp  ********************************************************************************************
 
 TOML_PUSH_WARNINGS;
@@ -7453,6 +7483,8 @@ TOML_PUSH_WARNINGS;
 #undef min
 #undef max
 #endif
+
+#include <iostream>
 
 TOML_IMPL_NAMESPACE_START
 {
@@ -7473,9 +7505,16 @@ TOML_IMPL_NAMESPACE_START
 		friend class table_iterator;
 
 		using proxy_type		   = table_proxy_pair<IsConst>;
+
+#if TOML_ENABLE_ORDERED_TABLES
+		using mutable_map_iterator = std::list<std::pair<toml::key, node_ptr>>::iterator;
+		using const_map_iterator = std::list<std::pair<toml::key, node_ptr>>::const_iterator;
+#else
 		using mutable_map_iterator = std::map<toml::key, node_ptr, std::less<>>::iterator;
 		using const_map_iterator   = std::map<toml::key, node_ptr, std::less<>>::const_iterator;
-		using map_iterator		   = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
+#endif
+
+		using map_iterator		 = std::conditional_t<IsConst, const_map_iterator, mutable_map_iterator>;
 
 		mutable map_iterator iter_;
 		alignas(proxy_type) mutable unsigned char proxy_[sizeof(proxy_type)];
@@ -7626,11 +7665,21 @@ TOML_NAMESPACE_START
 	{
 	  private:
 
-		using map_type			 = std::map<toml::key, impl::node_ptr, std::less<>>;
+#if TOML_ENABLE_ORDERED_TABLES
+		using map_pair			 = std::pair<toml::key, impl::node_ptr>;
+		using entries_type			 = std::list<std::pair<toml::key, impl::node_ptr>>;
+		using map_type			 = std::unordered_map<toml::key, entries_type::iterator>;
+		map_type map_;
+		entries_type entries_;
+		using map_iterator		 = typename entries_type::iterator;
+		using const_map_iterator = typename entries_type::const_iterator;
+#else
 		using map_pair			 = std::pair<const toml::key, impl::node_ptr>;
+		using map_type			 = std::map<toml::key, impl::node_ptr, std::less<>>;
 		using map_iterator		 = typename map_type::iterator;
 		using const_map_iterator = typename map_type::const_iterator;
 		map_type map_;
+#endif
 
 		bool inline_ = false;
 
@@ -7985,37 +8034,61 @@ TOML_NAMESPACE_START
 		TOML_PURE_INLINE_GETTER
 		iterator begin() noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return iterator{ entries_.begin() };
+#else
 			return iterator{ map_.begin() };
+#endif
 		}
 
 		TOML_PURE_INLINE_GETTER
 		const_iterator begin() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cbegin() };
+#else
 			return const_iterator{ map_.cbegin() };
+#endif
 		}
 
 		TOML_PURE_INLINE_GETTER
 		const_iterator cbegin() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cbegin() };
+#else
 			return const_iterator{ map_.cbegin() };
+#endif
 		}
 
 		TOML_PURE_INLINE_GETTER
 		iterator end() noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return iterator{ entries_.end() };
+#else
 			return iterator{ map_.end() };
+#endif
 		}
 
 		TOML_PURE_INLINE_GETTER
 		const_iterator end() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cend() };
+#else
 			return const_iterator{ map_.cend() };
+#endif
 		}
 
 		TOML_PURE_INLINE_GETTER
 		const_iterator cend() const noexcept
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			return const_iterator{ entries_.cend() };
+#else
 			return const_iterator{ map_.cend() };
+#endif
 		}
 
 	  private:
@@ -8074,7 +8147,11 @@ TOML_NAMESPACE_START
 
 			using kvp_type = impl::copy_cv<map_pair, std::remove_reference_t<Table>>;
 
+#if TOML_ENABLE_ORDERED_TABLES
+			for (kvp_type& kvp : tbl.entries_)
+#else
 			for (kvp_type& kvp : tbl.map_)
+#endif
 			{
 				using node_ref = impl::copy_cvref<toml::node, Table&&>;
 				static_assert(std::is_reference_v<node_ref>);
@@ -8214,11 +8291,14 @@ TOML_NAMESPACE_START
 
 	  private:
 
-		TOML_PURE_GETTER
-		TOML_EXPORTED_MEMBER_FUNCTION
-		map_iterator get_lower_bound(std::string_view) noexcept;
+#if !TOML_ENABLE_ORDERED_TABLES
+			TOML_PURE_GETTER
+			TOML_EXPORTED_MEMBER_FUNCTION
+			map_iterator get_lower_bound(std::string_view) noexcept;
+#endif
 
 	  public:
+#if !TOML_ENABLE_ORDERED_TABLES
 
 		TOML_PURE_GETTER
 		iterator lower_bound(std::string_view key) noexcept
@@ -8231,6 +8311,7 @@ TOML_NAMESPACE_START
 		{
 			return const_iterator{ const_cast<table&>(*this).get_lower_bound(key) };
 		}
+#endif // !TOML_ENABLE_ORDERED_TABLES
 
 #if TOML_ENABLE_WINDOWS_COMPAT
 
@@ -8388,6 +8469,28 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace_hint() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
+#if TOML_ENABLE_ORDERED_TABLES
+				auto toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					if constexpr (moving_node_ptr)
+						entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key,
+							std::move(static_cast<ValueArgs&&>(args)...) });
+					else
+					{
+						entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key,
+							new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } });
+					}
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return iterator{ entry_ipos };
+				}
+				else
+				{
+					return iterator{ ipos->second };
+				}
+#else
 				map_iterator ipos = insert_with_hint(hint, toml::key{ static_cast<KeyType&&>(key) }, nullptr);
 
 				// if second is nullptr then we successully claimed the key and inserted the empty sentinel,
@@ -8415,6 +8518,7 @@ TOML_NAMESPACE_START
 					}
 				}
 				return iterator{ ipos };
+#endif
 			}
 		}
 
@@ -8445,6 +8549,18 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
+#if TOML_ENABLE_ORDERED_TABLES
+				auto toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					auto table_ipos = insert_with_hint(iterator{ ipos->second },
+											toml::key{ static_cast<KeyType&&>(key) },
+											impl::make_node(static_cast<ValueType&&>(val), flags));
+					return { iterator{ table_ipos }, true };
+				}
+				return { iterator { ipos->second }, false };
+#else
 				const auto key_view = std::string_view{ key };
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -8455,6 +8571,7 @@ TOML_NAMESPACE_START
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
+#endif
 			}
 		}
 
@@ -8501,6 +8618,22 @@ TOML_NAMESPACE_START
 			}
 			else
 			{
+#if TOML_ENABLE_ORDERED_TABLES
+				toml::key toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				map_type::iterator ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					entries_.push_back(std::pair<toml::key, impl::node_ptr>{ toml_key, impl::make_node(static_cast<ValueType&&>(val), flags) });
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return { iterator{ entry_ipos }, true };
+				}
+				else
+				{
+					ipos->second->second = impl::make_node(static_cast<ValueType&&>(val), flags);
+					return { iterator{ ipos->second }, false };
+				}
+#else
 				const auto key_view = std::string_view{ key };
 				map_iterator ipos	= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -8515,6 +8648,7 @@ TOML_NAMESPACE_START
 					(*ipos).second = impl::make_node(static_cast<ValueType&&>(val), flags);
 					return { iterator{ ipos }, false };
 				}
+#endif
 			}
 		}
 
@@ -8548,6 +8682,22 @@ TOML_NAMESPACE_START
 							  "ValueType argument of table::emplace() must be one "
 							  "of:" TOML_SA_UNWRAPPED_NODE_TYPE_LIST);
 
+#if TOML_ENABLE_ORDERED_TABLES
+				toml::key toml_key = toml::key{ static_cast<KeyType&&>(key) };
+				auto ipos = map_.find(toml_key);
+				if (ipos == map_.end())
+				{
+					entries_.push_back(
+					  {
+					  	toml_key,
+						  impl::node_ptr{ new impl::wrap_node<unwrapped_type>{ static_cast<ValueArgs&&>(args)... } }
+						});
+					auto entry_ipos = std::prev(entries_.end());
+					map_.insert({ toml_key, entry_ipos });
+					return { iterator{ entry_ipos }, true };
+				}
+				return { iterator{ ipos->second }, false };
+#else
 				const auto key_view = std::string_view{ key };
 				auto ipos			= get_lower_bound(key_view);
 				if (ipos == map_.end() || ipos->first != key_view)
@@ -8559,6 +8709,7 @@ TOML_NAMESPACE_START
 					return { iterator{ ipos }, true };
 				}
 				return { iterator{ ipos }, false };
+#endif
 			}
 		}
 
@@ -12094,7 +12245,12 @@ TOML_NAMESPACE_START
 			if (!b->value) // empty node_views
 				continue;
 
+#if TOML_ENABLE_ORDERED_TABLES
+			entries_.push_back({ std::move(b->key), std::move(b->value) });
+			map_.insert_or_assign(std::move(b->key), std::prev(entries_.end()));
+#else
 			map_.insert_or_assign(std::move(b->key), std::move(b->value));
+#endif
 		}
 	}
 
@@ -12103,8 +12259,18 @@ TOML_NAMESPACE_START
 		: node(other),
 		  inline_{ other.inline_ }
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto&& [k, v] : other.entries_)
+		{
+			entries_.push_back({ k, impl::make_node(*v) });
+			map_.emplace(k, std::prev(entries_.end()));
+		}
+#else
 		for (auto&& [k, v] : other.map_)
+		{
 			map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+		}
+#endif
 
 #if TOML_LIFETIME_HOOKS
 		TOML_TABLE_CREATED;
@@ -12115,6 +12281,9 @@ TOML_NAMESPACE_START
 	table::table(table && other) noexcept //
 		: node(std::move(other)),
 		  map_{ std::move(other.map_) },
+#if TOML_ENABLE_ORDERED_TABLES
+		  entries_{ std::move(other.entries_) },
+#endif
 		  inline_{ other.inline_ }
 	{
 #if TOML_LIFETIME_HOOKS
@@ -12129,8 +12298,19 @@ TOML_NAMESPACE_START
 		{
 			node::operator=(rhs);
 			map_.clear();
+#if TOML_ENABLE_ORDERED_TABLES
+			entries_.clear();
+			for (auto&& [k, v] : rhs.entries_)
+			{
+				entries_.push_back({ k, impl::make_node(*v) });
+				map_.emplace(k, std::prev(entries_.end()));
+			}
+#else
 			for (auto&& [k, v] : rhs.map_)
+			{
 				map_.emplace_hint(map_.end(), k, impl::make_node(*v));
+			}
+#endif
 			inline_ = rhs.inline_;
 		}
 		return *this;
@@ -12155,10 +12335,17 @@ TOML_NAMESPACE_START
 		if (map_.empty())
 			return false;
 
+#if TOML_ENABLE_ORDERED_TABLES
+		if (ntype == node_type::none)
+			ntype = entries_.cbegin()->second->type();
+
+		for (auto&& [k, v] : entries_)
+#else
 		if (ntype == node_type::none)
 			ntype = map_.cbegin()->second->type();
 
 		for (auto&& [k, v] : map_)
+#endif
 		{
 			TOML_UNUSED(k);
 			if (v->type() != ntype)
@@ -12177,9 +12364,19 @@ TOML_NAMESPACE_START
 			first_nonmatch = {};
 			return false;
 		}
+
 		if (ntype == node_type::none)
+#if TOML_ENABLE_ORDERED_TABLES
+			ntype = entries_.cbegin()->second->type();
+#else
 			ntype = map_.cbegin()->second->type();
+#endif
+
+#if TOML_ENABLE_ORDERED_TABLES
+		for (const auto& [k, v] : entries_)
+#else
 		for (const auto& [k, v] : map_)
+#endif
 		{
 			TOML_UNUSED(k);
 			if (v->type() != ntype)
@@ -12205,8 +12402,12 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	node* table::get(std::string_view key) noexcept
 	{
-		if (auto it = map_.find(key); it != map_.end())
+		if (auto it = map_.find(toml::key{ key }); it != map_.end())
+#if TOML_ENABLE_ORDERED_TABLES
+			return it->second->second.get();
+#else
 			return it->second.get();
+#endif
 		return nullptr;
 	}
 
@@ -12234,48 +12435,86 @@ TOML_NAMESPACE_START
 		return *n;
 	}
 
+#if !TOML_ENABLE_ORDERED_TABLES
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::get_lower_bound(std::string_view key) noexcept
 	{
 		return map_.lower_bound(key);
 	}
+#endif // !TOML_ENABLE_ORDERED_TABLES
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::iterator table::find(std::string_view key) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		auto ipos = map_.find(toml::key{ key });
+		if (ipos == map_.end())
+		{
+			return iterator{ entries_.end() };
+		}
+		return iterator{ ipos->second };
+#else
 		return iterator{ map_.find(key) };
+#endif
 	}
 
 	TOML_PURE_GETTER
 	TOML_EXTERNAL_LINKAGE
 	table::const_iterator table::find(std::string_view key) const noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		return const_iterator{ map_.find(toml::key{ key })->second };
+#else
 		return const_iterator{ map_.find(key) };
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::erase(const_map_iterator pos) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		map_.erase(pos->first);
+		return entries_.erase(pos);
+#else
 		return map_.erase(pos);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::erase(const_map_iterator begin, const_map_iterator end) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto ipos = begin; ipos != end; ipos++) {
+			map_.erase(begin->first);
+		}
+		return entries_.erase(begin, end);
+#else
 		return map_.erase(begin, end);
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
 	size_t table::erase(std::string_view key) noexcept
 	{
+#if TOML_ENABLE_ORDERED_TABLES
+		size_t result = map_.erase(toml::key{ key });
+		auto ipos = map_.find(toml::key{ key });
+		if (ipos != map_.end())
+		{
+			map_.erase(ipos);
+			entries_.erase(ipos->second);
+		}
+		return result;
+#else
 		if (auto it = map_.find(key); it != map_.end())
 		{
 			map_.erase(it);
 			return size_t{ 1 };
 		}
 		return size_t{};
+#endif
 	}
 
 	TOML_EXTERNAL_LINKAGE
@@ -12286,7 +12525,11 @@ TOML_NAMESPACE_START
 
 		for (auto it = map_.begin(); it != map_.end();)
 		{
+#if TOML_ENABLE_ORDERED_TABLES
+			if (auto arr = it->second->second->as_array())
+#else
 			if (auto arr = it->second->as_array())
+#endif
 			{
 				if (recursive)
 					arr->prune(true);
@@ -12297,7 +12540,11 @@ TOML_NAMESPACE_START
 					continue;
 				}
 			}
+#if TOML_ENABLE_ORDERED_TABLES
+			else if (auto tbl = it->second->second->as_table())
+#else
 			else if (auto tbl = it->second->as_table())
+#endif
 			{
 				if (recursive)
 					tbl->prune(true);
@@ -12323,7 +12570,26 @@ TOML_NAMESPACE_START
 	TOML_EXTERNAL_LINKAGE
 	table::map_iterator table::insert_with_hint(const_iterator hint, key && k, impl::node_ptr && v)
 	{
-		return map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
+#if TOML_ENABLE_ORDERED_TABLES
+		auto ipos = map_.find(k);
+		if (ipos == map_.end())
+		{
+			entries_.emplace_back(std::pair{ k, std::move(v) });
+			auto entry_ipos = std::prev(entries_.end());
+			map_.emplace(std::move(k), entry_ipos);
+			return entry_ipos;
+		}
+		else
+		{
+			return ipos->second;
+		}
+#else
+		auto prev_size = map_.size();
+		auto ipos = map_.emplace_hint(const_map_iterator{ hint }, std::move(k), std::move(v));
+		if (map_.size() > prev_size)
+			last_inserted_ = iterator{ ipos };
+		return ipos;
+#endif
 	}
 
 	TOML_PURE_GETTER
@@ -12335,7 +12601,11 @@ TOML_NAMESPACE_START
 		if (lhs.map_.size() != rhs.map_.size())
 			return false;
 
+#if TOML_ENABLE_ORDERED_TABLES
+		for (auto l = lhs.entries_.begin(), r = rhs.entries_.begin(), e = lhs.entries_.end(); l != e; l++, r++)
+#else
 		for (auto l = lhs.map_.begin(), r = rhs.map_.begin(), e = lhs.map_.end(); l != e; l++, r++)
+#endif
 		{
 			if (l->first != r->first)
 				return false;
@@ -15630,10 +15900,18 @@ TOML_IMPL_NAMESPACE_START
 			for (size_t i = 0, e = key_buffer.size() - 1u; i < e; i++)
 			{
 				const std::string_view segment = key_buffer[i];
+#if TOML_ENABLE_ORDERED_TABLES
+				auto pit					   = parent->find(segment);
+#else
 				auto pit					   = parent->lower_bound(segment);
+#endif
 
 				// parent already existed
+#if TOML_ENABLE_ORDERED_TABLES
+				if (pit != parent->end())
+#else
 				if (pit != parent->end() && pit->first == segment)
+#endif
 				{
 					node& p = pit->second;
 
@@ -15684,13 +15962,21 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			const auto last_segment = key_buffer.back();
+#if TOML_ENABLE_ORDERED_TABLES
+			auto it					= parent->find(last_segment);
+#else
 			auto it					= parent->lower_bound(last_segment);
+#endif
 
 			// if there was already a matching node some sanity checking is necessary;
 			// this is ok if we're making an array and the existing element is already an array (new element)
 			// or if we're making a table and the existing element is an implicitly-created table (promote it),
 			// otherwise this is a redefinition error.
+#if TOML_ENABLE_ORDERED_TABLES
+			if (it != parent->end())
+#else
 			if (it != parent->end() && it->first == last_segment)
+#endif
 			{
 				node& matching_node = it->second;
 				if (auto arr = matching_node.as_array();
@@ -15820,10 +16106,18 @@ TOML_IMPL_NAMESPACE_START
 				for (size_t i = 0; i < key_buffer.size() - 1u; i++)
 				{
 					const std::string_view segment = key_buffer[i];
+#if TOML_ENABLE_ORDERED_TABLES
+					auto pit					   = tbl->find(segment);
+#else
 					auto pit					   = tbl->lower_bound(segment);
+#endif
 
 					// parent already existed
+#if TOML_ENABLE_ORDERED_TABLES
+					if (pit != tbl->end())
+#else
 					if (pit != tbl->end() && pit->first == segment)
+#endif
 					{
 						table* p = pit->second.as_table();
 
@@ -15857,8 +16151,13 @@ TOML_IMPL_NAMESPACE_START
 
 			// ensure this isn't a redefinition
 			const std::string_view last_segment = key_buffer.back();
+#if TOML_ENABLE_ORDERED_TABLES
+			auto it								= tbl->find(last_segment);
+			if (it != tbl->end())
+#else
 			auto it								= tbl->lower_bound(last_segment);
 			if (it != tbl->end() && it->first == last_segment)
+#endif
 			{
 				set_error("cannot redefine existing "sv,
 						  to_sv(it->second.type()),
