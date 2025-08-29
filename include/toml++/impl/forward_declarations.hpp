@@ -343,6 +343,9 @@ TOML_NAMESPACE_START // abi namespace
 
 		/// \brief Avoids the use of whitespace around key-value pairs.
 		terse_key_value_pairs = (1ull << 12),
+
+		/// \brief Always print multiline arrays (one element per line).
+		force_multiline_arrays = (1ull << 13),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 

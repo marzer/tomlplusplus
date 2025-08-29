@@ -130,6 +130,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::terse_key_value_pairs);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool force_multiline_arrays() const noexcept
+		{
+			return !!(config_.flags & format_flags::force_multiline_arrays);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 

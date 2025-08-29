@@ -614,6 +614,94 @@ key8 = [
 ])"sv;
 		CHECK(to_string(input, toml_formatter::default_flags, format_flags::indentation)
 			  == expected_without_indentation);
+
+		// forcing multiline arrays: even short arrays become one-per-line (with array elements indented)
+		constexpr auto expected_forced_multiline = R"(key1 = 'val1'
+key2 = [
+    1,
+    2,
+    3,
+    4,
+    '5'
+]
+key3 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+    [sub2.sub3]
+    key6 = 'val'
+    key7 = [
+        1,
+        2,
+        3,
+        4,
+        '5'
+    ]
+    key8 = [
+        'this is a really long array',
+        'and should be split over multiple lines',
+        'by the formatter',
+        'unless i dun goofed',
+        'i guess thats what tests are for'
+    ])"sv;
+
+		CHECK(to_string(input, toml_formatter::default_flags | format_flags::force_multiline_arrays)
+			  == expected_forced_multiline);
+
+		// forcing multiline arrays without indenting array elements
+		constexpr auto expected_forced_without_indented_arrays = R"(key1 = 'val1'
+key2 = [
+1,
+2,
+3,
+4,
+'5'
+]
+key3 = [
+'this is a really long array',
+'and should be split over multiple lines',
+'by the formatter',
+'unless i dun goofed',
+'i guess thats what tests are for'
+]
+
+[sub1]
+key4 = 'val'
+
+[sub2]
+key5 = 'val'
+
+    [sub2.sub3]
+    key6 = 'val'
+    key7 = [
+    1,
+    2,
+    3,
+    4,
+    '5'
+    ]
+    key8 = [
+    'this is a really long array',
+    'and should be split over multiple lines',
+    'by the formatter',
+    'unless i dun goofed',
+    'i guess thats what tests are for'
+    ])"sv;
+
+		CHECK(to_string(input,
+						toml_formatter::default_flags | format_flags::force_multiline_arrays,
+						format_flags::indent_array_elements)
+			  == expected_forced_without_indented_arrays);
 	}
 }
 
