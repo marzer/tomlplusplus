@@ -312,6 +312,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@tyler92](https://github.com/tyler92)** - Fixed stack overflow that occurred during fuzzing tests
 -   **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 -   **[@ximion](https://github.com/ximion)** - Added support for installation with meson
+-   **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
 <br>
 
 ## Contact

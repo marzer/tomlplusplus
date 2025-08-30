@@ -179,10 +179,11 @@ TOML_NAMESPACE_START
 		}
 
 		const auto original_indent = indent();
-		const auto multiline	   = TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
-			  arr,
-			  120u,
-			  indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+		const auto multiline	   = force_multiline_arrays()
+							|| TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
+								   arr,
+								   120u,
+								   indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 
 		print_unformatted("["sv);
 

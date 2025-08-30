@@ -1674,6 +1674,7 @@ TOML_NAMESPACE_START // abi namespace
 		indentation = indent_sub_tables | indent_array_elements,
 		relaxed_float_precision = (1ull << 11),
 		terse_key_value_pairs = (1ull << 12),
+		force_multiline_arrays = (1ull << 13),
 	};
 	TOML_MAKE_FLAGS(format_flags);
 
@@ -9890,6 +9891,12 @@ TOML_IMPL_NAMESPACE_START
 			return !!(config_.flags & format_flags::terse_key_value_pairs);
 		}
 
+		TOML_PURE_INLINE_GETTER
+		bool force_multiline_arrays() const noexcept
+		{
+			return !!(config_.flags & format_flags::force_multiline_arrays);
+		}
+
 		TOML_EXPORTED_MEMBER_FUNCTION
 		void attach(std::ostream& stream) noexcept;
 
@@ -17195,10 +17202,11 @@ TOML_NAMESPACE_START
 		}
 
 		const auto original_indent = indent();
-		const auto multiline	   = TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
-			  arr,
-			  120u,
-			  indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
+		const auto multiline	   = force_multiline_arrays()
+							|| TOML_ANON_NAMESPACE::toml_formatter_forces_multiline(
+								   arr,
+								   120u,
+								   indent_columns() * static_cast<size_t>(original_indent < 0 ? 0 : original_indent));
 
 		print_unformatted("["sv);
 
