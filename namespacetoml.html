@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.19.6" name="generator"/>
+  <meta content="Poxy v0.19.7" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -192,7 +192,8 @@
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa8bf21ed1736197d191a147317c7ea95b">indent_array_elements</a> = (1ull &lt;&lt; 10),
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa449072e30b43d04b744f22522a880818">indentation</a> = indent_sub_tables | indent_array_elements,
               <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa2023489f273b06937dd37c25b2cf2078">relaxed_float_precision</a> = (1ull &lt;&lt; 11),
-              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</a> = (1ull &lt;&lt; 12) }</span>
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</a> = (1ull &lt;&lt; 12),
+              <a class="m-doc" href="#a2102aa80bc57783d96180f36e1f64f6aa78b9ffac2669c1419aeb8dcc845a70bb">force_multiline_arrays</a> = (1ull &lt;&lt; 13) }</span>
             </dt>
             <dd>Format flags for modifying how TOML data is printed to streams.</dd>
             <dt>
@@ -577,6 +578,12 @@
                   <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd" id="a2102aa80bc57783d96180f36e1f64f6aa4c8bfd397c155cf5841842cdbb556edd">terse_key_value_pairs</a></td>
                   <td>
                   <p>Avoids the use of whitespace around key-value pairs.</p>
+                  </td>
+                </tr>
+                <tr>
+                  <td><a class="m-doc-self" href="#a2102aa80bc57783d96180f36e1f64f6aa78b9ffac2669c1419aeb8dcc845a70bb" id="a2102aa80bc57783d96180f36e1f64f6aa78b9ffac2669c1419aeb8dcc845a70bb">force_multiline_arrays</a></td>
+                  <td>
+                  <p>Always print multiline arrays (one element per line).</p>
                   </td>
                 </tr>
               </tbody>
