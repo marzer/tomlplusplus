@@ -115,8 +115,12 @@ jobs:
                 permissive:
                     - false
                     - true
-
-        runs-on: windows-2022
+                arch:
+                    - name: "x64"
+                      runner: "windows-2022"
+                    - name: "arm64"
+                      runner: "windows-11-arm"
+        runs-on: ${{ matrix.arch.runner }}
 
         defaults:
             run:
@@ -131,6 +135,8 @@ jobs:
             - uses: actions/checkout@v3
 
             - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                  arch: ${{ matrix.arch.name }}
 
             - name: Configure Meson
               run: meson setup build --vsenv --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false -Dpermissive=${{ matrix.permissive }}
