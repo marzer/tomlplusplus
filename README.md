@@ -288,6 +288,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 -   **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
 -   **[@capuanob](https://github.com/capuanob)** - Integrated this project into OSSFuzz
+-   **[@danielbodorin](https://github.com/danielbodorin)** - Fixed stack overflow from deeply nested arrays/inline tables
 -   **[@GiulioRomualdi](https://github.com/GiulioRomualdi)** - Added cmake+meson support
 -   **[@jonestristand](https://github.com/jonestristand)** - Designed and implemented the `toml::path`s feature
 -   **[@kcsaul](https://github.com/kcsaul)** - Fixed a bug
