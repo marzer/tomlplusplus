@@ -168,6 +168,18 @@ b = []
 		constexpr auto start = "fl =[ "sv;
 		memcpy(s.data(), start.data(), start.length());
 		parsing_should_fail(FILE_LINE_ARGS, std::string_view{ s });
+
+		// deeply nested inline tables should also fail gracefully, not stack overflow
+		{
+			// build: fl = {a={a={a={a=...{a=1}...}}}
+			std::string nested_tables = "fl = ";
+			for (size_t i = 0; i < 2048; i++)
+				nested_tables += "{a=";
+			nested_tables += "1";
+			for (size_t i = 0; i < 2048; i++)
+				nested_tables += "}";
+			parsing_should_fail(FILE_LINE_ARGS, std::string_view{ nested_tables });
+		}
 	}
 
 	SECTION("tomlplusplus/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
