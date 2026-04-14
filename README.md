@@ -314,6 +314,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@whiterabbit963](https://github.com/whiterabbit963)** - Fixed a bug with value_or conversions
 -   **[@ximion](https://github.com/ximion)** - Added support for installation with meson
 -   **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
+-   **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
 <br>
 
 ## Contact
