@@ -4,8 +4,11 @@
 // SPDX-License-Identifier: MIT
 #pragma once
 
+#undef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
+#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
 #include "forward_declarations.hpp"
 #include "print_to_stream.hpp"
+#include "std_optional.hpp"
 #include "header_start.hpp"
 
 TOML_NAMESPACE_START
