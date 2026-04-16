@@ -242,7 +242,9 @@ def main():
 				r'TOML_UNDEF_MACROS',
 				r'TOMLPLUSPLUS_H',
 				r'TOMLPLUSPLUS_HPP',
-				r'TOML_SHARED_LIB'
+				r'TOML_SHARED_LIB',
+                r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
+				r'TOML_DISABLE_NOEXCEPT_NOEXCEPT'
 			)
 			set_defines = []
 			for define, currently_set in defines.items():
