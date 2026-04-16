@@ -2715,9 +2715,6 @@ TOML_POP_WARNINGS;
 
 //********  impl/date_time.hpp  ****************************************************************************************
 
-#undef TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA
-#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
-
 TOML_PUSH_WARNINGS;
 #ifdef _MSC_VER
 #ifndef __clang__
