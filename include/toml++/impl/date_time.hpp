@@ -6,6 +6,7 @@
 
 #include "forward_declarations.hpp"
 #include "print_to_stream.hpp"
+#include "std_optional.hpp"
 #include "header_start.hpp"
 
 TOML_NAMESPACE_START

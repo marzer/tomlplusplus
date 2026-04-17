@@ -117,7 +117,7 @@ def main():
 			# blank lines between consecutive TOML_XXXXX_WARNINGS statements
 			toml_h = re.sub('(TOML_[A-Z_]+?_WARNINGS;)\n[ \t\n]*\n(TOML_[A-Z_]+?_WARNINGS;)', r'\1\n\2', toml_h)
 			# blank lines between consecutive #includes
-			toml_h = re.sub('[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
+			toml_h = re.sub(r'[#]\s*include\s*<(.+?)>\n[ \t\n]*\n[#]\s*include\s*<(.+?)>', r'#include <\1>\n#include <\2>', toml_h)
 			# blank lines following opening brackets or a comma
 			toml_h = re.sub(r'([^@][({,])\n\n', r'\1\n', toml_h)
 			# blank lines preceeding closing brackets
@@ -129,7 +129,7 @@ def main():
 
 	# change TOML_LIB_SINGLE_HEADER to 1
 	toml_h = re.sub(
-		'#\s*define\s+TOML_LIB_SINGLE_HEADER\s+[0-9]+',
+		r'#\s*define\s+TOML_LIB_SINGLE_HEADER\s+[0-9]+',
 		'#define	TOML_LIB_SINGLE_HEADER 1',
 		toml_h, 0, re.I
 	)
@@ -242,7 +242,9 @@ def main():
 				r'TOML_UNDEF_MACROS',
 				r'TOMLPLUSPLUS_H',
 				r'TOMLPLUSPLUS_HPP',
-				r'TOML_SHARED_LIB'
+				r'TOML_SHARED_LIB',
+                r'TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA',
+				r'TOML_DISABLE_NOEXCEPT_NOEXCEPT'
 			)
 			set_defines = []
 			for define, currently_set in defines.items():
