@@ -88,7 +88,7 @@ TOML_IMPL_NAMESPACE_START
 		if (str.empty())
 			return {};
 
-		return widen(std::string_view{ reinterpret_cast<const char*>(str.data()), str.length() });
+		return widen(std::string_view{ static_cast<const char*>(str.data()), str.length() });
 	}
 
 #endif // TOML_HAS_CHAR8

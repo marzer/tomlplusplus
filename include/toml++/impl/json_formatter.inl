@@ -52,8 +52,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -89,8 +89,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -109,8 +109,8 @@ TOML_NAMESPACE_START
 
 		switch (auto source_type = source().type())
 		{
-			case node_type::table: print(*reinterpret_cast<const table*>(&source())); break;
-			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			case node_type::table: print(*static_cast<const table*>(&source())); break;
+			case node_type::array: print(*static_cast<const array*>(&source())); break;
 			default: print_value(source(), source_type);
 		}
 	}

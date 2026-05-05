@@ -70,7 +70,7 @@ TOML_NAMESPACE_START
 		TOML_ALWAYS_INLINE
 		static Type* get_as(storage_t& s) noexcept
 		{
-			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
+			return TOML_LAUNDER(static_cast<Type*>(s.bytes));
 		}
 
 		void destroy() noexcept

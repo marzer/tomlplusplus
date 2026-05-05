@@ -256,7 +256,7 @@ TOML_NAMESPACE_START
 			auto type = child.elems_[i]->type();
 			if (type == node_type::array)
 			{
-				array& arr = *reinterpret_cast<array*>(child.elems_[i].get());
+				array& arr = *static_cast<array*>(child.elems_[i].get());
 				if (!arr.empty())
 					flatten_child(std::move(arr), dest_index);
 			}
@@ -370,7 +370,7 @@ TOML_NAMESPACE_START
 
 			const bool equal = lhs.elems_[i]->visit(
 				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}

@@ -306,7 +306,7 @@ TOML_NAMESPACE_START
 
 			const bool equal = l->second->visit(
 				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}
