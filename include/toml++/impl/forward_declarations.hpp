@@ -262,7 +262,7 @@ TOML_NAMESPACE_START // abi namespace
 		else
 		{
 			if constexpr (sizeof(Char) == sizeof(str_char_t))
-				return lhs << std::basic_string_view<Char>{ reinterpret_cast<const Char*>(str.data()), str.length() };
+				return lhs << std::basic_string_view<Char>{ static_cast<const Char*>(str.data()), str.length() };
 			else
 				return lhs << str.data();
 		}
