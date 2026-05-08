@@ -773,7 +773,6 @@
 	__pragma(warning(disable : 4710)) /* function not inlined */                                                       \
 	__pragma(warning(disable : 4711)) /* function selected for automatic expansion */                                  \
 	__pragma(warning(disable : 4820)) /* N bytes padding added */                                                      \
-	__pragma(warning(disable : 4946)) /* static_cast used between related classes */                              \
 	__pragma(warning(disable : 5026)) /* move constructor was implicitly defined as deleted	*/                         \
 	__pragma(warning(disable : 5027)) /* move assignment operator was implicitly defined as deleted	*/                 \
 	__pragma(warning(disable : 5039)) /* potentially throwing function passed to 'extern "C"' function */              \
@@ -1641,7 +1640,7 @@ TOML_NAMESPACE_START // abi namespace
 		else
 		{
 			if constexpr (sizeof(Char) == sizeof(str_char_t))
-				return lhs << std::basic_string_view<Char>{ static_cast<const Char*>(str.data()), str.length() };
+				return lhs << std::basic_string_view<Char>{ reinterpret_cast<const Char*>(str.data()), str.length() };
 			else
 				return lhs << str.data();
 		}
@@ -9330,7 +9329,7 @@ TOML_NAMESPACE_START
 		TOML_ALWAYS_INLINE
 		static Type* get_as(storage_t& s) noexcept
 		{
-			return TOML_LAUNDER(static_cast<Type*>(s.bytes));
+			return TOML_LAUNDER(reinterpret_cast<Type*>(s.bytes));
 		}
 
 		void destroy() noexcept
@@ -10350,7 +10349,7 @@ TOML_IMPL_NAMESPACE_START
 		if (str.empty())
 			return {};
 
-		return widen(std::string_view{ static_cast<const char*>(str.data()), str.length() });
+		return widen(std::string_view{ reinterpret_cast<const char*>(str.data()), str.length() });
 	}
 
 #endif // TOML_HAS_CHAR8
