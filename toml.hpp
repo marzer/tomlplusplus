@@ -773,7 +773,6 @@
 	__pragma(warning(disable : 4710)) /* function not inlined */                                                       \
 	__pragma(warning(disable : 4711)) /* function selected for automatic expansion */                                  \
 	__pragma(warning(disable : 4820)) /* N bytes padding added */                                                      \
-	__pragma(warning(disable : 4946)) /* reinterpret_cast used between related classes */                              \
 	__pragma(warning(disable : 5026)) /* move constructor was implicitly defined as deleted	*/                         \
 	__pragma(warning(disable : 5027)) /* move assignment operator was implicitly defined as deleted	*/                 \
 	__pragma(warning(disable : 5039)) /* potentially throwing function passed to 'extern "C"' function */              \
@@ -3811,7 +3810,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, node&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -3820,7 +3819,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, node&&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -3829,7 +3828,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, const node&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -3838,7 +3837,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, const node&&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 	  public:
@@ -12053,7 +12052,7 @@ TOML_NAMESPACE_START
 			auto type = child.elems_[i]->type();
 			if (type == node_type::array)
 			{
-				array& arr = *reinterpret_cast<array*>(child.elems_[i].get());
+				array& arr = *static_cast<array*>(child.elems_[i].get());
 				if (!arr.empty())
 					flatten_child(std::move(arr), dest_index);
 			}
@@ -12167,7 +12166,7 @@ TOML_NAMESPACE_START
 
 			const bool equal = lhs.elems_[i]->visit(
 				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}
@@ -12489,7 +12488,7 @@ TOML_NAMESPACE_START
 
 			const bool equal = l->second->visit(
 				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *reinterpret_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}
@@ -16981,13 +16980,13 @@ TOML_IMPL_NAMESPACE_START
 		TOML_ASSUME(type > node_type::array);
 		switch (type)
 		{
-			case node_type::string: print(*reinterpret_cast<const value<std::string>*>(&val_node)); break;
-			case node_type::integer: print(*reinterpret_cast<const value<int64_t>*>(&val_node)); break;
-			case node_type::floating_point: print(*reinterpret_cast<const value<double>*>(&val_node)); break;
-			case node_type::boolean: print(*reinterpret_cast<const value<bool>*>(&val_node)); break;
-			case node_type::date: print(*reinterpret_cast<const value<date>*>(&val_node)); break;
-			case node_type::time: print(*reinterpret_cast<const value<time>*>(&val_node)); break;
-			case node_type::date_time: print(*reinterpret_cast<const value<date_time>*>(&val_node)); break;
+			case node_type::string: print(*static_cast<const value<std::string>*>(&val_node)); break;
+			case node_type::integer: print(*static_cast<const value<int64_t>*>(&val_node)); break;
+			case node_type::floating_point: print(*static_cast<const value<double>*>(&val_node)); break;
+			case node_type::boolean: print(*static_cast<const value<bool>*>(&val_node)); break;
+			case node_type::date: print(*static_cast<const value<date>*>(&val_node)); break;
+			case node_type::time: print(*static_cast<const value<time>*>(&val_node)); break;
+			case node_type::date_time: print(*static_cast<const value<date_time>*>(&val_node)); break;
 			default: TOML_UNREACHABLE;
 		}
 	}
@@ -17055,7 +17054,7 @@ TOML_ANON_NAMESPACE_START
 		{
 			case node_type::table:
 			{
-				auto& tbl = *reinterpret_cast<const table*>(&node);
+				auto& tbl = *static_cast<const table*>(&node);
 				if (tbl.empty())
 					return 2u;		// "{}"
 				size_t weight = 3u; // "{ }"
@@ -17070,7 +17069,7 @@ TOML_ANON_NAMESPACE_START
 
 			case node_type::array:
 			{
-				auto& arr = *reinterpret_cast<const array*>(&node);
+				auto& arr = *static_cast<const array*>(&node);
 				if (arr.empty())
 					return 2u;		// "[]"
 				size_t weight = 3u; // "[ ]"
@@ -17087,13 +17086,13 @@ TOML_ANON_NAMESPACE_START
 			{
 				// todo: proper utf8 decoding?
 				// todo: tab awareness?
-				auto& str = (*reinterpret_cast<const value<std::string>*>(&node)).get();
+				auto& str = (*static_cast<const value<std::string>*>(&node)).get();
 				return str.length() + 2u; // + ""
 			}
 
 			case node_type::integer:
 			{
-				auto val = (*reinterpret_cast<const value<int64_t>*>(&node)).get();
+				auto val = (*static_cast<const value<int64_t>*>(&node)).get();
 				if (!val)
 					return 1u;
 				size_t weight = {};
@@ -17107,7 +17106,7 @@ TOML_ANON_NAMESPACE_START
 
 			case node_type::floating_point:
 			{
-				auto val = (*reinterpret_cast<const value<double>*>(&node)).get();
+				auto val = (*static_cast<const value<double>*>(&node)).get();
 				if (val == 0.0)
 					return 3u;		// "0.0"
 				size_t weight = 2u; // ".0"
@@ -17185,8 +17184,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print_inline(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17242,8 +17241,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print_inline(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17268,14 +17267,14 @@ TOML_NAMESPACE_START
 			if (!arr || !arr->is_array_of_tables())
 				return false;
 
-			return !reinterpret_cast<const table*>(&(*arr)[0])->is_inline();
+			return !static_cast<const table*>(&(*arr)[0])->is_inline();
 		};
 
 		// values, arrays, and inline tables/table arrays
 		for (auto&& [k, v] : tbl)
 		{
 			const auto type = v.type();
-			if ((type == node_type::table && !reinterpret_cast<const table*>(&v)->is_inline())
+			if ((type == node_type::table && !static_cast<const table*>(&v)->is_inline())
 				|| (type == node_type::array && is_non_inline_array_of_tables(v)))
 				continue;
 
@@ -17290,8 +17289,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print_inline(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print_inline(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17311,9 +17310,9 @@ TOML_NAMESPACE_START
 		for (auto&& [k, v] : tbl)
 		{
 			const auto type = v.type();
-			if (type != node_type::table || reinterpret_cast<const table*>(&v)->is_inline())
+			if (type != node_type::table || static_cast<const table*>(&v)->is_inline())
 				continue;
-			auto& child_tbl = *reinterpret_cast<const table*>(&v);
+			auto& child_tbl = *static_cast<const table*>(&v);
 
 			// we can skip indenting and emitting the headers for tables that only contain other tables
 			// (so we don't over-nest)
@@ -17328,7 +17327,7 @@ TOML_NAMESPACE_START
 				switch (child_type)
 				{
 					case node_type::table:
-						if (reinterpret_cast<const table*>(&child_v)->is_inline())
+						if (static_cast<const table*>(&child_v)->is_inline())
 							child_value_count++;
 						else
 							child_table_count++;
@@ -17374,7 +17373,7 @@ TOML_NAMESPACE_START
 		{
 			if (!is_non_inline_array_of_tables(v))
 				continue;
-			auto& arr = *reinterpret_cast<const array*>(&v);
+			auto& arr = *static_cast<const array*>(&v);
 
 			if (indent_sub_tables())
 				increase_indent();
@@ -17388,7 +17387,7 @@ TOML_NAMESPACE_START
 				print_key_path();
 				print_unformatted("]]"sv);
 				pending_table_separator_ = true;
-				print(*reinterpret_cast<const table*>(&arr[i]));
+				print(*static_cast<const table*>(&arr[i]));
 			}
 
 			key_path_.pop_back();
@@ -17407,7 +17406,7 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 			{
-				auto& tbl = *reinterpret_cast<const table*>(&source());
+				auto& tbl = *static_cast<const table*>(&source());
 				if (tbl.is_inline())
 					print_inline(tbl);
 				else
@@ -17418,7 +17417,7 @@ TOML_NAMESPACE_START
 				break;
 			}
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			case node_type::array: print(*static_cast<const array*>(&source())); break;
 
 			default: print_value(source(), source_type);
 		}
@@ -17486,8 +17485,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17523,8 +17522,8 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17543,8 +17542,8 @@ TOML_NAMESPACE_START
 
 		switch (auto source_type = source().type())
 		{
-			case node_type::table: print(*reinterpret_cast<const table*>(&source())); break;
-			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			case node_type::table: print(*static_cast<const table*>(&source())); break;
+			case node_type::array: print(*static_cast<const array*>(&source())); break;
 			default: print_value(source(), source_type);
 		}
 	}
@@ -17651,9 +17650,9 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
+				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17687,9 +17686,9 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v), true); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v), true); break;
-				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v), true); break;
+				case node_type::array: print(*static_cast<const array*>(&v), true); break;
+				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -17707,12 +17706,12 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 				decrease_indent(); // so root kvps and tables have the same indent
-				print(*reinterpret_cast<const table*>(&source()));
+				print(*static_cast<const table*>(&source()));
 				break;
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			case node_type::array: print(*static_cast<const array*>(&source())); break;
 
-			case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&source())); break;
+			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
 
 			default: print_value(source(), source_type);
 		}

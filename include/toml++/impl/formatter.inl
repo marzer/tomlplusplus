@@ -482,13 +482,13 @@ TOML_IMPL_NAMESPACE_START
 		TOML_ASSUME(type > node_type::array);
 		switch (type)
 		{
-			case node_type::string: print(*reinterpret_cast<const value<std::string>*>(&val_node)); break;
-			case node_type::integer: print(*reinterpret_cast<const value<int64_t>*>(&val_node)); break;
-			case node_type::floating_point: print(*reinterpret_cast<const value<double>*>(&val_node)); break;
-			case node_type::boolean: print(*reinterpret_cast<const value<bool>*>(&val_node)); break;
-			case node_type::date: print(*reinterpret_cast<const value<date>*>(&val_node)); break;
-			case node_type::time: print(*reinterpret_cast<const value<time>*>(&val_node)); break;
-			case node_type::date_time: print(*reinterpret_cast<const value<date_time>*>(&val_node)); break;
+			case node_type::string: print(*static_cast<const value<std::string>*>(&val_node)); break;
+			case node_type::integer: print(*static_cast<const value<int64_t>*>(&val_node)); break;
+			case node_type::floating_point: print(*static_cast<const value<double>*>(&val_node)); break;
+			case node_type::boolean: print(*static_cast<const value<bool>*>(&val_node)); break;
+			case node_type::date: print(*static_cast<const value<date>*>(&val_node)); break;
+			case node_type::time: print(*static_cast<const value<time>*>(&val_node)); break;
+			case node_type::date_time: print(*static_cast<const value<date_time>*>(&val_node)); break;
 			default: TOML_UNREACHABLE;
 		}
 	}

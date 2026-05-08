@@ -92,9 +92,9 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v)); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v)); break;
-				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v)); break;
+				case node_type::array: print(*static_cast<const array*>(&v)); break;
+				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -128,9 +128,9 @@ TOML_NAMESPACE_START
 			TOML_ASSUME(type != node_type::none);
 			switch (type)
 			{
-				case node_type::table: print(*reinterpret_cast<const table*>(&v), true); break;
-				case node_type::array: print(*reinterpret_cast<const array*>(&v), true); break;
-				case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&v)); break;
+				case node_type::table: print(*static_cast<const table*>(&v), true); break;
+				case node_type::array: print(*static_cast<const array*>(&v), true); break;
+				case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&v)); break;
 				default: print_value(v, type);
 			}
 		}
@@ -148,12 +148,12 @@ TOML_NAMESPACE_START
 		{
 			case node_type::table:
 				decrease_indent(); // so root kvps and tables have the same indent
-				print(*reinterpret_cast<const table*>(&source()));
+				print(*static_cast<const table*>(&source()));
 				break;
 
-			case node_type::array: print(*reinterpret_cast<const array*>(&source())); break;
+			case node_type::array: print(*static_cast<const array*>(&source())); break;
 
-			case node_type::string: print_yaml_string(*reinterpret_cast<const value<std::string>*>(&source())); break;
+			case node_type::string: print_yaml_string(*static_cast<const value<std::string>*>(&source())); break;
 
 			default: print_value(source(), source_type);
 		}

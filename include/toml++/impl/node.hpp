@@ -110,7 +110,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, node&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -119,7 +119,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, node&&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -128,7 +128,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, const node&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		template <typename T>
@@ -137,7 +137,7 @@ TOML_NAMESPACE_START
 		{
 			using out_ref  = ref_cast_type<T, const node&&>;
 			using out_type = std::remove_reference_t<out_ref>;
-			return static_cast<out_ref>(*reinterpret_cast<out_type*>(this));
+			return static_cast<out_ref>(*static_cast<out_type*>(this));
 		}
 
 		/// \endcond
