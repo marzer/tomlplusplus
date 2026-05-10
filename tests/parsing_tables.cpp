@@ -20,6 +20,11 @@ TEST_CASE("parsing - tables")
 						   });
 	parsing_should_fail(FILE_LINE_ARGS, "[]"sv);
 
+	parsing_should_fail(FILE_LINE_ARGS, "[[[1]]]"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[[a]]]"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[[]]"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "[[="sv);
+
 	// "Under that, and until the next header or EOF, are the key/values of that table.
 	//  Key/value pairs within tables are not guaranteed to be in any specific order."
 	parsing_should_succeed(FILE_LINE_ARGS,
