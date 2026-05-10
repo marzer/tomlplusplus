@@ -15741,11 +15741,6 @@ TOML_IMPL_NAMESPACE_START
 				if (*cp == U']')
 					set_error_and_return_default("tables with blank bare keys are explicitly prohibited"sv);
 
-				// the next character must be a valid key starter; otherwise parse_key()
-				// would be entered with an invalid precondition (e.g. for input like
-				// '[[[' the third '[' is neither a bare-key character nor a string
-				// delimiter). Reject explicitly here so we always raise a parse_error
-				// rather than tripping the precondition assertion in parse_key().
 				if (!is_bare_key_character(*cp) && !is_string_delimiter(*cp))
 					set_error_and_return_default("expected bare key starting character or string delimiter, saw '"sv,
 												 to_sv(*cp),

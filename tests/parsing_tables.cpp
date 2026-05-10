@@ -20,9 +20,6 @@ TEST_CASE("parsing - tables")
 						   });
 	parsing_should_fail(FILE_LINE_ARGS, "[]"sv);
 
-	// Regression: '[[' followed by a non-key, non-']' character used to violate
-	// the precondition assertion in parse_key() (UB under NDEBUG, abort under
-	// debug). The parser must reject these as a normal parse error.
 	parsing_should_fail(FILE_LINE_ARGS, "[[[1]]]"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "[[[a]]]"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "[[[]]"sv);
