@@ -14271,6 +14271,9 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(is_string_delimiter(*cp));
 			push_parse_scope("string"sv);
 
+			// snapshot length so the recording buffer can be rewound alongside go_back(2u) below
+			const auto recording_buffer_rollback_size = recording_buffer.length();
+
 			// get the first three characters to determine the string type
 			const auto first = cp->value;
 			advance_and_return_if_error_or_eof({});
@@ -14301,6 +14304,8 @@ TOML_IMPL_NAMESPACE_START
 				// step back two characters so that the current
 				// character is the string delimiter
 				go_back(2u);
+				if (recording)
+					recording_buffer.resize(recording_buffer_rollback_size);
 
 				return { first == U'\'' ? parse_literal_string(false) : parse_basic_string(false), false };
 			}

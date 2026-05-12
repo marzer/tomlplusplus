@@ -301,6 +301,34 @@ TEST_CASE("parsing - tables")
 						   });
 }
 
+TEST_CASE("parsing - redefinition error messages preserve quoted keys")
+{
+	// https://github.com/marzer/tomlplusplus/issues/300
+	static constexpr auto src = "[\"foo\"]\nx = 1\n[\"foo\"]\ny = 2\n"sv;
+#if TOML_EXCEPTIONS
+	std::string desc;
+	bool threw = false;
+	try
+	{
+		[[maybe_unused]] auto res = toml::parse(src);
+	}
+	catch (const toml::parse_error& err)
+	{
+		threw = true;
+		desc.assign(err.description());
+	}
+	REQUIRE(threw);
+	CHECK(desc.find("\"foo\"") != std::string::npos);
+	CHECK(desc.find("fofoo") == std::string::npos);
+#else
+	auto result = toml::parse(src);
+	REQUIRE(!result);
+	const std::string desc{ result.error().description() };
+	CHECK(desc.find("\"foo\"") != std::string::npos);
+	CHECK(desc.find("fofoo") == std::string::npos);
+#endif
+}
+
 TEST_CASE("parsing - inline tables")
 {
 	// these are the examples from https://toml.io/en/v1.0.0#inline-table

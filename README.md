@@ -316,6 +316,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@rafal-c](https://github.com/rafal-c)** - Added a formatting flag
 -   **[@jfsimoneau](https://github.com/jfsimoneau)** - Fixed a meson option
 -   **[@ShereeMorphett](https://github.com/ShereeMorphett)** - Fixed reinterpret_cast usage
+-   **[@SAY-5](https://github.com/SAY-5)** - Fixed a parser bug
 <br>
 
 ## Contact
