@@ -1686,10 +1686,7 @@ TOML_IMPL_NAMESPACE_START
 			TOML_ASSERT_ASSUME(is_string_delimiter(*cp));
 			push_parse_scope("string"sv);
 
-			// snapshot the recording buffer so we can rewind it alongside the input
-			// stream if the upcoming lookahead turns out to be a non-multi-line string
-			// (see go_back(2u) below). without this, the two lookahead code points end
-			// up recorded twice and pollute diagnostic messages (issue #300).
+			// snapshot length so the recording buffer can be rewound alongside go_back(2u) below
 			const auto recording_buffer_rollback_size = recording_buffer.length();
 
 			// get the first three characters to determine the string type
@@ -1722,10 +1719,6 @@ TOML_IMPL_NAMESPACE_START
 				// step back two characters so that the current
 				// character is the string delimiter
 				go_back(2u);
-
-				// rewind the recording buffer to mirror the input-stream rewind,
-				// otherwise the two lookahead code points get recorded a second time
-				// when the string is parsed for real (issue #300).
 				if (recording)
 					recording_buffer.resize(recording_buffer_rollback_size);
 
