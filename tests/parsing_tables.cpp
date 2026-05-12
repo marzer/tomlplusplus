@@ -304,9 +304,6 @@ TEST_CASE("parsing - tables")
 TEST_CASE("parsing - redefinition error messages preserve quoted keys")
 {
 	// https://github.com/marzer/tomlplusplus/issues/300
-	// quoted-key redefinition error messages used to contain a corrupted key (e.g. "fofoo"
-	// instead of "foo") because the parse_string lookahead recorded two extra code points
-	// into the diagnostic recording buffer that were never rewound on the non-multi-line path.
 	static constexpr auto src = "[\"foo\"]\nx = 1\n[\"foo\"]\ny = 2\n"sv;
 #if TOML_EXCEPTIONS
 	std::string desc;
