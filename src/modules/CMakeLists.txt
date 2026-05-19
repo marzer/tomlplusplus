@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.28)
+
 file(GLOB_RECURSE TOMLPLUSPLUS_MODULES *.cppm)
 
 add_library(tomlplusplus_modules)
@@ -6,21 +8,6 @@ target_sources(tomlplusplus_modules
     FILE_SET CXX_MODULES FILES
     ${TOMLPLUSPLUS_MODULES}
 )
-
-cmake_minimum_required(VERSION 3.28)
-
-if(NOT COMMAND configure_cpp_module_target)
-  function(configure_cpp_module_target target)
-    if(CMAKE_VERSION VERSION_GREATER_EQUAL 3.28)
-      target_sources(${target} PUBLIC FILE_SET CXX_MODULES FILES ${TOMLPLUSPLUS_MODULES})
-    else()
-      message(WARNING "C++ modules require CMake 3.28+. Using standard compilation.")
-      target_sources(${target} PRIVATE ${TOMLPLUSPLUS_MODULES})
-    endif()
-  endfunction()
-endif()
-
-configure_cpp_module_target(tomlplusplus_modules)
 
 target_link_libraries(tomlplusplus_modules
   PUBLIC
