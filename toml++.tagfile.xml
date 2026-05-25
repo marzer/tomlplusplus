@@ -1,32 +1,32 @@
-<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<?xml version='1.0' encoding='UTF-8'?>
 <tagfile doxygen_version="1.9.8">
   <compound kind="class">
     <name>toml::array</name>
     <filename>classtoml_1_1array.html</filename>
     <base>toml::node</base>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>a29fc707cf66a79f3c3d93dadbe3b2719</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>a3bd4611c96ce97d7e6991b7a4312370d</anchor>
       <arglist>(const array &amp;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>ac552a63c329598d671e6531b0cef957b</anchor>
       <arglist>(array &amp;&amp;other) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>array</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>acb17a58f1fbdb12aeaf8f7d1e8093e5c</anchor>
@@ -649,14 +649,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -758,14 +758,14 @@
       <name>iterator</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>a62a18471ca7c5b06204d2e26c963f833</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>const_array_iterator</type>
       <name>const_iterator</name>
       <anchorfile>classtoml_1_1array.html</anchorfile>
       <anchor>adfd38318d3390a76f073a83fd2f2aa21</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
       <type>iterator</type>
@@ -1440,14 +1440,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -1542,7 +1542,7 @@
     <name>toml::date</name>
     <filename>structtoml_1_1date.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>date</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
       <anchor>a5cbb79ab52538ec7a74022cf4fcfb129</anchor>
@@ -1560,21 +1560,21 @@
       <name>year</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
       <anchor>ad1dc522b115c69dc908540b1c6ff792b</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>uint8_t</type>
       <name>month</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
       <anchor>a0528c722d0a81741a95f6e3a1116614e</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>uint8_t</type>
       <name>day</name>
       <anchorfile>structtoml_1_1date.html</anchorfile>
       <anchor>a8ec7a7238b8edd3341b450a7b43ec011</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend constexpr bool</type>
@@ -1630,7 +1630,7 @@
     <name>toml::date_time</name>
     <filename>structtoml_1_1date__time.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>date_time</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
       <anchor>a2c9ee1c5c94a6623e9cac5db65289d1f</anchor>
@@ -1676,21 +1676,21 @@
       <name>date</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
       <anchor>a89f398585f373d1e7bd59fe440212074</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>toml::time</type>
       <name>time</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
       <anchor>a18d5e772db4f61635643cda390c2b720</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>optional&lt; toml::time_offset &gt;</type>
       <name>offset</name>
       <anchorfile>structtoml_1_1date__time.html</anchorfile>
       <anchor>af8596013f522b94a88d2caf69e90a1f5</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend constexpr bool</type>
@@ -1751,14 +1751,14 @@
     <name>toml::json_formatter</name>
     <filename>classtoml_1_1json__formatter.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>json_formatter</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
       <anchor>ade267ecca82e3bbac3d1392abab91be9</anchor>
       <arglist>(const toml::node &amp;source, format_flags flags=default_flags) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>json_formatter</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
       <anchor>a51785aa8ef373a9136e896fafabd53be</anchor>
@@ -1769,7 +1769,7 @@
       <name>default_flags</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
       <anchor>a4541a4662894ce8936f6f2c3ab90fe2e</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend std::ostream &amp;</type>
@@ -1790,63 +1790,63 @@
     <name>toml::key</name>
     <filename>classtoml_1_1key.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>ac978efd3b48ec0a5c14f08618e4dbe23</anchor>
       <arglist>() noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a5119f122c15687a2f0f81b270a627de2</anchor>
       <arglist>(std::string_view k, source_region &amp;&amp;src={})</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a0718eb26f4d9c1a4c0fb928efb0d6f81</anchor>
       <arglist>(std::string_view k, const source_region &amp;src)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a788b1bbeaf636dccc4a78f832bf123e0</anchor>
       <arglist>(std::string &amp;&amp;k, source_region &amp;&amp;src={}) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>ab86ff590f222d57b8f4630901298d8da</anchor>
       <arglist>(std::string &amp;&amp;k, const source_region &amp;src) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a981f5ee2fbd822d47d0b347c5df55f11</anchor>
       <arglist>(const char *k, source_region &amp;&amp;src={})</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>ad5f26b37172e34a8c70e848ad7911710</anchor>
       <arglist>(const char *k, const source_region &amp;src)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a67cfed717c84773ab3fe6ec1b7936fa7</anchor>
       <arglist>(std::wstring_view k, source_region &amp;&amp;src={})</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>key</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>aba2cb69db8cae7cbc60899a0ee7618d3</anchor>
@@ -1860,7 +1860,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator std::string_view</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a0f580806c0894ea820c533a9f6e0fa91</anchor>
@@ -2032,14 +2032,14 @@
       <name>const_iterator</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a38a33d5010936195ac2083e428165512</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>const_iterator</type>
       <name>iterator</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a40c42bc323383db54972b5752b9ad4dd</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
       <type>const_iterator</type>
@@ -2063,7 +2063,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator std::string_view</name>
       <anchorfile>classtoml_1_1key.html</anchorfile>
       <anchor>a0f580806c0894ea820c533a9f6e0fa91</anchor>
@@ -2578,14 +2578,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -2998,14 +2998,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -3077,38 +3077,38 @@
       <name>viewed_type</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>a1550f4e57532fd03b6c3e9d87805c03a</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>node_view</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>a0d8bf511db11b67081bea35c25e4ca9e</anchor>
       <arglist>() noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>node_view</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>a199ca0c01e27a74b2ad6dbe554113fb8</anchor>
       <arglist>(viewed_type *node) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>node_view</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>af40ced8902e81e354af44a033f05d682</anchor>
       <arglist>(viewed_type &amp;node) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>node_view</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>a6f2a4c199237385a61741ab30a64b500</anchor>
       <arglist>(const node_view &amp;) noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>node_view</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>a79091432e79c07c4bb8700f44adfb8d6</anchor>
@@ -3129,7 +3129,7 @@
       <arglist>(node_view &amp;&amp;) &amp;noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator bool</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
       <anchor>ab8ee0ffcb999601a9b0247c099aa9250</anchor>
@@ -3837,14 +3837,14 @@
     <name>toml::parse_result</name>
     <filename>classtoml_1_1parse__result.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>parse_result</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a49f926286dae7ed5a6298f5a3656548b</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>parse_result</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a058b76f39fb5a971585538f2d4098ba5</anchor>
@@ -3858,7 +3858,7 @@
       <arglist>(parse_result &amp;&amp;rhs) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>~parse_result</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>ad9e22f09854af4c36860d61e0c0f25b1</anchor>
@@ -3879,7 +3879,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator bool</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>af66ea78a6dd881521ce865a372298e12</anchor>
@@ -3907,21 +3907,21 @@
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator toml::table &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a5e14e22d4d68b27c11711a3319dc6bf9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator toml::table &amp;&amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a8dca1600886954b38b99a4a4f9cb77c4</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const toml::table &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a9d059289edaf6c7fb71916b21a2f9c9f</anchor>
@@ -3949,21 +3949,21 @@
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator parse_error &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>abc8a693cb538441b5974eff38c716669</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator parse_error &amp;&amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a9f70aa665d84aaf5f936dd27f6c95c4a</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const parse_error &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a43df64e02443b2abfd9d2c86c5e4c30a</anchor>
@@ -4065,14 +4065,14 @@
       <name>iterator</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>aae503c11e9f9162de5cbef5e2c9f4863</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>const_table_iterator</type>
       <name>const_iterator</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>abf92ffb48c1f4d0f129f4032708d4ab0</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
       <type>table_iterator</type>
@@ -4131,7 +4131,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator bool</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>af66ea78a6dd881521ce865a372298e12</anchor>
@@ -4159,21 +4159,21 @@
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator toml::table &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a5e14e22d4d68b27c11711a3319dc6bf9</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator toml::table &amp;&amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a8dca1600886954b38b99a4a4f9cb77c4</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const toml::table &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a9d059289edaf6c7fb71916b21a2f9c9f</anchor>
@@ -4201,21 +4201,21 @@
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator parse_error &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>abc8a693cb538441b5974eff38c716669</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator parse_error &amp;&amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a9f70aa665d84aaf5f936dd27f6c95c4a</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const parse_error &amp;</name>
       <anchorfile>classtoml_1_1parse__result.html</anchorfile>
       <anchor>a43df64e02443b2abfd9d2c86c5e4c30a</anchor>
@@ -4310,42 +4310,42 @@
     <name>toml::path</name>
     <filename>classtoml_1_1path.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>accc6964f93bc7990f38263894d4daae6</anchor>
       <arglist>() noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>aabc43d93056c759d389085b32935ec2a</anchor>
       <arglist>(std::string_view)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>a4f340e37cfb32ca1fdfebf24e5b842b4</anchor>
       <arglist>(std::wstring_view)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>~path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>ad585b73db97202e2b4841a64773046e5</anchor>
       <arglist>() noexcept=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>a3b120d3a25c2f3caffaba984ecf19bdc</anchor>
       <arglist>(const path &amp;)=default</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>a4b65042b43757e2d509d1563f4ee5342</anchor>
@@ -4359,7 +4359,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator bool</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>ac482e0b0187449abdbaf74830e0f1e48</anchor>
@@ -4685,14 +4685,14 @@
       <name>iterator</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>ad752d8838221c179af93c94d8a7ed3d2</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>std::vector&lt; path_component &gt;::const_iterator</type>
       <name>const_iterator</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>aaed31ecb434c644dc316042b744a6a59</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
       <type>iterator</type>
@@ -4884,7 +4884,7 @@
       <arglist>() const</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator std::string</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>a48e8847229969e912855c71a8c59c094</anchor>
@@ -4898,7 +4898,7 @@
       <arglist>() const</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator std::wstring</name>
       <anchorfile>classtoml_1_1path.html</anchorfile>
       <anchor>ac77a8dffca78bd3091b7db123837097b</anchor>
@@ -5070,42 +5070,42 @@
     <name>toml::path_component</name>
     <filename>classtoml_1_1path__component.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a71021caeadfba986add66776fde75afc</anchor>
       <arglist>()</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>ae8588444d8e20eedda3c7c9de020211d</anchor>
       <arglist>(size_t index) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a0a43eb66501060d7904e92ce83992231</anchor>
       <arglist>(std::string_view key)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>ae5cabcb9ca01c6fe1a523ebaf27b8203</anchor>
       <arglist>(std::wstring_view key)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a7b6ed29a247bfb453e67e84c4000ad32</anchor>
       <arglist>(const path_component &amp;pc)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a8510261dadffa958e0dd334fc442bff2</anchor>
@@ -5147,7 +5147,7 @@
       <arglist>(std::wstring_view new_key)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>~path_component</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a9023bc344bbf001fb54661491d52ed21</anchor>
@@ -5168,7 +5168,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator size_t</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a0776d976060500ceba2491dbcffa04e8</anchor>
@@ -5182,7 +5182,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const std::string &amp;</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>aa6f05d78ce148082e85ac7f648ef1b6a</anchor>
@@ -5210,7 +5210,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator size_t</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>a0776d976060500ceba2491dbcffa04e8</anchor>
@@ -5224,7 +5224,7 @@
       <arglist>() const noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const std::string &amp;</name>
       <anchorfile>classtoml_1_1path__component.html</anchorfile>
       <anchor>aa6f05d78ce148082e85ac7f648ef1b6a</anchor>
@@ -5260,14 +5260,14 @@
       <name>line</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
       <anchor>ab21cac59798d70e25fe97ac7433763cc</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>source_index</type>
       <name>column</name>
       <anchorfile>structtoml_1_1source__position.html</anchorfile>
       <anchor>a1ca6d0db40c69d2784703011f7cf5434</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend constexpr bool</type>
@@ -5334,21 +5334,21 @@
       <name>begin</name>
       <anchorfile>structtoml_1_1source__region.html</anchorfile>
       <anchor>ab36a5db15201864a13fb628f331196d0</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>source_position</type>
       <name>end</name>
       <anchorfile>structtoml_1_1source__region.html</anchorfile>
       <anchor>a054940b42dcf83391697ec2b8690531d</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>source_path_ptr</type>
       <name>path</name>
       <anchorfile>structtoml_1_1source__region.html</anchorfile>
       <anchor>a25fc23f579edb8afc0818c013c5ac5d7</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend std::ostream &amp;</type>
@@ -5363,28 +5363,28 @@
     <filename>classtoml_1_1table.html</filename>
     <base>toml::node</base>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>a823f0d3385d2d8d8320a72f78c677a35</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>a8c06941e05e31602d46f26ba84d14b23</anchor>
       <arglist>(const table &amp;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>ab47a76ab242afa13f1a74e5e2bcded44</anchor>
       <arglist>(table &amp;&amp;other) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>table</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>a7fdc52c0aa1bd67ae6738f029787bc2f</anchor>
@@ -6056,14 +6056,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -6151,14 +6151,14 @@
       <name>iterator</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>a87e055bad435d5332dc496c518733a4d</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>toml::const_table_iterator</type>
       <name>const_iterator</name>
       <anchorfile>classtoml_1_1table.html</anchorfile>
       <anchor>a68fea8ca9b1018f9675fd346b9f4512e</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
       <type>iterator</type>
@@ -6882,14 +6882,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -6970,7 +6970,7 @@
     <name>toml::time</name>
     <filename>structtoml_1_1time.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>time</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
       <anchor>a460d6626a20b992f38c676bf5ee62a20</anchor>
@@ -6988,28 +6988,28 @@
       <name>hour</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
       <anchor>a18f32a58846d333f9e866b725b7b7ae4</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>uint8_t</type>
       <name>minute</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
       <anchor>a02de4fe041dfa9535eb4df60d86f7fb4</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>uint8_t</type>
       <name>second</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
       <anchor>a8ae0ab849a761543207ca86a2e1d0fdf</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>uint32_t</type>
       <name>nanosecond</name>
       <anchorfile>structtoml_1_1time.html</anchorfile>
       <anchor>a3e9c60650ccd21f1e47132b777547185</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend constexpr bool</type>
@@ -7065,7 +7065,7 @@
     <name>toml::time_offset</name>
     <filename>structtoml_1_1time__offset.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>time_offset</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
       <anchor>a49af2cb136f213443f15e108657f5f0e</anchor>
@@ -7083,7 +7083,7 @@
       <name>minutes</name>
       <anchorfile>structtoml_1_1time__offset.html</anchorfile>
       <anchor>a2f4cd0259300e318defc0c5efde592dd</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend constexpr bool</type>
@@ -7139,14 +7139,14 @@
     <name>toml::toml_formatter</name>
     <filename>classtoml_1_1toml__formatter.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>toml_formatter</name>
       <anchorfile>classtoml_1_1toml__formatter.html</anchorfile>
       <anchor>a8110aaa1057d7633428f6795ac14983a</anchor>
       <arglist>(const toml::node &amp;source, format_flags flags=default_flags) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>toml_formatter</name>
       <anchorfile>classtoml_1_1toml__formatter.html</anchorfile>
       <anchor>a3af0ca99139edbd30845a5cd7d2c0137</anchor>
@@ -7157,7 +7157,7 @@
       <name>default_flags</name>
       <anchorfile>classtoml_1_1toml__formatter.html</anchorfile>
       <anchor>a0aa00006896f1b23e8bb2ec1a6842845</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend std::ostream &amp;</type>
@@ -7184,45 +7184,45 @@
       <name>value_type</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>ad87b8c7ec465c424b861aba2d4cd5526</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>value_arg</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>ae2ff26c3e1a69d18a35bfbf8b191ed70</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>ab7aa8ba30bd6ead7db1e9cadbff39e22</anchor>
       <arglist>(Args &amp;&amp;... args) noexcept(noexcept(value_type(impl::native_value_maker&lt; value_type, std::decay_t&lt; Args &gt;... &gt;::make(static_cast&lt; Args &amp;&amp; &gt;(args)...))))</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>a62ace5d37c6cf09fdc589efa5e0a0905</anchor>
       <arglist>(const value &amp;other) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>a65e6e8fa27455d83ad3ada020e11cf91</anchor>
       <arglist>(const value &amp;other, value_flags flags) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>adfb0250a9769fea9d585609db77bc64a</anchor>
       <arglist>(value &amp;&amp;other) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>value</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>a5f6f5a83b2dc3f5842f7fd5fbc0e4f59</anchor>
@@ -7544,28 +7544,28 @@
       <arglist>() const &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator value_type &amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>adaf04b51fea2bdc3da39fbf63c240b3b</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator value_type &amp;&amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>ad5d4a1c818d7004bc4c42219edf84dd9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const value_type &amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>aeaa7f385c753bc7f11f0758d8ae325b6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const value_type &amp;&amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>aef9bb783e7c8ba475838742b7cfc3178</anchor>
@@ -7712,14 +7712,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -8188,28 +8188,28 @@
       <arglist>() const &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator value_type &amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>adaf04b51fea2bdc3da39fbf63c240b3b</anchor>
       <arglist>() &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator value_type &amp;&amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>ad5d4a1c818d7004bc4c42219edf84dd9</anchor>
       <arglist>() &amp;&amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const value_type &amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>aeaa7f385c753bc7f11f0758d8ae325b6</anchor>
       <arglist>() const &amp;noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator const value_type &amp;&amp;</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
       <anchor>aef9bb783e7c8ba475838742b7cfc3178</anchor>
@@ -8356,14 +8356,14 @@
       <arglist>(Func &amp;&amp;visitor) const &amp;&amp;noexcept(visit_is_nothrow&lt; Func &amp;&amp;, const node &amp;&amp; &gt;)</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>a04d800d6ec9342d2ee2a364f05317573</anchor>
       <arglist>() noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>operator node_view&lt; const node &gt;</name>
       <anchorfile>classtoml_1_1node.html</anchorfile>
       <anchor>ac7d6979c7246d7faee8ca48aadfcee68</anchor>
@@ -8535,14 +8535,14 @@
     <name>toml::yaml_formatter</name>
     <filename>classtoml_1_1yaml__formatter.html</filename>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>yaml_formatter</name>
       <anchorfile>classtoml_1_1yaml__formatter.html</anchorfile>
       <anchor>a0089cdd517d9f6641ed10c8ddb5b1c11</anchor>
       <arglist>(const toml::node &amp;source, format_flags flags=default_flags) noexcept</arglist>
     </member>
     <member kind="function">
-      <type></type>
+      <type/>
       <name>yaml_formatter</name>
       <anchorfile>classtoml_1_1yaml__formatter.html</anchorfile>
       <anchor>a2eb50c4983f7ec26a417befeface23bf</anchor>
@@ -8553,7 +8553,7 @@
       <name>default_flags</name>
       <anchorfile>classtoml_1_1yaml__formatter.html</anchorfile>
       <anchor>af161f0a6c794945e85b210ee85cb78e9</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="friend">
       <type>friend std::ostream &amp;</type>
@@ -8599,70 +8599,70 @@
       <name>array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a29f7024613d87f4c439bcfe069a4a3e6</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>af895b4da4a93355537c7fce73b8a38ab</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>toml_formatter</type>
       <name>default_formatter</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a2b87b5d257f54773683328031f453e76</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>inserted_type_of</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a98d783a1c89ce747982c2d24a5329882</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>uint32_t</type>
       <name>source_index</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>afb852fa22a8b3ea9d200d645b9d5c308</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>std::shared_ptr&lt; const std::string &gt;</type>
       <name>source_path_ptr</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>ac6cf446b480546ae1f71f5b86442368d</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>std::optional&lt; T &gt;</type>
       <name>optional</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>af34a9fb3305e419784104609e6bbb7ac</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>aaed1da38e7ed361e105fae086cf7b0c1</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>aebe170823fa068b873aa4c775d597993</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="enumeration">
-      <type></type>
+      <type/>
       <name>node_type</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>abac3e84bbf1f2c90717fca107055f48d</anchor>
-      <arglist></arglist>
+      <arglist/>
       <enumvalue file="namespacetoml.html" anchor="abac3e84bbf1f2c90717fca107055f48da334c4a4c42fdb79d7ebc3e73b517e6f8">none</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="abac3e84bbf1f2c90717fca107055f48daaab9e1de16f38176f86d7a92ba337a8d">table</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="abac3e84bbf1f2c90717fca107055f48daf1f713c9e000f5d3f280adbd124df4f5">array</enumvalue>
@@ -8675,22 +8675,22 @@
       <enumvalue file="namespacetoml.html" anchor="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</enumvalue>
     </member>
     <member kind="enumeration">
-      <type></type>
+      <type/>
       <name>value_flags</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a73eba6a34e7c7c4a4d311100800e1bb5</anchor>
-      <arglist></arglist>
+      <arglist/>
       <enumvalue file="namespacetoml.html" anchor="a73eba6a34e7c7c4a4d311100800e1bb5a334c4a4c42fdb79d7ebc3e73b517e6f8">none</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a73eba6a34e7c7c4a4d311100800e1bb5a3d21a9285de175ffffc99cfa13df21df">format_as_binary</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a73eba6a34e7c7c4a4d311100800e1bb5adfc26763754dabbdf97d3c8833a2e8ba">format_as_octal</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a73eba6a34e7c7c4a4d311100800e1bb5a4dd3fec464b7da02debfbc0bd4725c29">format_as_hexadecimal</enumvalue>
     </member>
     <member kind="enumeration">
-      <type></type>
+      <type/>
       <name>format_flags</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a2102aa80bc57783d96180f36e1f64f6a</anchor>
-      <arglist></arglist>
+      <arglist/>
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa334c4a4c42fdb79d7ebc3e73b517e6f8">none</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa6e569050aafc6eca4c0c5dfab35fd25a">quote_dates_and_times</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aaebc5b9f8f77d6df3c806339479f46098">quote_infinities_and_nans</enumvalue>
@@ -8709,11 +8709,11 @@
       <enumvalue file="namespacetoml.html" anchor="a2102aa80bc57783d96180f36e1f64f6aa78b9ffac2669c1419aeb8dcc845a70bb">force_multiline_arrays</enumvalue>
     </member>
     <member kind="enumeration">
-      <type></type>
+      <type/>
       <name>path_component_type</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a05daf3902d4363b06fb467a3292c0bc5</anchor>
-      <arglist></arglist>
+      <arglist/>
       <enumvalue file="namespacetoml.html" anchor="a05daf3902d4363b06fb467a3292c0bc5a3c6e0b8a9c15224a8228b9a98ca1531d">key</enumvalue>
       <enumvalue file="namespacetoml.html" anchor="a05daf3902d4363b06fb467a3292c0bc5aa59d1ac564bcca436d50c942090e4259">array_index</enumvalue>
     </member>
@@ -8862,126 +8862,126 @@
       <name>preserve_source_value_flags</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a32f700b152e15c357801e905d626a4fb</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_table</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>ad11c8c8a8286d6931e40658679aa7ddb</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_array</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a2251b703f3ec4d1a3036c82ead3d69cc</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_container</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>ad6c6e1677e1cc564d40efa89af2514a2</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_string</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>aea14621807afe92a840d82c7139cde07</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_integer</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a513bdc4a19071f0be70e92bb6cb1a1a3</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_floating_point</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a1aaaa0e264cdd4f43518571f2f61ac36</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_number</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a64ce7ed6974d2b17823565bc67c40873</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_boolean</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a8e79820651cc9a835082cf9abd47d885</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_date</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a3c5daa4563e3aff2b5e6460aa97d28df</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_time</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a87aee32768a32bb838150421e4e3cf97</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_date_time</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a3285caf012789a607851026f9827a33d</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_chronological</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a7f8764060ca7dccb7e829f67d82c0485</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_value</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a0d9cd265e448130b95305ccd68d2f508</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_node</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a4e4126f63ba560963de095cd9bee0704</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_node_view</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>ab5b06dac8c1e0de9e06411917e10b618</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_key</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a7b8ef907d9629d139a30d874b345b195</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="variable">
       <type>constexpr bool</type>
       <name>is_key_or_convertible</name>
       <anchorfile>namespacetoml.html</anchorfile>
       <anchor>a052fafde71907ef3a8590ef7ec2455d8</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
   </compound>
   <compound kind="namespace">
@@ -8989,21 +8989,21 @@
     <filename>namespacetoml_1_1literals.html</filename>
     <member kind="function">
       <type>parse_result</type>
-      <name>operator&quot;&quot;_toml</name>
+      <name>operator""_toml</name>
       <anchorfile>namespacetoml_1_1literals.html</anchorfile>
       <anchor>a401530e560c2dc540729af01e10b2a74</anchor>
       <arglist>(const char *str, size_t len)</arglist>
     </member>
     <member kind="function">
       <type>parse_result</type>
-      <name>operator&quot;&quot;_toml</name>
+      <name>operator""_toml</name>
       <anchorfile>namespacetoml_1_1literals.html</anchorfile>
       <anchor>abb2307d66538d0d43dd074040f83224c</anchor>
       <arglist>(const char8_t *str, size_t len)</arglist>
     </member>
     <member kind="function">
       <type>path</type>
-      <name>operator&quot;&quot;_tpath</name>
+      <name>operator""_tpath</name>
       <anchorfile>namespacetoml_1_1literals.html</anchorfile>
       <anchor>ad406c84d960dd5bda91564f738f67d47</anchor>
       <arglist>(const char *str, size_t len)</arglist>
@@ -9018,112 +9018,112 @@
       <name>TOML_CONFIG_HEADER</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga09204feb4a3ff5534623c2bd052dcec0</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_HEADER_ONLY</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga8219bfd7e75587516385b6022b28abc2</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_HEADER_ONLY</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga8219bfd7e75587516385b6022b28abc2</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_IMPLEMENTATION</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga27ee69835a1ddff9dbaf3015b4b08a11</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_EXPORTED_CLASS</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga3d7aebf91431575688d573f09a17559a</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_EXPORTED_MEMBER_FUNCTION</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>gadf515bb7a6b8ce6b14bf86c8961a63cb</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_EXPORTED_STATIC_FUNCTION</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga8436c6f378c73f3446a3b6f1e2c5e81c</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_EXPORTED_FREE_FUNCTION</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>gac40a454cde06de4e76df3d6d460a3544</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_ENABLE_UNRELEASED_FEATURES</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga1110ff7d189a7738b9109d120f568b6b</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_ENABLE_PARSER</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga121912d75d4624de6ab6854e41d8a852</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_ENABLE_FORMATTERS</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga9fc77582d9de77f59d2ddc9ae1f748ca</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_ENABLE_WINDOWS_COMPAT</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga94867db67c98e0e9d4fbb70690951fbf</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_OPTIONAL_TYPE</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga9c2c03f867eb6d76a5f65b06eeb1186e</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_EXCEPTIONS</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga93097ecd88ca4bca393f60a78bda643b</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_CALLCONV</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga2bfc7ae4747f15378d92249aadce019e</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_SMALL_FLOAT_TYPE</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga11a3368da40938a6b5cfd898320706f7</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
@@ -9137,28 +9137,28 @@
       <name>TOML_SMALL_INT_TYPE</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga0722fa2c57da6360c7f2ba08c60e1a81</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_ENABLE_FLOAT16</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga56ab81041897681ac38ceba52a380b97</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_DISABLE_CONDITIONAL_NOEXCEPT_LAMBDA</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>ga5c13a4a38e4b663c78ab84b7c99845f4</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
     <member kind="define">
       <type>#define</type>
       <name>TOML_DISABLE_NOEXCEPT_NOEXCEPT</name>
       <anchorfile>group__configuration.html</anchorfile>
       <anchor>gac69eea7bc0905d58a6afc199982ed7ad</anchor>
-      <arglist></arglist>
+      <arglist/>
     </member>
   </compound>
   <compound kind="page">

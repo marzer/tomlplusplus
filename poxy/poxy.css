@@ -373,11 +373,11 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 .poxy-theme-dark {
 --font: 'Source Sans Pro', sans-serif;
 --code-font: 'Source Code Pro', monospace;
---font-size: 16px;
+--font-size: 17px;
 --code-font-size: 0.9em;
---line-height: normal;
---paragraph-indent: 1.5rem;
---paragraph-align: justify;
+--line-height: 1.65;
+--paragraph-indent: 0rem;
+--paragraph-align: left;
 --link-decoration: underline;
 --link-decoration-nav: none;
 --link-decoration-heading: none;
@@ -387,7 +387,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --nav-categories-case: lowercase;
 --landing-header-case: lowercase;
 --heading-font-weight: 600;
---border-radius: 0.2rem;
+--border-radius: 0.4rem;
 --background-color: #2f363f;
 --color: #dcdcdc;
 --line-color: #405363;
@@ -497,6 +497,15 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --special-filled-link-active-color: #e4a8ff;
 --detail-section-header-color: var(--header-background-color);
 --detail-section-background-color: rgba(0, 0, 0, 0.06);
+--poxy-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.25);
+--poxy-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.35), 0 8px 22px rgba(0, 0, 0, 0.32);
+--poxy-header-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+--poxy-card-border-color: #3a4654;
+--poxy-code-background-color: #282e36;
+--poxy-target-flash-color: rgba(255, 210, 80, 0.3);
+--poxy-target-bar-color: var(--article-heading-color);
+--poxy-footer-border-color: #545f6f;
+--poxy-header-bg-translucent: rgba(34, 39, 46, 0.8);
 --sponsor-color: #ff69b4;
 }
 /*==== m-theme-light.css =============================================================================================*/
@@ -519,11 +528,11 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 .poxy-theme-light {
 --font: 'Source Sans Pro', sans-serif;
 --code-font: 'Source Code Pro', monospace;
---font-size: 16px;
+--font-size: 17px;
 --code-font-size: 0.9em;
---line-height: normal;
---paragraph-indent: 1.5rem;
---paragraph-align: justify;
+--line-height: 1.65;
+--paragraph-indent: 0rem;
+--paragraph-align: left;
 --link-decoration: underline;
 --link-decoration-nav: none;
 --link-decoration-heading: none;
@@ -533,7 +542,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 --nav-categories-case: lowercase;
 --landing-header-case: lowercase;
 --heading-font-weight: 600;
---border-radius: 0.2rem;
+--border-radius: 0.4rem;
 --background-color: var(--theme-surface4);
 --color: var(--theme-text1);
 --line-color: var(--theme-surface6);
@@ -639,6 +648,7 @@ unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+
 }
 /*==== poxy-theme-light.css ==========================================================================================*/
 .poxy-theme-light {
+--code-background-color: var(--poxy-code-background-color);
 --code-font: "Consolas", "Source Code Pro", monospace;
 --code-color-comments: #008000;
 --code-color-keywords: #0000ff;
@@ -672,6 +682,15 @@ calc(var(--special-luminosity) * 1.4)
 --special-filled-link-active-color: var(--special-filled-color);
 --detail-section-header-color: var(--theme-surface3);
 --detail-section-background-color: rgba(255, 255, 255, 0.3);
+--poxy-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 4px rgba(15, 23, 42, 0.07);
+--poxy-shadow-md: 0 2px 6px rgba(15, 23, 42, 0.08), 0 8px 20px rgba(15, 23, 42, 0.08);
+--poxy-header-shadow: 0 1px 3px rgba(15, 23, 42, 0.14), 0 4px 14px rgba(15, 23, 42, 0.1);
+--poxy-card-border-color: hsl(var(--theme-hue), 22%, 86%);
+--poxy-code-background-color: hsl(var(--theme-hue), 30%, 97%);
+--poxy-target-flash-color: rgba(255, 196, 0, 0.45);
+--poxy-target-bar-color: var(--theme-surface8);
+--poxy-footer-border-color: hsl(var(--theme-hue), 22%, 74%);
+--poxy-header-bg-translucent: hsla(var(--theme-hue), calc(var(--theme-saturation) * 0.5), 55%, 0.8);
 --sponsor-color: #f8c8dc;
 }
 /*==== ../mcss/css/m-grid.css ========================================================================================*/
@@ -2671,7 +2690,7 @@ body > header,
 body > header * { white-space: nowrap; }
 a { text-decoration: none !important; }
 a:hover { text-decoration: underline !important; }
-article div > section { margin-top: 2.5rem; }
+article div > section { margin-top: 3rem; }
 article div > section:first-of-type { margin-top: initial; }
 article div > section > section { margin-top: 2.25rem; }
 article div > section > section:first-of-type { margin-top: initial; }
@@ -2817,6 +2836,21 @@ article section:target > .m-container-inflate > .m-block,
 article section:target section.m-doc-details > div > h3:first-child,
 article section.m-doc-details:target > div > h3:first-child { border-color: var(--article-heading-color) !important; }
 article section:target section.m-doc-details > div > h3:first-child { border-left-style: solid; border-left-width: 0.25rem; }
+@keyframes poxy-target-flash {
+from { background-color: var(--poxy-target-flash-color); }
+to { background-color: transparent; }
+}
+article section:target,
+article section.m-doc-details:target > div { animation: poxy-target-flash 2s ease-out 1; }
+article section:target { border-left-width: 0.35rem; border-left-color: var(--poxy-target-bar-color); }
+article section.m-doc-details:target > div > h3:first-child { border-left-color: var(--poxy-target-bar-color) !important; }
+@keyframes poxy-target-text-restore {
+from { color: var(--color); }
+to { color: var(--dim-color); }
+}
+article section:target .m-doc-template,
+article section:target dl.m-doc dd,
+article section:target ul.m-doc li > span.m-doc { animation: poxy-target-text-restore 2s ease-out 1; }
 .m-label:not(.m-flat) { color: var(--background-color) !important; }
 figure.m-figure > figcaption {
 font-weight: initial !important;
@@ -2854,4 +2888,52 @@ header nav a.sponsor:hover,
 footer nav a.sponsor:hover,
 a.poxy-icon.sponsor:hover { color: var(--sponsor-color) !important; }
 main article a.poxy-named-requirement { font-style: italic; }
+body > header > nav { box-shadow: var(--poxy-header-shadow); }
+body > header > nav:not(.m-navbar-landing):not(.m-navbar-cover) {
+background-color: var(--poxy-header-bg-translucent);
+-webkit-backdrop-filter: blur(10px);
+backdrop-filter: blur(10px);
+}
+body > footer > nav { border-top: 1px solid var(--poxy-footer-border-color); padding-top: 1.5rem; padding-bottom: 1.5rem; }
+pre.m-code,
+pre.m-console { border: 1px solid var(--poxy-card-border-color); box-shadow: var(--poxy-shadow-sm); }
+pre.m-console { border-color: transparent; }
+.m-note pre.m-code,
+.m-note pre.m-console { box-shadow: none; }
+.m-note { box-shadow: var(--poxy-shadow-sm); border-left: 0.3rem solid var(--dim-color); }
+.m-note > h4:first-child { font-weight: 600; margin-bottom: 0.5rem; }
+.m-note.m-primary { border-left-color: var(--primary-color); }
+.m-note.m-success { border-left-color: var(--success-color); }
+.m-note.m-warning { border-left-color: var(--warning-color); }
+.m-note.m-danger { border-left-color: var(--danger-color); }
+.m-note.m-info { border-left-color: var(--info-color); }
+.m-note.m-special { border-left-color: var(--special-color); }
+article section.m-doc-details > div { box-shadow: var(--poxy-shadow-md); border-radius: var(--border-radius); overflow: hidden; }
+article table.m-table {
+box-shadow: var(--poxy-shadow-sm);
+border-radius: var(--border-radius);
+border-collapse: separate;
+border-spacing: 0;
+overflow: hidden;
+}
+article table.m-table:not(.m-flat) thead th,
+article table.m-table:not(.m-flat) thead td { background-color: var(--detail-section-header-color); }
+article table.m-table.m-flat { box-shadow: none; border-radius: 0; }
+main article h1 { font-size: 2.2rem; }
+main article h2 { font-size: 1.6rem; }
+main article h3 { font-size: 1.3rem; }
+main article h4 { font-size: 1.15rem; }
+main article h5 { font-size: 1.05rem; }
+main article h6 { font-size: 1rem; }
+main article h5,
+main article h6 { font-weight: 700; }
+main article h1,
+main article h2,
+main article h3,
+main article h4,
+main article h5,
+main article h6,
+main article dl.m-doc dt { line-height: 1.25; }
+main article h2:not(:first-child),
+main article h3:not(:first-child) { margin-top: 2.25rem; }
 
