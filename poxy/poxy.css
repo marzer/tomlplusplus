@@ -2691,7 +2691,6 @@ body > header * { white-space: nowrap; }
 a { text-decoration: none !important; }
 a:hover { text-decoration: underline !important; }
 article div > section { margin-top: 3rem; }
-article div > section:first-of-type { margin-top: initial; }
 article div > section > section { margin-top: 2.25rem; }
 article div > section > section:first-of-type { margin-top: initial; }
 a.poxy-external { font-weight: normal; }
@@ -2936,4 +2935,50 @@ main article h6,
 main article dl.m-doc dt { line-height: 1.25; }
 main article h2:not(:first-child),
 main article h3:not(:first-child) { margin-top: 2.25rem; }
+/*==== poxy-tabs.css =================================================================================================*/
+.poxy-tabs { display: flex; flex-wrap: wrap; position: relative; margin-bottom: 1rem; }
+.poxy-tabs > .poxy-tab-radio {
+position: absolute;
+width: 1px;
+height: 1px;
+margin: -1px;
+padding: 0;
+border: 0;
+opacity: 0;
+overflow: hidden;
+clip: rect(0 0 0 0);
+}
+.poxy-tabs > .poxy-tab-label {
+order: -1;
+cursor: pointer;
+user-select: none;
+padding: 0.3rem 0.9rem;
+font-weight: bold;
+color: var(--color);
+opacity: 0.65;
+border-bottom: 2px solid transparent;
+}
+.poxy-tabs > .poxy-tab-label:hover { opacity: 1; color: var(--link-color); }
+.poxy-tabs > .poxy-tab-radio:checked + .poxy-tab-label { opacity: 1; color: var(--link-color); border-bottom-color: var(--link-color); }
+.poxy-tabs > .poxy-tab-radio:focus-visible + .poxy-tab-label { outline: 2px solid var(--link-color); outline-offset: 2px; }
+.poxy-tabs > .poxy-tab-panel {
+display: none;
+order: 0;
+width: 100%;
+box-sizing: border-box;
+margin-top: -2px;
+padding-top: 1rem;
+border-top: 2px solid var(--line-color);
+}
+.poxy-tabs > .poxy-tab-radio:checked + .poxy-tab-label + .poxy-tab-panel { display: block; }
+.poxy-tabs > .poxy-tab-panel > :last-child { margin-bottom: 0; }
+/*==== poxy-iframe.css ===============================================================================================*/
+iframe.poxy-iframe { display: block; border: 0; }
+iframe.poxy-iframe-full { width: 100vw; margin-left: calc(50% - 50vw); height: calc(100vh - 9.5rem); }
+iframe.poxy-iframe-inline {
+width: 100%;
+height: 40rem;
+border: 1px solid var(--line-color);
+border-radius: var(--border-radius);
+}
 
