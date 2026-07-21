@@ -182,6 +182,12 @@ b = []
 		}
 	}
 
+	SECTION("tomlplusplus/issues/295") // https://github.com/marzer/tomlplusplus/issues/295
+	{
+		parsing_should_fail(FILE_LINE_ARGS, "\xcc\xaa"sv);
+		parsing_should_fail(FILE_LINE_ARGS, "\xcf\xaa"sv);
+	}
+
 	SECTION("tomlplusplus/issues/112") // https://github.com/marzer/tomlplusplus/issues/112
 	{
 		parsing_should_fail(FILE_LINE_ARGS,

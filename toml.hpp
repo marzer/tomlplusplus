@@ -8809,10 +8809,8 @@ TOML_IMPL_NAMESPACE_START
 			case 0x05: return c == U'\u1680' || c == U'\u180E';
 			case 0x07:
 				return (U'\u2000' <= c && c <= U'\u200B') || (U'\u205F' <= c && c <= U'\u2060') || c == U'\u202F';
-			default: TOML_UNREACHABLE;
+			default: return false;
 		}
-
-		TOML_UNREACHABLE;
 	}
 
 	TOML_CONST_GETTER
