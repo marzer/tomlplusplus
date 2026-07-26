@@ -1692,6 +1692,10 @@ TOML_NAMESPACE_START // abi namespace
 	inserter(T&) -> inserter<T&>;
 
 	using default_formatter = toml_formatter;
+
+	template <typename T>
+	struct string_like : std::false_type
+	{};
 }
 TOML_NAMESPACE_END;
 
@@ -1716,12 +1720,42 @@ TOML_IMPL_NAMESPACE_START
 	inline constexpr bool is_wide_string =
 		is_one_of<std::decay_t<T>, const wchar_t*, wchar_t*, std::wstring_view, std::wstring>;
 
+	// user-defined string types (see toml::string_like)
+
+	template <typename T>
+	inline constexpr bool is_string_like = toml::string_like<remove_cvref<T>>::value;
+
+	// ... usable as an initializer for a TOML string value.
+	// note that a type converting via operator std::string() is *not* convertible to std::string_view (that would
+	// require two user-defined conversions), so both targets have to be checked independently.
+	template <typename T>
+	inline constexpr bool string_like_is_initializer =
+		is_string_like<T>
+		&& (std::is_convertible_v<const remove_cvref<T>&, std::string_view>
+			|| std::is_convertible_v<const remove_cvref<T>&, std::string>);
+
+	// ... usable as a target type when retrieving a TOML string value
+	template <typename T>
+	inline constexpr bool string_like_is_target = is_string_like<T>
+											  && (std::is_constructible_v<remove_cvref<T>, std::string_view>
+												  || std::is_constructible_v<remove_cvref<T>, const std::string&>);
+
+	// ... and whether constructing that target can throw (it is built from whichever of the two the type supports,
+	// preferring the view since it never allocates a temporary)
+	template <typename T>
+	inline constexpr bool string_like_target_is_nothrow =
+		std::is_constructible_v<remove_cvref<T>, std::string_view>
+			? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
+			: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>;
+
 	template <typename T>
 	inline constexpr bool value_retrieval_is_nothrow = !std::is_same_v<remove_cvref<T>, std::string>
 #if TOML_HAS_CHAR8
 													&& !std::is_same_v<remove_cvref<T>, std::u8string>
 #endif
-
+													// user-defined string types are constructed from the stored
+													// std::string, so they can throw iff that construction can
+													&& !(string_like_is_target<T> && !string_like_target_is_nothrow<T>)
 													&& !is_wide_string<T>;
 
 	template <typename, typename>
@@ -1816,12 +1850,17 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct value_traits;
 
+	// (defined alongside the other string traits, below)
+	template <typename T>
+	struct user_string_traits;
+
+	// note: enums cannot have conversion operators, so the enum and string-like cases are mutually exclusive
 	template <typename T, bool = std::is_enum_v<T>>
 	struct value_traits_base_selector
 	{
 		static_assert(!is_cvref<T>);
 
-		using type = default_value_traits;
+		using type = std::conditional_t<is_string_like<T>, user_string_traits<T>, default_value_traits>;
 	};
 	template <typename T>
 	struct value_traits_base_selector<T, true>
@@ -2050,6 +2089,23 @@ TOML_IMPL_NAMESPACE_START
 	template <size_t N>
 	struct value_traits<char[N]> : string_traits<char[N]>
 	{};
+
+	// string value_traits specializations - user-defined string types (see toml::string_like)
+	//
+	// unlike the built-in string types these are never 'native' (storage is always std::string), and the two
+	// directions are tracked independently, since a type may support only one of them:
+	//   - is_losslessly_convertible_to_native => usable as an initializer  (T -> std::string_view)
+	//   - can_represent_native                => usable as a retrieval target (std::string_view -> T)
+	template <typename T>
+	struct user_string_traits
+	{
+		using native_type										  = std::string;
+		static constexpr bool is_native							  = false;
+		static constexpr bool is_losslessly_convertible_to_native = string_like_is_initializer<T>;
+		static constexpr bool can_represent_native				  = string_like_is_target<T>;
+		static constexpr bool can_partially_represent_native	  = can_represent_native;
+		static constexpr auto type								  = node_type::string;
+	};
 
 	// string value_traits specializations - char8_t-based strings
 #if TOML_HAS_CHAR8
@@ -4904,7 +4960,11 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-		TOML_SA_LIST_END
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"							\
+	TOML_SA_LIST_BEG "must be constructible from std::string_view"											\
+	TOML_SA_LIST_END
 
 #define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
 	"The " type_arg " must be one of:"																		\
@@ -4928,6 +4988,10 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"							\
+	TOML_SA_LIST_BEG "must be constructible from std::string_view"											\
 	TOML_SA_LIST_END
 
 // clang-format on
@@ -5694,6 +5758,16 @@ TOML_NAMESPACE_START
 #endif
 			}
 
+			// char -> user-defined string type (see toml::string_like)
+			else if constexpr (string_like_is_target<T>)
+			{
+				// prefer the view; it never allocates a temporary
+				if constexpr (std::is_constructible_v<T, std::string_view>)
+					return T{ std::string_view{ str } };
+				else
+					return T{ str };
+			}
+
 #if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
@@ -5919,6 +5993,10 @@ TOML_NAMESPACE_START
 				#if TOML_ENABLE_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"
+				TOML_SA_LIST_BEG "must be constructible from std::string_view"
 				TOML_SA_LIST_END
 			);
 

@@ -44,7 +44,11 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
-		TOML_SA_LIST_END
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"							\
+	TOML_SA_LIST_BEG "must be constructible from std::string_view"											\
+	TOML_SA_LIST_END
 
 #define TOML_SA_VALUE_FUNC_MESSAGE(type_arg)																\
 	"The " type_arg " must be one of:"																		\
@@ -68,6 +72,10 @@ TOML_DISABLE_ARITHMETIC_WARNINGS;
 	TOML_SA_VALUE_MESSAGE_U8STRING_VIEW																		\
 	TOML_SA_LIST_SEP "const char*"																			\
 	TOML_SA_VALUE_MESSAGE_CONST_CHAR8																		\
+	TOML_SA_LIST_END																						\
+																											\
+	TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"							\
+	TOML_SA_LIST_BEG "must be constructible from std::string_view"											\
 	TOML_SA_LIST_END
 
 // clang-format on
@@ -1018,6 +1026,16 @@ TOML_NAMESPACE_START
 #endif
 			}
 
+			// char -> user-defined string type (see toml::string_like)
+			else if constexpr (string_like_is_target<T>)
+			{
+				// prefer the view; it never allocates a temporary
+				if constexpr (std::is_constructible_v<T, std::string_view>)
+					return T{ std::string_view{ str } };
+				else
+					return T{ str };
+			}
+
 #if TOML_HAS_CHAR8
 
 			// char -> char8_t (potentially unsafe - the feature is 'experimental'!)
@@ -1243,6 +1261,10 @@ TOML_NAMESPACE_START
 				#if TOML_ENABLE_WINDOWS_COMPAT
 				TOML_SA_LIST_SEP "const wchar_t*"
 				#endif
+				TOML_SA_LIST_END
+
+				TOML_SA_LIST_NXT "A user-defined string type opted-in via toml::string_like"
+				TOML_SA_LIST_BEG "must be constructible from std::string_view"
 				TOML_SA_LIST_END
 			);
 

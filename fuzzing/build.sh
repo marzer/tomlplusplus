@@ -15,6 +15,7 @@ clang++ -std=c++17 -O2 -DUSE_VENDORED_LIBS=1 \
     tests/conformance_burntsushi_valid.cpp \
     tests/conformance_iarna_invalid.cpp \
     tests/conformance_iarna_valid.cpp \
+    tests/custom_string.cpp \
     tests/formatters.cpp \
     tests/for_each.cpp \
     tests/impl_toml.cpp \
