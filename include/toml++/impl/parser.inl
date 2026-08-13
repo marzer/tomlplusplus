@@ -2772,7 +2772,8 @@ TOML_IMPL_NAMESPACE_START
 
 				// now things that can be identified from two or more characters
 				return_if_error({});
-				TOML_ASSERT_ASSUME(char_count >= 2u);
+				if (char_count < 2u)
+					set_error_and_return_default("could not determine value type"sv);
 
 				// do some 'fuzzy matching' where there's no ambiguity, since that allows the specific
 				// typed parse functions to take over and show better diagnostics if there's an issue
@@ -2833,6 +2834,10 @@ TOML_IMPL_NAMESPACE_START
 				// all correct value parses will come out of this list, so doing this as a switch is likely to
 				// be a better friend to the optimizer on the success path (failure path can be slow but that
 				// doesn't matter much).
+#if TOML_MSVC
+#pragma warning(push)
+#pragma warning(disable : 4702) // unreachable code (false-positive from trait bitmask switch)
+#endif
 				switch (unwrap_enum(traits))
 				{
 					// binary integers
