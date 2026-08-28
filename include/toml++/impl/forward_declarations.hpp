@@ -379,37 +379,6 @@ TOML_NAMESPACE_START // abi namespace
 	/// \brief The 'default' formatter used by TOML objects when they are printed to a stream.
 	/// \detail This is an alias for #toml::toml_formatter.
 	using default_formatter = toml_formatter;
-
-	/// \brief	Customization point for using your own string types with toml++.
-	///
-	/// \detail Specialize this for a user-defined string type to opt it in to being usable as an initializer
-	/// 		for TOML string values, and as a target type for node::value(), node::value_or() and friends: \cpp
-	/// namespace toml
-	/// {
-	/// 	template <>
-	/// 	struct string_like<foo::String> : std::true_type
-	/// 	{};
-	/// }
-	///
-	/// // ... thereafter:
-	/// tbl.insert("hostname", foo::String{ "localhost" });
-	/// auto hostname = tbl["hostname"].value<foo::String>();
-	/// \ecpp
-	///
-	/// 		Opting in is necessary but not sufficient; the direction(s) in which a type may be used are
-	/// 		determined by the conversions it actually supports:
-	/// 		 - to be usable as an initializer, it must be convertible to `std::string_view`
-	/// 		 - to be usable as a retrieval target, it must be constructible from `std::string_view`
-	///
-	/// 		Types satisfying only one of the two are supported in that direction only; attempting to use one
-	/// 		in the unsupported direction is a compile error.
-	///
-	/// \note	TOML string values are always stored internally as std::string. This customization point governs
-	/// 		conversions at the API boundary only, not the underlying storage, so retrieving a value as a
-	/// 		user-defined string type makes a copy.
-	template <typename T>
-	struct string_like : std::false_type
-	{};
 }
 TOML_NAMESPACE_END;
 
@@ -438,43 +407,89 @@ TOML_IMPL_NAMESPACE_START
 	inline constexpr bool is_wide_string =
 		is_one_of<std::decay_t<T>, const wchar_t*, wchar_t*, std::wstring_view, std::wstring>;
 
-	// user-defined string types (see toml::string_like)
+	// user-defined 'string-like' types (see toml::is_string_like), detected via expression SFINAE as any type with:
+	//   - a const-qualified data() or c_str() member returning (something convertible to) const char*, and
+	//   - a const-qualified length() member returning (something convertible to) size_t.
 
+	template <typename T, typename = void>
+	struct has_string_like_data : std::false_type
+	{};
 	template <typename T>
-	inline constexpr bool is_string_like = toml::string_like<remove_cvref<T>>::value;
+	struct has_string_like_data<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().data()), const char*>>>
+		: std::true_type
+	{};
 
-	// ... usable as an initializer for a TOML string value.
-	// note that a type converting via operator std::string() is *not* convertible to std::string_view (that would
-	// require two user-defined conversions), so both targets have to be checked independently.
+	template <typename T, typename = void>
+	struct has_string_like_c_str : std::false_type
+	{};
 	template <typename T>
-	inline constexpr bool string_like_is_initializer =
-		is_string_like<T>
-		&& (std::is_convertible_v<const remove_cvref<T>&, std::string_view>
-			|| std::is_convertible_v<const remove_cvref<T>&, std::string>);
+	struct has_string_like_c_str<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().c_str()), const char*>>>
+		: std::true_type
+	{};
 
-	// ... usable as a target type when retrieving a TOML string value
+	template <typename T, typename = void>
+	struct has_string_like_length : std::false_type
+	{};
+	template <typename T>
+	struct has_string_like_length<
+		T,
+		std::enable_if_t<std::is_convertible_v<decltype(std::declval<const T&>().length()), size_t>>> : std::true_type
+	{};
+
+	// (std::string and std::string_view would satisfy the member checks but are first-class citizens
+	// with their own dedicated handling, so they're excluded from the user-defined detection)
+	template <typename T>
+	inline constexpr bool is_string_like =							  //
+		std::is_class_v<remove_cvref<T>>							  //
+		&& !is_one_of<remove_cvref<T>, std::string, std::string_view> //
+		&& (has_string_like_data<remove_cvref<T>>::value			  //
+			|| has_string_like_c_str<remove_cvref<T>>::value)		  //
+		&& has_string_like_length<remove_cvref<T>>::value;
+
+	// the view over a string-like's character data (preferring data() where both it and c_str() are present)
+	template <typename T>
+	TOML_NODISCARD
+	inline std::string_view string_like_to_view(const T& str)
+	{
+		static_assert(is_string_like<T>);
+
+		if constexpr (has_string_like_data<remove_cvref<T>>::value)
+			return std::string_view{ static_cast<const char*>(str.data()), static_cast<size_t>(str.length()) };
+		else
+			return std::string_view{ static_cast<const char*>(str.c_str()), static_cast<size_t>(str.length()) };
+	}
+
+	// ... usable as a target type when retrieving a TOML string value (storage is always std::string,
+	// so the type must be constructible from the stored string or a view/pointer into it)
 	template <typename T>
 	inline constexpr bool string_like_is_target = is_string_like<T>
-											  && (std::is_constructible_v<remove_cvref<T>, std::string_view>
-												  || std::is_constructible_v<remove_cvref<T>, const std::string&>);
+											   && (std::is_constructible_v<remove_cvref<T>, std::string_view>
+												   || std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+												   || std::is_constructible_v<remove_cvref<T>, const std::string&>);
 
-	// ... and whether constructing that target can throw (it is built from whichever of the two the type supports,
-	// preferring the view since it never allocates a temporary)
+	// ... and whether constructing that target can throw (it is built from the first of
+	// std::string_view / (const char*, size_t) / const std::string& that the type supports)
 	template <typename T>
 	inline constexpr bool string_like_target_is_nothrow =
 		std::is_constructible_v<remove_cvref<T>, std::string_view>
 			? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
-			: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>;
+			: (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+				   ? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
+				   : std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>);
 
 	template <typename T>
-	inline constexpr bool value_retrieval_is_nothrow = !std::is_same_v<remove_cvref<T>, std::string>
+	inline constexpr bool value_retrieval_is_nothrow =
+		!std::is_same_v<remove_cvref<T>, std::string>
 #if TOML_HAS_CHAR8
-													&& !std::is_same_v<remove_cvref<T>, std::u8string>
+		&& !std::is_same_v<remove_cvref<T>, std::u8string>
 #endif
-													// user-defined string types are constructed from the stored
-													// std::string, so they can throw iff that construction can
-													&& !(string_like_is_target<T> && !string_like_target_is_nothrow<T>)
-													&& !is_wide_string<T>;
+		// user-defined string types are constructed from the stored
+		// std::string, so they can throw iff that construction can
+		&& !(string_like_is_target<T> && !string_like_target_is_nothrow<T>) && !is_wide_string<T>;
 
 	template <typename, typename>
 	struct copy_ref_;
@@ -572,7 +587,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename T>
 	struct user_string_traits;
 
-	// note: enums cannot have conversion operators, so the enum and string-like cases are mutually exclusive
+	// note: enums cannot have member functions, so the enum and string-like cases are mutually exclusive
 	template <typename T, bool = std::is_enum_v<T>>
 	struct value_traits_base_selector
 	{
@@ -808,18 +823,19 @@ TOML_IMPL_NAMESPACE_START
 	struct value_traits<char[N]> : string_traits<char[N]>
 	{};
 
-	// string value_traits specializations - user-defined string types (see toml::string_like)
+	// string value_traits specializations - user-defined string-like types (see toml::is_string_like)
 	//
 	// unlike the built-in string types these are never 'native' (storage is always std::string), and the two
 	// directions are tracked independently, since a type may support only one of them:
-	//   - is_losslessly_convertible_to_native => usable as an initializer  (T -> std::string_view)
-	//   - can_represent_native                => usable as a retrieval target (std::string_view -> T)
+	//   - is_losslessly_convertible_to_native => usable as an initializer (always true - the detected
+	//     data()/c_str() + length() members provide the character data)
+	//   - can_represent_native                => usable as a retrieval target (requires a suitable constructor)
 	template <typename T>
 	struct user_string_traits
 	{
 		using native_type										  = std::string;
 		static constexpr bool is_native							  = false;
-		static constexpr bool is_losslessly_convertible_to_native = string_like_is_initializer<T>;
+		static constexpr bool is_losslessly_convertible_to_native = true;
 		static constexpr bool can_represent_native				  = string_like_is_target<T>;
 		static constexpr bool can_partially_represent_native	  = can_represent_native;
 		static constexpr auto type								  = node_type::string;
@@ -1111,6 +1127,30 @@ TOML_NAMESPACE_START
 	/// \brief	Metafunction for determining if a type is, or is a reference to, a toml::node_view.
 	template <typename T>
 	inline constexpr bool is_node_view = impl::is_one_of<impl::remove_cvref<T>, node_view<node>, node_view<const node>>;
+
+	/// \brief	Metafunction for determining if a type is a user-defined 'string-like' type.
+	///
+	/// \detail User-defined string types are detected automatically and may be used anywhere the library
+	/// 		expects a string - as an initializer for TOML string values, and as a target type for
+	/// 		node::value(), node::value_or() and friends: \cpp
+	/// tbl.insert("hostname", foo::String{ "localhost" });
+	/// auto hostname = tbl["hostname"].value<foo::String>();
+	/// \ecpp
+	///
+	/// 		A type is detected as string-like when it has:
+	/// 		 - a const-qualified `data()` or `c_str()` member returning (something convertible to) `const char*`, and
+	/// 		 - a const-qualified `length()` member returning (something convertible to) `size_t`.
+	///
+	/// 		Being detected is sufficient to use a type as an initializer; to also be usable as a
+	/// 		retrieval target it must additionally be constructible from one of `std::string_view`,
+	/// 		`(const char*, size_t)` or `const std::string&`. Attempting to retrieve a value as a
+	/// 		string-like type without a suitable constructor is a compile error.
+	///
+	/// \note	TOML string values are always stored internally as std::string; detection governs conversions
+	/// 		at the API boundary only, not the underlying storage, so retrieving a value as a user-defined
+	/// 		string type makes a copy.
+	template <typename T>
+	inline constexpr bool is_string_like = impl::is_string_like<T>;
 }
 TOML_NAMESPACE_END;
 

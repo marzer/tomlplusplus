@@ -38,7 +38,6 @@ export namespace toml {
     using TOML_NAMESPACE::path_component;
     using TOML_NAMESPACE::source_position;
     using TOML_NAMESPACE::source_region;
-    using TOML_NAMESPACE::string_like;
     using TOML_NAMESPACE::table;
     using TOML_NAMESPACE::time;
     using TOML_NAMESPACE::time_offset;
@@ -81,6 +80,7 @@ export namespace toml {
     using TOML_NAMESPACE::is_node_view;
     using TOML_NAMESPACE::is_number;
     using TOML_NAMESPACE::is_string;
+    using TOML_NAMESPACE::is_string_like;
     using TOML_NAMESPACE::is_table;
     using TOML_NAMESPACE::is_time;
     using TOML_NAMESPACE::is_value;
