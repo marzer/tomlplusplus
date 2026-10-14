@@ -2637,9 +2637,8 @@ TOML_IMPL_NAMESPACE_START
 				bool eof_while_scanning = false;
 				const auto scan			= [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 				{
-					if (is_eof())
+					if (is_eof() || is_value_terminator(*cp))
 						return;
-					TOML_ASSERT_ASSUME(!is_value_terminator(*cp));
 
 					do
 					{
