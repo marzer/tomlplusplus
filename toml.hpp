@@ -13618,6 +13618,16 @@ TOML_ANON_NAMESPACE_END;
 	}                                                                                                                  \
 	while (false)
 
+#define check_entry_codepoint(...)                                                                                     \
+	do                                                                                                                 \
+	{                                                                                                                  \
+		TOML_ASSERT(!is_eof() && (__VA_ARGS__));                                                                       \
+		set_error_and_return_if_eof({});                                                                               \
+		if TOML_UNLIKELY(!(__VA_ARGS__))                                                                               \
+			set_error_and_return_default("unexpected character '"sv, escaped_codepoint{ *cp }, "'"sv);                 \
+	}                                                                                                                  \
+	while (false)
+
 #define advance_and_return_if_error(...)                                                                               \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -13920,8 +13930,7 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view parse_basic_string(bool multi_line)
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(*cp == U'"');
+			check_entry_codepoint(*cp == U'"');
 			push_parse_scope("string"sv);
 
 			// skip the '"'
@@ -14162,8 +14171,7 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view parse_literal_string(bool multi_line)
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(*cp == U'\'');
+			check_entry_codepoint(*cp == U'\'');
 			push_parse_scope("literal string"sv);
 
 			// skip the delimiter
@@ -14265,8 +14273,7 @@ TOML_IMPL_NAMESPACE_START
 		parsed_string parse_string()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_string_delimiter(*cp));
+			check_entry_codepoint(is_string_delimiter(*cp));
 			push_parse_scope("string"sv);
 
 			// snapshot length so the recording buffer can be rewound alongside go_back(2u) below
@@ -14314,8 +14321,7 @@ TOML_IMPL_NAMESPACE_START
 		std::string_view parse_bare_key_segment()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_bare_key_character(*cp));
+			check_entry_codepoint(is_bare_key_character(*cp));
 
 			string_buffer.clear();
 
@@ -14336,8 +14342,7 @@ TOML_IMPL_NAMESPACE_START
 		bool parse_boolean()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_match(*cp, U't', U'f', U'T', U'F'));
+			check_entry_codepoint(is_match(*cp, U't', U'f', U'T', U'F'));
 			push_parse_scope("boolean"sv);
 
 			start_recording(true);
@@ -14361,8 +14366,7 @@ TOML_IMPL_NAMESPACE_START
 		double parse_inf_or_nan()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_match(*cp, U'i', U'n', U'I', U'N', U'+', U'-'));
+			check_entry_codepoint(is_match(*cp, U'i', U'n', U'I', U'N', U'+', U'-'));
 			push_parse_scope("floating-point"sv);
 
 			start_recording(true);
@@ -14391,8 +14395,7 @@ TOML_IMPL_NAMESPACE_START
 		double parse_float()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_match(*cp, U'+', U'-', U'.') || is_decimal_digit(*cp));
+			check_entry_codepoint(is_match(*cp, U'+', U'-', U'.') || is_decimal_digit(*cp));
 			push_parse_scope("floating-point"sv);
 
 			// sign
@@ -14548,8 +14551,7 @@ TOML_IMPL_NAMESPACE_START
 		double parse_hex_float()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_match(*cp, U'0', U'+', U'-'));
+			check_entry_codepoint(is_match(*cp, U'0', U'+', U'-'));
 			push_parse_scope("hexadecimal floating-point"sv);
 
 #if TOML_LANG_UNRELEASED // toml/issues/562 (hexfloats)
@@ -14725,7 +14727,8 @@ TOML_IMPL_NAMESPACE_START
 		int64_t parse_integer()
 		{
 			return_if_error({});
-			assert_not_eof();
+			TOML_ASSERT(!is_eof());
+			set_error_and_return_if_eof({});
 			using traits = parse_integer_traits<base>;
 			push_parse_scope(traits::scope_qualifier);
 
@@ -14876,8 +14879,7 @@ TOML_IMPL_NAMESPACE_START
 		date parse_date(bool part_of_datetime = false)
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_decimal_digit(*cp));
+			check_entry_codepoint(is_decimal_digit(*cp));
 			push_parse_scope("date"sv);
 
 			// "YYYY"
@@ -14930,8 +14932,7 @@ TOML_IMPL_NAMESPACE_START
 		time parse_time(bool part_of_datetime = false)
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_decimal_digit(*cp));
+			check_entry_codepoint(is_decimal_digit(*cp));
 			push_parse_scope("time"sv);
 
 			static constexpr size_t max_digits = 64; // far more than necessary but needed to allow fractional
@@ -15018,8 +15019,7 @@ TOML_IMPL_NAMESPACE_START
 		date_time parse_date_time()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_decimal_digit(*cp));
+			check_entry_codepoint(is_decimal_digit(*cp));
 			push_parse_scope("date-time"sv);
 
 			// "YYYY-MM-DD"
@@ -15092,9 +15092,7 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr parse_value_known_prefixes()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(!is_control_character(*cp));
-			TOML_ASSERT_ASSUME(*cp != U'_');
+			check_entry_codepoint(!is_control_character(*cp) && *cp != U'_');
 
 			switch (cp->value)
 			{
@@ -15134,8 +15132,7 @@ TOML_IMPL_NAMESPACE_START
 		node_ptr parse_value()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(!is_value_terminator(*cp));
+			check_entry_codepoint(!is_value_terminator(*cp));
 			push_parse_scope("value"sv);
 
 			const depth_counter_scope depth_counter{ nested_values };
@@ -15621,8 +15618,7 @@ TOML_IMPL_NAMESPACE_START
 		bool parse_key()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_bare_key_character(*cp) || is_string_delimiter(*cp));
+			check_entry_codepoint(is_bare_key_character(*cp) || is_string_delimiter(*cp));
 			push_parse_scope("key"sv);
 
 			key_buffer.clear();
@@ -15708,8 +15704,7 @@ TOML_IMPL_NAMESPACE_START
 		table* parse_table_header()
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(*cp == U'[');
+			check_entry_codepoint(*cp == U'[');
 			push_parse_scope("table header"sv);
 
 			const source_position header_begin_pos = cp->position;
@@ -15938,8 +15933,7 @@ TOML_IMPL_NAMESPACE_START
 		bool parse_key_value_pair_and_insert(table* tbl)
 		{
 			return_if_error({});
-			assert_not_eof();
-			TOML_ASSERT_ASSUME(is_string_delimiter(*cp) || is_bare_key_character(*cp));
+			check_entry_codepoint(is_string_delimiter(*cp) || is_bare_key_character(*cp));
 			push_parse_scope("key-value pair"sv);
 
 			// read the key into the key buffer
@@ -16167,8 +16161,7 @@ TOML_IMPL_NAMESPACE_START
 	node_ptr parser::parse_array()
 	{
 		return_if_error({});
-		assert_not_eof();
-		TOML_ASSERT_ASSUME(*cp == U'[');
+		check_entry_codepoint(*cp == U'[');
 		push_parse_scope("array"sv);
 
 		// skip opening '['
@@ -16236,8 +16229,7 @@ TOML_IMPL_NAMESPACE_START
 	node_ptr parser::parse_inline_table()
 	{
 		return_if_error({});
-		assert_not_eof();
-		TOML_ASSERT_ASSUME(*cp == U'{');
+		check_entry_codepoint(*cp == U'{');
 		push_parse_scope("inline table"sv);
 
 		// skip opening '{'
@@ -16326,6 +16318,7 @@ TOML_IMPL_NAMESPACE_END;
 #undef advance_and_return_if_error_or_eof
 #undef assert_not_eof
 #undef assert_not_error
+#undef check_entry_codepoint
 #undef is_eof
 #undef is_error
 #undef parse_error_break

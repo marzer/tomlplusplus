@@ -29,6 +29,7 @@ template:
 - fixed unclear error message when parsing integers that would overflow (#224) (@chrimbo)
 - fixed CMake `install` target installing `meson.build` files (#236) (@JWCS)
 - lowered `TOML_MAX_NESTED_VALUES` default from 256 to 128 to prevent stack overflow on deeply nested arrays/inline tables in sanitizer builds (@danielbodorin)
+- changed the parser's per-function entry preconditions from optimizer assumptions to checks that report a parse error in release builds (@vera-rubin)
 
 ## v3.4.0
 
