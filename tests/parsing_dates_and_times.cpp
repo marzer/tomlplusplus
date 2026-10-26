@@ -171,4 +171,8 @@ TEST_CASE("parsing - dates and times")
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10:"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 10"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 1"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 1#"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16 1,"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16T:"sv);
+	parsing_should_fail(FILE_LINE_ARGS, "val = 1987-03-16t,"sv);
 }
