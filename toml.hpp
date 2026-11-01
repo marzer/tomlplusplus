@@ -15226,7 +15226,6 @@ TOML_IMPL_NAMESPACE_START
 				bool eof_while_scanning = false;
 				const auto scan			= [&]() noexcept(!TOML_COMPILER_HAS_EXCEPTIONS)
 				{
-					// the date-time rescan below can stop right before a terminator (e.g. "2000-01-01 1#")
 					if (is_eof() || is_value_terminator(*cp))
 						return;
 

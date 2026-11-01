@@ -9,6 +9,11 @@
 
 TEST_CASE("user feedback")
 {
+	SECTION("tomlplusplus/issues/313")
+	{
+		parsing_should_fail(FILE_LINE_ARGS, "a = 2026-10-13 1\n"sv);
+	}
+
 	SECTION("tomlplusplus/issues/49") // https://github.com/marzer/tomlplusplus/issues/49#issuecomment-664428571
 	{
 		toml::table t1;
