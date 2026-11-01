@@ -284,6 +284,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 ### With thanks to:
 
 -   **[@a-is](https://github.com/a-is)** - Fixed a bug
+-   **[@ac1982](https://github.com/ac1982)** - Fixed shared-library parse error visibility
 -   **[@beastle9end](https://github.com/beastle9end)** - Made Windows.h include bypass
 -   **[@bjadamson](https://github.com/bjadamson)** - Reported some bugs and helped design a new feature
 -   **[@bobfang1992](https://github.com/bobfang1992)** - Reported a bug and created a [wrapper in python](https://github.com/bobfang1992/pytomlpp)
@@ -300,6 +301,7 @@ UTF-8 decoding is performed using a state machine based on Bjoern Hoehrmann's '[
 -   **[@N-Dekker](https://github.com/N-Dekker)** - Added a workaround for the legacy lambda processor of MSVC 2019/2022, added `get_line`
 -   **[@ned14](https://github.com/ned14)** - Reported a bunch of bugs and helped design some new features
 -   **[@okureta](https://github.com/okureta)** - Reported a bug
+-   **[@peppergrayxyz](https://github.com/peppergrayxyz)** - Reported and suggested a fix for shared-library parse error visibility
 -   **[@prince-chrismc](https://github.com/prince-chrismc)** - Added toml++ to ConanCenter, and fixed some typos
 -   **[@rbrugo](https://github.com/rbrugo)** - Helped design a new feature
 -   **[@Reedbeta](https://github.com/Reedbeta)** - Fixed a bug and added additional Visual Studio debugger native visualizers

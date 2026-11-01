@@ -9184,6 +9184,11 @@ TOML_PUSH_WARNINGS;
 #undef max
 #endif
 
+#if TOML_MSVC
+// MSVC's std::runtime_error is implemented inline without a DLL annotation.
+#pragma warning(disable : 4275)
+#endif
+
 #if TOML_DOXYGEN || !TOML_EXCEPTIONS
 #define TOML_PARSE_ERROR_BASE
 #else
@@ -9194,7 +9199,7 @@ TOML_NAMESPACE_START
 {
 	TOML_ABI_NAMESPACE_BOOL(TOML_EXCEPTIONS, ex, noex);
 
-	class parse_error TOML_PARSE_ERROR_BASE
+	class TOML_EXPORTED_CLASS parse_error TOML_PARSE_ERROR_BASE
 	{
 	  private:
 #if !TOML_EXCEPTIONS
@@ -15032,6 +15037,8 @@ TOML_IMPL_NAMESPACE_START
 			advance_and_return_if_error_or_eof({});
 
 			// "HH:MM:SS.FFFFFFFFF"
+			if TOML_UNLIKELY(!is_decimal_digit(*cp))
+				set_error_and_return_default("expected 2-digit hour, saw '"sv, to_sv(*cp), "'"sv);
 			auto time = parse_time(true);
 			return_if_error({});
 
@@ -16217,6 +16224,12 @@ TOML_IMPL_NAMESPACE_START
 					continue;
 				}
 				prev = parse_type::val;
+
+				// e.g. '}' or a non-ASCII line break; parse_value() requires a value to start here
+				if TOML_UNLIKELY(is_value_terminator(*cp))
+					set_error_and_return_default("expected value or closing ']', saw '"sv,
+												 escaped_codepoint{ *cp },
+												 "'"sv);
 
 				auto val = parse_value();
 				return_if_error({});
