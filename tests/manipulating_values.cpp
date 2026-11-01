@@ -588,3 +588,246 @@ TEST_CASE("nodes - value() int/float/bool conversions")
 		CHECK_VALUE_FAIL(toml::date_time);
 	}
 }
+
+namespace string_like_types
+{
+	struct code_point_counted_string
+	{
+		std::string text;
+
+		explicit code_point_counted_string(std::string_view sv) //
+			: text{ sv }
+		{}
+
+		const char* data() const noexcept
+		{
+			return text.data();
+		}
+
+		size_t length() const noexcept
+		{
+			size_t count = {};
+			for (const auto c : text)
+				if ((static_cast<unsigned char>(c) & 0xC0u) != 0x80u)
+					count++;
+			return count;
+		}
+	};
+
+	struct convertible_to_string : code_point_counted_string
+	{
+		using code_point_counted_string::code_point_counted_string;
+
+		operator std::string() const
+		{
+			return text;
+		}
+	};
+
+	struct convertible_to_string_view : code_point_counted_string
+	{
+		using code_point_counted_string::code_point_counted_string;
+
+		operator std::string_view() const noexcept
+		{
+			return text;
+		}
+	};
+
+	struct convertible_to_c_string : code_point_counted_string
+	{
+		using code_point_counted_string::code_point_counted_string;
+
+		operator const char*() const noexcept
+		{
+			return text.c_str();
+		}
+	};
+
+	struct derived_from_string : std::string
+	{
+		using std::string::string;
+	};
+
+	struct retrievable_string
+	{
+		std::string text;
+
+		explicit retrievable_string(std::string_view sv) //
+			: text{ sv }
+		{}
+
+		const char* data() const noexcept
+		{
+			return text.data();
+		}
+
+		size_t length() const noexcept
+		{
+			return text.length();
+		}
+	};
+
+	struct initialiser_only_string : retrievable_string
+	{
+		explicit initialiser_only_string(const char* str) //
+			: retrievable_string{ str }
+		{}
+	};
+
+	struct move_only_string : retrievable_string
+	{
+		using retrievable_string::retrievable_string;
+
+		move_only_string(move_only_string&&)	  = default;
+		move_only_string(const move_only_string&) = delete;
+	};
+
+	struct potentially_throwing_copy_string
+	{
+		std::string_view text;
+
+		explicit potentially_throwing_copy_string(std::string_view sv) noexcept //
+			: text{ sv }
+		{}
+
+		potentially_throwing_copy_string(const potentially_throwing_copy_string& other) noexcept(false) //
+			: text{ other.text }
+		{}
+
+		const char* data() const noexcept
+		{
+			return text.data();
+		}
+
+		size_t length() const noexcept
+		{
+			return text.length();
+		}
+	};
+
+	template <typename T>
+	void check_existing_conversion_is_used()
+	{
+		static constexpr auto text = "h\xC3\xA9llo w\xC3\xB6rld"sv;
+
+		const T str{ text };
+		REQUIRE(str.length() < text.length());
+		REQUIRE(std::string_view{ str.data(), text.length() } == text);
+
+		CHECK(value<std::string>{ str }.get() == text);
+		CHECK(value<std::string>{ T{ text } }.get() == text);
+
+		array arr;
+		arr.emplace_back<std::string>(str);
+		CHECK(*arr.get_as<std::string>(0) == text);
+
+		table tbl;
+		tbl.emplace<std::string>("k", str);
+		CHECK(tbl["k"] == text);
+	}
+
+	template <typename T>
+	void check_equality_when_losslessly_convertible()
+	{
+		if constexpr (impl::is_losslessly_convertible_to_native<T>)
+		{
+			table tbl{ { "k", "x"sv } };
+			CHECK(tbl["k"] == T{ "x" });
+			CHECK(tbl["k"] != T{ "y" });
+			CHECK(tbl["missing"] != T{ "x" });
+
+			array arr{ "x"sv };
+			CHECK(arr == std::vector<T>{ T{ "x" } });
+			CHECK(arr != std::vector<T>{ T{ "y" } });
+		}
+	}
+
+	template <typename T>
+	void check_insertion_when_losslessly_convertible()
+	{
+		if constexpr (impl::is_losslessly_convertible_to_native<T>)
+		{
+			static_assert(std::is_same_v<inserted_type_of<T>, value<std::string>>);
+
+			table tbl;
+			tbl.insert("a", T{ "x" });
+			tbl.insert_or_assign("b", T{ "x" });
+			tbl.emplace("c", T{ "x" });
+			CHECK(tbl["a"] == "x"sv);
+			CHECK(tbl["b"] == "x"sv);
+			CHECK(tbl["c"] == "x"sv);
+
+			array arr;
+			arr.push_back(T{ "x" });
+			arr.emplace_back(T{ "x" });
+			CHECK(arr == array{ "x"sv, "x"sv });
+		}
+	}
+
+	template <typename T>
+	void check_value_or_when_native_is_representable()
+	{
+		if constexpr (impl::can_represent_native<T>)
+		{
+			table tbl{ { "k", "x"sv } };
+			CHECK(tbl["k"].value_or(T{ "y" }).text == "x"sv);
+			CHECK(tbl["missing"].value_or(T{ "y" }).text == "y"sv);
+		}
+	}
+
+	template <typename T>
+	void check_retrieval_is_not_noexcept_when_native_is_representable()
+	{
+		if constexpr (impl::can_represent_native<T>)
+		{
+			static_assert(!noexcept(std::declval<const node&>().value<T>()));
+			static_assert(!noexcept(std::declval<const node&>().value_exact<T>()));
+			static_assert(!noexcept(std::declval<const node&>().value_or(std::declval<T>())));
+		}
+	}
+}
+
+using namespace string_like_types;
+
+TEST_CASE("string-like types - construction uses existing conversions to std::string")
+{
+	check_existing_conversion_is_used<convertible_to_string>();
+	check_existing_conversion_is_used<convertible_to_string_view>();
+	check_existing_conversion_is_used<convertible_to_c_string>();
+}
+
+TEST_CASE("string-like types - construction moves from types derived from std::string when std::string does")
+{
+	static_assert(std::is_nothrow_constructible_v<value<std::string>, derived_from_string>
+				  == std::is_nothrow_constructible_v<std::string, derived_from_string>);
+
+	if constexpr (std::is_nothrow_constructible_v<std::string, derived_from_string>)
+	{
+		derived_from_string str{ "a string long enough that no implementation can store it in a small-string buffer" };
+		const auto buffer = std::as_const(str).data();
+
+		const value<std::string> val{ std::move(str) };
+		CHECK(val.get().data() == buffer);
+	}
+}
+
+TEST_CASE("string-like types - lossless conversion implies equality comparison")
+{
+	check_equality_when_losslessly_convertible<retrievable_string>();
+}
+
+TEST_CASE("string-like types - lossless conversion implies insertion")
+{
+	check_insertion_when_losslessly_convertible<initialiser_only_string>();
+}
+
+TEST_CASE("string-like types - value_or() supports move-only retrieval targets")
+{
+	check_value_or_when_native_is_representable<move_only_string>();
+}
+
+TEST_CASE("string-like types - retrieval is not noexcept when copying can throw")
+{
+	check_retrieval_is_not_noexcept_when_native_is_representable<potentially_throwing_copy_string>();
+}
