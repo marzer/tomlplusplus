@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.24.1" name="generator"/>
+  <meta content="Poxy v0.27.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -158,7 +158,7 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="namespacetoml.html#a8a37f07ea9c0a841be1352143b3cbc52">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
               node_type rhs) →  <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;</span>
             </dt>
-            <dd>Pretty-prints the value of a node_type to a stream.</dd>
+            <dd>Pretty-prints the value of a <a class="m-doc" href="namespacetoml.html#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> to a stream.</dd>
           </dl>
         </section>
         <section id="var-members">
@@ -173,7 +173,7 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a8e79820651cc9a835082cf9abd47d885">is_boolean</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a bool or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;bool&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a bool or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;bool&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a7f8764060ca7dccb7e829f67d82c0485">is_chronological</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -188,22 +188,22 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a3c5daa4563e3aff2b5e6460aa97d28df">is_date</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;date&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a3285caf012789a607851026f9827a33d">is_date_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected" href="structtoml_1_1date__time.html">date_time</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date_time&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a1aaaa0e264cdd4f43518571f2f61ac36">is_floating_point</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a double or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;double&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a double or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;double&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;int64_t&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a4e4126f63ba560963de095cd9bee0704">is_node</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -223,7 +223,7 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;std::<wbr/>string&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -233,7 +233,7 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a87aee32768a32bb838150421e4e3cf97">is_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or <a class="m-doc poxy-injected" href="classtoml_1_1value.html">toml::value</a>&lt;time&gt;.</dd>
+            <dd>Metafunction for determining if a type is, or is a reference to, a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;time&gt;</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc" href="namespacetoml.html#a0d9cd265e448130b95305ccd68d2f508">is_value</a> <span class="m-label m-flat m-primary">constexpr</span>

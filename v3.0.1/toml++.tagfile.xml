@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<tagfile doxygen_version="1.9.8">
+<tagfile doxygen_version="1.15.0">
   <compound kind="class">
     <name>toml::array</name>
     <filename>classtoml_1_1array.html</filename>
@@ -5929,7 +5929,7 @@
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>value_arg</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ae2ff26c3e1a69d18a35bfbf8b191ed70</anchor>
+      <anchor>a356270e4c2553f2bc6e9be01d0e08e58</anchor>
       <arglist/>
     </member>
     <member kind="function">
@@ -7279,63 +7279,63 @@
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a29f7024613d87f4c439bcfe069a4a3e6</anchor>
+      <anchor>aee3b170b9f3d47e30506423bebbacca8</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>af895b4da4a93355537c7fce73b8a38ab</anchor>
+      <anchor>aed798326768dc278dfc1dbc9b1a9941c</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>toml_formatter</type>
       <name>default_formatter</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a2b87b5d257f54773683328031f453e76</anchor>
+      <anchor>ab47e4c8925738f8ea61d029cf27eb15f</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>inserted_type_of</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a98d783a1c89ce747982c2d24a5329882</anchor>
+      <anchor>af1250a70d0a3b21ceef7f9e2833f009a</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>uint32_t</type>
       <name>source_index</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>afb852fa22a8b3ea9d200d645b9d5c308</anchor>
+      <anchor>a682b5dc96858d3afa1a199a5117c0407</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>std::shared_ptr&lt; const std::string &gt;</type>
       <name>source_path_ptr</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ac6cf446b480546ae1f71f5b86442368d</anchor>
+      <anchor>a84a518e37c3bf383c7011ee8728ab92a</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>std::optional&lt; T &gt;</type>
       <name>optional</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>af34a9fb3305e419784104609e6bbb7ac</anchor>
+      <anchor>ac31f263c98fdd3801f27ae42c83c8bfc</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aaed1da38e7ed361e105fae086cf7b0c1</anchor>
+      <anchor>a93e7756e1f8cbe9c2cbe0e8a6c7560d4</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>poxyimplementationdetailimplplaceholder</type>
       <name>const_table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>aebe170823fa068b873aa4c775d597993</anchor>
+      <anchor>a067566823d79c2420376bbb6bda0c7f6</anchor>
       <arglist/>
     </member>
     <member kind="enumeration">
@@ -7666,7 +7666,7 @@
       <type>#define</type>
       <name>TOML_HEADER_ONLY</name>
       <anchorfile>group__configuration.html</anchorfile>
-      <anchor>ga8219bfd7e75587516385b6022b28abc2</anchor>
+      <anchor>ga3e563d5e6b38ba02ed57306924d5af93</anchor>
       <arglist/>
     </member>
     <member kind="define">

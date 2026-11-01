@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<tagfile doxygen_version="1.9.8">
+<tagfile doxygen_version="1.15.0">
   <compound kind="class">
     <name>toml::array</name>
     <filename>classtoml_1_1array.html</filename>
@@ -1372,15 +1372,15 @@
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
-      <anchor>ac781b0ac6c466985e5517d0821558dc2</anchor>
-      <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;)</arglist>
+      <anchor>a7916d0e65337b1d78fdea027fadcf08a</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, default_formatter&lt; U &gt; &amp;rhs)</arglist>
     </member>
     <member kind="friend">
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1default__formatter.html</anchorfile>
-      <anchor>aaa687b3a683c4843abfe476391ebd75d</anchor>
-      <arglist>(std::basic_ostream&lt; T &gt; &amp;, default_formatter&lt; U &gt; &amp;&amp;)</arglist>
+      <anchor>aec227332051520e98597ced3e471abf6</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, default_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
     </member>
   </compound>
   <compound kind="struct">
@@ -1417,15 +1417,15 @@
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
-      <anchor>a2ede04ece10d1a0acb89c0ee47672f12</anchor>
-      <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;)</arglist>
+      <anchor>af48cc81d9df6c9de627e2c0105bcda58</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;rhs)</arglist>
     </member>
     <member kind="friend">
       <type>friend std::basic_ostream&lt; T &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1json__formatter.html</anchorfile>
-      <anchor>a62b6bdaeb881e5aab4a723ce86e3cd6e</anchor>
-      <arglist>(std::basic_ostream&lt; T &gt; &amp;, json_formatter&lt; U &gt; &amp;&amp;)</arglist>
+      <anchor>a4b047970c61b168956c169dc196bb599</anchor>
+      <arglist>(std::basic_ostream&lt; T &gt; &amp;lhs, json_formatter&lt; U &gt; &amp;&amp;rhs)</arglist>
     </member>
   </compound>
   <compound kind="class">
@@ -2294,8 +2294,8 @@
       <type>friend std::basic_ostream&lt; Char &gt; &amp;</type>
       <name>operator&lt;&lt;</name>
       <anchorfile>classtoml_1_1node__view.html</anchorfile>
-      <anchor>a76875814579f52ad2954aab7a75e9be7</anchor>
-      <arglist>(std::basic_ostream&lt; Char &gt; &amp;, const node_view&lt; T &gt; &amp;)</arglist>
+      <anchor>a952784ee660983379cedecaf3b4ee8cd</anchor>
+      <arglist>(std::basic_ostream&lt; Char &gt; &amp;os, const node_view&lt; T &gt; &amp;nv)</arglist>
     </member>
     <member kind="friend">
       <type>friend bool</type>
@@ -4310,7 +4310,7 @@
       <type>std::conditional_t&lt; std::is_same_v&lt; value_type, std::string &gt;, std::string_view, std::conditional_t&lt; impl::is_one_of&lt; value_type, double, int64_t, bool &gt;, value_type, const value_type &amp; &gt; &gt;</type>
       <name>value_arg</name>
       <anchorfile>classtoml_1_1value.html</anchorfile>
-      <anchor>ad31666efce027c28c5383357badfa555</anchor>
+      <anchor>a6e83f39e6c0bd276240e1a76e852f76c</anchor>
       <arglist/>
     </member>
     <member kind="function">
@@ -5311,49 +5311,49 @@
       <type>impl::array_iterator&lt; false &gt;</type>
       <name>array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a2b0930b7b75df6f189d9815c000bef8b</anchor>
+      <anchor>ad2155abd371972038f8f23e731a2ac48</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>impl::array_iterator&lt; true &gt;</type>
       <name>const_array_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>acc99ae392186dc605aeb233d26f07013</anchor>
+      <anchor>a45ad7bd8d13afe043cf8fc2a241e0c85</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>std::optional&lt; T &gt;</type>
       <name>optional</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>af34a9fb3305e419784104609e6bbb7ac</anchor>
+      <anchor>ac31f263c98fdd3801f27ae42c83c8bfc</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>std::shared_ptr&lt; const std::string &gt;</type>
       <name>source_path_ptr</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ac6cf446b480546ae1f71f5b86442368d</anchor>
+      <anchor>a84a518e37c3bf383c7011ee8728ab92a</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>uint16_t</type>
       <name>source_index</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>ae845239fd7271e3d8e529302d300ad5b</anchor>
+      <anchor>a98a4128d12a3c2b85e3f81e89bce6aa1</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>impl::table_iterator&lt; false &gt;</type>
       <name>table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>a57894617837065610e5746a3204fa8e9</anchor>
+      <anchor>a1a03042cfdb8bd595cb2374825b4a6d2</anchor>
       <arglist/>
     </member>
     <member kind="typedef">
       <type>impl::table_iterator&lt; true &gt;</type>
       <name>const_table_iterator</name>
       <anchorfile>namespacetoml.html</anchorfile>
-      <anchor>adeb2aa84bcd2bcb46e2cdfaa5dd6572f</anchor>
+      <anchor>a0f8ce228070cfdad8fb6edd5c75f0b1d</anchor>
       <arglist/>
     </member>
     <member kind="enumeration">

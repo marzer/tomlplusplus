@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.24.1" name="generator"/>
+  <meta content="Poxy v0.27.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -123,11 +123,11 @@
             </dt>
             <dd>Default constructor.</dd>
             <dt id="a8c06941e05e31602d46f26ba84d14b23">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8c06941e05e31602d46f26ba84d14b23">table</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;)</span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8c06941e05e31602d46f26ba84d14b23">table</a>(</span><span class="m-doc-wrap">const table&amp;)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="ab47a76ab242afa13f1a74e5e2bcded44">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab47a76ab242afa13f1a74e5e2bcded44">table</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#ab47a76ab242afa13f1a74e5e2bcded44">table</a>(</span><span class="m-doc-wrap">table&amp;&amp; other) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt>
@@ -140,11 +140,11 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="af9c04317296cdda78c97e4cc92463cd6">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af9c04317296cdda78c97e4cc92463cd6">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;) →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#af9c04317296cdda78c97e4cc92463cd6">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;) →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;</span>
             </dt>
             <dd>Copy-assignment operator.</dd>
             <dt id="ab39996f51aad45970e8bcb34883710df">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab39996f51aad45970e8bcb34883710df">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; rhs) →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab39996f51aad45970e8bcb34883710df">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;&amp; rhs) →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
           </dl>
@@ -153,13 +153,13 @@
           <h2><a href="#equality">Equality</a></h2>
           <dl class="m-doc">
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; lhs,
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Inequality operator.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; lhs,
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Equality operator.</dd>
           </dl>
@@ -193,11 +193,11 @@
             </dt>
             <dd>Removes the value with the given key from the table.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a21d4876e86a9ecec65592de2ff268c6d">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a21d4876e86a9ecec65592de2ff268c6d">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes empty child arrays and tables.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0d9ea14bacd9d8c945dd9aaca7463aa8">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a0d9ea14bacd9d8c945dd9aaca7463aa8">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Removes empty child arrays and tables (rvalue overload).</dd>
           </dl>
@@ -245,11 +245,11 @@
           <h2><a href="#iteration">Iteration</a></h2>
           <dl class="m-doc">
             <dt id="a68fea8ca9b1018f9675fd346b9f4512e">
-              using <a class="m-doc-self" href="#a68fea8ca9b1018f9675fd346b9f4512e">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#aebe170823fa068b873aa4c775d597993">toml::<wbr/>const_table_iterator</a>
+              using <a class="m-doc-self" href="#a68fea8ca9b1018f9675fd346b9f4512e">const_iterator</a> = <a class="m-doc" href="namespacetoml.html#a067566823d79c2420376bbb6bda0c7f6">toml::<wbr/>const_table_iterator</a>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="a87e055bad435d5332dc496c518733a4d">
-              using <a class="m-doc-self" href="#a87e055bad435d5332dc496c518733a4d">iterator</a> = <a class="m-doc" href="namespacetoml.html#aaed1da38e7ed361e105fae086cf7b0c1">toml::<wbr/>table_iterator</a>
+              using <a class="m-doc-self" href="#a87e055bad435d5332dc496c518733a4d">iterator</a> = <a class="m-doc" href="namespacetoml.html#a93e7756e1f8cbe9c2cbe0e8a6c7560d4">toml::<wbr/>table_iterator</a>
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt id="a334f050427eb20c8530254f4cd6dddf3">
@@ -278,22 +278,22 @@
             <dd>Returns an iterator to one-past-the-last key-value pair.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8a73c50b751f4e20dedfeb14a80f9381">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8a73c50b751f4e20dedfeb14a80f9381">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table.</dd>
             <dt id="ae9121137157dcdc3815fc3cb38f5ea4a">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae9121137157dcdc3815fc3cb38f5ea4a">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; →  <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ae9121137157dcdc3815fc3cb38f5ea4a">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp;&amp; →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (rvalue overload).</dd>
             <dt id="ac4cbd3e7e48d7ea37e25887fadf17e03">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac4cbd3e7e48d7ea37e25887fadf17e03">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; →  const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac4cbd3e7e48d7ea37e25887fadf17e03">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp; →  const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (const lvalue overload).</dd>
             <dt id="a28cbd231f12a9f0dac65f4d2fbe7a43e">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a28cbd231f12a9f0dac65f4d2fbe7a43e">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; →  const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a28cbd231f12a9f0dac65f4d2fbe7a43e">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) const &amp;&amp; →  const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;&amp; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Invokes a visitor on each key-value pair in the table (const rvalue overload).</dd>
           </dl>
@@ -394,7 +394,7 @@
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a65a894481bab5dd2bd00690931ed2692">find</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) const →  <a class="m-doc" href="#a68fea8ca9b1018f9675fd346b9f4512e">const_<wbr/>iterator</a> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
-            <dd>Gets an iterator to the node at a specific key (const overload)</dd>
+            <dd>Gets an iterator to the node at a specific key (const overload).</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#ab1f12a827212d23ee0895fda92a5113c">find</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) →  <a class="m-doc" href="#a87e055bad435d5332dc496c518733a4d">iterator</a></span>
             </dt>
@@ -504,11 +504,11 @@
             </dt>
             <dd>Returns <code>nullptr</code>.</dd>
             <dt id="ac44e9b5d6a35e7e01164eedd98a84a53">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac44e9b5d6a35e7e01164eedd98a84a53">as_table</a>(</span><span class="m-doc-wrap">) →  <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ac44e9b5d6a35e7e01164eedd98a84a53">as_table</a>(</span><span class="m-doc-wrap">) →  <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a pointer to the table.</dd>
             <dt id="a420935d7a61a6f6f4ba3dc36c0c899f0">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a420935d7a61a6f6f4ba3dc36c0c899f0">as_table</a>(</span><span class="m-doc-wrap">) const →  const <a class="m-doc" href="classtoml_1_1table.html">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a420935d7a61a6f6f4ba3dc36c0c899f0">as_table</a>(</span><span class="m-doc-wrap">) const →  const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>* <span class="m-label m-flat m-warning">final</span> <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns a const-qualified pointer to the table.</dd>
             <dt id="afd7e0ee6d0a60cf6225900e2df18d5e5">
@@ -608,19 +608,19 @@
             <dt id="a09e2c0437700b2a4e5c031e046a07b90">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a09e2c0437700b2a4e5c031e046a07b90">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) →  <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dd>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</dd>
             <dt id="acc57a41e07010edc8b351df267dc6fd0">
               <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#acc57a41e07010edc8b351df267dc6fd0">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) const →  const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dd>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afcecd9ea2e9c96c34def4471a2d689b4">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) →  <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dd>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a896761c1925d5ed3bdd1d92446b3d655">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) const →  const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp;</span>
             </dt>
-            <dd>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</dd>
+            <dd>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</dd>
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#afb43a06fdd11582f15761b120aa47fb4">get</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) →  <a class="m-doc" href="classtoml_1_1node.html">node</a>* <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
@@ -679,12 +679,12 @@
             <dd>Gets a raw reference to a node's underlying data (const rvalue overload).</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a302e5bc2e4796e9b1ae60b002911a007">value</a>(</span><span class="m-doc-wrap">) const →  <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a302e5bc2e4796e9b1ae60b002911a007">value</a>(</span><span class="m-doc-wrap">) const →  <a class="m-doc" href="namespacetoml.html#ac31f263c98fdd3801f27ae42c83c8bfc">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a11f4ae869670d876f704f676f0ead81b">value_exact</a>(</span><span class="m-doc-wrap">) const →  <a class="m-doc" href="namespacetoml.html#af34a9fb3305e419784104609e6bbb7ac">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="classtoml_1_1node.html#a11f4ae869670d876f704f676f0ead81b">value_exact</a>(</span><span class="m-doc-wrap">) const →  <a class="m-doc" href="namespacetoml.html#ac31f263c98fdd3801f27ae42c83c8bfc">optional</a>&lt;T&gt; <span class="m-label m-flat m-success">noexcept(…)</span></span>
             </dt>
             <dd>Gets the value contained by this node.</dd>
             <dt>
@@ -724,7 +724,7 @@
           <dl class="m-doc">
             <dt>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a82b6ece5db050fa6c468b08fa514a7dc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) →  <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs) →  <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp;</span>
             </dt>
             <dd>Prints the table out to a stream as formatted TOML.</dd>
           </dl>
@@ -756,8 +756,8 @@
           </div></section>
           <section class="m-doc-details" id="abdeb5d9d9fc23c031c78e544c6196ea6"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#abdeb5d9d9fc23c031c78e544c6196ea6">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; lhs,
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Inequality operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -784,8 +784,8 @@
           </div></section>
           <section class="m-doc-details" id="af8ebaed8105e5de2098992764f2d534a"><div>
             <h3>
-              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper">bool <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af8ebaed8105e5de2098992764f2d534a">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; lhs,
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs) <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Equality operator.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -977,7 +977,7 @@
           </div></section>
           <section class="m-doc-details" id="a21d4876e86a9ecec65592de2ff268c6d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a21d4876e86a9ecec65592de2ff268c6d">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a21d4876e86a9ecec65592de2ff268c6d">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp; <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes empty child arrays and tables.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1006,7 +1006,7 @@
           </div></section>
           <section class="m-doc-details" id="a0d9ea14bacd9d8c945dd9aaca7463aa8"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp;&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0d9ea14bacd9d8c945dd9aaca7463aa8">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp;&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a0d9ea14bacd9d8c945dd9aaca7463aa8">prune</a>(</span><span class="m-doc-wrap">bool recursive = true) &amp;&amp; <span class="m-label m-success">noexcept</span></span></span>
             </h3>
             <p>Removes empty child arrays and tables (rvalue overload).</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1192,7 +1192,7 @@
                   <th>Returns</th>
                   <td><p><strong><em>Valid input:</em></strong></p><ul><li>An iterator to the insertion position (or the position of the value that prevented insertion)</li><li>A boolean indicating if the insertion was successful.</li></ul>
 								<p><strong><em>Input is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong>
-							<code>{ <a class="m-doc" href="#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code></p></td>
+							<code>{ end(), false }</code></p></td>
                 </tr>
               </tfoot>
             </table>
@@ -1217,7 +1217,7 @@
 <span class="go">a = 1</span>
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
-<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was an null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
+<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ end(), false }</code> if the input value was an null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a331eb6de04d95c3f76bf64e6f84d4ad6"><div>
             <h3>
@@ -1324,7 +1324,7 @@
                   <th>Returns</th>
                   <td><p><strong><em>Valid input:</em></strong></p><ul><li>An iterator to the value's position</li><li><code>true</code> if the value was inserted, <code>false</code> if it was assigned.</li></ul>
 								<p><strong><em>Input is a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>:</em></strong>
-							<code>{ <a class="m-doc" href="#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code></p></td>
+							<code>{ end(), false }</code></p></td>
                 </tr>
               </tfoot>
             </table>
@@ -1350,14 +1350,14 @@
 <span class="go">a = 42</span>
 <span class="go">b = 2</span>
 <span class="go">c = 3</span>
-<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ <a class="m-doc" href="#a96da67654c5ca131cfec2e3c07aa2730">end()</a>, false }</code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion or assignment can take place. This is the only circumstance in which this can occur.</p></aside>
+<span class="go">d = 42</span></pre><aside class="m-note m-warning"><h4>Attention</h4><p>The return value will always be <code>{ end(), false }</code> if the input value was a null <a class="m-doc" href="classtoml_1_1node__view.html">toml::<wbr/>node_view</a>, because no insertion or assignment can take place. This is the only circumstance in which this can occur.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a8a73c50b751f4e20dedfeb14a80f9381"><div>
             <h3>
               <div class="m-doc-template">
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Func</span></span>&gt;
               </div>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a73c50b751f4e20dedfeb14a80f9381">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a73c50b751f4e20dedfeb14a80f9381">for_each</a>(</span><span class="m-doc-wrap">Func&amp;&amp; visitor) &amp; <span class="m-label m-success">noexcept(…)</span></span></span>
             </h3>
             <p>Invokes a visitor on each key-value pair in the table.</p>
             <table class="m-table m-fullwidth m-flat">
@@ -1617,7 +1617,7 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a68fea8ca9b1018f9675fd346b9f4512e">const_<wbr/>iterator</a> <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a65a894481bab5dd2bd00690931ed2692">find</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> key) const <span class="m-label m-success">noexcept</span></span></span>
             </h3>
-            <p>Gets an iterator to the node at a specific key (const overload)</p>
+            <p>Gets an iterator to the node at a specific key (const overload).</p>
             <table class="m-table m-fullwidth m-flat">
               <thead>
                 <tr><th colspan="2">Parameters</th></tr>
@@ -1815,14 +1815,14 @@
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#afcecd9ea2e9c96c34def4471a2d689b4">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key)</span></span>
             </h3>
-            <p>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</p>
+            <p>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="a896761c1925d5ed3bdd1d92446b3d655"><div>
             <h3>
               <span class="m-doc-wrap-bumper">const <a class="m-doc" href="classtoml_1_1node.html">node</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>table::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a896761c1925d5ed3bdd1d92446b3d655">at</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> key) const</span></span>
             </h3>
-            <p>Gets a reference to the element at a specific key, throwing <code><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/error/out_of_range.html" target="_blank">std::<wbr/>out_of_range</a></code> if none existed.</p>
+            <p>Gets a reference to the element at a specific key, throwing <code>std::out_of_range</code> if none existed.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
           </div></section>
           <section class="m-doc-details" id="afb43a06fdd11582f15761b120aa47fb4"><div>
@@ -2082,7 +2082,7 @@
           <section class="m-doc-details" id="a82b6ece5db050fa6c468b08fa514a7dc"><div>
             <h3>
               <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; </span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a82b6ece5db050fa6c468b08fa514a7dc">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>ostream</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1table.html">table</a>&amp; rhs)</span></span>
+              const <a class="m-doc" href="#a823f0d3385d2d8d8320a72f78c677a35">table</a>&amp; rhs)</span></span>
             </h3>
             <p>Prints the table out to a stream as formatted TOML.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This operator is only available when <a class="m-doc" href="group__configuration.html#ga9fc77582d9de77f59d2ddc9ae1f748ca">TOML_<wbr/>ENABLE_<wbr/>FORMATTERS</a> is enabled.</p></aside>

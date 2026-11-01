@@ -18,7 +18,7 @@
   <meta content="TOML for modern C++" property="og:description"/>
   <meta content="TOML for modern C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.24.1" name="generator"/>
+  <meta content="Poxy v0.27.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -194,33 +194,33 @@
         <section id="typedef-members">
           <h2><a href="#typedef-members">Typedefs</a></h2>
           <dl class="m-doc">
-            <dt id="a2b0930b7b75df6f189d9815c000bef8b">
-              using <a class="m-doc-self" href="#a2b0930b7b75df6f189d9815c000bef8b">array_iterator</a> = impl::array_iterator&lt;false&gt;
+            <dt id="ad2155abd371972038f8f23e731a2ac48">
+              using <a class="m-doc-self" href="#ad2155abd371972038f8f23e731a2ac48">array_iterator</a> = impl::array_iterator&lt;false&gt;
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="acc99ae392186dc605aeb233d26f07013">
-              using <a class="m-doc-self" href="#acc99ae392186dc605aeb233d26f07013">const_array_iterator</a> = impl::array_iterator&lt;true&gt;
+            <dt id="a45ad7bd8d13afe043cf8fc2a241e0c85">
+              using <a class="m-doc-self" href="#a45ad7bd8d13afe043cf8fc2a241e0c85">const_array_iterator</a> = impl::array_iterator&lt;true&gt;
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator" target="_blank">RandomAccessIterator</a> for iterating over const elements in a <a class="m-doc" href="classtoml_1_1array.html">toml::<wbr/>array</a>.</dd>
-            <dt id="adeb2aa84bcd2bcb46e2cdfaa5dd6572f">
-              using <a class="m-doc-self" href="#adeb2aa84bcd2bcb46e2cdfaa5dd6572f">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
+            <dt id="a0f8ce228070cfdad8fb6edd5c75f0b1d">
+              using <a class="m-doc-self" href="#a0f8ce228070cfdad8fb6edd5c75f0b1d">const_table_iterator</a> = impl::table_iterator&lt;true&gt;
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over const key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
-              using <a class="m-doc" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>&lt;T&gt;
+              using <a class="m-doc" href="#ac31f263c98fdd3801f27ae42c83c8bfc">optional</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>&lt;T&gt;
             </dt>
             <dd>The 'optional' type used throughout the library.</dd>
             <dt>
-              using <a class="m-doc" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
+              using <a class="m-doc" href="#a98a4128d12a3c2b85e3f81e89bce6aa1">source_index</a> = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </dt>
             <dd>The integer type used to tally line numbers and columns.</dd>
-            <dt id="ac6cf446b480546ae1f71f5b86442368d">
-              using <a class="m-doc-self" href="#ac6cf446b480546ae1f71f5b86442368d">source_path_ptr</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" target="_blank">std::<wbr/>shared_ptr</a>&lt;const <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;
+            <dt id="a84a518e37c3bf383c7011ee8728ab92a">
+              using <a class="m-doc-self" href="#a84a518e37c3bf383c7011ee8728ab92a">source_path_ptr</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/memory/shared_ptr.html" target="_blank">std::<wbr/>shared_ptr</a>&lt;const <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a>&gt;
             </dt>
             <dd>A pointer to a shared string resource containing a source path.</dd>
-            <dt id="a57894617837065610e5746a3204fa8e9">
-              using <a class="m-doc-self" href="#a57894617837065610e5746a3204fa8e9">table_iterator</a> = impl::table_iterator&lt;false&gt;
+            <dt id="a1a03042cfdb8bd595cb2374825b4a6d2">
+              using <a class="m-doc-self" href="#a1a03042cfdb8bd595cb2374825b4a6d2">table_iterator</a> = impl::table_iterator&lt;false&gt;
             </dt>
             <dd>A <a class="m-doc poxy-injected poxy-external poxy-cppreference poxy-named-requirement" href="https://en.cppreference.com/w/cpp/named_req/BidirectionalIterator" target="_blank">BidirectionalIterator</a> for iterating over key-value pairs in a <a class="m-doc" href="classtoml_1_1table.html">toml::<wbr/>table</a>.</dd>
           </dl>
@@ -238,7 +238,7 @@
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#a8a37f07ea9c0a841be1352143b3cbc52">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs) →  <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp;</span>
             </dt>
-            <dd>Pretty-prints the value of a node_type to a stream.</dd>
+            <dd>Pretty-prints the value of a <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> to a stream.</dd>
             <dt>
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename Char</span></span>&gt;</div>
               <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#aa1a9e34f231b99fc37d9e3cf667db19d">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
@@ -366,27 +366,27 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a8e79820651cc9a835082cf9abd47d885">is_boolean</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a bool toml::value&lt;bool&gt;.</dd>
+            <dd>Metafunction for determining if a type is a bool <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;bool&gt;</a>.</dd>
             <dt id="a3c5daa4563e3aff2b5e6460aa97d28df">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a3c5daa4563e3aff2b5e6460aa97d28df">is_date</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or toml::value&lt;date&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date.html">toml::<wbr/>date</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date&gt;</a>.</dd>
             <dt id="a3285caf012789a607851026f9827a33d">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a3285caf012789a607851026f9827a33d">is_date_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or toml::value&lt;date_time&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1date__time.html">toml::<wbr/>date_time</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date_time&gt;</a>.</dd>
             <dt id="a1aaaa0e264cdd4f43518571f2f61ac36">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a1aaaa0e264cdd4f43518571f2f61ac36">is_floating_point</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a double or toml::value&lt;double&gt;.</dd>
+            <dd>Metafunction for determining if a type is a double or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;double&gt;</a>.</dd>
             <dt id="a513bdc4a19071f0be70e92bb6cb1a1a3">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">is_integer</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is an <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is an <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;int64_t&gt;</a>.</dd>
             <dt id="ab5b06dac8c1e0de9e06411917e10b618">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#ab5b06dac8c1e0de9e06411917e10b618">is_node_view</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -396,12 +396,12 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a64ce7ed6974d2b17823565bc67c40873">is_number</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type satisfies <code><a class="m-doc" href="#a513bdc4a19071f0be70e92bb6cb1a1a3">toml::<wbr/>is_integer</a> || <a class="m-doc" href="#a1aaaa0e264cdd4f43518571f2f61ac36">toml::<wbr/>is_floating_point</a></code>.</dd>
+            <dd>Metafunction for determining if a type satisfies <code>toml::is_integer || toml::is_floating_point</code>.</dd>
             <dt id="aea14621807afe92a840d82c7139cde07">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#aea14621807afe92a840d82c7139cde07">is_string</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or toml::value&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string.html" target="_blank">std::<wbr/>string</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;std::<wbr/>string&gt;</a>.</dd>
             <dt id="ad11c8c8a8286d6931e40658679aa7ddb">
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#ad11c8c8a8286d6931e40658679aa7ddb">is_table</a> <span class="m-label m-flat m-primary">constexpr</span>
@@ -411,7 +411,7 @@
               <div class="m-doc-template">template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;</div>
               bool <a class="m-doc-self" href="#a87aee32768a32bb838150421e4e3cf97">is_time</a> <span class="m-label m-flat m-primary">constexpr</span>
             </dt>
-            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or toml::value&lt;time&gt;.</dd>
+            <dd>Metafunction for determining if a type is a <a class="m-doc" href="structtoml_1_1time.html">toml::<wbr/>time</a> or <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;time&gt;</a>.</dd>
           </dl>
         </section>
         <section>
@@ -486,43 +486,43 @@
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21" id="abac3e84bbf1f2c90717fca107055f48dab45cffe084dd3d20d928bee85e7b0f21">string</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/string/basic_string" target="_blank">std::string</a>&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;std::<wbr/>string&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8" id="abac3e84bbf1f2c90717fca107055f48da157db7df530023575515d366c9b672e8">integer</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;<a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">int64_t</a>&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;int64_t&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a" id="abac3e84bbf1f2c90717fca107055f48da387f7c620a256fdffcec74c1e7181a2a">floating_point</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;double&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;double&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27" id="abac3e84bbf1f2c90717fca107055f48da84e2c64f38f78ba3ea5c905ab5a2da27">boolean</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;bool&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;bool&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f" id="abac3e84bbf1f2c90717fca107055f48da5fc732311905cb27e82d67f4f6511f7f">date</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;date&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b" id="abac3e84bbf1f2c90717fca107055f48da07cc694b9b3fc636710fa08b6922c42b">time</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;time&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;time&gt;</a>.</p>
                   </td>
                 </tr>
                 <tr>
                   <td><a class="m-doc-self" href="#abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264" id="abac3e84bbf1f2c90717fca107055f48dad611c46f8e65d9e049afe165de18c264">date_time</a></td>
                   <td>
-                  <p>The node is a toml::value&lt;date_time&gt;.</p>
+                  <p>The node is a <a class="m-doc" href="classtoml_1_1value.html">toml::<wbr/>value&lt;date_time&gt;</a>.</p>
                   </td>
                 </tr>
               </tbody>
@@ -566,19 +566,19 @@
         </section>
         <section>
           <h2>Typedef documentation</h2>
-          <section class="m-doc-details" id="af34a9fb3305e419784104609e6bbb7ac"><div>
+          <section class="m-doc-details" id="ac31f263c98fdd3801f27ae42c83c8bfc"><div>
             <h3>
               <div class="m-doc-template">
                 template &lt;<span class="m-doc-template-params"><span class="m-doc-template-param">typename T</span></span>&gt;
               </div>
-              using <span class="m-doc-details-prefix">toml::<wbr/></span><a class="m-doc-self" href="#af34a9fb3305e419784104609e6bbb7ac">optional</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>&lt;T&gt;
+              using <span class="m-doc-details-prefix">toml::<wbr/></span><a class="m-doc-self" href="#ac31f263c98fdd3801f27ae42c83c8bfc">optional</a> = <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>&lt;T&gt;
             </h3>
             <p>The 'optional' type used throughout the library.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>By default this will be an alias for <a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/utility/optional.html" target="_blank">std::<wbr/>optional</a>, but you can change the optional type used by the library by defining <a class="m-doc" href="group__configuration.html#ga9c2c03f867eb6d76a5f65b06eeb1186e">TOML_<wbr/>OPTIONAL_<wbr/>TYPE</a>.</p></aside>
           </div></section>
-          <section class="m-doc-details" id="ae845239fd7271e3d8e529302d300ad5b"><div>
+          <section class="m-doc-details" id="a98a4128d12a3c2b85e3f81e89bce6aa1"><div>
             <h3>
-              using <span class="m-doc-details-prefix">toml::<wbr/></span><a class="m-doc-self" href="#ae845239fd7271e3d8e529302d300ad5b">source_index</a> = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
+              using <span class="m-doc-details-prefix">toml::<wbr/></span><a class="m-doc-self" href="#a98a4128d12a3c2b85e3f81e89bce6aa1">source_index</a> = <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint16_t</a>
             </h3>
             <p>The integer type used to tally line numbers and columns.</p>
 <aside class="m-note m-default"><h4>Remark</h4><p>This will be an alias for <a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/integer" target="_blank">uint32_t</a> if <a class="m-doc" href="group__configuration.html#ga55379d57f896d97994e0aca167297c7f">TOML_<wbr/>LARGE_<wbr/>FILES</a> is enabled.</p></aside>
@@ -594,7 +594,7 @@
               <span class="m-doc-wrap-bumper"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; <span class="m-doc-details-prefix">toml::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8a37f07ea9c0a841be1352143b3cbc52">operator&lt;&lt;</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/io/basic_ostream.html" target="_blank">std::<wbr/>basic_ostream</a>&lt;Char&gt;&amp; lhs,
               <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> rhs)</span></span>
             </h3>
-            <p>Pretty-prints the value of a node_type to a stream.</p>
+            <p>Pretty-prints the value of a <a class="m-doc" href="#abac3e84bbf1f2c90717fca107055f48d">node_<wbr/>type</a> to a stream.</p>
 <pre class="m-code"><span class="k">auto</span> <span class="n">arr</span> <span class="o">=</span> <span class="nn">toml</span><span class="o">::</span><span class="nc">array</span><span class="p">{</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="s">"3"</span><span class="p">,</span> <span class="k">false</span> <span class="p">};</span>
 <span class="k">for</span> <span class="p">(</span><span class="nc"><a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a></span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">arr</span><span class="p">.</span><span class="nf">size</span><span class="p">()</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span>
     <span class="nn">std</span><span class="o">::</span><span class="nc">cout</span> <span class="o">&lt;&lt;</span> <span class="s">"Element ["sv</span> <span class="o">&lt;&lt;</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="s">"] is: "sv</span> <span class="o">&lt;&lt;</span> <span class="n">arr</span><span class="p">[</span><span class="n">i</span><span class="p">].</span><span class="nf">type</span><span class="p">()</span> <span class="o">&lt;&lt;</span> <span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">;</span></pre><pre class="m-console"><span class="go">Element [0] is: integer</span>

@@ -18,7 +18,7 @@
   <meta content="TOML for C++" property="og:description"/>
   <meta content="TOML for C++" itemprop="description"/>
   <meta content="telephone=no" name="format-detection"/>
-  <meta content="Poxy v0.24.1" name="generator"/>
+  <meta content="Poxy v0.27.2" name="generator"/>
   <meta content="strict-origin-when-cross-origin" name="referrer"/>
   <meta content="gbtcNgKlNiPSMKkYMw4zWFVWGPH_oU93m9n_-nb4qK8" name="google-site-verification"/>
 </head>
@@ -98,11 +98,11 @@
             </dt>
             <dd>Constructor for a path component that is a key string.</dd>
             <dt id="a7b6ed29a247bfb453e67e84c4000ad32">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7b6ed29a247bfb453e67e84c4000ad32">path_component</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; pc)</span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a7b6ed29a247bfb453e67e84c4000ad32">path_component</a>(</span><span class="m-doc-wrap">const path_component&amp; pc)</span>
             </dt>
             <dd>Copy constructor.</dd>
             <dt id="a8510261dadffa958e0dd334fc442bff2">
-              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8510261dadffa958e0dd334fc442bff2">path_component</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;&amp; pc) <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#a8510261dadffa958e0dd334fc442bff2">path_component</a>(</span><span class="m-doc-wrap">path_component&amp;&amp; pc) <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move constructor.</dd>
             <dt id="a9023bc344bbf001fb54661491d52ed21">
@@ -115,23 +115,23 @@
           <h2><a href="#pub-methods">Public functions</a></h2>
           <dl class="m-doc">
             <dt id="ab4411fc0fa822591ef4adf0a35d16518">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab4411fc0fa822591ef4adf0a35d16518">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) →  <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#ab4411fc0fa822591ef4adf0a35d16518">operator=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; rhs) →  <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp;</span>
             </dt>
             <dd>Copy-assignment operator.</dd>
             <dt id="a500c0fe2100f162f01b6b91165a1fd19">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a500c0fe2100f162f01b6b91165a1fd19">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;&amp; rhs) →  <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a500c0fe2100f162f01b6b91165a1fd19">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp;&amp; rhs) →  <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Move-assignment operator.</dd>
             <dt id="a176bb0d528b4b60010f013724183b12d">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a176bb0d528b4b60010f013724183b12d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_index) →  <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a176bb0d528b4b60010f013724183b12d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc poxy-injected poxy-external poxy-cppreference" href="https://en.cppreference.com/w/cpp/types/size_t" target="_blank">size_t</a> new_index) →  <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Assigns an array index to this path component.</dd>
             <dt id="a14fcb83942dc34d3fb3d035eb7dc35ed">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a14fcb83942dc34d3fb3d035eb7dc35ed">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> new_key) →  <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a14fcb83942dc34d3fb3d035eb7dc35ed">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>string_view</a> new_key) →  <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp;</span>
             </dt>
             <dd>Assigns a path key to this path component.</dd>
             <dt>
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key) →  <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp;</span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key) →  <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp;</span>
             </dt>
             <dd>Assigns a path key to this path component.</dd>
             <dt id="a59858d261f3e4e9e67d83835163312d5">
@@ -158,13 +158,13 @@
           <h2><a href="#equality">Equality</a></h2>
           <dl class="m-doc">
             <dt id="a6ebe7d221b72eff60b9570c9e87aaa9a">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6ebe7d221b72eff60b9570c9e87aaa9a">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a6ebe7d221b72eff60b9570c9e87aaa9a">operator!=</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; lhs,
+              const <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if two path components do not represent the same key or array index.</dd>
             <dt id="a9aef313f246e34a691c7e7475a62f3dd">
-              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9aef313f246e34a691c7e7475a62f3dd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; lhs,
-              const <a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
+              <span class="m-doc-wrap-bumper">auto <a class="m-doc-self" href="#a9aef313f246e34a691c7e7475a62f3dd">operator==</a>(</span><span class="m-doc-wrap">const <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; lhs,
+              const <a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; rhs) →  bool <span class="m-label m-flat m-success">noexcept</span></span>
             </dt>
             <dd>Returns true if two path components represent the same key or array index.</dd>
           </dl>
@@ -194,7 +194,7 @@
           </div></section>
           <section class="m-doc-details" id="af2031c3540a29e3282339512f11fc42d"><div>
             <h3>
-              <span class="m-doc-wrap-bumper"><a class="m-doc" href="classtoml_1_1path__component.html">path_<wbr/>component</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>path_component::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key)</span></span>
+              <span class="m-doc-wrap-bumper"><a class="m-doc" href="#a71021caeadfba986add66776fde75afc">path_<wbr/>component</a>&amp; <span class="m-doc-details-prefix">toml::<wbr/>path_component::<wbr/></span></span><span class="m-doc-wrap"><span class="m-doc-wrap-bumper"><a class="m-doc-self" href="#af2031c3540a29e3282339512f11fc42d">operator=</a>(</span><span class="m-doc-wrap"><a class="m-doc-external poxy-cppreference poxy-external" href="http://en.cppreference.com/w/cpp/string/basic_string_view.html" target="_blank">std::<wbr/>wstring_view</a> new_key)</span></span>
             </h3>
             <p>Assigns a path key to this path component.</p>
 <aside class="m-block m-special"><h4>Conditional availability </h4><p>This overload is only available when <a class="m-doc" href="group__configuration.html#ga94867db67c98e0e9d4fbb70690951fbf">TOML_<wbr/>ENABLE_<wbr/>WINDOWS_<wbr/>COMPAT</a> is enabled.</p></aside>
