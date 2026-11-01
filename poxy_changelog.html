@@ -66,6 +66,7 @@
 
 ### Fixes {#poxy_changelog_fixes_2}
 
+- fixed assertion failure when parsing an incomplete <a class="m-doc poxy-injected" href="structtoml_1_1date__time.html">date-time</a> followed by a value terminator ([#313](https://github.com/marzer/tomlplusplus/issues/313)) ([@allenflux](https://github.com/allenflux))
 - fixed `is_homogeneous()` overloads with `first_nonmatch` outparam being broken in optimized builds ([#231](https://github.com/marzer/tomlplusplus/issues/231)) ([@Forbinn](https://github.com/Forbinn))
 - fixed unclear error message when parsing integers that would overflow ([#224](https://github.com/marzer/tomlplusplus/issues/224)) ([@chrimbo](https://github.com/chrimbo))
 - fixed CMake `install` target installing `meson.build` files ([#236](https://github.com/marzer/tomlplusplus/issues/236)) ([@JWCS](https://github.com/JWCS))
