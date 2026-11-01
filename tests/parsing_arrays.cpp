@@ -193,7 +193,7 @@ TEST_CASE("parsing - arrays")
 	// a value terminator where a value must start
 	parsing_should_fail(FILE_LINE_ARGS, "arr = [}]"sv);
 	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, }]"sv);
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [\xE2\x80\xA8]"sv);	// U+2028 LINE SEPARATOR
+	parsing_should_fail(FILE_LINE_ARGS, "arr = [\xE2\x80\xA8]"sv);		// U+2028 LINE SEPARATOR
 	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, \xE2\x80\xA9 2]"sv); // U+2029 PARAGRAPH SEPARATOR
-	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, \xC2\x85]"sv);	// U+0085 NEXT LINE
+	parsing_should_fail(FILE_LINE_ARGS, "arr = [1, \xC2\x85]"sv);		// U+0085 NEXT LINE
 }

@@ -8,9 +8,8 @@ TOML_DISABLE_SPAM_WARNINGS;
 
 TEST_CASE("parsing - dates and times")
 {
-	parsing_should_succeed(
-		FILE_LINE_ARGS,
-		R"(
+	parsing_should_succeed(FILE_LINE_ARGS,
+						   R"(
 			odt1 = 1979-05-27T07:32:00Z
 			odt2 = 1979-05-27T00:32:00-07:00
 			odt3 = 1979-05-27T00:32:00.999999-07:00
@@ -21,27 +20,28 @@ TEST_CASE("parsing - dates and times")
 			lt1 = 07:32:00
 			lt2 = 00:32:00.999999
 		)"sv,
-		[](table&& tbl)
-		{
-			static constexpr auto odt1 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
-			CHECK(tbl["odt1"] == odt1);
-			static constexpr auto odt2 = date_time{ { 1979, 5, 27 }, { 0, 32 }, { -7, 0 } };
-			CHECK(tbl["odt2"] == odt2);
-			static constexpr auto odt3 = date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, { -7, 0 } };
-			CHECK(tbl["odt3"] == odt3);
-			static constexpr auto odt4 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
-			CHECK(tbl["odt4"] == odt4);
-			static constexpr auto ldt1 = date_time{ { 1979, 5, 27 }, { 7, 32 } };
-			CHECK(tbl["ldt1"] == ldt1);
-			static constexpr auto ldt2 = date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u } };
-			CHECK(tbl["ldt2"] == ldt2);
-			static constexpr auto ld1 = date{ 1979, 5, 27 };
-			CHECK(tbl["ld1"] == ld1);
-			static constexpr auto lt1 = toml::time{ 7, 32 };
-			CHECK(tbl["lt1"] == lt1);
-			static constexpr auto lt2 = toml::time{ 0, 32, 0, 999999000u };
-			CHECK(tbl["lt2"] == lt2);
-		});
+						   [](table&& tbl)
+						   {
+							   static constexpr auto odt1 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
+							   CHECK(tbl["odt1"] == odt1);
+							   static constexpr auto odt2 = date_time{ { 1979, 5, 27 }, { 0, 32 }, { -7, 0 } };
+							   CHECK(tbl["odt2"] == odt2);
+							   static constexpr auto odt3 =
+								   date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u }, { -7, 0 } };
+							   CHECK(tbl["odt3"] == odt3);
+							   static constexpr auto odt4 = date_time{ { 1979, 5, 27 }, { 7, 32 }, {} };
+							   CHECK(tbl["odt4"] == odt4);
+							   static constexpr auto ldt1 = date_time{ { 1979, 5, 27 }, { 7, 32 } };
+							   CHECK(tbl["ldt1"] == ldt1);
+							   static constexpr auto ldt2 = date_time{ { 1979, 5, 27 }, { 0, 32, 0, 999999000u } };
+							   CHECK(tbl["ldt2"] == ldt2);
+							   static constexpr auto ld1 = date{ 1979, 5, 27 };
+							   CHECK(tbl["ld1"] == ld1);
+							   static constexpr auto lt1 = toml::time{ 7, 32 };
+							   CHECK(tbl["lt1"] == lt1);
+							   static constexpr auto lt2 = toml::time{ 0, 32, 0, 999999000u };
+							   CHECK(tbl["lt2"] == lt2);
+						   });
 
 	// value tests
 	parse_expected_value(FILE_LINE_ARGS, "1987-03-16"sv, date{ 1987, 3, 16 });

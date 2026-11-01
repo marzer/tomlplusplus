@@ -4,43 +4,43 @@
 # See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 # SPDX-License-Identifier: MIT
 
-import sys
-import utils
-import re
 import itertools
 from pathlib import Path
 from uuid import UUID, uuid5
 
+import utils
+
 
 def main():
 
-	mode_keys = [ '!!debug', '!x86', 'cpplatest', 'unrel', 'noexcept' ]
-	modes = [ [] ]
-	for n in range(1, len(mode_keys)):
-		for combo in itertools.combinations(mode_keys, n):
-			modes.append([i for i in combo])
-	modes.append(mode_keys)
-	for mode in modes:
-		if '!x86' not in mode:
-			mode.insert(0, '!x64')
-		if '!!debug' not in mode:
-			mode.insert(0, '!!release')
-		mode.sort()
-		for i in range(0, len(mode)):
-			while mode[i].startswith('!'):
-				mode[i] = mode[i][1:]
-	modes.sort()
+    mode_keys = ['!!debug', '!x86', 'cpplatest', 'unrel', 'noexcept']
+    modes = [[]]
+    for n in range(1, len(mode_keys)):
+        for combo in itertools.combinations(mode_keys, n):
+            modes.append([i for i in combo])
+    modes.append(mode_keys)
+    for mode in modes:
+        if '!x86' not in mode:
+            mode.insert(0, '!x64')
+        if '!!debug' not in mode:
+            mode.insert(0, '!!release')
+        mode.sort()
+        for i in range(0, len(mode)):
+            while mode[i].startswith('!'):
+                mode[i] = mode[i][1:]
+    modes.sort()
 
-	test_root = Path(utils.entry_script_dir(), '..', 'tests', 'vs').resolve()
-	uuid_namespace = UUID('{51C7001B-048C-4AF0-B598-D75E78FF31F0}')
-	configuration_name = lambda x: 'Debug' if x.lower() == 'debug' else 'Release'
-	platform_name = lambda x: 'Win32' if x == 'x86' else x
-	for mode in modes:
-		file_path = Path(test_root, 'test_{}.vcxproj'.format('_'.join(mode)))
-		print(f"Writing to {file_path}")
-		with open(file_path, 'w', encoding='utf-8-sig', newline='\r\n') as file:
-			write = lambda txt: print(txt, file=file)
-			write(r'''
+    test_root = Path(utils.entry_script_dir(), '..', 'tests', 'vs').resolve()
+    uuid_namespace = UUID('{51C7001B-048C-4AF0-B598-D75E78FF31F0}')
+    configuration_name = lambda x: 'Debug' if x.lower() == 'debug' else 'Release'
+    platform_name = lambda x: 'Win32' if x == 'x86' else x
+    for mode in modes:
+        file_path = Path(test_root, 'test_{}.vcxproj'.format('_'.join(mode)))
+        print(f"Writing to {file_path}")
+        with open(file_path, 'w', encoding='utf-8-sig', newline='\r\n') as file:
+            write = lambda txt: print(txt, file=file)
+            write(
+                r'''
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup Label="ProjectConfigurations">
@@ -170,13 +170,15 @@ def main():
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>
 			'''.strip().format(
-				configuration=next(configuration_name(x) for x in mode if x in ('debug', 'release')),
-				platform=next(platform_name(x) for x in mode if x in ('x64', 'x86')),
-				uuid=str(uuid5(uuid_namespace, '_'.join(mode))).upper(),
-				exceptions='false' if 'noexcept' in mode else 'Sync',
-				unreleased_features=1 if 'unrel' in mode else 0,
-				standard='cpplatest' if 'cpplatest' in mode else 'cpp17'
-			))
+                    configuration=next(configuration_name(x) for x in mode if x in ('debug', 'release')),
+                    platform=next(platform_name(x) for x in mode if x in ('x64', 'x86')),
+                    uuid=str(uuid5(uuid_namespace, '_'.join(mode))).upper(),
+                    exceptions='false' if 'noexcept' in mode else 'Sync',
+                    unreleased_features=1 if 'unrel' in mode else 0,
+                    standard='cpplatest' if 'cpplatest' in mode else 'cpp17',
+                )
+            )
+
 
 if __name__ == '__main__':
-	utils.run(main, verbose=True)
+    utils.run(main, verbose=True)

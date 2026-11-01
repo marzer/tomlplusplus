@@ -182,7 +182,8 @@ TOML_ANON_NAMESPACE_START
 			return value;
 		}
 	};
-	static_assert(std::is_trivially_default_constructible_v<utf8_codepoint> && std::is_trivially_copyable_v<utf8_codepoint>);
+	static_assert(std::is_trivially_default_constructible_v<utf8_codepoint>
+				  && std::is_trivially_copyable_v<utf8_codepoint>);
 	static_assert(std::is_standard_layout_v<utf8_codepoint>);
 
 	struct TOML_ABSTRACT_INTERFACE utf8_reader_interface
@@ -213,6 +214,7 @@ TOML_ANON_NAMESPACE_START
 #else
 #define utf8_reader_error(...)				err_.emplace(__VA_ARGS__)
 #define utf8_reader_return_after_error(...) return __VA_ARGS__
+	// clang-format off
 #define utf8_reader_error_check(...)                                                                                   \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -220,6 +222,7 @@ TOML_ANON_NAMESPACE_START
 			return __VA_ARGS__;                                                                                        \
 	}                                                                                                                  \
 	while (false)
+	// clang-format on
 
 #endif
 
@@ -482,6 +485,7 @@ TOML_ANON_NAMESPACE_START
 #if TOML_EXCEPTIONS
 #define utf8_buffered_reader_error_check(...) static_assert(true)
 #else
+	// clang-format off
 #define utf8_buffered_reader_error_check(...)                                                                          \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -489,6 +493,7 @@ TOML_ANON_NAMESPACE_START
 			return __VA_ARGS__;                                                                                        \
 	}                                                                                                                  \
 	while (false)
+	// clang-format on
 
 #endif
 
@@ -963,6 +968,7 @@ TOML_ANON_NAMESPACE_END;
 
 #define is_eof()		 !cp
 #define assert_not_eof() TOML_ASSERT_ASSUME(cp != nullptr)
+// clang-format off
 #define return_if_eof(...)                                                                                             \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -970,6 +976,7 @@ TOML_ANON_NAMESPACE_END;
 			return __VA_ARGS__;                                                                                        \
 	}                                                                                                                  \
 	while (false)
+// clang-format on
 
 #if TOML_EXCEPTIONS
 #define is_error()					false
@@ -981,6 +988,7 @@ TOML_ANON_NAMESPACE_END;
 #define is_error()				!!err
 #define return_after_error(...) return __VA_ARGS__
 #define assert_not_error()		TOML_ASSERT(!is_error())
+// clang-format off
 #define return_if_error(...)                                                                                           \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -995,6 +1003,7 @@ TOML_ANON_NAMESPACE_END;
 			return __VA_ARGS__;                                                                                        \
 	}                                                                                                                  \
 	while (false)
+// clang-format on
 #endif
 
 #if defined(TOML_BREAK_AT_PARSE_ERRORS) && TOML_BREAK_AT_PARSE_ERRORS
@@ -1027,6 +1036,7 @@ TOML_ANON_NAMESPACE_END;
 
 #define set_error_and_return_default(...) set_error_and_return({}, __VA_ARGS__)
 
+// clang-format off
 #define set_error_and_return_if_eof(...)                                                                               \
 	do                                                                                                                 \
 	{                                                                                                                  \
@@ -1034,6 +1044,7 @@ TOML_ANON_NAMESPACE_END;
 			set_error_and_return(__VA_ARGS__, "encountered end-of-file"sv);                                            \
 	}                                                                                                                  \
 	while (false)
+// clang-format on
 
 #define advance_and_return_if_error(...)                                                                               \
 	do                                                                                                                 \

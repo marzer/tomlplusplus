@@ -217,7 +217,7 @@ TEST_CASE("custom string types - detection")
 	// every detected type is usable as an initializer; being a retrieval target additionally
 	// requires a constructor taking std::string_view, (const char*, size_t) or const std::string&
 	static_assert(value_traits<UserDefinedString>::is_losslessly_convertible_to_native); // in
-	static_assert(value_traits<UserDefinedString>::can_represent_native);				// out
+	static_assert(value_traits<UserDefinedString>::can_represent_native);				 // out
 
 	static_assert(value_traits<UserDefinedStringInOnly>::is_losslessly_convertible_to_native);
 	static_assert(!value_traits<UserDefinedStringInOnly>::can_represent_native);

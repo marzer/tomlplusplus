@@ -237,7 +237,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	table& table::prune(bool recursive)& noexcept
+	table& table::prune(bool recursive) & noexcept
 	{
 		if (map_.empty())
 			return *this;
@@ -304,9 +304,9 @@ TOML_NAMESPACE_START
 			if (lhs_type != rhs_type)
 				return false;
 
-			const bool equal = l->second->visit(
-				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			const bool equal =
+				l->second->visit([&](const auto& lhs_) noexcept
+								 { return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}

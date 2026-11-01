@@ -157,14 +157,14 @@ bool parsing_should_fail(std::string_view test_file,
 							expected_failure_column,
 							[=]() { [[maybe_unused]] auto res = toml::parse(toml_str); });
 	result		= result
-		  && run_tests(expected_failure_line,
-					   expected_failure_column,
-					   [=]()
-					   {
+			   && run_tests(expected_failure_line,
+							expected_failure_column,
+							[=]()
+							{
 						   std::stringstream ss;
 						   ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 						   [[maybe_unused]] auto res = toml::parse(ss);
-					   });
+							});
 	return result;
 
 #else

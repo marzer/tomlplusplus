@@ -249,7 +249,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	void array::flatten_child(array && child, size_t & dest_index) noexcept
+	void array::flatten_child(array && child, size_t& dest_index) noexcept
 	{
 		for (size_t i = 0, e = child.size(); i < e; i++)
 		{
@@ -266,7 +266,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	array& array::flatten()&
+	array& array::flatten() &
 	{
 		if (elems_.empty())
 			return *this;
@@ -315,7 +315,7 @@ TOML_NAMESPACE_START
 	}
 
 	TOML_EXTERNAL_LINKAGE
-	array& array::prune(bool recursive)& noexcept
+	array& array::prune(bool recursive) & noexcept
 	{
 		if (elems_.empty())
 			return *this;
@@ -368,9 +368,9 @@ TOML_NAMESPACE_START
 			if (lhs_type != rhs_type)
 				return false;
 
-			const bool equal = lhs.elems_[i]->visit(
-				[&](const auto& lhs_) noexcept
-				{ return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
+			const bool equal =
+				lhs.elems_[i]->visit([&](const auto& lhs_) noexcept
+									 { return lhs_ == *static_cast<std::remove_reference_t<decltype(lhs_)>*>(&rhs_); });
 			if (!equal)
 				return false;
 		}

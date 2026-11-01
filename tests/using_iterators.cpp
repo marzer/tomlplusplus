@@ -17,7 +17,8 @@ number=5)"sv;
 			const auto tbl_begin = tbl.begin();
 			const auto tbl_end	 = tbl.end();
 
-			auto count_table_lambda = [tbl_begin, tbl_end](node_type type) noexcept {
+			auto count_table_lambda = [tbl_begin, tbl_end](node_type type) noexcept
+			{
 				return std::count_if(tbl_begin,
 									 tbl_end,
 									 [type](const auto& pair) noexcept { return pair.second.type() == type; });
@@ -37,7 +38,8 @@ number=5)"sv;
 			const auto arr_begin = arr->begin();
 			const auto arr_end	 = arr->end();
 
-			auto count_array_lambda = [arr_begin, arr_end](node_type type) noexcept {
+			auto count_array_lambda = [arr_begin, arr_end](node_type type) noexcept
+			{
 				return std::count_if(arr_begin,
 									 arr_end,
 									 [type](const auto& node) noexcept { return node.type() == type; });

@@ -59,7 +59,7 @@
 //#=====================================================================================================================
 
 #ifndef TOML_MAKE_VERSION
-#define TOML_MAKE_VERSION(major, minor, patch) (((major)*10000) + ((minor)*100) + ((patch)))
+#define TOML_MAKE_VERSION(major, minor, patch) (((major) * 10000) + ((minor) * 100) + ((patch)))
 #endif
 
 #ifndef TOML_INTELLISENSE
@@ -436,7 +436,7 @@
 #define TOML_ABSTRACT_INTERFACE TOML_DECLSPEC(novtable)
 #endif
 #ifndef TOML_EMPTY_BASES
-#define TOML_EMPTY_BASES		TOML_DECLSPEC(empty_bases)
+#define TOML_EMPTY_BASES TOML_DECLSPEC(empty_bases)
 #endif
 
 // TOML_TRIVIAL_ABI
@@ -1255,12 +1255,12 @@ TOML_ENABLE_WARNINGS;
 
 #ifndef TOML_DISABLE_NOEXCEPT_NOEXCEPT
 #define TOML_DISABLE_NOEXCEPT_NOEXCEPT 0
-	#ifdef _MSC_VER
-		#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
-		#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
-		#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
-		#endif
-	#endif
+#ifdef _MSC_VER
+#if _MSC_VER <= 1943 // Up to Visual Studio 2022 Version 17.13.6
+#undef TOML_DISABLE_NOEXCEPT_NOEXCEPT
+#define TOML_DISABLE_NOEXCEPT_NOEXCEPT 1
+#endif
+#endif
 #endif
 //# {{
 /// \def TOML_DISABLE_NOEXCEPT_NOEXCEPT

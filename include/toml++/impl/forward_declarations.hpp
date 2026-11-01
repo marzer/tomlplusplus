@@ -1204,7 +1204,7 @@ TOML_IMPL_NAMESPACE_START
 	template <typename Iterator, typename T>
 	TOML_PURE_GETTER
 	inline auto find(Iterator start, Iterator end, const T& needle) noexcept //
-		->decltype(&(*start))
+		-> decltype(&(*start))
 	{
 		for (; start != end; start++)
 			if (*start == needle)

@@ -12,6 +12,7 @@ on:
             - "**.py"
             - "**/meson.build"
             - "**/workflows/**.yaml"
+            - "pyproject.toml"
     pull_request:
         branches-ignore:
             - "gh-pages"
@@ -23,6 +24,7 @@ on:
             - "**.py"
             - "**/meson.build"
             - "**/workflows/**.yaml"
+            - "pyproject.toml"
     workflow_dispatch:
 
 concurrency:
@@ -30,6 +32,22 @@ concurrency:
     cancel-in-progress: true
 
 jobs:
+    pyright:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - uses: actions/setup-python@v7
+              with:
+                  python-version: "3.13"
+
+            - name: Install python dependencies
+              run: python -m pip install -r tools/requirements.txt pyright
+
+            - name: Run pyright
+              run: pyright
+
     linux:
         strategy:
             fail-fast: false
@@ -72,9 +90,7 @@ jobs:
                   python3 --version
 
             - name: Check toml.hpp
-              run: |
-                  cd tools
-                  python3 ci_single_header_check.py
+              run: python3 tools/ci_single_header_check.py
 
             - name: Configure Meson
               run: meson setup build --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false

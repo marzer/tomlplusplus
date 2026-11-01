@@ -162,7 +162,7 @@
 			<LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
 		</Link>
 	</ItemDefinitionGroup>
-	
+
 	<!-- :: strip debug symbols -->
 	<ItemDefinitionGroup Condition="'$(TomlStripSymbols_)'=='True'">
 		<ClCompile>
@@ -203,5 +203,5 @@
 	<Target Name="TomlDeleteIntDir" AfterTargets="TomlReportBuildDuration" Condition="'$(TomlDeleteIntDir_)'=='True' And Exists('$(IntDir)')">
 		<RemoveDir Directories="$(IntDir)" />
 	</Target>
-	
+
 </Project>

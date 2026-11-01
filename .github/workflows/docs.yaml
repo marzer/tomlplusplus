@@ -1,0 +1,124 @@
+name: docs
+
+on:
+    push:
+        branches:
+            - master
+        paths:
+            - "**.h"
+            - "**.hpp"
+            - "**.dox"
+            - "**.md"
+            - "docs/**"
+            - ".github/workflows/docs.yaml"
+    pull_request:
+        branches:
+            - master
+        paths:
+            - "**.h"
+            - "**.hpp"
+            - "**.dox"
+            - "**.md"
+            - "docs/**"
+            - ".github/workflows/docs.yaml"
+    release:
+        types:
+            - released
+    workflow_dispatch:
+
+permissions:
+    contents: read
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
+
+jobs:
+    docs-check:
+        if: github.event_name == 'pull_request'
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Install Doxygen
+              uses: ssciwr/doxygen-install@v2
+              with:
+                  version: "1.14.0"
+
+            - name: Install dependencies
+              run: |
+                  sudo rm -f /var/lib/man-db/auto-update || true
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends python3 python3-pip
+                  sudo -H pip3 install --upgrade poxy --break-system-packages
+                  poxy --version
+                  doxygen --version
+
+            - name: Generate HTML documentation
+              run: |
+                  cd docs
+                  poxy
+
+    docs:
+        if: github.event_name != 'pull_request'
+
+        permissions:
+            contents: read
+            pages: write
+            id-token: write
+
+        environment:
+            name: github-pages
+            url: ${{ steps.deployment.outputs.page_url }}
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  fetch-depth: 0
+                  fetch-tags: true
+
+            - name: Install Doxygen
+              uses: ssciwr/doxygen-install@v2
+              with:
+                  version: "1.14.0"
+
+            - name: Install dependencies
+              run: |
+                  sudo rm -f /var/lib/man-db/auto-update || true
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends python3 python3-pip
+                  sudo -H pip3 install --upgrade poxy --break-system-packages
+                  poxy --version
+                  poxy --where
+                  doxygen --version
+
+            - name: Generate HTML documentation
+              run: |
+                  git fetch origin master:refs/remotes/origin/master --tags --force
+                  git remote set-head origin -a
+                  git checkout master
+                  git pull --force
+                  cd docs
+                  poxy --git-tags --min-version v2.4.0
+
+                  if [ ! -f 'html/toml++.tagfile.xml' ]; then
+                      echo '::error::documentation generation failed for master'
+                      poxy
+                      exit 1
+                  fi
+
+            - name: Setup Pages
+              uses: actions/configure-pages@v6
+
+            - name: Upload
+              uses: actions/upload-pages-artifact@v5
+              with:
+                  path: "./docs/html"
+
+            - name: Deploy
+              id: deployment
+              uses: actions/deploy-pages@v5

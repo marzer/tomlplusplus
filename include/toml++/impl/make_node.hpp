@@ -93,7 +93,8 @@ TOML_IMPL_NAMESPACE_START
 			}
 
 			return static_cast<T&&>(val).visit(
-				[flags](auto&& concrete) {
+				[flags](auto&& concrete)
+				{
 					return static_cast<toml::node*>(
 						make_node_impl_specialized(static_cast<decltype(concrete)&&>(concrete), flags));
 				});
