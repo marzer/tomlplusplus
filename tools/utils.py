@@ -6,51 +6,12 @@
 
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 
-from misk import (
-    assert_existing_directory,
-    entry_script_dir,
-    get_all_files,
-    print_exception,
-    read_all_text_from_file,
-    run_python_script,
-    sha1,
-)
 
-__all__ = [
-    'apply_clang_format',
-    'assert_existing_directory',
-    'entry_script_dir',
-    'get_all_files',
-    'make_divider',
-    'print_exception',
-    'read_all_text_from_file',
-    'repeat_pattern',
-    'run',
-    'run_python_script',
-    'sha1',
-]
-
-
-def repeat_pattern(pattern, count):
-    if len(pattern) == 1:
-        return pattern * count
-    text = ''
-    for i in range(0, count):
-        text = text + pattern[i % len(pattern)]
-    return text
-
-
-def make_divider(text=None, text_col=40, pattern='-', line_length=120):
-    if text is None:
-        return "//" + repeat_pattern(pattern, line_length - 2)
-    else:
-        text = f"//{repeat_pattern(pattern, text_col - 2)}  {text}  "
-        if len(text) < line_length:
-            return text + repeat_pattern(pattern, line_length - len(text))
-        else:
-            return text
+def entry_script_dir():
+    return Path(sys.argv[0]).resolve().parent
 
 
 def apply_clang_format(text, cwd=None):
@@ -72,5 +33,8 @@ def run(main_func, verbose=False):
         else:
             sys.exit(int(result))
     except Exception as err:
-        print_exception(err, include_type=verbose, include_traceback=verbose, skip_frames=1)
+        if verbose:
+            traceback.print_exc()
+        else:
+            print(err, file=sys.stderr)
         sys.exit(-1)

@@ -4,18 +4,58 @@
 # See https://github.com/marzer/tomlplusplus/blob/master/LICENSE for the full license text.
 # SPDX-License-Identifier: MIT
 
+import os
 import re
+import sys
+from argparse import ArgumentParser
+from datetime import date
 from io import StringIO
 from pathlib import Path
 
-import utils
+ROOT = Path(__file__).resolve().parents[1]
+VERSION_FILE = ROOT / 'VERSION.txt'
+TRIPLET = r'[0-9]+(?:[.][0-9]+){2}'
+
+
+def read_text_file(path):
+    with open(path, encoding='utf-8', newline='') as f:
+        return f.read()
+
+
+def write_text_file(path, text):
+    print(rf'Regenerating {path.relative_to(ROOT)}')
+    temp = path.with_name(rf'{path.name}.{os.getpid()}.tmp')
+    with open(temp, 'w', encoding='utf-8', newline='') as f:
+        f.write(text)
+    os.replace(temp, path)
+
+
+def repeat_pattern(pattern, count):
+    if len(pattern) == 1:
+        return pattern * count
+    text = ''
+    for i in range(0, count):
+        text = text + pattern[i % len(pattern)]
+    return text
+
+
+def make_divider(text=None, text_col=40, pattern='-', line_length=120):
+    if text is None:
+        return "//" + repeat_pattern(pattern, line_length - 2)
+    else:
+        text = f"//{repeat_pattern(pattern, text_col - 2)}  {text}  "
+        if len(text) < line_length:
+            return text + repeat_pattern(pattern, line_length - len(text))
+        else:
+            return text
 
 
 class Preprocessor:
     __re_includes = re.compile(r'^\s*#\s*include\s+"(.+?)".*?$', re.I | re.M)
     __re_pragma_once = re.compile(r'^\s*#\s*pragma\s+once\s*$', re.M)
 
-    def __init__(self, file):
+    def __init__(self, file, read_file):
+        self.__read_file = read_file
         self.__processed_files = set()
         self.__once_only = set()
         self.__directory_stack = [Path.cwd()]
@@ -36,7 +76,7 @@ class Preprocessor:
             return ''
         self.__include_stack.append(incl)
 
-        text = utils.read_all_text_from_file(incl, logger=True).strip() + '\n'
+        text = self.__read_file(incl).strip() + '\n'
         text = text.replace('\r\n', '\n')  # convert windows newlines
 
         self.__directory_stack.append(incl.parent)
@@ -54,13 +94,13 @@ class Preprocessor:
             incl_normalized = incl_normalized[len(self.__entry_root) :].strip('/')
 
         if len(self.__include_stack) > 1 and incl_normalized not in (r'impl/header_start.hpp', r'impl/header_end.hpp'):
-            header = utils.make_divider(incl_normalized, 10, pattern=r'*')
+            header = make_divider(incl_normalized, 10, pattern=r'*')
             footer = ''
             if len(self.__include_stack) > 2:
                 footer = str(self.__include_stack[-2]).replace('\\', r'/')
                 if footer.startswith(self.__entry_root):
                     footer = footer[len(self.__entry_root) :].strip('/')
-                footer = utils.make_divider(footer, 10, pattern=r'*')
+                footer = make_divider(footer, 10, pattern=r'*')
 
             text = f'\n\n{header}\n\n{text}\n\n{footer}'.rstrip()
 
@@ -77,14 +117,10 @@ class Preprocessor:
         return out
 
 
-def main():
-
-    # establish local directories
-    root_dir = utils.entry_script_dir().parent
-    include_dir = Path(root_dir, 'include', 'toml++')
+def generate_single_header(version, read_file):
 
     # preprocess header(s)
-    toml_h = str(Preprocessor(Path(include_dir, 'toml.hpp')))
+    toml_h = str(Preprocessor(ROOT / 'include' / 'toml++' / 'toml.hpp', read_file))
 
     # strip various things:
     if 1:
@@ -130,20 +166,6 @@ def main():
         r'#\s*define\s+TOML_LIB_SINGLE_HEADER\s+[0-9]+', '#define	TOML_LIB_SINGLE_HEADER 1', toml_h, flags=re.I
     )
 
-    # read version number
-    version_h = utils.read_all_text_from_file(Path(include_dir, 'impl/version.hpp'), logger=True)
-    match = re.search(
-        r'#\s*define\s+TOML_LIB_MAJOR\s+([0-9]+)[^0-9].*'
-        + r'#\s*define\s+TOML_LIB_MINOR\s+([0-9]+)[^0-9].*'
-        + r'#\s*define\s+TOML_LIB_PATCH\s+([0-9]+)[^0-9]',
-        version_h,
-        re.I | re.S,
-    )
-    if match is None:
-        raise Exception("could not find TOML_LIB_MAJOR, TOML_LIB_MINOR or TOML_LIB_PATCH impl/version.hpp")
-    version = rf'{int(match[1])}.{int(match[2])}.{int(match[3])}'
-    print(rf'Library version: {version}')
-
     # build the preamble (license etc)
     preamble = []
     preamble.append(rf'''
@@ -163,16 +185,14 @@ def main():
 // v1.0.0:      https://toml.io/en/v1.0.0
 // v0.5.0:      https://toml.io/en/v0.5.0
 // changelog:   https://github.com/toml-lang/toml/blob/master/CHANGELOG.md''')
-    preamble.append(
-        utils.read_all_text_from_file(Path(utils.entry_script_dir(), '..', 'LICENSE').resolve(), logger=True)
-    )
+    preamble.append(read_file(ROOT / 'LICENSE'))
 
     # write the output
     with StringIO(newline='\n') as output:
         # build in a string buffer
         write = lambda txt, end='\n': print(txt, file=output, end=end)
         if len(preamble) > 0:
-            write(utils.make_divider())
+            write(make_divider())
         for pre in preamble:
             write('//')
             for line in pre.strip().splitlines():
@@ -183,7 +203,7 @@ def main():
                     write('// ', end='')
                 write(line)
             write('//')
-            write(utils.make_divider())
+            write(make_divider())
         write(toml_h)
         write('')
 
@@ -255,12 +275,85 @@ def main():
                 for define in set_defines:
                     print(f"\t#undef {define}")
 
-        # write the output file
-        output_file_path = Path(utils.entry_script_dir(), '..', 'toml.hpp').resolve()
-        print(f"Writing to {output_file_path}")
-        with open(output_file_path, 'w', encoding='utf-8', newline='\n') as output_file:
-            print(output_str, file=output_file)
+        return output_str + '\n'
+
+
+def parse_version():
+    text = read_text_file(VERSION_FILE).strip()
+    match = re.fullmatch(r'(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)', text)
+    if not match:
+        sys.exit(rf"error: {VERSION_FILE.name}: '{text}' is not a major.minor.patch version")
+    return (match[1], match[2], match[3])
+
+
+def version_rules(major, minor, patch):
+    version = rf'{major}.{minor}.{patch}'
+    snippets = [
+        (rf'(?i)(toml(?:plusplus|\+\+|pp)\s*[/:^]\s*){TRIPLET}', rf'\g<1>{version}'),
+        (rf'(?i)(GIT_TAG\s+)(?:v\s*)?{TRIPLET}', rf'\g<1>v{version}'),
+    ]
+    return {
+        'include/toml++/impl/version.hpp': [
+            (r'(#\s*define\s+TOML_LIB_MAJOR)\s+[0-9]+', rf'\g<1> {major}'),
+            (r'(#\s*define\s+TOML_LIB_MINOR)\s+[0-9]+', rf'\g<1> {minor}'),
+            (r'(#\s*define\s+TOML_LIB_PATCH)\s+[0-9]+', rf'\g<1> {patch}'),
+        ],
+        'README.md': snippets,
+        'docs/pages/main_page.md': snippets,
+        'toml++.natvis': [(r'toml::v[0-9]+::', rf'toml::v{major}::')],
+    }
+
+
+def apply_rules(path, rules):
+    text = read_text_file(ROOT / path)
+    for pattern, replacement in rules:
+        text, count = re.subn(pattern, replacement, text)
+        if not count:
+            sys.exit(rf"error: {path}: nothing matched '{pattern}'")
+    return text
+
+
+def updated_changelog(version):
+    text = read_text_file(ROOT / 'CHANGELOG.md')
+    if re.search(rf'(?m)^##\s+v{re.escape(version)}(?:\s|$)', text):
+        return text
+    released = rf'[Released](https://github.com/marzer/tomlplusplus/releases/tag/v{version}) {date.today()}'
+    text, count = re.subn(r'(?m)^## Unreleased[ \t]*$', rf'## Unreleased\n\n## v{version}\n\n{released}', text, count=1)
+    if not count:
+        sys.exit(rf'error: CHANGELOG.md has neither a "## v{version}" heading nor an "## Unreleased" one')
+    return text
+
+
+def main():
+    parser = ArgumentParser(description=r'Regenerates everything derived from VERSION.txt and include/toml++.')
+    parser.add_argument(r'--check', action='store_true', help=r'report anything out of date, changing nothing')
+    parser.add_argument(r'--stamp', type=Path, help=r'a file to write afterwards, for build systems to track')
+    args = parser.parse_args()
+
+    major, minor, patch = parse_version()
+    version = rf'{major}.{minor}.{patch}'
+
+    outputs = {ROOT / path: apply_rules(path, rules) for path, rules in version_rules(major, minor, patch).items()}
+    outputs[ROOT / 'CHANGELOG.md'] = updated_changelog(version)
+    outputs[ROOT / 'toml.hpp'] = generate_single_header(
+        version, lambda path: outputs[path] if path in outputs else read_text_file(path)
+    )
+
+    stale = [path for path, text in outputs.items() if not path.exists() or read_text_file(path) != text]
+
+    if args.check:
+        for path in stale:
+            print(rf'error: {path.relative_to(ROOT)} is out of date', file=sys.stderr)
+        if stale:
+            print(r'build the project, or run tools/regenerate.py', file=sys.stderr)
+        return 1 if stale else 0
+
+    for path in stale:
+        write_text_file(path, outputs[path])
+    if args.stamp:
+        args.stamp.write_text('', encoding='utf-8')
+    return 0
 
 
 if __name__ == '__main__':
-    utils.run(main, verbose=True)
+    sys.exit(main())

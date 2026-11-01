@@ -38,7 +38,7 @@ test_sources = files(
 	'windows_compat.cpp'
 )
 
-test_deps = [ tomlplusplus_dep ]
+test_deps = [ tomlplusplus_dep, regenerate_dep ]
 if not get_option('use_vendored_libs')
 	test_deps += dependency('catch2')
 endif

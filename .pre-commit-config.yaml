@@ -23,6 +23,15 @@ repos:
           - id: clang-format
             types_or: [c++, c]
 
+    - repo: local
+      hooks:
+          - id: regenerate
+            name: regenerate toml.hpp and other derived files
+            entry: python tools/regenerate.py
+            language: python
+            pass_filenames: false
+            always_run: true
+
     - repo: https://github.com/astral-sh/ruff-pre-commit
       rev: v0.17.3
       hooks:

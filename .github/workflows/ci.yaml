@@ -13,6 +13,8 @@ on:
             - "**/meson.build"
             - "**/workflows/**.yaml"
             - "pyproject.toml"
+            - "VERSION.txt"
+            - "LICENSE"
     pull_request:
         branches-ignore:
             - "gh-pages"
@@ -25,13 +27,50 @@ on:
             - "**/meson.build"
             - "**/workflows/**.yaml"
             - "pyproject.toml"
+            - "VERSION.txt"
+            - "LICENSE"
     workflow_dispatch:
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+    cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
 jobs:
+    generated:
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+
+        outputs:
+            sha: ${{ steps.commit.outputs.sha }}
+
+        defaults:
+            run:
+                shell: bash
+
+        steps:
+            - uses: actions/checkout@v7
+
+            - name: Regenerate
+              run: |
+                  python3 tools/regenerate.py
+                  git status --short
+
+            - name: Commit to master
+              id: commit
+              if: github.repository == 'marzer/tomlplusplus' && github.ref == 'refs/heads/master'
+              run: |
+                  if [ -n "$(git status --porcelain)" ]; then
+                    git config user.name 'github-actions[bot]'
+                    git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+                    git add --all
+                    git commit -m 'regenerate derived files'
+                    git pull --rebase origin master
+                    git push origin HEAD:master
+                  fi
+                  echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
     pyright:
         runs-on: ubuntu-latest
 
@@ -76,10 +115,8 @@ jobs:
 
             - uses: actions/checkout@v7
 
-            - name: Install python dependencies
-              run: |
-                  pipx install meson
-                  pip3 install --user --no-cache-dir --upgrade -r tools/requirements.txt
+            - name: Install meson
+              run: pipx install meson
 
             - name: Print tool versions
               run: |
@@ -89,9 +126,6 @@ jobs:
                   ninja --version
                   python3 --version
 
-            - name: Check toml.hpp
-              run: python3 tools/ci_single_header_check.py
-
             - name: Configure Meson
               run: meson setup build --buildtype=${{ matrix.type }} -Ddevel=true -Db_lto=false
 
@@ -100,6 +134,9 @@ jobs:
 
             - name: Test
               run: meson test -C build --verbose
+
+            - name: Report regenerated files
+              run: git status --short
 
     windows:
         strategy:
@@ -142,3 +179,54 @@ jobs:
 
             - name: Test
               run: meson test -C build --verbose
+
+            - name: Report regenerated files
+              run: git status --short
+
+    release:
+        needs: [generated, pyright, linux, windows]
+
+        if: github.repository == 'marzer/tomlplusplus' && github.ref == 'refs/heads/master'
+
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: write
+            actions: write
+
+        defaults:
+            run:
+                shell: bash
+
+        steps:
+            - uses: actions/checkout@v7
+              with:
+                  ref: ${{ needs.generated.outputs.sha }}
+
+            - name: Create release from VERSION.txt
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  TARGET_SHA: ${{ needs.generated.outputs.sha }}
+              run: |
+                  version=$(tr -d '[:space:]' < VERSION.txt)
+                  echo "VERSION.txt: $version"
+
+                  tag="v$version"
+                  if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+                    echo "release with tag $tag already exists; nothing to do."
+                    exit 0
+                  fi
+
+                  notes="This release was triggered automatically by a merge to \`$GITHUB_REF_NAME\`."
+                  notes+='<br/><br/>'
+                  notes+="See [CHANGELOG.md](https://github.com/$GITHUB_REPOSITORY/blob/$tag/CHANGELOG.md)"
+                  notes+=' for a human-friendly change log. :tada:'
+
+                  gh release create "$tag" toml.hpp \
+                    --repo "$GITHUB_REPOSITORY" \
+                    --target "$TARGET_SHA" \
+                    --title "$tag" \
+                    --generate-notes \
+                    --notes "$notes"
+
+                  gh workflow run docs.yaml --repo "$GITHUB_REPOSITORY" --ref master

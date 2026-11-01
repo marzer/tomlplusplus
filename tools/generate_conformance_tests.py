@@ -336,13 +336,13 @@ class TomlTest:
             yaml_file = Path(path_base + r'.yaml')
             if yaml_file.exists():
                 self.__expected = python_to_tomlpp(
-                    yaml.load(utils.read_all_text_from_file(yaml_file, logger=True), Loader=yaml.FullLoader)
+                    yaml.load(yaml_file.read_text(encoding='utf-8'), Loader=yaml.FullLoader)
                 )
             else:
                 json_file = Path(path_base + r'.json')
                 if json_file.exists():
                     self.__expected = python_to_tomlpp(
-                        json_to_python(json.loads(utils.read_all_text_from_file(json_file, logger=True)))
+                        json_to_python(json.loads(json_file.read_text(encoding='utf-8')))
                     )
 
         else:
@@ -377,8 +377,9 @@ class TomlTest:
 
 def load_tests(source_folder, is_valid_set, ignore_list=None):
     source_folder = source_folder.resolve()
-    utils.assert_existing_directory(source_folder)
-    files = utils.get_all_files(source_folder, all="*.toml", recursive=True)
+    if not source_folder.is_dir():
+        raise Exception(rf'{source_folder} was not an existing directory')
+    files = sorted(f for f in source_folder.rglob('*.toml') if f.is_file())
     strip_source_folder_len = len(str(source_folder))
     files = [(f, str(f)[strip_source_folder_len + 1 : -5].replace('\\', '-').replace('/', '-').strip()) for f in files]
     if ignore_list:
@@ -611,8 +612,7 @@ def write_test_file(name, all_tests):
         try:
             test_file_content = utils.apply_clang_format(test_file_content, cwd=test_file_path.parent)
         except Exception as ex:
-            print(rf'Error running clang-format:', file=sys.stderr)
-            utils.print_exception(ex)
+            print(rf'Error running clang-format: {ex}', file=sys.stderr)
 
         # write to disk
         print(rf'Writing {test_file_path}')

@@ -10,6 +10,7 @@ option('unreleased_features',	type: 'boolean', value: false,	description: 'Enabl
 
 option('generate_cmake_config',	type: 'boolean', value: true,	description: 'Generate a cmake package config file (default: true - no effect when included as a subproject)')
 option('use_vendored_libs',		type: 'boolean', value: true,	description: 'Use the libs from the vendor dir when building tests.')
+option('regenerate',			type: 'boolean', value: true,	description: 'Keep toml.hpp and other derived files up to date when building from a git checkout (default: true - no effect when included as a subproject)')
 
-option('compile_library',		type: 'boolean', value: false,  deprecated: 'build_lib')
+option('compile_library',		type: 'boolean', value: false,  deprecated: true,	description: 'Deprecated: use build_lib.')
 option('float16',				type: 'boolean', deprecated: true)

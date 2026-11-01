@@ -25,7 +25,6 @@
 - [ ] I've read [CONTRIBUTING.md]
 - [ ] I've rebased my changes against the current HEAD of `origin/master` (if necessary)
 - [ ] I've added new test cases to verify my change
-- [ ] I've regenerated toml.hpp ([how-to])
 - [ ] I've updated any affected documentation
 - [ ] I've rebuilt and run the tests with at least one of:
     - [ ] Clang 8 or higher
@@ -34,5 +33,4 @@
 - [ ] I've added my name to the list of contributors in [README.md](https://github.com/marzer/tomlplusplus/blob/master/README.md)
 
 [CONTRIBUTING.md]: https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md
-[how-to]: https://github.com/marzer/tomlplusplus/blob/master/CONTRIBUTING.md#regenerating-tomlhpp
 [README.md]: https://github.com/marzer/tomlplusplus/blob/master/README.md

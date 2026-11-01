@@ -7,7 +7,7 @@ project(
 	'tomlplusplus',
 	'cpp',
 	license: 'MIT',
-	version: '3.4.0',
+	version: files('VERSION.txt')[0],
 	meson_version: '>=0.61.0',
 	default_options: [
 		# https://mesonbuild.com/Builtin-options.html
@@ -185,6 +185,27 @@ if is_pedantic
 		'warning_level=3',
 		'werror=true',
 		]
+endif
+
+#-----------------------------------------------------------------------------------------------------------------------
+# generated files
+#-----------------------------------------------------------------------------------------------------------------------
+
+regenerate_dep = dependency('', required: false)
+
+if get_option('regenerate') and not is_subproject and import('fs').exists('.git')
+	python = import('python').find_installation()
+	regenerate_script = files('tools/regenerate.py')
+	run_command(python, regenerate_script, check: true)
+	regenerate_dep = declare_dependency(
+		sources: custom_target(
+			'regenerate',
+			output: 'regenerate.stamp',
+			command: [ python, regenerate_script, '--stamp', '@OUTPUT@' ],
+			build_by_default: true,
+			build_always_stale: true
+		)
+	)
 endif
 
 #-----------------------------------------------------------------------------------------------------------------------
