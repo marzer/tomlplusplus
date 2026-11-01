@@ -7,13 +7,17 @@ example_args = []
 example_args += global_args
 
 examples = [
-	'simple_parser',
-	'toml_to_json_transcoder',
 	'toml_generator',
 	'error_printer',
 	'parse_benchmark',
-	'toml_merger',
 ]
+if has_exceptions
+	examples += [
+		'simple_parser',
+		'toml_to_json_transcoder',
+		'toml_merger',
+	]
+endif
 
 example_executables = []
 foreach example : examples

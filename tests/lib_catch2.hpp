@@ -7,14 +7,9 @@
 #include "settings.hpp"
 
 #ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Weverything"
+#pragma clang system_header
 #elif defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wextra"
-#pragma GCC diagnostic ignored "-Wpadded"
-#pragma GCC diagnostic ignored "-Wfloat-equal"
+#pragma GCC system_header
 #elif defined(_MSC_VER)
 #pragma warning(push, 0)
 #pragma warning(disable : 4619)
@@ -25,20 +20,18 @@
 #pragma warning(disable : 5264)
 #endif
 
-#if !defined(USE_VENDORED_LIBS) || USE_VENDORED_LIBS
-#include "../vendor/catch.hpp"
-#elif __has_include(<Catch2/single_include/catch2/catch.hpp>)
-#include <Catch2/single_include/catch2/catch.hpp>
-#elif __has_include(<catch2/catch.hpp>)
-#include <catch2/catch.hpp>
+#if USE_VENDORED_LIBS
+#include "../vendor/catch_amalgamated.hpp"
+#elif __has_include(<catch2/catch_all.hpp>)
+#include <catch2/catch_all.hpp>
 #else
-#error Catch2 is missing!
+#error Catch2 v3 is missing!
 #endif
 
-#ifdef __clang__
-#pragma clang diagnostic pop
-#elif defined(__GNUC__)
-#pragma GCC diagnostic pop
-#elif defined(_MSC_VER)
+#if defined(CATCH_AMALGAMATED_CUSTOM_MAIN) && USE_VENDORED_LIBS
+#include "../vendor/catch_amalgamated.cpp"
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
 #pragma warning(pop)
 #endif

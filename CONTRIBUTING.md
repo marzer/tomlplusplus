@@ -69,7 +69,7 @@ cd build-debug && ninja && ninja test               \
 ```
 
 > ℹ&#xFE0F; Pass `-Duse_vendored_libs=false` to Meson if you wish to use the system-installed version
-> of Catch2 rather than the vendored one.
+> of Catch2 (v3 or newer) rather than the vendored one.
 
 <br>
 

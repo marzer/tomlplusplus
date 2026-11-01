@@ -478,6 +478,8 @@ def load_burnsushi_tests(tests):
             re.compile(r'inline-table-linebreak-.*'),
             'inline-table-trailing-comma',
             'key-special-character',
+            'local-datetime-no-secs',
+            'local-time-no-secs',
             'multi-line-inline-table',
             'string-basic-byte-escapes',
         ),

@@ -9,13 +9,17 @@
 #pragma warning(disable : 5264)
 #endif
 
-#define CATCH_CONFIG_RUNNER
+#define CATCH_AMALGAMATED_CUSTOM_MAIN
 #include "lib_catch2.hpp"
 #include <clocale>
+#include <iostream>
+#include <locale>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 
 #if LEAK_TESTS
 
-#include <iostream>
 #include <iomanip>
 #include <atomic>
 #include "leakproof.hpp"
@@ -69,7 +73,11 @@ int main(int argc, char* argv[])
 #ifdef _WIN32
 	SetConsoleOutputCP(65001);
 #endif
-	std::setlocale(LC_ALL, "");
+	if (!std::setlocale(LC_ALL, ""))
+	{
+		std::cerr << "skipped: the locale requested by the environment is not installed\n";
+		return 77;
+	}
 	std::locale::global(std::locale(""));
 	if (auto result = Catch::Session().run(argc, argv))
 		return result;

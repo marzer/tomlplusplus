@@ -358,7 +358,7 @@ b = []
 							   {
 								   const auto check_location = [&](std::string_view path, auto line, auto col)
 								   {
-									   INFO("Checking source location of  \""sv << path << "\""sv)
+									   INFO("Checking source location of  \""sv << path << "\""sv);
 									   auto v = tbl.at_path(path);
 									   REQUIRE(v.node());
 									   CHECK(v.node()->source().begin.line == static_cast<toml::source_index>(line));
@@ -456,7 +456,7 @@ b = []
 
 		parsing_should_succeed(FILE_LINE_ARGS,
 							   input,
-							   [&](auto&& tbl)
+							   [&](table&& tbl)
 							   {
 								   CHECK(tbl["a"]);
 								   CHECK(tbl["a\tb"]);

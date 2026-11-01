@@ -40,7 +40,7 @@ test_sources = files(
 
 test_deps = [ tomlplusplus_dep, regenerate_dep ]
 if not get_option('use_vendored_libs')
-	test_deps += dependency('catch2')
+	test_deps += dependency('catch2', version: '>=3.0.0')
 endif
 
 #-----------------------------------------------------------------------------------------------------------------------

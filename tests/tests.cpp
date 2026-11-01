@@ -12,11 +12,11 @@ bool parsing_should_succeed(std::string_view test_file,
 							std::string_view source_path)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-			   << "parsing_should_succeed(\""sv << toml_str << "\")"sv)
+			   << "parsing_should_succeed(\""sv << toml_str << "\")"sv);
 
 	constexpr auto validate_table = [](table&& tabl, std::string_view path) -> table&&
 	{
-		INFO("Validating table source information"sv)
+		INFO("Validating table source information"sv);
 		CHECK(tabl.source().begin != source_position{});
 		CHECK(tabl.source().end != source_position{});
 		if (path.empty())
@@ -34,14 +34,14 @@ bool parsing_should_succeed(std::string_view test_file,
 	try
 	{
 		{
-			INFO("Parsing string directly"sv)
+			INFO("Parsing string directly"sv);
 			if (func)
 				func(validate_table(toml::parse(toml_str, source_path), source_path));
 			else
 				validate_table(toml::parse(toml_str, source_path), source_path);
 		}
 		{
-			INFO("Parsing from a string stream"sv)
+			INFO("Parsing from a string stream"sv);
 			std::stringstream ss;
 			ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 			if (func)
@@ -60,7 +60,7 @@ bool parsing_should_succeed(std::string_view test_file,
 #else
 
 	{
-		INFO("Parsing string directly"sv)
+		INFO("Parsing string directly"sv);
 		parse_result result = toml::parse(toml_str, source_path);
 		if (result)
 		{
@@ -78,7 +78,7 @@ bool parsing_should_succeed(std::string_view test_file,
 	}
 
 	{
-		INFO("Parsing from a string stream"sv)
+		INFO("Parsing from a string stream"sv);
 		std::stringstream ss;
 		ss.write(toml_str.data(), static_cast<std::streamsize>(toml_str.length()));
 		parse_result result = toml::parse(ss, source_path);
@@ -109,7 +109,7 @@ bool parsing_should_fail(std::string_view test_file,
 						 source_index expected_failure_column)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-			   << "parsing_should_fail(\""sv << toml_str << "\")"sv)
+			   << "parsing_should_fail(\""sv << toml_str << "\")"sv);
 
 #if TOML_EXCEPTIONS
 
@@ -212,10 +212,6 @@ template bool parse_expected_value(std::string_view, uint32_t, std::string_view,
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
 template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const std::string_view&);
 
-namespace std
-{
-	template class unique_ptr<const Catch::IExceptionTranslator>;
-}
 namespace Catch
 {
 	template struct StringMaker<node_view<node>>;

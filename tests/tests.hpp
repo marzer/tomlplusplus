@@ -5,7 +5,11 @@
 
 #pragma once
 #include "settings.hpp"
+#if USE_SINGLE_HEADER
+#include "../toml.hpp"
+#else
 #include <toml++/toml.hpp>
+#endif
 
 #if TOML_COMPILER_HAS_EXCEPTIONS ^ SHOULD_HAVE_EXCEPTIONS
 #error TOML_COMPILER_HAS_EXCEPTIONS was not deduced correctly
@@ -149,7 +153,7 @@ inline bool parse_expected_value(std::string_view test_file,
 								 const T& expected)
 {
 	INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-			   << "parse_expected_value(\""sv << value_str << "\")"sv)
+			   << "parse_expected_value(\""sv << value_str << "\")"sv);
 
 	std::string val;
 	static constexpr auto key = "val = "sv;
@@ -203,7 +207,7 @@ inline bool parse_expected_value(std::string_view test_file,
 	value<value_type> val_parsed;
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-				   << "parse_expected_value: Checking initial parse"sv)
+				   << "parse_expected_value: Checking initial parse"sv);
 
 		bool stolen_value = false; // parsing_should_succeed invokes the functor more than once
 		const auto result = parsing_should_succeed(
@@ -329,7 +333,7 @@ inline bool parse_expected_value(std::string_view test_file,
 	// check round-tripping
 	{
 		INFO("["sv << test_file << ", line "sv << test_line << "] "sv
-				   << "parse_expected_value: Checking round-trip"sv)
+				   << "parse_expected_value: Checking round-trip"sv);
 		{
 			std::string str;
 			{
@@ -375,10 +379,6 @@ extern template bool parse_expected_value(std::string_view, uint32_t, std::strin
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const float&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const double&);
 extern template bool parse_expected_value(std::string_view, uint32_t, std::string_view, const std::string_view&);
-namespace std
-{
-	extern template class unique_ptr<const Catch::IExceptionTranslator>;
-}
 namespace Catch
 {
 	extern template struct StringMaker<node_view<node>>;
