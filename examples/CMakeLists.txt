@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.14...4.4)
 
-project(Examples LANGUAGES CXX)
+project(Examples VERSION 1.0.0 LANGUAGES CXX)
 
 include(../cmake/project-is-top-level.cmake)
 
@@ -15,13 +15,19 @@ function(add_example name)
   add_executable("${name}" "${name}.cpp")
   target_link_libraries("${name}" PRIVATE tomlplusplus::tomlplusplus)
   target_compile_features("${name}" PRIVATE cxx_std_17)
+  if(COMMAND tomlplusplus_set_compile_options)
+    tomlplusplus_set_compile_options("${name}")
+  endif()
   add_custom_target("run_${name}" COMMAND "${name}" ${_ARGS} VERBATIM)
   add_dependencies(run_examples "run_${name}")
 endfunction()
 
 add_example(error_printer)
 add_example(parse_benchmark)
-add_example(simple_parser)
 add_example(toml_generator)
-add_example(toml_merger)
-add_example(toml_to_json_transcoder ARGS "${PROJECT_SOURCE_DIR}/example.toml")
+
+if(tomlplusplus_EXCEPTIONS OR NOT DEFINED tomlplusplus_EXCEPTIONS)
+  add_example(simple_parser)
+  add_example(toml_merger)
+  add_example(toml_to_json_transcoder ARGS "${PROJECT_SOURCE_DIR}/example.toml")
+endif()

@@ -1,31 +1,26 @@
-cmake_minimum_required(VERSION 3.28)
+add_library(tomlplusplus_modules STATIC)
+add_library(tomlplusplus::modules ALIAS tomlplusplus_modules)
 
-file(GLOB_RECURSE TOMLPLUSPLUS_MODULES *.cppm)
+set_target_properties(tomlplusplus_modules PROPERTIES EXPORT_NAME modules POSITION_INDEPENDENT_CODE ON)
 
-add_library(tomlplusplus_modules)
-target_sources(tomlplusplus_modules
+target_sources(
+    tomlplusplus_modules
     PUBLIC
     FILE_SET CXX_MODULES FILES
-    ${TOMLPLUSPLUS_MODULES}
+    tomlplusplus.cppm
 )
 
-target_link_libraries(tomlplusplus_modules
-  PUBLIC
-    tomlplusplus::tomlplusplus
-)
-
-target_include_directories(tomlplusplus_modules
-  PRIVATE
-    ${tomlplusplus_SOURCE_DIR}/include
-)
+target_link_libraries(tomlplusplus_modules PUBLIC tomlplusplus::tomlplusplus)
 
 target_compile_features(tomlplusplus_modules PUBLIC cxx_std_20)
 
-if(TOMLPLUSPLUS_ENABLE_INSTALL)
-  install(TARGETS tomlplusplus_modules
-    EXPORT tomlplusplus-targets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    FILE_SET CXX_MODULES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/tomlplusplus/modules
+if(tomlplusplus_INSTALL)
+  install(
+      TARGETS tomlplusplus_modules
+      EXPORT tomlplusplusTargets
+      ARCHIVE COMPONENT tomlplusplus_Development
+      FILE_SET CXX_MODULES
+      DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}/tomlplusplus/modules"
+      COMPONENT tomlplusplus_Development
   )
 endif()

@@ -8,6 +8,7 @@ meson-private/
 build.ninja
 compile_commands.json
 [Bb]uild*/
+*.profraw
 .ruff_cache/
 .venv/
 

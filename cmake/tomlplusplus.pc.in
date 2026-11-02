@@ -1,0 +1,10 @@
+prefix=@tomlplusplus_pc_prefix@
+includedir=@tomlplusplus_pc_INCLUDEDIR@
+libdir=@tomlplusplus_pc_LIBDIR@
+
+Name: tomlplusplus
+Description: @tomlplusplus_pc_description@
+URL: @PROJECT_HOMEPAGE_URL@
+Version: @PROJECT_VERSION@
+Libs: @tomlplusplus_pc_libs@
+Cflags: -I${includedir}@tomlplusplus_pc_cflags@

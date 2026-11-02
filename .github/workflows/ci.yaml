@@ -8,11 +8,16 @@ on:
             - "**.h"
             - "**.hpp"
             - "**.cpp"
+            - "**.cppm"
             - "**.inl"
             - "**.py"
             - "**/meson.build"
+            - "**/CMakeLists.txt"
+            - "**.cmake"
+            - "**.in"
             - "**/workflows/**.yaml"
             - "pyproject.toml"
+            - "tests/sources.txt"
             - "VERSION.txt"
             - "LICENSE"
     pull_request:
@@ -22,11 +27,16 @@ on:
             - "**.h"
             - "**.hpp"
             - "**.cpp"
+            - "**.cppm"
             - "**.inl"
             - "**.py"
             - "**/meson.build"
+            - "**/CMakeLists.txt"
+            - "**.cmake"
+            - "**.in"
             - "**/workflows/**.yaml"
             - "pyproject.toml"
+            - "tests/sources.txt"
             - "VERSION.txt"
             - "LICENSE"
     workflow_dispatch:
@@ -183,8 +193,155 @@ jobs:
             - name: Report regenerated files
               run: git status --short
 
+    cmake-linux:
+        strategy:
+            fail-fast: false
+            matrix:
+                compiler:
+                    - "clang++"
+                    - "g++"
+                type:
+                    - "Debug"
+                    - "Release"
+                library:
+                    - "-Dtomlplusplus_BUILD_LIB=OFF"
+                    - "-Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON"
+
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                shell: bash
+
+        env:
+            CXX: ${{ matrix.compiler }}
+
+        steps:
+            - name: Install base dependencies
+              run: |
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends ninja-build locales-all
+
+            - uses: actions/checkout@v7
+
+            - name: Print tool versions
+              run: |
+                  cmake --version
+                  ninja --version
+
+            - name: Configure
+              run: >-
+                  cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ matrix.type }}
+                  -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+                  -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON
+                  ${{ matrix.library }}
+
+            - name: Build
+              run: cmake --build build
+
+            - name: Test
+              working-directory: build
+              run: ctest --output-on-failure
+
+            - name: Report regenerated files
+              run: git status --short
+
+    cmake-windows:
+        strategy:
+            fail-fast: false
+            matrix:
+                type:
+                    - "Debug"
+                    - "Release"
+                library:
+                    - "-Dtomlplusplus_BUILD_LIB=OFF"
+                    - "-Dtomlplusplus_BUILD_LIB=ON -DBUILD_SHARED_LIBS=ON"
+                arch:
+                    - name: "x64"
+                      runner: "windows-2022"
+                    - name: "arm64"
+                      runner: "windows-11-arm"
+        runs-on: ${{ matrix.arch.runner }}
+
+        defaults:
+            run:
+                shell: cmd
+
+        steps:
+            - name: Install dependencies
+              run: |
+                  python3 -m pip install -U pip
+                  pip3 install ninja
+
+            - uses: actions/checkout@v7
+
+            - uses: ilammy/msvc-dev-cmd@v1
+              with:
+                  arch: ${{ matrix.arch.name }}
+
+            - name: Print tool versions
+              run: |
+                  cmake --version
+                  ninja --version
+
+            - name: Configure
+              run: >-
+                  cmake -S . -B build -G Ninja -DCMAKE_CXX_COMPILER=cl -DCMAKE_BUILD_TYPE=${{ matrix.type }}
+                  -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON -Dtomlplusplus_BUILD_TOML_TEST=ON
+                  -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON
+                  ${{ matrix.library }}
+
+            - name: Build
+              run: cmake --build build
+
+            - name: Test
+              working-directory: build
+              run: ctest --output-on-failure
+
+            - name: Report regenerated files
+              run: git status --short
+
+    cmake-floor:
+        runs-on: ubuntu-latest
+
+        defaults:
+            run:
+                shell: bash
+
+        steps:
+            - name: Install base dependencies
+              run: |
+                  sudo apt -y update
+                  sudo apt -y install --no-install-recommends ninja-build locales-all
+
+            - name: Install the oldest supported CMake
+              run: |
+                  python3 -m venv "$RUNNER_TEMP/cmake"
+                  "$RUNNER_TEMP/cmake/bin/pip" install cmake==3.14.4.post1
+                  echo "$RUNNER_TEMP/cmake/bin" >> "$GITHUB_PATH"
+
+            - uses: actions/checkout@v7
+
+            - name: Print tool versions
+              run: |
+                  cmake --version
+                  ninja --version
+
+            - name: Configure
+              run: >-
+                  cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+                  -Dtomlplusplus_BUILD_TESTS=ON -DBUILD_EXAMPLES=ON
+                  -Dtomlplusplus_PEDANTIC=ON -Dtomlplusplus_WERROR=ON
+
+            - name: Build
+              run: cmake --build build
+
+            - name: Test
+              working-directory: build
+              run: ctest --output-on-failure
+
     release:
-        needs: [generated, pyright, linux, windows]
+        needs: [generated, pyright, linux, windows, cmake-linux, cmake-windows, cmake-floor]
 
         if: github.repository == 'marzer/tomlplusplus' && github.ref == 'refs/heads/master'
 

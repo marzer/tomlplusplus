@@ -1,0 +1,13 @@
+if(NOT tomlplusplus_USE_VENDORED_LIBS)
+  find_package(nlohmann_json REQUIRED)
+endif()
+
+foreach(name IN ITEMS tt_encoder tt_decoder)
+  add_executable("${name}" "${name}.cpp")
+  tomlplusplus_set_compile_options("${name}")
+  target_link_libraries("${name}" PRIVATE tomlplusplus::tomlplusplus)
+  target_compile_definitions("${name}" PRIVATE "USE_VENDORED_LIBS=$<BOOL:${tomlplusplus_USE_VENDORED_LIBS}>")
+  if(NOT tomlplusplus_USE_VENDORED_LIBS)
+    target_link_libraries("${name}" PRIVATE nlohmann_json::nlohmann_json)
+  endif()
+endforeach()

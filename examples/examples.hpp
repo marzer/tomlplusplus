@@ -32,7 +32,7 @@
 extern "C" __declspec(dllimport) int __stdcall SetConsoleOutputCP(unsigned int);
 #pragma comment(lib, "Kernel32.lib")
 #else
-#include <Windows.h>
+#include <windows.h>
 #endif
 #endif
 
