@@ -1784,11 +1784,13 @@ TOML_IMPL_NAMESPACE_START
 	// std::string_view / (const char*, size_t) / const std::string& that the type supports)
 	template <typename T>
 	inline constexpr bool string_like_target_is_nothrow =
-		std::is_constructible_v<remove_cvref<T>, std::string_view>
-			? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
-			: (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
-				   ? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
-				   : std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>);
+		(std::is_constructible_v<remove_cvref<T>, std::string_view>
+			 ? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
+			 : (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+					? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
+					: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>))
+		&& (std::is_nothrow_move_constructible_v<remove_cvref<T>>
+			|| std::is_nothrow_copy_constructible_v<remove_cvref<T>>);
 
 	template <typename T>
 	inline constexpr bool value_retrieval_is_nothrow =
@@ -4831,7 +4833,10 @@ TOML_NAMESPACE_START
 			else
 			{
 				const auto val = lhs.as<impl::native_type_of<T>>();
-				return val && *val == rhs;
+				if constexpr (impl::is_string_like<T>)
+					return val && *val == impl::string_like_to_view(rhs);
+				else
+					return val && *val == rhs;
 			}
 		}
 		TOML_ASYMMETRICAL_EQUALITY_OPS(const node_view&,
@@ -5056,7 +5061,8 @@ TOML_IMPL_NAMESPACE_START
 		{
 			// user-defined string-likes (see toml::is_string_like) provide their character data
 			// via data()/c_str() + length() rather than by conversion
-			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...))
+			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
+				&& !std::is_constructible_v<std::string, Args&&...>)
 				return std::string{ string_like_to_view(args)... };
 			else if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
@@ -6070,7 +6076,7 @@ TOML_NAMESPACE_START
 						return *ref_cast<typename traits::native_type>();
 				}
 				if (auto val = this->value<value_type>())
-					return *val;
+					return *std::move(val);
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else
@@ -6204,7 +6210,9 @@ TOML_IMPL_NAMESPACE_START
 		return make_node_impl(static_cast<T&&>(val.value), flags);
 	}
 
-	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
+	template <typename T,
+			  bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>
+					  || is_string_like<T>)>
 	struct inserted_type_of_
 	{
 		using type = std::remove_pointer_t<decltype(make_node_impl(std::declval<T>()))>;
@@ -7373,7 +7381,12 @@ TOML_NAMESPACE_START
 			for (auto& list_elem : rhs)
 			{
 				const auto elem = lhs.get_as<impl::native_type_of<element_type>>(i++);
-				if (!elem || *elem != list_elem)
+				if constexpr (impl::is_string_like<element_type>)
+				{
+					if (!elem || *elem != impl::string_like_to_view(list_elem))
+						return false;
+				}
+				else if (!elem || *elem != list_elem)
 					return false;
 			}
 

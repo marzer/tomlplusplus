@@ -97,7 +97,8 @@ TOML_IMPL_NAMESPACE_START
 		{
 			// user-defined string-likes (see toml::is_string_like) provide their character data
 			// via data()/c_str() + length() rather than by conversion
-			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...))
+			if constexpr (std::is_same_v<T, std::string> && sizeof...(Args) == 1u && (is_string_like<Args> && ...)
+				&& !std::is_constructible_v<std::string, Args&&...>)
 				return std::string{ string_like_to_view(args)... };
 			else if constexpr (std::is_aggregate_v<T>)
 				return T{ static_cast<Args&&>(args)... };
@@ -1292,7 +1293,7 @@ TOML_NAMESPACE_START
 						return *ref_cast<typename traits::native_type>();
 				}
 				if (auto val = this->value<value_type>())
-					return *val;
+					return *std::move(val);
 				if constexpr (std::is_pointer_v<value_type>)
 					return value_type{ default_value };
 				else

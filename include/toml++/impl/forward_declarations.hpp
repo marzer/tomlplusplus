@@ -475,11 +475,13 @@ TOML_IMPL_NAMESPACE_START
 	// std::string_view / (const char*, size_t) / const std::string& that the type supports)
 	template <typename T>
 	inline constexpr bool string_like_target_is_nothrow =
-		std::is_constructible_v<remove_cvref<T>, std::string_view>
-			? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
-			: (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
-				   ? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
-				   : std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>);
+		(std::is_constructible_v<remove_cvref<T>, std::string_view>
+			 ? std::is_nothrow_constructible_v<remove_cvref<T>, std::string_view>
+			 : (std::is_constructible_v<remove_cvref<T>, const char*, size_t>
+					? std::is_nothrow_constructible_v<remove_cvref<T>, const char*, size_t>
+					: std::is_nothrow_constructible_v<remove_cvref<T>, const std::string&>))
+		&& (std::is_nothrow_move_constructible_v<remove_cvref<T>>
+			|| std::is_nothrow_copy_constructible_v<remove_cvref<T>>);
 
 	template <typename T>
 	inline constexpr bool value_retrieval_is_nothrow =

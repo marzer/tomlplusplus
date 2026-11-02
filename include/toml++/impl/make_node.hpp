@@ -109,7 +109,9 @@ TOML_IMPL_NAMESPACE_START
 		return make_node_impl(static_cast<T&&>(val.value), flags);
 	}
 
-	template <typename T, bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>)>
+	template <typename T,
+			  bool = (is_node<T> || is_node_view<T> || is_value<T> || can_partially_represent_native<T>
+					  || is_string_like<T>)>
 	struct inserted_type_of_
 	{
 		using type = std::remove_pointer_t<decltype(make_node_impl(std::declval<T>()))>;
