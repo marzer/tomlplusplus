@@ -14,7 +14,8 @@ export module tomlplusplus;
  * @namespace toml
  * @brief The toml++ namespace toml:: 
  */
-export namespace toml {
+export TOML_NAMESPACE_START
+{
     /**
      * @namespace literals
      * @brief The toml++ namespace toml::literals::
@@ -87,3 +88,4 @@ export namespace toml {
 
 	using TOML_NAMESPACE::preserve_source_value_flags;
 }
+TOML_NAMESPACE_END;
